@@ -44,9 +44,6 @@ import java.util.List;
  */
 public interface EventStore
 {
-    List<Event> getAll( Program program, ProgramStage programStage, ProgramStatus programStatus, Boolean followUp, List<OrganisationUnit> organisationUnits,
-        TrackedEntityInstance trackedEntityInstance, Date startDate, Date endDate, EventStatus status );
-
-    List<Event> getAll( Program program, ProgramStage programStage, ProgramStatus programStatus, Boolean followUp, List<OrganisationUnit> organisationUnits,
-        TrackedEntityInstance trackedEntityInstance, Date startDate, Date endDate, EventStatus status, IdSchemes idSchemes );
+    List<Event> getEvents( Program program, ProgramStage programStage, ProgramStatus programStatus, Boolean followUp, List<OrganisationUnit> organisationUnits,
+        TrackedEntityInstance trackedEntityInstance, Date startDate, Date endDate, EventStatus status, Date lastUpdated, IdSchemes idSchemes );
 }

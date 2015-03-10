@@ -31,10 +31,8 @@ package org.hisp.dhis.webapi.controller.event;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -148,6 +146,7 @@ public class EventController
         @RequestParam( required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date startDate,
         @RequestParam( required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date endDate,
         @RequestParam( required = false ) EventStatus status,
+        @RequestParam( required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date lastUpdated,
         @RequestParam( required = false ) String attachment,
         @RequestParam( required = false, defaultValue = "false" ) boolean skipHeader,
         @RequestParam Map<String, String> parameters,
@@ -157,9 +156,8 @@ public class EventController
 
         Program pr = manager.get( Program.class, program );
         ProgramStage prs = manager.get( ProgramStage.class, programStage );
-        List<OrganisationUnit> organisationUnits = new ArrayList<>();
         TrackedEntityInstance tei = null;
-        OrganisationUnit rootOrganisationUnit = null;
+        OrganisationUnit ou = null;
 
         if ( trackedEntityInstance != null )
         {
@@ -174,33 +172,16 @@ public class EventController
 
         if ( orgUnit != null )
         {
-            rootOrganisationUnit = manager.get( OrganisationUnit.class, orgUnit );
+            ou = manager.get( OrganisationUnit.class, orgUnit );
 
-            if ( rootOrganisationUnit == null )
+            if ( ou == null )
             {
                 ContextUtils.conflictResponse( response, "Invalid orgUnit ID." );
                 return;
             }
         }
 
-        if ( rootOrganisationUnit != null )
-        {
-            if ( OrganisationUnitSelectionMode.DESCENDANTS.equals( ouMode ) )
-            {
-                organisationUnits.addAll( organisationUnitService.getOrganisationUnitWithChildren( rootOrganisationUnit.getUid() ) );
-            }
-            else if ( OrganisationUnitSelectionMode.CHILDREN.equals( ouMode ) )
-            {
-                organisationUnits.add( rootOrganisationUnit );
-                organisationUnits.addAll( rootOrganisationUnit.getChildren() );
-            }
-            else // SELECTED
-            {
-                organisationUnits.add( rootOrganisationUnit );
-            }
-        }
-
-        Events events = eventService.getEvents( pr, prs, programStatus, followUp, organisationUnits, tei, startDate, endDate, status, idSchemes );
+        Events events = eventService.getEvents( pr, prs, programStatus, followUp, ou, ouMode, tei, startDate, endDate, status, lastUpdated, idSchemes );
 
         if ( options.hasPaging() )
         {
@@ -242,6 +223,7 @@ public class EventController
         @RequestParam( required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date startDate,
         @RequestParam( required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date endDate,
         @RequestParam( required = false ) EventStatus status,
+        @RequestParam( required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date lastUpdated,
         @RequestParam( required = false ) boolean skipMeta,
         @RequestParam( required = false ) String attachment,
         @RequestParam Map<String, String> parameters, IdSchemes idSchemes, Model model, HttpServletResponse response, HttpServletRequest request )
@@ -250,9 +232,8 @@ public class EventController
 
         Program pr = manager.get( Program.class, program );
         ProgramStage prs = manager.get( ProgramStage.class, programStage );
-        List<OrganisationUnit> organisationUnits = new ArrayList<>();
         TrackedEntityInstance tei = null;
-        OrganisationUnit rootOrganisationUnit = null;
+        OrganisationUnit ou = null;
 
         if ( trackedEntityInstance != null )
         {
@@ -267,33 +248,16 @@ public class EventController
 
         if ( orgUnit != null )
         {
-            rootOrganisationUnit = manager.get( OrganisationUnit.class, orgUnit );
+            ou = manager.get( OrganisationUnit.class, orgUnit );
 
-            if ( rootOrganisationUnit == null )
+            if ( ou == null )
             {
                 ContextUtils.conflictResponse( response, "Invalid orgUnit ID." );
                 return null;
             }
         }
 
-        if ( rootOrganisationUnit != null )
-        {
-            if ( OrganisationUnitSelectionMode.DESCENDANTS.equals( ouMode ) )
-            {
-                organisationUnits.addAll( organisationUnitService.getOrganisationUnitWithChildren( rootOrganisationUnit.getUid() ) );
-            }
-            else if ( OrganisationUnitSelectionMode.CHILDREN.equals( ouMode ) )
-            {
-                organisationUnits.add( rootOrganisationUnit );
-                organisationUnits.addAll( rootOrganisationUnit.getChildren() );
-            }
-            else // SELECTED
-            {
-                organisationUnits.add( rootOrganisationUnit );
-            }
-        }
-
-        Events events = eventService.getEvents( pr, prs, programStatus, followUp, organisationUnits, tei, startDate, endDate, status, idSchemes );
+        Events events = eventService.getEvents( pr, prs, programStatus, followUp, ou, ouMode, tei, startDate, endDate, status, lastUpdated, idSchemes );
 
         if ( options.hasLinks() )
         {
@@ -341,32 +305,14 @@ public class EventController
         WebOptions options = new WebOptions( parameters );
 
         Program pr = manager.get( Program.class, program );
-        List<OrganisationUnit> organisationUnits = new ArrayList<>();
-        OrganisationUnit rootOrganisationUnit = null;
+        OrganisationUnit ou = null;
 
         if ( orgUnit != null )
         {
-            rootOrganisationUnit = manager.get( OrganisationUnit.class, orgUnit );
+            ou = manager.get( OrganisationUnit.class, orgUnit );
         }
 
-        if ( rootOrganisationUnit != null )
-        {
-            if ( OrganisationUnitSelectionMode.DESCENDANTS.equals( ouMode ) )
-            {
-                organisationUnits.addAll( organisationUnitService.getOrganisationUnitWithChildren( rootOrganisationUnit.getUid() ) );
-            }
-            else if ( OrganisationUnitSelectionMode.CHILDREN.equals( ouMode ) )
-            {
-                organisationUnits.add( rootOrganisationUnit );
-                organisationUnits.addAll( rootOrganisationUnit.getChildren() );
-            }
-            else // SELECTED
-            {
-                organisationUnits.add( rootOrganisationUnit );
-            }
-        }
-
-        EventRows eventRows = eventRowService.getEventRows( pr, organisationUnits, programStatus, eventStatus, startDate, endDate );
+        EventRows eventRows = eventRowService.getEventRows( pr, ou, ouMode, programStatus, eventStatus, startDate, endDate );
 
         if ( options.hasPaging() )
         {
