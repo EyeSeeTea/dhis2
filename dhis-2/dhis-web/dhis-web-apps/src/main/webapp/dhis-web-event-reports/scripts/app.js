@@ -4453,7 +4453,6 @@ console.log("reset");
                         dim = layout.columns[i];
                         record = recordMap[dim.dimension];
 
-						//aggWindow.colStore.add(record || extendDim(Ext.clone(dim)));
 						aggWindow.addDimension(record || extendDim(Ext.clone(dim)), aggWindow.colStore);
 					}
 				}
@@ -4463,7 +4462,6 @@ console.log("reset");
                         dim = layout.rows[i];
                         record = recordMap[dim.dimension];
 
-						//aggWindow.rowStore.add(record || extendDim(Ext.clone(dim)));
 						aggWindow.addDimension(record || extendDim(Ext.clone(dim)), aggWindow.rowStore);
 					}
 				}
@@ -4474,7 +4472,6 @@ console.log("reset");
 						record = recordMap[dim.dimension];
 						store = Ext.Array.contains(includeKeys, element.type) || element.optionSet ? aggWindow.filterStore : aggWindow.fixedFilterStore;
 
-						//store.add(record || extendDim(Ext.clone(dim)));
                         aggWindow.addDimension(record || extendDim(Ext.clone(dim)), store);
 					}
 				}
