@@ -1800,8 +1800,6 @@ Ext.onReady( function() {
 						}
 					}
 
-                    var range = valueStore.getRange();
-
                     // value
                     value.setDefaultDataIf();
 				},
@@ -4427,8 +4425,6 @@ Ext.onReady( function() {
 
             // favorite
 			if (layout && layout.dataType === 'aggregated_values') {
-				//aggWindow.reset(true);
-
 				if (layout.startDate && layout.endDate) {
 					aggWindow.fixedFilterStore.add({id: dimConf.startEndDate.value, name: dimConf.startEndDate.name});
 				}
