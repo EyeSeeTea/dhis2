@@ -7173,7 +7173,6 @@ Ext.onReady( function() {
 		// viewport
 
         aggregateButton = Ext.create('Ext.button.Button', {
-            //cls: 'mode',
             width: 223,
 			param: 'aggregated_values',
             text: '<b>Aggregated values</b><br/>Show aggregated event report',
@@ -7188,7 +7187,6 @@ Ext.onReady( function() {
         paramButtonMap[aggregateButton.param] = aggregateButton;
 
 		caseButton = Ext.create('Ext.button.Button', {
-            cls: 'mode',
             width: 224,
 			param: 'individual_cases',
             text: '<b>Individual cases</b><br/>Show case-based event report',
@@ -8127,10 +8125,6 @@ Ext.onReady( function() {
                                             url: init.contextPath + '/api/organisationUnitGroupSets.json?fields=id,' + namePropertyUrl + '&paging=false',
                                             success: function(r) {
                                                 init.dimensions = Ext.decode(r.responseText).organisationUnitGroupSets || [];
-
-for (var i = 0; i < 30; i++) {
-init.dimensions.push({id: i, name: i});
-}
                                                 fn();
                                             }
                                         });

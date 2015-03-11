@@ -797,12 +797,12 @@ table.pivot.fontsize-small td {
 	border-color: #aaa;
     background-image: none;
     background-color: #d6d6d6;
-    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #dadada), color-stop(100%, #e5e5e5));
-    background-image: -webkit-linear-gradient(top, #dadada,#e5e5e5);
-    background-image: -moz-linear-gradient(top, #dadada,#e5e5e5);
-    background-image: -o-linear-gradient(top, #dadada,#e5e5e5);
-    background-image: -ms-linear-gradient(top, #dadada,#e5e5e5);
-    background-image: linear-gradient(top, #dadada,#e5e5e5);
+    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #d1d1d1), color-stop(100%, #e5e5e5));
+    background-image: -webkit-linear-gradient(top, #d1d1d1,#e5e5e5);
+    background-image: -moz-linear-gradient(top, #d1d1d1,#e5e5e5);
+    background-image: -o-linear-gradient(top, #d1d1d1,#e5e5e5);
+    background-image: -ms-linear-gradient(top, #d1d1d1,#e5e5e5);
+    background-image: linear-gradient(top, #d1d1d1,#e5e5e5);
 }
 
 /*----------------------------------------------------------------------------
