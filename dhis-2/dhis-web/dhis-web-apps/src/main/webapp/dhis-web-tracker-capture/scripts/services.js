@@ -1,3 +1,5 @@
+/* global angular */
+
 'use strict';
 
 /* Services */
@@ -45,6 +47,62 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             });
             return promise;
         }
+    };
+})
+
+/* current selections */
+.service('PeriodService', function($translate, CalendarService){
+    
+    var calendarSetting = CalendarService.getSetting();    
+    var months = [
+                    $translate('jan'), 
+                    $translate('feb'),
+                    $translate('mar'),
+                    $translate('apr'),
+                    $translate('may'),
+                    $translate('jun'),
+                    $translate('jul'),
+                    $translate('aug'),                    
+                    $translate('sep'),
+                    $translate('oct'),
+                    $translate('nov'),
+                    $translate('dec')
+                  ];    
+   
+    this.getMonths = function(){
+        return months;
+    };
+    
+    this.getPeriods = function(events, stage){
+        var periods = [];
+        if(stage){            
+            angular.forEach(events, function(event){
+                periods.push({event: event.event, name: event.sortingDate, stage: stage.id});
+            });
+            /*if(stage.standardInterval === 30){
+                angular.forEach(events, function(event){
+                    var obj = {year: moment(event.sortingDate, calendarSetting.momentFormat).year(), month: moment(event.sortingDate, calendarSetting.momentFormat).month(), week: moment(event.sortingDate, calendarSetting.momentFormat).week(), day: moment(event.sortingDate, calendarSetting.momentFormat).day()};                
+                    periods.push({event: event.event, name: months[obj.month] + ' ' + obj.year, stage: stage.id});
+                });
+            }
+            else{
+                angular.forEach(events, function(event){
+                    periods.push({event: event.event, name: event.sortingDate, stage: stage.id});
+                });
+            }*/            
+        }
+        
+        return periods;
+    };
+    
+    
+    this.splitDate = function(dateValue){
+        if(!dateValue){
+            return;
+        }
+        var calendarSetting = CalendarService.getSetting();            
+
+        return {year: moment(dateValue, calendarSetting.momentFormat).year(), month: moment(dateValue, calendarSetting.momentFormat).month(), week: moment(dateValue, calendarSetting.momentFormat).week(), day: moment(dateValue, calendarSetting.momentFormat).day()};
     };
 })
 
@@ -1023,6 +1081,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     this.optionSets = null;
     this.attributesById = null;
     this.ouLevels = null;
+    this.sortedTeiIds = [];
     
     this.set = function(currentSelection){  
         this.currentSelection = currentSelection;        
@@ -1057,6 +1116,13 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     };
     this.getOuLevels = function(){
         return this.ouLevels;
+    };
+    
+    this.setSortedTeiIds = function(sortedTeiIds){
+        this.sortedTeiIds = sortedTeiIds;
+    };
+    this.getSortedTeiIds = function(){
+        return this.sortedTeiIds;
     };
 })
 
@@ -1136,6 +1202,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         },
         generateGridColumns: function(attributes, ouMode){
             
+            var filterTypes = {}, filterText = {};
             var columns = attributes ? angular.copy(attributes) : [];
        
             //also add extra columns which are not part of attributes (orgunit for example)
@@ -1144,16 +1211,20 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 
             //generate grid column for the selected program/attributes
             angular.forEach(columns, function(column){
-                if(column.id === 'orgUnitName' && ouMode !== 'SELECTED'){
+                column.show = false;                
+                if( (column.id === 'orgUnitName' && ouMode !== 'SELECTED') ||
+                    column.displayInListNoProgram || 
+                    column.displayInList || 
+                    column.id === 'created'){
                     column.show = true;    
+                }                
+                column.showFilter = false;                
+                filterTypes[column.id] = column.valueType;
+                if(column.valueType === 'date' || column.valueType === 'number' ){
+                    filterText[column.id]= {};
                 }
-
-                if(column.displayInListNoProgram || column.displayInList){
-                    column.show = true;
-                }  
-                column.showFilter = false;
             });
-            return columns;  
+            return {columns: columns, filterTypes: filterTypes, filterText: filterText};
         },
         getData: function(rows, columns){
             var data = [];

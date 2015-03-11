@@ -7173,6 +7173,7 @@ Ext.onReady( function() {
 		// viewport
 
         aggregateButton = Ext.create('Ext.button.Button', {
+            //cls: 'mode',
             width: 223,
 			param: 'aggregated_values',
             text: '<b>Aggregated values</b><br/>Show aggregated event report',
@@ -7187,6 +7188,7 @@ Ext.onReady( function() {
         paramButtonMap[aggregateButton.param] = aggregateButton;
 
 		caseButton = Ext.create('Ext.button.Button', {
+            cls: 'mode',
             width: 224,
 			param: 'individual_cases',
             text: '<b>Individual cases</b><br/>Show case-based event report',
@@ -7198,7 +7200,7 @@ Ext.onReady( function() {
 			}
         });
         paramButtonMap[caseButton.param] = caseButton;
-nissa = caseButton;
+
 		typeToolbar = Ext.create('Ext.toolbar.Toolbar', {
 			style: 'padding:1px; background:#fbfbfb; border:0 none',
             height: 41,
