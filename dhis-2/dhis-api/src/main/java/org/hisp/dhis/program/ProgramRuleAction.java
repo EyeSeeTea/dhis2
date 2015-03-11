@@ -176,6 +176,8 @@ public class ProgramRuleAction
         this.dataElement = dataElement;
     }
 
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getLocation()
     {
         return location;
@@ -186,6 +188,8 @@ public class ProgramRuleAction
         this.location = location;
     }
 
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getContent()
     {
         return content;
@@ -196,6 +200,8 @@ public class ProgramRuleAction
         this.content = content;
     }
 
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getData()
     {
         return data;
