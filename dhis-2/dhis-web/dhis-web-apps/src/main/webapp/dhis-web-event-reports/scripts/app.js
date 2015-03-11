@@ -8138,14 +8138,30 @@ Ext.onReady( function() {
 
                                         // option sets
                                         requests.push({
-                                            url: '#',
+                                            url: '.',
+                                            disableCaching: false,
                                             success: function() {
 
                                                 // check if idb has any option sets
                                                 dhis2.er.store.count('optionSets').done( function(count) {
                                                     var store = dhis2.er.store;
 
-                                                    if (count > 0) {
+                                                    if (count === 0) {
+                                                        Ext.Ajax.request({
+                                                            url: contextPath + '/api/optionSets.json?fields=id,name,version,options[code,name]&paging=false',
+                                                            success: function(r) {
+                                                                var sets = Ext.decode(r.responseText).optionSets;
+
+                                                                if (sets.length) {
+                                                                    store.setAll('optionSets', sets).done(fn);
+                                                                }
+                                                                else {
+                                                                    fn();
+                                                                }
+                                                            }
+                                                        });
+                                                    }
+                                                    else {
                                                         Ext.Ajax.request({
                                                             url: contextPath + '/api/optionSets.json?fields=id,version&paging=false',
                                                             success: function(r) {
@@ -8194,21 +8210,6 @@ Ext.onReady( function() {
                                                                             registerOptionSet(optionSets[i]);
                                                                         }
                                                                     });
-                                                                }
-                                                                else {
-                                                                    fn();
-                                                                }
-                                                            }
-                                                        });
-                                                    }
-                                                    else {
-                                                        Ext.Ajax.request({
-                                                            url: contextPath + '/api/optionSets.json?fields=id,name,version,options[code,name]&paging=false',
-                                                            success: function(r) {
-                                                                var sets = Ext.decode(r.responseText).optionSets;
-
-                                                                if (sets.length) {
-                                                                    store.setAll('optionSets', sets).done(fn);
                                                                 }
                                                                 else {
                                                                     fn();
