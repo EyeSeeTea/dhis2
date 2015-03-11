@@ -28,7 +28,9 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hisp.dhis.common.CodeGenerator;
+import org.hisp.dhis.dataintegrity.DataIntegrityReport;
 import org.hisp.dhis.dxf2.metadata.ImportSummary;
 import org.hisp.dhis.dxf2.common.JacksonUtils;
 import org.hisp.dhis.node.exception.InvalidTypeException;
@@ -124,6 +126,7 @@ public class SystemController
     public void getTaskSummaryJson( HttpServletResponse response, @PathVariable( "category" ) String category ) throws IOException
     {
         ImportSummary importSummary = new ImportSummary();
+        DataIntegrityReport dataIntegrityReport = new DataIntegrityReport();
 
         if ( category != null )
         {
@@ -135,11 +138,16 @@ public class SystemController
             if ( !taskCategory.equals( TaskCategory.DATAINTEGRITY ) )
             {
                 importSummary = (ImportSummary) notifier.getTaskSummary( taskId );
-                notifier.clear( taskId );
+                JacksonUtils.toJson( response.getOutputStream(), importSummary );
+            }
+            else
+            {
+                dataIntegrityReport = (DataIntegrityReport) notifier.getTaskSummary( taskId );
+                JacksonUtils.toJson( response.getOutputStream(), dataIntegrityReport.getFlattenedReport() );
             }
         }
 
-        JacksonUtils.toJson( response.getOutputStream(), importSummary );
+        //JacksonUtils.toJson( response.getOutputStream(), importSummary );
     }
 
     @RequestMapping( value = "/info", method = RequestMethod.GET, produces = { "application/json", "application/javascript" } )

@@ -28,6 +28,7 @@ package org.hisp.dhis.dataintegrity;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementOperand;
@@ -40,6 +41,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.validation.ValidationRule;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -52,48 +54,75 @@ import java.util.SortedMap;
 public class DataIntegrityReport
 {
     private List<DataElement> dataElementsWithoutDataSet;
-
+    
     private List<DataElement> dataElementsWithoutGroups;
-
+    
     private Map<DataElement, Collection<DataSet>> dataElementsAssignedToDataSetsWithDifferentPeriodTypes;
-
+    
     private SortedMap<DataElement, Collection<DataElementGroup>> dataElementsViolatingExclusiveGroupSets;
 
     private SortedMap<DataSet, Collection<DataElement>> dataElementsInDataSetNotInForm;
 
     private Map<DataSet, Set<DataElementOperand>> categoryOptionCombosNotInDataElementCategoryCombo;
-
+    
     private List<DataSet> dataSetsNotAssignedToOrganisationUnits;
-
+    
     private List<Section> sectionsWithInvalidCategoryCombinations;
 
     private Collection<Collection<Indicator>> indicatorsWithIdenticalFormulas;
-
+    
     private List<Indicator> indicatorsWithoutGroups;
-
+    
     private Map<Indicator, String> invalidIndicatorNumerators;
-
+    
     private Map<Indicator, String> invalidIndicatorDenominators;
-
+    
     private SortedMap<Indicator, Collection<IndicatorGroup>> indicatorsViolatingExclusiveGroupSets;
-
+    
     private List<Period> duplicatePeriods;
-
+    
     private List<OrganisationUnit> organisationUnitsWithCyclicReferences;
-
+    
     private List<OrganisationUnit> orphanedOrganisationUnits;
-
+    
     private List<OrganisationUnit> organisationUnitsWithoutGroups;
-
+    
     private SortedMap<OrganisationUnit, Collection<OrganisationUnitGroup>> organisationUnitsViolatingExclusiveGroupSets;
-
+    
     private List<OrganisationUnitGroup> organisationUnitGroupsWithoutGroupSets;
-
+    
     private List<ValidationRule> validationRulesWithoutGroups;
-
+    
     private Map<ValidationRule, String> invalidValidationRuleLeftSideExpressions;
-
+    
     private Map<ValidationRule, String> invalidValidationRuleRightSideExpressions;
+
+    public class FlattenedDataIntegrityReport
+    {
+        @JsonProperty
+        private List<String> dataElementsWithoutDataSet = new ArrayList<>();
+
+        @JsonProperty
+        private List<String> dataElementsWithoutGroups = new ArrayList<>();
+
+        public FlattenedDataIntegrityReport( DataIntegrityReport report )
+        {
+            for ( DataElement de : report.getDataElementsWithoutDataSet() )
+            {
+                dataElementsWithoutDataSet.add( de.getDisplayName() );
+            }
+
+            for( DataElement de : report.getDataElementsWithoutGroups() )
+            {
+                dataElementsWithoutGroups.add( de.getDisplayName() );
+            }
+        }
+    }
+
+    public FlattenedDataIntegrityReport getFlattenedReport()
+    {
+        return new FlattenedDataIntegrityReport( this );
+    }
 
     //-------------------------------------------------------------------------
     // Constructors
