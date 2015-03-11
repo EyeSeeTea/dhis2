@@ -560,7 +560,7 @@ function getProgramRuleAction( id )
         return $.ajax( {
             url: '../api/programRuleActions.json',
             type: 'GET',
-            data: 'paging=false&filter=id:eq:' + id +'&fields=id,programRule[id],dataElement[id],location,content,data'
+            data: 'paging=false&filter=id:eq:' + id +'&fields=id,programRule[id],programRuleActionType,dataElement[id],location,content,data,'
         }).done( function( response ){
             
             _.each( _.values( response.programRuleActions ), function ( programRuleAction ) { 

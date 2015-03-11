@@ -24,7 +24,7 @@ trackerCapture.controller('RuleBoundController',
             if(effect.location == $scope.widgetCode){
                 //This effect is affecting the local widget
                 
-                if(effect.action == "displaytext") {
+                if(effect.action == "DISPLAYTEXT") {
                     //this action is display text. Make sure the displaytext is
                     //added to the local list of displayed texts
                     if(!angular.isObject($scope.displayTextEffects[effect.id])){
@@ -34,8 +34,8 @@ trackerCapture.controller('RuleBoundController',
                     {
                         textInEffect = true;
                     }
-                } 
-                else if(effect.action == "displaykeydata") {
+                }
+                else if(effect.action == "DISPLAYKEYVALUEPAIR") {
                     //this action is display text. Make sure the displaytext is
                     //added to the local list of displayed texts
                     if(!angular.isObject($scope.displayTextEffects[effect.id])){

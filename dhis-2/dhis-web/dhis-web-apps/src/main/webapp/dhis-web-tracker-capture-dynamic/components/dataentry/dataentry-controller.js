@@ -56,20 +56,20 @@ trackerCapture.controller('DataEntryController',
                 
         angular.forEach($rootScope.ruleeffects, function(effect) {
             //in the data entry controller we only care about the "hidefield" actions
-            if(effect.action === "hidefield" && effect.content === id) {
+            if(effect.action === "HIDEFIELD" && effect.dataElement.id === id) {
                 hide = effect.ineffect;
             }
         });
         return hide;
     }; 
     
-    //check if field has an active error message
+    //check if field has a warning message
     $scope.errorMessage = function(id) { 
         var error = false;
         
         angular.forEach($rootScope.ruleeffects, function(effect) {
             //in the data entry controller we only care about the "hidefield" actions
-            if(effect.action === "validationerror" && effect.location === id && effect.ineffect) {
+            if(effect.action === "SHOWWARNING" && effect.location === id && effect.ineffect) {
                 error = effect.content;
             }
         });
