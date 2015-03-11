@@ -7121,7 +7121,9 @@ Ext.onReady( function() {
             defaultButton,
             centerRegion,
             getLayoutWindow,
-            viewport;
+            viewport,
+
+            scrollbarWidth = Ext.isWebKit ? 8 : (Ext.isLinux && Ext.isGecko ? 13 : 17);
 
 		ns.app.stores = ns.app.stores || {};
 
@@ -7196,7 +7198,7 @@ Ext.onReady( function() {
 			}
         });
         paramButtonMap[caseButton.param] = caseButton;
-
+nissa = caseButton;
 		typeToolbar = Ext.create('Ext.toolbar.Toolbar', {
 			style: 'padding:1px; background:#fbfbfb; border:0 none',
             height: 41,
@@ -7257,17 +7259,7 @@ Ext.onReady( function() {
 			preventHeader: true,
 			collapsible: true,
 			collapseMode: 'mini',
-			width: function() {
-				if (Ext.isWebKit) {
-					return ns.core.conf.layout.west_width + 8;
-				}
-				else {
-					if (Ext.isLinux && Ext.isGecko) {
-						return ns.core.conf.layout.west_width + 13;
-					}
-					return ns.core.conf.layout.west_width + 17;
-				}
-			}(),
+			width: ns.core.conf.layout.west_width + scrollbarWidth,
 			items: [
 				typeToolbar,
 				accordion
@@ -7876,6 +7868,8 @@ Ext.onReady( function() {
 					}
 					else {
 						westRegion.hasScrollbar = true;
+
+                        caseButton.setWidth(caseButton.getWidth() + scrollbarWidth);
 					}
 
 					// expand init panels
@@ -8131,6 +8125,10 @@ Ext.onReady( function() {
                                             url: init.contextPath + '/api/organisationUnitGroupSets.json?fields=id,' + namePropertyUrl + '&paging=false',
                                             success: function(r) {
                                                 init.dimensions = Ext.decode(r.responseText).organisationUnitGroupSets || [];
+
+for (var i = 0; i < 30; i++) {
+init.dimensions.push({id: i, name: i});
+}
                                                 fn();
                                             }
                                         });
