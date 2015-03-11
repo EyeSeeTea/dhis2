@@ -26,7 +26,7 @@ if( dhis2.tc.memoryOnly ) {
 dhis2.tc.store = new dhis2.storage.Store({
     name: 'dhis2tc',
     adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
-    objectStores: ['programs', 'programStages', 'trackedEntities', 'trackedEntityForms', 'attributes', 'relationshipTypes', 'optionSets', 'programValidations', 'ouLevels', 'programRuleVariables', 'programRules']      
+    objectStores: ['programs', 'programStages', 'trackedEntities', 'trackedEntityForms', 'attributes', 'relationshipTypes', 'optionSets', 'programValidations', 'ouLevels', 'programRuleVariables', 'programRules', 'programRuleActions']      
 });
 
 (function($) {
@@ -140,6 +140,8 @@ function downloadMetaData()
     promise = promise.then( getProgramRuleVariables );
     promise = promise.then( getMetaProgramRules );
     promise = promise.then( getProgramRules );
+    promise = promise.then( getMetaProgramRuleActions );
+    promise = promise.then( getProgramRuleActions );
     promise = promise.then( getMetaProgramValidations );
     promise = promise.then( getProgramValidations );    
     promise = promise.then( getTrackedEntityForms );
@@ -466,6 +468,115 @@ function getOptionSet( id )
     };
 }
 
+function getMetaProgramRuleActions( data )
+{
+    if( !data ){
+        return;
+    }
+    
+    var def = $.Deferred();
+    
+    var programRuleIds = [];
+    _.each( _.values( data.programRules ), function ( programRule ) { 
+        if( programRule.id ) {
+            programRuleIds.push( programRule.id );
+        }
+    });
+    
+    $.ajax({
+        url: '../api/programRuleActions.json',
+        type: 'GET',
+        data:'paging=false&fields=id,programRule[id]'
+    }).done( function(response) {          
+        var programRuleActions = [];
+        _.each( _.values( response.programRuleActions ), function ( programRuleAction ) { 
+            if( programRuleAction &&
+                programRuleAction.id &&
+                programRuleAction.programRule &&
+                programRuleAction.programRule.id &&
+                programRuleIds.indexOf( programRuleAction.programRule.id ) !== -1) {
+                
+                programRuleActions.push( programRuleAction );
+            }
+        });
+        
+        def.resolve( {programRuleActions: programRuleActions, programs: data.programs} );
+        
+    }).fail(function(){
+        def.resolve( null );
+    });
+    
+    return def.promise();    
+}
+
+function getProgramRuleActions( data )
+{
+    if( !data || !data.programRuleActions ){
+        return;
+    }
+    
+    var mainDef = $.Deferred();
+    var mainPromise = mainDef.promise();
+
+    var def = $.Deferred();
+    var promise = def.promise();
+
+    var builder = $.Deferred();
+    var build = builder.promise();
+
+    _.each( _.values( data.programRuleActions ), function ( programRuleAction ) {
+        build = build.then(function() {
+            var d = $.Deferred();
+            var p = d.promise();
+            dhis2.tc.store.get('programRuleActions', programRuleAction.id).done(function(obj) {
+                if(!obj) {
+                    promise = promise.then( getProgramRuleAction( programRuleAction.id ) );
+                }
+                d.resolve();
+            });
+
+            return p;
+        });
+    });
+
+    build.done(function() {
+        def.resolve();
+
+        promise = promise.done( function () {
+            mainDef.resolve( data.programs );
+        } );
+    }).fail(function(){
+        mainDef.resolve( null );
+    });
+
+    builder.resolve();
+
+    return mainPromise;
+}
+
+function getProgramRuleAction( id )
+{
+    return function() {
+        return $.ajax( {
+            url: '../api/programRuleActions.json',
+            type: 'GET',
+            data: 'paging=false&filter=id:eq:' + id +'&fields=id,programRule[id],dataElement[id],location,content,data'
+        }).done( function( response ){
+            
+            _.each( _.values( response.programRuleActions ), function ( programRuleAction ) { 
+                
+                if( programRuleAction &&
+                    programRuleAction.id &&
+                    programRuleAction.programRule &&
+                    programRuleAction.programRule.id ) {
+                
+                    dhis2.tc.store.set( 'programRuleActions', programRuleAction );
+                }
+            });
+        });
+    };
+}
+
 function getMetaProgramRuleVariables( programs )
 {
     if( !programs ){
@@ -559,7 +670,7 @@ function getProgramRuleVariable( id )
         return $.ajax( {
             url: '../api/programRuleVariables.json',
             type: 'GET',
-            data: 'paging=false&filter=id:eq:' + id +'&fields=id,program[id],name,sourcetype,attribute[id],dataElement[id],programStage[id]'
+            data: 'paging=false&filter=id:eq:' + id +'&fields=id,program[id],name,sourceType,attribute[id],dataElement[id],programStage[id]'
         }).done( function( response ){
             
             _.each( _.values( response.programRuleVariables ), function ( programRuleVariable ) { 
@@ -652,7 +763,7 @@ function getProgramRules( data )
         def.resolve();
 
         promise = promise.done( function () {
-            mainDef.resolve( data.programs );
+            mainDef.resolve( data );
         } );
     }).fail(function(){
         mainDef.resolve( null );
