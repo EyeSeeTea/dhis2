@@ -1,4 +1,4 @@
-package org.hisp.dhis.program;
+package org.hisp.dhis.programrule;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -30,6 +30,8 @@ package org.hisp.dhis.program;
 
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.MergeStrategy;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.DimensionalView;
 import org.hisp.dhis.common.view.ExportView;
@@ -211,5 +213,34 @@ public class ProgramRuleAction
     {
         this.data = data;
     }
+    
+    @Override
+    public void mergeWith( IdentifiableObject other, MergeStrategy strategy )
+    {
+        super.mergeWith( other, strategy );
 
+        if ( other.getClass().isInstance( this ) )
+        {
+            ProgramRuleAction programRuleAction = (ProgramRuleAction) other;
+
+            if ( strategy.isReplace() )
+            {
+                programRule = programRuleAction.getProgramRule();
+                programRuleActionType = programRuleAction.getProgramRuleActionType();
+                dataElement = programRuleAction.getDataElement();
+                location = programRuleAction.getLocation();
+                content = programRuleAction.getContent();
+                data = programRuleAction.getData();
+            }
+            else if ( strategy.isMerge() )
+            {
+                programRule = programRuleAction.getProgramRule() == null ? programRule : programRuleAction.getProgramRule();
+                programRuleActionType = programRuleAction.getProgramRuleActionType() == null ? programRuleActionType : programRuleAction.getProgramRuleActionType();
+                dataElement = programRuleAction.getDataElement() == null ? dataElement : programRuleAction.getDataElement();
+                location = programRuleAction.getLocation() == null ? location : programRuleAction.getLocation();
+                content = programRuleAction.getContent() == null ? content : programRuleAction.getContent();
+                data = programRuleAction.getData() == null ? data : programRuleAction.getData();            
+            }
+        }
+    }
 }

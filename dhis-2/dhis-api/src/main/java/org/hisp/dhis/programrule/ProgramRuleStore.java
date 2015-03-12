@@ -1,4 +1,4 @@
-package org.hisp.dhis.program;
+package org.hisp.dhis.programrule;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,34 +28,24 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Collection;
+
+import org.hisp.dhis.common.GenericNameableObjectStore;
+import org.hisp.dhis.program.Program;
+
 /**
  * @author markusbekken
  */
-public enum ProgramRuleActionType {
-    DISPLAYTEXT( "displaytext" ),
-    DISPLAYKEYVALUEPAIR( "displaykeyvaluepair" ),
-    HIDEFIELD( "hidefield" ),
-    ASSIGNVARIABLE( "assignvariable" ),
-    SHOWWARNING( "showwarning" ),
-    SHOWERROR( "showerror" );
+public interface ProgramRuleStore
+    extends GenericNameableObjectStore<ProgramRule>
+{
+    String ID = ProgramRuleStore.class.getName();
 
-    final String value;
-
-    private ProgramRuleActionType( String value )
-    {
-        this.value = value;
-    }
-
-    public static ProgramRuleActionType fromValue( String value )
-    {
-        for ( ProgramRuleActionType type : ProgramRuleActionType.values() )
-        {
-            if ( type.value.equalsIgnoreCase( value ) )
-            {
-                return type;
-            }
-        }
-
-        return null;
-    }
+    /**
+     * Get programRule by program
+     *
+     * @param program {@link Program}
+     * @return ProgramRuleVariable list
+     */
+    Collection<ProgramRule> get( Program program );
 }

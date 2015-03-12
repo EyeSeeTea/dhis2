@@ -6,7 +6,7 @@
   >
 
 <hibernate-mapping>
-  <class name="org.hisp.dhis.program.ProgramRuleAction" table="programruleaction">
+  <class name="org.hisp.dhis.programrule.ProgramRuleAction" table="programruleaction">
 
     <cache usage="read-write" />
 
@@ -18,12 +18,12 @@
 
     <property name="name" column="name" length="230" />
 
-	<many-to-one name="programRule" class="org.hisp.dhis.program.ProgramRule" 
+	<many-to-one name="programRule" class="org.hisp.dhis.programrule.ProgramRule" 
 		column="programruleid" foreign-key="fk_programruleaction_programrule" />
 
     <property name="programRuleActionType" column="actiontype">
         <type name="org.hibernate.type.EnumType">
-            <param name="enumClass">org.hisp.dhis.program.ProgramRuleActionType</param>
+            <param name="enumClass">org.hisp.dhis.programrule.ProgramRuleActionType</param>
             <param name="type">12</param>
         </type>
     </property>

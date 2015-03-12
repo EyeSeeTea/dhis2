@@ -1,4 +1,4 @@
-package org.hisp.dhis.program;
+package org.hisp.dhis.programrule;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,59 +28,42 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.system.deletion.DeletionHandler;
 
 /**
- *
  * @author markusbekken
  */
-public interface ProgramRuleService
+public class ProgramRuleVariableDeletionHandler
+    extends DeletionHandler 
 {
-    String ID = ProgramRuleService.class.getName();
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
 
-    /**
-     * Adds an {@link ProgramRule}
-     *
-     * @param ProgramRule The to ProgramRule add.
-     * @return A generated unique id of the added {@link ProgramRule}.
-     */
-    int addProgramRule( ProgramRule programRule );
+    ProgramRuleVariableService programRuleVariableService;
 
-    /**
-     * Deletes a {@link ProgramRule}
-     *
-     * @param ProgramRule The ProgramRule to delete.
-     */
-    void deleteProgramRule( ProgramRule programRule );
-
-    /**
-     * Updates an {@link ProgramRule}.
-     *
-     * @param ProgramRule The ProgramRule to update.
-     */
-    void updateProgramRule( ProgramRule programRule );
-
-    /**
-     * Returns a {@link ProgramRule}.
-     *
-     * @param id the id of the ProgramRule to return.
-     * @return the ProgramRule with the given id
-     */
-    ProgramRule getProgramRule( int id );
-
-    /**
-     * Returns all {@link ProgramRule}.
-     *
-     * @return a collection of all ProgramRule, or an empty collection if
-     * there are no ProgramRules.
-     */
-    Collection<ProgramRule> getAllProgramRule();
-
-    /**
-     * Get validation by {@link Program}
-     *
-     * @param program Program
-     * @return ProgramRule list
-     */
-    Collection<ProgramRule> getProgramRule( Program program );
+    public void setProgramRuleVariableService( ProgramRuleVariableService programRuleVariableService )
+    {
+        this.programRuleVariableService = programRuleVariableService;
+    }
+    
+    // -------------------------------------------------------------------------
+    // Implementation methods
+    // -------------------------------------------------------------------------
+    @Override
+    protected String getClassName()
+    {
+        return ProgramRuleVariable.class.getSimpleName();
+    }
+    
+    @Override
+    public void deleteProgram( Program program )
+    {
+        for ( ProgramRuleVariable programRuleVariable : programRuleVariableService.getProgramRuleVariable( program ) )
+        {
+            programRuleVariableService.deleteProgramRuleVariable( programRuleVariable );
+        }
+    }
+    
 }

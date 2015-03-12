@@ -6,7 +6,7 @@
   >
 
 <hibernate-mapping>
-  <class name="org.hisp.dhis.program.ProgramRule" table="programrule">
+  <class name="org.hisp.dhis.programrule.ProgramRule" table="programrule">
 
     <cache usage="read-write" />
 
@@ -28,7 +28,7 @@
 
     <set name="programRuleActions" cascade="all">
 		<key column="programruleid" />
-		<one-to-many class="org.hisp.dhis.program.ProgramRuleAction" />
+		<one-to-many class="org.hisp.dhis.programrule.ProgramRuleAction" />
 	</set>
 
     <property name="condition" />

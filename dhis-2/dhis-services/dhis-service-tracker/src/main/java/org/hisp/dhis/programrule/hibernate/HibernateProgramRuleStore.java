@@ -1,4 +1,4 @@
-package org.hisp.dhis.program.hibernate;
+package org.hisp.dhis.programrule.hibernate;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -33,8 +33,8 @@ import java.util.Collection;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramRule;
-import org.hisp.dhis.program.ProgramRuleStore;
+import org.hisp.dhis.programrule.ProgramRule;
+import org.hisp.dhis.programrule.ProgramRuleStore;
 
 /**
  * @author markusbekken

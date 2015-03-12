@@ -1,4 +1,4 @@
-package org.hisp.dhis.program;
+package org.hisp.dhis.programrule;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,41 +28,64 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.system.deletion.DeletionHandler;
+import java.util.Collection;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author markusbekken
  */
-public class ProgramRuleVariableDeletionHandler
-    extends DeletionHandler 
+@Transactional
+public class DefaultProgramRuleActionService
+    implements ProgramRuleActionService
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    ProgramRuleVariableService programRuleVariableService;
+    private ProgramRuleActionStore programRuleActionStore;
 
-    public void setProgramRuleVariableService( ProgramRuleVariableService programRuleVariableService )
+    public void setProgramRuleActionStore( ProgramRuleActionStore programRuleActionStore )
     {
-        this.programRuleVariableService = programRuleVariableService;
+        this.programRuleActionStore = programRuleActionStore;
     }
-    
+
     // -------------------------------------------------------------------------
-    // Implementation methods
+    // ProgramRuleAction implementation
     // -------------------------------------------------------------------------
+
     @Override
-    protected String getClassName()
+    public int addProgramRuleAction( ProgramRuleAction programRuleAction )
     {
-        return ProgramRuleVariable.class.getSimpleName();
+        return programRuleActionStore.save( programRuleAction );
     }
-    
+
     @Override
-    public void deleteProgram( Program program )
+    public void deleteProgramRuleAction( ProgramRuleAction programRuleAction )
     {
-        for ( ProgramRuleVariable programRuleVariable : programRuleVariableService.getProgramRuleVariable( program ) )
-        {
-            programRuleVariableService.deleteProgramRuleVariable( programRuleVariable );
-        }
+        programRuleActionStore.delete( programRuleAction );
     }
-    
+
+    @Override
+    public void updateProgramRuleAction( ProgramRuleAction programRuleAction )
+    {
+        programRuleActionStore.update( programRuleAction );
+    }
+
+    @Override
+    public ProgramRuleAction getProgramRuleAction( int id )
+    {
+        return programRuleActionStore.get( id );
+    }
+
+    @Override
+    public Collection<ProgramRuleAction> getAllProgramRuleAction()
+    {
+        return programRuleActionStore.getAll();
+    }
+
+    @Override
+    public Collection<ProgramRuleAction> getProgramRuleAction( ProgramRule programRule )
+    {
+        return programRuleActionStore.get( programRule );
+    }
 }

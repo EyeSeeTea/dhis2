@@ -1,4 +1,4 @@
-package org.hisp.dhis.program;
+package org.hisp.dhis.programrule;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -33,6 +33,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.hisp.dhis.DhisSpringTest;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramStageService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 

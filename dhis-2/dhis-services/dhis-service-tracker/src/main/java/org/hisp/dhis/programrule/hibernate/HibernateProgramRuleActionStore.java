@@ -1,4 +1,4 @@
-package org.hisp.dhis.program;
+package org.hisp.dhis.programrule.hibernate;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -30,57 +30,23 @@ package org.hisp.dhis.program;
 
 import java.util.Collection;
 
+import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.hisp.dhis.programrule.ProgramRule;
+import org.hisp.dhis.programrule.ProgramRuleAction;
+import org.hisp.dhis.programrule.ProgramRuleActionStore;
+
 /**
- *
  * @author markusbekken
  */
-public interface ProgramRuleActionService
+public class HibernateProgramRuleActionStore
+    extends HibernateIdentifiableObjectStore<ProgramRuleAction>
+    implements ProgramRuleActionStore
 {
-    String ID = ProgramRuleActionService.class.getName();
-
-    /**
-     * Adds an {@link ProgramRuleAction}
-     *
-     * @param ProgramRuleAction The to ProgramRuleAction add.
-     * @return A generated unique id of the added {@link ProgramRuleAction}.
-     */
-    int addProgramRuleAction( ProgramRuleAction programRuleAction );
-
-    /**
-     * Deletes a {@link ProgramRuleAction}
-     *
-     * @param ProgramRuleAction The ProgramRuleAction to delete.
-     */
-    void deleteProgramRuleAction( ProgramRuleAction programRuleAction );
-
-    /**
-     * Updates an {@link ProgramRuleAction}.
-     *
-     * @param ProgramRuleAction The ProgramRuleAction to update.
-     */
-    void updateProgramRuleAction( ProgramRuleAction programRuleAction );
-
-    /**
-     * Returns a {@link ProgramRuleAction}.
-     *
-     * @param id the id of the ProgramRuleAction to return.
-     * @return the ProgramRuleAction with the given id
-     */
-    ProgramRuleAction getProgramRuleAction( int id );
-
-    /**
-     * Returns all {@link ProgramRuleAction}.
-     *
-     * @return a collection of all ProgramRuleAction, or an empty collection if
-     * there are no ProgramRuleActions.
-     */
-    Collection<ProgramRuleAction> getAllProgramRuleAction();
-
-    /**
-     * Get validation by {@link ProgramRule}
-     *
-     * @param program Program
-     * @return ProgramRuleAction list
-     */
-    Collection<ProgramRuleAction> getProgramRuleAction( ProgramRule programRule );
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public Collection<ProgramRuleAction> get( ProgramRule programRule )
+    {
+        return getCriteria( Restrictions.eq( "programRule", programRule ) ).list();
+    }
 }

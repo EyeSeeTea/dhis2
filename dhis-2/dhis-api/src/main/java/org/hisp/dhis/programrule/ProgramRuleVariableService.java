@@ -1,4 +1,4 @@
-package org.hisp.dhis.program;
+package org.hisp.dhis.programrule;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -29,21 +29,60 @@ package org.hisp.dhis.program;
  */
 
 import java.util.Collection;
-import org.hisp.dhis.common.GenericNameableObjectStore;
+
+import org.hisp.dhis.program.Program;
 
 /**
+ *
  * @author markusbekken
  */
-public interface ProgramRuleVariableStore
-    extends GenericNameableObjectStore<ProgramRuleVariable>
+public interface ProgramRuleVariableService
 {
-    String ID = ProgramRuleVariableStore.class.getName();
+    String ID = ProgramRuleVariableService.class.getName();
 
     /**
-     * Get programRuleVariable by program
+     * Adds an {@link ProgramRuleVariable}
      *
-     * @param program {@link Program}
+     * @param programRuleVariable The to ProgramRuleVariable add.
+     * @return A generated unique id of the added {@link ProgramRuleVariable}.
+     */
+    int addProgramRuleVariable( ProgramRuleVariable programRuleVariable );
+
+    /**
+     * Deletes a {@link ProgramRuleVariable}
+     *
+     * @param programRuleVariable The ProgramRuleVariable to delete.
+     */
+    void deleteProgramRuleVariable( ProgramRuleVariable programRuleVariable );
+
+    /**
+     * Updates an {@link ProgramRuleVariable}.
+     *
+     * @param programRuleVariable The ProgramRuleVariable to update.
+     */
+    void updateProgramRuleVariable( ProgramRuleVariable programRuleVariable );
+
+    /**
+     * Returns a {@link ProgramRuleVariable}.
+     *
+     * @param id the id of the ProgramRuleVariable to return.
+     * @return the ProgramRuleVariable with the given id
+     */
+    ProgramRuleVariable getProgramRuleVariable( int id );
+
+    /**
+     * Returns all {@link ProgramRuleVariable}.
+     *
+     * @return a collection of all ProgramRuleVariable, or an empty collection if
+     * there are no ProgramRuleVariables.
+     */
+    Collection<ProgramRuleVariable> getAllProgramRuleVariable();
+
+    /**
+     * Get validation by {@link Program}
+     *
+     * @param program Program
      * @return ProgramRuleVariable list
      */
-    Collection<ProgramRuleVariable> get( Program program );
+    Collection<ProgramRuleVariable> getProgramRuleVariable( Program program );
 }

@@ -253,15 +253,15 @@
   </bean>
   
   <bean id="programRuleImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">
-    <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.program.ProgramRule" />
+    <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.programrule.ProgramRule" />
   </bean>
   
   <bean id="programRuleActionImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">
-    <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.program.ProgramRuleAction" />
+    <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.programrule.ProgramRuleAction" />
   </bean>
 
   <bean id="programRuleVariableImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">
-    <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.program.ProgramRuleVariable" />
+    <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.programrule.ProgramRuleVariable" />
   </bean>
 
   <bean id="relationshipTypeImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">

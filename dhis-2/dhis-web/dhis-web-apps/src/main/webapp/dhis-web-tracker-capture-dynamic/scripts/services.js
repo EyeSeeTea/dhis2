@@ -1479,7 +1479,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 variables.push({variablename:variablename,
                                 variablevalue:variablevalue,
                                 variabletype:variabletype,
-                                variablefound:variablefound
+                                hasValue:variablefound
                             });
             };
             
@@ -1610,6 +1610,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             var verbose = true;
             
             var variablesHash = {};
+            var variablesWithValueHash = {};
                     
             $scope.replaceVariables = function(expression) {
                 //replaces the variables in an expression with actual variable values.
@@ -1641,7 +1642,10 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 //Called from "runExpression". Only proceed with this logic in case there seems to be dhis function calls: "dhis." is present.
                 if(angular.isDefined(expression) && expression.indexOf("dhis.") !== -1){   
                     var dhisFunctions = [{name:"dhis.daysbetween",parameters:2},
-                                        {name:"dhis.floor",parameters:1}];
+                                        {name:"dhis.floor",parameters:1},
+                                        {name:"dhis.modulus",parameters:2},
+                                        {name:"dhis.hasValue",parameters:1},
+                                        {name:"dhis.concatenate"}];
                     
                     angular.forEach(dhisFunctions, function(dhisFunction){
                         //Replace each * with a regex that matches each parameter, allowing commas only inside single quotation marks.
@@ -1655,9 +1659,12 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                             
                             //Show error if no parameters is given and the function requires parameters,
                             //or if the number of parameters is wrong.
-                            if((!angular.isDefined(parameters) && dhisFunction.parameters > 0)
-                                    || parameters.length !== dhisFunction.parameters){
-                                $log.warn(dhisFunction.name + " was called with the incorrect number of parameters");
+                            if(angular.isDefined(dhisFunction.parameters)){
+                                //But we are only checking parameters where the dhisFunction actually has a defined set of parameters(concatenate, for example, does not have a fixed number);
+                                if((!angular.isDefined(parameters) && dhisFunction.parameters > 0)
+                                        || parameters.length !== dhisFunction.parameters){
+                                    $log.warn(dhisFunction.name + " was called with the incorrect number of parameters");
+                                }
                             }
 
                             //In case the function call is nested, the parameter itself contains an expression, run the expression.
@@ -1666,7 +1673,6 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                                     parameters[i] = $scope.runExpression(parameters[i],dhisFunction.name,"parameter:" + i);
                                 }
                             }
-                            
 
                             //Special block for dhis.weeksBetween(*,*) - add such a block for all other dhis functions.
                             if(dhisFunction.name === "dhis.daysbetween")
@@ -1681,9 +1687,33 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                             else if(dhisFunction.name === "dhis.floor")
                             {
                                 var floored = Math.floor(parameters[0]);
-                                
                                 //Replace the end evaluation of the dhis function:
                                 expression = expression.replace(callToThisFunction, floored);
+                            }
+                            else if(dhisFunction.name === "dhis.modulus")
+                            {
+                                var dividend = Number(parameters[0]);
+                                var divisor = Number(parameters[1]);
+                                var rest = dividend % divisor;
+                                //Replace the end evaluation of the dhis function:
+                                expression = expression.replace(callToThisFunction, rest);
+                            }
+                            else if(dhisFunction.name === "dhis.hasValue")
+                            {
+                                //"evaluate" hasvalue to true or false:
+                                if(variablesWithValueHash[parameters[0]]){
+                                    expression = expression.replace(callToThisFunction, 'true');
+                                } else {
+                                    expression = expression.replace(callToThisFunction, 'false');
+                                }
+                            }
+                            else if(dhisFunction.name === "dhis.concatenate")
+                            {
+                                var returnString = "";
+                                for (var i = 0; i < parameters.length; i++) {
+                                    returnString += parameters[i];
+                                }
+                                expression = expression.replace(callToThisFunction, returnString);
                             }
                         });
                     });
@@ -1729,6 +1759,11 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                     //Make a variables hash to allow direct lookup:
                     angular.forEach(variables, function(variable) {
                         variablesHash[variable.variablename] = variable.variablevalue;
+                    });
+                    
+                    //Make a variables-exists/hasvalue hash to allow direct lookup:
+                    angular.forEach(variables, function(variable) {
+                        variablesWithValueHash[variable.variablename] = variable.hasValue;
                     });
 
                     if(angular.isObject(rules) && angular.isArray(rules)){

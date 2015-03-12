@@ -1,4 +1,4 @@
-package org.hisp.dhis.program;
+package org.hisp.dhis.programrule;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -31,10 +31,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
+
 import org.junit.Test;
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementStore;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramStore;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ProgramRuleVariableStoreTest

@@ -1,4 +1,4 @@
-package org.hisp.dhis.program;
+package org.hisp.dhis.programrule;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,41 +28,24 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.system.deletion.DeletionHandler;
+import java.util.Collection;
+
+import org.hisp.dhis.common.GenericNameableObjectStore;
+import org.hisp.dhis.program.Program;
 
 /**
  * @author markusbekken
  */
-public class ProgramRuleDeletionHandler
-    extends DeletionHandler 
+public interface ProgramRuleVariableStore
+    extends GenericNameableObjectStore<ProgramRuleVariable>
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
+    String ID = ProgramRuleVariableStore.class.getName();
 
-    ProgramRuleService programRuleService;
-
-    public void setProgramRuleService( ProgramRuleService programRuleService )
-    {
-        this.programRuleService = programRuleService;
-    }
-    
-    // -------------------------------------------------------------------------
-    // Implementation methods
-    // -------------------------------------------------------------------------
-    
-    @Override
-    protected String getClassName()
-    {
-        return ProgramRule.class.getSimpleName();
-    }
-    
-    @Override
-    public void deleteProgram( Program program )
-    {
-        for ( ProgramRule programRule : programRuleService.getProgramRule( program ) )
-        {
-            programRuleService.deleteProgramRule( programRule );
-        }
-    }
+    /**
+     * Get programRuleVariable by program
+     *
+     * @param program {@link Program}
+     * @return ProgramRuleVariable list
+     */
+    Collection<ProgramRuleVariable> get( Program program );
 }

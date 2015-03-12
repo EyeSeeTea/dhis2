@@ -1,4 +1,4 @@
-package org.hisp.dhis.program.hibernate;
+package org.hisp.dhis.programrule;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -30,23 +30,57 @@ package org.hisp.dhis.program.hibernate;
 
 import java.util.Collection;
 
-import org.hibernate.criterion.Restrictions;
-import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
-import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramRuleVariable;
-import org.hisp.dhis.program.ProgramRuleVariableStore;
-
 /**
+ *
  * @author markusbekken
  */
-public class HibernateProgramRuleVariableStore
-    extends HibernateIdentifiableObjectStore<ProgramRuleVariable>
-    implements ProgramRuleVariableStore
+public interface ProgramRuleActionService
 {
-    @Override
-    @SuppressWarnings( "unchecked" )
-    public Collection<ProgramRuleVariable> get( Program program )
-    {
-        return getCriteria( Restrictions.eq( "program", program ) ).list();
-    }
+    String ID = ProgramRuleActionService.class.getName();
+
+    /**
+     * Adds an {@link ProgramRuleAction}
+     *
+     * @param ProgramRuleAction The to ProgramRuleAction add.
+     * @return A generated unique id of the added {@link ProgramRuleAction}.
+     */
+    int addProgramRuleAction( ProgramRuleAction programRuleAction );
+
+    /**
+     * Deletes a {@link ProgramRuleAction}
+     *
+     * @param ProgramRuleAction The ProgramRuleAction to delete.
+     */
+    void deleteProgramRuleAction( ProgramRuleAction programRuleAction );
+
+    /**
+     * Updates an {@link ProgramRuleAction}.
+     *
+     * @param ProgramRuleAction The ProgramRuleAction to update.
+     */
+    void updateProgramRuleAction( ProgramRuleAction programRuleAction );
+
+    /**
+     * Returns a {@link ProgramRuleAction}.
+     *
+     * @param id the id of the ProgramRuleAction to return.
+     * @return the ProgramRuleAction with the given id
+     */
+    ProgramRuleAction getProgramRuleAction( int id );
+
+    /**
+     * Returns all {@link ProgramRuleAction}.
+     *
+     * @return a collection of all ProgramRuleAction, or an empty collection if
+     * there are no ProgramRuleActions.
+     */
+    Collection<ProgramRuleAction> getAllProgramRuleAction();
+
+    /**
+     * Get validation by {@link ProgramRule}
+     *
+     * @param program Program
+     * @return ProgramRuleAction list
+     */
+    Collection<ProgramRuleAction> getProgramRuleAction( ProgramRule programRule );
 }

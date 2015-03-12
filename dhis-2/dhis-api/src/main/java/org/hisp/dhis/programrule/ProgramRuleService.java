@@ -1,4 +1,4 @@
-package org.hisp.dhis.program;
+package org.hisp.dhis.programrule;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,42 +28,60 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.system.deletion.DeletionHandler;
+import java.util.Collection;
+import org.hisp.dhis.program.Program;
 
 /**
+ *
  * @author markusbekken
  */
-public class ProgramRuleActionDeletionHandler
-    extends DeletionHandler 
+public interface ProgramRuleService
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
+    String ID = ProgramRuleService.class.getName();
 
-    ProgramRuleActionService programRuleActionService;
+    /**
+     * Adds an {@link ProgramRule}
+     *
+     * @param ProgramRule The to ProgramRule add.
+     * @return A generated unique id of the added {@link ProgramRule}.
+     */
+    int addProgramRule( ProgramRule programRule );
 
-    public void setProgramRuleActionService( ProgramRuleActionService programRuleActionService )
-    {
-        this.programRuleActionService = programRuleActionService;
-    }
-    
-    // -------------------------------------------------------------------------
-    // Implementation methods
-    // -------------------------------------------------------------------------
-    
-    @Override
-    protected String getClassName()
-    {
-        return ProgramRuleAction.class.getSimpleName();
-    }
-    
-    @Override
-    public void deleteProgramRule( ProgramRule programRule )
-    {
-        for ( ProgramRuleAction programRuleAction : programRuleActionService.getProgramRuleAction( programRule ) )
-        {
-            programRuleActionService.deleteProgramRuleAction( programRuleAction );
-        }
-    }
-    
+    /**
+     * Deletes a {@link ProgramRule}
+     *
+     * @param ProgramRule The ProgramRule to delete.
+     */
+    void deleteProgramRule( ProgramRule programRule );
+
+    /**
+     * Updates an {@link ProgramRule}.
+     *
+     * @param ProgramRule The ProgramRule to update.
+     */
+    void updateProgramRule( ProgramRule programRule );
+
+    /**
+     * Returns a {@link ProgramRule}.
+     *
+     * @param id the id of the ProgramRule to return.
+     * @return the ProgramRule with the given id
+     */
+    ProgramRule getProgramRule( int id );
+
+    /**
+     * Returns all {@link ProgramRule}.
+     *
+     * @return a collection of all ProgramRule, or an empty collection if
+     * there are no ProgramRules.
+     */
+    Collection<ProgramRule> getAllProgramRule();
+
+    /**
+     * Get validation by {@link Program}
+     *
+     * @param program Program
+     * @return ProgramRule list
+     */
+    Collection<ProgramRule> getProgramRule( Program program );
 }

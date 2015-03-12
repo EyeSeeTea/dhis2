@@ -6,7 +6,7 @@
   >
 
 <hibernate-mapping>
-  <class name="org.hisp.dhis.program.ProgramRuleVariable" table="programrulevariable">
+  <class name="org.hisp.dhis.programrule.ProgramRuleVariable" table="programrulevariable">
 
     <cache usage="read-write" />
 
@@ -23,7 +23,7 @@
     
     <property name="sourceType" column="sourcetype">
         <type name="org.hibernate.type.EnumType">
-            <param name="enumClass">org.hisp.dhis.program.ProgramRuleVariableSourceType</param>
+            <param name="enumClass">org.hisp.dhis.programrule.ProgramRuleVariableSourceType</param>
             <param name="type">12</param>
         </type>
     </property>

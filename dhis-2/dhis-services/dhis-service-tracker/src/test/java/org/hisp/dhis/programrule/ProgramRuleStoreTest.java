@@ -1,4 +1,4 @@
-package org.hisp.dhis.program;
+package org.hisp.dhis.programrule;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -34,53 +34,55 @@ import java.util.Collection;
 
 import org.junit.Test;
 import org.hisp.dhis.DhisSpringTest;
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementStore;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramStageStore;
+import org.hisp.dhis.program.ProgramStore;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class ProgramRuleActionStoreTest
+public class ProgramRuleStoreTest
     extends DhisSpringTest
 {
-    public ProgramRule programRuleA; 
+    public Program programA; 
     
-    public DataElement dataElementA;
-    
-    
-    @Autowired
-    public ProgramRuleStore programRuleStore;
+    public ProgramStage programStageA;
     
     @Autowired
-    public DataElementStore dataElementStore;
+    public ProgramStore programStore;
     
     @Autowired
-    public ProgramRuleActionStore actionStore;
+    public ProgramStageStore programStageStore;
+    
+    @Autowired
+    public ProgramRuleStore variableStore;
     
     @Override
     public void setUpTest()
     {
-        programRuleA = createProgramRule( 'A' );
-        dataElementA = createDataElement( 'A' );
+        programA = createProgram('A', null, null);
+        programStageA = createProgramStage( 'A', 0 );
         
-        programRuleStore.save( programRuleA );
-        dataElementStore.save( dataElementA );
+        programStore.save( programA );
+        programStageStore.save( programStageA );
+        
     }
     
     @Test
     public void testGetByProgram()
     {
-        ProgramRuleAction actionA = new ProgramRuleAction( "ActionA", programRuleA, ProgramRuleActionType.ASSIGNVARIABLE, null, null, "$myvar", "true");        
-        ProgramRuleAction actionB = new ProgramRuleAction( "ActionB", programRuleA, ProgramRuleActionType.DISPLAYTEXT, null, "con","Hello", "$placeofliving");
-        ProgramRuleAction actionC = new ProgramRuleAction( "ActionC", programRuleA, ProgramRuleActionType.HIDEFIELD, dataElementA, null, null, null);
-       
-        actionStore.save( actionA );
-        actionStore.save( actionB );
-        actionStore.save( actionC );
+        ProgramRule ruleA = new ProgramRule( "RuleA", "descriptionA", programA, programStageA, null, "true", null );
+        ProgramRule ruleB = new ProgramRule( "RuleA", "descriptionA", programA, null, null, "$a < 1", 1 );
+        ProgramRule ruleC = new ProgramRule( "RuleA", "descriptionA", programA, null, null, "($a < 1 && $a > -10) && !$b", 0 );
         
-        Collection<ProgramRuleAction> vars = actionStore.get( programRuleA );
+        variableStore.save( ruleA );
+        variableStore.save( ruleB );
+        variableStore.save( ruleC );
+        
+        Collection<ProgramRule> vars = variableStore.get( programA );
         
         assertEquals( 3, vars.size() );
-        assertTrue( vars.contains( actionA ) );
-        assertTrue( vars.contains( actionB ) );
-        assertTrue( vars.contains( actionC ) );
+        assertTrue( vars.contains( ruleA ) );
+        assertTrue( vars.contains( ruleB ) );
+        assertTrue( vars.contains( ruleC ) );
     }
 }

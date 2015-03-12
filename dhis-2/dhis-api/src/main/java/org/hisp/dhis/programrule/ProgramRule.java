@@ -1,4 +1,4 @@
-package org.hisp.dhis.program;
+package org.hisp.dhis.programrule;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,12 +28,17 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.MergeStrategy;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramStage;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -87,6 +92,7 @@ public class ProgramRule
     public ProgramRule()
     {
         this.setAutoFields();
+        this.programRuleActions = new HashSet<ProgramRuleAction>();
     }
     
     public ProgramRule( String name, String description, Program program, ProgramStage programStage, Set<ProgramRuleAction> programRuleActions, String condition, Integer priority )
@@ -97,8 +103,8 @@ public class ProgramRule
         this.program = program;
         this.programStage = programStage;
         this.programRuleActions = programRuleActions;
-        this.setCondition( condition );
-        this.setPriority( priority );
+        this.condition = condition;
+        this.priority = priority;
     }
     
     // -------------------------------------------------------------------------
@@ -178,5 +184,36 @@ public class ProgramRule
     public void setDescription( String description )
     {
         this.description = description;
+    }
+    
+    @Override
+    public void mergeWith( IdentifiableObject other, MergeStrategy strategy )
+    {
+        super.mergeWith( other, strategy );
+
+        if ( other.getClass().isInstance( this ) )
+        {
+            ProgramRule programRule = (ProgramRule) other;
+
+            if ( strategy.isReplace() )
+            {
+                description = programRule.getDescription();
+                priority = programRule.getPriority();
+                condition = programRule.getCondition();
+                program = programRule.getProgram();
+                programStage = programRule.getProgramStage();
+            }
+            else if ( strategy.isMerge() )
+            {
+                description = programRule.getDescription() == null ? description : programRule.getDescription();
+                priority = programRule.getPriority() == null ? priority : programRule.getPriority();
+                condition = programRule.getCondition() == null ? condition : programRule.getCondition();
+                program = programRule.getProgram() == null ? program : programRule.getProgram();
+                programStage = programRule.getProgramStage() == null ? programStage : programRule.getProgramStage();
+            }
+
+            programRuleActions.clear();
+            programRuleActions.addAll( programRule.getProgramRuleActions() );
+        }
     }
 }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.program;
+package org.hisp.dhis.programrule;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -29,63 +29,65 @@ package org.hisp.dhis.program;
  */
 
 import java.util.Collection;
+
+import org.hisp.dhis.program.Program;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author markusbekken
  */
 @Transactional
-public class DefaultProgramRuleActionService
-    implements ProgramRuleActionService
+public class DefaultProgramRuleVariableService
+    implements ProgramRuleVariableService
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private ProgramRuleActionStore programRuleActionStore;
+    private ProgramRuleVariableStore programRuleVariableStore;
 
-    public void setProgramRuleActionStore( ProgramRuleActionStore programRuleActionStore )
+    public void setProgramRuleVariableStore( ProgramRuleVariableStore programRuleVariableStore )
     {
-        this.programRuleActionStore = programRuleActionStore;
+        this.programRuleVariableStore = programRuleVariableStore;
     }
 
     // -------------------------------------------------------------------------
-    // ProgramRuleAction implementation
+    // ProgramRuleVariable implementation
     // -------------------------------------------------------------------------
 
     @Override
-    public int addProgramRuleAction( ProgramRuleAction programRuleAction )
+    public int addProgramRuleVariable( ProgramRuleVariable programRuleVariable )
     {
-        return programRuleActionStore.save( programRuleAction );
+        return programRuleVariableStore.save( programRuleVariable );
     }
 
     @Override
-    public void deleteProgramRuleAction( ProgramRuleAction programRuleAction )
+    public void deleteProgramRuleVariable( ProgramRuleVariable programRuleVariable )
     {
-        programRuleActionStore.delete( programRuleAction );
+        programRuleVariableStore.delete( programRuleVariable );
     }
 
     @Override
-    public void updateProgramRuleAction( ProgramRuleAction programRuleAction )
+    public void updateProgramRuleVariable( ProgramRuleVariable programRuleVariable )
     {
-        programRuleActionStore.update( programRuleAction );
+        programRuleVariableStore.update( programRuleVariable );
     }
 
     @Override
-    public ProgramRuleAction getProgramRuleAction( int id )
+    public ProgramRuleVariable getProgramRuleVariable( int id )
     {
-        return programRuleActionStore.get( id );
+        return programRuleVariableStore.get( id );
     }
 
     @Override
-    public Collection<ProgramRuleAction> getAllProgramRuleAction()
+    public Collection<ProgramRuleVariable> getAllProgramRuleVariable()
     {
-        return programRuleActionStore.getAll();
+        return programRuleVariableStore.getAll();
     }
 
     @Override
-    public Collection<ProgramRuleAction> getProgramRuleAction( ProgramRule programRule )
+    public Collection<ProgramRuleVariable> getProgramRuleVariable( Program program )
     {
-        return programRuleActionStore.get( programRule );
+        return programRuleVariableStore.get( program );
     }
 }

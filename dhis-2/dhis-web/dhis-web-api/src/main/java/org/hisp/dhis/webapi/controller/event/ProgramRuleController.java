@@ -28,7 +28,7 @@ package org.hisp.dhis.webapi.controller.event;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.program.ProgramRule;
+import org.hisp.dhis.programrule.ProgramRule;
 import org.hisp.dhis.schema.descriptors.ProgramRuleSchemaDescriptor;
 import org.hisp.dhis.webapi.controller.AbstractCrudController;
 import org.springframework.stereotype.Controller;

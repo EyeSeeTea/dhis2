@@ -1,4 +1,4 @@
-package org.hisp.dhis.program.hibernate;
+package org.hisp.dhis.programrule;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,25 +28,34 @@ package org.hisp.dhis.program.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-
-import org.hibernate.criterion.Restrictions;
-import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
-import org.hisp.dhis.program.ProgramRule;
-import org.hisp.dhis.program.ProgramRuleAction;
-import org.hisp.dhis.program.ProgramRuleActionStore;
-
 /**
  * @author markusbekken
  */
-public class HibernateProgramRuleActionStore
-    extends HibernateIdentifiableObjectStore<ProgramRuleAction>
-    implements ProgramRuleActionStore
-{
-    @Override
-    @SuppressWarnings( "unchecked" )
-    public Collection<ProgramRuleAction> get( ProgramRule programRule )
+public enum ProgramRuleActionType {
+    DISPLAYTEXT( "displaytext" ),
+    DISPLAYKEYVALUEPAIR( "displaykeyvaluepair" ),
+    HIDEFIELD( "hidefield" ),
+    ASSIGNVARIABLE( "assignvariable" ),
+    SHOWWARNING( "showwarning" ),
+    SHOWERROR( "showerror" );
+
+    final String value;
+
+    private ProgramRuleActionType( String value )
     {
-        return getCriteria( Restrictions.eq( "programRule", programRule ) ).list();
+        this.value = value;
+    }
+
+    public static ProgramRuleActionType fromValue( String value )
+    {
+        for ( ProgramRuleActionType type : ProgramRuleActionType.values() )
+        {
+            if ( type.value.equalsIgnoreCase( value ) )
+            {
+                return type;
+            }
+        }
+
+        return null;
     }
 }

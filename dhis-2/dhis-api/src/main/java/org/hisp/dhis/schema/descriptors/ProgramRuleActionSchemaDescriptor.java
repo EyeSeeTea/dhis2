@@ -33,7 +33,7 @@ import org.hisp.dhis.schema.Authority;
 import org.hisp.dhis.schema.AuthorityType;
 import org.hisp.dhis.schema.Schema;
 import org.hisp.dhis.schema.SchemaDescriptor;
-import org.hisp.dhis.program.ProgramRuleAction;
+import org.hisp.dhis.programrule.ProgramRuleAction;
 import org.springframework.stereotype.Component;
 
 /**

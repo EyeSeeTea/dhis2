@@ -1,4 +1,4 @@
-package org.hisp.dhis.schema.descriptors;
+package org.hisp.dhis.programrule;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,37 +28,39 @@ package org.hisp.dhis.schema.descriptors;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.collect.Lists;
-import org.hisp.dhis.schema.Authority;
-import org.hisp.dhis.schema.AuthorityType;
-import org.hisp.dhis.schema.Schema;
-import org.hisp.dhis.schema.SchemaDescriptor;
-import org.hisp.dhis.programrule.ProgramRule;
-import org.springframework.stereotype.Component;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.hisp.dhis.common.DxfNamespaces;
 
 /**
- *
  * @author markusbekken
  */
-@Component
-public class ProgramRuleSchemaDescriptor implements SchemaDescriptor
-{
-    public static final String SINGULAR = "programRule";
+@JacksonXmlRootElement( localName = "programRuleVariableSourceType", namespace = DxfNamespaces.DXF_2_0 )
+public enum ProgramRuleVariableSourceType {
+    DATAELEMENT_NEWEST_EVENT_PROGRAM_STAGE("dataelement_newest_event_program_stage"), 
+    DATAELEMENT_NEWEST_EVENT_PROGRAM("dataelement_newest_event_program"), 
+    DATAELEMENT_CURRENT_EVENT("dataelement_current_event"), 
+    DATAELEMENT_PREVIOUS_EVENT("dataelement_previous_event"), 
+    CALCULATED_VALUE("calculated_value"), 
+    TEI_ATTRIBUTE("tei_attribute"),
+    CONTEXT_VARIABLE("context_variable");
+    
+    private final String value;
 
-    public static final String PLURAL = "programRules";
-
-    public static final String API_ENDPOINT = "/" + PLURAL;
-
-    @Override
-    public Schema getSchema()
+    private ProgramRuleVariableSourceType( String value )
     {
-        Schema schema = new Schema( ProgramRule.class, SINGULAR, PLURAL );
-        schema.setApiEndpoint( API_ENDPOINT );
-        schema.setOrder( 1391 );
-        
-        schema.getAuthorities().add( new Authority( AuthorityType.CREATE, Lists.newArrayList( "F_PROGRAMRULE_ADD" ) ) );
-        schema.getAuthorities().add( new Authority( AuthorityType.DELETE, Lists.newArrayList( "F_PROGRAMRULE_DELETE" ) ) );
+        this.value = value;
+    }
 
-        return schema;
+    public static ProgramRuleVariableSourceType fromValue( String value )
+    {
+        for ( ProgramRuleVariableSourceType type : ProgramRuleVariableSourceType.values() )
+        {
+            if ( type.value.equalsIgnoreCase( value ) )
+            {
+                return type;
+            }
+        }
+
+        return null;
     }
 }

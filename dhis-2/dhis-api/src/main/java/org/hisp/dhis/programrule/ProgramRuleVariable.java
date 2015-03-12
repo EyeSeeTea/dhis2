@@ -1,4 +1,4 @@
-package org.hisp.dhis.program;
+package org.hisp.dhis.programrule;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -30,10 +30,14 @@ package org.hisp.dhis.program;
 
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.MergeStrategy;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.DimensionalView;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -188,5 +192,31 @@ public class ProgramRuleVariable
     public void setSourceType( ProgramRuleVariableSourceType sourceType )
     {
         this.sourceType = sourceType;
+    }
+    
+    @Override
+    public void mergeWith( IdentifiableObject other, MergeStrategy strategy )
+    {
+        super.mergeWith( other, strategy );
+
+        if ( other.getClass().isInstance( this ) )
+        {
+            ProgramRuleVariable programRuleVariable = (ProgramRuleVariable) other;
+
+            if ( strategy.isReplace() )
+            {
+                this.sourceType = programRuleVariable.getSourceType();
+                this.attribute = programRuleVariable.getAttribute();
+                this.dataElement = programRuleVariable.getDataElement();
+                this.programStage = programRuleVariable.getProgramStage();
+            }
+            else if ( strategy.isMerge() )
+            {
+                this.sourceType = programRuleVariable.getSourceType() == null ? sourceType : programRuleVariable.getSourceType();
+                this.attribute = programRuleVariable.getAttribute() == null ? attribute : programRuleVariable.getAttribute();
+                this.dataElement = programRuleVariable.getDataElement() == null ? dataElement : programRuleVariable.getDataElement();
+                this.programStage = programRuleVariable.getProgramStage() == null ? programStage : programRuleVariable.getProgramStage();
+            }
+        }
     }
 }

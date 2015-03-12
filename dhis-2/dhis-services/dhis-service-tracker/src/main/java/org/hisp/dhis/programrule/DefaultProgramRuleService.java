@@ -1,4 +1,4 @@
-package org.hisp.dhis.program;
+package org.hisp.dhis.programrule;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -29,21 +29,65 @@ package org.hisp.dhis.program;
  */
 
 import java.util.Collection;
-import org.hisp.dhis.common.GenericNameableObjectStore;
+
+import org.hisp.dhis.program.Program;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author markusbekken
  */
-public interface ProgramRuleActionStore
-    extends GenericNameableObjectStore<ProgramRuleAction>
+@Transactional
+public class DefaultProgramRuleService
+    implements ProgramRuleService
 {
-    String ID = ProgramRuleActionStore.class.getName();
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
 
-    /**
-     * Get programRuleAction by program
-     *
-     * @param program {@link Program}
-     * @return ProgramRuleActionVariable list
-     */
-    Collection<ProgramRuleAction> get( ProgramRule programRule );
+    private ProgramRuleStore programRuleStore;
+
+    public void setProgramRuleStore( ProgramRuleStore programRuleStore )
+    {
+        this.programRuleStore = programRuleStore;
+    }
+
+    // -------------------------------------------------------------------------
+    // ProgramRule implementation
+    // -------------------------------------------------------------------------
+
+    @Override
+    public int addProgramRule( ProgramRule programRule )
+    {
+        return programRuleStore.save( programRule );
+    }
+
+    @Override
+    public void deleteProgramRule( ProgramRule programRule )
+    {
+        programRuleStore.delete( programRule );
+    }
+
+    @Override
+    public void updateProgramRule( ProgramRule programRule )
+    {
+        programRuleStore.update( programRule );
+    }
+
+    @Override
+    public ProgramRule getProgramRule( int id )
+    {
+        return programRuleStore.get( id );
+    }
+
+    @Override
+    public Collection<ProgramRule> getAllProgramRule()
+    {
+        return programRuleStore.getAll();
+    }
+
+    @Override
+    public Collection<ProgramRule> getProgramRule( Program program )
+    {
+        return programRuleStore.get( program );
+    }
 }
