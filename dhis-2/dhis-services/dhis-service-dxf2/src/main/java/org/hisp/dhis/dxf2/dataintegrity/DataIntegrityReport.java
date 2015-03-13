@@ -37,6 +37,9 @@ import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.indicator.IndicatorGroup;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -151,12 +154,42 @@ public class DataIntegrityReport
 
         invalidIndicatorDenominators.putAll( transformGenericMapOfStrings( report.getInvalidIndicatorDenominators() ) );
 
-        
+        indicatorsViolatingExclusiveGroupSets.putAll( transformSortedIndicatorMap( report.getIndicatorsViolatingExclusiveGroupSets() ) );
+
+        duplicatePeriods.addAll( transformGenericList( report.getDuplicatePeriods() ) );
+
+        organisationUnitsWithCyclicReferences.addAll( transformGenericList( report.getOrganisationUnitsWithCyclicReferences() ) );
+
+        orphanedOrganisationUnits.addAll( transformGenericList( report.getOrphanedOrganisationUnits() ) );
+
+        organisationUnitsWithoutGroups.addAll( transformGenericList( report.getOrganisationUnitsWithoutGroups() ) );
+
+        organisationUnitsViolatingExclusiveGroupSets.putAll( transformSortedOrgUnitMap( report.getOrganisationUnitsViolatingExclusiveGroupSets() ) );
+
+        organisationUnitGroupsWithoutGroupSets.addAll( transformGenericList( report.getOrganisationUnitGroupsWithoutGroupSets() ) );
+
+        validationRulesWithoutGroups.addAll( transformGenericList( report.getValidationRulesWithoutGroups() ) );
+
+        invalidValidationRuleLeftSideExpressions.putAll( transformGenericMapOfStrings( report.getInvalidValidationRuleLeftSideExpressions() ) );
+
+        invalidValidationRuleRightSideExpressions.putAll( transformGenericMapOfStrings( report.getInvalidValidationRuleRightSideExpressions() ) );
     }
 
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
+
+    @SuppressWarnings( "unchecked" )
+    private SortedMap<String, Collection<String>> transformSortedOrgUnitMap( SortedMap<OrganisationUnit, Collection<OrganisationUnitGroup>> map )
+    {
+        return transformGenericSortedMap( (SortedMap<? extends IdentifiableObject, Collection<? extends IdentifiableObject>>)(SortedMap<?,?>) map );
+    }
+
+    @SuppressWarnings( "unchecked" )
+    private SortedMap<String, Collection<String>> transformSortedIndicatorMap( SortedMap<Indicator, Collection<IndicatorGroup>> map )
+    {
+        return transformGenericSortedMap( ( SortedMap<? extends IdentifiableObject, Collection<? extends IdentifiableObject>> )(SortedMap<?,?>) map );
+    }
 
     @SuppressWarnings( "unchecked" )
     private Collection<Collection<String>> transformCollectionOfIndicatorCollections( Collection<Collection<Indicator>> collection )
