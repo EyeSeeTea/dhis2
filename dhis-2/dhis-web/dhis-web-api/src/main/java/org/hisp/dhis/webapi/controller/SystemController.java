@@ -136,15 +136,15 @@ public class SystemController
             TaskId taskId = new TaskId( taskCategory, currentUserService.getCurrentUser() );
 
             // TODO Support DataIntegrityReport (make task summary generic).
-            if ( !taskCategory.equals( TaskCategory.DATAINTEGRITY ) )
-            {
-                importSummary = (ImportSummary) notifier.getTaskSummary( taskId );
-                JacksonUtils.toJson( response.getOutputStream(), importSummary );
-            }
-            else
+            if ( taskCategory.equals( TaskCategory.DATAINTEGRITY ) )
             {
                 dataIntegrityReport = (DataIntegrityReport) notifier.getTaskSummary( taskId );
                 JacksonUtils.toJson( response.getOutputStream(), new FlattenedDataIntegrityReport( dataIntegrityReport ) );
+            }
+            else
+            {
+                importSummary = (ImportSummary) notifier.getTaskSummary( taskId );
+                JacksonUtils.toJson( response.getOutputStream(), importSummary );
             }
         }
 
