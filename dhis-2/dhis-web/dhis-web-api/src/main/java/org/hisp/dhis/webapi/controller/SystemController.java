@@ -28,10 +28,9 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.dataintegrity.DataIntegrityReport;
-import org.hisp.dhis.dxf2.dataintegrity.FlattenedDataIntegrityReport;
+import org.hisp.dhis.dataintegrity.FlattenedDataIntegrityReport;
 import org.hisp.dhis.dxf2.metadata.ImportSummary;
 import org.hisp.dhis.dxf2.common.JacksonUtils;
 import org.hisp.dhis.node.exception.InvalidTypeException;
@@ -136,6 +135,7 @@ public class SystemController
             TaskId taskId = new TaskId( taskCategory, currentUserService.getCurrentUser() );
 
             // TODO Support DataIntegrityReport (make task summary generic).
+            // TODO Also avoid null pointer on fetching unfinished task
             if ( taskCategory.equals( TaskCategory.DATAINTEGRITY ) )
             {
                 dataIntegrityReport = (DataIntegrityReport) notifier.getTaskSummary( taskId );
