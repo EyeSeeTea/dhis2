@@ -31,6 +31,7 @@ package org.hisp.dhis.webapi.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.dataintegrity.DataIntegrityReport;
+import org.hisp.dhis.dxf2.dataintegrity.FlattenedDataIntegrityReport;
 import org.hisp.dhis.dxf2.metadata.ImportSummary;
 import org.hisp.dhis.dxf2.common.JacksonUtils;
 import org.hisp.dhis.node.exception.InvalidTypeException;
@@ -143,7 +144,7 @@ public class SystemController
             else
             {
                 dataIntegrityReport = (DataIntegrityReport) notifier.getTaskSummary( taskId );
-                JacksonUtils.toJson( response.getOutputStream(), dataIntegrityReport.getFlattenedReport() );
+                JacksonUtils.toJson( response.getOutputStream(), new FlattenedDataIntegrityReport( dataIntegrityReport ) );
             }
         }
 

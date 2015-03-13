@@ -28,7 +28,6 @@ package org.hisp.dhis.dataintegrity;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementOperand;
@@ -41,7 +40,6 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.validation.ValidationRule;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -96,33 +94,6 @@ public class DataIntegrityReport
     private Map<ValidationRule, String> invalidValidationRuleLeftSideExpressions;
     
     private Map<ValidationRule, String> invalidValidationRuleRightSideExpressions;
-
-    public class FlattenedDataIntegrityReport
-    {
-        @JsonProperty
-        private List<String> dataElementsWithoutDataSet = new ArrayList<>();
-
-        @JsonProperty
-        private List<String> dataElementsWithoutGroups = new ArrayList<>();
-
-        public FlattenedDataIntegrityReport( DataIntegrityReport report )
-        {
-            for ( DataElement de : report.getDataElementsWithoutDataSet() )
-            {
-                dataElementsWithoutDataSet.add( de.getDisplayName() );
-            }
-
-            for( DataElement de : report.getDataElementsWithoutGroups() )
-            {
-                dataElementsWithoutGroups.add( de.getDisplayName() );
-            }
-        }
-    }
-
-    public FlattenedDataIntegrityReport getFlattenedReport()
-    {
-        return new FlattenedDataIntegrityReport( this );
-    }
 
     //-------------------------------------------------------------------------
     // Constructors
