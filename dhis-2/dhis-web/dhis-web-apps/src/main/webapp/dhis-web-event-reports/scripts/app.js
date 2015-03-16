@@ -1301,6 +1301,9 @@ Ext.onReady( function() {
 			filterStore,
             onValueSelect,
 			value,
+            val,
+            onCollapseDataDimensionsChange,
+            collapseDataDimensions,
             aggregationType,
 
 			getStore,
@@ -1585,6 +1588,40 @@ Ext.onReady( function() {
             }
 		});
 
+        val = Ext.create('Ext.panel.Panel', {
+            bodyStyle: 'padding: 1px',
+            width: defaultWidth,
+            height: 220,
+            items: value,
+            tbar: {
+                height: 25,
+                style: 'padding: 1px',
+                items: [
+                    {
+                        xtype: 'label',
+                        height: 22,
+                        style: 'padding-left: 6px; line-height: 22px',
+                        text: NS.i18n.value
+                    },
+                    '->',
+                    aggregationType
+                ]
+            }
+        });
+
+        onCollapseDataDimensionsChange = function() {
+            toggleDataItems();
+            toggleValueGui();
+        };
+
+        collapseDataDimensions = Ext.create('Ext.form.field.Checkbox', {
+            boxLabel: NS.i18n.collapse_data_dimensions,
+            style: 'margin-left: 3px',
+            listeners: {
+                valuechange: onCollapseDataDimensionsChange
+            }
+        });
+
 		selectPanel = Ext.create('Ext.panel.Panel', {
 			bodyStyle: 'border:0 none',
 			items: [
@@ -1610,27 +1647,7 @@ Ext.onReady( function() {
 					bodyStyle: 'border:0 none',
 					items: [
 						row,
-                        {
-                            xtype: 'panel',
-                            bodyStyle: 'padding: 1px',
-                            width: defaultWidth,
-                            height: 220,
-                            items: value,
-                            tbar: {
-                                height: 25,
-                                style: 'padding: 1px',
-                                items: [
-                                    {
-                                        xtype: 'label',
-                                        height: 22,
-                                        style: 'padding-left: 6px; line-height: 22px',
-                                        text: NS.i18n.value
-                                    },
-                                    '->',
-                                    aggregationType
-                                ]
-                            }
-                        }
+                        val
 					]
 				}
 			]
@@ -1726,6 +1743,56 @@ Ext.onReady( function() {
 			fixedFilterStore.setListHeight();
 		};
 
+        toggleDataItems = function(param) {
+            var stores = [colStore, rowStore, filterStore, fixedFilterStore],
+                collapse = Ext.isObject(param) && param.collapseDataItems ? param.collapseDataItems : param,
+                keys = ['ou', 'pe', 'dates'],
+                dx = ['dx'],
+                keys;
+
+            // clear filters
+            for (var i = 0, store; i < stores.length; i++) {
+                stores[i].clearFilter();
+            }
+
+            // add dx if it does not exist
+            if (!hasDimension('dx')) {
+                addDimension({
+                    id: 'dx',
+                    name: 'Data'
+                }, rowStore);
+            }
+
+            if (collapse) { // included keys
+                keys = ['ou', 'pe', 'dates', 'dx'];
+            }
+            else { // excluded keys
+                keys = ['dx'];
+            }
+
+            // data items
+            for (var i = 0, store; i < stores.length; i++) {
+                store = stores[i];
+
+                if (collapse) {
+                    store.filterBy(function(record, id) {
+                        return Ext.Array.contains(keys, record.data.id);
+                    });
+                }
+                else {
+                    store.filterBy(function(record, id) {
+                        return !Ext.Array.contains(keys, record.data.id);
+                    });
+                }
+            }
+        };
+
+        toggleValueGui = function(param) {
+            var collapse = Ext.isObject(param) && param.collapseDataItems ? param.collapseDataItems : param;
+
+            val.setDisabled(collapse);
+        };
+
 		window = Ext.create('Ext.window.Window', {
 			title: NS.i18n.table_layout,
 			bodyStyle: 'background-color:#fff; padding:' + margin + 'px',
@@ -1746,6 +1813,9 @@ Ext.onReady( function() {
             saveState: saveState,
             resetData: resetData,
             reset: reset,
+            onCollapseDataDimensionsChange: onCollapseDataDimensionsChange,
+            toggleDataItems: toggleDataItems,
+            toggleValueGui: toggleValueGui,
             getValueConfig: function() {
                 var config = {},
                     valueId = value.getValue();
@@ -1757,9 +1827,15 @@ Ext.onReady( function() {
 
                 return config;
             },
-			hideOnBlur: true,
+            getOptions: function() {
+                return {
+                    collapseDataDimensions: collapseDataDimensions.getValue()
+                };
+            },
+            hideOnBlur: true,
 			items: selectPanel,
 			bbar: [
+                collapseDataDimensions,
 				'->',
 				{
 					text: NS.i18n.hide,
@@ -6769,16 +6845,15 @@ Ext.onReady( function() {
 			web.report = web.report || {};
 
 			web.report.getLayoutConfig = function() {
-                var view = ns.app.accordion.getView(),
-                    options = {};
+                var view = ns.app.accordion.getView();
 
                 if (!view) {
                     return;
                 }
 
                 if (view.dataType === 'aggregated_values') {
-                    options = ns.app.aggregateOptionsWindow.getOptions();
-                    Ext.applyIf(view, options);
+                    Ext.applyIf(view, ns.app.aggregateOptionsWindow.getOptions());
+                    Ext.applyIf(view, ns.app.aggregateLayoutWindow.getOptions());
 
                     // if order and limit -> sort
                     if (view.sortOrder && view.topLimit) {
@@ -6790,8 +6865,7 @@ Ext.onReady( function() {
                 }
 
                 if (view.dataType === 'individual_cases') {
-                    options = ns.app.queryOptionsWindow.getOptions();
-                    Ext.applyIf(view, options);
+                    Ext.applyIf(view, ns.app.queryOptionsWindow.getOptions());
 
                     view.paging = {
                         page: ns.app.statusBar.getCurrentPage(),
