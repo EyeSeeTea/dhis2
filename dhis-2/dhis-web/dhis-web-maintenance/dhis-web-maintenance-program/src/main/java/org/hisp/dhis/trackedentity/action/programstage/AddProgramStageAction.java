@@ -33,6 +33,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.period.PeriodService;
@@ -55,7 +56,6 @@ import com.opensymphony.xwork2.Action;
 /**
  * @author Abyot Asalefew Gizaw
  * @modified Tran Thanh Tri
- * @version $Id$
  */
 public class AddProgramStageAction
     implements Action
@@ -362,8 +362,7 @@ public class AddProgramStageAction
         remindCompleted = (remindCompleted == null) ? false : remindCompleted;
         allowGenerateNextVisit = (allowGenerateNextVisit == null) ? false : allowGenerateNextVisit;
         openAfterEnrollment = (openAfterEnrollment == null) ? false : openAfterEnrollment;
-        preGenerateUID = (preGenerateUID == null) ? false : preGenerateUID; 
-
+        preGenerateUID = (preGenerateUID == null) ? false : preGenerateUID;
 
         ProgramStage programStage = new ProgramStage();
         Program program = programService.getProgram( id );
@@ -377,11 +376,17 @@ public class AddProgramStageAction
         programStage.setMinDaysFromStart( minDaysFromStart );
         programStage.setDisplayGenerateEventBox( displayGenerateEventBox );
         programStage.setValidCompleteOnly( validCompleteOnly );
-        if( periodTypeName != null )
-        {
+        
+        periodTypeName = StringUtils.trimToNull( periodTypeName );
 
+        if ( periodTypeName != null )
+        {
             PeriodType periodType = PeriodType.getPeriodTypeByName( periodTypeName );
             programStage.setPeriodType( periodService.getPeriodTypeByClass( periodType.getClass() ) );
+        }
+        else
+        {
+            programStage.setPeriodType( null );
         }
         
         if ( program.isSingleEvent() )
@@ -392,6 +397,7 @@ public class AddProgramStageAction
         {
             programStage.setAutoGenerateEvent( autoGenerateEvent );
         }
+        
         programStage.setCaptureCoordinates( captureCoordinates );
         programStage.setBlockEntryForm( blockEntryForm );
         programStage.setRemindCompleted( remindCompleted );
@@ -410,8 +416,8 @@ public class AddProgramStageAction
             ProgramIndicator indicator = programIndicatorService.getProgramIndicator( id );
             programIndicators.add( indicator );
         }
+        
         programStage.setProgramIndicators( programIndicators );
-
       
         // SMS Reminder
 
@@ -425,6 +431,7 @@ public class AddProgramStageAction
             reminder.setSendTo( sendTo.get( i ) );
             reminder.setWhenToSend( whenToSend.get( i ) );
             reminder.setMessageType( messageType.get( i ) );
+            
             if ( sendTo.get( i ) == TrackedEntityInstanceReminder.SEND_TO_USER_GROUP )
             {
                 UserGroup selectedUserGroup = userGroupService.getUserGroup( userGroup.get( i ) );
@@ -434,8 +441,10 @@ public class AddProgramStageAction
             {
                 reminder.setUserGroup( null );
             }
+            
             reminders.add( reminder );
         }
+        
         programStage.setReminders( reminders );
         program.getProgramStages().add( programStage );
 

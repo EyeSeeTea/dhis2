@@ -33,6 +33,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.period.PeriodService;
@@ -53,8 +54,6 @@ import com.opensymphony.xwork2.Action;
 
 /**
  * @author Abyot Asalefew Gizaw
- * @version $Id$
- * @modified Tran Thanh Tri
  */
 public class UpdateProgramStageAction
     implements Action
@@ -379,12 +378,18 @@ public class UpdateProgramStageAction
         programStage.setReportDateToUse( reportDateToUse );
         programStage.setPreGenerateUID( preGenerateUID );
         
-        if( periodTypeName != null )
+        periodTypeName = StringUtils.trimToNull( periodTypeName );
+
+        if ( periodTypeName != null )
         {
             PeriodType periodType = PeriodType.getPeriodTypeByName( periodTypeName );
             programStage.setPeriodType( periodService.getPeriodTypeByClass( periodType.getClass() ) );
         }
-        
+        else
+        {
+            programStage.setPeriodType( null );
+        }
+
         if ( programStage.getProgram().isSingleEvent() )
         {
             programStage.setAutoGenerateEvent( true );
@@ -405,11 +410,13 @@ public class UpdateProgramStageAction
             ProgramIndicator indicator = programIndicatorService.getProgramIndicator( id );
             programIndicators.add( indicator );
         }
+        
         programStage.setProgramIndicators( programIndicators );
         
         // SMS Reminder
         
         programStage.getReminders().clear();
+        
         Set<TrackedEntityInstanceReminder> reminders = new HashSet<>();
         for ( int i = 0; i < this.daysAllowedSendMessages.size(); i++ )
         {
@@ -429,8 +436,10 @@ public class UpdateProgramStageAction
             {
                 reminder.setUserGroup( null );
             }
+            
             reminders.add( reminder );
         }
+        
         programStage.setReminders( reminders );
         programStageService.updateProgramStage( programStage );
         
