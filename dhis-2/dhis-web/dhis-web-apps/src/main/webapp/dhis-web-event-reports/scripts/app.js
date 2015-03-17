@@ -1329,7 +1329,8 @@ Ext.onReady( function() {
             defaultValueId = 'default';
 
 		getStore = function(applyConfig) {
-			var config = {};
+			var config = {},
+                store;
 
 			config.fields = ['id', 'name'];
 
@@ -1345,7 +1346,11 @@ Ext.onReady( function() {
 				return Ext.clone(dimensionNames);
 			};
 
-			return Ext.create('Ext.data.Store', config);
+			store = Ext.create('Ext.data.Store', config);
+
+            store.filteredDimensions = [];
+
+            return store;
 		};
 
 		getStoreKeys = function(store) {
@@ -1609,16 +1614,18 @@ Ext.onReady( function() {
             }
         });
 
-        onCollapseDataDimensionsChange = function() {
-            toggleDataItems();
-            toggleValueGui();
+        onCollapseDataDimensionsChange = function(value) {
+            toggleDataItems(value);
+            toggleValueGui(value);
         };
 
         collapseDataDimensions = Ext.create('Ext.form.field.Checkbox', {
             boxLabel: NS.i18n.collapse_data_dimensions,
             style: 'margin-left: 3px',
             listeners: {
-                valuechange: onCollapseDataDimensionsChange
+                change: function(chb, value) {
+                    onCollapseDataDimensionsChange(value);
+                }
             }
         });
 
@@ -1759,7 +1766,7 @@ Ext.onReady( function() {
             if (!hasDimension('dx')) {
                 addDimension({
                     id: 'dx',
-                    name: 'Data'
+                    name: NS.i18n.data
                 }, rowStore);
             }
 
@@ -1771,15 +1778,24 @@ Ext.onReady( function() {
             }
 
             // data items
-            for (var i = 0, store; i < stores.length; i++) {
+            for (var i = 0, store, include; i < stores.length; i++) {
                 store = stores[i];
 
                 if (collapse) {
                     store.filterBy(function(record, id) {
-                        return Ext.Array.contains(keys, record.data.id);
+                        include = Ext.Array.contains(keys, record.data.id);
+
+                        if (include) {
+                            store.filteredDimensions.push(record.data);
+                        }
+
+                        return include;
                     });
                 }
                 else {
+                    // delete cache
+                    store.filteredDimensions = [];
+
                     store.filterBy(function(record, id) {
                         return !Ext.Array.contains(keys, record.data.id);
                     });
@@ -6130,6 +6146,9 @@ Ext.onReady( function() {
                 return;
             }
 
+            // dx
+            map['dx'] = [{dimension: 'dx'}];
+
 			// pe
             if (periodMode.getValue() === 'dates') {
                 view.startDate = startDate.getSubmitValue();
@@ -6173,10 +6192,11 @@ Ext.onReady( function() {
             // other
             map['longitude'] = [{dimension: 'longitude'}];
             map['latitude'] = [{dimension: 'latitude'}];
-
+colStore = layoutWindow.colStore;
             // dimensions
             if (layoutWindow.colStore) {
 				layoutWindow.colStore.each(function(item) {
+console.log(layoutWindow.colStore.name, item.data.id, item.data.name);
 					a = map[item.data.id] || [];
 
 					if (a.length) {
@@ -6203,6 +6223,7 @@ Ext.onReady( function() {
 
             if (layoutWindow.rowStore) {
 				layoutWindow.rowStore.each(function(item) {
+console.log(layoutWindow.rowStore.name, item.data.id, item.data.name);
 					a = map[item.data.id] || [];
 
 					if (a.length) {
@@ -6229,6 +6250,7 @@ Ext.onReady( function() {
 
             if (layoutWindow.filterStore) {
 				layoutWindow.filterStore.each(function(item) {
+console.log(layoutWindow.filterStore.name, item.data.id, item.data.name);
 					a = map[item.data.id] || [];
 
 					if (a.length) {
@@ -6255,6 +6277,7 @@ Ext.onReady( function() {
 
             if (layoutWindow.fixedFilterStore) {
 				layoutWindow.fixedFilterStore.each(function(item) {
+console.log(layoutWindow.fixedFilterStore.name, item.data.id, item.data.name);
 					a = map[item.data.id] || [];
 
 					if (a.length) {
@@ -6291,7 +6314,7 @@ Ext.onReady( function() {
 
             // value, aggregation type
             Ext.apply(view, layoutWindow.getValueConfig());
-
+console.log(view);
 			return view;
 		};
 
