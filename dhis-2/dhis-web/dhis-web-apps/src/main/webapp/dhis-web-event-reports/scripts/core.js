@@ -2072,7 +2072,7 @@ Ext.onReady( function() {
 			web.analytics.getParamString = function(view, format, skipPaging) {
                 var paramString,
                     dimensions = Ext.Array.clean([].concat(view.columns || [], view.rows || [])),
-                    ignoreKeys = ['longitude', 'latitude'],
+                    ignoreKeys = ['dx', 'longitude', 'latitude'],
                     dataTypeMap = {
                         'aggregated_values': 'aggregate',
                         'individual_cases': 'query'
@@ -2193,6 +2193,11 @@ Ext.onReady( function() {
 
                 // display property
                 paramString += '&displayProperty=' + init.userAccount.settings.keyAnalysisDisplayProperty.toUpperCase();
+
+                // collapse data items
+                if (view.collapseDataDimensions) {
+                    paramString += '&collapseDataDimensions=true';
+                }
 
                 return paramString;
             };
