@@ -30,6 +30,7 @@ function pollDataIntegrityCheckFinished() {
 function populateIntegrityItems( json ) {
 
     // Render functions
+
     var asMap = function( obj, lineBreak ) {
         var violationsText = "";
 

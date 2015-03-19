@@ -29,8 +29,6 @@ package org.hisp.dhis.dataintegrity;
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 
 import java.util.ArrayList;
@@ -45,11 +43,10 @@ import java.util.TreeMap;
 
 /**
  * Flattened, easily serializable object derivable from the more complex DataIntegrityReport.
- * Use a derived instance of this object to serialize and deliver a DataIntegrityReport.
+ * Use an instance of this object to serialize and deliver a DataIntegrityReport.
  *
  * @author Halvdan Hoem Grelland <halvdanhg@gmail.com>
  */
-@JacksonXmlRootElement( namespace = DxfNamespaces.DXF_2_0, localName = "dataIntegrityReport" )
 public class FlattenedDataIntegrityReport
 {
     @JsonProperty
@@ -117,11 +114,6 @@ public class FlattenedDataIntegrityReport
 
     @JsonProperty
     private Map<String, String> invalidValidationRuleRightSideExpressions;
-
-    public FlattenedDataIntegrityReport()
-    {
-
-    }
 
     public FlattenedDataIntegrityReport( org.hisp.dhis.dataintegrity.DataIntegrityReport report )
     {
