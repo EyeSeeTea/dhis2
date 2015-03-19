@@ -125,9 +125,6 @@ public class SystemController
     @RequestMapping( value = "/taskSummaries/{category}", method = RequestMethod.GET, produces = { "*/*", "application/json" } )
     public void getTaskSummaryJson( HttpServletResponse response, @PathVariable( "category" ) String category ) throws IOException
     {
-        ImportSummary importSummary = new ImportSummary();
-        DataIntegrityReport dataIntegrityReport = new DataIntegrityReport();
-
         if ( category != null )
         {
             TaskCategory taskCategory = TaskCategory.valueOf( category.toUpperCase() );
@@ -138,17 +135,19 @@ public class SystemController
             // TODO Also avoid null pointer on fetching unfinished task
             if ( taskCategory.equals( TaskCategory.DATAINTEGRITY ) )
             {
-                dataIntegrityReport = (DataIntegrityReport) notifier.getTaskSummary( taskId );
+                DataIntegrityReport dataIntegrityReport = (DataIntegrityReport) notifier.getTaskSummary( taskId );
                 JacksonUtils.toJson( response.getOutputStream(), new FlattenedDataIntegrityReport( dataIntegrityReport ) );
+                return;
             }
             else
             {
-                importSummary = (ImportSummary) notifier.getTaskSummary( taskId );
+                ImportSummary importSummary = (ImportSummary) notifier.getTaskSummary( taskId );
                 JacksonUtils.toJson( response.getOutputStream(), importSummary );
+                return;
             }
         }
 
-        //JacksonUtils.toJson( response.getOutputStream(), importSummary );
+        JacksonUtils.toJson( response.getOutputStream(), new ImportSummary() );
     }
 
     @RequestMapping( value = "/info", method = RequestMethod.GET, produces = { "application/json", "application/javascript" } )
