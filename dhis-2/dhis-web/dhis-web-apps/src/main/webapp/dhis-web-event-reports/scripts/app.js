@@ -10,7 +10,7 @@ Ext.onReady( function() {
 
 		extendCore,
 		createViewport,
-		dimConf,
+		dimConf;
 
 		ns = {
 			core: {},
@@ -1820,6 +1820,7 @@ Ext.onReady( function() {
             resetData: resetData,
             reset: reset,
             onCollapseDataDimensionsChange: onCollapseDataDimensionsChange,
+            collapseDataDimensions: collapseDataDimensions,
             toggleDataItems: toggleDataItems,
             toggleValueGui: toggleValueGui,
             getValueConfig: function() {
@@ -4507,10 +4508,13 @@ Ext.onReady( function() {
 
             // favorite
 			if (layout && layout.dataType === 'aggregated_values') {
+
+                // start end dates
 				if (layout.startDate && layout.endDate) {
 					aggWindow.fixedFilterStore.add({id: dimConf.startEndDate.value, name: dimConf.startEndDate.name});
 				}
 
+                // columns
 				if (layout.columns) {
 					for (var i = 0, record, dim; i < layout.columns.length; i++) {
                         dim = layout.columns[i];
@@ -4520,6 +4524,7 @@ Ext.onReady( function() {
 					}
 				}
 
+                // rows
 				if (layout.rows) {
 					for (var i = 0, record, dim; i < layout.rows.length; i++) {
                         dim = layout.rows[i];
@@ -4529,6 +4534,7 @@ Ext.onReady( function() {
 					}
 				}
 
+                // filters
 				if (layout.filters) {
 					for (var i = 0, store, record, dim; i < layout.filters.length; i++) {
                         dim = layout.filters[i];
@@ -4538,6 +4544,10 @@ Ext.onReady( function() {
                         aggWindow.addDimension(record || extendDim(Ext.clone(dim)), store);
 					}
 				}
+
+                // collapse data dimensions
+                aggWindow.collapseDataDimensions.setValue(!!layout.collapseDataDimensions);
+                aggWindow.onCollapseDataDimensionsChange(!!layout.collapseDataDimensions);
 			}
         };
 
