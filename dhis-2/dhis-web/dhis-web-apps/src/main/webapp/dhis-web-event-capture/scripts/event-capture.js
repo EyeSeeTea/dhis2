@@ -1,4 +1,6 @@
 
+/* global dhis2, angular, i18n_ajax_login_failed, _ */
+
 dhis2.util.namespace('dhis2.ec');
 
 // whether current user has any organisation units
@@ -41,7 +43,6 @@ dhis2.ec.store = new dhis2.storage.Store({
         }
     };
 })(jQuery);
-
 
 /**
  * Page init. The order of events is:

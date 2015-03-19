@@ -1,4 +1,4 @@
-package org.hisp.dhis.trackedentity.action.program;
+package org.hisp.dhis.trackedentity.action.programstage;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,10 +28,9 @@ package org.hisp.dhis.trackedentity.action.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.attribute.Attribute;
+import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.constant.Constant;
 import org.hisp.dhis.constant.ConstantService;
@@ -48,59 +47,42 @@ import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.opensymphony.xwork2.Action;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
- * @author Abyot Asalefew Gizaw
- * @version $Id$
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class GetProgramAction
+public class ShowAddProgramStageAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
     private ProgramService programService;
 
-    public void setProgramService( ProgramService programService )
-    {
-        this.programService = programService;
-    }
-
+    @Autowired
     private SelectionTreeManager selectionTreeManager;
 
-    public void setSelectionTreeManager( SelectionTreeManager selectionTreeManager )
-    {
-        this.selectionTreeManager = selectionTreeManager;
-    }
-
+    @Autowired
     private UserGroupService userGroupService;
 
-    public void setUserGroupService( UserGroupService userGroupService )
-    {
-        this.userGroupService = userGroupService;
-    }
-
-    private List<PeriodType> periodTypes = new ArrayList<>();
-
-    public List<PeriodType> getPeriodTypes()
-    {
-        return periodTypes;
-    }
-
+    @Autowired
     private PeriodService periodService;
-
-    public void setPeriodService( PeriodService periodService )
-    {
-        this.periodService = periodService;
-    }
 
     @Autowired
     private ProgramIndicatorService programIndicatorService;
 
     @Autowired
     private ConstantService constantService;
+
+    @Autowired
+    private AttributeService attributeService;
 
     // -------------------------------------------------------------------------
     // Input/Output
@@ -172,6 +154,20 @@ public class GetProgramAction
         return constants;
     }
 
+    private List<PeriodType> periodTypes = new ArrayList<>();
+
+    public List<PeriodType> getPeriodTypes()
+    {
+        return periodTypes;
+    }
+
+    private List<Attribute> attributes;
+
+    public List<Attribute> getAttributes()
+    {
+        return attributes;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -195,6 +191,8 @@ public class GetProgramAction
         constants = new ArrayList<>( constantService.getAllConstants() );
 
         Collections.sort( constants, IdentifiableObjectNameComparator.INSTANCE );
+
+        attributes = new ArrayList<>( attributeService.getProgramStageAttributes() );
 
         return SUCCESS;
     }
