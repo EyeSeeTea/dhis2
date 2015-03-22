@@ -1,4 +1,4 @@
-package org.hisp.dhis.trackedentity.action.programstage;
+package org.hisp.dhis.trackedentity.action.trackedentity;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -31,59 +31,28 @@ package org.hisp.dhis.trackedentity.action.programstage;
 import com.opensymphony.xwork2.Action;
 import org.hisp.dhis.attribute.Attribute;
 import org.hisp.dhis.attribute.AttributeService;
-import org.hisp.dhis.period.PeriodService;
-import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.program.ProgramIndicator;
-import org.hisp.dhis.program.ProgramIndicatorService;
-import org.hisp.dhis.program.ProgramStage;
-import org.hisp.dhis.program.ProgramStageDataElement;
-import org.hisp.dhis.program.ProgramStageService;
 import org.hisp.dhis.system.util.AttributeUtils;
-import org.hisp.dhis.user.UserGroup;
-import org.hisp.dhis.user.UserGroupService;
+import org.hisp.dhis.trackedentity.TrackedEntity;
+import org.hisp.dhis.trackedentity.TrackedEntityService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * @author Abyot Asalefew Gizaw
- * @version $Id$
- * @modified Tran Thanh Tri
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class GetProgramStageAction
+public class ShowAddUpdateTrackedEntityAction
     implements Action
 {
     // -------------------------------------------------------------------------
-    // Dependencies
+    // Dependency
     // -------------------------------------------------------------------------
 
-    private ProgramStageService programStageService;
-
-    public void setProgramStageService( ProgramStageService programStageService )
-    {
-        this.programStageService = programStageService;
-    }
-
-    private UserGroupService userGroupService;
-
-    public void setUserGroupService( UserGroupService userGroupService )
-    {
-        this.userGroupService = userGroupService;
-    }
-
-    private PeriodService periodService;
-
-    public void setPeriodService( PeriodService periodService )
-    {
-        this.periodService = periodService;
-    }
-
     @Autowired
-    private ProgramIndicatorService programIndicatorService;
+    private TrackedEntityService trackedEntityService;
 
     @Autowired
     private AttributeService attributeService;
@@ -92,56 +61,18 @@ public class GetProgramStageAction
     // Input/Output
     // -------------------------------------------------------------------------
 
-    private int id;
+    private Integer id;
 
-    public int getId()
-    {
-        return id;
-    }
-
-    public void setId( int id )
+    public void setId( Integer id )
     {
         this.id = id;
     }
 
-    private ProgramStage programStage;
+    private TrackedEntity trackedEntity;
 
-    public ProgramStage getProgramStage()
+    public TrackedEntity getTrackedEntity()
     {
-        return programStage;
-    }
-
-    private Collection<ProgramStageDataElement> programStageDataElements;
-
-    public Collection<ProgramStageDataElement> getProgramStageDataElements()
-    {
-        return programStageDataElements;
-    }
-
-    private List<UserGroup> userGroups;
-
-    public List<UserGroup> getUserGroups()
-    {
-        return userGroups;
-    }
-
-    public void setUserGroups( List<UserGroup> userGroups )
-    {
-        this.userGroups = userGroups;
-    }
-
-    private List<ProgramIndicator> programIndicators;
-
-    public List<ProgramIndicator> getProgramIndicators()
-    {
-        return programIndicators;
-    }
-
-    private List<PeriodType> periodTypes = new ArrayList<>();
-
-    public List<PeriodType> getPeriodTypes()
-    {
-        return periodTypes;
+        return trackedEntity;
     }
 
     private List<Attribute> attributes;
@@ -166,24 +97,13 @@ public class GetProgramStageAction
     public String execute()
         throws Exception
     {
-        programStage = programStageService.getProgramStage( id );
-
-        if ( programStage == null )
+        if ( id != null )
         {
-            return INPUT;
+            trackedEntity = trackedEntityService.getTrackedEntity( id );
+            attributeValues = AttributeUtils.getAttributeValueMap( trackedEntity.getAttributeValues() );
         }
 
-        periodTypes = periodService.getAllPeriodTypes();
-
-        programStageDataElements = programStage.getProgramStageDataElements();
-
-        userGroups = new ArrayList<>( userGroupService.getAllUserGroups() );
-
-        programIndicators = new ArrayList<>( programIndicatorService.getProgramIndicators( programStage.getProgram() ) );
-        programIndicators.removeAll( programStage.getProgramIndicators() );
-
-        attributeValues = AttributeUtils.getAttributeValueMap( programStage.getAttributeValues() );
-        attributes = new ArrayList<>( attributeService.getProgramStageAttributes() );
+        attributes = new ArrayList<>( attributeService.getTrackedEntityAttributes() );
 
         return SUCCESS;
     }
