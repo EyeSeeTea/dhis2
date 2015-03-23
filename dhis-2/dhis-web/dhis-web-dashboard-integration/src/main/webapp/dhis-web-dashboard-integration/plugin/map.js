@@ -1470,6 +1470,11 @@ Ext.onReady(function() {
             styleEl = document.createElement("style");
 
         styleEl.setAttribute("type", "text/css");
+        var ss,
+            head = document.getElementsByTagName("head")[0],
+            styleEl = document.createElement("style");
+
+        styleEl.setAttribute("type", "text/css");
 
         if (id) {
            styleEl.setAttribute("id", id);
