@@ -32,6 +32,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.hisp.dhis.program.ProgramIndicator.*;
 
 import java.util.Collection;
 import java.util.Date;
@@ -40,9 +41,14 @@ import java.util.Map;
 import java.util.Set;
 
 import org.hisp.dhis.DhisSpringTest;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementDomain;
+import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.system.util.DateUtils;
+import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
+import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
 import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValueService;
@@ -52,8 +58,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Chau Thu Tran
- * 
- * @version $ ProgramIndicatorServiceTest.java Nov 13, 2013 1:34:55 PM $
  */
 public class ProgramIndicatorServiceTest
     extends DhisSpringTest
@@ -61,6 +65,9 @@ public class ProgramIndicatorServiceTest
     @Autowired
     private ProgramIndicatorService programIndicatorService;
 
+    @Autowired
+    private TrackedEntityAttributeService attributeService;
+    
     @Autowired
     private TrackedEntityInstanceService entityInstanceService;
 
@@ -78,24 +85,33 @@ public class ProgramIndicatorServiceTest
 
     @Autowired
     private TrackedEntityDataValueService dataValueService;
+    
+    @Autowired
+    private DataElementService dataElementService;
 
     private Date incidenDate;
 
     private Date enrollmentDate;
+    
+    private ProgramStage psA;
+    private ProgramStage psB;
 
     private Program programA;
-
     private Program programB;
 
     private ProgramInstance programInstance;
+    
+    private DataElement deA;    
+    private DataElement deB;
+    
+    private TrackedEntityAttribute atA;
+    private TrackedEntityAttribute atB;
 
     private ProgramIndicator indicatorDate;
-
     private ProgramIndicator indicatorInt;
-
     private ProgramIndicator indicatorC;
-    
     private ProgramIndicator indicatorD;
+    private ProgramIndicator indicatorE;
     
     @Override
     public void setUpTest()
@@ -106,17 +122,17 @@ public class ProgramIndicatorServiceTest
         programA = createProgram( 'A', new HashSet<ProgramStage>(), organisationUnit );
         programService.addProgram( programA );
 
-        ProgramStage stageA = new ProgramStage( "StageA", programA );
-        stageA.setSortOrder( 1 );
-        programStageService.saveProgramStage( stageA );
+        psA = new ProgramStage( "StageA", programA );
+        psA.setSortOrder( 1 );
+        programStageService.saveProgramStage( psA );
 
-        ProgramStage stageB = new ProgramStage( "StageB", programA );
-        stageB.setSortOrder( 2 );
-        programStageService.saveProgramStage( stageB );
+        psB = new ProgramStage( "StageB", programA );
+        psB.setSortOrder( 2 );
+        programStageService.saveProgramStage( psB );
 
         Set<ProgramStage> programStages = new HashSet<>();
-        programStages.add( stageA );
-        programStages.add( stageB );
+        programStages.add( psA );
+        programStages.add( psB );
         programA.setProgramStages( programStages );
         programService.updateProgram( programA );
 
@@ -138,8 +154,22 @@ public class ProgramIndicatorServiceTest
         programInstance = programInstanceService.enrollTrackedEntityInstance( entityInstance, programA, enrollmentDate, incidenDate,
             organisationUnit );
 
+        deA = createDataElement( 'A' );
+        deA.setDomainType( DataElementDomain.TRACKER );
+        deB = createDataElement( 'B' );
+        deB.setDomainType( DataElementDomain.TRACKER );
+        
+        dataElementService.addDataElement( deA );
+        dataElementService.addDataElement( deB );
+        
+        atA = createTrackedEntityAttribute( 'A' );
+        atB = createTrackedEntityAttribute( 'B' );
+        
+        attributeService.addTrackedEntityAttribute( atA );
+        attributeService.addTrackedEntityAttribute( atB );
+        
         indicatorDate = new ProgramIndicator( "IndicatorA", "IndicatorDesA", ProgramIndicator.VALUE_TYPE_INT, "( " + ProgramIndicator.KEY_PROGRAM_VARIABLE + "{"
-            + ProgramIndicator.INCIDENT_DATE + "} - " + ProgramIndicator.KEY_PROGRAM_VARIABLE + "{" + ProgramIndicator.ENROLLEMENT_DATE + "} )  / 7" );
+            + ProgramIndicator.INCIDENT_DATE + "} - " + ProgramIndicator.KEY_PROGRAM_VARIABLE + "{" + ProgramIndicator.ENROLLMENT_DATE + "} )  / 7" );
         indicatorDate.setUid( "UID-DATE" );
         indicatorDate.setShortName( "DATE" );
         indicatorDate.setProgram( programA );
@@ -155,13 +185,21 @@ public class ProgramIndicatorServiceTest
         indicatorC.setShortName( "C" );
         indicatorC.setProgram( programB );
         
-
         indicatorD = new ProgramIndicator( "IndicatorD", "IndicatorDesD", ProgramIndicator.VALUE_TYPE_INT, "0 + A + 4 + " + ProgramIndicator.KEY_PROGRAM_VARIABLE + "{"
             + ProgramIndicator.INCIDENT_DATE + "}" );
         indicatorD.setUid( "UID-D" );
         indicatorD.setShortName( "D" );
         indicatorD.setProgram( programB );
+        
+        indicatorE = new ProgramIndicator( "IndicatorE", "IndicatorDesE", VALUE_TYPE_INT, 
+            KEY_DATAELEMENT + "{" + psA.getUid() + "." + deA.getUid() + "} + " + 
+            KEY_DATAELEMENT + "{" + psB.getUid() + "." + deB.getUid() + "} - " + 
+            KEY_ATTRIBUTE + "{" + atA.getUid() + "} + " + KEY_ATTRIBUTE + "{" + atB.getUid() + "}" );
     }
+
+    // -------------------------------------------------------------------------
+    // CRUD tests
+    // -------------------------------------------------------------------------
 
     @Test
     public void testAddProgramIndicator()
@@ -273,6 +311,30 @@ public class ProgramIndicatorServiceTest
 
     }
 
+    // -------------------------------------------------------------------------
+    // Logic tests
+    // -------------------------------------------------------------------------
+
+    @Test
+    public void testGetProgramStageDataElementsInExpression()
+    {
+        Set<ProgramStageDataElement> elements = programIndicatorService.getProgramStageDataElementsInExpression( indicatorE );
+        
+        assertEquals( 2, elements.size() );
+        assertTrue( elements.contains( new ProgramStageDataElement( psA, deA ) ) );
+        assertTrue( elements.contains( new ProgramStageDataElement( psB, deB ) ) );
+    }
+    
+    @Test
+    public void testGetAttributesInExpression()
+    {
+        Set<TrackedEntityAttribute> attributes = programIndicatorService.getAttributesInExpression( indicatorE );
+        
+        assertEquals( 2, attributes.size() );
+        assertTrue( attributes.contains( atA ) );
+        assertTrue( attributes.contains( atB ) );
+    }
+    
     @Test
     public void testGetProgramIndicatorValue()
     {
@@ -322,6 +384,5 @@ public class ProgramIndicatorServiceTest
         assertEquals( ProgramIndicator.VALID, programIndicatorService.expressionIsValid( indicatorDate.getExpression() ) );
         assertEquals( ProgramIndicator.VALID, programIndicatorService.expressionIsValid( indicatorInt.getExpression() ) );
         assertEquals( ProgramIndicator.EXPRESSION_NOT_WELL_FORMED, programIndicatorService.expressionIsValid( indicatorD.getExpression() ) );
-    }
-    
+    }    
 }
