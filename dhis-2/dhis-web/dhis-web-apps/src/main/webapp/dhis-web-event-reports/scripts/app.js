@@ -1658,11 +1658,19 @@ Ext.onReady( function() {
 			]
 		});
 
-        addDimension = function(record, store, excludedStores) {
-            var store = dimensionStoreMap[record.id] || store || filterStore;
+        addDimension = function(record, store, excludedStores, force) {
+            store = store && force ? store : dimensionStoreMap[record.id] || store || filterStore;
 
-            if (!hasDimension(record.id, excludedStores) && record.id !== value.getValue()) {
-                store.add(record);
+            if (hasDimension(record.id, excludedStores)) {
+                if (force) {
+                    removeDimension(record.id);
+                    store.add(record);
+                }
+            }
+            else {
+                if (record.id !== value.getValue()) {
+                    store.add(record);
+                }
             }
         };
 
@@ -1816,6 +1824,7 @@ Ext.onReady( function() {
             addDimension: addDimension,
             removeDimension: removeDimension,
             hasDimension: hasDimension,
+            dimensionStoreMap: dimensionStoreMap,
             saveState: saveState,
             resetData: resetData,
             reset: reset,
@@ -1898,7 +1907,7 @@ Ext.onReady( function() {
                 }
 			}
 		});
-
+nissa = window;
 		return window;
 	};
 
@@ -4437,8 +4446,11 @@ Ext.onReady( function() {
 					'ou': {id: 'ou', name: 'Organisation units'}
 				},
                 extendDim = function(dim) {
+                    var md = ns.app.response.metaData,
+                        dimConf = ns.core.conf.finals.dimension;
+
                     dim.id = dim.id || dim.dimension;
-                    dim.name = dim.name || ns.app.response.metaData.names[dim.dimension];
+                    dim.name = dim.name || md.names[dim.dimension] || dimConf.objectNameMap[dim.dimension].name;
 
                     return dim;
                 };
@@ -4520,7 +4532,7 @@ Ext.onReady( function() {
                         dim = layout.columns[i];
                         record = recordMap[dim.dimension];
 
-						aggWindow.addDimension(record || extendDim(Ext.clone(dim)), aggWindow.colStore);
+						aggWindow.addDimension(record || extendDim(Ext.clone(dim)), aggWindow.colStore, null, true);
 					}
 				}
 
@@ -4530,7 +4542,7 @@ Ext.onReady( function() {
                         dim = layout.rows[i];
                         record = recordMap[dim.dimension];
 
-						aggWindow.addDimension(record || extendDim(Ext.clone(dim)), aggWindow.rowStore);
+						aggWindow.addDimension(record || extendDim(Ext.clone(dim)), aggWindow.rowStore, null, true);
 					}
 				}
 
@@ -4541,13 +4553,13 @@ Ext.onReady( function() {
 						record = recordMap[dim.dimension];
 						store = Ext.Array.contains(includeKeys, element.type) || element.optionSet ? aggWindow.filterStore : aggWindow.fixedFilterStore;
 
-                        aggWindow.addDimension(record || extendDim(Ext.clone(dim)), store);
+                        aggWindow.addDimension(record || extendDim(Ext.clone(dim)), store, null, true);
 					}
 				}
 
                 // collapse data dimensions
-                aggWindow.collapseDataDimensions.setValue(!!layout.collapseDataDimensions);
-                aggWindow.onCollapseDataDimensionsChange(!!layout.collapseDataDimensions);
+                aggWindow.collapseDataDimensions.setValue(layout.collapseDataDimensions);
+                aggWindow.onCollapseDataDimensionsChange(layout.collapseDataDimensions);
 			}
         };
 
