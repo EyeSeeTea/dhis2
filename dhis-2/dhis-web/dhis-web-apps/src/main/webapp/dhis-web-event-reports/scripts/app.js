@@ -1752,7 +1752,7 @@ Ext.onReady( function() {
             var stores = [colStore, rowStore, filterStore, fixedFilterStore],
                 collapse = Ext.isObject(param) && param.collapseDataItems ? param.collapseDataItems : param,
                 keys = ['ou', 'pe', 'dates'],
-                dx = ['dx'],
+                dy = ['dy'],
                 keys;
 
             // clear filters
@@ -1760,20 +1760,20 @@ Ext.onReady( function() {
                 stores[i].clearFilter();
             }
 
-            // add dx if it does not exist
-            if (!hasDimension('dx')) {
+            // add dy if it does not exist
+            if (!hasDimension('dy')) {
                 addDimension({
-                    id: 'dx',
+                    id: 'dy',
                     name: NS.i18n.data
                 }, rowStore);
             }
 
             // keys
             if (collapse) { // included keys
-                keys = ['ou', 'pe', 'dates', 'dx'];
+                keys = ['ou', 'pe', 'dates', 'dy'];
             }
             else { // excluded keys
-                keys = ['dx'];
+                keys = ['dy'];
             }
 
             // data items
@@ -6149,8 +6149,8 @@ Ext.onReady( function() {
                 return;
             }
 
-            // dx
-            map['dx'] = [{dimension: 'dx'}];
+            // dy
+            map['dy'] = [{dimension: 'dy'}];
 
 			// pe
             if (periodMode.getValue() === 'dates') {
@@ -6952,6 +6952,7 @@ console.log(view);
                         // add to dimConf, TODO
                         for (var i = 0, map = dimConf.objectNameMap, header; i < response.headers.length; i++) {
                             header = response.headers[i];
+
                             map[header.name] = map[header.name] || {
                                 id: header.name,
                                 dimensionName: header.name,

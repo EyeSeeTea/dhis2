@@ -32,8 +32,8 @@ Ext.onReady( function() {
 					data: {
 						value: 'data',
 						name: NS.i18n.data || 'Data',
-						dimensionName: 'dx',
-						objectName: 'dx',
+						dimensionName: 'dy',
+						objectName: 'dy',
 						warning: {
 							filter: '...'//NS.i18n.wm_multiple_filter_ind_de
 						}
@@ -1298,7 +1298,7 @@ Ext.onReady( function() {
 
                 // collapse data dimensions?
                 (function() {
-                    var keys = xLayout.collapseDataDimensions ? ['dx', 'pe', 'ou'] : ['dx'],
+                    var keys = xLayout.collapseDataDimensions ? ['dy', 'pe', 'ou'] : ['dy'],
                         dimensionsToRemove = [];
 
                     // find dimensions to remove
@@ -1949,7 +1949,7 @@ Ext.onReady( function() {
 
 				// idValueMap: vars
 				var valueHeaderIndex = response.nameHeaderMap[conf.finals.dimension.value.value].index,
-					dx = dimConf.data.dimensionName,
+					dy = dimConf.data.dimensionName,
 					axisDimensionNames = xLayout.axisDimensionNames,
 					idIndexOrder = [];
 
@@ -2102,7 +2102,7 @@ Ext.onReady( function() {
 			web.analytics.getParamString = function(view, format, skipPaging) {
                 var paramString,
                     dimensions = Ext.Array.clean([].concat(view.columns || [], view.rows || [])),
-                    ignoreKeys = ['dx', 'longitude', 'latitude'],
+                    ignoreKeys = ['dy', 'longitude', 'latitude'],
                     dataTypeMap = {
                         'aggregated_values': 'aggregate',
                         'individual_cases': 'query'
