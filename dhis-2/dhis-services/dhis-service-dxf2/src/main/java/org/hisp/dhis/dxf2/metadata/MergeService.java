@@ -1,4 +1,4 @@
-package org.hisp.dhis.common.adapter;
+package org.hisp.dhis.dxf2.metadata;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,58 +28,12 @@ package org.hisp.dhis.common.adapter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.IOException;
-
-import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodType;
-
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-
-class LocalPeriod
-{
-    private String id;
-
-    private String name;
-
-    LocalPeriod()
-    {
-    }
-
-    public String getId()
-    {
-        return id;
-    }
-
-    public void setId( String id )
-    {
-        this.id = id;
-    }
-
-    public String getName()
-    {
-        return name;
-    }
-
-    public void setName( String name )
-    {
-        this.name = name;
-    }
-}
+import org.hisp.dhis.common.MergeStrategy;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class JacksonPeriodDeserializer
-    extends JsonDeserializer<Period>
+public interface MergeService
 {
-    @Override
-    public Period deserialize( JsonParser jp, DeserializationContext ctxt )
-        throws IOException
-    {
-        LocalPeriod p = jp.readValueAs( LocalPeriod.class );
-
-        return p.getId() == null ? null : PeriodType.getPeriodFromIsoString( p.getId() );
-    }
+    <T> void merge( T source, T target, MergeStrategy mergeStrategy );
 }

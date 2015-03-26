@@ -504,7 +504,7 @@ public class DefaultAnalyticsService
             User user = currentUserService.getCurrentUser();
             
             List<OrganisationUnit> organisationUnits = asTypedList( params.getDimensionOrFilter( ORGUNIT_DIM_ID ), OrganisationUnit.class );
-            Collection<OrganisationUnit> roots = user != null ? user.getDataViewOrganisationUnits() : null;
+            Collection<OrganisationUnit> roots = user != null ? user.getOrganisationUnits() : null;
             
             if ( params.isHierarchyMeta() )
             {
@@ -811,7 +811,7 @@ public class DefaultAnalyticsService
     @Override
     public DataQueryParams getFromUrl( Set<String> dimensionParams, Set<String> filterParams, AggregationType aggregationType,
         String measureCriteria, boolean skipMeta, boolean skipRounding, boolean hierarchyMeta, boolean ignoreLimit,
-        boolean hideEmptyRows, boolean showHierarchy, DisplayProperty displayProperty, IdentifiableProperty outputIdScheme, I18nFormat format )
+        boolean hideEmptyRows, boolean showHierarchy, DisplayProperty displayProperty, IdentifiableProperty outputIdScheme, String approvalLevel, I18nFormat format )
     {
         DataQueryParams params = new DataQueryParams();
 
@@ -840,6 +840,7 @@ public class DefaultAnalyticsService
         params.setShowHierarchy( showHierarchy );
         params.setDisplayProperty( displayProperty );
         params.setOutputIdScheme( outputIdScheme );
+        params.setApprovalLevel( approvalLevel );
 
         return params;
     }
@@ -1068,17 +1069,17 @@ public class DefaultAnalyticsService
 
             for ( String ou : items )
             {
-                if ( KEY_USER_ORGUNIT.equals( ou ) && user != null && user.hasDataViewOrganisationUnitWithFallback() )
+                if ( KEY_USER_ORGUNIT.equals( ou ) && user != null && user.hasOrganisationUnit() )
                 {
-                    ous.add( user.getDataViewOrganisationUnitWithFallback() );
+                    ous.add( user.getOrganisationUnit() );
                 }
-                else if ( KEY_USER_ORGUNIT_CHILDREN.equals( ou ) && user != null && user.hasDataViewOrganisationUnitWithFallback() )
+                else if ( KEY_USER_ORGUNIT_CHILDREN.equals( ou ) && user != null && user.hasOrganisationUnit() )
                 {
-                    ous.addAll( user.getDataViewOrganisationUnitWithFallback().getSortedChildren() );
+                    ous.addAll( user.getOrganisationUnit().getSortedChildren() );
                 }
-                else if ( KEY_USER_ORGUNIT_GRANDCHILDREN.equals( ou ) && user != null && user.hasDataViewOrganisationUnitWithFallback() )
+                else if ( KEY_USER_ORGUNIT_GRANDCHILDREN.equals( ou ) && user != null && user.hasOrganisationUnit() )
                 {
-                    ous.addAll( user.getDataViewOrganisationUnitWithFallback().getSortedGrandChildren() );
+                    ous.addAll( user.getOrganisationUnit().getSortedGrandChildren() );
                 }
                 else if ( ou != null && ou.startsWith( KEY_LEVEL ) )
                 {
