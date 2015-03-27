@@ -6,7 +6,6 @@
     #if ( $object.organisationUnitsName )${object.organisationUnitsName}<br> #end
     #if ( $object.email)${object.email}<br>#end
     #if ( $object.phoneNumber)${object.phoneNumber}<br>#end
-    <br>
     $!{object.footer}
   </body>
 </html>

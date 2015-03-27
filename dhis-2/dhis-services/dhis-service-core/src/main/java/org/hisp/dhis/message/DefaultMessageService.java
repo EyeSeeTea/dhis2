@@ -66,7 +66,7 @@ public class DefaultMessageService
 
     private static final String COMPLETE_TEMPLATE = "completeness_message";
 
-    private static final String EMAIL_REPLY_FOOTER_TEMPLATE = "email_reply_footer";
+    private static final String MESSAGE_EMAIL_FOOTER_TEMPLATE = "message_email_footer";
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -194,7 +194,7 @@ public class DefaultMessageService
 
         users.remove( sender );
 
-        String footer = createMessageFooter( conversation );
+        String footer = getMessageFooter( conversation );
 
         invokeMessageSenders( subject, text, footer, sender, users, forceNotifications );
 
@@ -415,7 +415,7 @@ public class DefaultMessageService
         }
     }
 
-    private String createMessageFooter( MessageConversation conversation ) {
+    private String getMessageFooter( MessageConversation conversation ) {
         HashMap<String, Object> values = new HashMap<>( 2 );
         String baseUrl = systemSettingManager.getInstanceBaseUrl();
 
@@ -430,6 +430,6 @@ public class DefaultMessageService
         values.put( "i18n", i18nManager.getI18n( locale ) );
 
 
-        return new VelocityManager().render( values , EMAIL_REPLY_FOOTER_TEMPLATE );
+        return new VelocityManager().render( values , MESSAGE_EMAIL_FOOTER_TEMPLATE );
     }
 }
