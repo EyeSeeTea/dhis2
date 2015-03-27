@@ -429,7 +429,6 @@ public class DefaultMessageService
         Locale locale = (Locale) userSettingService.getUserSettingValue( conversation.getUser(), UserSettingService.KEY_UI_LOCALE, LocaleManager.DHIS_STANDARD_LOCALE );
         values.put( "i18n", i18nManager.getI18n( locale ) );
 
-
         return new VelocityManager().render( values , MESSAGE_EMAIL_FOOTER_TEMPLATE );
     }
 }

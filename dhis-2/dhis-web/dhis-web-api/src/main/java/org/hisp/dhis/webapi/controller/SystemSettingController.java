@@ -42,7 +42,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.Serializable;
@@ -68,8 +67,7 @@ public class SystemSettingController
         @PathVariable( value = "key" ) String key,
         @RequestParam( required = false, value = "key" ) String keyParam,
         @RequestParam( required = false ) String value,
-        @RequestBody( required = false ) String valuePayload, HttpServletResponse response ,
-        HttpServletRequest request )
+        @RequestBody( required = false ) String valuePayload, HttpServletResponse response )
     {
         if ( key == null && keyParam == null )
         {
