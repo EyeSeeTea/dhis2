@@ -1,4 +1,4 @@
-package org.hisp.dhis.message;
+package org.hisp.dhis.webapi.controller.event;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,23 +28,16 @@ package org.hisp.dhis.message;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Set;
+import org.hisp.dhis.program.ProgramIndicator;
+import org.hisp.dhis.schema.descriptors.ProgramIndicatorSchemaDescriptor;
+import org.hisp.dhis.webapi.controller.AbstractCrudController;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 
-import org.hisp.dhis.user.User;
-
-/**
- * @author Lars Helge Overland
- */
-public interface MessageSender
+@Controller
+@RequestMapping( value = ProgramIndicatorSchemaDescriptor.API_ENDPOINT )
+public class ProgramIndicatorController
+    extends AbstractCrudController<ProgramIndicator>
 {
-    /**
-     * Sends a message. The given message will be sent to the given set of users.
-     * 
-     * @param subject the message subject.
-     * @param text the message text.
-     * @param footer the message footer. Optionally included by the implementation.
-     * @param users the users to send the message to.
-     * @param forceSend force sending the message despite potential user settings.
-     */
-    String sendMessage( String subject, String text, String footer, User sender, Set<User> users, boolean forceSend );
+
 }

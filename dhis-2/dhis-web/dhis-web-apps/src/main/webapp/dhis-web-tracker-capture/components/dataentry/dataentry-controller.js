@@ -7,7 +7,7 @@ trackerCapture.controller('DataEntryController',
                 DateUtils,
                 EventUtils,
                 orderByFilter,
-                storage,
+                SessionStorageService,
                 ProgramStageFactory,
                 DHIS2EventFactory,
                 OptionSetService,
@@ -24,11 +24,9 @@ trackerCapture.controller('DataEntryController',
     $scope.currentPeriod = [];
     $scope.filterEvents = true;
     
-    var loginDetails = storage.get('LOGIN_DETAILS');
-    var storedBy = '';
-    if(loginDetails){
-        storedBy = loginDetails.userCredentials.username;
-    }
+    var userProfile = SessionStorageService.get('USER_PROFILE');
+    var storedBy = userProfile && userProfile.username ? userProfile.username : '';
+    
     var today = DateUtils.getToday();
     $scope.invalidDate = false;
     
@@ -60,7 +58,7 @@ trackerCapture.controller('DataEntryController',
         $scope.prStDes = [];
         
         var selections = CurrentSelection.get();          
-        $scope.selectedOrgUnit = storage.get('SELECTED_OU');
+        $scope.selectedOrgUnit = SessionStorageService.get('SELECTED_OU');
         $scope.selectedEntity = selections.tei;      
         $scope.selectedProgram = selections.pr;        
         $scope.selectedEnrollment = selections.selectedEnrollment;   

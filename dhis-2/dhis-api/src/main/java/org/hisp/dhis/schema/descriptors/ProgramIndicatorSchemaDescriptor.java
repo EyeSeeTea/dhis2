@@ -1,4 +1,4 @@
-package org.hisp.dhis.message;
+package org.hisp.dhis.schema.descriptors;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,23 +28,39 @@ package org.hisp.dhis.message;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Set;
+import org.hisp.dhis.program.ProgramIndicator;
+import org.hisp.dhis.schema.Authority;
+import org.hisp.dhis.schema.AuthorityType;
+import org.hisp.dhis.schema.Schema;
+import org.hisp.dhis.schema.SchemaDescriptor;
+import org.springframework.stereotype.Component;
 
-import org.hisp.dhis.user.User;
+import com.google.common.collect.Lists;
 
 /**
- * @author Lars Helge Overland
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface MessageSender
+@Component
+public class ProgramIndicatorSchemaDescriptor implements SchemaDescriptor
 {
-    /**
-     * Sends a message. The given message will be sent to the given set of users.
-     * 
-     * @param subject the message subject.
-     * @param text the message text.
-     * @param footer the message footer. Optionally included by the implementation.
-     * @param users the users to send the message to.
-     * @param forceSend force sending the message despite potential user settings.
-     */
-    String sendMessage( String subject, String text, String footer, User sender, Set<User> users, boolean forceSend );
+    public static final String SINGULAR = "programIndicator";
+
+    public static final String PLURAL = "programIndicators";
+
+    public static final String API_ENDPOINT = "/" + PLURAL;
+
+    @Override
+    public Schema getSchema()
+    {
+        Schema schema = new Schema( ProgramIndicator.class, SINGULAR, PLURAL );
+        schema.setApiEndpoint( API_ENDPOINT );
+        schema.setShareable( true );
+        schema.setOrder( 1560 );
+
+        schema.getAuthorities().add( new Authority( AuthorityType.CREATE_PUBLIC, Lists.newArrayList( "F_PROGRAM_INDICATOR_PUBLIC_ADD" ) ) );
+        schema.getAuthorities().add( new Authority( AuthorityType.CREATE_PRIVATE, Lists.newArrayList( "F_PROGRAM_INDICATOR_PRIVATE_ADD" ) ) );
+        schema.getAuthorities().add( new Authority( AuthorityType.DELETE, Lists.newArrayList( "F_PROGRAM_INDICATOR_DELETE" ) ) );
+
+        return schema;
+    }
 }
