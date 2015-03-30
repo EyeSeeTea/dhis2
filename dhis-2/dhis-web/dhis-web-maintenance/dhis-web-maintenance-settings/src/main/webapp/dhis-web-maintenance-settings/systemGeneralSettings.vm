@@ -154,6 +154,12 @@
 	<input type="text" id="helpPageLink" name="helpPageLink" value="$!helpPageLink"/>
 </div>
 
+<div class="settingLabel">$i18n.getString( "External URL" )</div>
+
+<div class="setting">
+    <input type="text" id="externalUrlLink" name="externalUrlLink" value="$!keyInstanceBaseUrl"/>
+</div>
+
 <div class="settingLabel">$i18n.getString( "google_analytics_ua_key" )</div>
 
 <div class="setting">
