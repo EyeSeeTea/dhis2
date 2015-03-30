@@ -103,13 +103,13 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 })
 
 /* service for getting calendar setting */
-.service('CalendarService', function(storage, $rootScope, SessionStorageService){    
+.service('CalendarService', function(storage, $rootScope){    
 
     return {
         getSetting: function() {
             
             var dhis2CalendarFormat = {keyDateFormat: 'yyyy-MM-dd', keyCalendar: 'gregorian', momentFormat: 'YYYY-MM-DD'};                
-            var storedFormat = SessionStorageService.get('CALENDAR_SETTING');
+            var storedFormat = storage.get('CALENDAR_SETTING');
             if(angular.isObject(storedFormat) && storedFormat.keyDateFormat && storedFormat.keyCalendar){
                 if(storedFormat.keyCalendar === 'iso8601'){
                     storedFormat.keyCalendar = 'gregorian';
@@ -191,17 +191,11 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 .service('CustomFormService', function(){
     
     return {
-        getForProgramStage: function(programStage){
+        getForProgramStage: function(programStage, programStageDataElements){
             
             var htmlCode = programStage.dataEntryForm ? programStage.dataEntryForm.htmlCode : null;  
             
             if(htmlCode){                
-            
-                var programStageDataElements = [];
-
-                angular.forEach(programStage.programStageDataElements, function(prStDe){
-                    programStageDataElements[prStDe.dataElement.id] = prStDe;
-                });
 
                 var inputRegex = /<input.*?\/>/g,
                     match,
@@ -409,7 +403,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 	                                            ' ng-model="selectedTei.' + attId + '" ' +
 	                                            ' ng-disabled="editingDisabled"' +
 	                                            ' ng-blur="validationAndSkipLogic(selectedTei,\'' + attId + '\')" ' +
-	                                            ' ng-required=" ' + att.mandatory + '"> ';
+	                                            ' ng-required=" ' + att.mandatory || att.unique + '"> ';
 	                        }                                               
 	                        else if(att.valueType === "optionSet"){
 	                            var optionSetId = att.optionSet.id;                            
@@ -428,7 +422,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 	                                            ' typeahead="option.name as option.name for option in optionSets.' + optionSetId + '.options | filter:$viewValue | limitTo:50"' +
 	                                            ' typeahead-open-on-focus ' +
 	                                            ' ng-blur="validationAndSkipLogic(selectedTei,\'' + attId + '\')" ' +
-	                                            ' ng-required=" ' + att.mandatory + '"> ';                            
+	                                            ' ng-required=" ' + att.mandatory || att.unique + '"> ';                            
 	                        }
 	                        else if(att.valueType === "bool"){
 	                            newInputField = '<select ' +
@@ -439,7 +433,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 	                                            ' ng-model="selectedTei.' + attId + '" ' +
 	                                            ' ng-disabled="editingDisabled"' +
 	                                            ' ng-change="validationAndSkipLogic(selectedTei,\'' + attId + '\')" ' +
-	                                            ' ng-required=" ' + att.mandatory + '"> ' +
+	                                            ' ng-required=" ' + att.mandatory || att.unique + '"> ' +
 	                                            ' <option value="">{{\'please_select\'| translate}}</option>' +
 	                                            ' <option value="false">{{\'no\'| translate}}</option>' + 
 	                                            ' <option value="true">{{\'yes\'| translate}}</option>' +
@@ -458,7 +452,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 	                                            ' d2-date' +
 	                                            ' d2-validation ' +
 	                                            ' blur-or-change="validationAndSkipLogic(selectedTei,\'' + attId + '\')" ' +
-	                                            ' ng-required=" ' + att.mandatory + '"> ';
+	                                            ' ng-required=" ' + att.mandatory || att.unique + '"> ';
 	                        }
 	                        else if(att.valueType === "trueOnly"){
 	                            newInputField = '<input type="checkbox" ' +  
@@ -470,7 +464,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 	                                            ' ng-model="selectedTei.' + attId + '" ' +
 	                                            ' ng-disabled="editingDisabled"' +
 	                                            ' ng-change="validationAndSkipLogic(selectedTei,\'' + attId + '\')" ' +
-	                                            ' ng-required=" ' + att.mandatory + '"> ';
+	                                            ' ng-required=" ' + att.mandatory || att.unique + '"> ';
 	                        }
 	                        else if(att.valueType === "email"){
 	                            newInputField = '<input type="email" ' +    
@@ -482,7 +476,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 	                                            ' ng-model="selectedTei.' + attId + '" ' +
 	                                            ' ng-disabled="editingDisabled"' +
 	                                            ' ng-blur="validationAndSkipLogic(selectedTei,\'' + attId + '\')" ' +
-	                                            ' ng-required=" ' + att.mandatory + '"> ';
+	                                            ' ng-required=" ' + att.mandatory || att.unique + '"> ';
 	                        }
 	                        else {
 	                            newInputField = '<input type="text" ' +
@@ -494,7 +488,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 	                                            ' ng-model="selectedTei.' + attId + '" ' +
 	                                            ' ng-disabled="editingDisabled"' +
 	                                            ' ng-blur="validationAndSkipLogic(selectedTei,\'' + attId + '\')" ' +
-	                                            ' ng-required=" ' + att.mandatory + '"> ';
+	                                            ' ng-required=" ' + att.mandatory || att.unique + '"> ';
 	                        }
                        }
                          
