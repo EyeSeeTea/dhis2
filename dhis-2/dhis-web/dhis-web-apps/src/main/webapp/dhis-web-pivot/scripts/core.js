@@ -16,8 +16,9 @@ Ext.onReady( function() {
 	NS.isDebug = false;
 	NS.isSessionStorage = ('sessionStorage' in window && window['sessionStorage'] !== null);
 
-	NS.getCore = function(init) {
-        var conf = {},
+	NS.getCore = function(ns) {
+        var init = ns.init,
+            conf = {},
             api = {},
             support = {},
             service = {},
@@ -433,6 +434,12 @@ Ext.onReady( function() {
 						web.message.alert('Assigned categories and detailed data elements cannot be specified together');
 						return;
 					}
+
+                    // in and aggregation type
+                    if (objectNameDimensionMap[dimConf.indicator.objectName] && config.aggregationType !== 'DEFAULT') {
+                        ns.alert('Indicators and aggregation types cannot be specified together', true);
+                        return;
+                    }
 
 					return true;
 				};
