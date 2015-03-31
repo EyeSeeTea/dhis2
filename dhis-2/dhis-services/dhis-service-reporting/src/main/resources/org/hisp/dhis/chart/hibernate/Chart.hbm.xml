@@ -170,6 +170,8 @@
 
     <property name="rangeAxisDecimals" />
     
+    <property name="aggregationType" />
+    
     <property name="sortOrder" />
 
     <!-- Access properties -->
