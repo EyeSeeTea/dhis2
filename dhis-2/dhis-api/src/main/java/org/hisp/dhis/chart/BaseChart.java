@@ -34,7 +34,6 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-
 import org.hisp.dhis.common.AnalyticsType;
 import org.hisp.dhis.common.BaseAnalyticalObject;
 import org.hisp.dhis.common.DimensionalObject;
@@ -113,8 +112,6 @@ public abstract class BaseChart
     protected Integer rangeAxisSteps; // Minimum 1
 
     protected Integer rangeAxisDecimals;
-
-    protected String aggregationType;
 
     // -------------------------------------------------------------------------
     // Dimensional properties
@@ -504,19 +501,6 @@ public abstract class BaseChart
         this.filterDimensions = filterDimensions;
     }
 
-    @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String getAggregationType()
-    {
-        return aggregationType;
-    }
-
-    public void setAggregationType( String aggregationType )
-    {
-        this.aggregationType = aggregationType;
-    }
-
     // -------------------------------------------------------------------------
     // Merge with
     // -------------------------------------------------------------------------
@@ -551,8 +535,6 @@ public abstract class BaseChart
                 rangeAxisMinValue = chart.getRangeAxisMinValue();
                 rangeAxisSteps = chart.getRangeAxisSteps();
                 rangeAxisDecimals = chart.getRangeAxisDecimals();
-                aggregationType = chart.getAggregationType();
-                
             }
             else if ( strategy.isMerge() )
             {
@@ -568,7 +550,6 @@ public abstract class BaseChart
                 rangeAxisMinValue = chart.getRangeAxisMinValue() == null ? rangeAxisMinValue : chart.getRangeAxisMinValue();
                 rangeAxisSteps = chart.getRangeAxisSteps() == null ? rangeAxisSteps : chart.getRangeAxisSteps();
                 rangeAxisDecimals = chart.getRangeAxisDecimals() == null ? rangeAxisDecimals : chart.getRangeAxisDecimals();
-                aggregationType = chart.getAggregationType() == null ? aggregationType : chart.getAggregationType();
             }
 
             filterDimensions.clear();
