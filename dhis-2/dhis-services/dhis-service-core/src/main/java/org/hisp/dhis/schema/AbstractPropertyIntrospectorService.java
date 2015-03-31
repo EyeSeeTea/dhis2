@@ -40,6 +40,8 @@ import org.hibernate.persister.collection.CollectionPersister;
 import org.hibernate.persister.entity.Joinable;
 import org.hibernate.type.AssociationType;
 import org.hibernate.type.CollectionType;
+import org.hibernate.type.ManyToOneType;
+import org.hibernate.type.OneToOneType;
 import org.hibernate.type.SingleColumnType;
 import org.hibernate.type.TextType;
 import org.hibernate.type.Type;
@@ -237,6 +239,15 @@ public abstract class AbstractPropertyIntrospectorService
                     property.setOwningRole( roleToRole.get( collectionType.getRole() ) );
                     property.setInverseRole( collectionType.getRole() );
                 }
+            }
+
+            if ( ManyToOneType.class.isInstance( type ) )
+            {
+                property.setManyToOne( true );
+            }
+            else if ( OneToOneType.class.isInstance( type ) )
+            {
+                property.setOneToOne( true );
             }
 
             if ( SingleColumnType.class.isInstance( type ) )

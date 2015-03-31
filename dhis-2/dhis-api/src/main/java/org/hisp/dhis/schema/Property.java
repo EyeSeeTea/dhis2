@@ -203,9 +203,14 @@ public class Property implements Ordered, Klass
     private boolean manyToMany;
 
     /**
-     * Is property one-to-many.
+     * Is property one-to-one.
      */
-    private boolean oneToMany;
+    private boolean oneToOne;
+
+    /**
+     * Is property many-to-one.
+     */
+    private boolean manyToOne;
 
     /**
      * The hibernate role of the owning side.
@@ -575,14 +580,26 @@ public class Property implements Ordered, Klass
 
     @JsonProperty
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public boolean isOneToMany()
+    public boolean isOneToOne()
     {
-        return oneToMany;
+        return oneToOne;
     }
 
-    public void setOneToMany( boolean oneToMany )
+    public void setOneToOne( boolean oneToOne )
     {
-        this.oneToMany = oneToMany;
+        this.oneToOne = oneToOne;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isManyToOne()
+    {
+        return manyToOne;
+    }
+
+    public void setManyToOne( boolean manyToOne )
+    {
+        this.manyToOne = manyToOne;
     }
 
     @JsonProperty
