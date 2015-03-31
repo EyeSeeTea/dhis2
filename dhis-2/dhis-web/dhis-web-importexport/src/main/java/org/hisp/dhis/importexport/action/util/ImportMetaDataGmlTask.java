@@ -84,11 +84,12 @@ public class ImportMetaDataGmlTask
     {
         importOptions.setImportStrategy( "update" ); // Force update only for GML import
 
+        // TODO importOptions.setIdScheme( scheme ); << Set Id, code or name-scheme here?
         try
         {
             gmlImportService.importGml( inputStream, userUid, importOptions, taskId );
         }
-        catch ( IOException | TransformerException e)
+        catch ( IOException | TransformerException e )
         {
             log.error( "Unable to read GML data from input stream", e );
         }

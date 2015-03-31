@@ -99,6 +99,16 @@ public class HibernateOrganisationUnitStore
     }
 
     @Override
+    @SuppressWarnings( "unchecked" )
+    public Collection<OrganisationUnit> getByCodes( Collection<String> codes )
+    {
+        Query query = getQuery( "from OrganisationUnit where code in :codes" );
+        query.setParameterList( "codes", codes );
+
+        return query.list();
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public Collection<OrganisationUnit> getAllOrganisationUnitsByStatus( boolean active )
     {

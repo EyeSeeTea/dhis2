@@ -51,6 +51,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -88,7 +89,9 @@ public class DefaultGmlImportService
 
         dxfStream.close();
 
-        Map<String, OrganisationUnit> namedMap = Maps.uniqueIndex( metaData.getOrganisationUnits(),
+        List<OrganisationUnit> gmlOrgUnits = metaData.getOrganisationUnits();
+
+        Map<String, OrganisationUnit> nameMap = Maps.uniqueIndex( gmlOrgUnits,
             new Function<OrganisationUnit, String>()
             {
                 @Override
@@ -99,14 +102,50 @@ public class DefaultGmlImportService
             }
         );
 
+        Map<String, OrganisationUnit> codeMap = Maps.uniqueIndex( gmlOrgUnits,
+            new Function<OrganisationUnit, String>()
+            {
+                @Override
+                public String apply( OrganisationUnit organisationUnit )
+                {
+                    return organisationUnit.getCode();
+                }
+            }
+        );
+
+        Map<String, OrganisationUnit> uidMap = Maps.uniqueIndex( gmlOrgUnits,
+            new Function<OrganisationUnit, String>()
+            {
+                @Override
+                public String apply( OrganisationUnit organisationUnit )
+                {
+                    return organisationUnit.getUid();
+                }
+            }
+        );
+
         // Fetch persisted OrganisationUnits and merge imported GML properties
-        Collection<OrganisationUnit> persistedOrgUnits = organisationUnitService.getOrganisationUnitsByNames( namedMap.keySet() );
 
-        for( OrganisationUnit persisted : persistedOrgUnits )
+        Collection<OrganisationUnit> persistedOrgUnits;
+
+        if ( uidMap.size() > 0 ) // Match on uid
         {
-            OrganisationUnit unit = namedMap.get( persisted.getName() );
+            persistedOrgUnits = organisationUnitService.getOrganisationUnitsByUid( uidMap.keySet() );
+        }
+        else if ( codeMap.size() > 0 ) // Match on code
+        {
+            persistedOrgUnits = organisationUnitService.getOrganisationUnitsByCodes( codeMap.keySet() );
+        }
+        else // Match on name
+        {
+            persistedOrgUnits = organisationUnitService.getOrganisationUnitsByNames( nameMap.keySet() );
+        }
 
-            if( unit == null || unit.getCoordinates() == null || unit.getFeatureType() == null )
+        for ( OrganisationUnit persisted : persistedOrgUnits )
+        {
+            OrganisationUnit unit = nameMap.get( persisted.getName() );
+
+            if ( unit == null || unit.getCoordinates() == null || unit.getFeatureType() == null )
             {
                 continue;
             }
@@ -119,7 +158,7 @@ public class DefaultGmlImportService
             unit.setCoordinates( coordinates );
             unit.setFeatureType( featureType );
 
-            if( persisted.getParent() != null )
+            if ( persisted.getParent() != null )
             {
                 OrganisationUnit parent = new OrganisationUnit();
                 parent.setUid( persisted.getParent().getUid() );
