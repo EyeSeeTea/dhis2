@@ -160,6 +160,8 @@
 	<property name="colSubTotals" />
 
     <property name="hideEmptyRows" />
+    
+    <property name="hideNaData" />
 
     <property name="aggregationType" length="40">
 		<type name="org.hibernate.type.EnumType">
