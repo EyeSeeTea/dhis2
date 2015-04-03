@@ -1907,7 +1907,7 @@ Ext.onReady( function() {
                 }
 			}
 		});
-nissa = window;
+
 		return window;
 	};
 
