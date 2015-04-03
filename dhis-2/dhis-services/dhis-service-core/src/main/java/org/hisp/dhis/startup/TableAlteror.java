@@ -517,7 +517,7 @@ public class TableAlteror
         
         executeSql( "update eventreport set showhierarchy = false where showhierarchy is null" );
         executeSql( "update eventreport set counttype = 'events' where counttype is null" );
-        executeSql( "update chart set hidenadata = false where hidenadata is null" );
+        executeSql( "update eventreport set hidenadata = false where hidenadata is null" );
 
         // eventreport col/rowtotals = keep existing || copy from totals || true
         executeSql( "update eventreport set totals = true where totals is null" );
