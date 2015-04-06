@@ -1778,8 +1778,12 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                         angular.forEach(rules, function(rule) {
                             var expression = rule.condition;
                             //Go through and populate variables with actual values, but only if there actually is any replacements to be made(one or more "$" is present)
-                            if(expression.indexOf('$') !== -1) {
-                                expression = $scope.replaceVariables(expression);
+                            if(expression) {
+                                if(expression.indexOf('$') !== -1) {
+                                    expression = $scope.replaceVariables(expression);
+                                }
+                            } else {
+                                debugger;
                             }
 
                             //run expression:

@@ -68,7 +68,21 @@ trackerCapture.controller('DataEntryController',
         var error = false;
         
         angular.forEach($rootScope.ruleeffects, function(effect) {
-            //in the data entry controller we only care about the "hidefield" actions
+            //in the data entry controller we only care about the "SHOWWARNING" and "SHOWERROR" actions
+            if(effect.action === "SHOWERROR" && effect.location === id && effect.ineffect) {
+                error = effect.content;
+            }
+        });
+        //No error message 
+        return error;
+    };
+    
+    //check if field has a warning message
+    $scope.warningMessage = function(id) { 
+        var error = false;
+        
+        angular.forEach($rootScope.ruleeffects, function(effect) {
+            //in the data entry controller we only care about the "SHOWWARNING" and "SHOWERROR" actions
             if(effect.action === "SHOWWARNING" && effect.location === id && effect.ineffect) {
                 error = effect.content;
             }
@@ -91,7 +105,7 @@ trackerCapture.controller('DataEntryController',
         $scope.eventsByStage = [];
         $scope.programStages = [];
         $rootScope.ruleeffects = {};
-		$scope.prStDes = [];
+	$scope.prStDes = [];
         
         var selections = CurrentSelection.get();          
         $scope.selectedOrgUnit = storage.get('SELECTED_OU');
