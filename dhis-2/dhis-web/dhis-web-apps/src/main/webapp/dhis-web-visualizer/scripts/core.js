@@ -2981,7 +2981,7 @@ console.log(config.aggregationType);
                         renderer: function(si, item) {
                             if (item.value) {
                                 var value = item.value[1] === '0.0' ? '-' : item.value[1];
-                                this.update('<div style="font-size:17px; font-weight:bold">' + value + '</div><div style="font-size:10px">' + si.data[conf.finals.data.domain] + '</div>');
+                                this.update('<div style="font-size:17px; font-weight:bold">' + support.prototype.number.prettyPrint(value) + '</div><div style="font-size:10px">' + si.data[conf.finals.data.domain] + '</div>');
                             }
                         }
                     };
