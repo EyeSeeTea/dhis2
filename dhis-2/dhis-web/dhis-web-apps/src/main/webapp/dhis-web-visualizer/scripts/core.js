@@ -724,6 +724,13 @@ Ext.onReady( function() {
                 }
             };
 
+			conf.report = {
+				digitGroupSeparator: {
+					'comma': ',',
+					'space': ' '
+				}
+			};
+
             conf.url = {
                 analysisFields: [
                     '*',
@@ -1030,7 +1037,7 @@ Ext.onReady( function() {
 						ns.alert('Categories and detailed data elements cannot be specified together', true);
 						return;
 					}
-
+console.log(config.aggregationType);
                     // in and aggregation type
                     if (objectNameDimensionMap[dimConf.indicator.objectName] && config.aggregationType !== 'DEFAULT') {
                         ns.alert('Indicators and aggregation types cannot be specified together', true);
@@ -1341,6 +1348,19 @@ Ext.onReady( function() {
 				}
 
 				return null;
+			};
+
+                // number
+			support.prototype.number = {};
+                        
+			support.prototype.number.prettyPrint = function(number, separator) {
+				separator = separator || 'space';
+
+				if (separator === 'none') {
+					return number;
+				}
+
+				return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, conf.report.digitGroupSeparator[separator]);
 			};
 
 				// str
@@ -2575,7 +2595,10 @@ Ext.onReady( function() {
                         fields: store.numericFields,
                         minimum: minimum < 0 ? minimum : 0,
                         label: {
-                            renderer: Ext.util.Format.numberRenderer(renderer),
+                            //renderer: Ext.util.Format.numberRenderer(renderer),
+                            renderer: function(v) {
+                                return support.prototype.number.prettyPrint(v);
+                            },
                             style: {},
                             rotate: {}
                         },
@@ -2867,7 +2890,8 @@ Ext.onReady( function() {
                             font: labelFont,
                             fill: labelColor,
                             renderer: function(n) {
-                                return n === '0.0' ? '' : n;
+                                n = n === '0.0' ? '' : n;
+                                return support.prototype.number.prettyPrint(n);
                             }
                         };
                     }
