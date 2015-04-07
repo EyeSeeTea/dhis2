@@ -1037,7 +1037,7 @@ Ext.onReady( function() {
 						ns.alert('Categories and detailed data elements cannot be specified together', true);
 						return;
 					}
-console.log(config.aggregationType);
+
                     // in and aggregation type
                     if (objectNameDimensionMap[dimConf.indicator.objectName] && config.aggregationType !== 'DEFAULT') {
                         ns.alert('Indicators and aggregation types cannot be specified together', true);
