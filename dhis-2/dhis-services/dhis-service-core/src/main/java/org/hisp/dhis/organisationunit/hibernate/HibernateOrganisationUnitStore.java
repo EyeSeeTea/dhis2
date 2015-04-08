@@ -31,6 +31,7 @@ package org.hisp.dhis.organisationunit.hibernate;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -92,6 +93,11 @@ public class HibernateOrganisationUnitStore
     @SuppressWarnings( "unchecked" )
     public Collection<OrganisationUnit> getByNames( Collection<String> names )
     {
+        if ( names == null || names.isEmpty() )
+        {
+            return new ArrayList<>();
+        }
+
         Query query = getQuery( "from OrganisationUnit where name in :names" );
         query.setParameterList( "names", names );
 
@@ -102,6 +108,12 @@ public class HibernateOrganisationUnitStore
     @SuppressWarnings( "unchecked" )
     public Collection<OrganisationUnit> getByCodes( Collection<String> codes )
     {
+
+        if ( codes == null || codes.isEmpty() )
+        {
+            return new ArrayList<>();
+        }
+
         Query query = getQuery( "from OrganisationUnit where code in :codes" );
         query.setParameterList( "codes", codes );
 
