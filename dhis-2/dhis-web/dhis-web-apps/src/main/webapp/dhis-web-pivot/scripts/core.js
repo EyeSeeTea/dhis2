@@ -16,8 +16,9 @@ Ext.onReady( function() {
 	NS.isDebug = false;
 	NS.isSessionStorage = ('sessionStorage' in window && window['sessionStorage'] !== null);
 
-	NS.getCore = function(init) {
-        var conf = {},
+	NS.getCore = function(ns) {
+        var init = ns.init,
+            conf = {},
             api = {},
             support = {},
             service = {},
@@ -176,7 +177,7 @@ Ext.onReady( function() {
 				multiselect_fill_reportingrates: 315
 			};
 
-			conf.pivot = {
+			conf.report = {
 				digitGroupSeparator: {
 					'comma': ',',
 					'space': '&nbsp;'
@@ -326,7 +327,7 @@ Ext.onReady( function() {
 
 				// hideEmptyRows: boolean (false)
 
-                // aggregationType: string ('default') - 'default', 'count', 'sum'
+                // aggregationType: string ('DEFAULT') - 'DEFAULT', 'COUNT', 'SUM', 'STDDEV', 'VARIANCE', 'MIN', 'MAX'
 
 				// showHierarchy: boolean (false)
 
@@ -434,6 +435,12 @@ Ext.onReady( function() {
 						return;
 					}
 
+                    // in and aggregation type
+                    if (objectNameDimensionMap[dimConf.indicator.objectName] && config.aggregationType !== 'DEFAULT') {
+                        ns.alert('Indicators and aggregation types cannot be specified together', true);
+                        return;
+                    }
+
 					return true;
 				};
 
@@ -493,7 +500,7 @@ Ext.onReady( function() {
 					layout.showRowSubTotals = Ext.isBoolean(config.rowSubTotals) ? config.rowSubTotals : (Ext.isBoolean(config.showRowSubTotals) ? config.showRowSubTotals : true);
 					layout.showDimensionLabels = Ext.isBoolean(config.showDimensionLabels) ? config.showDimensionLabels : (Ext.isBoolean(config.showDimensionLabels) ? config.showDimensionLabels : true);
 					layout.hideEmptyRows = Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : false;
-                    layout.aggregationType = Ext.isString(config.aggregationType) ? config.aggregationType : 'default';
+                    layout.aggregationType = Ext.isString(config.aggregationType) ? config.aggregationType : 'DEFAULT';
 
 					layout.showHierarchy = Ext.isBoolean(config.showHierarchy) ? config.showHierarchy : false;
 
@@ -732,7 +739,7 @@ Ext.onReady( function() {
 					return number;
 				}
 
-				return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, conf.pivot.digitGroupSeparator[separator]);
+				return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, conf.reporet.digitGroupSeparator[separator]);
 			};
 
 			// color
@@ -1677,7 +1684,7 @@ Ext.onReady( function() {
 					delete layout.sorting;
 				}
 
-				if (layout.aggregationType === 'default') {
+				if (layout.aggregationType === 'DEFAULT') {
 					delete layout.aggregationType;
 				}
 
@@ -1921,14 +1928,7 @@ Ext.onReady( function() {
 					map = xLayout.dimensionNameItemsMap,
 					dx = dimConf.indicator.dimensionName,
 					co = dimConf.category.dimensionName,
-                    aggTypes = {
-                        'count': 'COUNT',
-                        'sum': 'SUM',
-                        'stddev': 'STDDEV',
-                        'variance': 'VARIANCE',
-                        'min': 'MIN',
-                        'max': 'MAX'
-                    };
+                    aggTypes = ['COUNT', 'SUM', 'STDDEV', 'VARIANCE', 'MIN', 'MAX'];
 
 				for (var i = 0, dimName, items; i < axisDimensionNames.length; i++) {
 					dimName = axisDimensionNames[i];
@@ -1975,9 +1975,10 @@ Ext.onReady( function() {
 					paramString += '&hierarchyMeta=true';
 				}
 
-                if (aggTypes.hasOwnProperty(xLayout.aggregationType)) {
-                    paramString += '&aggregationType=' + aggTypes[xLayout.aggregationType];
-                }
+				// aggregation type
+				if (Ext.Array.contains(aggTypes, xLayout.aggregationType)) {
+					paramString += '&aggregationType=' + xLayout.aggregationType;
+				}
 
                 // display property
                 paramString += '&displayProperty=' + init.userAccount.settings.keyAnalysisDisplayProperty.toUpperCase();

@@ -34,7 +34,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.common.BaseIdentifiableObject;
@@ -47,7 +46,6 @@ import org.hisp.dhis.common.adapter.JacksonOrganisationUnitChildrenSerializer;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
-import org.hisp.dhis.common.view.UuidView;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.period.PeriodType;
@@ -102,7 +100,7 @@ public class OrganisationUnit
     private static final Pattern JSON_COORDINATE_PATTERN = Pattern.compile( "(\\[{3}.*?\\]{3})" );
     private static final Pattern COORDINATE_PATTERN = Pattern.compile( "([\\-0-9.]+,[\\-0-9.]+)" );
 
-    private static final String NAME_SEPARATOR = " - ";
+    private static final String NAME_SEPARATOR = " / ";
 
     private String uuid;
 
@@ -547,16 +545,15 @@ public class OrganisationUnit
 
     public String getAncestorNames()
     {
-        StringBuilder builder = new StringBuilder( name );
+        List<OrganisationUnit> units = getAncestors();
+        
+        StringBuilder builder = new StringBuilder();
 
-        OrganisationUnit unit = parent;
-
-        while ( unit != null )
+        for ( OrganisationUnit unit : units )
         {
-            builder.append( NAME_SEPARATOR ).append( unit.getName() );
-            unit = unit.getParent();
+            builder.append( unit.getName() ).append( NAME_SEPARATOR );
         }
-
+        
         return builder.toString();
     }
 
@@ -761,7 +758,7 @@ public class OrganisationUnit
      * Returns a mapping between the uid and the uid parent graph of the given
      * organisation units.
      */
-    public static Map<String, String> getParentNameGraphMap( List<OrganisationUnit> organisationUnits, 
+    public static Map<String, String> getParentNameGraphMap( List<OrganisationUnit> organisationUnits,
         Collection<OrganisationUnit> roots, boolean includeThis, DisplayProperty displayProperty )
     {
         Map<String, String> map = new HashMap<>();
@@ -798,7 +795,7 @@ public class OrganisationUnit
     // -------------------------------------------------------------------------
 
     @JsonProperty
-    @JsonView( UuidView.class )
+    @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( isAttribute = true )
     @PropertyRange( min = 36, max = 36 )
     public String getUuid()

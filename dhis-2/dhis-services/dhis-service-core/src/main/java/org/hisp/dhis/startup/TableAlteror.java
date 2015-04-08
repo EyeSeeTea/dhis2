@@ -432,6 +432,7 @@ public class TableAlteror
         executeSql( "update eventchart set regression = false where regression is null" );
         executeSql( "update eventchart set hidetitle = false where hidetitle is null" );
         executeSql( "update eventchart set hidesubtitle = false where hidesubtitle is null" );
+        executeSql( "update eventchart set hidenadata = false where hidenadata is null" );
         executeSql( "update reporttable set showdimensionlabels = false where showdimensionlabels is null" );
         executeSql( "update eventreport set showdimensionlabels = false where showdimensionlabels is null" );
 
@@ -471,7 +472,6 @@ public class TableAlteror
         executeSql( "update reporttable set sortorder = 0 where sortorder is null" );
         executeSql( "update reporttable set toplimit = 0 where toplimit is null" );
         executeSql( "update reporttable set showhierarchy = false where showhierarchy is null" );
-        executeSql( "update reporttable set aggregationtype = 'default' where aggregationtype is null" );
 
         // reporttable col/row totals = keep existing || copy from totals || true
         executeSql( "update reporttable set totals = true where totals is null" );
@@ -517,6 +517,7 @@ public class TableAlteror
         
         executeSql( "update eventreport set showhierarchy = false where showhierarchy is null" );
         executeSql( "update eventreport set counttype = 'events' where counttype is null" );
+        executeSql( "update eventreport set hidenadata = false where hidenadata is null" );
 
         // eventreport col/rowtotals = keep existing || copy from totals || true
         executeSql( "update eventreport set totals = true where totals is null" );
@@ -807,6 +808,8 @@ public class TableAlteror
         executeSql( "UPDATE attributevalue SET lastupdated=now() WHERE lastupdated IS NULL" );
         
         executeSql( "update dashboarditem set shape = 'normal' where shape is null" );
+        
+        executeSql( "update categoryoptioncombo set ignoreapproval = false where ignoreapproval is null" );
 
         upgradeDataValuesWithAttributeOptionCombo();
         upgradeCompleteDataSetRegistrationsWithAttributeOptionCombo();
@@ -816,6 +819,7 @@ public class TableAlteror
         updateOptions();
         
         upgradeAggregationType( "reporttable" );
+        upgradeAggregationType( "chart" );
         
         updateRelativePeriods();
 
@@ -830,7 +834,7 @@ public class TableAlteror
         executeSql( "update " + table + " set aggregationtype='VARIANCE' where aggregationtype='variance'" );
         executeSql( "update " + table + " set aggregationtype='MIN' where aggregationtype='min'" );
         executeSql( "update " + table + " set aggregationtype='MAX' where aggregationtype='max'" );
-        executeSql( "update " + table + " set aggregationtype='DEFAULT' where aggregationtype='default'" );
+        executeSql( "update " + table + " set aggregationtype='DEFAULT' where aggregationtype='default' or aggregationtype is null" );
     }
 
     private void updateRelativePeriods()
