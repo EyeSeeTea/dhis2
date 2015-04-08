@@ -414,13 +414,13 @@ table.small td {
 
 	/* Custom */
 .ns-combo.h21 .x-form-trigger {
-    height: 21px;
+    height: 21px !important;
 }
 .ns-combo.h22 .x-form-trigger {
-    height: 22px;
+    height: 22px !important;
 }
 .ns-combo.h24 .x-form-trigger {
-    height: 24px;
+    height: 24px !important;
 }
 
 /*----------------------------------------------------------------------------
@@ -793,6 +793,19 @@ table.small td {
 .ns-button-combotrigger-disabled * {
     opacity: 0.8;
     cursor: default !important;
+}
+
+	/* Link button */
+.ns-linkbutton.x-btn-default-small {
+    border: 1px solid transparent;
+    background: transparent;
+}
+.ns-linkbutton .x-btn-inner {
+    color: #3162c5;
+    padding: 0;
+}
+.ns-linkbutton.x-btn-over .x-btn-inner {
+    text-decoration: underline;
 }
 
 
