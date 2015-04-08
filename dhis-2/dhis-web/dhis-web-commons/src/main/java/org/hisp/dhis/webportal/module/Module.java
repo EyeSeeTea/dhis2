@@ -1,7 +1,5 @@
 package org.hisp.dhis.webportal.module;
 
-import java.io.File;
-
 import org.hisp.dhis.appmanager.App;
 import org.hisp.dhis.system.util.TextUtils;
 
@@ -86,8 +84,8 @@ public class Module
         
         String defaultAction = app.getLaunchUrl();
 
-        String icon = hasIcon ? icon = app.getBaseUrl() + File.separator + app.getFolderName() +
-            File.separator + app.getIcons().getIcon48() : null;
+        String icon = hasIcon ? icon = app.getBaseUrl() + "/" + app.getFolderName() +
+            "/" + app.getIcons().getIcon48() : null;
 
         String description = TextUtils.subString( app.getDescription(), 0, 80 );
         
@@ -100,7 +98,7 @@ public class Module
     
     public String getIconFallback()
     {
-        return icon != null ? icon : ".." + File.separator + "icons" + File.separator + name + ".png";
+        return icon != null ? icon : "../icons/" + name + ".png";
     }
     
     // -------------------------------------------------------------------------

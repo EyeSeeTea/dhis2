@@ -432,6 +432,7 @@ public class TableAlteror
         executeSql( "update eventchart set regression = false where regression is null" );
         executeSql( "update eventchart set hidetitle = false where hidetitle is null" );
         executeSql( "update eventchart set hidesubtitle = false where hidesubtitle is null" );
+        executeSql( "update eventchart set hidenadata = false where hidenadata is null" );
         executeSql( "update reporttable set showdimensionlabels = false where showdimensionlabels is null" );
         executeSql( "update eventreport set showdimensionlabels = false where showdimensionlabels is null" );
 
@@ -517,6 +518,7 @@ public class TableAlteror
         
         executeSql( "update eventreport set showhierarchy = false where showhierarchy is null" );
         executeSql( "update eventreport set counttype = 'events' where counttype is null" );
+        executeSql( "update eventreport set hidenadata = false where hidenadata is null" );
 
         // eventreport col/rowtotals = keep existing || copy from totals || true
         executeSql( "update eventreport set totals = true where totals is null" );
@@ -707,8 +709,10 @@ public class TableAlteror
         executeSql( "alter table validationrulegroup rename column validationgroupid to validationrulegroupid" );
         executeSql( "update sqlview set sqlviewid=viweid" );
         executeSql( "alter table sqlview drop column viewid" );
-        executeSql( "update sqlview set query = false where query is null" );
-
+        executeSql( "update sqlview set type = 'QUERY' where query is true" );
+        executeSql( "update sqlview set type = 'VIEW' where type is null" );
+        executeSql( "alter table sqlview drop column query" );
+        
         executeSql( "UPDATE dashboard SET publicaccess='--------' WHERE publicaccess is null" );
 
         executeSql( "UPDATE optionset SET version=0 WHERE version IS NULL" );
@@ -754,6 +758,9 @@ public class TableAlteror
         executeSql( "UPDATE attribute SET usergroupattribute=false WHERE usergroupattribute IS NULL" );
         executeSql( "UPDATE attribute SET datasetattribute=false WHERE datasetattribute IS NULL" );
         executeSql( "UPDATE attribute SET programattribute=false WHERE programattribute IS NULL" );
+        executeSql( "UPDATE attribute SET programstageattribute=false WHERE programstageattribute IS NULL" );
+        executeSql( "UPDATE attribute SET trackedentityattribute=false WHERE trackedentityattribute IS NULL" );
+        executeSql( "UPDATE attribute SET trackedentityattributeattribute=false WHERE trackedentityattributeattribute IS NULL" );
 
         executeSql( "ALTER TABLE trackedentityattributedimension DROP COLUMN operator" );
         executeSql( "ALTER TABLE trackedentitydataelementdimension DROP COLUMN operator" );
@@ -809,10 +816,32 @@ public class TableAlteror
         upgradeTranslations();
 
         updateOptions();
+        
+        upgradeAggregationType( "reporttable" );
+        
+        updateRelativePeriods();
 
         log.info( "Tables updated" );
     }
+    
+    private void upgradeAggregationType( String table )
+    {
+        executeSql( "update " + table + " set aggregationtype='SUM' where aggregationtype='sum'" );
+        executeSql( "update " + table + " set aggregationtype='COUNT' where aggregationtype='count'" );
+        executeSql( "update " + table + " set aggregationtype='STDDEV' where aggregationtype='stddev'" );
+        executeSql( "update " + table + " set aggregationtype='VARIANCE' where aggregationtype='variance'" );
+        executeSql( "update " + table + " set aggregationtype='MIN' where aggregationtype='min'" );
+        executeSql( "update " + table + " set aggregationtype='MAX' where aggregationtype='max'" );
+        executeSql( "update " + table + " set aggregationtype='DEFAULT' where aggregationtype='default'" );
+    }
 
+    private void updateRelativePeriods()
+    {
+        executeSql( "update relativeperiods set lastmonth=reportingmonth" );
+        executeSql( "update relativeperiods set lastbimonth=reportingbimonth" );
+        executeSql( "update relativeperiods set lastquarter=reportingquarter" );
+    }
+    
     private void upgradeDataValuesWithAttributeOptionCombo()
     {
         final String sql = statementBuilder.getNumberOfColumnsInPrimaryKey( "datavalue" );

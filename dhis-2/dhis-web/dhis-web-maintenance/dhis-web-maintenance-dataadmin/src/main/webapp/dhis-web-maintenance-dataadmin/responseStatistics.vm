@@ -30,7 +30,11 @@
     </tr>
     <tr>
         <td>$i18n.getString( "organisation_units" )</td>
-        <td>$objects.getValue( "SOURCE" )</td>
+        <td>$objects.getValue( "ORGANISATIONUNIT" )</td>
+    </tr>
+    <tr>
+        <td>$i18n.getString( "organisation_unit_groups" )</td>
+        <td>$objects.getValue( "ORGANISATIONUNITGROUP" )</td>
     </tr>
     <tr>
         <td>$i18n.getString( "validation_rules" )</td>
@@ -43,6 +47,10 @@
     <tr>
         <td>$i18n.getString( "users" )</td>
         <td>$objects.getValue( "USER" )</td>
+    </tr>
+    <tr>
+        <td>$i18n.getString( "user_groups" )</td>
+        <td>$objects.getValue( "USERGROUP" )</td>
     </tr>
     <tr>
         <td>$i18n.getString( "data_values" )</td>
@@ -78,6 +86,24 @@
 		<td>$i18n.getString( "last_30_days" )</td>
 		<td>$activeUsers.get( 30 )</td>
 	</tr>
+    <tr>
+    	<td colspan="2" style="height:15px"></td>
+    </tr>
+</table>
+
+<table>
+	<tr>
+		<th style="width:200px">$i18n.getString( "user_account_invitations" )</th>
+		<th style="width:200px">$i18n.getString( "number" )</th>
+	</tr>
+    <tr>
+        <td>$i18n.getString( "pending_invitations" )</td>
+        <td>$userInvitations.getValue( "ALL" )</td>
+    </tr>
+    <tr>
+        <td>$i18n.getString( "expired_invitations" )</td>
+        <td>$userInvitations.getValue( "EXPIRED" )</td>
+    </tr>
     <tr>
     	<td colspan="2" style="height:15px"></td>
     </tr>

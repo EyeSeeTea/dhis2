@@ -79,6 +79,8 @@ public interface IdentifiableObjectManager
 
     <T extends IdentifiableObject> List<T> getByUid( Class<T> clazz, Collection<String> uids );
 
+    <T extends IdentifiableObject> List<T> getByUidOrdered( Class<T> clazz, List<String> uids );
+    
     <T extends IdentifiableObject> Collection<T> getLikeName( Class<T> clazz, String name );
 
     <T extends NameableObject> Collection<T> getLikeShortName( Class<T> clazz, String shortName );
@@ -133,7 +135,9 @@ public interface IdentifiableObjectManager
 
     <T extends NameableObject> int getCountLikeShortName( Class<T> clazz, String shortName );
     
-    <T extends DimensionalObject> List<T> getByDataDimensionNoAcl( Class<T> clazz, boolean dataDimension );
+    <T extends DimensionalObject> List<T> getDataDimensions( Class<T> clazz );
+
+    <T extends DimensionalObject> List<T> getDataDimensionsNoAcl( Class<T> clazz );
 
     void refresh( Object object );
 
@@ -142,6 +146,8 @@ public interface IdentifiableObjectManager
     // -------------------------------------------------------------------------
 
     <T extends IdentifiableObject> T getNoAcl( Class<T> clazz, String uid );
+    
+    <T extends IdentifiableObject> T getNoAcl( Class<T> clazz, int id );
 
     <T extends IdentifiableObject> void updateNoAcl( T object );
 

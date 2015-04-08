@@ -1,3 +1,5 @@
+/* global angular */
+
 'use strict';
 
 /* Controllers */
@@ -11,7 +13,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                 $translate,
                 $anchorScroll,
                 orderByFilter,
-                storage,
+                SessionStorageService,
                 Paginator,
                 OptionSetService,
                 ProgramValidationService,
@@ -56,18 +58,18 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
     
     //notes
     $scope.note = {};
-    $scope.today = DateUtils.getToday();
+    $scope.today = DateUtils.getToday();    
     
-    var userAccount = storage.get('USER_PROFILE');
-    var storedBy = userAccount ? userAccount.userName : '';    
+    var userProfile = SessionStorageService.get('USER_PROFILE');
+    var storedBy = userProfile && userProfile.username ? userProfile.username : '';
+    
     $scope.noteExists = false;
-    storage.remove('SELECTED_OU');
         
     //watch for selection of org unit from tree
     $scope.$watch('selectedOrgUnit', function() {
         
         if(angular.isObject($scope.selectedOrgUnit)){
-            storage.set('SELECTED_OU', $scope.selectedOrgUnit);
+            SessionStorageService.set('SELECTED_OU', $scope.selectedOrgUnit);
             
             //get ouLevels
             ECStorageService.currentStore.open().done(function(){
@@ -114,12 +116,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         if (angular.isObject($scope.selectedOrgUnit)) {    
             
             ProgramFactory.getAll().then(function(programs){
-                $scope.programs = [];
-                angular.forEach(programs, function(program){                            
-                    if(program.organisationUnits.hasOwnProperty($scope.selectedOrgUnit.id)){                                
-                        $scope.programs.push(program);
-                    }
-                });
+                $scope.programs = programs;                
                 
                 if(angular.isObject($scope.programs) && $scope.programs.length === 1){
                     $scope.selectedProgram = $scope.programs[0];
@@ -151,8 +148,6 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                 angular.forEach($scope.selectedProgramStage.programStageSections, function(section){
                     section.open = true;
                 });
-
-                $scope.customForm = CustomFormService.getForProgramStage($scope.selectedProgramStage);
 
                 $scope.prStDes = [];  
                 $scope.eventGridColumns = [];
@@ -198,12 +193,13 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                         $scope.filterText[prStDe.dataElement.id]= {};
                     }
                 });
+                
+                $scope.customForm = CustomFormService.getForProgramStage($scope.selectedProgramStage, $scope.prStDes);
 
                 if($scope.selectedProgramStage.captureCoordinates){
                     $scope.newDhis2Event.coordinate = {};
                 }
                 $scope.newDhis2Event.eventDate = '';
-
 
                 ErrorMessageService.setErrorMessages(errorMessages);
 

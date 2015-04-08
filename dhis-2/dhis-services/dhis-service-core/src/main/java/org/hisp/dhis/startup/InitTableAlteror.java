@@ -31,6 +31,7 @@ package org.hisp.dhis.startup;
 import org.amplecode.quick.StatementManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.system.startup.AbstractStartupRoutine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,6 +46,9 @@ public class InitTableAlteror
 
     @Autowired
     private StatementManager statementManager;
+    
+    @Autowired
+    private StatementBuilder statementBuilder;
 
     // -------------------------------------------------------------------------
     // Execute
@@ -65,18 +69,39 @@ public class InitTableAlteror
         executeSql( "UPDATE programstageinstance SET status='COMPLETED' WHERE status='1';" );
         executeSql( "UPDATE programstageinstance SET status='SKIPPED' WHERE status='5';" );
         executeSql( "ALTER TABLE program DROP COLUMN displayonallorgunit" );
+        
+        upgradeProgramStageDataElements();
     }
 
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
 
+    private void upgradeProgramStageDataElements()
+    {
+        if ( tableExists( "programstage_dataelements" ) )
+        {
+            String autoIncr = statementBuilder.getAutoIncrementValue();
+            
+            String insertSql = 
+                "insert into programstagedataelement(programstagedataelementid,programstageid,dataelementid,compulsory,allowprovidedelsewhere,sort_order,displayinreports,allowfuturedate) " +
+                "select " + autoIncr + ",programstageid,dataelementid,compulsory,allowprovidedelsewhere,sort_order,displayinreports,allowfuturedate " +
+                "from programstage_dataelements";
+            
+            executeSql( insertSql );
+            
+            String dropSql = "drop table programstage_dataelements";
+            
+            executeSql( dropSql );
+            
+            log.info( "Upgraded program stage data elements" );
+        }
+    }
+    
     private int executeSql( String sql )
     {
         try
         {
-            // TODO use jdbcTemplate
-
             return statementManager.getHolder().executeUpdate( sql );
         }
         catch ( Exception ex )
@@ -84,6 +109,19 @@ public class InitTableAlteror
             log.debug( ex );
 
             return -1;
+        }
+    }
+    
+    private boolean tableExists( String table )
+    {
+        try
+        {
+            statementManager.getHolder().queryForInteger( "select 1 from " + table );
+            return true;
+        }
+        catch ( Exception ex )
+        {
+            return false;
         }
     }
 }

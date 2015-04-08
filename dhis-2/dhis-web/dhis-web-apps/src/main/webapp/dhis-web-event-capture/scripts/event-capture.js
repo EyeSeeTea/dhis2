@@ -1,4 +1,6 @@
 
+/* global dhis2, angular, i18n_ajax_login_failed, _ */
+
 dhis2.util.namespace('dhis2.ec');
 
 // whether current user has any organisation units
@@ -16,6 +18,7 @@ var i18n_uploading_data_notification = 'Uploading locally stored data to the ser
 var PROGRAMS_METADATA = 'EVENT_PROGRAMS';
 
 var EVENT_VALUES = 'EVENT_VALUES';
+var optionSetsInPromise = [];
 
 dhis2.ec.store = null;
 dhis2.ec.memoryOnly = $('html').hasClass('ie7') || $('html').hasClass('ie8');
@@ -41,7 +44,6 @@ dhis2.ec.store = new dhis2.storage.Store({
         }
     };
 })(jQuery);
-
 
 /**
  * Page init. The order of events is:
@@ -141,7 +143,8 @@ function downloadMetaData(){
     var def = $.Deferred();
     var promise = def.promise();
     
-    promise = promise.then( dhis2.ec.store.open );
+    promise = promise.then( dhis2.ec.store.open );    
+    promise = promise.then( getUserRoles );
     promise = promise.then( getCalendarSetting );
     promise = promise.then( getOrgUnitLevels );    
     promise = promise.then( getMetaPrograms );     
@@ -163,8 +166,35 @@ function downloadMetaData(){
     def.resolve();
 }
 
+function getUserRoles()
+{
+    var SessionStorageService = angular.element('body').injector().get('SessionStorageService');
+    
+    if( SessionStorageService.get('USER_ROLES') ){
+       return; 
+    }
+    
+    var def = $.Deferred();
+
+    $.ajax({
+        url: '../api/me.json?fields=id,name,userCredentials[userRoles[id]]',
+        type: 'GET'
+    }).done(function(response) {
+        SessionStorageService.set('USER_ROLES', response);
+        def.resolve();
+    }).fail(function(){
+        def.resolve();
+    });
+
+    return def.promise();
+}
+
 function getCalendarSetting()
 {
+    if(localStorage['CALENDAR_SETTING']){
+       return; 
+    }
+    
     var def = $.Deferred();
 
     $.ajax({
@@ -280,7 +310,7 @@ function getProgram( id )
 {
     return function() {
         return $.ajax( {
-            url: '../api/programs.json?filter=id:eq:' + id +'&fields=id,name,type,version,dataEntryMethod,dateOfEnrollmentDescription,dateOfIncidentDescription,displayIncidentDate,ignoreOverdueEvents,organisationUnits[id,name],programStages[id,name,version]',
+            url: '../api/programs.json?filter=id:eq:' + id +'&fields=id,name,type,version,dataEntryMethod,dateOfEnrollmentDescription,dateOfIncidentDescription,displayIncidentDate,ignoreOverdueEvents,organisationUnits[id,name],programStages[id,name,version],userRoles[id,name]',
             type: 'GET'
         }).done( function( response ){
             
@@ -393,9 +423,10 @@ function getOptionSets( programs )
                     build = build.then(function() {
                         var d = $.Deferred();
                         var p = d.promise();
-                        dhis2.ec.store.get('optionSets', prStDe.dataElement.optionSet.id).done(function(obj) {                    
-                            if(!obj || obj.version !== prStDe.dataElement.optionSet.version) {
-                                promise = promise.then( getOptionSet( prStDe.dataElement.optionSet.id ) );
+                        dhis2.ec.store.get('optionSets', prStDe.dataElement.optionSet.id).done(function(obj) {
+                            if( (!obj || obj.version !== prStDe.dataElement.optionSet.version) && optionSetsInPromise.indexOf(prStDe.dataElement.optionSet.id) === -1) {
+                                optionSetsInPromise.push( prStDe.dataElement.optionSet.id );
+                                promise = promise.then( getOptionSet( prStDe.dataElement.optionSet.id ) );                                
                             }
                             d.resolve();
                         });

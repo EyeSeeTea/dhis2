@@ -104,36 +104,36 @@ Ext.onReady( function() {
 			createSelectionHandlers,
 			layerNumbers = ['1', '2', '3', '4'];
 
-		if (window.google) {
-			layers.googleStreets = new OpenLayers.Layer.Google('Google Streets', {
-				numZoomLevels: 20,
-				animationEnabled: true,
-				layerType: gis.conf.finals.layer.type_base,
-				layerOpacity: 1,
-				setLayerOpacity: function(number) {
-					if (number) {
-						this.layerOpacity = parseFloat(number);
-					}
-					this.setOpacity(this.layerOpacity);
-				}
-			});
-			layers.googleStreets.id = 'googleStreets';
+		//if (window.google) {
+			//layers.googleStreets = new OpenLayers.Layer.Google('Google Streets', {
+				//numZoomLevels: 20,
+				//animationEnabled: true,
+				//layerType: gis.conf.finals.layer.type_base,
+				//layerOpacity: 1,
+				//setLayerOpacity: function(number) {
+					//if (number) {
+						//this.layerOpacity = parseFloat(number);
+					//}
+					//this.setOpacity(this.layerOpacity);
+				//}
+			//});
+			//layers.googleStreets.id = 'googleStreets';
 
-			layers.googleHybrid = new OpenLayers.Layer.Google('Google Hybrid', {
-				type: google.maps.MapTypeId.HYBRID,
-				numZoomLevels: 20,
-				animationEnabled: true,
-				layerType: gis.conf.finals.layer.type_base,
-				layerOpacity: 1,
-				setLayerOpacity: function(number) {
-					if (number) {
-						this.layerOpacity = parseFloat(number);
-					}
-					this.setOpacity(this.layerOpacity);
-				}
-			});
-			layers.googleHybrid.id = 'googleHybrid';
-		}
+			//layers.googleHybrid = new OpenLayers.Layer.Google('Google Hybrid', {
+				//type: google.maps.MapTypeId.HYBRID,
+				//numZoomLevels: 20,
+				//animationEnabled: true,
+				//layerType: gis.conf.finals.layer.type_base,
+				//layerOpacity: 1,
+				//setLayerOpacity: function(number) {
+					//if (number) {
+						//this.layerOpacity = parseFloat(number);
+					//}
+					//this.setOpacity(this.layerOpacity);
+				//}
+			//});
+			//layers.googleHybrid.id = 'googleHybrid';
+		//}
 
 		layers.openStreetMap = new OpenLayers.Layer.OSM.Mapnik('OpenStreetMap', {
 			layerType: gis.conf.finals.layer.type_base,
@@ -1048,7 +1048,7 @@ Ext.onReady( function() {
 		return window;
 	};
 
-	GIS.core.MapLoader = function(gis) {
+	GIS.core.MapLoader = function(gis, isSession) {
 		var getMap,
 			setMap,
 			afterLoad,
@@ -1138,6 +1138,7 @@ Ext.onReady( function() {
 			views = Ext.Array.clean(views);
 
 			if (!views.length) {
+                gis.olmap.mask.hide();
 				return;
 			}
 
@@ -1180,7 +1181,7 @@ Ext.onReady( function() {
                 lat = p.y;
             }
 
-			if (gis.el) {
+			if (gis.el || isSession) {
 				gis.olmap.zoomToVisibleExtent();
 			}
 			else {
@@ -2387,7 +2388,11 @@ Ext.onReady( function() {
 		};
 
 		loadLegend = function(view) {
-			var bounds,
+            var bounds = [],
+                colors = [],
+                names = [],
+                legends = [],
+
 				addNames,
 				fn;
 
@@ -2428,34 +2433,29 @@ Ext.onReady( function() {
 				view.filters[0].items[0].name = metaData.names[peIds[peIds.length - 1]];
 			};
 
-			fn = function() {
-				addNames(gis.response);
+            fn = function() {
+                addNames(gis.response);
 
-				// Classification options
-				var options = {
-					indicator: gis.conf.finals.widget.value,
-					method: view.legendSet ? mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS : view.method,
-					numClasses: view.classes,
-					bounds: bounds,
-					colors: layer.core.getColors(view.colorLow, view.colorHigh),
-					minSize: view.radiusLow,
-					maxSize: view.radiusHigh
-				};
+                // Classification options
+                var options = {
+                    indicator: gis.conf.finals.widget.value,
+                    method: view.legendSet ? mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS : view.method,
+                    numClasses: view.classes,
+                    bounds: bounds,
+                    colors: layer.core.getColors(view.colorLow, view.colorHigh),
+                    minSize: view.radiusLow,
+                    maxSize: view.radiusHigh
+                };
 
-				layer.core.view = view;
-				layer.core.colorInterpolation = colors;
-				layer.core.applyClassification(options);
+                layer.core.view = view;
+                layer.core.colorInterpolation = colors;
+                layer.core.applyClassification(options);
 
-				afterLoad(view);
-			};
+                afterLoad(view);
+            };
 
-			if (view.legendSet) {
-				var bounds = [],
-					colors = [],
-					names = [],
-					legends = [];
-
-				Ext.Ajax.request({
+            loadLegendSet = function(view) {
+                Ext.Ajax.request({
 					url: gis.init.contextPath + '/api/legendSets/' + view.legendSet.id + '.json?fields=' + gis.conf.url.legendSetFields.join(','),
 					scope: this,
                     disableCaching: false,
@@ -2483,13 +2483,42 @@ Ext.onReady( function() {
 						view.legendSet.names = names;
 						view.legendSet.bounds = bounds;
 						view.legendSet.colors = colors;
-
+					},
+                    callback: function() {
 						fn();
-					}
+                    }
 				});
-			}
+            };
+
+			if (view.legendSet) {
+                loadLegendSet(view);
+            }
 			else {
-				fn();
+                var elementMap = {
+                        'in': 'indicators',
+                        'de': 'dataElements',
+                        'ds': 'dataSets'
+                    },
+                    elementUrl = elementMap[view.columns[0].dimension],
+                    id = view.columns[0].items[0].id;
+
+                Ext.Ajax.request({
+                    url: gis.init.contextPath + '/api/' + elementUrl + '.json?fields=legendSet[id,name]&paging=false&filter=id:eq:' + id,
+                    success: function(r) {
+                        var set = Ext.decode(r.responseText)[elementUrl][0].legendSet;
+
+                        if (set) {
+                            view.legendSet = set;
+                            loadLegendSet(view);
+                        }
+                        else {
+                            fn();
+                        }
+                    },
+                    failure: function() {
+                        fn();
+                    }
+                });
 			}
 		};
 
@@ -3544,9 +3573,9 @@ Ext.onReady( function() {
 		gis.layer = GIS.core.getLayers(gis);
 		gis.thematicLayers = [gis.layer.thematic1, gis.layer.thematic2, gis.layer.thematic3, gis.layer.thematic4];
 
-		if (window.google) {
-			layers.push(gis.layer.googleStreets, gis.layer.googleHybrid);
-		}
+		//if (window.google) {
+			//layers.push(gis.layer.googleStreets, gis.layer.googleHybrid);
+		//}
 
 		layers.push(
 			gis.layer.openStreetMap,

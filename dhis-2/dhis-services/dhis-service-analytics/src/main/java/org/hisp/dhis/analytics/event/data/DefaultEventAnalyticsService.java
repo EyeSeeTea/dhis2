@@ -30,6 +30,7 @@ package org.hisp.dhis.analytics.event.data;
 
 import static org.hisp.dhis.analytics.AnalyticsService.NAMES_META_KEY;
 import static org.hisp.dhis.analytics.AnalyticsService.OU_HIERARCHY_KEY;
+import static org.hisp.dhis.analytics.AnalyticsService.OU_NAME_HIERARCHY_KEY;
 import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObjectUtils.DIMENSION_NAME_SEP;
@@ -40,6 +41,7 @@ import static org.hisp.dhis.common.DimensionalObjectUtils.toDimension;
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
 import static org.hisp.dhis.common.NameableObjectUtils.asTypedList;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.getParentGraphMap;
+import static org.hisp.dhis.organisationunit.OrganisationUnit.getParentNameGraphMap;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -50,6 +52,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.analytics.AnalyticsSecurityManager;
 import org.hisp.dhis.analytics.AnalyticsService;
@@ -182,7 +185,7 @@ public class DefaultEventAnalyticsService
 
         if ( params.isCollapseDataDimensions() )
         {
-            grid.addHeader( new GridHeader( DimensionalObject.DATA_X_DIM_ID, DataQueryParams.DISPLAY_NAME_DATA_X, String.class.getName(), false, true ) );
+            grid.addHeader( new GridHeader( DimensionalObject.DATA_COLLAPSED_DIM_ID, DataQueryParams.DISPLAY_NAME_DATA_X, String.class.getName(), false, true ) );
         }
         else
         {
@@ -247,13 +250,18 @@ public class DefaultEventAnalyticsService
             metaData.put( ORGUNIT_DIM_ID, getUids( params.getDimensionOrFilter( ORGUNIT_DIM_ID ) ) );
 
             User user = currentUserService.getCurrentUser();
-            
-            Collection<OrganisationUnit> roots = user != null ? user.getDataViewOrganisationUnits() : null;
+
+            List<OrganisationUnit> organisationUnits = asTypedList( params.getDimensionOrFilter( ORGUNIT_DIM_ID ), OrganisationUnit.class );
+            Collection<OrganisationUnit> roots = user != null ? user.getOrganisationUnits() : null;
             
             if ( params.isHierarchyMeta() )
             {
-                metaData.put( OU_HIERARCHY_KEY, getParentGraphMap( asTypedList( 
-                    params.getDimensionOrFilter( ORGUNIT_DIM_ID ), OrganisationUnit.class ), roots ) );
+                metaData.put( OU_HIERARCHY_KEY, getParentGraphMap( organisationUnits, roots ) );
+            }
+
+            if ( params.isShowHierarchy() )
+            {
+                metaData.put( OU_NAME_HIERARCHY_KEY, getParentNameGraphMap( organisationUnits, roots, true, params.getDisplayProperty() ) );
             }
 
             grid.setMetaData( metaData );
@@ -339,7 +347,7 @@ public class DefaultEventAnalyticsService
 
         User user = currentUserService.getCurrentUser();
 
-        Collection<OrganisationUnit> roots = user != null ? user.getDataViewOrganisationUnits() : null;
+        Collection<OrganisationUnit> roots = user != null ? user.getOrganisationUnits() : null;
         
         if ( params.isHierarchyMeta() )
         {
@@ -361,7 +369,7 @@ public class DefaultEventAnalyticsService
     @Override
     public EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate,
         Set<String> dimension, Set<String> filter, String value, AggregationType aggregationType, boolean skipMeta, boolean skipRounding, boolean hierarchyMeta, 
-        SortOrder sortOrder, Integer limit, EventOutputType outputType, boolean collapseDataDimensions, DisplayProperty displayProperty, I18nFormat format )
+        boolean showHierarchy, SortOrder sortOrder, Integer limit, EventOutputType outputType, boolean collapseDataDimensions, DisplayProperty displayProperty, I18nFormat format )
     {
         EventQueryParams params = getFromUrl( program, stage, startDate, endDate, dimension, filter, null, null, null,
             skipMeta, hierarchyMeta, false, displayProperty, null, null, format );
@@ -369,6 +377,7 @@ public class DefaultEventAnalyticsService
         params.setValue( getValueDimension( value ) );
         params.setAggregationType( aggregationType );
         params.setSkipRounding( skipRounding );
+        params.setShowHierarchy( showHierarchy );
         params.setSortOrder( sortOrder );
         params.setLimit( limit );
         params.setOutputType( MoreObjects.firstNonNull( outputType, EventOutputType.EVENT ) );
@@ -394,7 +403,7 @@ public class DefaultEventAnalyticsService
 
         ProgramStage ps = programStageService.getProgramStage( stage );
 
-        if ( stage != null && !stage.isEmpty() && ps == null )
+        if ( StringUtils.isNotEmpty( stage ) && ps == null )
         {
             throw new IllegalQueryException( "Program stage is specified but does not exist: " + stage );
         }
@@ -651,6 +660,15 @@ public class DefaultEventAnalyticsService
                 {
                     map.putAll( IdentifiableObjectUtils.getUidNameMap( objects ) );
                 }
+            }
+            
+            if ( dimension.getDisplayShortName() != null && DisplayProperty.SHORTNAME.equals( displayProperty ) )
+            {
+                map.put( dimension.getDimension(), dimension.getDisplayShortName() );
+            }
+            else if ( dimension.getDisplayName() != null ) // NAME
+            {
+                map.put( dimension.getDimension(), dimension.getDisplayName() );
             }
         }
 

@@ -28,20 +28,18 @@ package org.hisp.dhis.oum.action.organisationunit;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.system.util.TextUtils.nullIfEmpty;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.calendar.CalendarService;
 import org.hisp.dhis.calendar.DateTimeUnit;
 import org.hisp.dhis.common.IdentifiableObjectManager;
-import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.system.util.AttributeUtils;
@@ -60,19 +58,17 @@ public class AddOrganisationUnitAction
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
     private OrganisationUnitService organisationUnitService;
 
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
-    {
-        this.organisationUnitService = organisationUnitService;
-    }
+    @Autowired
+    private AttributeService attributeService;
 
-    private OrganisationUnitGroupService organisationUnitGroupService;
+    @Autowired
+    private IdentifiableObjectManager manager;
 
-    public void setOrganisationUnitGroupService( OrganisationUnitGroupService organisationUnitGroupService )
-    {
-        this.organisationUnitGroupService = organisationUnitGroupService;
-    }
+    @Autowired
+    private CalendarService calendarService;
 
     private OrganisationUnitSelectionManager selectionManager;
 
@@ -80,31 +76,6 @@ public class AddOrganisationUnitAction
     {
         this.selectionManager = selectionManager;
     }
-
-    private DataSetService dataSetService;
-
-    public void setDataSetService( DataSetService dataSetService )
-    {
-        this.dataSetService = dataSetService;
-    }
-
-    private AttributeService attributeService;
-
-    public void setAttributeService( AttributeService attributeService )
-    {
-        this.attributeService = attributeService;
-    }
-
-    private IdentifiableObjectManager manager;
-
-    @Autowired
-    public void setManager( IdentifiableObjectManager manager )
-    {
-        this.manager = manager;
-    }
-
-    @Autowired
-    private CalendarService calendarService;
 
     // -------------------------------------------------------------------------
     // Input & Output
@@ -237,22 +208,6 @@ public class AddOrganisationUnitAction
     public String execute()
         throws Exception
     {
-        code = nullIfEmpty( code );
-        comment = nullIfEmpty( comment );
-        description = nullIfEmpty( description );
-        longitude = nullIfEmpty( longitude );
-        latitude = nullIfEmpty( latitude );
-        url = nullIfEmpty( url );
-
-        contactPerson = nullIfEmpty( contactPerson );
-        address = nullIfEmpty( address );
-        email = nullIfEmpty( email );
-        phoneNumber = nullIfEmpty( phoneNumber );
-
-        // ---------------------------------------------------------------------
-        // Get parent
-        // ---------------------------------------------------------------------
-
         OrganisationUnit parent = selectionManager.getSelectedOrganisationUnit();
 
         if ( parent == null )
@@ -270,15 +225,20 @@ public class AddOrganisationUnitAction
 
         DateTimeUnit isoOpeningDate = calendarService.getSystemCalendar().toIso( openingDate );
 
-        OrganisationUnit organisationUnit = new OrganisationUnit( name, shortName, code, isoOpeningDate.toJdkCalendar().getTime(), null, comment );
+        OrganisationUnit organisationUnit = new OrganisationUnit();
 
+        organisationUnit.setName( StringUtils.trimToNull( name ) );
+        organisationUnit.setShortName( StringUtils.trimToNull( shortName ) );
+        organisationUnit.setCode( StringUtils.trimToNull( code ) );
+        organisationUnit.setOpeningDate( isoOpeningDate.toJdkCalendar().getTime() );
         organisationUnit.setDescription( description );
-        organisationUnit.setUrl( url );
+        organisationUnit.setComment( StringUtils.trimToNull( comment ) );
+        organisationUnit.setUrl( StringUtils.trimToNull( url ) );
         organisationUnit.setParent( parent );
-        organisationUnit.setContactPerson( contactPerson );
-        organisationUnit.setAddress( address );
-        organisationUnit.setEmail( email );
-        organisationUnit.setPhoneNumber( phoneNumber );
+        organisationUnit.setContactPerson( StringUtils.trimToNull( contactPerson ) );
+        organisationUnit.setAddress( StringUtils.trimToNull( address ) );
+        organisationUnit.setEmail( StringUtils.trimToNull( email ) );
+        organisationUnit.setPhoneNumber( StringUtils.trimToNull( phoneNumber ) );
 
         if ( parent != null )
         {
@@ -315,13 +275,12 @@ public class AddOrganisationUnitAction
 
         for ( String id : dataSets )
         {
-            organisationUnit.addDataSet( dataSetService.getDataSet( Integer.parseInt( id ) ) );
+            organisationUnit.addDataSet( manager.getNoAcl( DataSet.class, Integer.parseInt( id ) ) );
         }
 
         for ( String id : selectedGroups )
         {
-            OrganisationUnitGroup group = organisationUnitGroupService
-                .getOrganisationUnitGroup( Integer.parseInt( id ) );
+            OrganisationUnitGroup group = manager.getNoAcl( OrganisationUnitGroup.class, Integer.parseInt( id ) );
 
             if ( group != null )
             {

@@ -30,10 +30,12 @@ package org.hisp.dhis.program;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
+
+import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 
 /**
  * @author Chau Thu Tran
- * @version $ ProgramIndicatorService.java Apr 16, 2013 1:11:07 PM $
  */
 public interface ProgramIndicatorService
 {
@@ -101,14 +103,6 @@ public interface ProgramIndicatorService
     Collection<ProgramIndicator> getAllProgramIndicators();
 
     /**
-     * Get {@link ProgramIndicator} of a program
-     *
-     * @param program Program
-     * @return ProgramIndicators belong to the program
-     */
-    Collection<ProgramIndicator> getProgramIndicators( Program program );
-
-    /**
      * Calculate an program indicator value based on program instance and an
      * indicator defined for a TrackedEntityInstance
      *
@@ -122,7 +116,7 @@ public interface ProgramIndicatorService
      * Get indicator values of all program indicators defined for a TrackedEntityInstance
      *
      * @param programInstance ProgramInstance
-     * @return Map<Indicator name, Indicator value>
+     * @return a mapping of indicator display name and indicator value.
      */
     Map<String, String> getProgramIndicatorValues( ProgramInstance programInstance );
 
@@ -141,5 +135,22 @@ public interface ProgramIndicatorService
      * @return The expression is valid or not
      */
     String expressionIsValid( String expression );
+    
+    /**
+     * Get all {@link ProgramStageDataElement} part of the expression of the 
+     * given indicator.
+     * 
+     * @param indicator the ProgramIndicator.
+     * @return a set of ProgramStageDataElements.
+     */
+    Set<ProgramStageDataElement> getProgramStageDataElementsInExpression( ProgramIndicator indicator );
 
+    /**
+     * Get all {@link TrackedEntityAttribute} part of the expression of the 
+     * given indicator.
+     * 
+     * @param indicator the ProgramIndicator.
+     * @return a set of TrackedEntityAttributes.
+     */
+    Set<TrackedEntityAttribute> getAttributesInExpression( ProgramIndicator indicator );
 }

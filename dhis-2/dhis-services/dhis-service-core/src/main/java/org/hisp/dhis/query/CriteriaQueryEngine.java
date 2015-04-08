@@ -31,6 +31,7 @@ package org.hisp.dhis.query;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Disjunction;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
@@ -82,6 +83,40 @@ public class CriteriaQueryEngine<T extends IdentifiableObject> implements QueryE
         }
 
         return criteria.list();
+    }
+
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public int count( Query query )
+    {
+        Schema schema = query.getSchema();
+
+        // create a copy of this query using only the restrictions
+        Query countQuery = Query.from( query.getSchema() );
+        countQuery.add( query.getRestrictions() );
+
+        if ( schema == null )
+        {
+            return 0;
+        }
+
+        HibernateGenericStore<?> store = getStore( (Class<? extends IdentifiableObject>) schema.getKlass() );
+
+        if ( store == null )
+        {
+            return 0;
+        }
+
+        Criteria criteria = buildCriteria( store.getSharingCriteria(), countQuery );
+
+        if ( criteria == null )
+        {
+            return 0;
+        }
+
+        return ((Number) criteria
+            .setProjection( Projections.countDistinct( "id" ) )
+            .uniqueResult()).intValue();
     }
 
     private Criteria buildCriteria( Criteria criteria, Query query )
@@ -196,12 +231,12 @@ public class CriteriaQueryEngine<T extends IdentifiableObject> implements QueryE
             }
             case IN:
             {
-                if ( !Collection.class.isInstance( parameters.get( 0 ) ) || ((Collection) parameters.get( 0 )).isEmpty() )
+                if ( !Collection.class.isInstance( parameters.get( 0 ) ) || ((Collection<?>) parameters.get( 0 )).isEmpty() )
                 {
                     return null;
                 }
 
-                return Restrictions.in( property.getFieldName(), (Collection) parameters.get( 0 ) );
+                return Restrictions.in( property.getFieldName(), (Collection<?>) parameters.get( 0 ) );
             }
         }
 

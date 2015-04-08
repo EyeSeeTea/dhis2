@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.analytics.EventOutputType;
 import org.hisp.dhis.common.BaseAnalyticalObject;
 import org.hisp.dhis.common.BaseDimensionalObject;
@@ -104,11 +103,6 @@ public class EventReport
     private TrackedEntityAttribute attributeValueDimension;
     
     /**
-     * Aggregation type.
-     */
-    private AggregationType aggregationType;
-    
-    /**
      * Type of data, can be aggregated values and individual cases.
      */
     private String dataType;
@@ -162,6 +156,11 @@ public class EventReport
      * Indicates rendering of empty rows for the table.
      */
     private boolean hideEmptyRows;
+    
+    /**
+     * Indicates rendering of empty rows for the table.
+     */
+    private boolean hideNaData;
 
     /**
      * Indicates rendering of empty rows for the table.
@@ -330,19 +329,6 @@ public class EventReport
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public AggregationType getAggregationType()
-    {
-        return aggregationType;
-    }
-
-    public void setAggregationType( AggregationType aggregationType )
-    {
-        this.aggregationType = aggregationType;
-    }
-
-    @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getDataType()
     {
         return dataType;
@@ -463,6 +449,19 @@ public class EventReport
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isHideNaData()
+    {
+        return hideNaData;
+    }
+
+    public void setHideNaData( boolean hideNaData )
+    {
+        this.hideNaData = hideNaData;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public EventOutputType getOutputType()
     {
         return outputType;
@@ -573,6 +572,7 @@ public class EventReport
             rowSubTotals = report.isRowSubTotals();
             colSubTotals = report.isColSubTotals();
             hideEmptyRows = report.isHideEmptyRows();
+            hideNaData = report.isHideNaData();
             rowTotals = report.isRowTotals();
             colTotals = report.isColTotals();
             showHierarchy = report.isShowHierarchy();
@@ -582,7 +582,6 @@ public class EventReport
             {
                 dataElementValueDimension = report.getDataElementValueDimension();
                 attributeValueDimension = report.getAttributeValueDimension();
-                aggregationType = report.getAggregationType();
                 dataType = report.getDataType();
                 program = report.getProgram();
                 programStage = report.getProgramStage();
@@ -596,7 +595,6 @@ public class EventReport
             {
                 dataElementValueDimension = report.getDataElementValueDimension() == null ? dataElementValueDimension : report.getDataElementValueDimension();
                 attributeValueDimension = report.getAttributeValueDimension() == null ? attributeValueDimension : report.getAttributeValueDimension();
-                aggregationType = report.getAggregationType() == null ? aggregationType : report.getAggregationType();
                 dataType = report.getDataType() == null ? dataType : report.getDataType();
                 program = report.getProgram() == null ? program : report.getProgram();
                 programStage = report.getProgramStage() == null ? programStage : report.getProgramStage();

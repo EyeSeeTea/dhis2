@@ -11,8 +11,7 @@ trackerCapture.controller('UpcomingEventsController',
                 AttributesFactory,
                 ProgramFactory,
                 CurrentSelection,
-                OptionSetService,
-                storage) {
+                OptionSetService) {
     $scope.today = DateUtils.getToday();
     
     $scope.selectedOuMode = 'SELECTED';
@@ -53,7 +52,6 @@ trackerCapture.controller('UpcomingEventsController',
     $scope.$watch('selectedOrgUnit', function() {      
         $scope.selectedProgram = null;
         if( angular.isObject($scope.selectedOrgUnit)){            
-            storage.set('SELECTED_OU', $scope.selectedOrgUnit);            
             $scope.loadPrograms($scope.selectedOrgUnit);
         }
     });
@@ -154,7 +152,8 @@ trackerCapture.controller('UpcomingEventsController',
 
             
             AttributesFactory.getByProgram($scope.selectedProgram).then(function(atts){            
-                $scope.gridColumns = TEIGridService.generateGridColumns(atts, $scope.selectedOuMode);
+                var grid = TEIGridService.generateGridColumns(atts, $scope.selectedOuMode);
+                $scope.gridColumns = grid.columns;
                 
                 $scope.gridColumns.push({name: $translate('event_orgunit_name'), id: 'eventOrgUnitName', type: 'string', displayInListNoProgram: false, showFilter: false, show: true});
                 $scope.filterTypes['orgUnitName'] = 'string';

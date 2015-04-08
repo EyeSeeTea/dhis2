@@ -28,6 +28,8 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.regex.Pattern;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -55,27 +57,31 @@ public class ProgramIndicator
     public static final String KEY_PROGRAM_VARIABLE = "V";
     public static final String KEY_CONSTANT = "C";
     public static final String INCIDENT_DATE = "incident_date";
-    public static final String ENROLLEMENT_DATE = "enrollment_date";
+    public static final String ENROLLMENT_DATE = "enrollment_date";
     public static final String CURRENT_DATE = "current_date";
     public static final String VALUE_TYPE_DATE = "date";
     public static final String VALUE_TYPE_INT = "int";
-    private static final long serialVersionUID = 7920320128945484331L;
-    public static String SEPARATOR_OBJECT = ":";
+    
+    public static String SEP_OBJECT = ":";
 
-    public static final String regExp = "("+KEY_DATAELEMENT+"|"+KEY_ATTRIBUTE+"|"+KEY_PROGRAM_VARIABLE+"|"+KEY_CONSTANT+")\\{([a-zA-Z0-9]+|" + INCIDENT_DATE + "|" + ENROLLEMENT_DATE + "|"
-        + CURRENT_DATE + ")" + SEPARATOR_ID + "*([a-zA-Z0-9]*)\\}";
+    public static final String EXPRESSION_REGEXP = "(" + KEY_DATAELEMENT + "|" + KEY_ATTRIBUTE + "|" + KEY_PROGRAM_VARIABLE + "|" + KEY_CONSTANT + ")\\{(\\w+|" + 
+        INCIDENT_DATE + "|" + ENROLLMENT_DATE + "|" + CURRENT_DATE + ")" + SEPARATOR_ID + "?(\\w*)\\}";
 
+    public static final Pattern EXPRESSION_PATTERN = Pattern.compile( EXPRESSION_REGEXP );    
+    public static final Pattern DATAELEMENT_PATTERN = Pattern.compile( KEY_DATAELEMENT + "\\{(\\w{11})" + SEPARATOR_ID + "(\\w{11})\\}" );
+    public static final Pattern ATTRIBUTE_PATTERN = Pattern.compile( KEY_ATTRIBUTE + "\\{(\\w{11})\\}" );
+    
     public static final String VALID = "valid";
 
     public static final String EXPRESSION_NOT_WELL_FORMED = "expression_not_well_formed";
+
+    private Program program;
     
     private String valueType;
 
     private String expression;
 
     private String rootDate;
-
-    private Program program;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -86,11 +92,13 @@ public class ProgramIndicator
         setAutoFields();
     }
 
-    public ProgramIndicator( String name, String description, String valueType, String expression )
+    public ProgramIndicator( String name, String description, Program program, String valueType, String expression )
     {
         this();
         this.name = name;
         this.description = description;
+        this.program = program;
+        program.getProgramIndicators().add( this );
         this.valueType = valueType;
         this.expression = expression;
     }
@@ -98,6 +106,20 @@ public class ProgramIndicator
     // -------------------------------------------------------------------------
     // Getters && Setters
     // -------------------------------------------------------------------------
+
+    @JsonProperty
+    @JsonSerialize( as = BaseIdentifiableObject.class )
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Program getProgram()
+    {
+        return program;
+    }
+
+    public void setProgram( Program program )
+    {
+        this.program = program;
+    }
 
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
@@ -138,20 +160,6 @@ public class ProgramIndicator
         this.rootDate = rootDate;
     }
 
-    @JsonProperty
-    @JsonSerialize( as = BaseIdentifiableObject.class )
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public Program getProgram()
-    {
-        return program;
-    }
-
-    public void setProgram( Program program )
-    {
-        this.program = program;
-    }
-
     @Override
     public void mergeWith( IdentifiableObject other, MergeStrategy strategy )
     {
@@ -163,17 +171,17 @@ public class ProgramIndicator
 
             if ( strategy.isReplace() )
             {
+                program = programIndicator.getProgram();
                 valueType = programIndicator.getValueType();
                 expression = programIndicator.getExpression();
                 rootDate = programIndicator.getRootDate();
-                program = programIndicator.getProgram();
             }
             else if ( strategy.isMerge() )
             {
+                program = programIndicator.getProgram() == null ? program : programIndicator.getProgram();
                 valueType = programIndicator.getValueType() == null ? valueType : programIndicator.getValueType();
                 expression = programIndicator.getExpression() == null ? expression : programIndicator.getExpression();
                 rootDate = programIndicator.getRootDate() == null ? rootDate : programIndicator.getRootDate();
-                program = programIndicator.getProgram() == null ? program : programIndicator.getProgram();
             }
         }
     }

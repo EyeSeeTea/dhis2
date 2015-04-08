@@ -1,3 +1,5 @@
+/* global trackerCapture, angular */
+
 //Controller for dashboard
 trackerCapture.controller('DashboardController',
         function($rootScope,
@@ -8,7 +10,7 @@ trackerCapture.controller('DashboardController',
                 $filter,
                 TCStorageService,
                 orderByFilter,
-                storage,
+                SessionStorageService,
                 TEIService, 
                 TEService,
                 OptionSetService,
@@ -20,7 +22,27 @@ trackerCapture.controller('DashboardController',
     //selections
     $scope.selectedTeiId = ($location.search()).tei; 
     $scope.selectedProgramId = ($location.search()).program; 
-    $scope.selectedOrgUnit = storage.get('SELECTED_OU');
+    $scope.selectedOrgUnit = SessionStorageService.get('SELECTED_OU');
+    
+    $scope.sortedTeiIds = CurrentSelection.getSortedTeiIds();    
+    
+    $scope.previousTeiExists = false;
+    $scope.nextTeiExists = false;
+    
+    if($scope.sortedTeiIds && $scope.sortedTeiIds.length > 0){
+        var current = $scope.sortedTeiIds.indexOf($scope.selectedTeiId);
+        
+        if(current !== -1){
+            if($scope.sortedTeiIds.length-1 > current){
+                $scope.nextTeiExists = true;
+            }
+            
+            if(current > 0){
+                $scope.previousTeiExists = true;
+            }
+        }
+    }
+    
     $scope.selectedProgram;    
     $scope.selectedTei;
     
@@ -163,14 +185,13 @@ trackerCapture.controller('DashboardController',
                                 $scope.programStageNames = [];        
 
                                 //get programs valid for the selected ou and tei
-                                angular.forEach(programs, function(program){
-                                    $scope.programNames[program.id] = {id: program.id, name: program.name};
-                                    angular.forEach(program.programStages, function(stage){                
-                                        $scope.programStageNames[stage.id] = {id: stage.id, name: stage.name};
-                                    });
-                                    if(program.organisationUnits.hasOwnProperty($scope.selectedOrgUnit.id) &&
-                                       program.trackedEntity.id === $scope.selectedTei.trackedEntity){
+                                angular.forEach(programs, function(program){                                    
+                                    if( program.trackedEntity.id === $scope.selectedTei.trackedEntity ){
                                         $scope.programs.push(program);
+                                        $scope.programNames[program.id] = {id: program.id, name: program.name};
+										angular.forEach(program.programStages, function(stage){                
+											$scope.programStageNames[stage.id] = {id: stage.id, name: stage.name};
+										});
 
                                         if($scope.selectedProgramId && program.id === $scope.selectedProgramId || selectedEnrollment && selectedEnrollment.program === program.id){
                                             $scope.selectedProgram = program;
@@ -199,6 +220,8 @@ trackerCapture.controller('DashboardController',
                 $scope.selectedProgram = pr;
             }
         });
+        
+        $scope.applySelectedProgram();
     }); 
     
     //watch for widget sorting    
@@ -314,5 +337,18 @@ trackerCapture.controller('DashboardController',
     
     $rootScope.closeOpenWidget = function(widget){
         saveDashboardLayout();
+    };
+    
+    $scope.fetchTei = function(mode){
+        var current = $scope.sortedTeiIds.indexOf($scope.selectedTeiId);
+        var pr = ($location.search()).program;
+        var tei = null;
+        if(mode === 'NEXT'){            
+            tei = $scope.sortedTeiIds[current+1];
+        }
+        else{            
+            tei = $scope.sortedTeiIds[current-1];
+        }        
+        $location.path('/dashboard').search({tei: tei, program: pr ? pr: null});
     };
 });

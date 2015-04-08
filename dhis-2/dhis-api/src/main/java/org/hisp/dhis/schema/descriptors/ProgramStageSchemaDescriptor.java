@@ -40,7 +40,8 @@ import org.springframework.stereotype.Component;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Component
-public class ProgramStageSchemaDescriptor implements SchemaDescriptor
+public class
+    ProgramStageSchemaDescriptor implements SchemaDescriptor
 {
     public static final String SINGULAR = "programStage";
 

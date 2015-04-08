@@ -28,22 +28,22 @@ package org.hisp.dhis.dxf2.gml;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.apache.commons.math.util.MathUtils;
+import org.apache.commons.math3.util.Precision;
 
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
 
 /**
- * Methods to parse various GML coordinate formats and output the DHIS 2 internal representation.
- * @author Halvdan Hoem Grelland
+ * Methods to parse various GML coordinate formats and output GeoJSON strings.
+ * @author Halvdan Hoem Grelland <halvdanhg@gmail.com>
  */
 public class GmlConversionUtils
 {
     private static final NumberFormat NF = NumberFormat.getInstance( Locale.ENGLISH );
 
     /**
-     * Parses a gml:coordinates element and outputs the DHIS 2 internal string representation.
+     * Parses a gml:coordinates element and outputs a GeoJSON string.
      *
      * @param coordinates contents of gml:coordinates element to parse.
      * @param precision decimal precision to use in output.
@@ -71,7 +71,7 @@ public class GmlConversionUtils
     }
 
     /**
-     * Parses a gml:pos element and outputs the DHIS 2 internal string representation.
+     * Parses a gml:pos element and outputs a GeoJSON string.
      *
      * @param pos contents of gml:pos element to parse.
      * @param precision decimal precision to use in output.
@@ -97,7 +97,7 @@ public class GmlConversionUtils
     }
 
     /**
-     * Parses a gml:posList element and outputs the DHIS 2 internal string representation.
+     * Parses a gml:posList element and outputs a GeoJSON string.
      *
      * @param posList contents of gml:posList element to parse.
      * @param precision decimal precision to use in output.
@@ -132,6 +132,6 @@ public class GmlConversionUtils
     private static String parseCoordinate( String number, int precision, NumberFormat nf )
         throws ParseException
     {
-        return Double.toString( MathUtils.round( nf.parse( number ).doubleValue(), precision ) );
+        return Double.toString( Precision.round(nf.parse(number).doubleValue(), precision ) );
     }
 }

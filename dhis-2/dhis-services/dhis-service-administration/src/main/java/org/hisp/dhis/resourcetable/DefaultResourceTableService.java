@@ -46,6 +46,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.calendar.Calendar;
+import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.dataelement.CategoryOptionGroup;
@@ -56,12 +57,9 @@ import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementGroupSet;
-import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.indicator.IndicatorGroupSet;
-import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Cal;
@@ -92,6 +90,13 @@ public class DefaultResourceTableService
     {
         this.resourceTableStore = resourceTableStore;
     }
+    
+    private IdentifiableObjectManager idObjectManager;
+
+    public void setIdObjectManager( IdentifiableObjectManager idObjectManager )
+    {
+        this.idObjectManager = idObjectManager;
+    }
 
     private OrganisationUnitService organisationUnitService;
 
@@ -100,32 +105,11 @@ public class DefaultResourceTableService
         this.organisationUnitService = organisationUnitService;
     }
 
-    private OrganisationUnitGroupService organisationUnitGroupService;
-
-    public void setOrganisationUnitGroupService( OrganisationUnitGroupService organisationUnitGroupService )
-    {
-        this.organisationUnitGroupService = organisationUnitGroupService;
-    }
-
     private DataElementCategoryService categoryService;
 
     public void setCategoryService( DataElementCategoryService categoryService )
     {
         this.categoryService = categoryService;
-    }
-
-    private DataElementService dataElementService;
-
-    public void setDataElementService( DataElementService dataElementService )
-    {
-        this.dataElementService = dataElementService;
-    }
-
-    private IndicatorService indicatorService;
-
-    public void setIndicatorService( IndicatorService indicatorService )
-    {
-        this.indicatorService = indicatorService;
     }
 
     private PeriodService periodService;
@@ -214,6 +198,12 @@ public class DefaultResourceTableService
 
         for ( DataElementCategoryCombo combo : combos )
         {
+            if ( !combo.isValid() )
+            {
+                log.warn( "Ignoring category combo, not valid: " + combo );
+                continue;
+            }
+            
             for ( DataElementCategoryOptionCombo coc : combo.getSortedOptionCombos() )
             {
                 List<Object> values = new ArrayList<>();
@@ -241,7 +231,7 @@ public class DefaultResourceTableService
         List<DataElementCategoryOptionCombo> categoryOptionCombos =
             new ArrayList<>( categoryService.getAllDataElementCategoryOptionCombos() );
 
-        List<CategoryOptionGroupSet> groupSets = new ArrayList<>( categoryService.getAllCategoryOptionGroupSets() );
+        List<CategoryOptionGroupSet> groupSets = new ArrayList<>( idObjectManager.getAllNoAcl( CategoryOptionGroupSet.class ) );
 
         Collections.sort( groupSets, IdentifiableObjectNameComparator.INSTANCE );
 
@@ -283,7 +273,7 @@ public class DefaultResourceTableService
     @Transactional
     public void generateDataElementGroupSetTable()
     {
-        List<DataElementGroupSet> groupSets = new ArrayList<>( dataElementService.getDataDimensionDataElementGroupSets() );
+        List<DataElementGroupSet> groupSets = new ArrayList<>( idObjectManager.getDataDimensionsNoAcl( DataElementGroupSet.class ) );
 
         Collections.sort( groupSets, IdentifiableObjectNameComparator.INSTANCE );
 
@@ -302,7 +292,7 @@ public class DefaultResourceTableService
     @Transactional
     public void generateIndicatorGroupSetTable()
     {
-        List<IndicatorGroupSet> groupSets = new ArrayList<>( indicatorService.getAllIndicatorGroupSets() );
+        List<IndicatorGroupSet> groupSets = new ArrayList<>( idObjectManager.getAllNoAcl( IndicatorGroupSet.class ) );
 
         Collections.sort( groupSets, IdentifiableObjectNameComparator.INSTANCE );
 
@@ -322,7 +312,7 @@ public class DefaultResourceTableService
     public void generateOrganisationUnitGroupSetTable()
     {
         List<OrganisationUnitGroupSet> groupSets = new ArrayList<>(
-            organisationUnitGroupService.getDataDimensionOrganisationUnitGroupSets() );
+            idObjectManager.getDataDimensionsNoAcl( OrganisationUnitGroupSet.class ) );
 
         Collections.sort( groupSets, IdentifiableObjectNameComparator.INSTANCE );
 
@@ -345,7 +335,8 @@ public class DefaultResourceTableService
         // Create table - only using data dimension categories
         // ---------------------------------------------------------------------
 
-        List<DataElementCategory> categories = new ArrayList<>( categoryService.getDataDimensionDataElementCategories() );
+        List<DataElementCategory> categories = new ArrayList<>( 
+            idObjectManager.getDataDimensionsNoAcl( DataElementCategory.class ) );
 
         Collections.sort( categories, IdentifiableObjectNameComparator.INSTANCE );
 
@@ -368,7 +359,7 @@ public class DefaultResourceTableService
         // Create table
         // ---------------------------------------------------------------------
 
-        Collection<DataElement> dataElements = dataElementService.getAllDataElements();
+        List<DataElement> dataElements = new ArrayList<>( idObjectManager.getAllNoAcl( DataElement.class ) );
 
         resourceTableStore.createDataElementStructure();
 
@@ -548,7 +539,7 @@ public class DefaultResourceTableService
         {
             if ( !view.isQuery() )
             {
-                sqlViewService.dropViewTable( view.getViewName() );
+                sqlViewService.dropViewTable( view );
             }
         }
     }

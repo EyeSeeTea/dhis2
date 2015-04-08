@@ -61,9 +61,39 @@ Ext.onReady(function() {
 	// ext config
 	Ext.Ajax.method = 'GET';
 
-    Ext.isIE = function() {
-        return /trident/.test(Ext.userAgent);
-    }();
+    Ext.isIE = (/trident/.test(Ext.userAgent));
+
+    Ext.isIE11 = Ext.isIE && (/rv:11.0/.test(Ext.userAgent));
+
+    Ext.util.CSS.createStyleSheet = function(cssText, id) {
+        var ss,
+            head = document.getElementsByTagName("head")[0],
+            styleEl = document.createElement("style");
+
+        styleEl.setAttribute("type", "text/css");
+        
+        if (id) {
+           styleEl.setAttribute("id", id);
+        }
+
+        if (Ext.isIE && !Ext.isIE11) {
+           head.appendChild(styleEl);
+           ss = styleEl.styleSheet;
+           ss.cssText = cssText;
+        }
+        else {
+            try {
+                styleEl.appendChild(document.createTextNode(cssText));
+            }
+            catch(e) {
+               styleEl.cssText = cssText;
+            }
+            head.appendChild(styleEl);
+            ss = styleEl.styleSheet ? styleEl.styleSheet : (styleEl.sheet || document.styleSheets[document.styleSheets.length-1]);
+        }
+        this.cacheStyleSheet(ss);
+        return ss;
+    };
 
     // override
     Ext.override(Ext.chart.Chart, {
@@ -207,7 +237,7 @@ Ext.onReady(function() {
                 markerConfig, label, mask,
                 radius, toggle = false,
                 seriesStyle = Ext.apply(series.seriesStyle, series.style),
-                labelMarkerSize = legend.labelMarkerSize || 12;
+                labelMarkerSize = legend.labelMarkerSize || 10;
 
             function getSeriesProp(name) {
                 var val = series[name];
@@ -216,7 +246,7 @@ Ext.onReady(function() {
 
             label = me.add('label', surface.add({
                 type: 'text',
-                x: 0,
+                x: 30,
                 y: 0,
                 zIndex: z || 0,
                 font: legend.labelFont,
@@ -2749,7 +2779,7 @@ Ext.onReady(function() {
                         numberOfItems = titles.length,
                         numberOfChars,
                         totalItemLength = numberOfItems * itemLength,
-                        minLength = 5,
+                        //minLength = 5,
                         maxLength = support.prototype.array.getMaxLength(titles),
                         fallbackLength = 10,
                         maxWidth = ns.app.centerRegion.getWidth(),
@@ -2763,7 +2793,7 @@ Ext.onReady(function() {
 
                         fallbackLength = len < fallbackLength ? len : fallbackLength;
 
-                        for (var i = len, width; i >= minLength; i--) {
+                        for (var i = len, width; i > 0; i--) {
                             newTitles = [];
 
                             for (var j = 0, title, numberOfChars, newTitle; j < titles.length; j++) {
@@ -3163,16 +3193,17 @@ Ext.onReady(function() {
                         store = config.store || {},
                         width = ns.app.centerRegion.getWidth(),
                         height = ns.app.centerRegion.getHeight(),
+                        isLineBased = Ext.Array.contains(['line', 'area'], xLayout.type),
                         defaultConfig = {
                             //animate: true,
                             animate: false,
                             shadow: false,
                             insetPadding: ns.dashboard ? 17 : 35,
                             insetPaddingObject: {
-                                top: 10,
-                                right: 3,
-                                bottom: 2,
-                                left: 7
+                                top: ns.dashboard ? 12 : 22,
+                                right: ns.dashboard ? (isLineBased ? 5 : 3) : 10,
+                                bottom: ns.dashboard ? 2 : 10,
+                                left: ns.dashboard ? (isLineBased ? 15 : 7) : 17
                             },
                             width: ns.dashboard ? width : width - 15,
                             height: ns.dashboard ? height : height - 40,
@@ -3184,7 +3215,7 @@ Ext.onReady(function() {
                         defaultConfig.legend = getDefaultLegend(store, config);
 
                         if (defaultConfig.legend.position === 'right') {
-                            defaultConfig.insetPaddingObject.top = ns.dashboard ? 20 : 40;
+                            defaultConfig.insetPaddingObject.top = ns.dashboard ? 22 : 40;
                             defaultConfig.insetPaddingObject.right = ns.dashboard ? 5 : 40;
                         }
                     }

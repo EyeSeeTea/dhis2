@@ -30,13 +30,18 @@ package org.hisp.dhis.trackedentity.action.programstage;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.hisp.dhis.program.ProgramIndicator;
-import org.hisp.dhis.program.ProgramIndicatorService;
+import org.hisp.dhis.attribute.Attribute;
+import org.hisp.dhis.attribute.AttributeService;
+import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageDataElement;
 import org.hisp.dhis.program.ProgramStageService;
+import org.hisp.dhis.system.util.AttributeUtils;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,8 +50,8 @@ import com.opensymphony.xwork2.Action;
 
 /**
  * @author Abyot Asalefew Gizaw
- * @modified Tran Thanh Tri
  * @version $Id$
+ * @modified Tran Thanh Tri
  */
 public class GetProgramStageAction
     implements Action
@@ -61,17 +66,24 @@ public class GetProgramStageAction
     {
         this.programStageService = programStageService;
     }
-    
+
     private UserGroupService userGroupService;
-    
+
     public void setUserGroupService( UserGroupService userGroupService )
     {
         this.userGroupService = userGroupService;
     }
 
+    private PeriodService periodService;
+
+    public void setPeriodService( PeriodService periodService )
+    {
+        this.periodService = periodService;
+    }
+
     @Autowired
-    private ProgramIndicatorService programIndicatorService;
-    
+    private AttributeService attributeService;
+
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
@@ -101,7 +113,7 @@ public class GetProgramStageAction
     {
         return programStageDataElements;
     }
-    
+
     private List<UserGroup> userGroups;
 
     public List<UserGroup> getUserGroups()
@@ -114,13 +126,27 @@ public class GetProgramStageAction
         this.userGroups = userGroups;
     }
 
-    private List<ProgramIndicator> programIndicators;
+    private List<PeriodType> periodTypes = new ArrayList<>();
 
-    public List<ProgramIndicator> getProgramIndicators()
+    public List<PeriodType> getPeriodTypes()
     {
-        return programIndicators;
+        return periodTypes;
     }
-    
+
+    private List<Attribute> attributes;
+
+    public List<Attribute> getAttributes()
+    {
+        return attributes;
+    }
+
+    private Map<Integer, String> attributeValues = new HashMap<>();
+
+    public Map<Integer, String> getAttributeValues()
+    {
+        return attributeValues;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -131,13 +157,20 @@ public class GetProgramStageAction
     {
         programStage = programStageService.getProgramStage( id );
 
+        if ( programStage == null )
+        {
+            return INPUT;
+        }
+
+        periodTypes = periodService.getAllPeriodTypes();
+
         programStageDataElements = programStage.getProgramStageDataElements();
-        
+
         userGroups = new ArrayList<>( userGroupService.getAllUserGroups() );
-        
-        programIndicators = new ArrayList<>( programIndicatorService.getProgramIndicators( programStage.getProgram() ) );
-        programIndicators.removeAll( programStage.getProgramIndicators() );
-        
+
+        attributeValues = AttributeUtils.getAttributeValueMap( programStage.getAttributeValues() );
+        attributes = new ArrayList<>( attributeService.getProgramStageAttributes() );
+
         return SUCCESS;
     }
 }

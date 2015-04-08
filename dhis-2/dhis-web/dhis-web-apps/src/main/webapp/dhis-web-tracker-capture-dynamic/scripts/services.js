@@ -1,3 +1,5 @@
+/* global angular, moment, dhis2 */
+
 'use strict';
 
 /* Services */
@@ -45,6 +47,73 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             });
             return promise;
         }
+    };
+})
+
+/* current selections */
+.service('PeriodService', function(DateUtils, CalendarService, $filter){
+    
+    var calendarSetting = CalendarService.getSetting();    
+    
+    var splitDate = function(dateValue){
+        if(!dateValue){
+            return;
+        }
+        var calendarSetting = CalendarService.getSetting();            
+
+        return {year: moment(dateValue, calendarSetting.momentFormat).year(), month: moment(dateValue, calendarSetting.momentFormat).month(), week: moment(dateValue, calendarSetting.momentFormat).week(), day: moment(dateValue, calendarSetting.momentFormat).day()};
+    };
+    
+    this.getPeriods = function(events, stage, enrollment){
+     
+        if(!stage){
+            return;
+        }
+        
+        var referenceDate = enrollment.dateOfIncident ? enrollment.dateOfIncident : enrollment.dateOfEnrollment;
+        var offset = stage.minDaysFromStart;
+        
+        if(stage.generatedByEnrollmentDate){
+            referenceDate = enrollment.dateOfEnrollment;
+        }        
+               
+        var occupiedPeriods = [];
+        var availablePeriods = [];
+        if(!stage.periodType){
+            angular.forEach(events, function(event){
+                occupiedPeriods.push({event: event.event, name: event.sortingDate, stage: stage.id});
+            });            
+            
+        }
+        else{
+
+            var startDate = DateUtils.format( moment(referenceDate, calendarSetting.momentFormat).add(offset, 'days') );
+            var periodOffset = splitDate(DateUtils.getToday()).year - splitDate(startDate).year;
+            var eventDateOffSet = moment(referenceDate, calendarSetting.momentFormat).add('d', offset)._d;
+            eventDateOffSet = $filter('date')(eventDateOffSet, calendarSetting.keyDateFormat);        
+            
+            //generate availablePeriods
+            var pt = new PeriodType();
+            var d2Periods = pt.get(stage.periodType).generatePeriods({offset: periodOffset, filterFuturePeriods: false, reversePeriods: false});
+            angular.forEach(d2Periods, function(p){
+                p.endDate = DateUtils.formatFromApiToUser(p.endDate);
+                p.startDate = DateUtils.formatFromApiToUser(p.startDate);
+                
+                if(moment(p.endDate).isAfter(eventDateOffSet)){
+                    availablePeriods[p.endDate] = p;
+                }                
+            });                
+
+            //get occupied periods
+            angular.forEach(events, function(event){
+                var p = availablePeriods[event.sortingDate];
+                if(p){
+                    occupiedPeriods.push({event: event.event, name: p.name, stage: stage.id, eventDate: event.sortingDate});
+                    delete availablePeriods[event.sortingDate];
+                }                    
+            });
+        }
+        return {occupiedPeriods: occupiedPeriods, availablePeriods: availablePeriods};
     };
 })
 
@@ -135,17 +204,38 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 })
 
 /* Factory to fetch programs */
-.factory('ProgramFactory', function($q, $rootScope, TCStorageService) { 
-    return {
+.factory('ProgramFactory', function($q, $rootScope, SessionStorageService, TCStorageService) { 
+    
+    var userHasValidRole = function(program, userRoles){
+        
+        var hasRole = false;
+
+        if($.isEmptyObject(program.userRoles)){
+            return !hasRole;
+        }
+
+        for(var i=0; i < userRoles.length && !hasRole; i++){
+            if( program.userRoles.hasOwnProperty( userRoles[i].id ) ){
+                hasRole = true;
+            }
+        }        
+        return hasRole;        
+    };
+    
+    return {        
+        
         getAll: function(){
             
+            var roles = SessionStorageService.get('USER_ROLES');
+            var userRoles = roles && roles.userCredentials && roles.userCredentials.userRoles ? roles.userCredentials.userRoles : [];
+            var ou = SessionStorageService.get('SELECTED_OU');
             var def = $q.defer();
             
             TCStorageService.currentStore.open().done(function(){
                 TCStorageService.currentStore.getAll('programs').done(function(prs){
                     var programs = [];
                     angular.forEach(prs, function(pr){
-                        if(pr.type === 1){
+                        if(pr.organisationUnits.hasOwnProperty( ou.id ) && userHasValidRole(pr, userRoles)){
                             programs.push(pr);
                         }
                     });
@@ -171,31 +261,37 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             return def.promise;            
         },
         getProgramsByOu: function(ou, selectedProgram){
+            var roles = SessionStorageService.get('USER_ROLES');
+            var userRoles = roles && roles.userCredentials && roles.userCredentials.userRoles ? roles.userCredentials.userRoles : [];
             var def = $q.defer();
             
             TCStorageService.currentStore.open().done(function(){
                 TCStorageService.currentStore.getAll('programs').done(function(prs){
                     var programs = [];
                     angular.forEach(prs, function(pr){                            
-                        if(pr.organisationUnits.hasOwnProperty(ou.id)){                                
+                        if(pr.organisationUnits.hasOwnProperty( ou.id ) && userHasValidRole(pr, userRoles)){
                             programs.push(pr);
                         }
                     });
+                    
                     if(programs.length === 0){
                         selectedProgram = null;
                     }
+                    else if(programs.length === 1){
+                        selectedProgram = programs[0];
+                    } 
                     else{
                         if(selectedProgram){
-                            angular.forEach(programs, function(pr){                            
-                                if(pr.id === selectedProgram.id){                                
-                                    selectedProgram = pr;
+                            var continueLoop = true;
+                            for(var i=0; i<programs.length && continueLoop; i++){
+                                if(programs[i].id === selectedProgram.id){                                
+                                    selectedProgram = programs[i];
+                                    continueLoop = false;
                                 }
-                            });
-                        }
-                        else{                        
-                            if(programs.length === 1){
-                                selectedProgram = programs[0];
-                            }                        
+                            }
+                            if(continueLoop){
+                                selectedProgram = null;
+                            }
                         }
                     }
                     
@@ -366,6 +462,42 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             return myOrgUnitsPromise;
         }
     }; 
+})
+
+/* service to deal with TEI registration and update */
+.service('RegistrationService', function(DialogService, TEIService, $q){
+    return {
+        registerOrUpdate: function(tei, optionSets, attributesById){
+            if(tei){
+                var def = $q.defer();
+                if(tei.trackedEntityInstance){
+                    TEIService.update(tei, optionSets, attributesById).then(function(response){
+                        def.resolve(response); 
+                    });
+                }
+                else{
+                    TEIService.register(tei, optionSets, attributesById).then(function(response){
+                        def.resolve(response); 
+                    });
+                }
+                return def.promise;
+            }            
+        },
+        processForm: function(existingTei, formTei, attributesById){
+            var tei = angular.copy(existingTei);
+            tei.attributes = [];
+            var formEmpty = true;
+            for(var k in attributesById){
+                if( formTei[k] ){
+                    var att = attributesById[k];
+                    tei.attributes.push({attribute: att.id, value: formTei[k], displayName: att.name, type: att.valueType});
+                    formEmpty = false;
+                }
+                delete tei[k];
+            }
+            return {tei: tei, formEmpty: formEmpty};
+        }
+    };
 })
 
 /* Service to deal with enrollment */
@@ -570,11 +702,13 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         },
         register: function(tei, optionSets, attributesById){
             var formattedTei = angular.copy(tei);
-            angular.forEach(formattedTei.attributes, function(att){                        
-                att.value = AttributesFactory.formatAttributeValue(att, attributesById, optionSets, 'API');                                                                
+            var attributes = [];
+            angular.forEach(formattedTei.attributes, function(att){ 
+                attributes.push({attribute: att.attribute, value: AttributesFactory.formatAttributeValue(att, attributesById, optionSets, 'API')});
             });
             
-            var promise = $http.put( '../api/trackedEntityInstances' , formattedTei ).then(function(response){                    
+            formattedTei.attributes = attributes;
+            var promise = $http.post( '../api/trackedEntityInstances' , formattedTei ).then(function(response){                    
                 return response.data;
             });            
             return promise;            
@@ -642,7 +776,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                         att.mandatory = pAttribute.mandatory;
                         if(pAttribute.displayInList){
                             att.displayInListNoProgram = true;
-                        }                    
+                        }
                         programAttributes.push(att);                
                     });
                     
@@ -775,7 +909,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 })
 
 /* factory for handling events */
-.factory('DHIS2EventFactory', function($http, $q) {   
+.factory('DHIS2EventFactory', function($http) {   
     
     return {     
         
@@ -786,7 +920,12 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             return promise;
         },
         getEventsByProgram: function(entity, program){   
-            var promise = $http.get( '../api/events.json?' + 'trackedEntityInstance=' + entity + '&program=' + program + '&paging=false').then(function(response){
+            
+            var url = '../api/events.json?' + 'trackedEntityInstance=' + entity + '&paging=false';            
+            if(program){
+                url = url + '&program=' + program;
+            }
+            var promise = $http.get( url ).then(function(response){
                 return response.data.events;
             });            
             return promise;
@@ -1142,6 +1281,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     this.optionSets = null;
     this.attributesById = null;
     this.ouLevels = null;
+    this.sortedTeiIds = [];
     
     this.set = function(currentSelection){  
         this.currentSelection = currentSelection;        
@@ -1176,6 +1316,13 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     };
     this.getOuLevels = function(){
         return this.ouLevels;
+    };
+    
+    this.setSortedTeiIds = function(sortedTeiIds){
+        this.sortedTeiIds = sortedTeiIds;
+    };
+    this.getSortedTeiIds = function(){
+        return this.sortedTeiIds;
     };
 })
 
@@ -1255,6 +1402,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         },
         generateGridColumns: function(attributes, ouMode){
             
+            var filterTypes = {}, filterText = {};
             var columns = attributes ? angular.copy(attributes) : [];
        
             //also add extra columns which are not part of attributes (orgunit for example)
@@ -1263,16 +1411,19 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 
             //generate grid column for the selected program/attributes
             angular.forEach(columns, function(column){
-                if(column.id === 'orgUnitName' && ouMode !== 'SELECTED'){
+                column.show = false;                
+                if( (column.id === 'orgUnitName' && ouMode !== 'SELECTED') ||
+                    column.displayInListNoProgram || 
+                    column.displayInList){
                     column.show = true;    
+                }                
+                column.showFilter = false;                
+                filterTypes[column.id] = column.valueType;
+                if(column.valueType === 'date' || column.valueType === 'number' ){
+                    filterText[column.id]= {};
                 }
-
-                if(column.displayInListNoProgram || column.displayInList){
-                    column.show = true;
-                }  
-                column.showFilter = false;
             });
-            return columns;  
+            return {columns: columns, filterTypes: filterTypes, filterText: filterText};
         },
         getData: function(rows, columns){
             var data = [];
@@ -1299,20 +1450,93 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     };
 })
 
-.service('EventUtils', function(DateUtils, CalendarService, OptionSetService, $filter, orderByFilter){
+.service('EventUtils', function(DateUtils, PeriodService, CalendarService, OptionSetService, $filter, orderByFilter){
+    
+    var getEventDueDate = function(eventsByStage, programStage, enrollment){       
+        
+        var referenceDate = enrollment.dateOfIncident ? enrollment.dateOfIncident : enrollment.dateOfEnrollment,
+            offset = programStage.minDaysFromStart,
+            calendarSetting = CalendarService.getSetting(),
+            dueDate;
+
+        if(programStage.generatedByEnrollmentDate){
+            referenceDate = enrollment.dateOfEnrollment;
+        }
+
+        if(programStage.repeatable){
+            var evs = [];                
+            angular.forEach(eventsByStage, function(ev){
+                if(ev.eventDate){
+                    evs.push(ev);
+                }
+            });
+
+            if(evs.length > 0){
+                evs = orderByFilter(evs, '-eventDate');                
+                if(programStage.periodType){
+                    
+                }
+                else{
+                    referenceDate = evs[0].eventDate;
+                    offset = programStage.standardInterval;
+                }
+            }                
+        }
+        dueDate = moment(referenceDate, calendarSetting.momentFormat).add('d', offset)._d;
+        dueDate = $filter('date')(dueDate, calendarSetting.keyDateFormat);        
+        return dueDate;
+    };
+    
+    var getEventDuePeriod = function(eventsByStage, programStage, enrollment){ 
+        
+        var evs = [];                
+        angular.forEach(eventsByStage, function(ev){
+            if(ev.eventDate){
+                evs.push(ev);
+            }
+        });
+
+        if(evs.length > 0){
+            evs = orderByFilter(evs, '-eventDate');
+        }
+        
+        var availabelPeriods = PeriodService.getPeriods(evs,programStage, enrollment).availablePeriods;
+        var periods = [];
+        for(var k in availabelPeriods){
+            if(availabelPeriods.hasOwnProperty(k)){
+                periods.push( availabelPeriods[k] );
+            }
+        }        
+        return periods;
+    };
+    
     return {
-        createDummyEvent: function(eventsPerStage, programStage, orgUnit, enrollment){
-            var today = DateUtils.getToday();    
-            var dueDate = this.getEventDueDate(eventsPerStage, programStage, enrollment);
-            var dummyEvent = {programStage: programStage.id, 
+        createDummyEvent: function(eventsPerStage, tei, program, programStage, orgUnit, enrollment){
+            var today = DateUtils.getToday();
+            var dummyEvent = {trackedEntityInstance: tei.trackedEntityInstance, 
+                              programStage: programStage.id, 
+                              program: program.id,
                               orgUnit: orgUnit.id,
                               orgUnitName: orgUnit.name,
-                              dueDate: dueDate,
-                              sortingDate: dueDate,
                               name: programStage.name,
                               reportDateDescription: programStage.reportDateDescription,
                               enrollmentStatus: 'ACTIVE',
+                              enrollment: enrollment.enrollment,
                               status: 'SCHEDULED'};
+                          
+            if(programStage.periodType){                
+                var periods = getEventDuePeriod(eventsPerStage, programStage, enrollment);
+                dummyEvent.dueDate = periods[0].endDate;
+                dummyEvent.periodName = periods[0].name;
+                dummyEvent.eventDate = dummyEvent.dueDate;
+                dummyEvent.periods = periods;
+            }
+            else{
+                dummyEvent.dueDate = getEventDueDate(eventsPerStage, programStage, enrollment);
+            }
+            
+            dummyEvent.sortingDate = dummyEvent.dueDate;
+            
             
             if(programStage.captureCoordinates){
                 dummyEvent.coordinate = {};
@@ -1350,34 +1574,44 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 }               
             }            
         },
-        getEventDueDate: function(eventsByStage, programStage, enrollment){            
-            var referenceDate = enrollment.dateOfIncident ? enrollment.dateOfIncident : enrollment.dateOfEnrollment,
-                offset = programStage.minDaysFromStart,
-                calendarSetting = CalendarService.getSetting();
-        
-            if(programStage.generatedByEnrollmentDate){
-                referenceDate = enrollment.dateOfEnrollment;
-            }
-            
-            if(programStage.repeatable){
-                var evs = [];                
-                angular.forEach(eventsByStage, function(ev){
-                    if(ev.eventDate){
-                        evs.push(ev);
+        autoGenerateEvents: function(teiId, program, orgUnit, enrollment){
+            var dhis2Events = {events: []};
+            if(teiId && program && orgUnit && enrollment){                
+                angular.forEach(program.programStages, function(stage){
+                    if(stage.autoGenerateEvent){
+                        var newEvent = {
+                                trackedEntityInstance: teiId,
+                                program: program.id,
+                                programStage: stage.id,
+                                orgUnit: orgUnit.id,
+                                enrollment: enrollment.enrollment,                                
+                                status: 'SCHEDULE'
+                            };
+                        if(stage.periodType){
+                            var periods = getEventDuePeriod(null, stage, enrollment);
+                            newEvent.dueDate = DateUtils.formatFromUserToApi(periods[0].endDate);;
+                            newEvent.eventDate = newEvent.dueDate;
+                        }
+                        else{
+                            newEvent.dueDate = DateUtils.formatFromUserToApi(getEventDueDate(null,stage, enrollment));
+                        }
+                        
+                        if(stage.openAfterEnrollment){
+                            if(stage.reportDateToUse === 'dateOfIncident'){
+                                newEvent.eventDate = DateUtils.formatFromUserToApi(enrollment.dateOfIncident);
+                            }
+                            else{
+                                newEvent.eventDate = DateUtils.formatFromUserToApi(enrollment.dateOfEnrollment);
+                            }
+                        }
+
+                        dhis2Events.events.push(newEvent);    
                     }
                 });
-                
-                if(evs.length > 0){
-                    evs = orderByFilter(evs, '-eventDate');
-                    referenceDate = evs[0].eventDate;
-                    offset = programStage.standardInterval;
-                }                
-            }            
+            }
             
-            var dueDate = moment(referenceDate, calendarSetting.momentFormat).add('d', offset)._d;
-            dueDate = $filter('date')(dueDate, calendarSetting.keyDateFormat); 
-            return dueDate;
-        },
+           return dhis2Events;
+        },        
         reconstruct: function(dhis2Event, programStage, optionSets){
             
             var e = {dataValues: [], 
@@ -1871,4 +2105,3 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         }
     };
 });
-

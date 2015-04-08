@@ -28,15 +28,34 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import static org.hisp.dhis.common.DimensionalObject.CATEGORYOPTIONCOMBO_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.DATAELEMENT_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.DATAELEMENT_OPERAND_ID;
+import static org.hisp.dhis.common.DimensionalObject.DATASET_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.DATA_COLLAPSED_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.DATA_X_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.DIMENSION_SEP;
+import static org.hisp.dhis.common.DimensionalObject.INDICATOR_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.STATIC_DIMS;
+import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_LEVEL;
+import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_ORGUNIT_GROUP;
+import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT;
+import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT_CHILDREN;
+import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT_GRANDCHILDREN;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
+import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.common.annotation.Scanned;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.DimensionalView;
@@ -58,17 +77,14 @@ import org.hisp.dhis.trackedentity.TrackedEntityAttributeDimension;
 import org.hisp.dhis.trackedentity.TrackedEntityDataElementDimension;
 import org.hisp.dhis.user.User;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.hisp.dhis.common.DimensionalObject.*;
-import static org.hisp.dhis.organisationunit.OrganisationUnit.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
  * This class contains associations to dimensional meta-data. Should typically
@@ -125,6 +141,8 @@ public abstract class BaseAnalyticalObject
 
     protected int topLimit;
 
+    protected AggregationType aggregationType;
+    
     // -------------------------------------------------------------------------
     // Analytical properties
     // -------------------------------------------------------------------------
@@ -258,19 +276,19 @@ public abstract class BaseAnalyticalObject
             items.addAll( organisationUnits );
             items.addAll( transientOrganisationUnits );
 
-            if ( userOrganisationUnit && user != null && user.hasDataViewOrganisationUnitWithFallback() )
+            if ( userOrganisationUnit && user != null && user.hasOrganisationUnit() )
             {
-                items.add( user.getDataViewOrganisationUnitWithFallback() );
+                items.add( user.getOrganisationUnit() );
             }
 
-            if ( userOrganisationUnitChildren && user != null && user.hasDataViewOrganisationUnitWithFallback() )
+            if ( userOrganisationUnitChildren && user != null && user.hasOrganisationUnit() )
             {
-                items.addAll( user.getDataViewOrganisationUnitWithFallback().getSortedChildren() );
+                items.addAll( user.getOrganisationUnit().getSortedChildren() );
             }
 
-            if ( userOrganisationUnitGrandChildren && user != null && user.hasDataViewOrganisationUnitWithFallback() )
+            if ( userOrganisationUnitGrandChildren && user != null && user.hasOrganisationUnit() )
             {
-                items.addAll( user.getDataViewOrganisationUnitWithFallback().getSortedGrandChildren() );
+                items.addAll( user.getOrganisationUnit().getSortedGrandChildren() );
             }
 
             if ( organisationUnitLevels != null && !organisationUnitLevels.isEmpty() && organisationUnitsAtLevel != null )
@@ -513,6 +531,10 @@ public abstract class BaseAnalyticalObject
             DataElementCategoryDimension categoryDimension = categoryDimensions.get( categoryDims.indexOf( dimension ) );
 
             objects.add( new BaseDimensionalObject( dimension, DimensionType.CATEGORY, categoryDimension.getItems() ) );
+        }
+        else if ( DATA_COLLAPSED_DIM_ID.contains( dimension ) )
+        {
+            objects.add( new BaseDimensionalObject( dimension, DimensionType.DATA_COLLAPSED, new ArrayList<NameableObject>() ) );
         }
         else if ( STATIC_DIMS.contains( dimension ) )
         {
@@ -766,10 +788,12 @@ public abstract class BaseAnalyticalObject
             if ( strategy.isReplace() )
             {
                 relatives = object.getRelatives();
+                aggregationType = object.getAggregationType();
             }
             else if ( strategy.isMerge() )
             {
                 relatives = object.getRelatives() == null ? relatives : object.getRelatives();
+                aggregationType = object.getAggregationType() == null ? aggregationType : object.getAggregationType();
             }
 
             indicators.addAll( object.getIndicators() );
@@ -959,6 +983,19 @@ public abstract class BaseAnalyticalObject
     public void setTopLimit( int topLimit )
     {
         this.topLimit = topLimit;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public AggregationType getAggregationType()
+    {
+        return aggregationType;
+    }
+
+    public void setAggregationType( AggregationType aggregationType )
+    {
+        this.aggregationType = aggregationType;
     }
 
     // -------------------------------------------------------------------------

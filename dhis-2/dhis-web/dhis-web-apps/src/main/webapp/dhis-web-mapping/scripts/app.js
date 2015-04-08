@@ -1864,11 +1864,22 @@ Ext.onReady( function() {
 			items = [],
 			item,
 			panel,
-			visibleLayer = window.google ? layers.googleStreets : layers.openStreetMap,
-			orderedLayers = gis.olmap.layers.reverse();
+			visibleLayer = function() {
+                return window.google ? layers.googleStreets : layers.openStreetMap;
+            }(),
+			orderedLayers = gis.olmap.layers.reverse(),
+            layerIsVisibleLayer;
 
-		for (var i = 0; i < orderedLayers.length; i++) {
+        // gm first
+        for (var i = 0; i < 2; i++) {
+            if (Ext.Array.contains(['googleStreets', 'googleHybrid'], orderedLayers[0].id)) {
+                orderedLayers.push(orderedLayers.shift());
+            }
+        }
+
+		for (var i = 0, layerIsVisibleLayer; i < orderedLayers.length; i++) {
 			layer = orderedLayers[i];
+            layerIsVisibleLayer = Ext.isObject(visibleLayer) && layer.id === visibleLayer.id;
 
 			item = Ext.create('Ext.ux.panel.LayerItemPanel', {
 				cls: 'gis-container-inner',
@@ -1876,17 +1887,19 @@ Ext.onReady( function() {
 				layer: layer,
 				text: layer.name,
 				imageUrl: 'images/' + layer.id + '_14.png',
-				value: layer.id === visibleLayer.id && window.google ? true : false,
+				value: layerIsVisibleLayer && window.google ? true : false,
 				opacity: layer.layerOpacity,
 				defaultOpacity: layer.layerOpacity,
-				numberFieldDisabled: layer.id !== visibleLayer.id
+				numberFieldDisabled: !layerIsVisibleLayer
 			});
 
 			layer.item = item;
 			items.push(layer.item);
 		}
 
-		visibleLayer.item.setValue(!!window.google);
+        if (visibleLayer) {
+            visibleLayer.item.setValue(!!window.google);
+        }
 
         panel = Ext.create('Ext.panel.Panel', {
 			renderTo: 'layerItems',
@@ -2330,7 +2343,7 @@ Ext.onReady( function() {
 				];
 
 				if (isPublicAccess) {
-					data.unshift({id: '-------', name: GIS.i18n.none});
+					data.unshift({id: '--------', name: GIS.i18n.none});
 				}
 
 				return data;
@@ -9282,7 +9295,7 @@ Ext.onReady( function() {
 				layout = gis.api.layout.Layout(JSON.parse(sessionStorage.getItem('dhis2'))[session]);
 
 				if (layout) {
-					GIS.core.MapLoader(gis).load([layout]);
+					GIS.core.MapLoader(gis, true).load([layout]);
 				}
 			}
 
@@ -9372,15 +9385,117 @@ Ext.onReady( function() {
 
 		fn = function() {
 			if (++callbacks === requests.length) {
+
+                // instance
 				gis = GIS.core.getInstance(init);
 
+                // ux
 				GIS.app.createExtensions();
 
+                // extend instance
 				GIS.app.extendInstance(gis);
 
+                // google maps
+                var gm_fn = function() {
+                    var googleStreets = new OpenLayers.Layer.Google('Google Streets', {
+                        numZoomLevels: 20,
+                        animationEnabled: true,
+                        layerType: gis.conf.finals.layer.type_base,
+                        layerOpacity: 1,
+                        setLayerOpacity: function(number) {
+                            if (number) {
+                                this.layerOpacity = parseFloat(number);
+                            }
+                            this.setOpacity(this.layerOpacity);
+                        }
+                    });
+                    googleStreets.id = 'googleStreets';
+                    gis.layer.googleStreets = googleStreets;
+
+                    var googleHybrid = new OpenLayers.Layer.Google('Google Hybrid', {
+                        type: google.maps.MapTypeId.HYBRID,
+                        numZoomLevels: 20,
+                        animationEnabled: true,
+                        layerType: gis.conf.finals.layer.type_base,
+                        layerOpacity: 1,
+                        setLayerOpacity: function(number) {
+                            if (number) {
+                                this.layerOpacity = parseFloat(number);
+                            }
+                            this.setOpacity(this.layerOpacity);
+                        }
+                    });
+                    googleHybrid.id = 'googleHybrid';
+                    gis.layer.googleHybrid = googleHybrid;
+
+                    gis.olmap.addLayers([googleStreets, googleHybrid]);
+                    gis.olmap.setBaseLayer(googleStreets);
+                };
+
+                if (GIS_GM.ready) {
+                    console.log('GM is ready -> skip queue, add layers, set as baselayer');
+                    gm_fn();
+                }
+                else {
+                    if (GIS_GM.offline) {
+                        console.log('Deactivate base layer');
+                        gis.olmap.baseLayer.setVisibility(false);
+                    }
+                    else {
+                        console.log('GM is not ready -> add to queue');
+                        GIS_GM.array.push({
+                            scope: this,
+                            fn: gm_fn
+                        });
+                    }
+                }
+
+                // viewport
 				gis.viewport = createViewport();
 			}
 		};
+
+        // dhis2
+        dhis2.util.namespace('dhis2.gis');
+
+        dhis2.gis.store = dhis2.gis.store || new dhis2.storage.Store({
+            name: 'dhis2',
+            adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
+            objectStores: ['optionSets']
+        });
+
+        dhis2.gis.store.open();
+
+        // inject google maps
+        GIS_GM = {
+            ready: false,
+            array: [],
+            offline: false
+        };
+
+        GIS_GM_fn = function() {
+            console.log("GM called back, queue length: " + GIS_GM.array.length);
+            GIS_GM.ready = true;
+
+            for (var i = 0, obj; i < GIS_GM.array.length; i++) {
+                obj = GIS_GM.array[i];
+
+                if (obj) {
+                    console.log("GM running queue obj " + (i + 1));
+                    obj.fn.call(obj.scope);
+                }
+            }
+        };
+
+        Ext.Loader.injectScriptElement('//maps.googleapis.com/maps/api/js?callback=GIS_GM_fn',
+            function() {
+                console.log("GM available (online)");
+            },
+            function() {
+                console.log("GM not available (offline)");
+                GIS_GM.offline = true;
+            }
+        );
 
 		// requests
 		Ext.Ajax.request({
@@ -9428,15 +9543,6 @@ Ext.onReady( function() {
                                         dateFormat = init.systemInfo.dateFormat;
 
                                         init.namePropertyUrl = namePropertyUrl;
-
-                                        // dhis2
-                                        dhis2.util.namespace('dhis2.gis');
-
-                                        dhis2.gis.store = dhis2.gis.store || new dhis2.storage.Store({
-                                            name: 'dhis2',
-                                            adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
-                                            objectStores: ['optionSets']
-                                        });
 
                                         // calendar
                                         (function() {
@@ -9647,58 +9753,86 @@ Ext.onReady( function() {
 
                                         // option sets
                                         requests.push({
-                                            url: contextPath + '/api/optionSets.json?fields=id,version&paging=false',
-                                            success: function(r) {
-                                                var optionSets = Ext.decode(r.responseText).optionSets || [],
-                                                    store = dhis2.gis.store,
-                                                    ids = [],
-                                                    url = '',
-                                                    callbacks = 0,
-                                                    checkOptionSet,
-                                                    updateStore;
+                                            url: '.',
+                                            disableCaching: false,
+                                            success: function() {
+                                                var store = dhis2.gis.store;
 
-                                                updateStore = function() {
-                                                    if (++callbacks === optionSets.length) {
-                                                        if (!ids.length) {
-                                                            fn();
-                                                            return;
-                                                        }
+                                                // check if idb has any option sets
+                                                store.count('optionSets').done( function(count) {
 
-                                                        for (var i = 0; i < ids.length; i++) {
-                                                            url += '&filter=id:eq:' + ids[i];
-                                                        }
-
+                                                    if (count === 0) {
                                                         Ext.Ajax.request({
-                                                            url: contextPath + '/api/optionSets.json?fields=id,name,version,options[code,name]&paging=false' + url,
+                                                            url: contextPath + '/api/optionSets.json?fields=id,name,version,options[code,name]&paging=false',
                                                             success: function(r) {
                                                                 var sets = Ext.decode(r.responseText).optionSets;
 
-                                                                store.setAll('optionSets', sets).done(fn);
+                                                                if (sets.length) {
+                                                                    store.setAll('optionSets', sets).done(fn);
+                                                                }
+                                                                else {
+                                                                    fn();
+                                                                }
                                                             }
                                                         });
                                                     }
-                                                };
+                                                    else {
+                                                        Ext.Ajax.request({
+                                                            url: contextPath + '/api/optionSets.json?fields=id,version&paging=false',
+                                                            success: function(r) {
+                                                                var optionSets = Ext.decode(r.responseText).optionSets || [],
+                                                                    ids = [],
+                                                                    url = '',
+                                                                    callbacks = 0,
+                                                                    checkOptionSet,
+                                                                    updateStore;
 
-                                                registerOptionSet = function(optionSet) {
-                                                    store.get('optionSets', optionSet.id).done( function(obj) {
-                                                        if (!Ext.isObject(obj) || obj.version !== optionSet.version) {
-                                                            ids.push(optionSet.id);
-                                                        }
+                                                                updateStore = function() {
+                                                                    if (++callbacks === optionSets.length) {
+                                                                        if (!ids.length) {
+                                                                            fn();
+                                                                            return;
+                                                                        }
 
-                                                        updateStore();
-                                                    });
-                                                };
+                                                                        for (var i = 0; i < ids.length; i++) {
+                                                                            url += '&filter=id:eq:' + ids[i];
+                                                                        }
 
-                                                if (optionSets.length) {
-                                                    store.open().done( function() {
-                                                        for (var i = 0; i < optionSets.length; i++) {
-                                                            registerOptionSet(optionSets[i]);
-                                                        }
-                                                    });
-                                                }
-                                                else {
-                                                    fn();
-                                                }
+                                                                        Ext.Ajax.request({
+                                                                            url: contextPath + '/api/optionSets.json?fields=id,name,version,options[code,name]&paging=false' + url,
+                                                                            success: function(r) {
+                                                                                var sets = Ext.decode(r.responseText).optionSets;
+
+                                                                                store.setAll('optionSets', sets).done(fn);
+                                                                            }
+                                                                        });
+                                                                    }
+                                                                };
+
+                                                                registerOptionSet = function(optionSet) {
+                                                                    store.get('optionSets', optionSet.id).done( function(obj) {
+                                                                        if (!Ext.isObject(obj) || obj.version !== optionSet.version) {
+                                                                            ids.push(optionSet.id);
+                                                                        }
+
+                                                                        updateStore();
+                                                                    });
+                                                                };
+
+                                                                if (optionSets.length) {
+                                                                    store.open().done( function() {
+                                                                        for (var i = 0; i < optionSets.length; i++) {
+                                                                            registerOptionSet(optionSets[i]);
+                                                                        }
+                                                                    });
+                                                                }
+                                                                else {
+                                                                    fn();
+                                                                }
+                                                            }
+                                                        });
+                                                    }
+                                                });
                                             }
                                         });
 

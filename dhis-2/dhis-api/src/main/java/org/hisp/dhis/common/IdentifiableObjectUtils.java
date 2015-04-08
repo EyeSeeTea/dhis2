@@ -28,14 +28,6 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.calendar.Calendar;
-import org.hisp.dhis.calendar.DateTimeUnit;
-import org.hisp.dhis.dataelement.DataElementCategory;
-import org.hisp.dhis.dataelement.DataElementCategoryCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryOption;
-import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodType;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,6 +38,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+
+import org.hisp.dhis.calendar.Calendar;
+import org.hisp.dhis.calendar.DateTimeUnit;
+import org.hisp.dhis.dataelement.DataElementCategory;
+import org.hisp.dhis.dataelement.DataElementCategoryCombo;
+import org.hisp.dhis.dataelement.DataElementCategoryOption;
+import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.PeriodType;
 
 /**
  * @author Lars Helge Overland
@@ -371,6 +371,28 @@ public class IdentifiableObjectUtils
             for ( IdentifiableObject object : objects )
             {
                 map.put( object.getUid(), object.getDisplayName() );
+            }
+        }
+
+        return map;
+    }
+
+    /**
+     * Returns a mapping between the uid and the name of the given identifiable
+     * objects.
+     *
+     * @param objects the identifiable objects.
+     * @return mapping between the uid and the name of the given objects.
+     */
+    public static <T extends IdentifiableObject> Map<String, T> getUidObjectMap( Collection<T> objects )
+    {
+        Map<String, T> map = new HashMap<>();
+
+        if ( objects != null )
+        {
+            for ( T object : objects )
+            {
+                map.put( object.getUid(), object );
             }
         }
 

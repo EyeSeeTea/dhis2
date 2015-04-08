@@ -29,16 +29,18 @@ package org.hisp.dhis.schema;
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.NameableObject;
 import org.springframework.core.Ordered;
 
 import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -196,9 +198,19 @@ public class Property implements Ordered, Klass
     private String cascade;
 
     /**
-     * Is collection many-to-many.
+     * Is property many-to-many.
      */
     private boolean manyToMany;
+
+    /**
+     * Is property one-to-one.
+     */
+    private boolean oneToOne;
+
+    /**
+     * Is property many-to-one.
+     */
+    private boolean manyToOne;
 
     /**
      * The hibernate role of the owning side.
@@ -209,6 +221,11 @@ public class Property implements Ordered, Klass
      * The hibernate role of the inverse side (if many-to-many).
      */
     private String inverseRole;
+
+    /**
+     * If property type is enum, this is the list of valid options.
+     */
+    private List<String> constants;
 
     public Property()
     {
@@ -563,6 +580,30 @@ public class Property implements Ordered, Klass
 
     @JsonProperty
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isOneToOne()
+    {
+        return oneToOne;
+    }
+
+    public void setOneToOne( boolean oneToOne )
+    {
+        this.oneToOne = oneToOne;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isManyToOne()
+    {
+        return manyToOne;
+    }
+
+    public void setManyToOne( boolean manyToOne )
+    {
+        this.manyToOne = manyToOne;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getOwningRole()
     {
         return owningRole;
@@ -585,9 +626,27 @@ public class Property implements Ordered, Klass
         this.inverseRole = inverseRole;
     }
 
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "constants", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "constant", namespace = DxfNamespaces.DXF_2_0 )
+    public List<String> getConstants()
+    {
+        return constants;
+    }
+
+    public void setConstants( List<String> constants )
+    {
+        this.constants = constants;
+    }
+
     public String key()
     {
         return isCollection() ? collectionName : name;
+    }
+
+    public boolean is( PropertyType propertyType )
+    {
+        return propertyType != null && propertyType.equals( this.propertyType );
     }
 
     @Override
@@ -599,8 +658,9 @@ public class Property implements Ordered, Klass
     @Override
     public int hashCode()
     {
-        return Objects.hashCode( klass, itemKlass, getterMethod, name, fieldName, persisted, collectionName, description,
-            namespace, attribute, simple, collection, identifiableObject, nameableObject );
+        return Objects.hash( klass, propertyType, itemKlass, itemPropertyType, getterMethod, setterMethod, name, fieldName, persisted, collectionName,
+            collectionWrapping, description, namespace, attribute, simple, collection, owner, identifiableObject, nameableObject, readable, writable,
+            unique, required, length, max, min, cascade, manyToMany, oneToOne, manyToOne, owningRole, inverseRole, constants );
     }
 
     @Override
@@ -610,6 +670,7 @@ public class Property implements Ordered, Klass
         {
             return true;
         }
+
         if ( obj == null || getClass() != obj.getClass() )
         {
             return false;
@@ -617,15 +678,39 @@ public class Property implements Ordered, Klass
 
         final Property other = (Property) obj;
 
-        return Objects.equal( this.klass, other.klass ) && Objects.equal( this.itemKlass, other.itemKlass )
-            && Objects.equal( this.propertyType, other.propertyType ) && Objects.equal( this.itemPropertyType, other.itemPropertyType )
-            && Objects.equal( this.getterMethod, other.getterMethod ) && Objects.equal( this.setterMethod, other.setterMethod )
-            && Objects.equal( this.name, other.name ) && Objects.equal( this.fieldName, other.fieldName )
-            && Objects.equal( this.persisted, other.persisted ) && Objects.equal( this.collectionName, other.collectionName )
-            && Objects.equal( this.description, other.description ) && Objects.equal( this.namespace, other.namespace )
-            && Objects.equal( this.attribute, other.attribute ) && Objects.equal( this.simple, other.simple )
-            && Objects.equal( this.collection, other.collection ) && Objects.equal( this.identifiableObject, other.identifiableObject )
-            && Objects.equal( this.nameableObject, other.nameableObject );
+        return Objects.equals( this.klass, other.klass )
+            && Objects.equals( this.propertyType, other.propertyType )
+            && Objects.equals( this.itemKlass, other.itemKlass )
+            && Objects.equals( this.itemPropertyType, other.itemPropertyType )
+            && Objects.equals( this.getterMethod, other.getterMethod )
+            && Objects.equals( this.setterMethod, other.setterMethod )
+            && Objects.equals( this.name, other.name )
+            && Objects.equals( this.fieldName, other.fieldName )
+            && Objects.equals( this.persisted, other.persisted )
+            && Objects.equals( this.collectionName, other.collectionName )
+            && Objects.equals( this.collectionWrapping, other.collectionWrapping )
+            && Objects.equals( this.description, other.description )
+            && Objects.equals( this.namespace, other.namespace )
+            && Objects.equals( this.attribute, other.attribute )
+            && Objects.equals( this.simple, other.simple )
+            && Objects.equals( this.collection, other.collection )
+            && Objects.equals( this.owner, other.owner )
+            && Objects.equals( this.identifiableObject, other.identifiableObject )
+            && Objects.equals( this.nameableObject, other.nameableObject )
+            && Objects.equals( this.readable, other.readable )
+            && Objects.equals( this.writable, other.writable )
+            && Objects.equals( this.unique, other.unique )
+            && Objects.equals( this.required, other.required )
+            && Objects.equals( this.length, other.length )
+            && Objects.equals( this.max, other.max )
+            && Objects.equals( this.min, other.min )
+            && Objects.equals( this.cascade, other.cascade )
+            && Objects.equals( this.manyToMany, other.manyToMany )
+            && Objects.equals( this.oneToOne, other.oneToOne )
+            && Objects.equals( this.manyToOne, other.manyToOne )
+            && Objects.equals( this.owningRole, other.owningRole )
+            && Objects.equals( this.inverseRole, other.inverseRole )
+            && Objects.equals( this.constants, other.constants );
     }
 
     @Override
@@ -637,17 +722,34 @@ public class Property implements Ordered, Klass
             .add( "itemKlass", itemKlass )
             .add( "itemPropertyType", itemPropertyType )
             .add( "getterMethod", getterMethod )
+            .add( "setterMethod", setterMethod )
             .add( "name", name )
             .add( "fieldName", fieldName )
             .add( "persisted", persisted )
             .add( "collectionName", collectionName )
+            .add( "collectionWrapping", collectionWrapping )
             .add( "description", description )
             .add( "namespace", namespace )
             .add( "attribute", attribute )
             .add( "simple", simple )
             .add( "collection", collection )
+            .add( "owner", owner )
             .add( "identifiableObject", identifiableObject )
             .add( "nameableObject", nameableObject )
+            .add( "readable", readable )
+            .add( "writable", writable )
+            .add( "unique", unique )
+            .add( "required", required )
+            .add( "length", length )
+            .add( "max", max )
+            .add( "min", min )
+            .add( "cascade", cascade )
+            .add( "manyToMany", manyToMany )
+            .add( "oneToOne", oneToOne )
+            .add( "manyToOne", manyToOne )
+            .add( "owningRole", owningRole )
+            .add( "inverseRole", inverseRole )
+            .add( "constants", constants )
             .toString();
     }
 }

@@ -28,9 +28,8 @@ package org.hisp.dhis.trackedentity.startup;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.program.ProgramExpression.OBJECT_PROGRAM_STAGE_DATAELEMENT;
 import static org.hisp.dhis.program.ProgramExpression.OBJECT_PROGRAM_STAGE;
-
+import static org.hisp.dhis.program.ProgramExpression.OBJECT_PROGRAM_STAGE_DATAELEMENT;
 import static org.hisp.dhis.program.ProgramExpression.SEPARATOR_ID;
 import static org.hisp.dhis.program.ProgramExpression.SEPARATOR_OBJECT;
 
@@ -58,8 +57,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Chau Thu Tran
- * 
- * @version TableAlteror.java Sep 9, 2010 10:22:29 PM
  */
 public class TableAlteror
     extends AbstractStartupRoutine
@@ -318,6 +315,9 @@ public class TableAlteror
         executeSql( "update userroleauthorities set authority='F_ADD_TRACKED_ENTITY_FORM' where authority='F_TRACKED_ENTITY_FORM_ADD'" );
 
         updateProgramExpressionUid();
+        
+        // TODO fix
+        // executeSql( "DROP TABLE programstage_programindicators" );
     }
 
     // -------------------------------------------------------------------------
@@ -530,72 +530,69 @@ public class TableAlteror
             holder.close();
         }
     }
-    
+
     private void updateProgramExpressionUid()
     {
-		String regExp = "\\[(" + OBJECT_PROGRAM_STAGE_DATAELEMENT + "|"
-				+ OBJECT_PROGRAM_STAGE + ")" + SEPARATOR_OBJECT + "([0-9]+["
-				+ SEPARATOR_ID + "[a-zA-z0-9]+]*)\\]";
-		
-		StatementHolder holder = statementManager.getHolder();
+        String regExp = "\\[(" + OBJECT_PROGRAM_STAGE_DATAELEMENT + "|" + OBJECT_PROGRAM_STAGE + ")" + SEPARATOR_OBJECT
+            + "([0-9]+[" + SEPARATOR_ID + "[a-zA-z0-9]+]*)\\]";
 
-         try
-         {
-             Statement statement = holder.getStatement();
+        StatementHolder holder = statementManager.getHolder();
 
-             ResultSet resultSet = statement
-                 .executeQuery( "select programexpressionid, expression from programexpression" );
+        try
+        {
+            Statement statement = holder.getStatement();
 
-             while ( resultSet.next() )
-             {
-            	 int id = resultSet.getInt( "programexpressionid" );
-                 String expression = resultSet.getString( "expression" );
-                 String result = expression;
-                 
-                 Pattern pattern = Pattern.compile( regExp );
-                 Matcher matcher = pattern.matcher( expression );
-                 while ( matcher.find() )
-                 {
-                	 String group = matcher.group();
-                 	 String key = matcher.group(1);
-                	 if( key.equals( OBJECT_PROGRAM_STAGE_DATAELEMENT) )
-                	 {
-	                	 String[] ids = matcher.group(2).split( SEPARATOR_ID );
+            ResultSet resultSet = statement
+                .executeQuery( "select programexpressionid, expression from programexpression" );
 
-	                     int programStageId = Integer.parseInt( ids[0] );
-	                	 int deId = Integer.parseInt( ids[1] );
-	                     
-	                	 String programStageUid = programStageService.getProgramStage(programStageId).getUid();
-	                	 String deUid = dataElementService.getDataElement(deId).getUid();
+            while ( resultSet.next() )
+            {
+                int id = resultSet.getInt( "programexpressionid" );
+                String expression = resultSet.getString( "expression" );
+                String result = expression;
 
-	                	 result = result.replace(group, "[" + ProgramExpression.OBJECT_PROGRAM_STAGE_DATAELEMENT + ProgramExpression.SEPARATOR_OBJECT
-	                             + programStageUid + "." + deUid + "]" );
-                	 }
-                	 else
-                	 {
-                		String[] ids = matcher.group(2).split( SEPARATOR_ID );
- 	                    int programStageId = Integer.parseInt( ids[0] );
- 	                    String programStageUid = programStageService.getProgramStage(programStageId).getUid();
-	                	
- 	                   result = result.replace( group ,
-	                             "[" + OBJECT_PROGRAM_STAGE + ProgramExpression.SEPARATOR_OBJECT
-	                             + programStageUid +  "." + ids[1] + "]" );
-                	 }
-                 }
-                 
-                 executeSql( "UPDATE programexpression SET expression='" + result + "' WHERE programexpressionid=" + id );
-             }
-         }
-         catch ( Exception ex )
-         {
-             log.debug( ex );
-         }
-         finally
-         {
-             holder.close();
-         }
+                Pattern pattern = Pattern.compile( regExp );
+                Matcher matcher = pattern.matcher( expression );
+                while ( matcher.find() )
+                {
+                    String group = matcher.group();
+                    String key = matcher.group( 1 );
+                    if ( key.equals( OBJECT_PROGRAM_STAGE_DATAELEMENT ) )
+                    {
+                        String[] ids = matcher.group( 2 ).split( SEPARATOR_ID );
+
+                        int programStageId = Integer.parseInt( ids[0] );
+                        int deId = Integer.parseInt( ids[1] );
+
+                        String programStageUid = programStageService.getProgramStage( programStageId ).getUid();
+                        String deUid = dataElementService.getDataElement( deId ).getUid();
+
+                        result = result.replace( group, "[" + ProgramExpression.OBJECT_PROGRAM_STAGE_DATAELEMENT
+                            + ProgramExpression.SEPARATOR_OBJECT + programStageUid + "." + deUid + "]" );
+                    }
+                    else
+                    {
+                        String[] ids = matcher.group( 2 ).split( SEPARATOR_ID );
+                        int programStageId = Integer.parseInt( ids[0] );
+                        String programStageUid = programStageService.getProgramStage( programStageId ).getUid();
+
+                        result = result.replace( group, "[" + OBJECT_PROGRAM_STAGE + ProgramExpression.SEPARATOR_OBJECT
+                            + programStageUid + "." + ids[1] + "]" );
+                    }
+                }
+
+                executeSql( "UPDATE programexpression SET expression='" + result + "' WHERE programexpressionid=" + id );
+            }
+        }
+        catch ( Exception ex )
+        {
+            log.debug( ex );
+        }
+        finally
+        {
+            holder.close();
+        }
     }
-    
     
     private int executeSql( String sql )
     {

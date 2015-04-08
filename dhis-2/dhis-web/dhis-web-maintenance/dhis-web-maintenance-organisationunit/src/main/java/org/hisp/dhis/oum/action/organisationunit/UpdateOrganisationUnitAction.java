@@ -28,7 +28,6 @@ package org.hisp.dhis.oum.action.organisationunit;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.system.util.TextUtils.nullIfEmpty;
 import static org.hisp.dhis.system.util.ValidationUtils.coordinateIsValid;
 
 import java.util.ArrayList;
@@ -38,15 +37,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.calendar.CalendarService;
 import org.hisp.dhis.calendar.DateTimeUnit;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.system.util.AttributeUtils;
@@ -65,41 +63,14 @@ public class UpdateOrganisationUnitAction
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
     private OrganisationUnitService organisationUnitService;
 
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
-    {
-        this.organisationUnitService = organisationUnitService;
-    }
-
-    private OrganisationUnitGroupService organisationUnitGroupService;
-
-    public void setOrganisationUnitGroupService( OrganisationUnitGroupService organisationUnitGroupService )
-    {
-        this.organisationUnitGroupService = organisationUnitGroupService;
-    }
-
-    private DataSetService dataSetService;
-
-    public void setDataSetService( DataSetService dataSetService )
-    {
-        this.dataSetService = dataSetService;
-    }
-
+    @Autowired
     private AttributeService attributeService;
 
-    public void setAttributeService( AttributeService attributeService )
-    {
-        this.attributeService = attributeService;
-    }
-
-    private IdentifiableObjectManager manager;
-
     @Autowired
-    public void setManager( IdentifiableObjectManager manager )
-    {
-        this.manager = manager;
-    }
+    private IdentifiableObjectManager manager;
 
     @Autowired
     private CalendarService calendarService;
@@ -254,18 +225,6 @@ public class UpdateOrganisationUnitAction
     public String execute()
         throws Exception
     {
-        code = nullIfEmpty( code );
-        comment = nullIfEmpty( comment );
-        description = nullIfEmpty( description );
-        longitude = nullIfEmpty( longitude );
-        latitude = nullIfEmpty( latitude );
-        url = nullIfEmpty( url );
-
-        contactPerson = nullIfEmpty( contactPerson );
-        address = nullIfEmpty( address );
-        email = nullIfEmpty( email );
-        phoneNumber = nullIfEmpty( phoneNumber );
-
         DateTimeUnit isoOpeningDate = calendarService.getSystemCalendar().toIso( openingDate );
         Date oDate = isoOpeningDate.toJdkCalendar().getTime();
 
@@ -288,18 +247,18 @@ public class UpdateOrganisationUnitAction
             organisationUnitService.updateVersion();
         }
 
-        organisationUnit.setName( name );
-        organisationUnit.setShortName( shortName );
-        organisationUnit.setDescription( description );
-        organisationUnit.setCode( code );
+        organisationUnit.setName( StringUtils.trimToNull( name ) );
+        organisationUnit.setShortName( StringUtils.trimToNull( shortName ) );
+        organisationUnit.setDescription( StringUtils.trimToNull( description ) );
+        organisationUnit.setCode( StringUtils.trimToNull( code ) );
         organisationUnit.setOpeningDate( oDate );
         organisationUnit.setClosedDate( cDate );
-        organisationUnit.setComment( comment );
-        organisationUnit.setUrl( url );
-        organisationUnit.setContactPerson( contactPerson );
-        organisationUnit.setAddress( address );
-        organisationUnit.setEmail( email );
-        organisationUnit.setPhoneNumber( phoneNumber );
+        organisationUnit.setComment( StringUtils.trimToNull( comment ) );
+        organisationUnit.setUrl( StringUtils.trimToNull( url ) );
+        organisationUnit.setContactPerson( StringUtils.trimToNull( contactPerson ) );
+        organisationUnit.setAddress( StringUtils.trimToNull( address ) );
+        organisationUnit.setEmail( StringUtils.trimToNull( email ) );
+        organisationUnit.setPhoneNumber( StringUtils.trimToNull( phoneNumber ) );
 
         if ( jsonAttributeValues != null )
         {
@@ -334,7 +293,7 @@ public class UpdateOrganisationUnitAction
 
         for ( String id : dataSets )
         {
-            sets.add( dataSetService.getDataSet( Integer.parseInt( id ) ) );
+            sets.add( manager.getNoAcl( DataSet.class, Integer.parseInt( id ) ) );
         }
 
         organisationUnit.updateDataSets( sets );
@@ -343,12 +302,12 @@ public class UpdateOrganisationUnitAction
 
         for ( int i = 0; i < orgUnitGroupSets.size(); i++ )
         {
-            OrganisationUnitGroupSet groupSet = organisationUnitGroupService.getOrganisationUnitGroupSet( Integer
+            OrganisationUnitGroupSet groupSet = manager.getNoAcl( OrganisationUnitGroupSet.class, Integer
                 .parseInt( orgUnitGroupSets.get( i ) ) );
 
             OrganisationUnitGroup oldGroup = groupSet.getGroup( organisationUnit );
 
-            OrganisationUnitGroup newGroup = organisationUnitGroupService.getOrganisationUnitGroup( Integer
+            OrganisationUnitGroup newGroup = manager.getNoAcl( OrganisationUnitGroup.class, Integer
                 .parseInt( orgUnitGroups.get( i ) ) );
 
             if ( oldGroup != null && oldGroup.getMembers().remove( organisationUnit ) )

@@ -28,27 +28,32 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeStrategy;
+import org.hisp.dhis.common.adapter.JacksonPeriodTypeDeserializer;
+import org.hisp.dhis.common.adapter.JacksonPeriodTypeSerializer;
 import org.hisp.dhis.common.annotation.Scanned;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
+import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataentryform.DataEntryForm;
+import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.schema.annotation.PropertyRange;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceReminder;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
  * @author Abyot Asalefew
@@ -76,9 +81,8 @@ public class ProgramStage
 
     private Program program;
 
+    @Scanned
     private Set<ProgramStageDataElement> programStageDataElements = new HashSet<>();
-
-    private List<ProgramIndicator> programIndicators = new ArrayList<>();
 
     @Scanned
     private Set<ProgramStageSection> programStageSections = new HashSet<>();
@@ -119,6 +123,13 @@ public class ProgramStage
 
     private Integer sortOrder;
 
+    private PeriodType periodType;
+
+    /**
+     * Set of the dynamic attributes values that belong to this data element.
+     */
+    private Set<AttributeValue> attributeValues = new HashSet<>();
+
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -133,6 +144,43 @@ public class ProgramStage
         setAutoFields();
         this.name = name;
         this.program = program;
+    }
+
+    // -------------------------------------------------------------------------
+    // Logic
+    // -------------------------------------------------------------------------
+
+    public Set<DataElement> getAllDataElements()
+    {
+        Set<DataElement> dataElements = new HashSet<>();
+
+        for ( ProgramStageDataElement element : programStageDataElements )
+        {
+            if ( element.getDataElement() != null )
+            {
+                dataElements.add( element.getDataElement() );
+            }
+        }
+
+        return dataElements;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getDataEntryType()
+    {
+        if ( dataEntryForm != null )
+        {
+            return TYPE_CUSTOM;
+        }
+
+        if ( programStageSections.size() > 0 )
+        {
+            return TYPE_SECTION;
+        }
+
+        return TYPE_DEFAULT;
     }
 
     // -------------------------------------------------------------------------
@@ -288,6 +336,7 @@ public class ProgramStage
 
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     @JacksonXmlElementWrapper( localName = "programStageDataElements", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "programStageDataElement", namespace = DxfNamespaces.DXF_2_0 )
     public Set<ProgramStageDataElement> getProgramStageDataElements()
@@ -356,24 +405,6 @@ public class ProgramStage
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String getDataEntryType()
-    {
-        if ( dataEntryForm != null )
-        {
-            return TYPE_CUSTOM;
-        }
-
-        if ( programStageSections.size() > 0 )
-        {
-            return TYPE_SECTION;
-        }
-
-        return TYPE_DEFAULT;
-    }
-
-    @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getDefaultTemplateMessage()
     {
         return "Dear {person-name}, please come to your appointment on {program-stage-name} at {due-date}";
@@ -433,20 +464,6 @@ public class ProgramStage
 
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlElementWrapper( localName = "programIndicators", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "programIndicator", namespace = DxfNamespaces.DXF_2_0 )
-    public List<ProgramIndicator> getProgramIndicators()
-    {
-        return programIndicators;
-    }
-
-    public void setProgramIndicators( List<ProgramIndicator> programIndicators )
-    {
-        this.programIndicators = programIndicators;
-    }
-
-    @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Boolean getPreGenerateUID()
     {
@@ -469,6 +486,35 @@ public class ProgramStage
     public void setSortOrder( Integer sortOrder )
     {
         this.sortOrder = sortOrder;
+    }
+
+    @JsonProperty
+    @JsonSerialize( using = JacksonPeriodTypeSerializer.class )
+    @JsonDeserialize( using = JacksonPeriodTypeDeserializer.class )
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public PeriodType getPeriodType()
+    {
+        return periodType;
+    }
+
+    public void setPeriodType( PeriodType periodType )
+    {
+        this.periodType = periodType;
+    }
+
+    @JsonProperty( "attributeValues" )
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlElementWrapper( localName = "attributeValues", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "attributeValue", namespace = DxfNamespaces.DXF_2_0 )
+    public Set<AttributeValue> getAttributeValues()
+    {
+        return attributeValues;
+    }
+
+    public void setAttributeValues( Set<AttributeValue> attributeValues )
+    {
+        this.attributeValues = attributeValues;
     }
 
     @Override
@@ -530,6 +576,9 @@ public class ProgramStage
 
             reminders.clear();
             reminders.addAll( programStage.getReminders() );
+
+            attributeValues.clear();
+            attributeValues.addAll( programStage.getAttributeValues() );
         }
     }
 }

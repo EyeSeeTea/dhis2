@@ -28,12 +28,16 @@ package org.hisp.dhis.trackedentity.action.programstage;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
+import org.hisp.dhis.program.ProgramIndicator;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageDataElement;
 import org.hisp.dhis.program.ProgramStageSection;
 import org.hisp.dhis.program.ProgramStageService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
 
@@ -49,12 +53,8 @@ public class ShowAddProgramStageSectionAction
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
     private ProgramStageService programStageService;
-
-    public void setProgramStageService( ProgramStageService programStageService )
-    {
-        this.programStageService = programStageService;
-    }
 
     // -------------------------------------------------------------------------
     // Input/Output
@@ -81,13 +81,20 @@ public class ShowAddProgramStageSectionAction
         return section;
     }
 
-    private Collection<ProgramStageDataElement> availableDataElements;
+    private List<ProgramStageDataElement> availableDataElements;
 
-    public Collection<ProgramStageDataElement> getAvailableDataElements()
+    public List<ProgramStageDataElement> getAvailableDataElements()
     {
         return availableDataElements;
     }
 
+    private List<ProgramIndicator> availableProgramIndicators;
+
+    public List<ProgramIndicator> getAvailableProgramIndicators()
+    {
+        return availableProgramIndicators;
+    }
+    
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -98,13 +105,20 @@ public class ShowAddProgramStageSectionAction
     {
         programStage = programStageService.getProgramStage( programStageId );
 
-        availableDataElements = programStage.getProgramStageDataElements();
-
-        for ( ProgramStageSection section : programStage.getProgramStageSections() )
+        if ( programStage != null && programStage.getProgram() != null )
         {
-            availableDataElements.removeAll( section.getProgramStageDataElements() );
+            availableDataElements = new ArrayList<>( programStage.getProgramStageDataElements() );            
+            availableProgramIndicators = new ArrayList<>( programStage.getProgram().getProgramIndicators() );
+        
+            for ( ProgramStageSection section : programStage.getProgramStageSections() )
+            {
+                availableDataElements.removeAll( section.getProgramStageDataElements() );
+            }
+            
+            Collections.sort( availableDataElements );
+            Collections.sort( availableProgramIndicators );
         }
-
+        
         return SUCCESS;
     }
 }

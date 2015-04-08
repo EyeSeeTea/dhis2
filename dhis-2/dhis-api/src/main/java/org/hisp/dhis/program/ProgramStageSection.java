@@ -38,6 +38,7 @@ import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeStrategy;
+import org.hisp.dhis.common.annotation.Scanned;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
 
@@ -55,7 +56,11 @@ public class ProgramStageSection
 
     private ProgramStage programStage;
 
+    @Scanned
     private List<ProgramStageDataElement> programStageDataElements = new ArrayList<>();
+
+    @Scanned
+    private List<ProgramIndicator> programIndicators = new ArrayList<>();
 
     private Integer sortOrder;
 
@@ -117,6 +122,20 @@ public class ProgramStageSection
 
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlElementWrapper( localName = "programIndicators", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "programIndicator", namespace = DxfNamespaces.DXF_2_0 )
+    public List<ProgramIndicator> getProgramIndicators()
+    {
+        return programIndicators;
+    }
+
+    public void setProgramIndicators( List<ProgramIndicator> programIndicators )
+    {
+        this.programIndicators = programIndicators;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Integer getSortOrder()
     {
@@ -150,6 +169,9 @@ public class ProgramStageSection
 
             programStageDataElements.clear();
             programStageDataElements.addAll( programStageSection.getProgramStageDataElements() );
+
+            programIndicators.clear();
+            programIndicators.addAll( programStageSection.getProgramIndicators() );
         }
     }
 }
