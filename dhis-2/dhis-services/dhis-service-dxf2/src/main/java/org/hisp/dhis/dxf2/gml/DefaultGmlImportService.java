@@ -30,6 +30,9 @@ package org.hisp.dhis.dxf2.gml;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.hisp.dhis.common.IdentifiableProperty;
 import org.hisp.dhis.common.MergeStrategy;
 import org.hisp.dhis.dxf2.common.ImportOptions;
 import org.hisp.dhis.dxf2.metadata.ImportService;
@@ -38,6 +41,7 @@ import org.hisp.dhis.dxf2.render.RenderService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.scheduling.TaskId;
+import org.hisp.dhis.util.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,8 +55,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Halvdan Hoem Grelland
@@ -91,16 +98,18 @@ public class DefaultGmlImportService
 
         List<OrganisationUnit> gmlOrgUnits = metaData.getOrganisationUnits();
 
-        Map<String, OrganisationUnit> nameMap = Maps.uniqueIndex( gmlOrgUnits,
+        Map<String, OrganisationUnit> uidMap = Maps.uniqueIndex( gmlOrgUnits,
             new Function<OrganisationUnit, String>()
             {
                 @Override
                 public String apply( OrganisationUnit organisationUnit )
                 {
-                    return organisationUnit.getName();
+                    return organisationUnit.getUid();
                 }
             }
         );
+
+        gmlOrgUnits.removeAll( uidMap.values() );
 
         Map<String, OrganisationUnit> codeMap = Maps.uniqueIndex( gmlOrgUnits,
             new Function<OrganisationUnit, String>()
@@ -113,41 +122,50 @@ public class DefaultGmlImportService
             }
         );
 
-        Map<String, OrganisationUnit> uidMap = Maps.uniqueIndex( gmlOrgUnits,
+        gmlOrgUnits.removeAll( codeMap.values() );
+
+        Map<String, OrganisationUnit> nameMap = Maps.uniqueIndex( gmlOrgUnits,
             new Function<OrganisationUnit, String>()
             {
                 @Override
                 public String apply( OrganisationUnit organisationUnit )
                 {
-                    return organisationUnit.getUid();
+                    return organisationUnit.getName();
                 }
             }
         );
 
-        // Fetch persisted OrganisationUnits and merge imported GML properties
+        Set<OrganisationUnit> persistedOrgUnits = new HashSet<>();
 
-        Collection<OrganisationUnit> persistedOrgUnits;
+        Collection<OrganisationUnit> persistedUidOrgUnits = organisationUnitService.getOrganisationUnitsByUid( uidMap.keySet() );
+        Collection<OrganisationUnit> persistedCodeOrgUnits = organisationUnitService.getOrganisationUnitsByCodes( codeMap.keySet() );
+        Collection<OrganisationUnit> persistedNameOrgUnits = organisationUnitService.getOrganisationUnitsByNames( nameMap.keySet() );
 
-        if ( uidMap.size() > 0 ) // Match on uid
-        {
-            persistedOrgUnits = organisationUnitService.getOrganisationUnitsByUid( uidMap.keySet() );
-        }
-        else if ( codeMap.size() > 0 ) // Match on code
-        {
-            persistedOrgUnits = organisationUnitService.getOrganisationUnitsByCodes( codeMap.keySet() );
-        }
-        else // Match on name
-        {
-            persistedOrgUnits = organisationUnitService.getOrganisationUnitsByNames( nameMap.keySet() );
-        }
+        persistedOrgUnits.addAll( persistedNameOrgUnits );
+        persistedOrgUnits.addAll( persistedCodeOrgUnits );
+        persistedOrgUnits.addAll( persistedUidOrgUnits );
 
         for ( OrganisationUnit persisted : persistedOrgUnits )
         {
-            OrganisationUnit unit = nameMap.get( persisted.getName() );
+            // TODO Fix non null safe references
+            OrganisationUnit unit = null;
+
+            if ( persistedUidOrgUnits.contains( persisted ) )
+            {
+                unit = uidMap.get( persisted.getUid() );
+            }
+            else if ( persistedCodeOrgUnits.contains( persisted ) )
+            {
+                unit = codeMap.get( persisted.getUid() );
+            }
+            else if ( persistedNameOrgUnits.contains( persisted ) )
+            {
+                unit = nameMap.get( persisted.getName() );
+            }
 
             if ( unit == null || unit.getCoordinates() == null || unit.getFeatureType() == null )
             {
-                continue;
+                continue; // Failed to dereference a persisted entity for this orgunit or geo data incomplete/missing, therefore ignore
             }
 
             String coordinates = unit.getCoordinates(),
@@ -168,6 +186,104 @@ public class DefaultGmlImportService
 
         return metaData;
     }
+
+//    @Override
+//    public MetaData fromGml( InputStream inputStream )
+//        throws IOException, TransformerException
+//    {
+//        InputStream dxfStream = transformGml( inputStream );
+//
+//        MetaData metaData = renderService.fromXml( dxfStream, MetaData.class );
+//
+//        dxfStream.close();
+//
+//        List<OrganisationUnit> gmlOrgUnits = metaData.getOrganisationUnits();
+//
+//        Map<String, OrganisationUnit> nameMap = Maps.uniqueIndex( gmlOrgUnits,
+//            new Function<OrganisationUnit, String>()
+//            {
+//                @Override
+//                public String apply( OrganisationUnit organisationUnit )
+//                {
+//                    return organisationUnit.getName();
+//                }
+//            }
+//        );
+//
+//        Map<String, OrganisationUnit> codeMap = Maps.uniqueIndex( gmlOrgUnits,
+//            new Function<OrganisationUnit, String>()
+//            {
+//                @Override
+//                public String apply( OrganisationUnit organisationUnit )
+//                {
+//                    return organisationUnit.getCode();
+//                }
+//            }
+//        );
+//
+//        Map<String, OrganisationUnit> uidMap = Maps.uniqueIndex( gmlOrgUnits,
+//            new Function<OrganisationUnit, String>()
+//            {
+//                @Override
+//                public String apply( OrganisationUnit organisationUnit )
+//                {
+//                    return organisationUnit.getUid();
+//                }
+//            }
+//        );
+//
+//        Map<String, OrganisationUnit> mergedMap = Maps.newHashMap();
+//
+//        for ( OrganisationUnit orgUnit : gmlOrgUnits )
+//        {
+//            mergedMap.put( , ObjectUtils.firstNonNull( uidMap.get( orgUnit.getUid() ), codeMap.get( orgUnit.getName() ), nameMap.get( orgUnit.getName() ) );
+//        }
+//
+//
+//        // Fetch persisted OrganisationUnits and merge imported GML properties
+//
+//        Collection<OrganisationUnit> persistedOrgUnits;
+//
+//        if ( uidMap.size() > 0 ) // Match on uid
+//        {
+//            persistedOrgUnits = organisationUnitService.getOrganisationUnitsByUid( uidMap.keySet() );
+//        }
+//        else if ( codeMap.size() > 0 ) // Match on code
+//        {
+//            persistedOrgUnits = organisationUnitService.getOrganisationUnitsByCodes( codeMap.keySet() );
+//        }
+//        else // Match on name
+//        {
+//            persistedOrgUnits = organisationUnitService.getOrganisationUnitsByNames( nameMap.keySet() );
+//        }
+//
+//        for ( OrganisationUnit persisted : persistedOrgUnits )
+//        {
+//            OrganisationUnit unit = nameMap.get( persisted.getName() );
+//
+//            if ( unit == null || unit.getCoordinates() == null || unit.getFeatureType() == null )
+//            {
+//                continue;
+//            }
+//
+//            String coordinates = unit.getCoordinates(),
+//                   featureType = unit.getFeatureType();
+//
+//            unit.mergeWith( persisted, MergeStrategy.MERGE_IF_NOT_NULL );
+//
+//            unit.setCoordinates( coordinates );
+//            unit.setFeatureType( featureType );
+//
+//            if ( persisted.getParent() != null )
+//            {
+//                OrganisationUnit parent = new OrganisationUnit();
+//                parent.setUid( persisted.getParent().getUid() );
+//                unit.setParent( parent );
+//            }
+//        }
+//
+//        return metaData;
+//    }
 
     @Transactional
     @Override
