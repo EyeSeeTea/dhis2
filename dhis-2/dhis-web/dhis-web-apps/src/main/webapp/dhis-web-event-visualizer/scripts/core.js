@@ -3340,12 +3340,12 @@ Ext.onReady( function() {
 			}
 
 			// legend set map
-			//init.idLegendSetMap = {};
+			init.idLegendSetMap = {};
 
-			//for (var i = 0, set; i < init.legendSets.length; i++) {
-				//set = init.legendSets[i];
-				//init.idLegendSetMap[set.id] = set;
-			//}
+			for (var i = 0, set; i < init.legendSets.length; i++) {
+				set = init.legendSets[i];
+				init.idLegendSetMap[set.id] = set;
+			}
 		}());
 
 		// instance
