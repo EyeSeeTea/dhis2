@@ -37,9 +37,9 @@ Ext.onReady( function() {
 				dimension: {
 					data: {
 						value: 'data',
-						name: NS.i18n.data,
-						dimensionName: 'dx',
-						objectName: 'dx',
+						name: NS.i18n.data || 'Data',
+						dimensionName: 'dy',
+						objectName: 'dy',
 						warning: {
 							filter: '...'//NS.i18n.wm_multiple_filter_ind_de
 						}
@@ -789,6 +789,29 @@ Ext.onReady( function() {
                 return o;
             };
 
+            support.prototype.array.getObjectDataById = function(array, sourceArray, properties, idProperty) {
+                array = Ext.Array.from(array);
+                sourceArray = Ext.Array.from(sourceArray);
+                properties = Ext.Array.from(properties);
+                idProperty = idProperty || 'id';
+
+                for (var i = 0, obj; i < array.length; i++) {
+                    obj = array[i];
+
+                    for (var j = 0, sourceObj; j < sourceArray.length; j++) {
+                        sourceObj = sourceArray[j];
+
+                        if (Ext.isString(obj[idProperty]) && sourceObj[idProperty] && obj[idProperty].indexOf(sourceObj.id) !== -1) {
+                            for (var k = 0, property; k < properties.length; k++) {
+                                property = properties[k];
+
+                                obj[property] = sourceObj[property];
+                            }
+                        }
+                    }
+                }
+            };
+
 				// object
 			support.prototype.object = {};
 
@@ -1301,6 +1324,32 @@ Ext.onReady( function() {
                     return xLayout;
                 };
 
+                // collapse data dimensions?
+                (function() {
+                    var keys = xLayout.collapseDataDimensions ? ['dy', 'pe', 'ou'] : ['dy'],
+                        dimensionsToRemove = [];
+
+                    // find dimensions to remove
+                    for (var i = 0, dim; i < dimensions.length; i++) {
+                        dim = dimensions[i];
+
+                        if (xLayout.collapseDataDimensions && !Ext.Array.contains(keys, dim.dimension)) {
+                            dimensionsToRemove.push(dim);
+                        }
+                        else if (!xLayout.collapseDataDimensions && Ext.Array.contains(keys, dim.dimension)) {
+                            dimensionsToRemove.push(dim);
+                        }
+                    }
+
+                    // remove dimensions
+                    for (var i = 0, dim; i < dimensionsToRemove.length; i++) {
+                        removeDimensionFromXLayout(dimensionsToRemove[i].dimension);
+                    }
+
+                    // update dimensions array
+                    dimensions = Ext.Array.clean([].concat(xLayout.columns || [], xLayout.rows || [], xLayout.filters || []));
+                }());
+
                 // items
                 for (var i = 0, dim, header; i < dimensions.length; i++) {
                     dim = dimensions[i];
@@ -1320,30 +1369,34 @@ Ext.onReady( function() {
                     }
                 }
 
-                // restore order for options
+                // restore item order
                 for (var i = 0, orgDim; i < originalDimensions.length; i++) {
                     orgDim = originalDimensions[i];
 
+                    // if sorting and row dim, dont restore order
+                    if (layout.sorting && Ext.Array.contains(xLayout.rowDimensionNames, orgDim.dimension)) {
+                        continue;
+                    }
+
+                    // user specified options/legends
                     if (Ext.isString(orgDim.filter)) {
                         var a = orgDim.filter.split(':');
 
                         if (a[0] === 'IN' && a.length > 1 && Ext.isString(a[1])) {
-                            var options = a[1].split(';'),
-                                items = [];
+                            var options = a[1].split(';');
 
-                            for (var j = 0, dim; j < dimensions.length; j++) {
+                            for (var j = 0, dim, items; j < dimensions.length; j++) {
                                 dim = dimensions[j];
 
                                 if (dim.dimension === orgDim.dimension && dim.items && dim.items.length) {
-                                    var items = [];
+                                    items = [];
 
                                     for (var k = 0, option; k < options.length; k++) {
                                         option = options[k];
 
                                         for (var l = 0, item; l < dim.items.length; l++) {
                                             item = dim.items[l];
-
-                                            if (item.name === option) {
+                                            if (item.id === option || item.id === (dim.dimension + option)) {
                                                 items.push(item);
                                             }
                                         }
@@ -1351,6 +1404,21 @@ Ext.onReady( function() {
 
                                     dim.items = items;
                                 }
+                            }
+                        }
+                    }
+                    // no specified legends -> sort by start value
+                    else if (orgDim.legendSet && orgDim.legendSet.id) {
+                        for (var j = 0, dim, items; j < dimensions.length; j++) {
+                            dim = dimensions[j];
+
+                            if (dim.dimension === orgDim.dimension && dim.items && dim.items.length) {
+
+                                // get start/end value
+                                support.prototype.array.getObjectDataById(dim.items, init.idLegendSetMap[orgDim.legendSet.id].legends, ['startValue', 'endValue']);
+
+                                // sort by start value
+                                support.prototype.array.sort(dim.items, 'ASC', 'startValue');
                             }
                         }
                     }
@@ -1997,7 +2065,10 @@ Ext.onReady( function() {
 			web.analytics.getParamString = function(layout, format) {
                 var paramString,
                     dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [])),
-                    ignoreKeys = ['longitude', 'latitude'],
+                    ignoreKeys = ['dy', 'longitude', 'latitude'],
+                    dataTypeMap = {
+                        'aggregated_values': 'aggregate'
+                    },
                     nameItemsMap;
 
                 paramString = '/api/analytics/events/aggregate/' + layout.program.id + '.' + (format || 'json') + '?';
@@ -2025,6 +2096,13 @@ Ext.onReady( function() {
 								paramString += encodeURIComponent(item.id) + ((j < (dim.items.length - 1)) ? ';' : '');
 							}
 						}
+                        else if (Ext.isObject(dim.legendSet) && dim.legendSet.id) {
+                            paramString += '-' + dim.legendSet.id;
+
+                            if (dim.filter) {
+                                paramString += ':' + encodeURIComponent(dim.filter);
+                            }
+                        }
 						else {
 							paramString += dim.filter ? ':' + encodeURIComponent(dim.filter) : '';
 						}
@@ -2044,6 +2122,13 @@ Ext.onReady( function() {
                             for (var j = 0; j < dim.items.length; j++) {
                                 paramString += encodeURIComponent(dim.items[j].id);
                                 paramString += j < dim.items.length - 1 ? ';' : '';
+                            }
+                        }
+                        else if (Ext.isObject(dim.legendSet) && dim.legendSet.id) {
+                            paramString += '-' + dim.legendSet.id;
+
+                            if (dim.filter) {
+                                paramString += ':' + encodeURIComponent(dim.filter);
                             }
                         }
                         else {
@@ -2077,6 +2162,11 @@ Ext.onReady( function() {
 
                 // display property
                 paramString += '&displayProperty=' + init.userAccount.settings.keyAnalysisDisplayProperty.toUpperCase();
+
+                // collapse data items
+                if (layout.collapseDataDimensions) {
+                    paramString += '&collapseDataDimensions=true';
+                }
 
                 return paramString;
             };

@@ -5797,6 +5797,9 @@ Ext.onReady( function() {
                 return;
             }
 
+            // dy
+            map['dy'] = [{dimension: 'dy'}];
+
 			// pe
             if (periodMode.getValue() === 'dates') {
                 view.startDate = startDate.getSubmitValue();
@@ -5842,110 +5845,71 @@ Ext.onReady( function() {
             //map['longitude'] = [{dimension: 'longitude'}];
             //map['latitude'] = [{dimension: 'latitude'}];
 
-            // dimensions
-            if (layoutWindow.colStore) {
-				layoutWindow.colStore.each(function(item) {
-					a = map[item.data.id] || [];
+            addAxisDimension = function(a, axis) {
+                if (a.length) {
+                    if (a.length === 1) {
+                        axis.push(a[0]);
+                    }
+                    else {
+                        var dim;
 
-					if (a.length) {
-						if (a.length === 1) {
-							columns.push(a[0]);
-						}
-						else {
-							var dim;
+                        for (var i = 0; i < a.length; i++) {
+                            if (!dim) { //todo ??
+                                dim = a[i];
+                            }
+                            else {
+                                dim.filter += ':' + a[i].filter;
+                            }
+                        }
 
-							for (var i = 0; i < a.length; i++) {
-								if (!dim) {
-									dim = a[i];
-								}
-								else {
-									dim.filter += ':' + a[i].filter;
-								}
-							}
+                        axis.push(dim);
+                    }
+                }
+            };
 
-							columns.push(dim);
-						}
-					}
-				});
-			}
+            // columns
+            store = layoutWindow.colStore;
 
-            if (layoutWindow.rowStore) {
-				layoutWindow.rowStore.each(function(item) {
-					a = map[item.data.id] || [];
+            if (store) {
+                data = store.snapshot || store.data;
 
-					if (a.length) {
-						if (a.length === 1) {
-							rows.push(a[0]);
-						}
-						else {
-							var dim;
+                data.each(function(item) {
+                    addAxisDimension(map[item.data.id] || [], columns);
+                });
+            }
 
-							for (var i = 0; i < a.length; i++) {
-								if (!dim) {
-									dim = a[i];
-								}
-								else {
-									dim.filter += ':' + a[i].filter;
-								}
-							}
+            // rows
+            store = layoutWindow.rowStore;
 
-							rows.push(dim);
-						}
-					}
-				});
-			}
+            if (store) {
+                data = store.snapshot || store.data;
 
-            if (layoutWindow.filterStore) {
-				layoutWindow.filterStore.each(function(item) {
-					a = map[item.data.id] || [];
+                data.each(function(item) {
+                    addAxisDimension(map[item.data.id] || [], rows);
+                });
+            }
 
-					if (a.length) {
-						if (a.length === 1) {
-							filters.push(a[0]);
-						}
-						else {
-							var dim;
+            // filters
+            store = layoutWindow.filterStore;
 
-							for (var i = 0; i < a.length; i++) {
-								if (!dim) {
-									dim = a[i];
-								}
-								else {
-									dim.filter += ':' + a[i].filter;
-								}
-							}
+            if (store) {
+                data = store.snapshot || store.data;
 
-							filters.push(dim);
-						}
-					}
-				});
-			}
+                data.each(function(item) {
+                    addAxisDimension(map[item.data.id] || [], filters);
+                });
+            }
 
-            if (layoutWindow.fixedFilterStore) {
-				layoutWindow.fixedFilterStore.each(function(item) {
-					a = map[item.data.id] || [];
+            // fixed filters
+            store = layoutWindow.fixedFilterStore;
 
-					if (a.length) {
-						if (a.length === 1) {
-							filters.push(a[0]);
-						}
-						else {
-							var dim;
+            if (store) {
+                data = store.snapshot || store.data;
 
-							for (var i = 0; i < a.length; i++) {
-								if (!dim) {
-									dim = a[i];
-								}
-								else {
-									dim.filter += ':' + a[i].filter;
-								}
-							}
-
-							filters.push(dim);
-						}
-					}
-				});
-			}
+                data.each(function(item) {
+                    addAxisDimension(map[item.data.id] || [], filters);
+                });
+            }
 
 			if (columns.length) {
 				view.columns = columns;
