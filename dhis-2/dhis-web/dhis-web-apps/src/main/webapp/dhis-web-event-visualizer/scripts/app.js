@@ -1410,7 +1410,25 @@ Ext.onReady( function() {
 						filterStore.add(record);
 					});
 
-					ms.store.on('add', function() {
+					ms.store.on('add', function(store, addedRecords) {
+                        var range = store.getRange();
+
+                        if (range.length > 1) {
+                            var addedIds = Ext.Array.pluck(addedRecords, 'internalId'),
+                                records = Ext.clone(range);
+
+                            store.removeAll();
+
+                            for (var i = 0; i < range.length; i++) {
+                                if (Ext.Array.contains(addedIds, range[i].internalId)) {
+                                    store.add(range[i]);
+                                }
+                                else {
+                                    filterStore.add(range[i]);
+                                }
+                            }
+                        }
+
 						Ext.defer( function() {
 							ms.boundList.getSelectionModel().deselectAll();
 						}, 10);
@@ -1444,7 +1462,25 @@ Ext.onReady( function() {
 						filterStore.add(record);
 					});
 
-					ms.store.on('add', function() {
+					ms.store.on('add', function(store, addedRecords) {
+                        var range = store.getRange();
+
+                        if (range.length > 1) {
+                            var addedIds = Ext.Array.pluck(addedRecords, 'internalId'),
+                                records = Ext.clone(range);
+
+                            store.removeAll();
+
+                            for (var i = 0; i < range.length; i++) {
+                                if (Ext.Array.contains(addedIds, range[i].internalId)) {
+                                    store.add(range[i]);
+                                }
+                                else {
+                                    filterStore.add(range[i]);
+                                }
+                            }
+                        }
+
 						Ext.defer( function() {
 							ms.boundList.getSelectionModel().deselectAll();
 						}, 10);
@@ -1739,8 +1775,8 @@ Ext.onReady( function() {
             value.clearValue();
 
 			if (!isAll) {
-				colStore.add({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
-				colStore.add({id: dimConf.period.dimensionName, name: dimConf.period.name});
+				filterStore.add({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
+				rowStore.add({id: dimConf.period.dimensionName, name: dimConf.period.name});
 			}
 
 			fixedFilterStore.setListHeight();
@@ -4146,7 +4182,7 @@ Ext.onReady( function() {
                     }
                 }
 
-                store = Ext.Array.contains(includeKeys, element.type) || element.optionSet ? aggWindow.rowStore : aggWindow.fixedFilterStore;
+                store = Ext.Array.contains(includeKeys, element.type) || element.optionSet ? aggWindow.colStore : aggWindow.fixedFilterStore;
 
                 aggWindow.addDimension(element, store, valueStore);
                 //queryWindow.colStore.add(element);
