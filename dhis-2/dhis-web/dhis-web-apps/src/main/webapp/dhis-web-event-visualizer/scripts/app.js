@@ -3597,14 +3597,11 @@ Ext.onReady( function() {
 				levels = [],
 				groups = [],
 
-				winMap = {
-					'aggregated_values': ns.app.aggregateOptionsWindow
-				},
-				optionsWindow = winMap[layout.dataType];
+                optionsWindow = ns.app.aggregateOptionsWindow;
 
             reset();
 
-            ns.app.typeToolbar.setType(layout.dataType);
+            //ns.app.typeToolbar.setType(layout.dataType);
             ns.app.aggregateLayoutWindow.reset();
             //ns.app.queryLayoutWindow.reset();
 
