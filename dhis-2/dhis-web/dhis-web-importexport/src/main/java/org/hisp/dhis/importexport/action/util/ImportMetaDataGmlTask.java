@@ -84,7 +84,6 @@ public class ImportMetaDataGmlTask
     {
         importOptions.setImportStrategy( "update" ); // Force update only for GML import
 
-        // TODO importOptions.setIdScheme( scheme ); << Set Id, code or name-scheme here?
         try
         {
             gmlImportService.importGml( inputStream, userUid, importOptions, taskId );

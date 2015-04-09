@@ -32,9 +32,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import org.apache.commons.collections.iterators.CollatingIterator;
-import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.common.MergeStrategy;
 import org.hisp.dhis.dxf2.common.ImportOptions;
 import org.hisp.dhis.dxf2.metadata.ImportService;
@@ -55,11 +52,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Halvdan Hoem Grelland
@@ -104,15 +99,16 @@ public class DefaultGmlImportService
 
         for ( OrganisationUnit orgUnit : gmlOrgUnits ) // Identifier Matching priority: uid, code, name
         {
-            if ( !Strings.isNullOrEmpty( orgUnit.getUid() ) )
-            {
-                uidMap.put( orgUnit.getUid(), orgUnit );
-            }
-            else if ( !Strings.isNullOrEmpty( orgUnit.getCode() ) )
-            {
-                codeMap.put( orgUnit.getCode(), orgUnit );
-            }
-            else if ( !Strings.isNullOrEmpty( orgUnit.getName() ) )
+//            if ( !Strings.isNullOrEmpty( orgUnit.getUid() ) )
+//            {
+//                uidMap.put( orgUnit.getUid(), orgUnit );
+//            }
+//            else if ( !Strings.isNullOrEmpty( orgUnit.getCode() ) )
+//            {
+//                codeMap.put( orgUnit.getCode(), orgUnit );
+//            }
+//            else if ( !Strings.isNullOrEmpty( orgUnit.getName() ) )
+            if ( !Strings.isNullOrEmpty( orgUnit.getName() ) )
             {
                 nameMap.put( orgUnit.getName(), orgUnit );
             }
@@ -151,13 +147,9 @@ public class DefaultGmlImportService
         Iterator<OrganisationUnit> allPersistedOrgUnits = Iterators.concat(
             persistedUidMap.values().iterator(), persistedCodeMap.values().iterator(), persistedNameMap.values().iterator() );
 
-        System.out.println( "Iterator size: " + Iterators.size( allPersistedOrgUnits ) );
-
         while( allPersistedOrgUnits.hasNext() )
         {
             OrganisationUnit persisted = allPersistedOrgUnits.next(), unit = null;
-
-            System.out.println( "Persisted: " + persisted.getName() + " uid: " + persisted.getUid() );
 
             if ( !Strings.isNullOrEmpty( persisted.getUid() ) && uidMap.containsKey( persisted.getUid() ) )
             {
@@ -170,7 +162,6 @@ public class DefaultGmlImportService
             else if ( !Strings.isNullOrEmpty( persisted.getName() ) && nameMap.containsKey( persisted.getName() ) )
             {
                 unit = nameMap.get( persisted.getName() );
-                System.out.println( "    unit: " + unit.getName() + " unit feature" + unit.getFeatureType() );
             }
 
             if ( unit == null || unit.getCoordinates() == null || unit.getFeatureType() == null )
@@ -180,8 +171,6 @@ public class DefaultGmlImportService
 
             String coordinates = unit.getCoordinates(),
                    featureType = unit.getFeatureType();
-
-            unit.setShortName( StringUtils.abbreviate( persisted.getName(), 50 ) );
 
             unit.mergeWith( persisted, MergeStrategy.MERGE );
 
