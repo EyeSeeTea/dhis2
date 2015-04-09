@@ -107,42 +107,9 @@ public class DefaultGmlImportService
         Map<String, OrganisationUnit> persistedCodeMap = getMatchingPersistedOrgUnits( codeMap.keySet(), IdentifiableProperty.CODE );
         Map<String, OrganisationUnit> persistedNameMap = getMatchingPersistedOrgUnits( nameMap.keySet(), IdentifiableProperty.NAME );
 
-//        Map<String, OrganisationUnit> persistedUidMap = Maps.uniqueIndex( organisationUnitService.getOrganisationUnitsByUid( uidMap.keySet() ),
-//            new Function<OrganisationUnit, String>()
-//            {
-//                @Override
-//                public String apply( OrganisationUnit organisationUnit )
-//                {
-//                    return organisationUnit.getUid();
-//                }
-//            }
-//        );
-//
-//        Map<String, OrganisationUnit> persistedCodeMap = Maps.uniqueIndex( organisationUnitService.getOrganisationUnitsByCodes( codeMap.keySet() ),
-//            new Function<OrganisationUnit, String>()
-//            {
-//                @Override
-//                public String apply( OrganisationUnit organisationUnit )
-//                {
-//                    return organisationUnit.getCode();
-//                }
-//            }
-//        );
-//
-//        Map<String, OrganisationUnit> persistedNameMap = Maps.uniqueIndex( organisationUnitService.getOrganisationUnitsByNames( nameMap.keySet() ),
-//            new Function<OrganisationUnit, String>()
-//            {
-//                @Override
-//                public String apply( OrganisationUnit organisationUnit )
-//                {
-//                    return organisationUnit.getName();
-//                }
-//            }
-//        );
-
         for ( Iterator<OrganisationUnit> persistedOrgUnits =
               Iterators.concat( persistedUidMap.values().iterator(), persistedCodeMap.values().iterator(), persistedNameMap.values().iterator() ) ;
-              persistedOrgUnits.hasNext() ; /* NOOP */ )
+              persistedOrgUnits.hasNext() ; /* NO-OP */ )
         {
             OrganisationUnit persisted = persistedOrgUnits.next(), unit = null;
 
