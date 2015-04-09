@@ -32,6 +32,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Maps;
+import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.MergeStrategy;
 import org.hisp.dhis.dxf2.common.ImportOptions;
 import org.hisp.dhis.dxf2.metadata.ImportService;
@@ -77,6 +78,9 @@ public class DefaultGmlImportService
     @Autowired
     private OrganisationUnitService organisationUnitService;
 
+    @Autowired
+    private IdentifiableObjectManager idObjectManager;
+
     // -------------------------------------------------------------------------
     // GmlImportService implementation
     // -------------------------------------------------------------------------
@@ -103,12 +107,11 @@ public class DefaultGmlImportService
 //            {
 //                uidMap.put( orgUnit.getUid(), orgUnit );
 //            }
-//            else if ( !Strings.isNullOrEmpty( orgUnit.getCode() ) )
-//            {
-//                codeMap.put( orgUnit.getCode(), orgUnit );
-//            }
-//            else if ( !Strings.isNullOrEmpty( orgUnit.getName() ) )
-            if ( !Strings.isNullOrEmpty( orgUnit.getName() ) )
+            if ( !Strings.isNullOrEmpty( orgUnit.getCode() ) )
+            {
+                codeMap.put( orgUnit.getCode(), orgUnit );
+            }
+            else if ( !Strings.isNullOrEmpty( orgUnit.getName() ) )
             {
                 nameMap.put( orgUnit.getName(), orgUnit );
             }
