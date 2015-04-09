@@ -30,12 +30,11 @@ package org.hisp.dhis.dxf2.gml;
 
 import com.google.common.base.Function;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.hisp.dhis.common.IdentifiableProperty;
+import org.apache.commons.collections.iterators.CollatingIterator;
+import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.common.MergeStrategy;
 import org.hisp.dhis.dxf2.common.ImportOptions;
 import org.hisp.dhis.dxf2.metadata.ImportService;
@@ -44,7 +43,6 @@ import org.hisp.dhis.dxf2.render.RenderService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.scheduling.TaskId;
-import org.hisp.dhis.util.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,10 +55,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -106,7 +102,7 @@ public class DefaultGmlImportService
                                       codeMap = Maps.newHashMap(),
                                       nameMap = Maps.newHashMap();
 
-        for ( OrganisationUnit orgUnit : gmlOrgUnits ) // Priority: uid, code, name
+        for ( OrganisationUnit orgUnit : gmlOrgUnits ) // Identifier Matching priority: uid, code, name
         {
             if ( !Strings.isNullOrEmpty( orgUnit.getUid() ) )
             {
@@ -122,32 +118,59 @@ public class DefaultGmlImportService
             }
         }
 
-        Set<OrganisationUnit> persistedOrgUnits = Sets.newHashSet();
+        Map<String, OrganisationUnit> persistedUidMap = Maps.uniqueIndex( organisationUnitService.getOrganisationUnitsByUid( uidMap.keySet() ),
+            new Function<OrganisationUnit, String>()
+            {
+                @Override public String apply( OrganisationUnit organisationUnit )
+                {
+                    return organisationUnit.getUid();
+                }
+            }
+        );
 
-        Collection<OrganisationUnit> persistedUidOrgUnits  = organisationUnitService.getOrganisationUnitsByUid( uidMap.keySet() ),
-                                     persistedCodeOrgUnits = organisationUnitService.getOrganisationUnitsByCodes( codeMap.keySet() ),
-                                     persistedNameOrgUnits = organisationUnitService.getOrganisationUnitsByNames( nameMap.keySet() );
+        Map<String, OrganisationUnit> persistedCodeMap = Maps.uniqueIndex( organisationUnitService.getOrganisationUnitsByCodes( codeMap.keySet() ),
+            new Function<OrganisationUnit, String>()
+            {
+                @Override public String apply( OrganisationUnit organisationUnit )
+                {
+                    return organisationUnit.getCode();
+                }
+            }
+        );
 
-        persistedOrgUnits.addAll( persistedNameOrgUnits );
-        persistedOrgUnits.addAll( persistedCodeOrgUnits );
-        persistedOrgUnits.addAll( persistedUidOrgUnits );
+        Map<String, OrganisationUnit> persistedNameMap = Maps.uniqueIndex( organisationUnitService.getOrganisationUnitsByNames( nameMap.keySet() ),
+            new Function<OrganisationUnit, String>()
+            {
+                @Override public String apply( OrganisationUnit organisationUnit )
+                {
+                    return organisationUnit.getName();
+                }
+            }
+        );
 
-        for ( OrganisationUnit persisted : persistedOrgUnits )
+        Iterator<OrganisationUnit> allPersistedOrgUnits = Iterators.concat(
+            persistedUidMap.values().iterator(), persistedCodeMap.values().iterator(), persistedNameMap.values().iterator() );
+
+        System.out.println( "Iterator size: " + Iterators.size( allPersistedOrgUnits ) );
+
+        while( allPersistedOrgUnits.hasNext() )
         {
-            // TODO Fix non null safe references
-            OrganisationUnit unit = null;
+            OrganisationUnit persisted = allPersistedOrgUnits.next(), unit = null;
 
-            if ( persistedUidOrgUnits.contains( persisted ) )
+            System.out.println( "Persisted: " + persisted.getName() + " uid: " + persisted.getUid() );
+
+            if ( !Strings.isNullOrEmpty( persisted.getUid() ) && uidMap.containsKey( persisted.getUid() ) )
             {
                 unit = uidMap.get( persisted.getUid() );
             }
-            else if ( persistedCodeOrgUnits.contains( persisted ) )
+            else if ( !Strings.isNullOrEmpty( persisted.getCode() ) && codeMap.containsKey( persisted.getCode() ) )
             {
-                unit = codeMap.get( persisted.getUid() );
+                unit = codeMap.get( persisted.getCode() );
             }
-            else if ( persistedNameOrgUnits.contains( persisted ) )
+            else if ( !Strings.isNullOrEmpty( persisted.getName() ) && nameMap.containsKey( persisted.getName() ) )
             {
                 unit = nameMap.get( persisted.getName() );
+                System.out.println( "    unit: " + unit.getName() + " unit feature" + unit.getFeatureType() );
             }
 
             if ( unit == null || unit.getCoordinates() == null || unit.getFeatureType() == null )
@@ -157,6 +180,8 @@ public class DefaultGmlImportService
 
             String coordinates = unit.getCoordinates(),
                    featureType = unit.getFeatureType();
+
+            unit.setShortName( StringUtils.abbreviate( persisted.getName(), 50 ) );
 
             unit.mergeWith( persisted, MergeStrategy.MERGE );
 
