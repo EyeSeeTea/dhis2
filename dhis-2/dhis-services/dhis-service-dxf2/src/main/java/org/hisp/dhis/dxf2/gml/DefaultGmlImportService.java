@@ -131,20 +131,7 @@ public class DefaultGmlImportService
                 continue; // Failed to dereference a persisted entity for this org unit or geo data incomplete/missing, therefore ignore
             }
 
-            String coordinates = unit.getCoordinates(),
-                   featureType = unit.getFeatureType();
-
-            unit.mergeWith( persisted, MergeStrategy.MERGE );
-
-            unit.setCoordinates( coordinates );
-            unit.setFeatureType( featureType );
-
-            if ( persisted.getParent() != null )
-            {
-                OrganisationUnit parent = new OrganisationUnit();
-                parent.setUid( persisted.getParent().getUid() );
-                unit.setParent( parent );
-            }
+            mergeNonGeoData( persisted, unit );
         }
 
         return metaData;
@@ -219,5 +206,23 @@ public class DefaultGmlImportService
                 }
             }
         );
+    }
+
+    private void mergeNonGeoData( OrganisationUnit source, OrganisationUnit target )
+    {
+        String coordinates = target.getCoordinates(),
+            featureType = target.getFeatureType();
+
+        target.mergeWith( source, MergeStrategy.MERGE );
+
+        target.setCoordinates( coordinates );
+        target.setFeatureType( featureType );
+
+        if ( source.getParent() != null )
+        {
+            OrganisationUnit parent = new OrganisationUnit();
+            parent.setUid( source.getParent().getUid() );
+            target.setParent( parent );
+        }
     }
 }
