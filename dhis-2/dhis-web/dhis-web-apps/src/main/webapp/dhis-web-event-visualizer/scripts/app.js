@@ -1849,7 +1849,6 @@ Ext.onReady( function() {
             hideOnBlur: true,
 			items: selectPanel,
 			bbar: [
-                collapseDataDimensions,
 				'->',
 				{
 					text: NS.i18n.hide,
@@ -5990,6 +5989,10 @@ Ext.onReady( function() {
 			reset: reset,
 			setGui: setGui,
 			getView: getView,
+
+            getUxArray: function(id) {
+                return dataElementSelected.getUxArrayById(id);
+            },
 
             listeners: {
                 added: function() {
