@@ -33,6 +33,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Maps;
 import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.common.IdentifiableProperty;
 import org.hisp.dhis.common.MergeStrategy;
 import org.hisp.dhis.dxf2.common.ImportOptions;
 import org.hisp.dhis.dxf2.metadata.ImportService;
@@ -53,6 +54,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -90,69 +94,57 @@ public class DefaultGmlImportService
         throws IOException, TransformerException
     {
         InputStream dxfStream = transformGml( inputStream );
-
         MetaData metaData = renderService.fromXml( dxfStream, MetaData.class );
-
         dxfStream.close();
-
-        List<OrganisationUnit> gmlOrgUnits = metaData.getOrganisationUnits();
 
         Map<String, OrganisationUnit> uidMap  = Maps.newHashMap(),
                                       codeMap = Maps.newHashMap(),
                                       nameMap = Maps.newHashMap();
 
-        for ( OrganisationUnit orgUnit : gmlOrgUnits ) // Identifier Matching priority: uid, code, name
-        {
-//            if ( !Strings.isNullOrEmpty( orgUnit.getUid() ) )
+        matchAndFilterOnIdentifiers( metaData.getOrganisationUnits(), uidMap, codeMap, nameMap );
+
+        Map<String, OrganisationUnit> persistedUidMap  = getMatchingPersistedOrgUnits( uidMap.keySet(),  IdentifiableProperty.UID );
+        Map<String, OrganisationUnit> persistedCodeMap = getMatchingPersistedOrgUnits( codeMap.keySet(), IdentifiableProperty.CODE );
+        Map<String, OrganisationUnit> persistedNameMap = getMatchingPersistedOrgUnits( nameMap.keySet(), IdentifiableProperty.NAME );
+
+//        Map<String, OrganisationUnit> persistedUidMap = Maps.uniqueIndex( organisationUnitService.getOrganisationUnitsByUid( uidMap.keySet() ),
+//            new Function<OrganisationUnit, String>()
 //            {
-//                uidMap.put( orgUnit.getUid(), orgUnit );
+//                @Override
+//                public String apply( OrganisationUnit organisationUnit )
+//                {
+//                    return organisationUnit.getUid();
+//                }
 //            }
-            if ( !Strings.isNullOrEmpty( orgUnit.getCode() ) )
-            {
-                codeMap.put( orgUnit.getCode(), orgUnit );
-            }
-            else if ( !Strings.isNullOrEmpty( orgUnit.getName() ) )
-            {
-                nameMap.put( orgUnit.getName(), orgUnit );
-            }
-        }
+//        );
+//
+//        Map<String, OrganisationUnit> persistedCodeMap = Maps.uniqueIndex( organisationUnitService.getOrganisationUnitsByCodes( codeMap.keySet() ),
+//            new Function<OrganisationUnit, String>()
+//            {
+//                @Override
+//                public String apply( OrganisationUnit organisationUnit )
+//                {
+//                    return organisationUnit.getCode();
+//                }
+//            }
+//        );
+//
+//        Map<String, OrganisationUnit> persistedNameMap = Maps.uniqueIndex( organisationUnitService.getOrganisationUnitsByNames( nameMap.keySet() ),
+//            new Function<OrganisationUnit, String>()
+//            {
+//                @Override
+//                public String apply( OrganisationUnit organisationUnit )
+//                {
+//                    return organisationUnit.getName();
+//                }
+//            }
+//        );
 
-        Map<String, OrganisationUnit> persistedUidMap = Maps.uniqueIndex( organisationUnitService.getOrganisationUnitsByUid( uidMap.keySet() ),
-            new Function<OrganisationUnit, String>()
-            {
-                @Override public String apply( OrganisationUnit organisationUnit )
-                {
-                    return organisationUnit.getUid();
-                }
-            }
-        );
-
-        Map<String, OrganisationUnit> persistedCodeMap = Maps.uniqueIndex( organisationUnitService.getOrganisationUnitsByCodes( codeMap.keySet() ),
-            new Function<OrganisationUnit, String>()
-            {
-                @Override public String apply( OrganisationUnit organisationUnit )
-                {
-                    return organisationUnit.getCode();
-                }
-            }
-        );
-
-        Map<String, OrganisationUnit> persistedNameMap = Maps.uniqueIndex( organisationUnitService.getOrganisationUnitsByNames( nameMap.keySet() ),
-            new Function<OrganisationUnit, String>()
-            {
-                @Override public String apply( OrganisationUnit organisationUnit )
-                {
-                    return organisationUnit.getName();
-                }
-            }
-        );
-
-        Iterator<OrganisationUnit> allPersistedOrgUnits = Iterators.concat(
-            persistedUidMap.values().iterator(), persistedCodeMap.values().iterator(), persistedNameMap.values().iterator() );
-
-        while( allPersistedOrgUnits.hasNext() )
+        for ( Iterator<OrganisationUnit> persistedOrgUnits =
+              Iterators.concat( persistedUidMap.values().iterator(), persistedCodeMap.values().iterator(), persistedNameMap.values().iterator() ) ;
+              persistedOrgUnits.hasNext() ; /* NOOP */ )
         {
-            OrganisationUnit persisted = allPersistedOrgUnits.next(), unit = null;
+            OrganisationUnit persisted = persistedOrgUnits.next(), unit = null;
 
             if ( !Strings.isNullOrEmpty( persisted.getUid() ) && uidMap.containsKey( persisted.getUid() ) )
             {
@@ -217,5 +209,48 @@ public class DefaultGmlImportService
         gml.getInputStream().close();
 
         return new ByteArrayInputStream( output.toByteArray() );
+    }
+
+    private void matchAndFilterOnIdentifiers( List<OrganisationUnit> sourceList, Map<String, OrganisationUnit> uidMap, Map<String,
+        OrganisationUnit> codeMap, Map<String, OrganisationUnit> nameMap )
+    {
+        for ( OrganisationUnit orgUnit : sourceList ) // Identifier Matching priority: uid, code, name
+        {
+            // Only matches if UID is actually in DB as an empty UID on input will be replaced by auto-generated value
+            if ( !Strings.isNullOrEmpty( orgUnit.getUid() ) && idObjectManager.exists( OrganisationUnit.class, orgUnit.getUid() ) )
+            {
+                uidMap.put( orgUnit.getUid(), orgUnit );
+            }
+            else if ( !Strings.isNullOrEmpty( orgUnit.getCode() ) )
+            {
+                codeMap.put( orgUnit.getCode(), orgUnit );
+            }
+            else if ( !Strings.isNullOrEmpty( orgUnit.getName() ) )
+            {
+                nameMap.put( orgUnit.getName(), orgUnit );
+            }
+        }
+    }
+
+    private Map<String, OrganisationUnit> getMatchingPersistedOrgUnits( Collection<String> identifiers, final IdentifiableProperty idProperty )
+    {
+        Collection<OrganisationUnit> orgUnits =
+            idProperty == IdentifiableProperty.UID ? organisationUnitService.getOrganisationUnitsByUid( identifiers ) :
+            idProperty == IdentifiableProperty.CODE ? organisationUnitService.getOrganisationUnitsByCodes( identifiers ) :
+            idProperty == IdentifiableProperty.NAME ? organisationUnitService.getOrganisationUnitsByNames( identifiers ) :
+            new HashSet<OrganisationUnit>();
+
+        return Maps.uniqueIndex( orgUnits,
+            new Function<OrganisationUnit, String>()
+            {
+                @Override
+                public String apply( OrganisationUnit organisationUnit )
+                {
+                    return idProperty == IdentifiableProperty.UID ? organisationUnit.getUid() :
+                           idProperty == IdentifiableProperty.CODE ? organisationUnit.getCode() :
+                           idProperty == IdentifiableProperty.NAME ? organisationUnit.getName() : null;
+                }
+            }
+        );
     }
 }
