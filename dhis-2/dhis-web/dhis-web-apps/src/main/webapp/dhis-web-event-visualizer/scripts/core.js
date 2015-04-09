@@ -3431,8 +3431,10 @@ Ext.onReady( function() {
                                                 tmpText = '';
 
                                             if (operator === 'IN') {
-                                                for (var ii = 0; ii < valueArray.length; ii++) {
-                                                    tmpText += (tmpText.length ? ', ' : '') + valueArray[ii];
+                                                for (var ii = 0, value; ii < valueArray.length; ii++) {
+                                                    value = valueArray[ii];
+
+                                                    tmpText += (tmpText.length ? ', ' : '') + (md.booleanNames[value] || md.optionNames[value] || md.names[value] || value);
                                                 }
 
                                                 text += tmpText;
