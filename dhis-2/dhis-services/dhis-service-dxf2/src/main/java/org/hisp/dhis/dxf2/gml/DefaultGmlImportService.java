@@ -96,9 +96,7 @@ public class DefaultGmlImportService
         MetaData metaData = renderService.fromXml( dxfStream, MetaData.class );
         dxfStream.close();
 
-        Map<String, OrganisationUnit> uidMap  = Maps.newHashMap(),
-                                      codeMap = Maps.newHashMap(),
-                                      nameMap = Maps.newHashMap();
+        Map<String, OrganisationUnit> uidMap  = Maps.newHashMap(), codeMap = Maps.newHashMap(), nameMap = Maps.newHashMap();
 
         matchAndFilterOnIdentifiers( metaData.getOrganisationUnits(), uidMap, codeMap, nameMap );
 
@@ -106,31 +104,32 @@ public class DefaultGmlImportService
         Map<String, OrganisationUnit> persistedCodeMap = getMatchingPersistedOrgUnits( codeMap.keySet(), IdentifiableProperty.CODE );
         Map<String, OrganisationUnit> persistedNameMap = getMatchingPersistedOrgUnits( nameMap.keySet(), IdentifiableProperty.NAME );
 
-        for ( Iterator<OrganisationUnit> persistedOrgUnits =
-              Iterators.concat( persistedUidMap.values().iterator(), persistedCodeMap.values().iterator(), persistedNameMap.values().iterator() ) ;
-              persistedOrgUnits.hasNext() ; /* NO-OP */ )
+        Iterator<OrganisationUnit> persistedIterator = Iterators.concat( persistedUidMap.values().iterator(),
+            persistedCodeMap.values().iterator(), persistedNameMap.values().iterator() );
+
+        while ( persistedIterator.hasNext() )
         {
-            OrganisationUnit persisted = persistedOrgUnits.next(), unit = null;
+            OrganisationUnit persisted = persistedIterator.next(), imported = null;
 
             if ( !Strings.isNullOrEmpty( persisted.getUid() ) && uidMap.containsKey( persisted.getUid() ) )
             {
-                unit = uidMap.get( persisted.getUid() );
+                imported = uidMap.get( persisted.getUid() );
             }
             else if ( !Strings.isNullOrEmpty( persisted.getCode() ) && codeMap.containsKey( persisted.getCode() ) )
             {
-                unit = codeMap.get( persisted.getCode() );
+                imported = codeMap.get( persisted.getCode() );
             }
             else if ( !Strings.isNullOrEmpty( persisted.getName() ) && nameMap.containsKey( persisted.getName() ) )
             {
-                unit = nameMap.get( persisted.getName() );
+                imported = nameMap.get( persisted.getName() );
             }
 
-            if ( unit == null || unit.getCoordinates() == null || unit.getFeatureType() == null )
+            if ( imported == null || imported.getCoordinates() == null || imported.getFeatureType() == null )
             {
                 continue; // Failed to dereference a persisted entity for this org unit or geo data incomplete/missing, therefore ignore
             }
 
-            mergeNonGeoData( persisted, unit );
+            mergeNonGeoData( persisted, imported );
         }
 
         return metaData;
@@ -165,7 +164,7 @@ public class DefaultGmlImportService
     }
 
     private void matchAndFilterOnIdentifiers( List<OrganisationUnit> sourceList, Map<String, OrganisationUnit> uidMap, Map<String,
-        OrganisationUnit> codeMap, Map<String, OrganisationUnit> nameMap )
+        OrganisationUnit> codeMap, Map<String, OrganisationUnit> nameMap ) throws IOException
     {
         for ( OrganisationUnit orgUnit : sourceList ) // Identifier Matching priority: uid, code, name
         {
@@ -173,6 +172,7 @@ public class DefaultGmlImportService
             if ( !Strings.isNullOrEmpty( orgUnit.getUid() ) && idObjectManager.exists( OrganisationUnit.class, orgUnit.getUid() ) )
             {
                 uidMap.put( orgUnit.getUid(), orgUnit );
+                throw new IOException( "Teh lolz" );
             }
             else if ( !Strings.isNullOrEmpty( orgUnit.getCode() ) )
             {
@@ -210,7 +210,7 @@ public class DefaultGmlImportService
     private void mergeNonGeoData( OrganisationUnit source, OrganisationUnit target )
     {
         String coordinates = target.getCoordinates(),
-            featureType = target.getFeatureType();
+               featureType = target.getFeatureType();
 
         target.mergeWith( source, MergeStrategy.MERGE );
 

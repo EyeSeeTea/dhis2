@@ -78,9 +78,9 @@
   </xsl:template>
 
   <xsl:template match="gml:featureMember">
-    <xsl:variable name="name" select=".//*[local-name()='Name' or local-name()='NAME' or local-name()='name']"/>
-    <xsl:variable name="uid" select=".//*[local-name()='Uid' or local-name()='UID' or local-name()='uid']" />
+    <xsl:variable name="uid"  select=".//*[local-name()='uid'  or local-name()='UID'  or local-name()='Uid']" />
     <xsl:variable name="code" select=".//*[local-name()='code' or local-name()='CODE' or local-name()='Code']" />
+    <xsl:variable name="name" select=".//*[local-name()='name' or local-name()='NAME' or local-name()='Name']" />
     <organisationUnit>
       <xsl:choose> <!-- Priority is uid, code, name. First match in order excludes the others -->
         <xsl:when test="$uid != ''">
