@@ -267,6 +267,32 @@ public class ExpressionServiceTest
         assertTrue( dataElements.size() == 2 );
         assertTrue( dataElements.contains( dataElementA ) );
         assertTrue( dataElements.contains( dataElementB ) );
+        
+        dataElements = expressionService.getDataElementsInExpression( expressionG );
+
+        assertTrue( dataElements.size() == 3 );
+        assertTrue( dataElements.contains( dataElementA ) );
+        assertTrue( dataElements.contains( dataElementB ) );
+        assertTrue( dataElements.contains( dataElementC ) );
+    }
+
+    @Test
+    public void testGetDataElementTotalsInExpression()
+    {
+        Set<DataElement> dataElements = expressionService.getDataElementTotalsInExpression( expressionG );
+
+        assertTrue( dataElements.size() == 2 );
+        assertTrue( dataElements.contains( dataElementB ) );
+        assertTrue( dataElements.contains( dataElementC ) );
+    }
+
+    @Test
+    public void testGetDataElementsWithOptionCombosInExpression()
+    {
+        Set<DataElement> dataElements = expressionService.getDataElementsWithOptionCombosInExpression( expressionG );
+
+        assertTrue( dataElements.size() == 1 );
+        assertTrue( dataElements.contains( dataElementA ) );
     }
 
     @Test
@@ -295,6 +321,24 @@ public class ExpressionServiceTest
 
         assertTrue( operands.contains( operandA ) );
         assertTrue( operands.contains( operandB ) );
+        
+        operands = expressionService.getOperandsInExpression( expressionG );
+
+        assertNotNull( operands );
+        assertEquals( 1, operands.size() );
+
+        assertTrue( operands.contains( operandA ) );
+    }
+
+    @Test
+    public void testGetOptionCombosInExpression()
+    {
+        Set<DataElementCategoryOptionCombo> optionCombos = expressionService.getOptionCombosInExpression( expressionG );
+
+        assertNotNull( optionCombos );
+        assertEquals( 1, optionCombos.size() );
+
+        assertTrue( optionCombos.contains( categoryOptionCombo ) );
     }
 
     @Test
