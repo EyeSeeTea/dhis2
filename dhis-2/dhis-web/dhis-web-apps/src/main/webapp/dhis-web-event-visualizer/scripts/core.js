@@ -1377,19 +1377,6 @@ Ext.onReady( function() {
 				return null;
 			};
 
-                // number
-			support.prototype.number = {};
-
-			support.prototype.number.prettyPrint = function(number, separator) {
-				separator = separator || 'space';
-
-				if (separator === 'none') {
-					return number;
-				}
-
-				return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, conf.report.digitGroupSeparator[separator]);
-			};
-
 				// str
 			support.prototype.str = {};
 
@@ -1432,6 +1419,10 @@ Ext.onReady( function() {
 
 			support.prototype.number.prettyPrint = function(number, separator) {
 				separator = separator || 'space';
+
+                if (!Ext.isNumber(number)) {
+                    return;
+                }
 
 				if (separator === 'none') {
 					return number;
@@ -3496,11 +3487,14 @@ Ext.onReady( function() {
                                 }
                             }
                         }
-                        else if (Ext.isObject(layout.value) && layout.value.id && layout.aggregationType) {
-                            var value = layout.value.id;
+                    }
 
-                            text = (md.booleanNames[value] || md.optionNames[value] || md.names[value] || value) + ' (' + conf.aggregationType.idNameMap[layout.aggregationType] + ')';
-                        }
+                    // aggregation type
+                    if (Ext.isObject(layout.value) && layout.value.id && layout.aggregationType) {
+                        var value = layout.value.id;
+
+                        text += text.length ? ', ' : '';
+                        text += (md.booleanNames[value] || md.optionNames[value] || md.names[value] || value) + ' (' + conf.aggregationType.idNameMap[layout.aggregationType] + ')';
                     }
 
                     fontSize = (centerRegion.getWidth() / text.length) < 11.6 ? 13 : 18;
