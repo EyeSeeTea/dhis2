@@ -164,7 +164,7 @@ public class DefaultGmlImportService
     }
 
     private void matchAndFilterOnIdentifiers( List<OrganisationUnit> sourceList, Map<String, OrganisationUnit> uidMap, Map<String,
-        OrganisationUnit> codeMap, Map<String, OrganisationUnit> nameMap ) throws IOException
+        OrganisationUnit> codeMap, Map<String, OrganisationUnit> nameMap )
     {
         for ( OrganisationUnit orgUnit : sourceList ) // Identifier Matching priority: uid, code, name
         {
@@ -172,7 +172,6 @@ public class DefaultGmlImportService
             if ( !Strings.isNullOrEmpty( orgUnit.getUid() ) && idObjectManager.exists( OrganisationUnit.class, orgUnit.getUid() ) )
             {
                 uidMap.put( orgUnit.getUid(), orgUnit );
-                throw new IOException( "Teh lolz" );
             }
             else if ( !Strings.isNullOrEmpty( orgUnit.getCode() ) )
             {

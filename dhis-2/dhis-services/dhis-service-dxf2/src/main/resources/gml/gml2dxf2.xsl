@@ -84,7 +84,7 @@
     <organisationUnit>
       <xsl:choose> <!-- Priority is uid, code, name. First match in order excludes the others -->
         <xsl:when test="$uid != ''">
-          <xsl:attribute name="uid">
+          <xsl:attribute name="id"> <!-- 'uid' is mapped to 'id' in dxf2 -->
             <xsl:value-of select="$uid" />
           </xsl:attribute>
         </xsl:when>
