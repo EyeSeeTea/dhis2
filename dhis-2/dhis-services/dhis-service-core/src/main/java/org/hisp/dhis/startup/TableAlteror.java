@@ -265,6 +265,9 @@ public class TableAlteror
         executeSql( "ALTER TABLE expression ALTER expression TYPE text" );
         executeSql( "ALTER TABLE translation ALTER value TYPE text" );
         executeSql( "ALTER TABLE organisationunit ALTER comment TYPE text" );
+        executeSql( "ALTER TABLE program ALTER description TYPE text" );
+        executeSql( "ALTER TABLE trackedentityattribute ALTER description TYPE text" );
+        executeSql( "ALTER TABLE trackedentityattributegroup ALTER description TYPE text" );
 
         executeSql( "ALTER TABLE minmaxdataelement RENAME minvalue TO minimumvalue" );
         executeSql( "ALTER TABLE minmaxdataelement RENAME maxvalue TO maximumvalue" );
@@ -472,7 +475,6 @@ public class TableAlteror
         executeSql( "update reporttable set sortorder = 0 where sortorder is null" );
         executeSql( "update reporttable set toplimit = 0 where toplimit is null" );
         executeSql( "update reporttable set showhierarchy = false where showhierarchy is null" );
-        executeSql( "update reporttable set aggregationtype = 'default' where aggregationtype is null" );
 
         // reporttable col/row totals = keep existing || copy from totals || true
         executeSql( "update reporttable set totals = true where totals is null" );
@@ -677,11 +679,6 @@ public class TableAlteror
         executeSql( "ALTER TABLE report DROP CONSTRAINT report_name_key" );
         executeSql( "ALTER TABLE usergroup DROP CONSTRAINT usergroup_name_key" );
 
-        executeSql( "update relativeperiods set lastweek = false where lastweek is null" );
-        executeSql( "update relativeperiods set last4weeks = false where last4weeks is null" );
-        executeSql( "update relativeperiods set last12weeks = false where last12weeks is null" );
-        executeSql( "update relativeperiods set last6months = false where last6months is null" );
-
         upgradeChartRelativePeriods();
         upgradeReportTableRelativePeriods();
         upgradeReportTables();
@@ -809,6 +806,8 @@ public class TableAlteror
         executeSql( "UPDATE attributevalue SET lastupdated=now() WHERE lastupdated IS NULL" );
         
         executeSql( "update dashboarditem set shape = 'normal' where shape is null" );
+        
+        executeSql( "update categoryoptioncombo set ignoreapproval = false where ignoreapproval is null" );
 
         upgradeDataValuesWithAttributeOptionCombo();
         upgradeCompleteDataSetRegistrationsWithAttributeOptionCombo();
@@ -818,6 +817,7 @@ public class TableAlteror
         updateOptions();
         
         upgradeAggregationType( "reporttable" );
+        upgradeAggregationType( "chart" );
         
         updateRelativePeriods();
 
@@ -832,14 +832,25 @@ public class TableAlteror
         executeSql( "update " + table + " set aggregationtype='VARIANCE' where aggregationtype='variance'" );
         executeSql( "update " + table + " set aggregationtype='MIN' where aggregationtype='min'" );
         executeSql( "update " + table + " set aggregationtype='MAX' where aggregationtype='max'" );
-        executeSql( "update " + table + " set aggregationtype='DEFAULT' where aggregationtype='default'" );
+        executeSql( "update " + table + " set aggregationtype='DEFAULT' where aggregationtype='default' or aggregationtype is null" );
     }
 
     private void updateRelativePeriods()
     {
-        executeSql( "update relativeperiods set lastmonth=reportingmonth" );
-        executeSql( "update relativeperiods set lastbimonth=reportingbimonth" );
-        executeSql( "update relativeperiods set lastquarter=reportingquarter" );
+        executeSql( "update relativeperiods set thismonth=reportingmonth" );
+        executeSql( "update relativeperiods set thisbimonth=reportingbimonth" );
+        executeSql( "update relativeperiods set thisquarter=reportingquarter" );
+
+        executeSql( "update relativeperiods set lastweek = false where lastweek is null" );
+        executeSql( "update relativeperiods set last4weeks = false where last4weeks is null" );
+        executeSql( "update relativeperiods set last12weeks = false where last12weeks is null" );
+        executeSql( "update relativeperiods set last6months = false where last6months is null" );
+
+        executeSql( "update relativeperiods set thismonth = false where thismonth is null" );
+        executeSql( "update relativeperiods set thisbimonth = false where thisbimonth is null" );
+        executeSql( "update relativeperiods set thisquarter = false where thisquarter is null" );
+        executeSql( "update relativeperiods set thissixmonth = false where thissixmonth is null" );
+        executeSql( "update relativeperiods set thisweek = false where thisweek is null" );
     }
     
     private void upgradeDataValuesWithAttributeOptionCombo()
@@ -932,13 +943,13 @@ public class TableAlteror
 
             while ( rs.next() )
             {
-                RelativePeriods r = new RelativePeriods( rs.getBoolean( "reportingmonth" ), false,
-                    rs.getBoolean( "reportingquarter" ), rs.getBoolean( "lastsixmonth" ),
+                RelativePeriods r = new RelativePeriods( false, rs.getBoolean( "reportingmonth" ), false, false,
+                    rs.getBoolean( "reportingquarter" ), false, rs.getBoolean( "lastsixmonth" ), false,
                     rs.getBoolean( "monthsthisyear" ), rs.getBoolean( "quartersthisyear" ),
                     rs.getBoolean( "thisyear" ), false, false, rs.getBoolean( "lastyear" ),
                     rs.getBoolean( "last5years" ), rs.getBoolean( "last12months" ), false, rs.getBoolean( "last3months" ),
                     false, rs.getBoolean( "last4quarters" ), rs.getBoolean( "last2sixmonths" ), false, false, false,
-                    false, false, false, false );
+                    false, false, false, false, false );
 
                 int chartId = rs.getInt( "chartid" );
 
@@ -991,8 +1002,8 @@ public class TableAlteror
 
             while ( rs.next() )
             {
-                RelativePeriods r = new RelativePeriods( rs.getBoolean( "reportingmonth" ),
-                    rs.getBoolean( "reportingbimonth" ), rs.getBoolean( "reportingquarter" ),
+                RelativePeriods r = new RelativePeriods( false, rs.getBoolean( "reportingmonth" ), false, false,
+                    rs.getBoolean( "reportingbimonth" ), false, rs.getBoolean( "reportingquarter" ),
                     rs.getBoolean( "lastsixmonth" ), rs.getBoolean( "monthsthisyear" ),
                     rs.getBoolean( "quartersthisyear" ), rs.getBoolean( "thisyear" ),
                     rs.getBoolean( "monthslastyear" ), rs.getBoolean( "quarterslastyear" ),
@@ -1000,7 +1011,7 @@ public class TableAlteror
                     rs.getBoolean( "last3months" ), false, rs.getBoolean( "last4quarters" ),
                     rs.getBoolean( "last2sixmonths" ), rs.getBoolean( "thisfinancialyear" ),
                     rs.getBoolean( "lastfinancialyear" ), rs.getBoolean( "last5financialyears" ), false, false, false,
-                    false );
+                    false, false );
 
                 int reportTableId = rs.getInt( "reporttableid" );
 

@@ -29,8 +29,7 @@
                                    ng-blur="saveDatavalue(prStDe)" 
                                    name="foo"/>
                             <span ng-show="dataEntryOuterForm.submitted && dataEntryInnerForm.foo.$invalid" class="error">{{'number_required'| translate}}</span>
-                        </div>   
-                        
+                        </div>                        
                         <div ng-switch-when="string">                            
                             <div ng-if="prStDe.dataElement.optionSet">
                                 <div ng-if="!selectedProgram.dataEntryMethod || optionSets[prStDe.dataElement.optionSet.id].options.length >= 7">

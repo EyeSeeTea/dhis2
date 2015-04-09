@@ -1,14 +1,6 @@
-<div ng-controller="RelativeRegistrationController" class="modal-dialog">    
-    <hr>
-
+<div ng-controller="RelativeRegistrationController">
+    
     <form name="outerForm" novalidate>
-
-        <select ng-model="selectedProgramForRelative"
-                class="form-control"
-                ng-disabled="programs.length < 1 || (selectedProgramForRelative && selectedProgram.relatedProgram && relatedProgramRelationship)"
-                ng-options="program as program.name for program in programs | orderBy: 'name'">
-            <option value="">{{'please_select_a_program'| translate}}</option>
-        </select>
 
         <div ng-if='!selectedProgramForRelative'>
             <h3>{{'category' | translate}}</h3>
