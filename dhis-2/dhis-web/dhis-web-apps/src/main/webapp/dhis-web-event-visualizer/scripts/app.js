@@ -1523,15 +1523,7 @@ Ext.onReady( function() {
             },
 			store: Ext.create('Ext.data.Store', {
 				fields: ['id', 'text'],
-				data: [
-					{id: 'COUNT', text: NS.i18n.count},
-					{id: 'AVERAGE', text: NS.i18n.average},
-					{id: 'SUM', text: NS.i18n.sum},
-					{id: 'STDDEV', text: NS.i18n.stddev},
-					{id: 'VARIANCE', text: NS.i18n.variance},
-					{id: 'MIN', text: NS.i18n.min},
-					{id: 'MAX', text: NS.i18n.max}
-				]
+				data: ns.core.conf.aggregationType.data
 			}),
             resetData: function() {
                 this.setDisabled();

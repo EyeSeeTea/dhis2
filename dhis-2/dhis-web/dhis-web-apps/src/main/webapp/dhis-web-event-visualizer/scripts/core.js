@@ -526,6 +526,8 @@ Ext.onReady( function() {
 
 		// conf
 		(function() {
+
+            // finals
 			conf.finals = {
 				dimension: {
 					data: {
@@ -643,6 +645,7 @@ Ext.onReady( function() {
 			dimConf.objectNameMap[dimConf.organisationUnit.objectName] = dimConf.organisationUnit;
 			dimConf.objectNameMap[dimConf.dimension.objectName] = dimConf.dimension;
 
+            // period
 			conf.period = {
 				periodTypes: [
 					{id: 'Daily', name: NS.i18n.daily},
@@ -658,6 +661,26 @@ Ext.onReady( function() {
 				]
 			};
 
+            // aggregation type
+            conf.aggregationType = {
+                data: [
+					{id: 'COUNT', name: NS.i18n.count, text: NS.i18n.count},
+					{id: 'AVERAGE', name: NS.i18n.average, text: NS.i18n.average},
+					{id: 'SUM', name: NS.i18n.sum, text: NS.i18n.sum},
+					{id: 'STDDEV', name: NS.i18n.stddev, text: NS.i18n.stddev},
+					{id: 'VARIANCE', name: NS.i18n.variance, text: NS.i18n.variance},
+					{id: 'MIN', name: NS.i18n.min, text: NS.i18n.min},
+					{id: 'MAX', name: NS.i18n.max, text: NS.i18n.max}
+                ],
+                idNameMap: {}
+            };
+
+            for (var i = 0, obj; i < conf.aggregationType.data.length; i++) {
+                obj = conf.aggregationType.data[i];
+                conf.aggregationType.idNameMap[obj.id] = obj.text;
+            }
+
+            // gui layout
 			conf.layout = {
 				west_width: 452,
 				west_fill: 2,
@@ -693,6 +716,7 @@ Ext.onReady( function() {
 				multiselect_fill_reportingrates: 315
 			};
 
+            // chart
 			conf.chart = {
                 style: {
                     inset: 30,
@@ -703,6 +727,7 @@ Ext.onReady( function() {
                 }
             };
 
+            // report
 			conf.report = {
 				digitGroupSeparator: {
 					'comma': ',',
@@ -710,6 +735,7 @@ Ext.onReady( function() {
 				}
 			};
 
+            // url
             conf.url = {
                 analysisFields: [
                     '*',
@@ -3469,6 +3495,11 @@ Ext.onReady( function() {
                                     }
                                 }
                             }
+                        }
+                        else if (Ext.isObject(layout.value) && layout.value.id && layout.aggregationType) {
+                            var value = layout.value.id;
+
+                            text = (md.booleanNames[value] || md.optionNames[value] || md.names[value] || value) + ' (' + conf.aggregationType.idNameMap[layout.aggregationType] + ')';
                         }
                     }
 
