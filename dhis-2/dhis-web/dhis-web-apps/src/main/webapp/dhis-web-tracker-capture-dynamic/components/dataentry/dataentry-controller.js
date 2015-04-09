@@ -1,3 +1,5 @@
+/* global angular, trackerCapture */
+
 trackerCapture.controller('DataEntryController',
         function($rootScope,
                 $scope,
@@ -26,6 +28,9 @@ trackerCapture.controller('DataEntryController',
     $scope.eventPeriods = [];
     $scope.currentPeriod = [];
     $scope.filterEvents = true;
+    $scope.errorMessages = {};
+    $scope.warningMessages = {};
+    $scope.hiddenFields = {};
     
     var userProfile = SessionStorageService.get('USER_PROFILE');
     var storedBy = userProfile && userProfile.username ? userProfile.username : '';
@@ -46,6 +51,29 @@ trackerCapture.controller('DataEntryController',
                          ];
     $scope.showEventColors = false;
     
+    //listen for rule effect changes
+    $scope.$on('ruleeffectsupdated', function(event, args) {
+        angular.forEach($rootScope.ruleeffects, function(effect) {
+            //in the data entry controller we only care about the "hidefield" actions
+            if(effect.action === "HIDEFIELD") {
+                //Hide the field if the hiding is in effect, and there is no data value in the field.
+                var hide = effect.ineffect && !$scope.currentEvent[effect.dataElement.id];
+                $scope.hiddenFields[effect.dataElement.id] = hide;
+            } else if(effect.action === "SHOWERROR") {
+                if(effect.ineffect){
+                    $scope.errorMessages[effect.dataElement.id] = effect.content;
+                } else {
+                    $scope.errorMessages[effect.dataElement.id] = false;
+                }
+            } else if(effect.action === "SHOWWARNING") {
+                if(effect.ineffect){
+                    $scope.warningMessages[effect.dataElement.id] = effect.content;
+                } else {
+                    $scope.warningMessages[effect.dataElement.id] = false;
+                }
+            }
+        });
+    });
     //check if field is hidden
     $scope.isHidden = function(id) {
         //TODO: This function is working, but non-optimalized.
@@ -73,7 +101,7 @@ trackerCapture.controller('DataEntryController',
         
         angular.forEach($rootScope.ruleeffects, function(effect) {
             //in the data entry controller we only care about the "SHOWWARNING" and "SHOWERROR" actions
-            if(effect.action === "SHOWERROR" && effect.location === id && effect.ineffect) {
+            if(effect.action === "SHOWERROR" && effect.dataElement.id === id && effect.ineffect) {
                 error = effect.content;
             }
         });
@@ -87,7 +115,7 @@ trackerCapture.controller('DataEntryController',
         
         angular.forEach($rootScope.ruleeffects, function(effect) {
             //in the data entry controller we only care about the "SHOWWARNING" and "SHOWERROR" actions
-            if(effect.action === "SHOWWARNING" && effect.location === id && effect.ineffect) {
+            if(effect.action === "SHOWWARNING" && effect.dataElement.id === id && effect.ineffect) {
                 error = effect.content;
             }
         });
@@ -109,7 +137,7 @@ trackerCapture.controller('DataEntryController',
         $scope.eventsByStage = [];
         $scope.programStages = [];
         $rootScope.ruleeffects = {};
-		$scope.prStDes = [];
+	$scope.prStDes = [];
         
         var selections = CurrentSelection.get();          
         $scope.selectedOrgUnit = SessionStorageService.get('SELECTED_OU');

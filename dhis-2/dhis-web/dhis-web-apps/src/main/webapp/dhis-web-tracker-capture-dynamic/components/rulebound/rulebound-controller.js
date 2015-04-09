@@ -14,7 +14,7 @@ trackerCapture.controller('RuleBoundController',
     $scope.displayTextEffects = {};
     $scope.displayKeyDataEffects = {};
     
-    //listen for the selected items
+    //listen for updated rule effects
     $scope.$on('ruleeffectsupdated', function(event, args) {
         var textInEffect = false;
         var keyDataInEffect = false;

@@ -21,7 +21,7 @@
                 <ng-form name="dataEntryInnerForm">
                     <div ng-switch="prStDe.dataElement.type">
                         <div ng-switch-when="int">
-                            <input type="number"
+                            <input type="text"
                                    ng-class='getInputNotifcationClass(prStDe.dataElement.id,false)'
                                    ng-model="currentEvent[prStDe.dataElement.id]" 
                                    ng-required={{prStDe.compulsory}}
@@ -29,7 +29,8 @@
                                    ng-blur="saveDatavalue(prStDe)" 
                                    name="foo"/>
                             <span ng-show="dataEntryOuterForm.submitted && dataEntryInnerForm.foo.$invalid" class="error">{{'number_required'| translate}}</span>
-                        </div>                        
+                        </div>   
+                        
                         <div ng-switch-when="string">                            
                             <div ng-if="prStDe.dataElement.optionSet">
                                 <div ng-if="!selectedProgram.dataEntryMethod || optionSets[prStDe.dataElement.optionSet.id].options.length >= 7">
@@ -115,13 +116,13 @@
                                    name="foo"/>
                         </div>
                     </div>
-                    <div class="alert alert-danger alert-dismissible" role="alert" ng-if="warningMessage(prStDe.dataElement.id)">
+                    <div class="alert alert-warning alert-dismissible" role="alert" ng-if="warningMessages[prStDe.dataElement.id]">
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        {{errorMessage(prStDe.dataElement.id)}}
+                        {{warningMessages[prStDe.dataElement.id]}}
                     </div>
-                    <div class="alert alert-warning alert-dismissible" role="alert" ng-if="errorMessage(prStDe.dataElement.id)">
+                    <div class="alert alert-danger alert-dismissible" role="alert" ng-if="errorMessages[prStDe.dataElement.id]">
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        {{errorMessage(prStDe.dataElement.id)}}
+                        {{errorMessages[prStDe.dataElement.id]}}
                     </div>
                 </ng-form>
                 <span ng-show="dataEntryOuterForm.submitted && dataEntryInnerForm.foo.$invalid" class="error">{{'required'| translate}}</span>
@@ -166,8 +167,8 @@
                                         <div ng-switch-when="int">
                                             <input type="number"
                                                    ng-class='getInputNotifcationClass(prStDes[de.dataElement.id].dataElement.id,false)'
-                                                   ng-model="currentEvent[prStDes[de.dataElement.id].dataElement.id]" 
-                                                   ng-required={{prStDes[de.dataElement.id].compulsory}}
+                                                   ng-model="currentEvent[de.dataElement.id]" 
+												   ng-required={{prStDes[de.dataElement.id].compulsory}}
                                                    ng-disabled="selectedEnrollment.status !== 'ACTIVE' || currentEvent.editingNotAllowed" 
                                                    ng-blur="saveDatavalue(prStDes[de.dataElement.id])" 
                                                    name="foo"/>
@@ -257,14 +258,14 @@
                                                    ng-change="saveDatavalue(prStDes[de.dataElement.id])" 
                                                    name="foo"/>
                                         </div>
-					                    <div class="alert alert-danger alert-dismissible" role="alert" ng-if="warningMessage(prStDe.dataElement.id)">
-					                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-					                        {{errorMessage(prStDe.dataElement.id)}}
-					                    </div>
-					                    <div class="alert alert-warning alert-dismissible" role="alert" ng-if="errorMessage(prStDe.dataElement.id)">
-					                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-					                        {{errorMessage(prStDe.dataElement.id)}}
-					                    </div>
+                                        <div class="alert alert-danger alert-dismissible" role="alert" ng-if="warningMessage(de.dataElement.id)">
+                                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                            {{errorMessage(de.dataElement.id)}}
+                                        </div>
+                                        <div class="alert alert-warning alert-dismissible" role="alert" ng-if="errorMessage(de.dataElement.id)">
+                                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                            {{errorMessage(de.dataElement.id)}}
+                                        </div>
                                     </div>
                                 </ng-form>
                                 <span ng-show="dataEntryOuterForm.submitted && dataEntryInnerForm.foo.$invalid" class="error">{{'required'| translate}}</span>

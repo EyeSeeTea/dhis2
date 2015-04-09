@@ -1747,14 +1747,20 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 angular.forEach(programVariables, function(programVariable) {
                     var valueFound = false;
                     if(programVariable.sourceType === "DATAELEMENT_NEWEST_EVENT_PROGRAM_STAGE"){
-                        angular.forEach(eventsSortedPerProgramStage[programVariable.programStage.id], function(event) {
-                            if(angular.isDefined(event[programVariable.dataElement.id])
-                                    && event[programVariable.dataElement.id] !== null ){
-                                valueFound = true;
-                                $scope.pushVariable(programVariable.name, event[programVariable.dataElement.id], allDes[programVariable.dataElement.id].dataElement.type, valueFound );
-                            }
-
-                        });
+                        if(programVariable.programStage) {
+                            angular.forEach(eventsSortedPerProgramStage[programVariable.programStage.id], function(event) {
+                                if(angular.isDefined(event[programVariable.dataElement.id])
+                                        && event[programVariable.dataElement.id] !== null ){
+                                    valueFound = true;
+                                    $scope.pushVariable(programVariable.name, event[programVariable.dataElement.id], allDes[programVariable.dataElement.id].dataElement.type, valueFound );
+                                }
+                            });
+                        } else {
+                            $log.warn("Variable id:'" + programVariable.id + "' name:'" + programVariable.name 
+                                    + "' does not have a programstage defined,"
+                                    + " despite that the variable has sourcetype DATAELEMENT_NEWEST_EVENT_PROGRAM_STAGE" );
+                        }
+                        
                     }
                     else if(programVariable.sourceType === "DATAELEMENT_NEWEST_EVENT_PROGRAM"){
                         angular.forEach(allEventsSorted, function(event) {
@@ -2010,19 +2016,20 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                         var updatedEffectsExits = false;
 
                         angular.forEach(rules, function(rule) {
+                            var ruleEffective = false;
+
                             var expression = rule.condition;
                             //Go through and populate variables with actual values, but only if there actually is any replacements to be made(one or more "$" is present)
                             if(expression) {
                                 if(expression.indexOf('$') !== -1) {
                                     expression = $scope.replaceVariables(expression);
                                 }
+                                //run expression:
+                                ruleEffective = $scope.runExpression(expression, rule.condition, "rule:" + rule.id);
                             } else {
-                                debugger;
+                                $log.warn("Rule id:'" + rule.id + "'' and name:'" + rule.name + "' had no condition specified. Please check rule configuration.");
                             }
-
-                            //run expression:
-                            var ruleEffective = $scope.runExpression(expression, rule.condition, "rule:" + rule.id);
-
+                            
                             angular.forEach(rule.actions, function(action){
                                 //In case the effect-hash is not populated, add entries
                                 if(angular.isUndefined( $rootScope.ruleeffects[action.id] )){
