@@ -190,6 +190,25 @@ public class ProgramRuleServiceTest
         assertNull( programRuleService.getProgramRule( idJ ) );
     }
     
+    @Test
+    public void testAddGetLongContent()
+    {
+        ProgramRule ruleK = new ProgramRule( "RuleK", "descriptionK is very very very very very very very very very "
+            + " very very very very very very very very very very "
+            + " very very very very very very very very very very "
+            + " very very very very very very very very very very "
+            + " very very very very very very very very very very "
+            + " very very very very very very very very very very "
+            + " very very very very very very very very very very "
+            + " very very very very very very very very very very long ", 
+            programA, programStageA, null, "true", null );
+        
+        int idK = programRuleService.addProgramRule( ruleK );
+        
+        assertEquals( ruleK, programRuleService.getProgramRule( idK ) );
+       
+    }
+    
     /*TODO: Fix the functionality for 2 level cascading deletes.
         
     @Test
