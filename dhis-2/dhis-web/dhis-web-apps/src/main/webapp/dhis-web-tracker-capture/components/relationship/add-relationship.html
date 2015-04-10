@@ -66,7 +66,8 @@
                         <select ng-model="selectedProgramForRelative"
                                 class="form-control"
                                 ng-disabled="programs.length < 1 || (selectedProgramForRelative && selectedProgram.relatedProgram && relatedProgramRelationship)"
-                                ng-options="program as program.name for program in programs | orderBy: 'name'">
+                                ng-options="program as program.name for program in programs | orderBy: 'name'" 
+                                ng-change="setAttributesForSearch(selectedProgramForRelative)">
                             <option value="">{{'please_select_a_program'| translate}}</option>
                         </select>                
                     </div>
@@ -76,8 +77,8 @@
                         <div class="input-group-btn">
                             <button class="btn btn-default without-border-radius trim" type="button" title="{{'advanced_search'| translate}}" ng-click="showHideSearch(false)"><i class="fa fa-caret-down"></i></button>
                             <button class="btn btn-primary without-border-radius trim" type="button" title="{{'search'| translate}}" ng-click="search(searchMode.freeText)"><i class="fa fa-search"></i></button>                            
-                            <button class="btn btn-info without-border-radius trim" type="button" title="{{'list_all'| translate}}" ng-disabled="showRegistrationDiv" ng-click="search(searchMode.listAll)"><i class="fa fa-list"></i></button>
-                            <button class="btn btn-success trim" type="button" title="{{'add_new'| translate}}" ng-click="showRegistration()"><i class="fa fa-plus-square"></i></button>                            
+                            <button class="btn btn-default without-border-radius trim" type="button" title="{{'list_all'| translate}}" ng-disabled="showRegistrationDiv" ng-click="search(searchMode.listAll)"><i class="fa fa-list"></i></button>
+                            <button class="btn btn-success trim" type="button" title="{{'register'| translate}}" ng-click="showRegistration()"><i class="fa fa-plus-square"></i></button>                            
                         </div>                
                     </div>
                     
@@ -91,7 +92,7 @@
                 <!-- entity grid begins -->
                 <div class="row" ng-if="showTrackedEntityDiv">
                     <img class="col-md-12" src="../images/ajax-loader-bar.gif" ng-if="!teiFetched"/>
-                    <div class="col-md-12" ng-include="'components/relationship/tei.html'"></div>                        
+                    <div class="col-md-12" ng-include="'views/tei.html'"></div>                        
                 </div>
                 <!-- entity grid ends -->
 
