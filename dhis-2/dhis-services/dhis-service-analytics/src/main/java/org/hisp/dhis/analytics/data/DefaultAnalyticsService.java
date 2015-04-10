@@ -106,6 +106,7 @@ import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.common.IdentifiableProperty;
 import org.hisp.dhis.common.IllegalQueryException;
+import org.hisp.dhis.common.MapMap;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.NameableObjectUtils;
 import org.hisp.dhis.constant.ConstantService;
@@ -1228,8 +1229,12 @@ public class DefaultAnalyticsService
         DataQueryParams dataSourceParams = getQueryIndicatorsReplacedByDataElements( params );
 
         Map<String, Double> aggregatedDataMap = getAggregatedDataValueMap( dataSourceParams );
+        
+        MapMap<String, DataElementOperand, Double> permOperandValueMap = new MapMap<>();
 
-        return DataQueryParams.getPermutationOperandValueMap( aggregatedDataMap );
+        DataQueryParams.putPermutationOperandValueMap( permOperandValueMap, aggregatedDataMap, true );
+        
+        return permOperandValueMap;
     }
     
     /**
