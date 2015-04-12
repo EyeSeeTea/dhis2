@@ -208,7 +208,7 @@ Ext.onReady( function() {
 				height: 25,
 				items: {
 					xtype: 'label',
-					text: NS.i18n.dimensions,
+					text: NS.i18n.excluded_dimensions,
 					cls: 'ns-toolbar-multiselect-leftright-label'
 				}
 			},
