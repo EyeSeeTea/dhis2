@@ -3515,6 +3515,7 @@ Ext.onReady( function() {
                         record.set('color', '#' + editColor.getValue());
 
                         editWindow.destroy();
+                        window.isDirty = true;
                     }
                 });
 
@@ -3654,6 +3655,8 @@ Ext.onReady( function() {
 						startValue.reset();
 						endValue.reset();
 						color.reset();
+
+                        window.isDirty = true;
 					}
 				}
 			});
@@ -3832,18 +3835,6 @@ Ext.onReady( function() {
 			return panel;
 		};
 
-        LegendEditWindow = function(data) {
-            var editLegendName,
-                editStartValue,
-                editEndValue,
-                editColor,
-                editCancel,
-                editUpdate,
-                showUpdateLegend,
-                validateForm,
-                editWindow;
-        };
-
 		showUpdateLegendSet = function(id) {
 			legendPanel = new LegendPanel(id);
 			window.removeAll();
@@ -3904,6 +3895,7 @@ Ext.onReady( function() {
 			legendSetPanel = new LegendSetPanel();
 			window.removeAll();
 			window.add(legendSetPanel);
+            window.isDirty = false;
 
 			info.show();
 			cancel.hide();
@@ -4032,7 +4024,12 @@ Ext.onReady( function() {
 			listeners: {
 				show: function() {
 					this.setPosition(269, 33);
-				}
+				},
+                beforeclose: function() {
+                    if (window.isDirty) {
+                        return confirm('The legend set has unsaved modifications. Close anyway?');
+                    }
+                }
 			}
 		});
 
