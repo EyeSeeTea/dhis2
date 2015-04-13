@@ -3705,7 +3705,7 @@ Ext.onReady( function() {
                 editColor,
                 editUpdate,
                 editWindow;
-console.log(data);
+
 			editLegendName = Ext.create('Ext.form.field.Text', {
 				cls: 'gis-textfield',
 				width: windowWidth - windowBorder - bodyPadding - (2 * legendBodyBorder) - (2 * legendBodyPadding) + 4,
@@ -3756,7 +3756,9 @@ console.log(data);
             editWindow = Ext.create('Ext.window.Window', {
                 title: 'Edit legend (' + data.name + ')',
                 width: windowWidth,
-                model: true,
+                modal: true,
+                shadow: true,
+                resizable: false,
                 bodyStyle: 'background: #fff; padding: 1px',
                 bbar: [
                     editCancel,
@@ -3814,7 +3816,7 @@ console.log(data);
 		};
 
         showUpdateLegend = function(data) {
-            LegendEditWindow(data).showAt(window.getPosition()[0], window.getPosition()[1] + 50);
+            LegendEditWindow(data).showAt(window.getPosition()[0], window.getPosition()[1] + 55);
         };
 
 		deleteLegendSet = function(id) {
