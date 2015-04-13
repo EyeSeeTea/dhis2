@@ -3484,7 +3484,7 @@ Ext.onReady( function() {
                 });
 
                 validateEditLegendForm = function() {
-                    if (!(editLegendName.getValue() && editStartValue.getValue() && editEndValue.getValue() && editColor.getValue())) {
+                    if (!(editLegendName.getValue() && Ext.isNumber(editStartValue.getValue()) && Ext.isNumber(editEndValue.getValue()) && editColor.getValue())) {
                         return;
                     }
 
@@ -3516,6 +3516,7 @@ Ext.onReady( function() {
 
                         editWindow.destroy();
                         window.isDirty = true;
+                        tmpLegendStore.sort('startValue', 'ASC');
                     }
                 });
 
