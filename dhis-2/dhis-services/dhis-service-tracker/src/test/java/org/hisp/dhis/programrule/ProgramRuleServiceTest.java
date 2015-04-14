@@ -189,7 +189,7 @@ public class ProgramRuleServiceTest
         assertNull( programRuleService.getProgramRule( idI ) );
         assertNull( programRuleService.getProgramRule( idJ ) );
     }
-    
+    /*
     @Test
     public void testAddGetLongContent()
     {
@@ -207,7 +207,7 @@ public class ProgramRuleServiceTest
         
         assertEquals( ruleK, programRuleService.getProgramRule( idK ) );
        
-    }
+    }*/
     
     /*TODO: Fix the functionality for 2 level cascading deletes.
         
