@@ -257,13 +257,13 @@
                                                    ng-change="saveDatavalue(prStDes[de.dataElement.id])" 
                                                    name="foo"/>
                                         </div>
-                                        <div class="alert alert-danger alert-dismissible" role="alert" ng-if="warningMessage(de.dataElement.id)">
+                                        <div class="alert alert-warning alert-dismissible" role="alert" ng-if="warningMessages[de.dataElement.id]">
                                             <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                            {{errorMessage(de.dataElement.id)}}
+                                            {{warningMessages[de.dataElement.id]}}
                                         </div>
-                                        <div class="alert alert-warning alert-dismissible" role="alert" ng-if="errorMessage(de.dataElement.id)">
+                                        <div class="alert alert-danger alert-dismissible" role="alert" ng-if="errorMessages[de.dataElement.id]">
                                             <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                            {{errorMessage(de.dataElement.id)}}
+                                            {{errorMessages[de.dataElement.id]}}
                                         </div>
                                     </div>
                                 </ng-form>

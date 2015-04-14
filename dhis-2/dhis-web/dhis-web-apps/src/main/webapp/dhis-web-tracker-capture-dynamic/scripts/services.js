@@ -1121,10 +1121,10 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 {title: 'current_selections', type: 'current_selections', show: false, expand: true, horizontalplacement:"right", index:0},
                 {title: 'profile', type: 'profile', show: false, expand: true, horizontalplacement:"right", index:1},
                 {title: 'Conditions/Complications',  type:'rulebound', code:"con", show: true, expand: true, horizontalplacement:"right", index:2},
-                {title: 'Reminders',  type:'rulebound', code:"rem", show: true, expand: true, horizontalplacement:"right", index:3},
-                {title: 'relationships', type: 'relationships', show: false, expand: true, horizontalplacement:"right", index:4},
-                {title: 'notes', type: 'notes', show: true, expand: true, horizontalplacement:"right", index:5},
-                {title: 'Summary', type: 'rulebound', code:"sum", show: true, expand: true, horizontalplacement:"right", index:6}
+                {title: 'Reminders',  type:'rulebound', code:"rem", show: true, expand: true, horizontalplacement:"left", index:4},
+                {title: 'relationships', type: 'relationships', show: false, expand: true, horizontalplacement:"right", index:3},
+                {title: 'notes', type: 'notes', show: true, expand: true, horizontalplacement:"right", index:4},
+                {title: 'Summary', type: 'rulebound', code:"sum", show: true, expand: true, horizontalplacement:"left", index:5}
             ];
         },
         getDefaultWidgetConfiguration: function() {
