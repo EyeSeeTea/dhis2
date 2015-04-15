@@ -139,7 +139,7 @@
     
     <div ng-if='currentEvent && currentStage.programStageSections.length'>
         <accordion close-others='false'>
-            <accordion-group heading="{{section.name}}" is-open="section.open" ng-repeat='section in currentStage.programStageSections'>
+            <accordion-group heading="{{section.name}}" is-open="section.open" ng-repeat='section in currentStage.programStageSections' style="overflow:visible">
                 <table class="dhis2-list-table-striped">                    
                     <thead>                        
                         <tr class="col-md-12">
