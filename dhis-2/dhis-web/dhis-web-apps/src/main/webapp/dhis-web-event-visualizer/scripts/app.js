@@ -5824,6 +5824,8 @@ Ext.onReady( function() {
 			if (!updateGui) {
 				return;
 			}
+            
+			ns.app.viewport.chartType.setChartType(layout.type);
 
             setLayout(layout);
 		};
