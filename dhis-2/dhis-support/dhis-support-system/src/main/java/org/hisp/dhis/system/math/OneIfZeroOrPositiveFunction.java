@@ -1,4 +1,4 @@
-package org.hisp.dhis.resourcetable.statement;
+package org.hisp.dhis.system.math;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,46 +28,44 @@ package org.hisp.dhis.resourcetable.statement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
+import java.util.Stack;
 
-import org.amplecode.quick.Statement;
-import org.hisp.dhis.dataelement.DataElementGroupSet;
+import org.nfunk.jep.ParseException;
+import org.nfunk.jep.function.PostfixMathCommand;
 
 /**
+ * JEP function which returns 1 if the argument is a zero or positive number, 0
+ * otherwise.
+ * 
  * @author Lars Helge Overland
  */
-public class CreateDataElementGroupSetTableStatement
-    implements Statement
+public class OneIfZeroOrPositiveFunction
+    extends PostfixMathCommand
 {
-    private static final String LONG_TEXT_COLUMN_TYPE = "VARCHAR (250)";
-    
-    public static final String TABLE_NAME = "_dataelementgroupsetstructure";
-    
-    private List<DataElementGroupSet> groupSets;
-    
-    private String quote;
-    
-    public CreateDataElementGroupSetTableStatement( List<DataElementGroupSet> groupSets, String quote )
+    public OneIfZeroOrPositiveFunction()
     {
-        this.groupSets = groupSets;
-        this.quote = quote;
-    }
-    
-    @Override
-    public String getStatement()
-    {
-        String statement = "CREATE TABLE " + TABLE_NAME + " ( " +
-            "dataelementid " + NUMERIC_COLUMN_TYPE + SEPARATOR +
-            "dataelementname " + LONG_TEXT_COLUMN_TYPE + SEPARATOR;
+        super();
         
-        for ( DataElementGroupSet groupSet : groupSets )
+        numberOfParameters = 1;
+    }
+
+    @Override
+    @SuppressWarnings( { "rawtypes", "unchecked" } )
+    public void run( Stack inStack ) throws ParseException 
+    {
+        checkStack( inStack );
+        
+        Object param = inStack.pop();
+        
+        if ( param == null || !( param instanceof Double ) )
         {
-            statement += quote + groupSet.getName() + quote + SPACE + LONG_TEXT_COLUMN_TYPE + SEPARATOR;
-            statement += quote + groupSet.getUid() + quote + SPACE + "CHARACTER(11)" + SEPARATOR;
+            throw new ParseException( "Invalid parameter type, must be double: " + param );
         }
         
-        statement += "PRIMARY KEY ( dataelementid ) )";
+        double value = ( (Double) param ).doubleValue();
         
-        return statement;
+        double result = value >= 0 ? 1d : 0d;
+        
+        inStack.push( new Double( result ) );
     }
 }

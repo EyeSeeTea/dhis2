@@ -1,4 +1,4 @@
-package org.hisp.dhis.resourcetable.statement;
+package org.hisp.dhis.system.log;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,46 +28,13 @@ package org.hisp.dhis.resourcetable.statement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
-
-import org.amplecode.quick.Statement;
-import org.hisp.dhis.dataelement.DataElementGroupSet;
-
 /**
  * @author Lars Helge Overland
  */
-public class CreateDataElementGroupSetTableStatement
-    implements Statement
-{
-    private static final String LONG_TEXT_COLUMN_TYPE = "VARCHAR (250)";
-    
-    public static final String TABLE_NAME = "_dataelementgroupsetstructure";
-    
-    private List<DataElementGroupSet> groupSets;
-    
-    private String quote;
-    
-    public CreateDataElementGroupSetTableStatement( List<DataElementGroupSet> groupSets, String quote )
-    {
-        this.groupSets = groupSets;
-        this.quote = quote;
-    }
-    
-    @Override
-    public String getStatement()
-    {
-        String statement = "CREATE TABLE " + TABLE_NAME + " ( " +
-            "dataelementid " + NUMERIC_COLUMN_TYPE + SEPARATOR +
-            "dataelementname " + LONG_TEXT_COLUMN_TYPE + SEPARATOR;
-        
-        for ( DataElementGroupSet groupSet : groupSets )
-        {
-            statement += quote + groupSet.getName() + quote + SPACE + LONG_TEXT_COLUMN_TYPE + SEPARATOR;
-            statement += quote + groupSet.getUid() + quote + SPACE + "CHARACTER(11)" + SEPARATOR;
-        }
-        
-        statement += "PRIMARY KEY ( dataelementid ) )";
-        
-        return statement;
-    }
+public interface LogConfigInitializer
+{    
+    /**
+     * Initializes log configuration.
+     */
+    void initConfig();
 }
