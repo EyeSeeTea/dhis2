@@ -3649,34 +3649,47 @@ Ext.onReady( function() {
                 getDefaultChart = function(config) {
                     var chart,
                         store = config.store || {},
+                        width = ns.app.centerRegion.getWidth(),
+                        height = ns.app.centerRegion.getHeight(),
+                        isLineBased = Ext.Array.contains(['line', 'area'], xLayout.type),
                         defaultConfig = {
-                            animate: true,
+                            //animate: true,
+                            animate: false,
                             shadow: false,
-                            insetPadding: 35,
-                            width: centerRegion.getWidth() - 15,
-                            height: centerRegion.getHeight() - 40,
+                            insetPadding: ns.dashboard ? 17 : 35,
+                            insetPaddingObject: {
+                                top: ns.dashboard ? 12 : 32,
+                                right: ns.dashboard ? (isLineBased ? 5 : 3) : (isLineBased ? 25 : 15),
+                                bottom: ns.dashboard ? 2 : 10,
+                                left: ns.dashboard ? (isLineBased ? 15 : 7) : (isLineBased ? 70 : 50)
+                            },
+                            width: ns.dashboard ? width : width - 15,
+                            height: ns.dashboard ? height : height - 40,
                             theme: 'dv1'
                         };
-
+                        
                     // legend
                     if (!xLayout.hideLegend) {
-                        defaultConfig.legend = getDefaultLegend(store);
+                        defaultConfig.legend = getDefaultLegend(store, config);
 
                         if (defaultConfig.legend.position === 'right') {
-                            defaultConfig.insetPadding = 40;
+                            defaultConfig.insetPaddingObject.top = ns.dashboard ? 22 : 40;
+                            defaultConfig.insetPaddingObject.right = ns.dashboard ? 5 : 40;
                         }
                     }
 
                     // title
-                    if (!xLayout.hideTitle) {
-                        defaultConfig.items = [getDefaultChartTitle(store)];
+                    if (xLayout.hideTitle) {
+                        defaultConfig.insetPadding = ns.dashboard ? 1 : 10;
+                        defaultConfig.insetPaddingObject.top = ns.dashboard ? 3 : 10;
                     }
                     else {
-                        defaultConfig.insetPadding = 10;
+                        defaultConfig.items = [getDefaultChartTitle(store)];
                     }
 
                     Ext.apply(defaultConfig, config);
 
+                    // chart
                     chart = Ext.create('Ext.chart.Chart', defaultConfig);
 
                     chart.setChartSize = getDefaultChartSizeHandler();
@@ -3688,7 +3701,7 @@ Ext.onReady( function() {
                         chart.setTitlePosition();
                     };
 
-                    chart.on('afterrender', function() {
+                    chart.on('resize', function() {
                         chart.setTitlePosition();
                     });
 
