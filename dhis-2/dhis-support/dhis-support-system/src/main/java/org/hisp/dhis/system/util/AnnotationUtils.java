@@ -1,4 +1,4 @@
-package org.hisp.dhis.system.debug;
+package org.hisp.dhis.system.util;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,11 +28,43 @@ package org.hisp.dhis.system.debug;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public interface Debugger
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * @author Lars Helge Overland
+ */
+public class AnnotationUtils
 {
     /**
-     * Will perform a select query including the key, can be used to look up order
-     * of events in database logs.
+     * Returns methods on the given target object which are annotated with the
+     * annotation of the given class.
+     * 
+     * @param target the target object.
+     * @param annotationType the annotation class type.
+     * @return a list of methods annotated with the given annotation.
      */
-    void markDbLog( String key );
+    public static List<Method> getAnnotatedMethods( Object target, Class<? extends Annotation> annotationType )
+    {
+        final List<Method> methods = new ArrayList<>();
+        
+        if ( target == null || annotationType == null )
+        {
+            return methods;
+        }
+        
+        for ( Method method : target.getClass().getMethods() )
+        {
+            Annotation a = org.springframework.core.annotation.AnnotationUtils.findAnnotation( method, annotationType );
+            
+            if ( a != null )
+            {
+                methods.add( method );
+            }
+        }
+        
+        return methods;
+    }
 }

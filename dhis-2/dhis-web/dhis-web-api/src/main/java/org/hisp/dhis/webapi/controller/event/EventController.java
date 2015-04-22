@@ -42,8 +42,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
-import org.hisp.dhis.common.Pager;
-import org.hisp.dhis.common.PagerUtils;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dxf2.common.IdSchemes;
@@ -131,61 +129,6 @@ public class EventController
     // READ
     // -------------------------------------------------------------------------
 
-    @RequestMapping( value = "", method = RequestMethod.GET, produces = { "application/csv", "application/csv+gzip", "text/csv" } )
-    @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_DATAVALUE_ADD')" )
-    public void getCsvEvents(
-        @RequestParam( required = false ) String program,
-        @RequestParam( required = false ) String programStage,
-        @RequestParam( required = false ) ProgramStatus programStatus,
-        @RequestParam( required = false ) Boolean followUp,
-        @RequestParam( required = false ) String trackedEntityInstance,
-        @RequestParam( required = false ) String orgUnit,
-        @RequestParam( required = false ) OrganisationUnitSelectionMode ouMode,
-        @RequestParam( required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date startDate,
-        @RequestParam( required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date endDate,
-        @RequestParam( required = false ) EventStatus status,
-        @RequestParam( required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date lastUpdated,
-        @RequestParam( required = false ) Integer page,
-        @RequestParam( required = false ) Integer pageSize,
-        @RequestParam( required = false ) String attachment,
-        @RequestParam( required = false, defaultValue = "false" ) boolean skipHeader,
-        @RequestParam Map<String, String> parameters,
-        IdSchemes idSchemes, Model model, HttpServletResponse response, HttpServletRequest request ) throws IOException
-    {
-        WebOptions options = new WebOptions( parameters );
-
-        EventSearchParams params = eventService.getFromUrl( program, programStage, programStatus, followUp, orgUnit, ouMode, 
-            trackedEntityInstance, startDate, endDate, status, lastUpdated, idSchemes, page, pageSize );
-        
-        Events events = eventService.getEvents( params );
-
-        if ( options.hasPaging() )
-        {
-            Pager pager = new Pager( options.getPage(), events.getEvents().size(), options.getPageSize() );
-            events.setPager( pager );
-            events.setEvents( PagerUtils.pageCollection( events.getEvents(), pager ) );
-        }
-
-        OutputStream outputStream = response.getOutputStream();
-        response.setContentType( "application/csv" );
-
-        if ( ContextUtils.isAcceptGzip( request ) )
-        {
-            response.addHeader( ContextUtils.HEADER_CONTENT_TRANSFER_ENCODING, "binary" );
-            outputStream = new GZIPOutputStream( outputStream );
-            response.setContentType( "application/csv+gzip" );
-        }
-
-        if ( !StringUtils.isEmpty( attachment ) )
-        {
-            response.addHeader( "Content-Disposition", "attachment; filename=" + attachment );
-        }
-
-        csvEventService.writeEvents( outputStream, events, !skipHeader );
-        response.getOutputStream().flush();
-        response.getOutputStream().close();
-    }
-
     @RequestMapping( value = "", method = RequestMethod.GET )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_DATAVALUE_ADD')" )
     public String getEvents(
@@ -221,13 +164,6 @@ public class EventController
             }
         }
 
-        if ( options.hasPaging() )
-        {
-            Pager pager = new Pager( options.getPage(), events.getEvents().size(), options.getPageSize() );
-            events.setPager( pager );
-            events.setEvents( PagerUtils.pageCollection( events.getEvents(), pager ) );
-        }
-
         if ( !skipMeta && params.getProgram() != null )
         {
             events.setMetaData( getMetaData( params.getProgram() ) );
@@ -242,6 +178,52 @@ public class EventController
         }
 
         return "events";
+    }
+
+    @RequestMapping( value = "", method = RequestMethod.GET, produces = { "application/csv", "application/csv+gzip", "text/csv" } )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_DATAVALUE_ADD')" )
+    public void getCsvEvents(
+        @RequestParam( required = false ) String program,
+        @RequestParam( required = false ) String programStage,
+        @RequestParam( required = false ) ProgramStatus programStatus,
+        @RequestParam( required = false ) Boolean followUp,
+        @RequestParam( required = false ) String trackedEntityInstance,
+        @RequestParam( required = false ) String orgUnit,
+        @RequestParam( required = false ) OrganisationUnitSelectionMode ouMode,
+        @RequestParam( required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date startDate,
+        @RequestParam( required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date endDate,
+        @RequestParam( required = false ) EventStatus status,
+        @RequestParam( required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date lastUpdated,
+        @RequestParam( required = false ) Integer page,
+        @RequestParam( required = false ) Integer pageSize,
+        @RequestParam( required = false ) String attachment,
+        @RequestParam( required = false, defaultValue = "false" ) boolean skipHeader,
+        @RequestParam Map<String, String> parameters,
+        IdSchemes idSchemes, Model model, HttpServletResponse response, HttpServletRequest request ) throws IOException
+    {
+        EventSearchParams params = eventService.getFromUrl( program, programStage, programStatus, followUp, orgUnit, ouMode, 
+            trackedEntityInstance, startDate, endDate, status, lastUpdated, idSchemes, page, pageSize );
+        
+        Events events = eventService.getEvents( params );
+
+        OutputStream outputStream = response.getOutputStream();
+        response.setContentType( "application/csv" );
+
+        if ( ContextUtils.isAcceptGzip( request ) )
+        {
+            response.addHeader( ContextUtils.HEADER_CONTENT_TRANSFER_ENCODING, "binary" );
+            outputStream = new GZIPOutputStream( outputStream );
+            response.setContentType( "application/csv+gzip" );
+        }
+
+        if ( !StringUtils.isEmpty( attachment ) )
+        {
+            response.addHeader( "Content-Disposition", "attachment; filename=" + attachment );
+        }
+
+        csvEventService.writeEvents( outputStream, events, !skipHeader );
+        response.getOutputStream().flush();
+        response.getOutputStream().close();
     }
 
     @RequestMapping( value = "/eventRows", method = RequestMethod.GET )
@@ -262,13 +244,6 @@ public class EventController
             orgUnit, ouMode, null, startDate, endDate, null, null, null, null, null );
         
         EventRows eventRows = eventRowService.getEventRows( params );
-
-        if ( options.hasPaging() )
-        {
-            Pager pager = new Pager( options.getPage(), eventRows.getEventRows().size(), options.getPageSize() );
-            eventRows.setPager( pager );
-            eventRows.setEventRows( PagerUtils.pageCollection( eventRows.getEventRows(), pager ) );
-        }
 
         model.addAttribute( "model", eventRows );
         model.addAttribute( "viewClass", options.getViewClass( "detailed" ) );
