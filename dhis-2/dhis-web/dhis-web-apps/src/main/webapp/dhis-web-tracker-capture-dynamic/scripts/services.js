@@ -1949,10 +1949,11 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                             }
                             else if(dhisFunction.name === "dhis.concatenate")
                             {
-                                var returnString = "";
+                                var returnString = "'";
                                 for (var i = 0; i < parameters.length; i++) {
                                     returnString += parameters[i];
                                 }
+                                returnString += "'";
                                 expression = expression.replace(callToThisFunction, returnString);
                             }
                         });
