@@ -158,3 +158,29 @@
     	<td colspan="2" style="height:15px"></td>
     </tr>
 </table>
+
+<table>
+    <tr>
+        <th style="width:200px">$i18n.getString( "events" )</th>
+        <th style="width:200px">$i18n.getString( "number" )</th>
+    </tr>
+    <tr>
+        <td>$i18n.getString( "today" )</td>
+        <td>$eventCount.get( 0 )</td>
+    </tr>
+    <tr>
+        <td>$i18n.getString( "yesterday" )</td>
+        <td>$eventCount.get( 1 )</td>
+    </tr>
+    <tr>
+        <td>$i18n.getString( "last_7_days" )</td>
+        <td>$eventCount.get( 7 )</td>
+    </tr>
+    <tr>
+        <td>$i18n.getString( "last_30_days" )</td>
+        <td>$eventCount.get( 30 )</td>
+    </tr>
+    <tr>
+        <td colspan="2" style="height:15px"></td>
+    </tr>
+</table>
