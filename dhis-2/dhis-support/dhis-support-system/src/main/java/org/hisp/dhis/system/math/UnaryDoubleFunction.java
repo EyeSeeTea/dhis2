@@ -1,4 +1,4 @@
-package org.hisp.dhis.startup;
+package org.hisp.dhis.system.math;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,54 +28,45 @@ package org.hisp.dhis.startup;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.aggregation.AggregatedDataValueService;
-import org.hisp.dhis.system.startup.AbstractStartupRoutine;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
+import java.util.Stack;
+
+import org.nfunk.jep.ParseException;
+import org.nfunk.jep.function.PostfixMathCommand;
 
 /**
+ * Abstract JEP function for a single, numerical argument.
+ * 
  * @author Lars Helge Overland
  */
-public class TableCreator
-    extends AbstractStartupRoutine
+public abstract class UnaryDoubleFunction
+    extends PostfixMathCommand
 {
-    private static final Log log = LogFactory.getLog( TableCreator.class );
-    
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
+    public UnaryDoubleFunction()
+    {
+        super();
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+        numberOfParameters = 1;
+    }
     
-    @Autowired
-    private AggregatedDataValueService aggregatedDataValueService;    
-    
-    // -------------------------------------------------------------------------
-    // StartupRoutine implementation
-    // -------------------------------------------------------------------------
-
     @Override
-    public void execute()
+    @SuppressWarnings( { "rawtypes", "unchecked" } )
+    public void run( Stack inStack ) throws ParseException 
     {
-        aggregatedDataValueService.createDataMart();
+        checkStack( inStack );
         
-        createSilently( "create unique index dataapproval_unique on dataapproval(datasetid,periodid,organisationunitid,attributeoptioncomboid,dataapprovallevelid)", "dataapproval_unique" );
+        Object param = inStack.pop();
+        
+        if ( param == null || !( param instanceof Double ) )
+        {
+            throw new ParseException( "Invalid parameter type, must be double: " + param );
+        }
+        
+        double arg = ( (Double) param ).doubleValue();
+        
+        Double result = eval( arg );
+        
+        inStack.push( result );
     }
     
-    private void createSilently( final String sql, final String name )
-    {
-        try
-        {
-            jdbcTemplate.execute( sql );
-            
-            log.info( "Created table/index " + name );
-        }
-        catch ( Exception ex )
-        {
-            log.debug( "Table/index " + name + " exists" );
-        }
-    }
+    public abstract Double eval( double arg );
 }
