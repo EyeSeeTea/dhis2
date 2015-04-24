@@ -134,9 +134,9 @@ public interface ProgramStageInstanceStore
     Grid getCompleteness( Collection<Integer> orgunitIds, Program program, String startDate, String endDate, I18n i18n );
 
     /**
-     * 
-     * @param time
-     * @return
+     * Get the number of ProgramStageInstances updates since the given Date.
+     * @param time the time.
+     * @return the number of ProgramStageInstances.
      */
     long getProgramStageInstanceCountLastUpdatedAfter( Date time );
 }

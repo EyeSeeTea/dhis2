@@ -1,10 +1,9 @@
-
 $( document ).ready( function()
 {
-	showLoader();
+    showLoader();
 
-	$( '#contentDiv' ).load( 'getStatistics.action?' + getDC(), function()
-	{
-		hideLoader();
-	} );
+    $( '#contentDiv' ).load( 'getStatistics.action?' + getDC(), function()
+    {
+        hideLoader();
+    } );
 } );
