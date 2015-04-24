@@ -99,7 +99,7 @@
 		<td>$activeUsers.get( 1 )</td>
 	</tr>
 	<tr>
-		<td>$i18n.getString( "yesterday" )</td>
+		<td>$i18n.getString( "last_2_days" )</td>
 		<td>$activeUsers.get( 2 )</td>
 	</tr>
 	<tr>
@@ -143,7 +143,7 @@
 		<td>$dataValueCount.get( 0 )</td>
 	</tr>
 	<tr>
-		<td>$i18n.getString( "yesterday" )</td>
+		<td>$i18n.getString( "last_2_days" )</td>
 		<td>$dataValueCount.get( 1 )</td>
 	</tr>
 	<tr>
@@ -169,7 +169,7 @@
         <td>$eventCount.get( 0 )</td>
     </tr>
     <tr>
-        <td>$i18n.getString( "yesterday" )</td>
+        <td>$i18n.getString( "last_2_days" )</td>
         <td>$eventCount.get( 1 )</td>
     </tr>
     <tr>
