@@ -689,14 +689,14 @@ public class DefaultProgramInstanceService
         {
             programStageInstance = new ProgramStageInstance();
             programStageInstance.setProgramInstance( programInstance );
-            programStageInstance.setProgramStage( programStage );
-            programStageInstance.setOrganisationUnit( orgunit );
+            programStageInstance.setProgramStage( programStage );            
             programStageInstance.setDueDate( dueDate );
             programStageInstance.setStatus( EventStatus.SCHEDULE );
 
             if ( programStage.getOpenAfterEnrollment() || programInstance.getProgram().isSingleEvent()
                 || programStage.getPeriodType() != null )
             {
+                programStageInstance.setOrganisationUnit( orgunit );
                 programStageInstance.setExecutionDate( dueDate );
                 programStageInstance.setStatus( EventStatus.ACTIVE );
             }

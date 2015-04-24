@@ -388,7 +388,6 @@ public abstract class AbstractEnrollmentService
         }
 
         OrganisationUnit organisationUnit = getOrganisationUnit( enrollment.getOrgUnit() );
-        System.err.println( "Enrollment: " + organisationUnit );
 
         ProgramInstance programInstance = programInstanceService.enrollTrackedEntityInstance( enrollment.getEnrollment(), entityInstance, program,
             enrollment.getDateOfEnrollment(), enrollment.getDateOfIncident(), organisationUnit );
@@ -465,11 +464,11 @@ public abstract class AbstractEnrollmentService
 
         if ( programInstance.getStatus() != enrollment.getStatus().getValue() )
         {
-            if ( enrollment.getStatus().equals( EnrollmentStatus.CANCELLED ) )
+            if ( EnrollmentStatus.CANCELLED == enrollment.getStatus() )
             {
                 programInstanceService.cancelProgramInstanceStatus( programInstance );
             }
-            else if ( enrollment.getStatus().equals( EnrollmentStatus.COMPLETED ) )
+            else if ( EnrollmentStatus.COMPLETED == enrollment.getStatus() )
             {
                 programInstanceService.completeProgramInstanceStatus( programInstance );
             }
