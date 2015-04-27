@@ -1855,22 +1855,22 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             $scope.replaceVariables = function(expression) {
                 //replaces the variables in an expression with actual variable values.
                 //First check if the expression contains variables at all(any dollar signs):
-                if(expression.indexOf('$') !== -1) {
+                if(expression.indexOf('#') !== -1) {
                     //Find every variable name in the expression;
-                    var variablespresent = expression.match(/\$[a-zA-Z0-9]*/g);
+                    var variablespresent = expression.match(/#{\w+}/g);
                     //Replace each matched variable:
                     angular.forEach(variablespresent, function(variablepresent) {
                         //First strip away any dollar signs from the variable name:
-                        variablepresent = variablepresent.replace("$","");
+                        variablepresent = variablepresent.replace("#{","").replace("}","");
                         
                         if(angular.isDefined(variablesHash[variablepresent])) {
                             //Replace all occurrences of the variable name(hence using regex replacement):
-                            expression = expression.replace(new RegExp("\\$" + variablepresent, 'g'),
+                            expression = expression.replace(new RegExp("#{" + variablepresent + "}", 'g'),
                                 variablesHash[variablepresent]);
                         }
                         else {
                             $log.warn("Expression " + expression + " conains variable " + variablepresent 
-                                    + " - but this variable is not defined." )
+                                    + " - but this variable is not defined." );
                         }
                             
                     });
@@ -2022,7 +2022,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                             var expression = rule.condition;
                             //Go through and populate variables with actual values, but only if there actually is any replacements to be made(one or more "$" is present)
                             if(expression) {
-                                if(expression.indexOf('$') !== -1) {
+                                if(expression.indexOf('#') !== -1) {
                                     expression = $scope.replaceVariables(expression);
                                 }
                                 //run expression:
@@ -2054,14 +2054,14 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                                     //To make a lookup in variables hash, we must make a lookup without the dollar sign in the variable name
                                     //The first strategy is to make a direct lookup. In case the "data" expression is more complex, we have to do more replacement and evaluation.
 
-                                    var nameWithoutDollarSign = action.data.replace('$','');
+                                    var nameWithoutDollarSign = action.data.replace('#{','').replace('}','');
                                     if(angular.isDefined(variablesHash[nameWithoutDollarSign]))
                                     {
                                         //The variable exists, and is replaced with its corresponding value
                                         $rootScope.ruleeffects[action.id].data =
                                             variablesHash[nameWithoutDollarSign];
                                     }
-                                    else if(action.data.indexOf('$') !== -1)
+                                    else if(action.data.indexOf('#') !== -1)
                                     {
                                         //Since the value couldnt be looked up directly, and contains a dollar sign, the expression was more complex
                                         //Now we will have to make a thorough replacement and separate evaluation to find the correct value:
@@ -2084,7 +2084,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                                 if($rootScope.ruleeffects[action.id].action === "ASSIGNVARIABLE" && $rootScope.ruleeffects[action.id].ineffect){
                                     //from earlier evaluation, the data portion of the ruleeffect now contains the value of the variable to be assign.
                                     //the content portion of the ruleeffect defines the name for the variable, when dollar is removed:
-                                    var variabletoassign = $rootScope.ruleeffects[action.id].content.replace("$","");
+                                    var variabletoassign = $rootScope.ruleeffects[action.id].content.replace("#{","").replace("}","");
 
                                     if(!angular.isDefined(variablesHash[variabletoassign])){
                                         $log.warn("Variable " + variabletoassign + " was not defined.");
