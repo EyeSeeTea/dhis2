@@ -2767,6 +2767,7 @@ Ext.onReady( function() {
             favoriteUrlItem,
             apiUrlItem,
             shareButton,
+            aboutButton,
             defaultButton,
             centerRegion,
             setGui,
