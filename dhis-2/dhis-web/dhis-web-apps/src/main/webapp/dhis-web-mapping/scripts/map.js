@@ -6089,7 +6089,7 @@ Ext.onReady(function() {
             },
 
             updateLegend: function() {
-
+                return {};
             },
 
             CLASS_NAME: "mapfish.GeoStat.Event"
@@ -6293,7 +6293,7 @@ Ext.onReady(function() {
             },
 
             updateLegend: function() {
-
+                return {};
             },
 
             CLASS_NAME: "mapfish.GeoStat.Boundary"
