@@ -1950,6 +1950,8 @@ Ext.onReady( function() {
 							w.update(html);
 						},
                         callback: function() {
+                            document.body.oncontextmenu = true;
+
                             if (ns.app.aboutButton.rendered) {
                                 ns.core.web.window.setAnchorPosition(w, ns.app.aboutButton);
 
@@ -1959,7 +1961,17 @@ Ext.onReady( function() {
                             }
                         }
 					});
-				}
+				},
+                hide: function() {
+                    document.body.oncontextmenu = function() {
+                        return false;
+                    };
+                },
+                destroy: function() {
+                    document.body.oncontextmenu = function() {
+                        return false;
+                    };
+                }
 			}
 		});
 	};
