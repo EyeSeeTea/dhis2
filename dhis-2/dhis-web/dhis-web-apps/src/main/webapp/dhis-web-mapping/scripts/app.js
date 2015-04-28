@@ -2578,7 +2578,16 @@ Ext.onReady( function() {
 				show: function(w) {
 					var pos = gis.viewport.favoriteWindow.getPosition();
 					w.setPosition(pos[0] + 5, pos[1] + 5);
-				}
+
+					if (!w.hasDestroyOnBlurHandler) {
+						gis.util.gui.window.addDestroyOnBlurHandler(w);
+					}
+
+                    gis.viewport.favoriteWindow.destroyOnBlur = false;
+				},
+                destroy: function() {
+                    gis.viewport.favoriteWindow.destroyOnBlur = true;
+                }
 			}
 		});
 
@@ -2798,6 +2807,7 @@ Ext.onReady( function() {
 				resizable: false,
 				modal: true,
 				items: nameTextfield,
+				destroyOnBlur: true,
 				bbar: [
 					cancelButton,
 					'->',
@@ -2806,6 +2816,12 @@ Ext.onReady( function() {
 				listeners: {
 					show: function() {
 						this.setPosition(favoriteWindow.x + 14, favoriteWindow.y + 67);
+
+                        if (!w.hasDestroyOnBlurHandler) {
+                            gis.util.gui.window.addDestroyOnBlurHandler(w);
+                        }
+
+                        gis.viewport.favoriteWindow.destroyOnBlur = true;
 
 						nameTextfield.focus(false, 500);
 					}
