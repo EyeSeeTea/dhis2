@@ -1,4 +1,4 @@
-package org.hisp.dhis.schema.descriptors;
+package org.hisp.dhis.system.util;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,38 +28,55 @@ package org.hisp.dhis.schema.descriptors;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.collect.Lists;
-import org.hisp.dhis.dataelement.DataElementGroupSet;
-import org.hisp.dhis.schema.Authority;
-import org.hisp.dhis.schema.AuthorityType;
-import org.hisp.dhis.schema.Schema;
-import org.hisp.dhis.schema.SchemaDescriptor;
-import org.springframework.stereotype.Component;
+import java.util.Map;
+
+import org.apache.commons.jexl2.Expression;
+import org.apache.commons.jexl2.JexlContext;
+import org.apache.commons.jexl2.JexlEngine;
+import org.apache.commons.jexl2.MapContext;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Lars Helge Overland
  */
-@Component
-public class DataElementGroupSetSchemaDescriptor implements SchemaDescriptor
+public class ExpressionUtils
 {
-    public static final String SINGULAR = "dataElementGroupSet";
+    private static final JexlEngine JEXL = new JexlEngine();
 
-    public static final String PLURAL = "dataElementGroupSets";
-
-    public static final String API_ENDPOINT = "/" + PLURAL;
-
-    @Override
-    public Schema getSchema()
+    static 
     {
-        Schema schema = new Schema( DataElementGroupSet.class, SINGULAR, PLURAL );
-        schema.setRelativeApiEndpoint( API_ENDPOINT );
-        schema.setShareable( true );
-        schema.setOrder( 1220 );
-
-        schema.getAuthorities().add( new Authority( AuthorityType.CREATE_PUBLIC, Lists.newArrayList( "F_DATAELEMENTGROUPSET_PUBLIC_ADD" ) ) );
-        schema.getAuthorities().add( new Authority( AuthorityType.CREATE_PRIVATE, Lists.newArrayList( "F_DATAELEMENTGROUPSET_PRIVATE_ADD" ) ) );
-        schema.getAuthorities().add( new Authority( AuthorityType.DELETE, Lists.newArrayList( "F_DATAELEMENTGROUPSET_DELETE" ) ) );
-
-        return schema;
+        JEXL.setCache( 512 );
+        JEXL.setSilent( false );
     }
+    
+    /**
+     * Evaluates the given expression. The given variables will be substituted 
+     * in the expression.
+     * 
+     * @param expression the expression.
+     * @param vars the variables, can be null.
+     * @return the result of the evaluation.
+     */
+    public static Object evaluate( String expression, Map<String, Object> vars )
+    {
+        Expression exp = JEXL.createExpression( expression );
+        
+        JexlContext context = vars != null ? new MapContext( vars ) : new MapContext();
+                
+        return exp.evaluate( context );
+    }
+
+    /**
+     * Evaluates the given expression to true or false. The given variables will 
+     * be substituted in the expression.
+     * 
+     * @param expression the expression.
+     * @param vars the variables, can be null.
+     * @return true or false.
+     */
+    public static boolean isTrue( String expression, Map<String, Object> vars )
+    {
+        Boolean result = (Boolean) evaluate( expression, vars );
+        
+        return result != null ? result : false;
+    }    
 }
