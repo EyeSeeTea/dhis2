@@ -1683,7 +1683,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 else if(variabletype === 'date') {
                     variablevalue = "'" + variablevalue + "'";
                 }
-                else if(variabletype === 'bool') {
+                else if(variabletype === 'bool' || variabletype === 'trueOnly') {
                     if(eval(variablevalue)) {
                         variablevalue = true;
                     }
