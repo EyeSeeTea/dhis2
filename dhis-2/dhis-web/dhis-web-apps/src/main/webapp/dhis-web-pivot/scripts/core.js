@@ -398,7 +398,7 @@ Ext.onReady( function() {
 
 							// Indicators as filter
 							if (layout.filters[i].dimension === dimConf.indicator.objectName) {
-								web.message.alert(NS.i18n.indicators_cannot_be_specified_as_filter || 'Indicators cannot be specified as filter');
+								ns.alert(NS.i18n.indicators_cannot_be_specified_as_filter || 'Indicators cannot be specified as filter', 'error');
 								return;
 							}
 
@@ -2941,6 +2941,63 @@ Ext.onReady( function() {
 			}
 		}());
 
+        // alert
+        (function() {
+            ns.alert = function(msg, type) {
+                var config = {},
+                    window,
+                    title,
+                    iconCls;
+                    
+                if (!msg) {
+                    return;
+                }
+
+                if (type === 'error') {
+                    title = NS.i18n.error;
+                    iconCls = type;
+                }
+                else if (type === 'warning') {
+                    title = NS.i18n.warning;
+                    iconCls = warning;
+                }
+
+                // title
+                if (title) {
+                    config.title = title;
+                }
+
+                // iconCls
+                if (iconCls) {
+                    config.iconCls = 'ns-window-title-messagebox ' + iconCls;
+                }
+
+                // bodyStyle
+                config.bodyStyle = 'padding: 10px; background: #fff';
+
+                // destroy handler
+                config.modal = true;
+                config.destroyOnBlur = true;
+
+                // listeners
+                config.listeners = {
+                    show: function(w) {
+                        w.update(msg + '.');
+
+                        w.setPosition(w.getPosition()[0], 200);
+
+						if (!w.hasDestroyOnBlurHandler) {
+							ns.core.web.window.addDestroyOnBlurHandler(w);
+						}
+                    }
+                };
+
+                window = Ext.create('Ext.window.Window', config);
+
+                window.show();
+            };
+        }());
+            
 		// instance
 		return {
 			conf: conf,

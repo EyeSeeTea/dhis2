@@ -889,8 +889,10 @@ table.pivot.fontsize-small td {
 }
 .ns-window-title-messagebox {
     padding-left: 16px;
-    background-image: url('../images/error_m.png');
     background-position-y: 1px;
+}
+.ns-window-title-messagebox.error {
+    background-image: url('../images/error_m.png');
 }
 
 	/* Confirm list */

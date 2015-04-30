@@ -6757,14 +6757,15 @@ Ext.onReady( function() {
 				NS.instances.push(ns);
 
                 ns.init = init;
-                ns.alert = function(msg, isAlert) {
-                    if (isAlert) {
-                        alert(msg);
-                    }
-                    else {
-                        console.log(msg);
-                    }
-                };
+                ns.alert = function() {};
+                //ns.alert = function(msg, isAlert) {
+                    //if (isAlert) {
+                        //alert(msg);
+                    //}
+                    //else {
+                        //console.log(msg);
+                    //}
+                //};
 
 				ns.core = NS.getCore(ns);
 				extendCore(ns.core);
