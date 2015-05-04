@@ -2385,7 +2385,7 @@ Ext.onReady( function() {
 
                 msg += '\n\n' + 'Hint: A good way to reduce the number of items is to use relative periods and level/group organisation unit selection modes.';
 
-                ns.alert(msg);
+                ns.alert(msg, 'warning');
 			};
 
 			// chart
