@@ -2003,11 +2003,7 @@ Ext.onReady( function() {
                 config.html = msg + (msg.substr(msg.length - 1) === '.' ? '' : '.');
 
                 // bodyStyle
-                config.bodyStyle = 'padding: 10px; background: #fff; max-width: 350px';
-
-                // width
-                config.maxWidth = 358;
-                config.maxHeight = ns.app.centerRegion.getHeight() / 2;
+                config.bodyStyle = 'padding: 10px; background: #fff; max-width: 350px; max-height: ' + ns.app.centerRegion.getHeight() / 2 + 'px';
 
                 // destroy handler
                 config.modal = true;
