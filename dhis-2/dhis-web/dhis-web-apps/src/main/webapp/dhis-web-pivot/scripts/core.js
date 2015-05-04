@@ -38,27 +38,27 @@ Ext.onReady( function() {
 				dimension: {
 					data: {
 						value: 'data',
-						name: PT.i18n.data || 'Data',
+						name: NS.i18n.data || 'Data',
 						dimensionName: 'dx',
 						objectName: 'dx',
 						warning: {
-							filter: '...'//PT.i18n.wm_multiple_filter_ind_de
+							filter: '...'//NS.i18n.wm_multiple_filter_ind_de
 						}
 					},
 					category: {
-						name: PT.i18n.assigned_categories || 'Assigned categories',
+						name: NS.i18n.assigned_categories || 'Assigned categories',
 						dimensionName: 'co',
 						objectName: 'co',
 					},
 					indicator: {
 						value: 'indicators',
-						name: PT.i18n.indicators || 'Indicators',
+						name: NS.i18n.indicators || 'Indicators',
 						dimensionName: 'dx',
 						objectName: 'in'
 					},
 					dataElement: {
 						value: 'dataElements',
-						name: PT.i18n.data_elements || 'Data elements',
+						name: NS.i18n.data_elements || 'Data elements',
 						dimensionName: 'dx',
 						objectName: 'de'
 					},
@@ -70,13 +70,13 @@ Ext.onReady( function() {
 					},
 					dataSet: {
 						value: 'dataSets',
-						name: PT.i18n.data_sets || 'Data sets',
+						name: NS.i18n.data_sets || 'Data sets',
 						dimensionName: 'dx',
 						objectName: 'ds'
 					},
 					period: {
 						value: 'period',
-						name: PT.i18n.periods || 'Periods',
+						name: NS.i18n.periods || 'Periods',
 						dimensionName: 'pe',
 						objectName: 'pe'
 					},
@@ -88,7 +88,7 @@ Ext.onReady( function() {
 					},
 					organisationUnit: {
 						value: 'organisationUnits',
-						name: PT.i18n.organisation_units || 'Organisation units',
+						name: NS.i18n.organisation_units || 'Organisation units',
 						dimensionName: 'ou',
 						objectName: 'ou'
 					},
@@ -1945,7 +1945,7 @@ Ext.onReady( function() {
 			};
 
 			// window
-			web.window = {};
+			web.window = web.window || {};
 
 			web.window.setAnchorPosition = function(w, target) {
 				var vpw = ns.app.viewport.getWidth(),
@@ -1962,8 +1962,7 @@ Ext.onReady( function() {
 			};
 
 			web.window.addHideOnBlurHandler = function(w) {
-				var maskElements = Ext.query('.x-mask'),
-                    el = Ext.get(maskElements[0]);
+				var el = Ext.get(Ext.query('.x-mask')[0]);
 
 				el.on('click', function() {
 					if (w.hideOnBlur) {
