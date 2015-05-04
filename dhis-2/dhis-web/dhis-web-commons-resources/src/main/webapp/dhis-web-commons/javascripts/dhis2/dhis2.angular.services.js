@@ -19,7 +19,10 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         var promise = $http.get(url).then(function(response){
             tx= {locale: locale, keys: dhis2.util.parseJavaProperties(response.data)};
             return tx;
-        }, function(){            
+        }, function(){
+        	
+        	setHeaderDelayMessage($translate('No translation file is found for the selected locale. Using default translation (English).'));
+        	            
             var p = $http.get(defaultUrl).then(function(response){
                 tx= {locale: locale, keys: dhis2.util.parseJavaProperties(response.data)};
                 return tx;
@@ -62,6 +65,35 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                 });
             });
             return deferred.promise;
+        }
+    };
+})
+
+.service('AuthorityService', function() {
+    var getAuthorities = function(roles){
+        var authority = {};
+        if( roles && roles.userCredentials && roles.userCredentials.userRoles ){
+            angular.forEach(roles.userCredentials.userRoles, function(role){
+                angular.forEach(role.authorities, function(auth){
+                    authority[auth] = true;
+                });
+            });
+        }
+        return authority;
+    };
+    
+    return {
+        getUserAuthorities: function(roles){
+            var auth = getAuthorities(roles);
+            var authority = {};
+            authority.canDeleteEvent = auth['F_TRACKED_ENTITY_DATAVALUE_DELETE'] || auth['ALL'] ? true:false;
+            authority.canAddOrUpdateEvent = auth['F_TRACKED_ENTITY_DATAVALUE_ADD'] || auth['ALL'] ? true:false;
+            authority.canSearchTei = auth['F_TRACKED_ENTITY_INSTANCE_SEARCH'] || auth['ALL'] ? true:false;
+            authority.canDeleteTei = auth['F_TRACKED_ENTITY_INSTANCE_DELETE'] || auth['ALL'] ? true:false;
+            authority.canRegisterTei = auth['F_TRACKED_ENTITY_INSTANCE_ADD'] || auth['ALL'] ? true:false;
+            authority.canEnrollTei = auth['F_PROGRAM_ENROLLMENT'] || auth['ALL'] ? true:false;
+            authority.canUnEnrollTei = auth['F_PROGRAM_UNENROLLMENT'] || auth['ALL'] ? true:false;
+            return authority;
         }
     };
 })

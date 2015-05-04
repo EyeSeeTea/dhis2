@@ -894,6 +894,9 @@ table.pivot.fontsize-small td {
 .ns-window-title-messagebox.error {
     background-image: url('../images/error_m.png');
 }
+.ns-window-title-messagebox.warning {
+    background-image: url('../images/warning.png');
+}
 
 	/* Confirm list */
 .ns-window-confirm-list .x-panel-body {
