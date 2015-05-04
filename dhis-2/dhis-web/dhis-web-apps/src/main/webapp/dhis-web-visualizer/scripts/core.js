@@ -780,12 +780,12 @@ Ext.onReady( function() {
 
 				return function() {
 					if (!Ext.isObject(config)) {
-						ns.alert('Record: config is not an object: ' + config, true);
+						console.log('api.layout.Record: config is not an object: ' + config);
 						return;
 					}
 
 					if (!Ext.isString(config.id)) {
-						ns.alert('Record: id is not text: ' + config, true);
+						console.log('api.layout.Record: id is not text: ' + config, true);
 						return;
 					}
 
@@ -2186,7 +2186,7 @@ Ext.onReady( function() {
 
 				message = message || 'Loading..';
 
-				if (component.mask) {
+				if (component.mask && component.mask.destroy) {
 					component.mask.destroy();
 					component.mask = null;
 				}
@@ -2211,11 +2211,96 @@ Ext.onReady( function() {
 					return null;
 				}
 
-				if (component.mask) {
+				if (component.mask && component.mask.destroy) {
 					component.mask.destroy();
 					component.mask = null;
 				}
 			};
+
+			// window
+			web.window = {};
+
+			web.window.setAnchorPosition = function(w, target) {
+				var vpw = ns.app.viewport.getWidth(),
+					targetx = target ? target.getPosition()[0] : 4,
+					winw = w.getWidth(),
+					y = target ? target.getPosition()[1] + target.getHeight() + 4 : 33;
+
+				if ((targetx + winw) > vpw) {
+					w.setPosition((vpw - winw - 2), y);
+				}
+				else {
+					w.setPosition(targetx, y);
+				}
+			};
+
+			web.window.addHideOnBlurHandler = function(w) {
+				var maskElements = Ext.query('.x-mask'),
+                    el = Ext.get(maskElements[0]);
+
+				el.on('click', function() {
+					if (w.hideOnBlur) {
+						w.hide();
+					}
+				});
+
+				w.hasHideOnBlurHandler = true;
+			};
+
+			web.window.addDestroyOnBlurHandler = function(w) {
+				var maskElements = Ext.query('.x-mask'),
+                    el = Ext.get(maskElements[0]);
+
+				el.on('click', function() {
+					if (w.destroyOnBlur) {
+						w.destroy();
+					}
+				});
+
+				w.hasDestroyOnBlurHandler = true;
+			};
+            
+			// message
+			web.message = {};
+
+			web.message.alert = function(msg, type) {
+                var config = {},
+                    window;
+
+                if (!msg) {
+                    return;
+                }
+
+                type = type || 'error';
+
+				config.title = type === 'error' ? NS.i18n.error : (type === 'warning' ? NS.i18n.warning : NS.i18n.info);
+				config.iconCls = 'ns-window-title-messagebox ' + type;
+
+                // html
+                config.html = msg + (msg.substr(msg.length - 1) === '.' ? '' : '.');
+
+                // bodyStyle
+                config.bodyStyle = 'padding: 10px; background: #fff; max-width: 350px; max-height: ' + ns.app.centerRegion.getHeight() / 2 + 'px';
+
+                // destroy handler
+                config.modal = true;
+                config.destroyOnBlur = true;
+
+                // listeners
+                config.listeners = {
+                    show: function(w) {
+                        w.setPosition(w.getPosition()[0], w.getPosition()[1] / 2);
+
+						if (!w.hasDestroyOnBlurHandler) {
+							web.window.addDestroyOnBlurHandler(w);
+						}
+                    }
+                };
+
+                window = Ext.create('Ext.window.Window', config);
+
+                window.show();
+            };
 
 			// analytics
 			web.analytics = {};
@@ -3810,7 +3895,9 @@ Ext.onReady( function() {
 			}
 		}());
 
-		// instance
+		// alert
+        ns.alert = web.message.alert;
+        
 		return {
 			conf: conf,
 			api: api,

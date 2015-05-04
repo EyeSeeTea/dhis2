@@ -56,6 +56,9 @@ Ext.onReady( function() {
             web = {},
             dimConf;
 
+        // tmp
+        ns.alert = function() {};
+
 		// conf
 		(function() {
 			conf.finals = {

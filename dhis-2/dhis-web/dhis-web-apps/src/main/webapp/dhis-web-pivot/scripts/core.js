@@ -3,9 +3,9 @@ Ext.onReady( function() {
 	// ext config
 	Ext.Ajax.method = 'GET';
 
-    Ext.isIE = function() {
-        return /trident/.test(Ext.userAgent);
-    }();
+    Ext.isIE = (/trident/.test(Ext.userAgent));
+
+    Ext.isIE11 = Ext.isIE && (/rv:11.0/.test(Ext.userAgent));
 
 	// namespace
 	PT = {};
@@ -24,6 +24,9 @@ Ext.onReady( function() {
             service = {},
             web = {},
             dimConf;
+
+        // tmp
+        ns.alert = function() {};
 
 		// conf
 		(function() {
@@ -1942,7 +1945,7 @@ Ext.onReady( function() {
 			};
 
 			// window
-			web.window = web.window || {};
+			web.window = {};
 
 			web.window.setAnchorPosition = function(w, target) {
 				var vpw = ns.app.viewport.getWidth(),
@@ -1959,7 +1962,8 @@ Ext.onReady( function() {
 			};
 
 			web.window.addHideOnBlurHandler = function(w) {
-				var el = Ext.get(Ext.query('.x-mask')[0]);
+				var maskElements = Ext.query('.x-mask'),
+                    el = Ext.get(maskElements[0]);
 
 				el.on('click', function() {
 					if (w.hideOnBlur) {
