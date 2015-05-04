@@ -6866,8 +6866,6 @@ Ext.onReady( function() {
 				NS.instances.push(ns);
 
                 ns.init = init;
-                ns.alert = function() {};
-
 				ns.core = NS.getCore(ns);
 				extendCore(ns.core);
 
