@@ -3284,10 +3284,11 @@ Ext.onReady( function() {
                 headers = {
                     'Content-Type': headerMap[type],
                     'Accepts': headerMap[type]
-                };
+                },
+                el = Ext.get(init.el);
 
 			// message
-			web.message = {};
+			web.message = web.message || {};
 
 			web.message.alert = function(text) {
                 var div = Ext.get(init.el);
@@ -3506,17 +3507,17 @@ Ext.onReady( function() {
 				ns.app.centerRegion.update(getTitleHtml(layout.name) + table.html);
 
                 // fade
-                if (!ns.skipFade) {
-                    Ext.defer(function() {
-                        var el = Ext.get(init.el);
+                //if (!ns.skipFade) {
+                    //Ext.defer(function() {
+                        //var el = Ext.get(init.el);
 
-                        if (el) {
-                            el.fadeIn({
-                                duration: 400
-                            });
-                        }
-                    }, 300 );
-                }
+                        //if (el) {
+                            //el.fadeIn({
+                                //duration: 400
+                            //});
+                        //}
+                    //}, 300 );
+                //}
 
 				// after render
 				ns.app.layout = layout;
@@ -3581,17 +3582,14 @@ Ext.onReady( function() {
             ns.crossDomain = init.crossDomain;
             ns.skipMask = init.skipMask;
             ns.skipFade = init.skipFade;
+
             ns.alert = web.message.alert;
 
 			init.el = config.el;
 
-            if (!ns.skipFade) {
-                var el = Ext.get(init.el);
-
-                if (el) {
-                    el.setStyle('opacity', 0);
-                }
-            }
+            //if (!ns.skipFade && el) {
+				//el.setStyle('opacity', 0);
+            //}
 		};
 
 		createViewport = function() {
@@ -3617,10 +3615,9 @@ Ext.onReady( function() {
             init.skipMask = Ext.isBoolean(config.skipMask) ? config.skipMask : false;
             init.skipFade = Ext.isBoolean(config.skipFade) ? config.skipFade : false;
 
+			// init
             ns.init = init;
-            ns.alert = function() {};
-
-            // init
+            PT.instances.push(ns);
 			ns.core = PT.getCore(ns);
 			extendInstance(ns);
 
