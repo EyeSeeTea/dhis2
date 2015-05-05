@@ -130,6 +130,7 @@ trackerCapture.controller('DataEntryController',
         $scope.showEventCreationDiv = false;
         $scope.currentEvent = null;
         $scope.currentStage = null;
+        $scope.currentStageEvents = null;
         $scope.totalEvents = 0;
             
         $scope.allowEventCreation = false;
@@ -194,14 +195,15 @@ trackerCapture.controller('DataEntryController',
                             }                       
 
                             dhis2Event.statusColor = EventUtils.getEventStatusColor(dhis2Event);
+                            
                             dhis2Event = processEvent(dhis2Event, eventStage);
+                            
                             $scope.eventsByStage[dhis2Event.programStage].push(dhis2Event);
                             
                             if($scope.currentStage && $scope.currentStage.id === dhis2Event.programStage){
                                 $scope.currentEvent = dhis2Event;                                
                                 $scope.showDataEntry($scope.currentEvent, true);
                             }
-                            //$scope.eventsByStage[dhis2Event.programStage].push(dhis2Event);
                         }
                     }
                 });
@@ -275,8 +277,12 @@ trackerCapture.controller('DataEntryController',
                     newEvent.coordinate = {};
                 }
                 
+                //Have to make sure the event is preprocessed - this does not happen unless "Dashboardwidgets" is invoked.
+                newEvent = processEvent(newEvent,stage);
+                
                 $scope.eventsByStage[newEvent.programStage].push(newEvent);
                 sortEventsByStage();
+                
                 $scope.showDataEntry(newEvent, false);
             }            
         }, function () {
@@ -314,22 +320,27 @@ trackerCapture.controller('DataEntryController',
         }
     }; 
     
-    $scope.switchDataEntryForm = function(){
-        $scope.displayCustomForm = !$scope.displayCustomForm;
-    };
-    
     $scope.getDataEntryForm = function(){
         
         $scope.currentStage = $scope.stagesById[$scope.currentEvent.programStage];
+        $scope.currentStageEvents = $scope.eventsByStage[$scope.currentEvent.programStage];
         
         angular.forEach($scope.currentStage.programStageSections, function(section){
             section.open = true;
         });
 
         $scope.customForm = CustomFormService.getForProgramStage($scope.currentStage, $scope.prStDes);
-        $scope.displayCustomForm = $scope.customForm ? true:false;        
+        $scope.displayCustomForm = "default";
+        if($scope.customForm){
+            $scope.displayCustomForm = "custom";
+        }
+        else if($scope.currentStage.name.startsWith("Table:")) {
+            $scope.displayCustomForm = "table";
+        }
+        
+        $scope.currentEventOriginal = angular.copy($scope.currentEvent);
 
-        $scope.currentEventOriginal = angular.copy($scope.currentEvent);        
+        $scope.currentStageEventsOriginal = angular.copy($scope.currentStageEvents);
     };
     
     var processEvent = function(event, stage){
@@ -383,6 +394,10 @@ trackerCapture.controller('DataEntryController',
     };
     
     $scope.saveDatavalue = function(prStDe){
+        $scope.saveDatavalueForEvent(prStDe,$scope.currentEvent);
+    };
+
+    $scope.saveDatavalueForEvent = function(prStDe,eventToSave,object){
 
         //check for input validity
         $scope.dataEntryOuterForm.submitted = true;        
@@ -391,9 +406,16 @@ trackerCapture.controller('DataEntryController',
         }
 
         //input is valid        
-        var value = $scope.currentEvent[prStDe.dataElement.id];
+        var value = eventToSave[prStDe.dataElement.id];
         
-        if($scope.currentEventOriginal[prStDe.dataElement.id] !== value){
+        var oldValue = null;
+        angular.forEach($scope.currentStageEventsOriginal, function (eventOriginal) {
+            if(eventOriginal.event === eventToSave.event) {
+               oldValue = eventOriginal[prStDe.dataElement.id];
+            }
+        });
+        
+        if(oldValue !== value){
             
             if(value){
                 if(prStDe.dataElement.type === 'date'){                    
@@ -402,41 +424,47 @@ trackerCapture.controller('DataEntryController',
                 if(prStDe.dataElement.type === 'string'){                    
                     if(prStDe.dataElement.optionSet && $scope.optionSets[prStDe.dataElement.optionSet.id] &&  $scope.optionSets[prStDe.dataElement.optionSet.id].options ) {
                         value = OptionSetService.getCode($scope.optionSets[prStDe.dataElement.optionSet.id].options, value);
-                    }                    
+                    }
                 }
             }
 
             $scope.updateSuccess = false;
 
-            $scope.currentElement = {id: prStDe.dataElement.id, saved: false};
+            $scope.currentElement = {id: prStDe.dataElement.id, event:eventToSave.event, saved: false};
 
-            var ev = {  event: $scope.currentEvent.event,
-                        orgUnit: $scope.currentEvent.orgUnit,
-                        program: $scope.currentEvent.program,
-                        programStage: $scope.currentEvent.programStage,
-                        status: $scope.currentEvent.status,
-                        trackedEntityInstance: $scope.currentEvent.trackedEntityInstance,
+            var ev = {  event: eventToSave.event,
+                        orgUnit: eventToSave.orgUnit,
+                        program: eventToSave.program,
+                        programStage: eventToSave.programStage,
+                        status: eventToSave.status,
+                        trackedEntityInstance: eventToSave.trackedEntityInstance,
                         dataValues: [
                                         {
                                             dataElement: prStDe.dataElement.id, 
                                             value: value, 
-                                            providedElsewhere: $scope.currentEvent.providedElsewhere[prStDe.dataElement.id] ? true : false
+                                            providedElsewhere: eventToSave.providedElsewhere[prStDe.dataElement.id] ? true : false
                                         }
                                     ]
                      };
             DHIS2EventFactory.updateForSingleValue(ev).then(function(response){
                 var index = -1;
-                for(var i=0; i<$scope.eventsByStage[$scope.currentEvent.programStage].length && index === -1; i++){
-                    if($scope.eventsByStage[$scope.currentEvent.programStage][i].event === $scope.currentEvent.event){
+                for(var i=0; i<$scope.eventsByStage[eventToSave.programStage].length && index === -1; i++){
+                    if($scope.eventsByStage[eventToSave.programStage][i].event === eventToSave.event){
                         index = i;
                     }
                 }
                 if(index !== -1){
-                    $scope.eventsByStage[$scope.currentEvent.programStage].splice(index,1,$scope.currentEvent);
+                    $scope.eventsByStage[$scope.currentEvent.programStage];
+                    $scope.currentStageEvents.splice(index,1,eventToSave);
                 }
+                
                 $scope.currentElement.saved = true;
+                
                 $scope.currentEventOriginal = angular.copy($scope.currentEvent);
-				TrackerRulesExecutionService.executeRules($scope);
+                
+                $scope.currentStageEventsOriginal = angular.copy($scope.currentStageEvents);
+
+		TrackerRulesExecutionService.executeRules($scope);
             });
             
         }
@@ -579,8 +607,11 @@ trackerCapture.controller('DataEntryController',
         //valid coordinate(s), proceed with the saving
         var dhis2Event = EventUtils.reconstruct($scope.currentEvent, $scope.currentStage, $scope.optionSets);
         
-        DHIS2EventFactory.update(dhis2Event).then(function(response){            
+        DHIS2EventFactory.update(dhis2Event).then(function(response){
+
             $scope.currentEventOriginal = angular.copy($scope.currentEvent);
+            $scope.currentStageEventsOriginal = angular.copy($scope.currentStageEvents);
+
             if(type === 'LAT' || type === 'LATLNG' ){
                 $scope.latitudeSaved = true;
             }
@@ -619,15 +650,19 @@ trackerCapture.controller('DataEntryController',
          $scope.note = '';           
     };
     
-    $scope.getInputNotifcationClass = function(id, custom){
-        if($scope.currentElement.id){
-            if($scope.currentElement.saved && ($scope.currentElement.id === id)){
+    $scope.getInputNotifcationClass = function(id, custom, event){
+        if(!event) {
+            event = $scope.currentEvent;
+        }
+        if($scope.currentElement.id && $scope.currentElement.event){
+            if($scope.currentElement.saved && ($scope.currentElement.id === id && $scope.currentElement.event === event.event)){
+                
                 if(custom){
                     return 'input-success';
                 }
                 return 'form-control input-success';
             }            
-            if(!$scope.currentElement.saved && ($scope.currentElement.id === id)){
+            if(!$scope.currentElement.saved && ($scope.currentElement.id === id && $scope.currentElement.event === event.event)){
                 if(custom){
                     return 'input-error';
                 }

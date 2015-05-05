@@ -150,7 +150,7 @@ trackerCapture.controller('DataEntryController',
             }            
             return true;            
         }        
-        return false;        
+        return false;   
     };
     
     $scope.showCreateEvent = function(stage){
