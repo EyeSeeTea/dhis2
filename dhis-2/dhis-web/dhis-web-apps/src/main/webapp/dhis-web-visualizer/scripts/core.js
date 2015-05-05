@@ -3902,13 +3902,12 @@ Ext.onReady( function() {
 		// alert
         ns.alert = web.message.alert;
 
-		return {
-			conf: conf,
-			api: api,
-			support: support,
-			service: service,
-			web: web,
-			init: init
-		};
+		ns.conf = conf;
+		ns.api = api;
+		ns.support = support;
+		ns.service = service;
+		ns.web = web;
+
+		return ns;
     };
 });

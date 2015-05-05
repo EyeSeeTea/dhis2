@@ -2907,7 +2907,7 @@ Ext.onReady( function() {
 							failure: function(r) {
 								ns.core.web.mask.show();
 
-                                alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+                                ns.alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
 							},
 							success: function(r) {
 								var id = r.getAllResponseHeaders().location.split('/').pop();
@@ -2937,7 +2937,7 @@ Ext.onReady( function() {
 							failure: function(r) {
 								ns.core.web.mask.show();
 
-                                alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+                                ns.alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
 							},
 							success: function(r) {
 								eventReport = Ext.decode(r.responseText);
@@ -2951,7 +2951,7 @@ Ext.onReady( function() {
 									failure: function(r) {
 										ns.core.web.mask.show();
 
-                                        alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+                                        ns.alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
 									},
 									success: function(r) {
 										if (ns.app.layout && ns.app.layout.id === id) {
@@ -3167,7 +3167,7 @@ Ext.onReady( function() {
 										}
 									}
 									else {
-										alert(NS.i18n.please_create_a_table_first);
+										ns.alert(NS.i18n.please_create_a_table_first);
 									}
 								}
 							}
@@ -3187,7 +3187,7 @@ Ext.onReady( function() {
 										failure: function(r) {
 											ns.app.viewport.mask.hide();
 
-                                            alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+                                            ns.alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
 										},
 										success: function(r) {
 											var sharing = Ext.decode(r.responseText),
@@ -3466,7 +3466,7 @@ Ext.onReady( function() {
 
 		getBody = function() {
 			if (!ns.core.init.user) {
-				alert('User is not assigned to any organisation units');
+				ns.alert('User is not assigned to any organisation units');
 				return;
 			}
 
@@ -6388,7 +6388,7 @@ Ext.onReady( function() {
 		validateView = function(view) {
 			if (!(Ext.isArray(view.rows) && view.rows.length && Ext.isString(view.rows[0].dimension) && Ext.isArray(view.rows[0].items) && view.rows[0].items.length)) {
 				NS.logg.push([view.rows, layer.id + '.rows: dimension array']);
-				alert('No organisation units selected');
+				ns.alert('No organisation units selected');
 				return false;
 			}
 
@@ -6560,66 +6560,6 @@ Ext.onReady( function() {
 					height = panel.getHeight() - fill - (ms[i].hasToolbar ? 25 : 0);
 					ms[i].setHeight(height);
 				}
-			};
-
-			// window
-			web.window = web.window || {};
-
-			web.window.setAnchorPosition = function(w, target) {
-				var vpw = ns.app.viewport.getWidth(),
-					targetx = target ? target.getPosition()[0] : 4,
-					winw = w.getWidth(),
-					y = target ? target.getPosition()[1] + target.getHeight() + 4 : 33;
-
-				if ((targetx + winw) > vpw) {
-					w.setPosition((vpw - winw - 2), y);
-				}
-				else {
-					w.setPosition(targetx, y);
-				}
-			};
-
-			web.window.addHideOnBlurHandler = function(w) {
-				var masks = Ext.query('.x-mask');
-
-                for (var i = 0, el; i < masks.length; i++) {
-                    el = Ext.get(masks[i]);
-
-                    if (el.getWidth() == Ext.getBody().getWidth()) {
-                        el.on('click', function() {
-                            if (w.hideOnBlur) {
-                                w.hide();
-                            }
-                        });
-                    }
-                }
-
-				w.hasHideOnBlurHandler = true;
-			};
-
-			web.window.addDestroyOnBlurHandler = function(w) {
-				var masks = Ext.query('.x-mask');
-
-                for (var i = 0, el; i < masks.length; i++) {
-                    el = Ext.get(masks[i]);
-
-                    if (el.getWidth() == Ext.getBody().getWidth()) {
-                        el.on('click', function() {
-                            if (w.destroyOnBlur) {
-                                w.destroy();
-                            }
-                        });
-                    }
-                }
-
-				w.hasDestroyOnBlurHandler = true;
-			};
-
-			// message
-			web.message = web.message || {};
-
-			web.message.alert = function(message) {
-				alert(message);
 			};
 
 			// url
@@ -6968,7 +6908,7 @@ Ext.onReady( function() {
 
 			web.report.loadReport = function(id) {
 				if (!Ext.isString(id)) {
-					alert('Invalid report id');
+					ns.alert('Invalid report id');
 					return;
 				}
 
@@ -6978,10 +6918,10 @@ Ext.onReady( function() {
 						web.mask.hide(ns.app.centerRegion);
 
                         if (Ext.Array.contains([403], r.status)) {
-                            alert(NS.i18n.you_do_not_have_access_to_all_items_in_this_favorite);
+                            ns.alert(NS.i18n.you_do_not_have_access_to_all_items_in_this_favorite);
                         }
                         else {
-                            alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+                            ns.alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
                         }
 					},
 					success: function(r) {
@@ -7043,7 +6983,7 @@ Ext.onReady( function() {
 
 						web.mask.hide(ns.app.centerRegion);
 
-                        alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+                        ns.alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
 					},
 					success: function(r) {
                         ns.app.dateCreate = new Date();
@@ -7144,7 +7084,7 @@ Ext.onReady( function() {
                         table = getHtml(xLayout, xResponse);
 
                         if (table.tdCount > 20000 || (layout.hideEmptyRows && table.tdCount > 10000)) {
-                            alert('Table has too many cells. Please reduce the table and try again.');
+                            ns.alert('Table has too many cells. Please reduce the table and try again.');
                             web.mask.hide(ns.app.centerRegion);
                             return;
                         }
@@ -8108,7 +8048,8 @@ Ext.onReady( function() {
 
 				NS.instances.push(ns);
 
-				ns.core = NS.getCore(init);
+                ns.init = init;
+				ns.core = NS.getCore(ns);
 				extendCore(ns.core);
 
 				dimConf = ns.core.conf.finals.dimension;
@@ -8234,7 +8175,7 @@ Ext.onReady( function() {
                                                         Ext.get('init').update(NS.i18n.initializing + '..');
                                                     },
                                                     failure: function() {
-                                                        alert('No translations found for system locale (' + keyUiLocale + ') or default locale (' + defaultKeyUiLocale + ').');
+                                                        ns.alert('No translations found for system locale (' + keyUiLocale + ') or default locale (' + defaultKeyUiLocale + ').');
                                                     },
                                                     callback: fn
                                                 });
@@ -8257,7 +8198,7 @@ Ext.onReady( function() {
                                                 init.organisationUnitLevels = Ext.decode(r.responseText).organisationUnitLevels || [];
 
                                                 if (!init.organisationUnitLevels.length) {
-                                                    alert('No organisation unit levels');
+                                                    ns.alert('No organisation unit levels');
                                                 }
 
                                                 fn();
@@ -8288,7 +8229,7 @@ Ext.onReady( function() {
                                                     init.user.ouc = ouc;
                                                 }
                                                 else {
-                                                    alert('User is not assigned to any organisation units');
+                                                    ns.alert('User is not assigned to any organisation units');
                                                 }
 
                                                 fn();
