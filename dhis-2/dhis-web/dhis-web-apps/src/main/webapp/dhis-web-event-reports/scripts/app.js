@@ -6464,13 +6464,13 @@ Ext.onReady( function() {
 	};
 
 	// core
-	extendCore = function(core) {
-        var conf = core.conf,
-			api = core.api,
-			support = core.support,
-			service = core.service,
-			web = core.web,
-			init = core.init;
+	extendCore = function(ns) {
+        var conf = ns.core.conf,
+			api = ns.core.api,
+			support = ns.core.support,
+			service = ns.core.service,
+			web = ns.core.web,
+			init = ns.core.init;
 
         // init
         (function() {
@@ -8058,9 +8058,9 @@ Ext.onReady( function() {
 
 				NS.instances.push(ns);
 
-                ns.init = init;
-				ns.core = NS.getCore(ns);
-				extendCore(ns.core);
+                ns.core.init = init;
+				NS.getCore(ns);
+				extendCore(ns);
 
 				dimConf = ns.core.conf.finals.dimension;
 				ns.app.viewport = createViewport();

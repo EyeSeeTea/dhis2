@@ -15,7 +15,7 @@ Ext.onReady( function() {
             styleEl = document.createElement("style");
 
         styleEl.setAttribute("type", "text/css");
-        
+
         if (id) {
            styleEl.setAttribute("id", id);
         }
@@ -3408,7 +3408,7 @@ Ext.onReady( function() {
         css += '.td-sortable { background-image: url("' + arrowUrl + '"); background-repeat: no-repeat; background-position: right center; padding-right: 15px !important; } \n';
 
         // alert
-        css += '.ns-plugin-alert { width: 90%; padding: 5%; color: #777 } \n';
+        css += '.ns-plugin-alert { width: 90%; padding: 3%; color: #777; font-size: 11px } \n';
 
         Ext.util.CSS.createStyleSheet(css);
     };
@@ -3465,10 +3465,6 @@ Ext.onReady( function() {
             ns.skipFade = init.skipFade;
 
 			init.el = config.el;
-
-            if (!ns.skipFade && el) {
-                el.setStyle('opacity', 0);
-            }
 
 			// mouse events
 			web.events = web.events || {};

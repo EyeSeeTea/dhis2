@@ -18,7 +18,7 @@ Ext.onReady( function() {
 
     // core
 	NS.getCore = function(ns) {
-        var init = ns.init,
+        var init = ns.core.init,
             conf = {},
             api = {},
             support = {},
@@ -3420,11 +3420,11 @@ Ext.onReady( function() {
 		// alert
 		ns.alert = web.message.alert;
 
-		ns.conf = conf;
-		ns.api = api;
-		ns.support = support;
-		ns.service = service;
-		ns.web = web;
+		ns.core.conf = conf;
+		ns.core.api = api;
+		ns.core.support = support;
+		ns.core.service = service;
+		ns.core.web = web;
 
 		return ns;
 	};
