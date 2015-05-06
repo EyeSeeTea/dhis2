@@ -4355,10 +4355,6 @@ Ext.onReady(function() {
             ns.alert = web.message.alert;
 
 			init.el = config.el;
-
-            //if (!ns.skipFade && el) {
-                //el.setStyle('opacity', 0);
-            //}
         };
 
 		createViewport = function() {

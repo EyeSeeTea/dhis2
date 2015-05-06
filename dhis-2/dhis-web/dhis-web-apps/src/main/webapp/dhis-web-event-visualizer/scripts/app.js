@@ -2577,7 +2577,7 @@ Ext.onReady( function() {
 							params: Ext.encode(favorite),
 							failure: function(r) {
 								ns.core.web.mask.show();
-                                alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+                                ns.alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
 							},
 							success: function(r) {
 								var id = r.getAllResponseHeaders().location.split('/').pop();
@@ -2608,7 +2608,7 @@ Ext.onReady( function() {
 							method: 'GET',
 							failure: function(r) {
 								ns.core.web.mask.show();
-                                alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+                                ns.alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
 							},
 							success: function(r) {
 								eventChart = Ext.decode(r.responseText);
@@ -2621,7 +2621,7 @@ Ext.onReady( function() {
 									params: Ext.encode(eventChart),
 									failure: function(r) {
 										ns.core.web.mask.show();
-                                        alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+                                        ns.alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
 									},
 									success: function(r) {
 										if (ns.app.layout && ns.app.layout.id === id) {
@@ -2837,7 +2837,7 @@ Ext.onReady( function() {
 										}
 									}
 									else {
-										alert(NS.i18n.please_create_a_table_first);
+										ns.alert(NS.i18n.please_create_a_table_first);
 									}
 								}
 							}
@@ -2856,7 +2856,7 @@ Ext.onReady( function() {
 										method: 'GET',
 										failure: function(r) {
 											ns.app.viewport.mask.hide();
-                                            alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+                                            ns.alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
 										},
 										success: function(r) {
 											var sharing = Ext.decode(r.responseText),
@@ -3135,7 +3135,7 @@ Ext.onReady( function() {
 
 		getBody = function() {
 			if (!ns.core.init.user) {
-				alert('User is not assigned to any organisation units');
+				ns.alert('User is not assigned to any organisation units');
 				return;
 			}
 
@@ -6046,7 +6046,7 @@ Ext.onReady( function() {
 		validateView = function(view) {
 			if (!(Ext.isArray(view.rows) && view.rows.length && Ext.isString(view.rows[0].dimension) && Ext.isArray(view.rows[0].items) && view.rows[0].items.length)) {
 				NS.logg.push([view.rows, layer.id + '.rows: dimension array']);
-				alert('No organisation units selected');
+				ns.alert('No organisation units selected');
 				return false;
 			}
 
@@ -6156,7 +6156,7 @@ Ext.onReady( function() {
 					form = Ext.query('#exportForm')[0];
 
 				if (!(Ext.isArray(svg) && svg.length)) {
-					alert('Browser does not support SVG');
+					ns.alert('Browser does not support SVG');
 					return;
 				}
 
@@ -6583,7 +6583,7 @@ Ext.onReady( function() {
 
 			web.report.loadReport = function(id) {
 				if (!Ext.isString(id)) {
-					alert('Invalid report id');
+					ns.alert('Invalid report id');
 					return;
 				}
 
@@ -6593,10 +6593,10 @@ Ext.onReady( function() {
 						web.mask.hide(ns.app.centerRegion);
 
                         if (Ext.Array.contains([403], r.status)) {
-                            alert(NS.i18n.you_do_not_have_access_to_all_items_in_this_favorite);
+                            ns.alert(NS.i18n.you_do_not_have_access_to_all_items_in_this_favorite);
                         }
                         else {
-                            alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+                            ns.alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
                         }
 					},
 					success: function(r) {
@@ -6626,7 +6626,7 @@ Ext.onReady( function() {
 
 						web.mask.hide(ns.app.centerRegion);
 
-                        alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+                        ns.alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
 					},
 					success: function(r) {
                         ns.app.dateCreate = new Date();
@@ -6715,7 +6715,10 @@ Ext.onReady( function() {
 
                     ns.app.centerRegion.update();
                     ns.app.centerRegion.removeAll(true);
-                    ns.app.centerRegion.add(chart);
+                    ns.app.centerRegion.add(response.rows.length ? chart : {
+                        bodyStyle: 'padding:20px; border:0 none; background:transparent; color: #555',
+                        html: NS.i18n.no_values_found_for_current_selection + '.'
+                    });
 
                     // timing
                     ns.app.dateTotal = new Date();
@@ -7834,7 +7837,7 @@ Ext.onReady( function() {
                                                         Ext.get('init').update(NS.i18n.initializing + '..');
                                                     },
                                                     failure: function() {
-                                                        alert('No translations found for system locale (' + keyUiLocale + ') or default locale (' + defaultKeyUiLocale + ').');
+                                                        ns.alert('No translations found for system locale (' + keyUiLocale + ') or default locale (' + defaultKeyUiLocale + ').');
                                                     },
                                                     callback: fn
                                                 });
@@ -7857,7 +7860,7 @@ Ext.onReady( function() {
                                                 init.organisationUnitLevels = Ext.decode(r.responseText).organisationUnitLevels || [];
 
                                                 if (!init.organisationUnitLevels.length) {
-                                                    alert('No organisation unit levels');
+                                                    ns.alert('No organisation unit levels');
                                                 }
 
                                                 fn();
@@ -7888,7 +7891,7 @@ Ext.onReady( function() {
                                                     init.user.ouc = ouc;
                                                 }
                                                 else {
-                                                    alert('User is not assigned to any organisation units');
+                                                    ns.alert('User is not assigned to any organisation units');
                                                 }
 
                                                 fn();

@@ -1036,7 +1036,7 @@ Ext.onReady( function() {
 
                     // period
                     if (!Ext.Array.contains(objectNames, 'pe') && !(config.startDate && config.endDate)) {
-                        alert('At least one fixed period, one relative period or start/end dates must be specified');
+                        ns.alert('At least one fixed period, one relative period or start/end dates must be specified');
                         return;
                     }
 
@@ -1201,8 +1201,8 @@ Ext.onReady( function() {
 					}
 
 					if (!(Ext.isArray(config.rows) && config.rows.length > 0)) {
-						alert('No values found');
-						return;
+						//alert('No values found');
+						return; // for EV, not for DV
 					}
 
 					if (config.headers.length !== config.rows[0].length) {
@@ -2832,7 +2832,7 @@ Ext.onReady( function() {
 
                 msg += '\n\n' + 'Hint: A good way to reduce the number of items is to use relative periods and level/group organisation unit selection modes.';
 
-                alert(msg);
+                ns.alert(msg, 'warning');
 			};
 
 			// report

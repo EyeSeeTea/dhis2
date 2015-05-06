@@ -1119,7 +1119,7 @@ Ext.onReady( function() {
 
                     // period
                     if (!Ext.Array.contains(objectNames, 'pe') && !(config.startDate && config.endDate)) {
-                        alert('At least one fixed period, one relative period or start/end dates must be specified');
+                        ns.alert('At least one fixed period, one relative period or start/end dates must be specified');
                         return;
                     }
 
@@ -2915,7 +2915,7 @@ Ext.onReady( function() {
 
                 msg += '\n\n' + 'Hint: A good way to reduce the number of items is to use relative periods and level/group organisation unit selection modes.';
 
-                alert(msg);
+                ns.alert(msg);
 			};
 
 			// report
@@ -4546,7 +4546,7 @@ Ext.onReady( function() {
                     init.user.ouc = ouc;
                 }
                 else {
-                    alert('User is not assigned to any organisation units');
+                    ns.alert('User is not assigned to any organisation units');
                 }
 
                 fn();
@@ -4640,17 +4640,15 @@ Ext.onReady( function() {
                 },
                 el = Ext.get(init.el);
 
-            ns.plugin = init.plugin;
-            ns.dashboard = init.dashboard;
-            ns.crossDomain = init.crossDomain;
-            ns.skipMask = init.skipMask;
-            ns.skipFade = init.skipFade;
+			// message
+			web.message = web.message || {};
 
-			init.el = config.el;
-
-            if (!ns.skipFade && el) {
-                el.setStyle('opacity', 0);
-            }
+			web.message.alert = function(text) {
+                if (el) {
+                    el.setStyle('opacity', 1);
+                    el.update('<div class="ns-plugin-alert">' + text + '</div>');
+                }
+            };
 
 			// report
 			web.report = web.report || {};
@@ -4877,6 +4875,17 @@ Ext.onReady( function() {
 
                 getXResponse();
 			};
+
+            // ns        
+            ns.plugin = init.plugin;
+            ns.dashboard = init.dashboard;
+            ns.crossDomain = init.crossDomain;
+            ns.skipMask = init.skipMask;
+            ns.skipFade = init.skipFade;
+
+            ns.alert = web.message.alert;
+
+			init.el = config.el;
         };
 
 		createViewport = function() {
