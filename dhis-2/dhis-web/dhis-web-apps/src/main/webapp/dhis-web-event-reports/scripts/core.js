@@ -620,7 +620,7 @@ Ext.onReady( function() {
 
 					if (!(Ext.isArray(config.rows) && config.rows.length > 0)) {
 						//alert('No values found');
-						//return;
+						return; // for ER, not for PT
 					}
 
 					if (config.rows.length > 0 && config.headers.length !== config.rows[0].length) {

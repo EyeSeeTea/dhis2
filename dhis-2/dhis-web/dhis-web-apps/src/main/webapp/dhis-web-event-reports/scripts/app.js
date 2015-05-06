@@ -1045,6 +1045,10 @@ Ext.onReady( function() {
 				});
 			},
             setStatus: function(layout, response) {
+                if (!(layout && response)) {
+                    return;
+                }
+
                 this.pager = response.metaData.pager;
 
                 this.reset(layout.dataType);
@@ -6993,6 +6997,7 @@ Ext.onReady( function() {
                         if (!response) {
 							//ns.app.viewport.setGui(layout, xLayout, isUpdateGui);
 							web.mask.hide(ns.app.centerRegion);
+                            web.report.success(layout, service.layout.getExtendedLayout(layout)); // ER, not PT
 							return;
 						}
 
@@ -7103,42 +7108,7 @@ Ext.onReady( function() {
                         ns.app.centerRegion.removeAll(true);
                         ns.app.centerRegion.update(table.html);
 
-                        // timing
-                        ns.app.dateTotal = new Date();
-
-                        // after render
-                        ns.app.layout = layout;
-                        ns.app.xLayout = xLayout;
-                        ns.app.response = response;
-                        ns.app.xResponse = xResponse;
-                        ns.app.xColAxis = xColAxis;
-                        ns.app.xRowAxis = xRowAxis;
-                        ns.app.uuidDimUuidsMap = table.uuidDimUuidsMap;
-                        ns.app.uuidObjectMap = Ext.applyIf((xColAxis ? xColAxis.uuidObjectMap : {}), (xRowAxis ? xRowAxis.uuidObjectMap : {}));
-
-                        if (NS.isSessionStorage) {
-                            //web.events.setValueMouseHandlers(layout, response || xResponse, ns.app.uuidDimUuidsMap, ns.app.uuidObjectMap);
-                            web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
-                            web.storage.session.set(layout, 'eventtable');
-                        }
-
-                        ns.app.accordion.setGui(layout, xLayout, response, isUpdateGui, table);
-
-                        web.mask.hide(ns.app.centerRegion);
-
-                        if (NS.isDebug) {
-                            console.log("Number of cells", table.tdCount);
-                            console.log("DATA", (ns.app.dateCreate - ns.app.dateData) / 1000);
-                            console.log("CREATE", (ns.app.dateRender - ns.app.dateCreate) / 1000);
-                            console.log("RENDER", (ns.app.dateTotal - ns.app.dateRender) / 1000);
-                            console.log("TOTAL", (ns.app.dateTotal - ns.app.dateData) / 1000);
-                            console.log("layout", layout);
-                            console.log("response", response);
-                            console.log("xResponse", xResponse);
-                            console.log("xLayout", xLayout);
-                            console.log("core", ns.core);
-                            console.log("app", ns.app);
-                        }
+                        web.report.success(layout, xLayout, response, xResponse, xColAxis, xRowAxis, table, isUpdateGui);
                     };
 
                     getSXLayout = function() {
@@ -7155,8 +7125,6 @@ Ext.onReady( function() {
                     };
 
                     // execute
-					response = response || ns.app.response;
-
                     getXResponse();
 				};
 
@@ -7175,18 +7143,20 @@ Ext.onReady( function() {
                         ns.app.centerRegion.removeAll(true);
                         ns.app.centerRegion.update(table.html);
 
+                        web.report.success(layout, null, response, xResponse, null, null, table, isUpdateGui);
+
                         // after render
-                        ns.app.layout = layout;
-                        ns.app.response = response;
-                        ns.app.xResponse = xResponse;
+                        //ns.app.layout = layout;
+                        //ns.app.response = response;
+                        //ns.app.xResponse = xResponse;
 
-                        if (NS.isSessionStorage) {
-                            web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
-                        }
+                        //if (NS.isSessionStorage) {
+                            //web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
+                        //}
 
-                        ns.app.accordion.setGui(layout, null, response, isUpdateGui, table);
+                        //ns.app.accordion.setGui(layout, null, response, isUpdateGui, table);
 
-                        web.mask.hide(ns.app.centerRegion);
+                        //web.mask.hide(ns.app.centerRegion);
                     };
 
                     // execute
@@ -7197,6 +7167,57 @@ Ext.onReady( function() {
 
 				map[layout.dataType]();
 			};
+
+            web.report.success = function(layout, xLayout, response, xResponse, xColAxis, xRowAxis, table, isUpdateGui) {
+                ns.app.dateTotal = new Date();
+
+                // response
+                if (!response) {
+                    ns.app.centerRegion.update('');
+                    ns.app.centerRegion.removeAll();
+                    ns.app.centerRegion.add({
+                        bodyStyle: 'padding:20px; border:0 none; background:transparent; color: #555',
+                        html: NS.i18n.no_values_found_for_current_selection + '.'
+                    });
+                }
+
+                // after render
+                ns.app.layout = layout || null;
+                ns.app.xLayout = xLayout || null;
+                ns.app.response = response || null;
+                ns.app.xResponse = xResponse || null;
+                ns.app.xColAxis = xColAxis || null;
+                ns.app.xRowAxis = xRowAxis || null;
+                ns.app.uuidDimUuidsMap = table ? table.uuidDimUuidsMap || null : null;
+                ns.app.uuidObjectMap = Ext.applyIf((xColAxis ? xColAxis.uuidObjectMap : {}), (xRowAxis ? xRowAxis.uuidObjectMap : {})) || null;
+
+                if (NS.isSessionStorage) {
+                    web.storage.session.set(layout, 'eventtable');
+
+                    if (layout && response) {
+                        //web.events.setValueMouseHandlers(layout, response || xResponse, ns.app.uuidDimUuidsMap, ns.app.uuidObjectMap);
+                        web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
+                    }
+                }
+
+                ns.app.accordion.setGui(layout, xLayout, response, isUpdateGui, table);
+
+                web.mask.hide(ns.app.centerRegion);
+
+                if (NS.isDebug) {
+                    console.log("Number of cells", table.tdCount);
+                    console.log("DATA", (ns.app.dateCreate - ns.app.dateData) / 1000);
+                    console.log("CREATE", (ns.app.dateRender - ns.app.dateCreate) / 1000);
+                    console.log("RENDER", (ns.app.dateTotal - ns.app.dateRender) / 1000);
+                    console.log("TOTAL", (ns.app.dateTotal - ns.app.dateData) / 1000);
+                    console.log("layout", layout);
+                    console.log("response", response);
+                    console.log("xResponse", xResponse);
+                    console.log("xLayout", xLayout);
+                    console.log("core", ns.core);
+                    console.log("app", ns.app);
+                }
+            };
 		}());
 	};
 
