@@ -3960,20 +3960,21 @@ Ext.onReady( function() {
                 success = function(r) {
                     var response = api.response.Response((r.responseText ? Ext.decode(r.responseText) : r));
 
-                    if (!response && !ns.skipMask) {
-                        web.mask.hide(ns.app.centerRegion);
-                        return;
+                    if (response) {
+
+                        // add to dimConf, TODO
+                        for (var i = 0, map = dimConf.objectNameMap, header; i < response.headers.length; i++) {
+                            header = response.headers[i];
+
+                            map[header.name] = map[header.name] || {
+                                id: header.name,
+                                dimensionName: header.name,
+                                name: header.column
+                            };
+                        }
                     }
 
-                    // add to dimConf, TODO
-                    for (var i = 0, map = dimConf.objectNameMap, header; i < response.headers.length; i++) {
-                        header = response.headers[i];
-                        map[header.name] = map[header.name] || {
-                            id: header.name,
-                            dimensionName: header.name,
-                            name: header.column
-                        };
-                    }
+                    web.mask.show(ns.app.centerRegion, 'Creating table..');
 
                     ns.app.paramString = paramString;
 
