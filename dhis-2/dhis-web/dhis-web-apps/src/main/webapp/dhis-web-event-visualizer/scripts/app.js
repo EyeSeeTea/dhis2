@@ -6633,11 +6633,21 @@ Ext.onReady( function() {
 
                         var response = api.response.Response(Ext.decode(r.responseText));
 
-                        if (!response) {
-							//ns.app.viewport.setGui(layout, xLayout, isUpdateGui);
-							web.mask.hide(ns.app.centerRegion);
-							return;
-						}
+                        if (response) {
+
+                            // add to dimConf, TODO
+                            for (var i = 0, map = dimConf.objectNameMap, header; i < response.headers.length; i++) {
+                                header = response.headers[i];
+
+                                map[header.name] = map[header.name] || {
+                                    id: header.name,
+                                    dimensionName: header.name,
+                                    name: header.column
+                                };
+                            }
+                        }
+
+                        web.mask.show(ns.app.centerRegion, 'Creating chart..');
 
                         ns.app.paramString = paramString;
 
@@ -6765,8 +6775,18 @@ Ext.onReady( function() {
                     getOptionSets(xResponse, getSXLayout);
                 };
 
-                // execute
-                response = response || ns.app.response;
+                if (!response) {
+                    ns.app.centerRegion.removeAll(true);
+                    ns.app.centerRegion.update('');
+                    ns.app.centerRegion.add({
+                        bodyStyle: 'padding:20px; border:0 none; background:transparent; color: #555',
+                        html: NS.i18n.no_values_found_for_current_selection + '.'
+                    });
+
+                    web.mask.hide(ns.app.centerRegion);
+
+                    return;
+                }
 
                 getXResponse();
 			};
