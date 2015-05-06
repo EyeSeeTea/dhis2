@@ -6122,13 +6122,13 @@ Ext.onReady( function() {
 	};
 
 	// core
-	extendCore = function(core) {
-        var conf = core.conf,
-			api = core.api,
-			support = core.support,
-			service = core.service,
-			web = core.web,
-			init = core.init;
+	extendCore = function(ns) {
+        var conf = ns.core.conf,
+			api = ns.core.api,
+			support = ns.core.support,
+			service = ns.core.service,
+			web = ns.core.web,
+			init = ns.core.init;
 
         // init
         (function() {
@@ -6244,66 +6244,6 @@ Ext.onReady( function() {
 					height = panel.getHeight() - fill - (ms[i].hasToolbar ? 25 : 0);
 					ms[i].setHeight(height);
 				}
-			};
-
-			// window
-			web.window = web.window || {};
-
-			web.window.setAnchorPosition = function(w, target) {
-				var vpw = ns.app.viewport.getWidth(),
-					targetx = target ? target.getPosition()[0] : 4,
-					winw = w.getWidth(),
-					y = target ? target.getPosition()[1] + target.getHeight() + 4 : 33;
-
-				if ((targetx + winw) > vpw) {
-					w.setPosition((vpw - winw - 2), y);
-				}
-				else {
-					w.setPosition(targetx, y);
-				}
-			};
-
-			web.window.addHideOnBlurHandler = function(w) {
-				var masks = Ext.query('.x-mask');
-
-                for (var i = 0, el; i < masks.length; i++) {
-                    el = Ext.get(masks[i]);
-
-                    if (el.getWidth() == Ext.getBody().getWidth()) {
-                        el.on('click', function() {
-                            if (w.hideOnBlur) {
-                                w.hide();
-                            }
-                        });
-                    }
-                }
-
-				w.hasHideOnBlurHandler = true;
-			};
-
-			web.window.addDestroyOnBlurHandler = function(w) {
-				var masks = Ext.query('.x-mask');
-
-                for (var i = 0, el; i < masks.length; i++) {
-                    el = Ext.get(masks[i]);
-
-                    if (el.getWidth() == Ext.getBody().getWidth()) {
-                        el.on('click', function() {
-                            if (w.destroyOnBlur) {
-                                w.destroy();
-                            }
-                        });
-                    }
-                }
-
-				w.hasDestroyOnBlurHandler = true;
-			};
-
-			// message
-			web.message = web.message || {};
-
-			web.message.alert = function(message) {
-				alert(message);
 			};
 
 			// url
@@ -7767,9 +7707,9 @@ Ext.onReady( function() {
 
 				NS.instances.push(ns);
 
-                ns.init = init;
-				ns.core = NS.getCore(ns);
-				extendCore(ns.core);
+                ns.core.init = init;
+				NS.getCore(ns);
+				extendCore(ns);
 
 				dimConf = ns.core.conf.finals.dimension;
 				ns.app.viewport = createViewport();
