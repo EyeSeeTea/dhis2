@@ -1235,26 +1235,6 @@ Ext.onReady( function() {
 				return array.length;
 			};
 
-            support.prototype.array.getMaxLength = function(array, suppressWarning) {
-				if (!Ext.isArray(array)) {
-					if (!suppressWarning) {
-						console.log('support.prototype.array.getLength: not an array');
-					}
-
-					return null;
-				}
-
-                var maxLength = 0;
-
-                for (var i = 0; i < array.length; i++) {
-                    if (Ext.isString(array[i]) && array[i].length > maxLength) {
-                        maxLength = array[i].length;
-                    }
-                }
-
-                return maxLength;
-            };
-
 			support.prototype.array.sort = function(array, direction, key, emptyFirst) {
 				// supports [number], [string], [{key: number}], [{key: string}], [[string]], [[number]]
 
@@ -1310,6 +1290,32 @@ Ext.onReady( function() {
 				return array;
 			};
 
+            support.prototype.array.sortArrayByArray = function(array, reference, isNotDistinct) {
+                var tmp = [];
+
+                // copy and clear
+                for (var i = 0; i < array.length; i++) {
+                    tmp[tmp.length] = array[i];
+                }
+
+                array.length = 0;
+
+                // sort
+                for (var i = 0; i < reference.length; i++) {
+                    for (var j = 0; j < tmp.length; j++) {
+                        if (tmp[j] === reference[i]) {
+                            array.push(tmp[j]);
+
+                            if (!isNotDistinct) {
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                return array;
+            };
+
             support.prototype.array.uniqueByProperty = function(array, property) {
                 var names = [],
                     uniqueItems = [];
@@ -1324,6 +1330,64 @@ Ext.onReady( function() {
                 }
 
                 return uniqueItems;
+            };
+
+            support.prototype.array.getNameById = function(array, value, idProperty, nameProperty) {
+                if (!(Ext.isArray(array) && value)) {
+                    return;
+                }
+
+                idProperty = idProperty || 'id';
+                nameProperty = nameProperty || 'name';
+
+                for (var i = 0; i < array.length; i++) {
+                    if (array[i][idProperty] === value) {
+                        return array[i][nameProperty];
+                    }
+                }
+
+                return;
+            };
+
+            support.prototype.array.cleanFalsy = function(array) {
+                if (!Ext.isArray(array)) {
+                    return [];
+                }
+
+                if (!array.length) {
+                    return array;
+                }
+
+                for (var i = 0; i < array.length; i++) {
+                    array[i] = array[i] || null;
+                }
+
+                var a = Ext.clean(array);
+                array = null;
+
+                return a;
+            };
+
+            support.prototype.array.pluckIf = function(array, pluckProperty, valueProperty, value, type) {
+                var a = [];
+
+                if (!(Ext.isArray(array) && array.length)) {
+                    return a;
+                }
+
+                pluckProperty = pluckProperty || 'name';
+                valueProperty = valueProperty || pluckProperty;
+
+                for (var i = 0; i < array.length; i++) {
+                    if (Ext.isDefined(type) && typeof array[i][valueProperty] === type) {
+                        a.push(array[i][pluckProperty]);
+                    }
+                    else if (Ext.isDefined(value) && array[i][valueProperty] === value) {
+                        a.push(array[i][pluckProperty]);
+                    }
+                }
+
+                return a;
             };
 
             support.prototype.array.getObjectMap = function(array, idProperty, nameProperty, namePrefix) {
@@ -1366,6 +1430,26 @@ Ext.onReady( function() {
                         }
                     }
                 }
+            };
+
+            support.prototype.array.getMaxLength = function(array, suppressWarning) {
+				if (!Ext.isArray(array)) {
+					if (!suppressWarning) {
+						console.log('support.prototype.array.getLength: not an array');
+					}
+
+					return null;
+				}
+
+                var maxLength = 0;
+
+                for (var i = 0; i < array.length; i++) {
+                    if (Ext.isString(array[i]) && array[i].length > maxLength) {
+                        maxLength = array[i].length;
+                    }
+                }
+
+                return maxLength;
             };
 
 				// object
@@ -1668,6 +1752,10 @@ Ext.onReady( function() {
 						xDim.objectName = dim.dimension;
 						xDim.dimensionName = dimConf.objectNameMap.hasOwnProperty(dim.dimension) ? dimConf.objectNameMap[dim.dimension].dimensionName || dim.dimension : dim.dimension;
 
+                        if (dim.legendSet) {
+                            xDim.legendSet = dim.legendSet;
+                        }
+
 						xDim.items = [];
 						xDim.ids = [];
 
@@ -1706,6 +1794,10 @@ Ext.onReady( function() {
 						xDim.objectName = dim.dimension;
 						xDim.dimensionName = dimConf.objectNameMap.hasOwnProperty(dim.dimension) ? dimConf.objectNameMap[dim.dimension].dimensionName || dim.dimension : dim.dimension;
 
+                        if (dim.legendSet) {
+                            xDim.legendSet = dim.legendSet;
+                        }
+
 						xDim.items = [];
 						xDim.ids = [];
 
@@ -1743,6 +1835,10 @@ Ext.onReady( function() {
 						xDim.dimension = dim.dimension;
 						xDim.objectName = dim.dimension;
 						xDim.dimensionName = dimConf.objectNameMap.hasOwnProperty(dim.dimension) ? dimConf.objectNameMap[dim.dimension].dimensionName || dim.dimension : dim.dimension;
+
+                        if (dim.legendSet) {
+                            xDim.legendSet = dim.legendSet;
+                        }
 
 						xDim.items = [];
 						xDim.ids = [];
@@ -2428,6 +2524,7 @@ Ext.onReady( function() {
 				var emptyId = '[N/A]',
                     meta = ['ou', 'pe'],
                     ouHierarchy,
+                    md,
                     names,
 					headers,
                     booleanNameMap = {
@@ -2436,13 +2533,15 @@ Ext.onReady( function() {
                     };
 
 				response = Ext.clone(response);
+                md = response.metaData;
 				headers = response.headers;
-                ouHierarchy = response.metaData.ouHierarchy,
-                names = response.metaData.names;
+                ouHierarchy = md.ouHierarchy,
+                names = md.names;
                 names[emptyId] = emptyId;
 
-                response.metaData.booleanNames = {};
-                response.metaData.optionNames = {};
+                md.optionNames = {};
+                md.booleanNames = {};
+
 				response.nameHeaderMap = {};
 				response.idValueMap = {};
 
@@ -2467,10 +2566,12 @@ Ext.onReady( function() {
 
                                 fullId = header.name + id;
                                 parsedId = parseFloat(id);
+
                                 displayId = Ext.isNumber(parsedId) ? parsedId : (names[id] || id);
 
 								// update names
-                                names[fullId] = (isMeta ? '' : header.column + ' ') + displayId;
+                                //names[fullId] = (isMeta ? '' : header.column + ' ') + displayId;
+                                names[fullId] = displayId;
 
 								// update rows
                                 response.rows[j][i] = fullId;
@@ -2484,6 +2585,23 @@ Ext.onReady( function() {
 
                             support.prototype.array.sort(objects, 'ASC', 'sortingId');
                             header.ids = Ext.Array.pluck(objects, 'id');
+                        }
+                        else if (header.name === 'pe') {
+                            var selectedItems = xLayout.dimensionNameIdsMap['pe'],
+                                isRelative = false;
+
+                            for (var j = 0; j < selectedItems.length; j++) {
+                                if (Ext.Array.contains(conf.period.relativePeriods, selectedItems[j])) {
+                                    isRelative = true;
+                                    break;
+                                }
+                            }
+
+                            header.ids = Ext.clone(md[header.name]);
+
+                            if (!isRelative) {
+                                support.prototype.array.sortArrayByArray(header.ids, xLayout.dimensionNameIdsMap['pe'])
+                            }
                         }
                         else {
 							var objects = [];
@@ -2546,13 +2664,17 @@ Ext.onReady( function() {
 
 				// idValueMap: vars
 				var valueHeaderIndex = response.nameHeaderMap[conf.finals.dimension.value.value].index,
-					dx = dimConf.data.dimensionName,
+					dy = dimConf.data.dimensionName,
 					axisDimensionNames = xLayout.axisDimensionNames,
 					idIndexOrder = [];
 
 				// idValueMap: idIndexOrder
-				for (var i = 0; i < axisDimensionNames.length; i++) {
-					idIndexOrder.push(response.nameHeaderMap[axisDimensionNames[i]].index);
+				for (var i = 0, dimensionName; i < axisDimensionNames.length; i++) {
+                    dimensionName = axisDimensionNames[i];
+
+                    if (response.nameHeaderMap.hasOwnProperty(dimensionName)) {
+                        idIndexOrder.push(response.nameHeaderMap[dimensionName].index);
+                    }
 				}
 
 				// idValueMap
@@ -2569,6 +2691,7 @@ Ext.onReady( function() {
 
 				return response;
 			};
+
         }());
 
 		// web
