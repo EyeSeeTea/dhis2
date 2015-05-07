@@ -76,51 +76,28 @@ trackerCapture.controller('DataEntryController',
     });
     //check if field is hidden
     $scope.isHidden = function(id) {
-        //TODO: This function is working, but non-optimalized.
-        var hide = false;
-        
         //In case the field contains a value, we cant hide it. 
         //If we hid a field with a value, it would falsely seem the user was aware that the value was entered in the UI.
         if($scope.currentEvent[id])
         {
            return false; 
         }
-                
-        angular.forEach($rootScope.ruleeffects, function(effect) {
-            //in the data entry controller we only care about the "hidefield" actions
-            if(effect.action === "HIDEFIELD" && effect.dataElement.id === id) {
-                hide = effect.ineffect;
-            }
-        });
-        return hide;
+        else
+        {
+            return $scope.hiddenFields[id];
+        }
     }; 
     
-    //check if field has a warning message
+    //return message if field has a warning message
     $scope.errorMessage = function(id) { 
-        var error = false;
         
-        angular.forEach($rootScope.ruleeffects, function(effect) {
-            //in the data entry controller we only care about the "SHOWWARNING" and "SHOWERROR" actions
-            if(effect.action === "SHOWERROR" && effect.dataElement.id === id && effect.ineffect) {
-                error = effect.content;
-            }
-        });
-        //No error message 
-        return error;
+        return $scope.errorMessages[id];
+        
     };
     
-    //check if field has a warning message
+    //return message if field has a warning message
     $scope.warningMessage = function(id) { 
-        var error = false;
-        
-        angular.forEach($rootScope.ruleeffects, function(effect) {
-            //in the data entry controller we only care about the "SHOWWARNING" and "SHOWERROR" actions
-            if(effect.action === "SHOWWARNING" && effect.dataElement.id === id && effect.ineffect) {
-                error = effect.content;
-            }
-        });
-        //No error message 
-        return error;
+        return $scope.warningMessages[id];
     }; 
     
     
@@ -225,7 +202,12 @@ trackerCapture.controller('DataEntryController',
     };
     
     $scope.stageNeedsEvent = function(stage){  
-      
+        
+        //In case the event is a table, we sould always allow adding more events(rows)
+        if(stage.displayEventsInTable) {
+            return true;
+        }
+        
         if($scope.eventsByStage[stage.id].length < 1){                
             return true;
         }
@@ -257,7 +239,12 @@ trackerCapture.controller('DataEntryController',
                 },
                 eventPeriods: function(){
                     return $scope.eventPeriods;
+                },
+                autoCreate: function() {
+                    //In case the programstage is a table, autocreate
+                    return stage.displayEventsInTable;
                 }
+                
             }
         });
 
@@ -293,7 +280,9 @@ trackerCapture.controller('DataEntryController',
         
         if(event){
 
-            if($scope.currentEvent && !rightAfterEnrollment && $scope.currentEvent.event === event.event){
+            if($scope.currentEvent && 
+                    !rightAfterEnrollment && 
+                    $scope.currentEvent.event === event.event){
                 //clicked on the same stage, do toggling
                 $scope.currentEvent = null;
                 $scope.currentElement = {id: '', saved: false};
@@ -334,7 +323,7 @@ trackerCapture.controller('DataEntryController',
         if($scope.customForm){
             $scope.displayCustomForm = "custom";
         }
-        else if($scope.currentStage.name.startsWith("Table:")) {
+        else if($scope.currentStage.displayEventsInTable) {
             $scope.displayCustomForm = "table";
         }
         
@@ -398,7 +387,9 @@ trackerCapture.controller('DataEntryController',
     };
 
     $scope.saveDatavalueForEvent = function(prStDe,eventToSave,object){
-
+        //Blank out the input-saved class on the last saved due date:
+        $scope.eventDateSaved = false;
+        
         //check for input validity
         $scope.dataEntryOuterForm.submitted = true;        
         if( $scope.dataEntryOuterForm.$invalid ){            
@@ -494,42 +485,45 @@ trackerCapture.controller('DataEntryController',
                      };
             DHIS2EventFactory.updateForSingleValue(ev).then(function(response){
                 $scope.updateSuccess = true;
-            });            
-        }        
+            });
+        }
     };
     
-    $scope.saveEventDate = function(){
-        
+    $scope.saveEventDate = function () {
+        $scope.saveEventDateForEvent($scope.currentEvent);
+    };
+    
+    $scope.saveEventDateForEvent = function(eventToSave){
         $scope.eventDateSaved = false;
-        if($scope.currentEvent.eventDate === ''){            
-            $scope.invalidDate = true;
+        if(eventToSave.eventDate === ''){            
+            $scope.invalidDate = eventToSave.event;
             return false;
         }
         
-        var rawDate = angular.copy($scope.currentEvent.eventDate);
-        var convertedDate = DateUtils.format($scope.currentEvent.eventDate);
+        var rawDate = angular.copy(eventToSave.eventDate);
+        var convertedDate = DateUtils.format(eventToSave.eventDate);
         
         if(rawDate !== convertedDate){
             $scope.invalidDate = true;
             return false;
         }
         
-        var e = {event: $scope.currentEvent.event,
-             enrollment: $scope.currentEvent.enrollment,
-             dueDate: DateUtils.formatFromUserToApi($scope.currentEvent.dueDate),
-             status: $scope.currentEvent.status === 'SCHEDULE' ? 'ACTIVE' : $scope.currentEvent.status,
-             program: $scope.currentEvent.program,
-             programStage: $scope.currentEvent.programStage,
-             orgUnit: $scope.currentEvent.dataValues && $scope.currentEvent.dataValues.length > 0 ? $scope.currentEvent.orgUnit : $scope.selectedOrgUnit.id,
-             eventDate: DateUtils.formatFromUserToApi($scope.currentEvent.eventDate),
-             trackedEntityInstance: $scope.currentEvent.trackedEntityInstance
+        var e = {event: eventToSave.event,
+             enrollment: eventToSave.enrollment,
+             dueDate: DateUtils.formatFromUserToApi(eventToSave.dueDate),
+             status: eventToSave.status === 'SCHEDULE' ? 'ACTIVE' : eventToSave.status,
+             program: eventToSave.program,
+             programStage: eventToSave.programStage,
+             orgUnit: eventToSave.dataValues && eventToSave.length > 0 ? eventToSave.orgUnit : $scope.selectedOrgUnit.id,
+             eventDate: DateUtils.formatFromUserToApi(eventToSave.eventDate),
+             trackedEntityInstance: eventToSave.trackedEntityInstance
             };
 
         DHIS2EventFactory.updateForEventDate(e).then(function(data){
-            $scope.currentEvent.sortingDate = $scope.currentEvent.eventDate;
+            eventToSave.sortingDate = eventToSave.eventDate;
             $scope.invalidDate = false;
-            $scope.eventDateSaved = true;
-            $scope.currentEvent.statusColor = EventUtils.getEventStatusColor($scope.currentEvent);
+            $scope.eventDateSaved = eventToSave.event;
+            eventToSave.statusColor = EventUtils.getEventStatusColor(eventToSave);
             sortEventsByStage();
         });
     };
@@ -648,6 +642,16 @@ trackerCapture.controller('DataEntryController',
     
     $scope.clearNote = function(){
          $scope.note = '';           
+    };
+    
+    $scope.getInputDueDateClass = function(event) {
+        if(event.event === $scope.eventDateSaved) {
+            return 'input-success';
+        }
+        else {
+            return '';
+        }
+            
     };
     
     $scope.getInputNotifcationClass = function(id, custom, event){
@@ -920,7 +924,8 @@ trackerCapture.controller('DataEntryController',
             DialogService,
             stagesById,
             dummyEvent,
-            eventPeriods){
+            eventPeriods,
+            autoCreate){
     $scope.stagesById = stagesById;
     $scope.programStageId = dummyEvent.programStage;
     $scope.eventPeriods = eventPeriods;
@@ -937,6 +942,7 @@ trackerCapture.controller('DataEntryController',
     
     $scope.dueDateInvalid = false;
     $scope.eventDateInvalid = false;
+    
     
     //watch for changes in due/event-date
     $scope.$watchCollection('[dhis2Event.dueDate, dhis2Event.eventDate]', function() {        
@@ -1002,6 +1008,12 @@ trackerCapture.controller('DataEntryController',
             }
         });
         
+        
+    };
+    
+    //If the caller wants to create right away, go ahead and save.
+    if(autoCreate) {
+        $scope.save();
     };
     
     $scope.cancel = function(){

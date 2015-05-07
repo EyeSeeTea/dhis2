@@ -1,13 +1,28 @@
-<form name="tableEntryOuterForm" novalidate>                
+<form name="tableEntryOuterForm" novalidate>          
     <table class="table-borderless table-striped" ng-if='currentEvent'>
         <thead>
             <tr class="col-md-12">
+                <th class="col-md-2" >
+                    {{currentEvent.reportDateDescription}}
+                </th>
                 <th class="col-md-2" ng-repeat="prStDe in currentStage.programStageDataElements" ng-if="!isHidden(prStDe.dataElement.id)">
                     {{prStDe.dataElement.formName ? prStDe.dataElement.formName : prStDe.dataElement.name}}
                 </th>
             </tr>
         </thead>
         <tr class="col-md-12" ng-repeat="eventRow in currentStageEvents" ng-if="currentStageEvents">
+            <td>
+                <input type="text"
+                       placeholder="{{dhis2CalendarFormat.keyDateFormat}}"
+                       class="form-control" 
+                       ng-class="getInputDueDateClass(eventRow)"
+                       d2-date 
+                       ng-model="eventRow.eventDate"
+                       ng-disabled="eventRow.status === 'SKIPPED' || eventRow.enrollmentStatus !== 'ACTIVE' || eventRow.editingNotAllowed"    
+                       ng-required="true"
+                       blur-or-change="saveEventDateForEvent(eventRow)"/>
+                <span ng-if="invalidDate === eventRow.event" class="error">{{'date_required'| translate}}</span>
+            </td>
             <td class="col-md-2" ng-repeat="prStDe in currentStage.programStageDataElements" ng-if="!isHidden(prStDe.dataElement.id)">
                 <ng-form name="dataEntryInnerForm">
                     <div ng-switch="prStDe.dataElement.type">
@@ -82,7 +97,6 @@
                                 <option value="false">{{'no'| translate}}</option>
                                 <option value="true">{{'yes'| translate}}</option>
                             </select>
-
                         </div>
                         <div ng-switch-when="date">
                             <input type="text" 
@@ -127,4 +141,11 @@
             </td>-->
         </tr>
     </table>
+    <div class="col-md-12"style="text-align: right"> 
+        <button type="button" 
+                class="btn btn-default"
+                ng-click="showCreateEvent(currentStage)">
+            {{'add'| translate}}
+        </button>
+    </div>
 </form>

@@ -315,6 +315,9 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             TCStorageService.currentStore.open().done(function(){
                 TCStorageService.currentStore.get('programStages', uid).done(function(pst){                    
                     $rootScope.$apply(function(){
+                        if(pst.name.startsWith("Table:")){
+                            pst.displayEventsInTable = true;
+                        }
                         def.resolve(pst);
                     });
                 });
@@ -332,7 +335,10 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             TCStorageService.currentStore.open().done(function(){
                 TCStorageService.currentStore.getAll('programStages').done(function(stages){   
                     angular.forEach(stages, function(stage){
-                        if(stageIds.indexOf(stage.id) !== -1){                            
+                        if(stageIds.indexOf(stage.id) !== -1){  
+                            if(stage.name.startsWith("Table:")){
+                                stage.displayEventsInTable = true;
+                            }
                             programStages.push(stage);                               
                         }                        
                     });
