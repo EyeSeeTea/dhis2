@@ -319,9 +319,8 @@ Ext.onReady( function() {
 				}();
 			};
 
-			api.layout.Layout = function(config) {
-				var config = Ext.clone(config),
-					layout = {},
+			api.layout.Layout = function(config, applyConfig) {
+				var layout = {},
 					getValidatedDimensionArray,
 					validateSpecialCases;
 
@@ -558,7 +557,7 @@ Ext.onReady( function() {
 						return;
 					}
 
-					return layout;
+                    return Ext.apply(layout, applyConfig);
 				}();
 			};
 
@@ -620,7 +619,7 @@ Ext.onReady( function() {
 
 					if (!(Ext.isArray(config.rows) && config.rows.length > 0)) {
 						//alert('No values found');
-						return; // for ER, not for PT
+						//return; // for ER, not for PT
 					}
 
 					if (config.rows.length > 0 && config.headers.length !== config.rows[0].length) {

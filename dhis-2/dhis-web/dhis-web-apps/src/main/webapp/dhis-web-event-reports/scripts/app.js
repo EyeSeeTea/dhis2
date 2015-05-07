@@ -6990,19 +6990,19 @@ Ext.onReady( function() {
 
                         var response = api.response.Response(Ext.decode(r.responseText));
 
-                        if (response) {
+                        //if (response) {
 
-                            // add to dimConf, TODO
-                            for (var i = 0, map = dimConf.objectNameMap, header; i < response.headers.length; i++) {
-                                header = response.headers[i];
+                        // add to dimConf, TODO
+                        for (var i = 0, map = dimConf.objectNameMap, header; i < response.headers.length; i++) {
+                            header = response.headers[i];
 
-                                map[header.name] = map[header.name] || {
-                                    id: header.name,
-                                    dimensionName: header.name,
-                                    name: header.column
-                                };
-                            }
+                            map[header.name] = map[header.name] || {
+                                id: header.name,
+                                dimensionName: header.name,
+                                name: header.column
+                            };
                         }
+                        //}
 
                         web.mask.show(ns.app.centerRegion, 'Creating table..');
 
@@ -7192,7 +7192,7 @@ Ext.onReady( function() {
                     getOptionSets(xResponse, getReport);
 				};
 
-                if (!response) {
+                if (!response.rows.length) {
                     ns.app.centerRegion.removeAll(true);
                     ns.app.centerRegion.update('');
                     ns.app.centerRegion.add({

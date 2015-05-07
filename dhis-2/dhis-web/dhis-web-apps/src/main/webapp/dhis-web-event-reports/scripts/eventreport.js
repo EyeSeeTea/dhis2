@@ -376,9 +376,8 @@ Ext.onReady( function() {
 				}();
 			};
 
-			api.layout.Layout = function(config) {
-				var config = Ext.clone(config),
-					layout = {},
+			api.layout.Layout = function(config, applyConfig) {
+				var layout = {},
 					getValidatedDimensionArray,
 					validateSpecialCases;
 
@@ -615,7 +614,7 @@ Ext.onReady( function() {
 						return;
 					}
 
-					return layout;
+                    return Ext.apply(layout, applyConfig);
 				}();
 			};
 
@@ -677,7 +676,7 @@ Ext.onReady( function() {
 
 					if (!(Ext.isArray(config.rows) && config.rows.length > 0)) {
 						//alert('No values found');
-						return; // for ER, not for PT
+						//return;
 					}
 
 					if (config.rows.length > 0 && config.headers.length !== config.rows[0].length) {
@@ -3960,21 +3959,23 @@ Ext.onReady( function() {
                 success = function(r) {
                     var response = api.response.Response((r.responseText ? Ext.decode(r.responseText) : r));
 
-                    if (response) {
+                    //if (response) {
 
-                        // add to dimConf, TODO
-                        for (var i = 0, map = dimConf.objectNameMap, header; i < response.headers.length; i++) {
-                            header = response.headers[i];
+                    // add to dimConf, TODO
+                    for (var i = 0, map = dimConf.objectNameMap, header; i < response.headers.length; i++) {
+                        header = response.headers[i];
 
-                            map[header.name] = map[header.name] || {
-                                id: header.name,
-                                dimensionName: header.name,
-                                name: header.column
-                            };
-                        }
+                        map[header.name] = map[header.name] || {
+                            id: header.name,
+                            dimensionName: header.name,
+                            name: header.column
+                        };
                     }
+                    //}
 
-                    web.mask.show(ns.app.centerRegion, 'Creating table..');
+                    if (!ns.skipMask) {
+                        web.mask.show(ns.app.centerRegion, 'Creating table..');
+                    }
 
                     ns.app.paramString = paramString;
 
@@ -4094,17 +4095,17 @@ Ext.onReady( function() {
                         ns.app.centerRegion.update(getTitleHtml(layout.name) + table.html);
 
                         // fade
-                        if (!ns.skipFade) {
-                            Ext.defer( function() {
-                                var el = Ext.get(init.el);
+                        //if (!ns.skipFade) {
+                            //Ext.defer( function() {
+                                //var el = Ext.get(init.el);
 
-                                if (el) {
-                                    el.fadeIn({
-                                        duration: 400
-                                    });
-                                }
-                            }, 300 );
-                        }
+                                //if (el) {
+                                    //el.fadeIn({
+                                        //duration: 400
+                                    //});
+                                //}
+                            //}, 300 );
+                        //}
 
                         // after render
                         ns.app.layout = layout;
@@ -4149,8 +4150,6 @@ Ext.onReady( function() {
                     };
 
                     // execute
-					response = response || ns.app.response;
-
                     getXResponse();
 				};
 
@@ -4203,6 +4202,14 @@ Ext.onReady( function() {
 
                     getOptionSets(xResponse, getReport);
 				};
+
+                if (!response.rows.length) {
+                    ns.app.centerRegion.update('<div style="padding:20px; border:0 none; background:transparent; color:#555">No values found for the current selection.</div>');
+
+                    web.mask.hide(ns.app.centerRegion);
+
+                    return;
+                }
 
 				map[layout.dataType]();
 			};
