@@ -719,8 +719,8 @@ Ext.onReady( function() {
                     store: {
                         fields: ['id', 'name'],
                         data: [
-                            {id: 'true', name: ER.i18n.yes},
-                            {id: 'false', name: ER.i18n.no}
+                            {id: 'true', name: EV.i18n.yes},
+                            {id: 'false', name: EV.i18n.no}
                         ]
                     }
                 });
@@ -6663,6 +6663,7 @@ Ext.onReady( function() {
                     xRowAxis,
                     chart,
                     getOptionSets,
+                    success,
                     getReport,
                     getSXLayout,
                     getXResponse;
