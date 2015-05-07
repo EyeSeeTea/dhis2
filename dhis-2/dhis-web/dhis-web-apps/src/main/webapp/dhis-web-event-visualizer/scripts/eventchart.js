@@ -717,33 +717,7 @@ Ext.onReady( function() {
 					{id: 'FinancialJuly', name: EV.i18n.financial_july},
 					{id: 'FinancialApril', name: EV.i18n.financial_april}
 				],
-                relativePeriods: [
-                    'THIS_WEEK',
-                    'LAST_WEEK',
-                    'LAST_4_WEEKS',
-                    'LAST_12_WEEKS',
-                    'LAST_52_WEEKS',
-                    'THIS_MONTH',
-                    'LAST_MONTH',
-                    'LAST_3_MONTHS',
-                    'LAST_6_MONTHS',
-                    'LAST_12_MONTHS',
-                    'THIS_BIMONTH',
-                    'LAST_BIMONTH',
-                    'LAST_6_BIMONTHS',
-                    'THIS_QUARTER',
-                    'LAST_QUARTER',
-                    'LAST_4_QUARTERS',
-                    'THIS_SIX_MONTH',
-                    'LAST_SIX_MONTH',
-                    'LAST_2_SIXMONTHS',
-                    'THIS_FINANCIAL_YEAR',
-                    'LAST_FINANCIAL_YEAR',
-                    'LAST_5_FINANCIAL_YEARS',
-                    'THIS_YEAR',
-                    'LAST_YEAR',
-                    'LAST_5_YEARS'
-                ]
+                relativePeriods: []
 			};
 
                 // aggregation type
@@ -1285,11 +1259,11 @@ Ext.onReady( function() {
 
 					if (!(Ext.isArray(config.rows) && config.rows.length > 0)) {
 						//alert('No values found');
-						return; // for EV, not for DV
+						//return;
 					}
 
-					if (config.headers.length !== config.rows[0].length) {
-						console.log('Response: headers.length !== rows[0].length');
+					if (config.rows.length && config.headers.length !== config.rows[0].length) {
+						console.log('api.response.Response: headers.length !== rows[0].length');
 					}
 
 					return config;
@@ -4834,11 +4808,6 @@ Ext.onReady( function() {
                 success = function(r) {
                     var response = api.response.Response((r.responseText ? Ext.decode(r.responseText) : r));
 
-                    if (!response && !ns.skipMask) {
-                        web.mask.hide(ns.app.centerRegion);
-                        return;
-                    }
-
                     // add to dimConf, TODO
                     for (var i = 0, map = dimConf.objectNameMap, header; i < response.headers.length; i++) {
                         header = response.headers[i];
@@ -4847,6 +4816,10 @@ Ext.onReady( function() {
                             dimensionName: header.name,
                             name: header.column
                         };
+                    }
+
+                    if (!ns.skipMask) {
+                        web.mask.show(ns.app.centerRegion, 'Creating chart..');
                     }
 
                     ns.app.paramString = paramString;
@@ -4932,16 +4905,34 @@ Ext.onReady( function() {
                     }
                 };
 
+                success = function() {
+
+                    // after render
+                    ns.app.layout = layout;
+                    ns.app.xLayout = xLayout;
+                    ns.app.response = response;
+                    ns.app.xResponse = xResponse;
+                    ns.app.chart = chart;
+
+                    if (!ns.skipMask) {
+                        web.mask.hide(ns.app.centerRegion);
+                    }
+
+                    if (EV.isDebug) {
+                        console.log("layout", layout);
+                        console.log("response", response);
+                        console.log("xResponse", xResponse);
+                        console.log("xLayout", xLayout);
+                        console.log("core", ns.core);
+                        console.log("app", ns.app);
+                    }
+                };
+
                 getReport = function() {
                     if (!xLayout && !ns.skipMask) {
                         web.mask.hide(ns.app.centerRegion);
                         return;
                     }
-
-                    ns.app.layout = layout;
-                    ns.app.xLayout = xLayout;
-                    ns.app.response = response;
-                    ns.app.xResponse = xResponse;
 
                     chart = web.report.aggregate.createChart(layout, xLayout, xResponse, ns.app.centerRegion);
 
@@ -4963,21 +4954,7 @@ Ext.onReady( function() {
                     ns.app.centerRegion.removeAll();
                     ns.app.centerRegion.add(chart);
 
-                    // after render
-                    ns.app.chart = chart;
-
-                    if (!ns.skipMask) {
-                        web.mask.hide(ns.app.centerRegion);
-                    }
-
-                    if (EV.isDebug) {
-                        console.log("layout", layout);
-                        console.log("response", response);
-                        console.log("xResponse", xResponse);
-                        console.log("xLayout", xLayout);
-                        console.log("core", ns.core);
-                        console.log("app", ns.app);
-                    }
+                    success();
                 };
 
                 getSXLayout = function() {
@@ -4993,7 +4970,7 @@ Ext.onReady( function() {
                     getOptionSets(xResponse, getSXLayout);
                 };
 
-                if (!response) {
+                if (!response.rows.length) {
                     ns.app.centerRegion.removeAll(true);
                     ns.app.centerRegion.update('');
                     ns.app.centerRegion.add({
@@ -5001,12 +4978,11 @@ Ext.onReady( function() {
                         html: NS.i18n.no_values_found_for_current_selection + '.'
                     });
 
-                    web.mask.hide(ns.app.centerRegion);
-
-                    return;
+                    success();
                 }
-
-                getXResponse();
+                else {
+                    getXResponse();
+                }
 			};
 
             // ns        

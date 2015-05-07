@@ -1231,7 +1231,7 @@ Ext.onReady( function() {
 					}
 
 					if (config.rows.length && config.headers.length !== config.rows[0].length) {
-						console.log('Response: headers.length !== rows[0].length');
+						console.log('api.response.Response: headers.length !== rows[0].length');
 					}
 
 					return config;
