@@ -1370,7 +1370,7 @@ Ext.onReady( function() {
         fixedFilterStore = getStore({name: 'fixedFilterStore'});
         filterStore = getStore({name: 'filterStore'});
         valueStore = getStore({name: 'valueStore'});
-
+nissa = rowStore;
         // store functions
         valueStore.addDefaultData = function() {
             if (!this.getById(defaultValueId)) {
@@ -1768,6 +1768,7 @@ Ext.onReady( function() {
             if (!hasDimension('dy')) {
                 addDimension({
                     id: 'dy',
+                    dimension: 'dy',
                     name: NS.i18n.data
                 }, rowStore);
             }
@@ -4591,6 +4592,8 @@ Ext.onReady( function() {
             // favorite
 			if (layout && layout.dataType === 'aggregated_values') {
 
+                aggWindow.reset(true);
+
                 // start end dates
 				if (layout.startDate && layout.endDate) {
 					aggWindow.fixedFilterStore.add({id: dimConf.startEndDate.value, name: dimConf.startEndDate.name});
@@ -4602,7 +4605,8 @@ Ext.onReady( function() {
                         dim = layout.columns[i];
                         record = recordMap[dim.dimension];
 
-						aggWindow.addDimension(record || extendDim(Ext.clone(dim)), aggWindow.colStore, null, true);
+						//aggWindow.addDimension(record || extendDim(Ext.clone(dim)), aggWindow.colStore, null, true);
+                        aggWindow.colStore.add(record || extendDim(Ext.clone(dim)));
 					}
 				}
 
@@ -4612,7 +4616,8 @@ Ext.onReady( function() {
                         dim = layout.rows[i];
                         record = recordMap[dim.dimension];
 
-						aggWindow.addDimension(record || extendDim(Ext.clone(dim)), aggWindow.rowStore, null, true);
+						//aggWindow.addDimension(record || extendDim(Ext.clone(dim)), aggWindow.rowStore, null, true);
+                        aggWindow.rowStore.add(record || extendDim(Ext.clone(dim)));
 					}
 				}
 
@@ -4623,7 +4628,8 @@ Ext.onReady( function() {
 						record = recordMap[dim.dimension];
 						store = Ext.Array.contains(includeKeys, element.type) || element.optionSet ? aggWindow.filterStore : aggWindow.fixedFilterStore;
 
-                        aggWindow.addDimension(record || extendDim(Ext.clone(dim)), store, null, true);
+                        //aggWindow.addDimension(record || extendDim(Ext.clone(dim)), store, null, true);
+                        store.add(record || extendDim(Ext.clone(dim)));
 					}
 				}
 
