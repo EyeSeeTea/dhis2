@@ -1202,11 +1202,11 @@ Ext.onReady( function() {
 
 					if (!(Ext.isArray(config.rows) && config.rows.length > 0)) {
 						//alert('No values found');
-						return; // for EV, not for DV
+						//return;
 					}
 
-					if (config.headers.length !== config.rows[0].length) {
-						console.log('Response: headers.length !== rows[0].length');
+					if (config.rows.length && config.headers.length !== config.rows[0].length) {
+						console.log('api.response.Response: headers.length !== rows[0].length');
 					}
 
 					return config;
@@ -2708,7 +2708,7 @@ Ext.onReady( function() {
 
 				message = message || 'Loading..';
 
-				if (component.mask) {
+				if (component.mask && component.mask.destroy) {
 					component.mask.destroy();
 					component.mask = null;
 				}
@@ -2729,7 +2729,7 @@ Ext.onReady( function() {
 					return null;
 				}
 
-				if (component.mask) {
+				if (component.mask && component.mask.destroy) {
 					component.mask.destroy();
 					component.mask = null;
 				}

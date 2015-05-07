@@ -6633,19 +6633,19 @@ Ext.onReady( function() {
 
                         var response = api.response.Response(Ext.decode(r.responseText));
 
-                        if (response) {
+                        //if (response) {
 
-                            // add to dimConf, TODO
-                            for (var i = 0, map = dimConf.objectNameMap, header; i < response.headers.length; i++) {
-                                header = response.headers[i];
+                        // add to dimConf, TODO
+                        for (var i = 0, map = dimConf.objectNameMap, header; i < response.headers.length; i++) {
+                            header = response.headers[i];
 
-                                map[header.name] = map[header.name] || {
-                                    id: header.name,
-                                    dimensionName: header.name,
-                                    name: header.column
-                                };
-                            }
+                            map[header.name] = map[header.name] || {
+                                id: header.name,
+                                dimensionName: header.name,
+                                name: header.column
+                            };
                         }
+                        //}
 
                         web.mask.show(ns.app.centerRegion, 'Creating chart..');
 
@@ -6710,26 +6710,8 @@ Ext.onReady( function() {
                     }
                 };
 
-                getReport = function() {
-                    if (!xLayout) {
-                        web.mask.hide(ns.app.centerRegion);
-                        return;
-                    }
-
-                    web.mask.show(ns.app.centerRegion, 'Error while rendering chart..');
-
-                    chart = web.report.aggregate.createChart(layout, xLayout, xResponse, ns.app.centerRegion);
-
-                    // timing
-                    ns.app.dateRender = new Date();
-
-                    ns.app.centerRegion.update();
-                    ns.app.centerRegion.removeAll(true);
-                    ns.app.centerRegion.add(response.rows.length ? chart : {
-                        bodyStyle: 'padding:20px; border:0 none; background:transparent; color: #555',
-                        html: NS.i18n.no_values_found_for_current_selection + '.'
-                    });
-
+                success = function() {
+                    
                     // timing
                     ns.app.dateTotal = new Date();
 
@@ -6744,7 +6726,7 @@ Ext.onReady( function() {
                         web.storage.session.set(layout, 'eventchart');
                     }
 
-                    ns.app.accordion.setGui(layout, xLayout, response, isUpdateGui); //table);
+                    ns.app.accordion.setGui(layout, xLayout, response, isUpdateGui);
 
                     web.mask.hide(ns.app.centerRegion);
 
@@ -6762,6 +6744,26 @@ Ext.onReady( function() {
                     }
                 };
 
+                getReport = function() {
+                    if (!xLayout) {
+                        web.mask.hide(ns.app.centerRegion);
+                        return;
+                    }
+
+                    web.mask.show(ns.app.centerRegion, 'Error while rendering chart..');
+
+                    chart = web.report.aggregate.createChart(layout, xLayout, xResponse, ns.app.centerRegion);
+
+                    // timing
+                    ns.app.dateRender = new Date();
+
+                    ns.app.centerRegion.update();
+                    ns.app.centerRegion.removeAll(true);
+                    ns.app.centerRegion.add(chart);
+
+                    success();                    
+                };
+
                 getSXLayout = function() {
                     xLayout = service.layout.getSyncronizedXLayout(layout, xLayout, xResponse);
 
@@ -6775,7 +6777,7 @@ Ext.onReady( function() {
                     getOptionSets(xResponse, getSXLayout);
                 };
 
-                if (!response) {
+                if (!response.rows.length) {
                     ns.app.centerRegion.removeAll(true);
                     ns.app.centerRegion.update('');
                     ns.app.centerRegion.add({
@@ -6783,12 +6785,11 @@ Ext.onReady( function() {
                         html: NS.i18n.no_values_found_for_current_selection + '.'
                     });
 
-                    web.mask.hide(ns.app.centerRegion);
-
-                    return;
+                    success();
                 }
-
-                getXResponse();
+                else {
+                    getXResponse();
+                }
 			};
 		}());
 	};
