@@ -11,7 +11,7 @@ Ext.onReady( function() {
 
 		extendCore,
 		createViewport,
-		dimConf;
+		dimConf,
 
 		ns = {
 			core: {},
