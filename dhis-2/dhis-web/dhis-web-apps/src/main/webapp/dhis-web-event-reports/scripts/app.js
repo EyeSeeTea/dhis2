@@ -6995,6 +6995,14 @@ nissa = rowStore;
                         ns.app.dateCreate = new Date();
 
                         var response = api.response.Response(Ext.decode(r.responseText));
+response.headers[2] = {
+    "name": "dy",
+    "column": "Data",
+    "type": "java.lang.String",
+    "hidden": false,
+    "meta": true,
+    "optionSet": ["iDFPKpFTiVw", "fEDqAkq2X4o"]
+};
 
                         //if (response) {
 
@@ -7027,7 +7035,7 @@ nissa = rowStore;
                     var optionSetHeaders = [];
 
                     for (var i = 0; i < xResponse.headers.length; i++) {
-                        if (Ext.isString(xResponse.headers[i].optionSet)) {
+                        if (xResponse.headers[i].optionSet) {
                             optionSetHeaders.push(xResponse.headers[i]);
                         }
                     }
@@ -7055,10 +7063,12 @@ nissa = rowStore;
                         // execute
                         for (var i = 0, header, optionSetId, dataElementId; i < optionSetHeaders.length; i++) {
                             header = optionSetHeaders[i];
-                            optionSetId = header.optionSet;
+                            optionSetIds = Ext.Array.from(header.optionSet);
                             dataElementId = header.name;
 
-                            getOptions(optionSetId, dataElementId);
+                            for (var j = 0; j < optionSetIds.length; j++) {
+                                getOptions(optionSetIds[j], dataElementId);
+                            }
                         }
                     }
                     else {
