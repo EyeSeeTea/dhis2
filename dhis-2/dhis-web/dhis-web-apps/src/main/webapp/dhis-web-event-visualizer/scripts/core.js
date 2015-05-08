@@ -1136,6 +1136,23 @@ Ext.onReady( function() {
 					//layout.sortOrder = Ext.isNumber(config.sortOrder) ? config.sortOrder : 0;
 					//layout.topLimit = Ext.isNumber(config.topLimit) ? config.topLimit : 0;
 
+                    // style
+                    if (Ext.isObject(config.domainAxisStyle)) {
+                        layout.domainAxisStyle = config.domainAxisStyle;
+                    }
+
+                    if (Ext.isObject(config.rangeAxisStyle)) {
+                        layout.rangeAxisStyle = config.rangeAxisStyle;
+                    }
+
+                    if (Ext.isObject(config.legendStyle)) {
+                        layout.legendStyle = config.legendStyle;
+                    }
+
+                    if (Ext.isObject(config.seriesStyle)) {
+                        layout.seriesStyle = config.seriesStyle;
+                    }
+
 					if (!validateSpecialCases()) {
 						return;
 					}
