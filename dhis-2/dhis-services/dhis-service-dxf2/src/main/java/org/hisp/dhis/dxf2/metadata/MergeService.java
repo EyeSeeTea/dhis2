@@ -35,5 +35,12 @@ import org.hisp.dhis.common.MergeStrategy;
  */
 public interface MergeService
 {
+    /**
+     * Merges source object into target object, requires a "schema friendly" class.
+     *
+     * @param source        Source object to merge from
+     * @param target        Target object to merge into
+     * @param mergeStrategy Strategy to use
+     */
     <T> void merge( T source, T target, MergeStrategy mergeStrategy );
 }

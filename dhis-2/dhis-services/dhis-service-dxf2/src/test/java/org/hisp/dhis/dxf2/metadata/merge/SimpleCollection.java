@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataanalysis;
+package org.hisp.dhis.dxf2.metadata.merge;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,14 +28,53 @@ package org.hisp.dhis.dataanalysis;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
+import java.util.ArrayList;
+import java.util.List;
 
-public interface MinMaxDataAnalysisService
-    extends DataAnalysisService
-{    
-    void generateMinMaxValues( Collection<OrganisationUnit> organisationUnits,
-        Collection<DataElement> dataElements, Double stdDevFactor );
+/**
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
+ */
+public class SimpleCollection
+{
+    private String name;
+
+    private List<Simple> simples = new ArrayList<>();
+
+    public SimpleCollection()
+    {
+    }
+
+    public SimpleCollection( String name )
+    {
+        this.name = name;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName( String name )
+    {
+        this.name = name;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( localName = "simple" )
+    @JacksonXmlElementWrapper( localName = "simples" )
+    public List<Simple> getSimples()
+    {
+        return simples;
+    }
+
+    public void setSimples( List<Simple> simples )
+    {
+        this.simples = simples;
+    }
 }
