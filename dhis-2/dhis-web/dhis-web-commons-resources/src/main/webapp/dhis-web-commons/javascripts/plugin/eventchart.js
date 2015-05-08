@@ -71,7 +71,7 @@ Ext.onReady( function() {
             styleEl = document.createElement("style");
 
         styleEl.setAttribute("type", "text/css");
-        
+
         if (id) {
            styleEl.setAttribute("id", id);
         }
@@ -717,7 +717,33 @@ Ext.onReady( function() {
 					{id: 'FinancialJuly', name: EV.i18n.financial_july},
 					{id: 'FinancialApril', name: EV.i18n.financial_april}
 				],
-                relativePeriods: []
+                relativePeriods: [
+                    'THIS_WEEK',
+                    'LAST_WEEK',
+                    'LAST_4_WEEKS',
+                    'LAST_12_WEEKS',
+                    'LAST_52_WEEKS',
+                    'THIS_MONTH',
+                    'LAST_MONTH',
+                    'LAST_3_MONTHS',
+                    'LAST_6_MONTHS',
+                    'LAST_12_MONTHS',
+                    'THIS_BIMONTH',
+                    'LAST_BIMONTH',
+                    'LAST_6_BIMONTHS',
+                    'THIS_QUARTER',
+                    'LAST_QUARTER',
+                    'LAST_4_QUARTERS',
+                    'THIS_SIX_MONTH',
+                    'LAST_SIX_MONTH',
+                    'LAST_2_SIXMONTHS',
+                    'THIS_FINANCIAL_YEAR',
+                    'LAST_FINANCIAL_YEAR',
+                    'LAST_5_FINANCIAL_YEARS',
+                    'THIS_YEAR',
+                    'LAST_YEAR',
+                    'LAST_5_YEARS'
+                ]
 			};
 
                 // aggregation type
@@ -4423,8 +4449,6 @@ Ext.onReady( function() {
 		ns.core.support = support;
 		ns.core.service = service;
 		ns.core.web = web;
-
-		return ns;
 	};
 
 	// PLUGIN
@@ -4660,7 +4684,14 @@ Ext.onReady( function() {
 			}
 		});
 
-        init.legendSets = [];
+        // legend sets
+        requests.push({
+            url: init.contextPath + '/api/legendSets.json?fields=id,name,legends[id,name,startValue,endValue,color]&paging=false',
+            success: function(r) {
+                init.legendSets = Ext.decode(r.responseText).legendSets || [];
+                fn();
+            }
+        });
 
 		for (var i = 0; i < requests.length; i++) {
             if (type === 'jsonp') {
@@ -4672,7 +4703,7 @@ Ext.onReady( function() {
 		}
 	};
 
-    applyCss = function(config) {
+    applyCss = function() {
         var css = '';
 
         // tooltip
@@ -4687,7 +4718,7 @@ Ext.onReady( function() {
         css += '.x-mask { opacity: 0; } \n';
 
         // alert
-        css += '.ns-plugin-alert { width: 90%; padding: 5%; color: #777 } \n';
+        css += '.ns-plugin-alert { width: 90%; padding: 3%; color: #777; font-size: 11px } \n';
 
         Ext.util.CSS.createStyleSheet(css);
     };
@@ -4737,15 +4768,13 @@ Ext.onReady( function() {
                 },
                 el = Ext.get(init.el);
 
-			// message
-			web.message = web.message || {};
+            ns.plugin = init.plugin;
+            ns.dashboard = init.dashboard;
+            ns.crossDomain = init.crossDomain;
+            ns.skipMask = init.skipMask;
+            ns.skipFade = init.skipFade;
 
-			web.message.alert = function(text) {
-                if (el) {
-                    el.setStyle('opacity', 1);
-                    el.update('<div class="ns-plugin-alert">' + text + '</div>');
-                }
-            };
+			init.el = config.el;
 
 			// report
 			web.report = web.report || {};
@@ -4808,6 +4837,13 @@ Ext.onReady( function() {
                 success = function(r) {
                     var response = api.response.Response((r.responseText ? Ext.decode(r.responseText) : r));
 
+                    if (!response) {
+                        if (!ns.skipMask) {
+                            web.mask.hide(ns.app.centerRegion);
+                        }
+                        return;
+                    }
+
                     // add to dimConf, TODO
                     for (var i = 0, map = dimConf.objectNameMap, header; i < response.headers.length; i++) {
                         header = response.headers[i];
@@ -4816,10 +4852,6 @@ Ext.onReady( function() {
                             dimensionName: header.name,
                             name: header.column
                         };
-                    }
-
-                    if (!ns.skipMask) {
-                        web.mask.show(ns.app.centerRegion, 'Creating chart..');
                     }
 
                     ns.app.paramString = paramString;
@@ -4905,34 +4937,16 @@ Ext.onReady( function() {
                     }
                 };
 
-                success = function() {
-
-                    // after render
-                    ns.app.layout = layout;
-                    ns.app.xLayout = xLayout;
-                    ns.app.response = response;
-                    ns.app.xResponse = xResponse;
-                    ns.app.chart = chart;
-
-                    if (!ns.skipMask) {
-                        web.mask.hide(ns.app.centerRegion);
-                    }
-
-                    if (EV.isDebug) {
-                        console.log("layout", layout);
-                        console.log("response", response);
-                        console.log("xResponse", xResponse);
-                        console.log("xLayout", xLayout);
-                        console.log("core", ns.core);
-                        console.log("app", ns.app);
-                    }
-                };
-
                 getReport = function() {
                     if (!xLayout && !ns.skipMask) {
                         web.mask.hide(ns.app.centerRegion);
                         return;
                     }
+
+                    ns.app.layout = layout;
+                    ns.app.xLayout = xLayout;
+                    ns.app.response = response;
+                    ns.app.xResponse = xResponse;
 
                     chart = web.report.aggregate.createChart(layout, xLayout, xResponse, ns.app.centerRegion);
 
@@ -4954,7 +4968,21 @@ Ext.onReady( function() {
                     ns.app.centerRegion.removeAll();
                     ns.app.centerRegion.add(chart);
 
-                    success();
+                    // after render
+                    ns.app.chart = chart;
+
+                    if (!ns.skipMask) {
+                        web.mask.hide(ns.app.centerRegion);
+                    }
+
+                    if (EV.isDebug) {
+                        console.log("layout", layout);
+                        console.log("response", response);
+                        console.log("xResponse", xResponse);
+                        console.log("xLayout", xLayout);
+                        console.log("core", ns.core);
+                        console.log("app", ns.app);
+                    }
                 };
 
                 getSXLayout = function() {
@@ -4970,44 +4998,28 @@ Ext.onReady( function() {
                     getOptionSets(xResponse, getSXLayout);
                 };
 
-                if (!response.rows.length) {
-                    ns.app.centerRegion.removeAll(true);
-                    ns.app.centerRegion.update('');
-                    ns.app.centerRegion.add({
-                        bodyStyle: 'padding:20px; border:0 none; background:transparent; color: #555',
-                        html: NS.i18n.no_values_found_for_current_selection + '.'
-                    });
+                // execute
+                response = response || ns.app.response;
 
-                    success();
-                }
-                else {
-                    getXResponse();
-                }
+                getXResponse();
 			};
-
-            // ns        
-            ns.plugin = init.plugin;
-            ns.dashboard = init.dashboard;
-            ns.crossDomain = init.crossDomain;
-            ns.skipMask = init.skipMask;
-            ns.skipFade = init.skipFade;
-
-            ns.alert = web.message.alert;
-
-			init.el = config.el;
         };
 
 		createViewport = function() {
 			var el = Ext.get(ns.core.init.el),
 				centerRegion,
-				elBorderW = parseInt(el.getStyle('border-left-width')) + parseInt(el.getStyle('border-right-width')),
-				elBorderH = parseInt(el.getStyle('border-top-width')) + parseInt(el.getStyle('border-bottom-width')),
-				elPaddingW = parseInt(el.getStyle('padding-left')) + parseInt(el.getStyle('padding-right')),
-				elPaddingH = parseInt(el.getStyle('padding-top')) + parseInt(el.getStyle('padding-bottom')),
+				elBorderW,
+				elBorderH,
+				elPaddingW,
+				elPaddingH,
 				width,
 				height;
 
             if (el) {
+				elBorderW = parseInt(el.getStyle('border-left-width')) + parseInt(el.getStyle('border-right-width'));
+				elBorderH = parseInt(el.getStyle('border-top-width')) + parseInt(el.getStyle('border-bottom-width'));
+				elPaddingW = parseInt(el.getStyle('padding-left')) + parseInt(el.getStyle('padding-right'));
+				elPaddingH = parseInt(el.getStyle('padding-top')) + parseInt(el.getStyle('padding-bottom'));
                 width = el.getWidth() - elBorderW - elPaddingW;
                 height = el.getHeight() - elBorderH - elPaddingH;
             }
@@ -5015,8 +5027,8 @@ Ext.onReady( function() {
 			centerRegion = Ext.create('Ext.panel.Panel', {
 				renderTo: el,
 				bodyStyle: 'border: 0 none',
-				width: config.width || width,
-				height: config.height || height,
+				width: config.width || width || '90%',
+				height: config.height || height || '50%',
 				layout: 'fit'
 			});
 
@@ -5033,7 +5045,7 @@ Ext.onReady( function() {
 			}
 
             // css
-            applyCss(config);
+            applyCss();
 
             // config
             init.plugin = true;
