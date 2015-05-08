@@ -1219,6 +1219,23 @@ Ext.onReady( function() {
 					//layout.sortOrder = Ext.isNumber(config.sortOrder) ? config.sortOrder : 0;
 					//layout.topLimit = Ext.isNumber(config.topLimit) ? config.topLimit : 0;
 
+                    // style
+                    if (Ext.isObject(config.domainAxisStyle)) {
+                        layout.domainAxisStyle = config.domainAxisStyle;
+                    }
+
+                    if (Ext.isObject(config.rangeAxisStyle)) {
+                        layout.rangeAxisStyle = config.rangeAxisStyle;
+                    }
+
+                    if (Ext.isObject(config.legendStyle)) {
+                        layout.legendStyle = config.legendStyle;
+                    }
+
+                    if (Ext.isObject(config.seriesStyle)) {
+                        layout.seriesStyle = config.seriesStyle;
+                    }
+
 					if (!validateSpecialCases()) {
 						return;
 					}
@@ -3897,6 +3914,8 @@ Ext.onReady( function() {
                     var a = [],
                         text = '',
                         fontSize,
+                        titleFont,
+                        titleColor,
                         md = xResponse.metaData,
                         operatorMap = {
                             'EQ': '=',
@@ -4002,15 +4021,33 @@ Ext.onReady( function() {
                         text += (md.booleanNames[value] || md.optionNames[value] || md.names[value] || value) + ' (' + conf.aggregationType.idNameMap[layout.aggregationType] + ')';
                     }
 
-                    fontSize = (centerRegion.getWidth() / text.length) < 11.6 ? 13 : 18;
+                    fontSize = (centerRegion.getWidth() / text.length) < 11.6 ? 12 : 17;
+                    titleFont = 'normal ' + fontSize + 'px ' + conf.chart.style.fontFamily;
+                    titleColor = 'black';
+
+                    // legend
+                    if (Ext.isObject(xLayout.legendStyle)) {
+                        var style = xLayout.legendStyle;
+
+                        titleColor = style.titleColor || titleColor;
+
+                        if (style.titleFont) {
+                            titleFont = style.titleFont;
+                        }
+                        else {
+                            titleFont = style.titleFontWeight ? style.titleFontWeight + ' ' : 'normal ';
+                            titleFont += style.titleFontSize ? parseFloat(style.titleFontSize) + 'px ' : (fontSize + 'px ');
+                            titleFont +=  style.titleFontFamily ? style.titleFontFamily : conf.chart.style.fontFamily;
+                        }
+                    }
 
                     return Ext.create('Ext.draw.Sprite', {
                         type: 'text',
                         text: text,
-                        font: 'bold ' + fontSize + 'px ' + conf.chart.style.fontFamily,
-                        fill: '#111',
+                        font: titleFont,
+                        fill: titleColor,
                         height: 20,
-                        y: 	20
+                        y: ns.dashboard ? 7 : 20
                     });
                 };
 
@@ -4534,7 +4571,7 @@ Ext.onReady( function() {
                             labelFont: labelFont
                         }
                     });
-                    
+
                     return chart;
                 };
 
