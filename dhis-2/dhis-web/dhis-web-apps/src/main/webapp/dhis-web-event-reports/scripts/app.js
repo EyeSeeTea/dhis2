@@ -6995,14 +6995,6 @@ nissa = rowStore;
                         ns.app.dateCreate = new Date();
 
                         var response = api.response.Response(Ext.decode(r.responseText));
-response.headers[2] = {
-    "name": "dy",
-    "column": "Data",
-    "type": "java.lang.String",
-    "hidden": false,
-    "meta": true,
-    "optionSet": ["iDFPKpFTiVw", "fEDqAkq2X4o"]
-};
 
                         //if (response) {
 
