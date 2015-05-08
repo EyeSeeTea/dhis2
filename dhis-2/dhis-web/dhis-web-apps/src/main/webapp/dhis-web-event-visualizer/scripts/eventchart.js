@@ -717,7 +717,33 @@ Ext.onReady( function() {
 					{id: 'FinancialJuly', name: EV.i18n.financial_july},
 					{id: 'FinancialApril', name: EV.i18n.financial_april}
 				],
-                relativePeriods: []
+                relativePeriods: [
+                    'THIS_WEEK',
+                    'LAST_WEEK',
+                    'LAST_4_WEEKS',
+                    'LAST_12_WEEKS',
+                    'LAST_52_WEEKS',
+                    'THIS_MONTH',
+                    'LAST_MONTH',
+                    'LAST_3_MONTHS',
+                    'LAST_6_MONTHS',
+                    'LAST_12_MONTHS',
+                    'THIS_BIMONTH',
+                    'LAST_BIMONTH',
+                    'LAST_6_BIMONTHS',
+                    'THIS_QUARTER',
+                    'LAST_QUARTER',
+                    'LAST_4_QUARTERS',
+                    'THIS_SIX_MONTH',
+                    'LAST_SIX_MONTH',
+                    'LAST_2_SIXMONTHS',
+                    'THIS_FINANCIAL_YEAR',
+                    'LAST_FINANCIAL_YEAR',
+                    'LAST_5_FINANCIAL_YEARS',
+                    'THIS_YEAR',
+                    'LAST_YEAR',
+                    'LAST_5_YEARS'
+                ]
 			};
 
                 // aggregation type
@@ -4749,10 +4775,6 @@ Ext.onReady( function() {
             ns.skipFade = init.skipFade;
 
 			init.el = config.el;
-
-            if (!ns.skipFade && el) {
-                el.setStyle('opacity', 0);
-            }
 
 			// report
 			web.report = web.report || {};
