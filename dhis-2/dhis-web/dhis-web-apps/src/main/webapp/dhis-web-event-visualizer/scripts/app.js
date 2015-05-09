@@ -1779,6 +1779,7 @@ Ext.onReady( function() {
 
             if (!skipValueStore) {
                 valueStore.removeAll();
+                valueStore.addDefaultData();
             }
 
             value.clearValue();
