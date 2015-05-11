@@ -80,22 +80,18 @@ public enum ValueType
     {        
         if ( DataElement.VALUE_TYPE_STRING.equals( dataElement.getType() ) )
         {
-            if ( DataElement.VALUE_TYPE_TEXT.equals( dataElement.getTextType() ) )
-            {
-                return ValueType.TEXT;
-            }
             if ( DataElement.VALUE_TYPE_LONG_TEXT.equals( dataElement.getTextType() ) )
             {
                 return ValueType.LONG_TEXT;
             }
+            else
+            {
+                return ValueType.TEXT;
+            }
         }
         else if ( DataElement.VALUE_TYPE_INT.equals( dataElement.getType() ) )
         {
-            if ( DataElement.VALUE_TYPE_NUMBER.equals( dataElement.getNumberType() ) )
-            {
-                return ValueType.NUMBER;
-            }
-            else if ( DataElement.VALUE_TYPE_UNIT_INTERVAL.equals( dataElement.getNumberType() ) )
+            if ( DataElement.VALUE_TYPE_UNIT_INTERVAL.equals( dataElement.getNumberType() ) )
             {
                 return ValueType.UNIT_INTERVAL;
             }
@@ -119,6 +115,10 @@ public enum ValueType
             {
                 return ValueType.INTEGER_NEGATIVE;
             }
+            else
+            {
+                return ValueType.NUMBER;
+            }
         }
         else if ( DataElement.VALUE_TYPE_BOOL.equals( dataElement.getType() ) )
         {
@@ -133,7 +133,7 @@ public enum ValueType
             return ValueType.DATE;
         }
 
-        return null;
+        return ValueType.TEXT; // Fall back
     }
 
     /**
@@ -155,6 +155,6 @@ public enum ValueType
             return ValueType.DATE;
         }
         
-        return ValueType.TEXT;
+        return ValueType.TEXT; // Fall back
     }    
 }
