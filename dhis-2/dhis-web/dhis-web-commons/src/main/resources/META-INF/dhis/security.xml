@@ -59,6 +59,7 @@
       authentication-success-handler-ref="defaultAuthenticationSuccessHandler" />
 
     <sec:form-login default-target-url="/" always-use-default-target="false"
+      username-parameter="j_username" password-parameter="j_password"
       authentication-failure-handler-ref="securityExceptionTranslationHandler"
       login-processing-url="/dhis-web-commons-security/login.action"
       login-page="/dhis-web-commons/security/login.action"
