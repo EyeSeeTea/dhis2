@@ -4286,7 +4286,6 @@ Ext.onReady( function() {
             }
 
             dataElementSearch.enable();
-            dataElementFilter.setValue('');
             dataElementSearch.hideFilter();
 
 			loadDataElements(stageId, layout);
@@ -6296,7 +6295,6 @@ Ext.onReady( function() {
             dataElementsByStageStore.removeAll();
             dataElementSelected.removeAll();
 
-            dataElementFilter.setValue('');
             dataElementSearch.hideFilter();
 
             startDate.reset();
