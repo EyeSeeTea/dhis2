@@ -338,7 +338,9 @@ Ext.onReady( function() {
 
 				// showRowSubTotals: boolean (true)
 
-                // showDimensionLabels: boolean (false)
+                // showDimensionLabels: boolean (true)
+
+                // showDataItemPrefix: boolean (true)
 
 				// hideEmptyRows: boolean (false)
 
@@ -522,7 +524,8 @@ Ext.onReady( function() {
 					layout.showColSubTotals = Ext.isBoolean(config.colSubTotals) ? config.colSubTotals : (Ext.isBoolean(config.showColSubTotals) ? config.showColSubTotals : true);
 					layout.showRowSubTotals = Ext.isBoolean(config.rowSubTotals) ? config.rowSubTotals : (Ext.isBoolean(config.showRowSubTotals) ? config.showRowSubTotals : true);
 					layout.showDimensionLabels = Ext.isBoolean(config.showDimensionLabels) ? config.showDimensionLabels : (Ext.isBoolean(config.showDimensionLabels) ? config.showDimensionLabels : true);
-					layout.hideEmptyRows = Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : false;
+                    layout.showDataItemPrefix = Ext.isBoolean(config.showDataItemPrefix) ? config.showDataItemPrefix : (Ext.isBoolean(config.showDataItemPrefix) ? config.showDataItemPrefix : true);
+                    layout.hideEmptyRows = Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : false;
                     layout.hideNaData = Ext.isBoolean(config.hideNaData) ? config.hideNaData : false;
 					layout.outputType = Ext.isString(config.outputType) && !Ext.isEmpty(config.outputType) ? config.outputType : 'EVENT';
 					layout.showHierarchy = Ext.isBoolean(config.showHierarchy) ? config.showHierarchy : false;
@@ -807,20 +810,21 @@ Ext.onReady( function() {
                 return a;
             };
 
-            support.prototype.array.getObjectMap = function(array, idProperty, nameProperty, namePrefix) {
+            support.prototype.array.getObjectMap = function(array, keyProperty, valueProperty, keyPrefix, valuePrefix) {
                 if (!(Ext.isArray(array) && array.length)) {
                     return {};
                 }
 
                 var o = {};
-                idProperty = idProperty || 'id';
-                nameProperty = nameProperty || 'name';
-                namePrefix = namePrefix || '';
+                keyProperty = keyProperty || 'id';
+                valueProperty = valueProperty || 'name';
+                keyPrefix = keyPrefix || '';
+                valuePrefix = valuePrefix || '';
 
                 for (var i = 0, obj; i < array.length; i++) {
                     obj = array[i];
 
-                    o[namePrefix + obj[idProperty]] = obj[nameProperty];
+                    o[keyPrefix + obj[keyProperty]] = valuePrefix + obj[valueProperty];
                 }
 
                 return o;
@@ -1077,7 +1081,7 @@ Ext.onReady( function() {
 			service.layout.getExtendedLayout = function(layout) {
 				var layout = Ext.clone(layout),
 					xLayout;
-
+console.log(layout.showDataItemPrefix);
 				xLayout = {
 					columns: [],
 					rows: [],
@@ -1303,7 +1307,7 @@ Ext.onReady( function() {
 
 				// Uuid
 				xLayout.tableUuid = init.el + '_' + Ext.data.IdGenerator.get('uuid').generate();
-
+console.log(xLayout.showDataItemPrefix);
 				return xLayout;
 			};
 
@@ -1949,8 +1953,8 @@ Ext.onReady( function() {
                                 displayId = Ext.isNumber(parsedId) ? parsedId : (names[id] || id);
 
 								// update names
-                                //names[fullId] = (isMeta ? '' : header.column + ' ') + displayId;
-                                names[fullId] = displayId;
+                                names[fullId] = (xLayout.showDataItemPrefix && !isMeta ? '(' + header.column + ') ' : '') + displayId;
+                                //names[fullId] = displayId;
 
 								// update rows
                                 response.rows[j][i] = fullId;

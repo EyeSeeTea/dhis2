@@ -2242,6 +2242,7 @@ Ext.onReady( function() {
 			showColSubTotals,
             showRowSubTotals,
 			showDimensionLabels,
+            showDataItemPrefix,
 			hideEmptyRows,
             hideNaData,
             limit,
@@ -2292,6 +2293,12 @@ Ext.onReady( function() {
 		showDimensionLabels = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: NS.i18n.show_dimension_labels,
 			style: 'margin-top:' + separatorTopMargin + 'px; margin-bottom:' + checkboxBottomMargin + 'px',
+			checked: true
+		});
+
+		showDataItemPrefix = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: NS.i18n.show_data_prefix_for_items,
+			style: 'margin-bottom:' + checkboxBottomMargin + 'px',
 			checked: true
 		});
 
@@ -2412,6 +2419,7 @@ Ext.onReady( function() {
 				showRowTotals,
                 showRowSubTotals,
                 showDimensionLabels,
+                showDataItemPrefix,
 				hideEmptyRows,
                 hideNaData,
                 limit,
@@ -2454,6 +2462,7 @@ Ext.onReady( function() {
 					showColSubTotals: showColSubTotals.getValue(),
                     showRowSubTotals: showRowSubTotals.getValue(),
                     showDimensionLabels: showDimensionLabels.getValue(),
+                    showDataItemPrefix: showDataItemPrefix.getValue(),
 					hideEmptyRows: hideEmptyRows.getValue(),
                     hideNaData: hideNaData.getValue(),
                     sortOrder: limit.getSortOrder(),
@@ -2473,6 +2482,7 @@ Ext.onReady( function() {
 				showColSubTotals.setValue(Ext.isBoolean(layout.showColSubTotals) ? layout.showColSubTotals : true);
 				showRowSubTotals.setValue(Ext.isBoolean(layout.showRowSubTotals) ? layout.showRowSubTotals : true);
 				showDimensionLabels.setValue(Ext.isBoolean(layout.showDimensionLabels) ? layout.showDimensionLabels : true);
+				showDataItemPrefix.setValue(Ext.isBoolean(layout.showDataItemPrefix) ? layout.showDataItemPrefix : true);
 				hideEmptyRows.setValue(Ext.isBoolean(layout.hideEmptyRows) ? layout.hideEmptyRows : false);
 				hideNaData.setValue(Ext.isBoolean(layout.hideNaData) ? layout.hideNaData : false);
 				limit.setValues(layout.sortOrder, layout.topLimit);
@@ -2561,6 +2571,7 @@ Ext.onReady( function() {
 					w.showColSubTotals = showColSubTotals
 					w.showRowSubTotals = showRowSubTotals;
                     w.showDimensionLabels = showDimensionLabels;
+                    w.showDataItemPrefix = showDataItemPrefix;
 					w.hideEmptyRows = hideEmptyRows;
                     w.hideNaData = hideNaData;
                     w.limit = limit;
@@ -7149,7 +7160,8 @@ Ext.onReady( function() {
 
                         getOptions = function(optionSetId, dataElementId) {
                             dhis2.er.store.get('optionSets', optionSetId).done( function(obj) {
-                                Ext.apply(optionMap, support.prototype.array.getObjectMap(obj.options, 'code', 'name', dataElementId));
+                                var valuePrefix = layout.showDataItemPrefix ? '(' + obj.name + ') ' : '';
+                                Ext.apply(optionMap, support.prototype.array.getObjectMap(obj.options, 'code', 'name', dataElementId, valuePrefix));
                                 fn();
                             });
                         };
