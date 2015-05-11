@@ -842,9 +842,8 @@ Ext.onReady( function() {
 				}();
 			};
 
-			api.layout.Layout = function(config) {
-				var config = Ext.clone(config),
-					layout = {},
+			api.layout.Layout = function(config, applyConfig) {
+				var layout = {},
 					getValidatedDimensionArray,
 					validateSpecialCases;
 
@@ -1157,7 +1156,7 @@ Ext.onReady( function() {
 						return;
 					}
 
-					return layout;
+                    return Ext.apply(layout, applyConfig);
 				}();
 			};
 
