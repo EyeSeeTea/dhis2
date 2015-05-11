@@ -3850,6 +3850,8 @@ Ext.onReady( function() {
                     var a = [],
                         text = '',
                         fontSize,
+                        titleFont,
+                        titleColor,
                         md = xResponse.metaData,
                         operatorMap = {
                             'EQ': '=',
