@@ -54,22 +54,39 @@ trackerCapture.controller('DataEntryController',
     //listen for rule effect changes
     $scope.$on('ruleeffectsupdated', function(event, args) {
         angular.forEach($rootScope.ruleeffects, function(effect) {
-            //in the data entry controller we only care about the "hidefield" actions
-            if(effect.action === "HIDEFIELD") {
-                //Hide the field if the hiding is in effect, and there is no data value in the field.
-                var hide = effect.ineffect && !$scope.currentEvent[effect.dataElement.id];
-                $scope.hiddenFields[effect.dataElement.id] = hide;
-            } else if(effect.action === "SHOWERROR") {
-                if(effect.ineffect){
-                    $scope.errorMessages[effect.dataElement.id] = effect.content;
-                } else {
-                    $scope.errorMessages[effect.dataElement.id] = false;
-                }
-            } else if(effect.action === "SHOWWARNING") {
-                if(effect.ineffect){
-                    $scope.warningMessages[effect.dataElement.id] = effect.content;
-                } else {
-                    $scope.warningMessages[effect.dataElement.id] = false;
+            if( effect.dataElement ) {
+                //in the data entry controller we only care about the "hidefield" actions
+                if(effect.action === "HIDEFIELD") {
+                    if(effect.dataElement) {
+                        //Hide the field if the hiding is in effect, and there is no data value in the field.
+                        var hide = effect.ineffect && !$scope.currentEvent[effect.dataElement.id];
+                        $scope.hiddenFields[effect.dataElement.id] = hide;
+                    }
+                    else {
+                        $log.warn("ProgramRuleAction " + effect.id + " is of type HIDEFIELD, bot does not have a dataelement defined");
+                    }
+                } else if(effect.action === "SHOWERROR") {
+                    if(effect.dataElement) {
+                        if(effect.ineffect){
+                            $scope.errorMessages[effect.dataElement.id] = effect.content;
+                        } else {
+                            $scope.errorMessages[effect.dataElement.id] = false;
+                        }
+                    }
+                    else {
+                        $log.warn("ProgramRuleAction " + effect.id + " is of type SHOWERROR, bot does not have a dataelement defined");
+                    }
+                } else if(effect.action === "SHOWWARNING") {
+                    if(effect.dataElement) {
+                        if(effect.ineffect){
+                            $scope.warningMessages[effect.dataElement.id] = effect.content;
+                        } else {
+                            $scope.warningMessages[effect.dataElement.id] = false;
+                        }
+                    }
+                    else {
+                        $log.warn("ProgramRuleAction " + effect.id + " is of type SHOWWARNING, bot does not have a dataelement defined");
+                    }
                 }
             }
         });

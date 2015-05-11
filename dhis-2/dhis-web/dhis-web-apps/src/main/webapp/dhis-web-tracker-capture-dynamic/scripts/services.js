@@ -1127,10 +1127,9 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 {title: 'current_selections', type: 'current_selections', show: false, expand: true, horizontalplacement:"right", index:0},
                 {title: 'profile', type: 'profile', show: false, expand: true, horizontalplacement:"right", index:1},
                 {title: 'Conditions/Complications',  type:'rulebound', code:"con", show: true, expand: true, horizontalplacement:"right", index:2},
-                {title: 'Reminders',  type:'rulebound', code:"rem", show: true, expand: true, horizontalplacement:"left", index:4},
                 {title: 'relationships', type: 'relationships', show: false, expand: true, horizontalplacement:"right", index:3},
                 {title: 'notes', type: 'notes', show: true, expand: true, horizontalplacement:"right", index:4},
-                {title: 'Summary', type: 'rulebound', code:"sum", show: true, expand: true, horizontalplacement:"left", index:5}
+                {title: 'Summary', type: 'rulebound', code:"sum", show: true, expand: true, horizontalplacement:"left", index:4}
             ];
         },
         getDefaultWidgetConfiguration: function() {
@@ -1824,7 +1823,14 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                     if(!valueFound){
                         //If there is still no value found, assign default value:
                         if(programVariable.dataElement) {
-                            $scope.pushVariable(programVariable.name, "", allDes[programVariable.dataElement.id].dataElement.type );
+                            var dataElement = allDes[programVariable.dataElement.id];
+                            if( dataElement ) {
+                                $scope.pushVariable(programVariable.name, "", dataElement.dataElement.type );
+                            } 
+                            else {
+                                $log.warn("Variable #{" + programVariable.name + "} is linked to a dataelement that is not part of the program");
+                                $scope.pushVariable(programVariable.name, "", "string" );
+                            }
                         }
                         else {
                             $scope.pushVariable(programVariable.name, "", "string" );
