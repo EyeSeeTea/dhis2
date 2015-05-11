@@ -3864,7 +3864,10 @@ Ext.onReady( function() {
                         text = xLayout.startDate + ' - ' + xLayout.endDate;
                     }
 
-                    if (xLayout.title) {
+                    if (ns.dashboard && Ext.isString(xLayout.name)) {
+                        text = xLayout.name;
+                    }
+                    else if (xLayout.title) {
                         text += (text.length ? ', ' : '') + xLayout.title;
                     }
                     else if (xLayout.type === conf.finals.chart.pie) {
@@ -3948,22 +3951,40 @@ Ext.onReady( function() {
                     }
 
                     // aggregation type
-                    if (Ext.isObject(layout.value) && layout.value.id && layout.aggregationType) {
+                    if (!ns.dashboard && Ext.isObject(layout.value) && layout.value.id && layout.aggregationType) {
                         var value = layout.value.id;
 
                         text += text.length ? ', ' : '';
                         text += (md.booleanNames[value] || md.optionNames[value] || md.names[value] || value) + ' (' + conf.aggregationType.idNameMap[layout.aggregationType] + ')';
                     }
 
-                    fontSize = (centerRegion.getWidth() / text.length) < 11.6 ? 13 : 18;
+                    fontSize = (centerRegion.getWidth() / text.length) < 11.6 ? 12 : 17;
+                    titleFont = 'normal ' + fontSize + 'px ' + conf.chart.style.fontFamily;
+                    titleColor = 'black';
+
+                    // legend
+                    if (Ext.isObject(xLayout.legendStyle)) {
+                        var style = xLayout.legendStyle;
+
+                        titleColor = style.titleColor || titleColor;
+
+                        if (style.titleFont) {
+                            titleFont = style.titleFont;
+                        }
+                        else {
+                            titleFont = style.titleFontWeight ? style.titleFontWeight + ' ' : 'normal ';
+                            titleFont += style.titleFontSize ? parseFloat(style.titleFontSize) + 'px ' : (fontSize + 'px ');
+                            titleFont +=  style.titleFontFamily ? style.titleFontFamily : conf.chart.style.fontFamily;
+                        }
+                    }
 
                     return Ext.create('Ext.draw.Sprite', {
                         type: 'text',
                         text: text,
-                        font: 'bold ' + fontSize + 'px ' + conf.chart.style.fontFamily,
-                        fill: '#111',
+                        font: titleFont,
+                        fill: titleColor,
                         height: 20,
-                        y: 	20
+                        y: ns.dashboard ? 7 : 20
                     });
                 };
 
