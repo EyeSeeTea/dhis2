@@ -206,7 +206,7 @@ trackerCapture.controller('DataEntryController',
             
             //Execute rules for the first time, to make the initial page appear correctly.
             //Subsequent calls will be made from the "saveDataValue" function.
-            TrackerRulesExecutionService.executeRules($scope); 
+            //TrackerRulesExecutionService.executeRules($scope); 
         });          
     };
     
@@ -347,6 +347,10 @@ trackerCapture.controller('DataEntryController',
         $scope.currentEventOriginal = angular.copy($scope.currentEvent);
 
         $scope.currentStageEventsOriginal = angular.copy($scope.currentStageEvents);
+        
+        //Execute rules for the first time, to make the initial page appear correctly.
+        //Subsequent calls will be made from the "saveDataValue" function.
+        TrackerRulesExecutionService.executeRules($scope);
     };
     
     var processEvent = function(event, stage){

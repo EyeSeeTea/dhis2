@@ -1736,10 +1736,10 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                             allEventsSorted.push(event);
                             eventsSortedPerProgramStage[key].push(event);
                         });
-                        eventsSortedPerProgramStage[key] = orderByFilter(eventsSortedPerProgramStage[key], '+eventDate').reverse(); 
+                        eventsSortedPerProgramStage[key] = orderByFilter(eventsSortedPerProgramStage[key], '-sortingDate').reverse(); 
                     }
                 }
-                allEventsSorted = orderByFilter(allEventsSorted, '+eventDate').reverse(); 
+                allEventsSorted = orderByFilter(allEventsSorted, '-sortingDate').reverse(); 
                 
                 var allDes = {};
                 angular.forEach($scope.programStages, function(programStage){
@@ -1786,18 +1786,25 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                     else if(programVariable.sourceType === "DATAELEMENT_PREVIOUS_EVENT"){
                         //Only continue checking for a value if there is more than one event.
                         if(allEventsSorted && allEventsSorted.length > 1) {
-                            for(var i = 1; i < allEventsSorted.length; i++) {
-                                //When we reach the current stage, and the current stage is not the oldest stage(allEventsSorted[0] is the oldest), 
-                                //check if the value we want exists in the previous stage.
-                                if(allEventsSorted[i].programStage !== currentEvent.programStage) {
-                                    //Fetch the value from the previous event.
-                                    var previousvalue = allEventsSorted[i-1][programVariable.dataElement.id];
-                                    if(angular.isDefined(previousvalue) 
-                                            && previousvalue !== null ) {
-                                        valueFound = true;
+                            var previousvalue = null;
+                            var currentEventPassed = false;
+                            for(var i = 0; i < allEventsSorted.length; i++) {
+                                //Store the values as we iterate through the stages
+                                //If the event[i] is not the current event, it is older(previous). Store the previous value if it exists
+                                if(!currentEventPassed && allEventsSorted[i] !== currentEvent && 
+                                        angular.isDefined(allEventsSorted[i][programVariable.dataElement.id])) {
+                                    previousvalue = allEventsSorted[i][programVariable.dataElement.id];
+                                    valueFound = true;
+                                }
+                                else if(allEventsSorted[i] === currentEvent) {
+                                    //We have iterated to the newest event - store the last collected variable value - if any is found:
+                                    if(valueFound) {
                                         $scope.pushVariable(programVariable.name, previousvalue, allDes[programVariable.dataElement.id].dataElement.type, valueFound );
                                     }
+                                    //Set currentEventPassed, ending the iteration:
+                                    currentEventPassed = true;
                                 }
+                                
                             }
                         }
                     }
@@ -1813,6 +1820,14 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                     }
                     else if(programVariable.sourceType === "CALCULATED_VALUE"){
                         //We won't assign the calculated variables at this step. The rules execution will calculate and assign the variable.
+                    }
+                    else if(programVariable.sourceType === "NUMBEROFEVENTS_PROGRAMSTAGE"){
+                        var numberOfEvents = 0;
+                        if( programVariable.programStage && eventsSortedPerProgramStage[programVariable.programStage.id] ) {
+                            numberOfEvents = eventsSortedPerProgramStage[programVariable.programStage.id].length;
+                        }
+                        valueFound = true;
+                        $scope.pushVariable(programVariable.name, numberOfEvents, 'int', valueFound );
                     }
                     else {
                         //Missing handing of ruletype
