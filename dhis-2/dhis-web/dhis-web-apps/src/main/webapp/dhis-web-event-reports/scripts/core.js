@@ -3377,7 +3377,7 @@ Ext.onReady( function() {
 						header = dimensionHeaders[j];
 						str = row[header.index];
 
-                        str = optionNames[header.name + str] || optionNames[str] || booleanNames[header.name + str] || booleanNames[str] || names[str] || str;
+                        str = optionNames[header.name + str] || optionNames[str] || booleanNames[str] || names[str] || str;
 						name = web.report.query.format(str);
 
 						//if (header.name === 'ouname' && layout.showHierarchy) {
