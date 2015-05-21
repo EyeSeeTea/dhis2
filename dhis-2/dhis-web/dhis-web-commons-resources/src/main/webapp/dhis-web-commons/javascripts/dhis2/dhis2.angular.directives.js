@@ -47,7 +47,7 @@ var d2Directives = angular.module('d2Directives', [])
     };
 })
 
-.directive('selectedOrgUnit', function($timeout, storage) {        
+.directive('selectedOrgUnit', function($timeout) {        
 
     return {        
         restrict: 'A',        
@@ -358,7 +358,7 @@ var d2Directives = angular.module('d2Directives', [])
                 featureStyle = {
                 strokeWeight: 2,
                 strokeOpacity: 0.4,
-                fillOpacity: 0.4,
+                fillOpacity: 0.2,
                 fillColor: '#99cc99'
             };            
             

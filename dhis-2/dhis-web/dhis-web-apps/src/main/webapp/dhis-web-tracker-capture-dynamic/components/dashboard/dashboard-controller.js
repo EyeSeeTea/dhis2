@@ -17,6 +17,7 @@ trackerCapture.controller('DashboardController',
 				EnrollmentService,
                 TrackerWidgetsConfigurationFactory,
                 ProgramFactory,
+                DHIS2EventFactory,
                 DashboardLayoutService,
                 AttributesFactory,
                 CurrentSelection) {
@@ -210,10 +211,13 @@ trackerCapture.controller('DashboardController',
                                         }
                                     }                                
                                 });
-
-                                //prepare selected items for broadcast
-                                CurrentSelection.set({tei: $scope.selectedTei, te: $scope.trackedEntity, prs: $scope.programs, pr: $scope.selectedProgram, prNames: $scope.programNames, prStNames: $scope.programStageNames, enrollments: enrollments, selectedEnrollment: selectedEnrollment, optionSets: $scope.optionSets});                            
-                                getDashboardLayout();                    
+                                
+                                DHIS2EventFactory.getEventsByProgram($scope.selectedTeiId, null).then(function(events){                                        
+                                    //prepare selected items for broadcast
+                                    CurrentSelection.setSelectedTeiEvents(events);                                        
+                                    CurrentSelection.set({tei: $scope.selectedTei, te: $scope.trackedEntity, prs: $scope.programs, pr: $scope.selectedProgram, prNames: $scope.programNames, prStNames: $scope.programStageNames, enrollments: enrollments, selectedEnrollment: selectedEnrollment, optionSets: $scope.optionSets});                            
+                                    getDashboardLayout(); 
+                                });                    
                             });
                         });
                     });            

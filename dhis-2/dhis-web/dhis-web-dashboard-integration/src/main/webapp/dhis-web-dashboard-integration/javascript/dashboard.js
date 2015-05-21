@@ -128,7 +128,6 @@ dhis2.db.tmpl = {
 
 	eventReportItem: "<li id='liDrop-${itemId}' class='liDropItem'><div class='dropItem' id='drop-${itemId}' data-item='${itemId}'></div></li>" +
         "<li id='li-${itemId}' class='liItem'><div class='item' id='${itemId}' style='${style}'><div class='itemHeader'><a href='javascript:dhis2.db.removeItem( \"${itemId}\" )'>${i18n_remove}</a>" +
-        "<a href='javascript:dhis2.db.viewShareForm( \"${id}\", \"reportTable\", \"${name}\" )'>${i18n_share}</a>" +
         "<a href='javascript:dhis2.db.exploreEventReport( \"${id}\" )'>${i18n_explore}</a>" +
         "<a href='javascript:dhis2.db.resizeItem( \"${itemId}\", true )'>${i18n_resize}</a>" +
 	    "<i class=\"fa fa-arrows dragIcon\" title=\"${i18n_click_and_drag_to_new_position}\"></i></div>" +
@@ -612,7 +611,6 @@ dhis2.db.renderItems = function( $d, dashboardItem, width, prepend )
                 labelFont: '9px sans-serif'
             },
             legendStyle: {
-                //labelMaxLength: 10,
                 labelFont: 'normal 10px sans-serif',
                 labelColor: '#222',
                 labelMarkerSize: 10,
@@ -650,7 +648,6 @@ dhis2.db.renderItems = function( $d, dashboardItem, width, prepend )
                 labelFont: '9px sans-serif'
             },
             legendStyle: {
-                labelMaxLength: 10,
                 labelFont: 'normal 10px sans-serif',
                 labelColor: '#222',
                 labelMarkerSize: 10,

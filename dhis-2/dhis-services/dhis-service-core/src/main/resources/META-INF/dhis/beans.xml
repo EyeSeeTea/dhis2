@@ -28,7 +28,9 @@
   <!-- Store definitions -->
 
   <bean id="org.hisp.dhis.dataentryform.DataEntryFormStore" class="org.hisp.dhis.dataentryform.hibernate.HibernateDataEntryFormStore">
+    <property name="clazz" value="org.hisp.dhis.dataentryform.DataEntryForm" />
     <property name="sessionFactory" ref="sessionFactory" />
+    <property name="cacheable" value="true" />
   </bean>
 
   <bean id="org.hisp.dhis.dataelement.DataElementStore" class="org.hisp.dhis.dataelement.hibernate.HibernateDataElementStore">
@@ -745,6 +747,7 @@
         <value>mali</value>
         <value>mozambique</value>
         <value>msf</value>
+        <value>msi</value>
         <value>namibia</value>
         <value>nicaragua</value>
         <value>nepal</value>
@@ -1119,9 +1122,7 @@
 
   <bean id="org.hisp.dhis.user.UserDeletionHandler" class="org.hisp.dhis.user.UserDeletionHandler" />
 
-  <bean id="org.hisp.dhis.user.UserGroupDeletionHandler" class="org.hisp.dhis.user.UserGroupDeletionHandler">
-    <property name="userGroupService" ref="org.hisp.dhis.user.UserGroupService" />
-  </bean>
+  <bean id="org.hisp.dhis.user.UserGroupDeletionHandler" class="org.hisp.dhis.user.UserGroupDeletionHandler" />
 
   <bean id="org.hisp.dhis.user.UserAuthorityGroupDeletionHandler" class="org.hisp.dhis.user.UserAuthorityGroupDeletionHandler">
     <property name="userService" ref="org.hisp.dhis.user.UserService" />

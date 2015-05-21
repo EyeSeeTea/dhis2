@@ -48,9 +48,9 @@ import static org.hisp.dhis.common.DimensionalObject.DIMENSION_SEP;
 import static org.hisp.dhis.common.DimensionalObject.INDICATOR_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.LATITUDE_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.LONGITUDE_DIM_ID;
-import static org.hisp.dhis.common.DimensionalObject.PROGRAM_INDICATOR_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.PROGRAM_INDICATOR_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObjectUtils.toDimension;
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getLocalPeriodIdentifier;
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getLocalPeriodIdentifiers;
@@ -106,27 +106,27 @@ import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.common.IdentifiableProperty;
 import org.hisp.dhis.common.IllegalQueryException;
+import org.hisp.dhis.common.MapMap;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.NameableObjectUtils;
 import org.hisp.dhis.constant.ConstantService;
+import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
+import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementGroupSet;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataelement.DataElementOperandService;
-import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
@@ -176,16 +176,7 @@ public class DefaultAnalyticsService
     private IdentifiableObjectManager idObjectManager;
     
     @Autowired
-    private DataElementService dataElementService;
-
-    @Autowired
-    private DataElementCategoryService categoryService;
-
-    @Autowired
     private OrganisationUnitService organisationUnitService;
-
-    @Autowired
-    private OrganisationUnitGroupService organisationUnitGroupService;
 
     @Autowired
     private ExpressionService expressionService;
@@ -284,31 +275,22 @@ public class DefaultAnalyticsService
         if ( params.getIndicators() != null )
         {
             int indicatorIndex = params.getIndicatorDimensionIndex();
+            
             List<Indicator> indicators = asTypedList( params.getIndicators() );
 
-            expressionService.explodeExpressions( indicators );
+            Period filterPeriod = params.getFilterPeriod();
+
+            Map<String, Double> constantMap = constantService.getConstantMap();
 
             // -----------------------------------------------------------------
             // Get indicator values
             // -----------------------------------------------------------------
 
-            DataQueryParams dataSourceParams = params.instance();
-            dataSourceParams.removeDimension( DATAELEMENT_DIM_ID );
-            dataSourceParams.removeDimension( DATASET_DIM_ID );
+            Map<String, Map<String, Integer>> permutationOrgUnitTargetMap = getOrgUnitTargetMap( params, indicators );
 
-            dataSourceParams = replaceIndicatorsWithDataElements( dataSourceParams, indicatorIndex );
+            List<List<DimensionItem>> dimensionItemPermutations = params.getDimensionItemPermutations();
 
-            Map<String, Double> aggregatedDataMap = getAggregatedDataValueMap( dataSourceParams );
-
-            Map<String, Map<DataElementOperand, Double>> permutationOperandValueMap = dataSourceParams.getPermutationOperandValueMap( aggregatedDataMap );
-
-            List<List<DimensionItem>> dimensionItemPermutations = dataSourceParams.getDimensionItemPermutations();
-
-            Map<String, Double> constantMap = constantService.getConstantMap();
-
-            Period filterPeriod = dataSourceParams.getFilterPeriod();
-
-            Map<String, Map<String, Integer>> permutationOrgUnitTargetMap = getOrgUnitTargetMap( dataSourceParams, indicators );
+            Map<String, Map<DataElementOperand, Double>> permutationOperandValueMap = getPermutationOperandValueMap( params );
 
             for ( Indicator indicator : indicators )
             {
@@ -643,7 +625,7 @@ public class DefaultAnalyticsService
 
         Map<String, Double> orgUnitCountMap = getAggregatedOrganisationUnitTargetMap( orgUnitTargetParams );
 
-        return orgUnitTargetParams.getPermutationOrgUnitGroupCountMap( orgUnitCountMap );
+        return DataQueryParams.getPermutationOrgUnitGroupCountMap( orgUnitCountMap );
     }
 
     /**
@@ -923,7 +905,7 @@ public class DefaultAnalyticsService
                 {
                     String groupUid = DimensionalObjectUtils.getUidFromGroupParam( uid );
                     
-                    DataElementGroup group = dataElementService.getDataElementGroup( groupUid );
+                    DataElementGroup group = idObjectManager.get( DataElementGroup.class, groupUid );
                     
                     if ( group != null )
                     {
@@ -1095,7 +1077,7 @@ public class DefaultAnalyticsService
                 {
                     String uid = DimensionalObjectUtils.getUidFromGroupParam( ou );
 
-                    OrganisationUnitGroup group = organisationUnitGroupService.getOrganisationUnitGroup( uid );
+                    OrganisationUnitGroup group = idObjectManager.get( OrganisationUnitGroup.class, uid );
 
                     if ( group != null )
                     {
@@ -1168,44 +1150,44 @@ public class DefaultAnalyticsService
             return ListUtils.getList( object );
         }
 
-        OrganisationUnitGroupSet ougs = organisationUnitGroupService.getOrganisationUnitGroupSet( dimension );
+        OrganisationUnitGroupSet ougs = idObjectManager.get( OrganisationUnitGroupSet.class, dimension );
 
         if ( ougs != null && ougs.isDataDimension() )
         {
-            List<NameableObject> ous = !allItems ? asList( organisationUnitGroupService.getOrganisationUnitGroupsByUid( items ) ) : ougs.getItems();
+            List<NameableObject> ous = !allItems ? asList( idObjectManager.getByUidOrdered( OrganisationUnitGroup.class, items ) ) : ougs.getItems();
 
             DimensionalObject object = new BaseDimensionalObject( dimension, DimensionType.ORGANISATIONUNIT_GROUPSET, null, ougs.getDisplayName(), ous );
 
             return ListUtils.getList( object );
         }
 
-        DataElementGroupSet degs = dataElementService.getDataElementGroupSet( dimension );
+        DataElementGroupSet degs = idObjectManager.get( DataElementGroupSet.class, dimension );
 
         if ( degs != null && degs.isDataDimension() )
         {
-            List<NameableObject> des = !allItems ? asList( dataElementService.getDataElementGroupsByUid( items ) ) : degs.getItems();
+            List<NameableObject> des = !allItems ? asList( idObjectManager.getByUidOrdered( DataElementGroup.class, items ) ) : degs.getItems();
 
             DimensionalObject object = new BaseDimensionalObject( dimension, DimensionType.DATAELEMENT_GROUPSET, null, degs.getDisplayName(), des );
 
             return ListUtils.getList( object );
         }
 
-        CategoryOptionGroupSet cogs = categoryService.getCategoryOptionGroupSet( dimension );
+        CategoryOptionGroupSet cogs = idObjectManager.get( CategoryOptionGroupSet.class, dimension );
 
         if ( cogs != null && cogs.isDataDimension() )
         {
-            List<NameableObject> cogz = !allItems ? asList( categoryService.getCategoryOptionGroupsByUid( items ) ) : cogs.getItems();
+            List<NameableObject> cogz = !allItems ? asList( idObjectManager.getByUidOrdered( CategoryOptionGroup.class, items ) ) : cogs.getItems();
 
             DimensionalObject object = new BaseDimensionalObject( dimension, DimensionType.CATEGORYOPTION_GROUPSET, null, cogs.getDisplayName(), cogz );
 
             return ListUtils.getList( object );
         }
 
-        DataElementCategory dec = categoryService.getDataElementCategory( dimension );
+        DataElementCategory dec = idObjectManager.get( DataElementCategory.class, dimension );
 
         if ( dec != null && dec.isDataDimension() )
         {
-            List<NameableObject> decos = !allItems ? asList( categoryService.getDataElementCategoryOptionsByUid( items ) ) : dec.getItems();
+            List<NameableObject> decos = !allItems ? asList( idObjectManager.getByUidOrdered( DataElementCategoryOption.class, items ) ) : dec.getItems();
 
             DimensionalObject object = new BaseDimensionalObject( dimension, DimensionType.CATEGORY, null, dec.getDisplayName(), decos );
 
@@ -1225,22 +1207,76 @@ public class DefaultAnalyticsService
     // -------------------------------------------------------------------------
 
     /**
-     * Replaces the indicator dimension including items with the data elements
-     * part of the indicator expressions.
+     * Returns a mapping of permutation keys and mappings of data element operands
+     * and values, based on the given mapping of dimension option keys and 
+     * aggregated values.
+     * 
+     * @param params the data query parameters.
+     */
+    private Map<String, Map<DataElementOperand, Double>> getPermutationOperandValueMap( DataQueryParams params )
+    {
+        Map<String, Double> aggregatedDataTotalsMap = getAggregatedDataValueMapTotals( params );
+        Map<String, Double> aggregatedDataOptionCombosMap = getAggregatedDataValueMapOptionCombos( params );
+        
+        MapMap<String, DataElementOperand, Double> permOperandValueMap = new MapMap<>();
+
+        DataQueryParams.putPermutationOperandValueMap( permOperandValueMap, aggregatedDataTotalsMap, false );
+        DataQueryParams.putPermutationOperandValueMap( permOperandValueMap, aggregatedDataOptionCombosMap, true );
+        
+        return permOperandValueMap;
+    }
+    
+    /**
+     * Returns a mapping of dimension keys and aggregated values for the data
+     * element totals part of the indicators in the given query.
      *
      * @param params the data query parameters.
-     * @param indicatorIndex the index of the indicator dimension in the given query.
-     * @return the data query parameters.
+     * @return a mapping of dimension keys and aggregated values.
      */
-    private DataQueryParams replaceIndicatorsWithDataElements( DataQueryParams params, int indicatorIndex )
+    private Map<String, Double> getAggregatedDataValueMapTotals( DataQueryParams params )
     {
         List<Indicator> indicators = asTypedList( params.getIndicators() );
-        List<NameableObject> dataElements = asList( expressionService.getDataElementsInIndicators( indicators ) );
+        List<NameableObject> dataElements = asList( expressionService.getDataElementTotalsInIndicators( indicators ) );
 
-        params.getDimensions().set( indicatorIndex, new BaseDimensionalObject( DATAELEMENT_DIM_ID, DimensionType.DATAELEMENT, dataElements ) );
-        params.enableCategoryOptionCombos();
+        if ( !dataElements.isEmpty() )
+        {
+            DataQueryParams dataSourceParams = params.instance().removeDimensions( DATAELEMENT_DIM_ID, DATASET_DIM_ID, INDICATOR_DIM_ID );
+            
+            dataSourceParams.getDimensions().add( DataQueryParams.DE_IN_INDEX, new BaseDimensionalObject( 
+                DATAELEMENT_DIM_ID, DimensionType.DATAELEMENT, dataElements ) );
+    
+            return getAggregatedDataValueMap( dataSourceParams );
+        }
+        
+        return new HashMap<>();
+    }
 
-        return params;
+    /**
+     * Returns a mapping of dimension keys and aggregated values for the data
+     * elements with category option combinations part of the indicators in the 
+     * given query.
+     *
+     * @param params the data query parameters.
+     * @return a mapping of dimension keys and aggregated values.
+     */
+    private Map<String, Double> getAggregatedDataValueMapOptionCombos( DataQueryParams params )
+    {
+        List<Indicator> indicators = asTypedList( params.getIndicators() );
+        List<NameableObject> dataElements = asList( expressionService.getDataElementWithOptionCombosInIndicators( indicators ) );
+
+        if ( !dataElements.isEmpty() )
+        {
+            DataQueryParams dataSourceParams = params.instance().removeDimensions( DATAELEMENT_DIM_ID, DATASET_DIM_ID, INDICATOR_DIM_ID );
+            
+            dataSourceParams.getDimensions().add( DataQueryParams.DE_IN_INDEX, new BaseDimensionalObject( 
+                DATAELEMENT_DIM_ID, DimensionType.DATAELEMENT, dataElements ) );
+            dataSourceParams.getDimensions().add( DataQueryParams.CO_IN_INDEX, new BaseDimensionalObject( 
+                CATEGORYOPTIONCOMBO_DIM_ID, DimensionType.CATEGORY_OPTION_COMBO, new ArrayList<NameableObject>() ) );
+    
+            return getAggregatedDataValueMap( dataSourceParams );
+        }
+        
+        return new HashMap<>();
     }
 
     /**

@@ -424,7 +424,8 @@ Ext.onReady( function() {
 			};
 
 			util.gui.window.addHideOnBlurHandler = function(w) {
-				var el = Ext.get(Ext.query('.x-mask')[0]);
+				var maskElements = Ext.query('.x-mask'),
+                    el = Ext.get(maskElements[maskElements.length - 1]);
 
 				el.on('click', function() {
 					if (w.hideOnBlur) {
@@ -436,7 +437,8 @@ Ext.onReady( function() {
 			};
 
 			util.gui.window.addDestroyOnBlurHandler = function(w) {
-				var el = Ext.get(Ext.query('.x-mask')[0]);
+				var maskElements = Ext.query('.x-mask'),
+                    el = Ext.get(maskElements[maskElements.length - 1]);
 
 				el.on('click', function() {
 					if (w.destroyOnBlur) {
@@ -546,13 +548,13 @@ Ext.onReady( function() {
 			}
 
 			// sort organisation unit levels
-			gis.util.array.sort(init.organisationUnitLevels, 'ASC', 'level');
+			util.array.sort(init.organisationUnitLevels, 'ASC', 'level');
 
 			// sort indicator groups
-			gis.util.array.sort(init.indicatorGroups);
+			util.array.sort(init.indicatorGroups);
 
 			// sort data element groups
-			gis.util.array.sort(init.dataElementGroups);
+			util.array.sort(init.dataElementGroups);
 		}());
 
 		// store
@@ -1949,7 +1951,7 @@ Ext.onReady( function() {
 				}
 			],
 			listeners: {
-				show: function() {
+				show: function(w) {
 					if (!this.isRendered) {
 						this.isRendered = true;
 
@@ -2576,7 +2578,16 @@ Ext.onReady( function() {
 				show: function(w) {
 					var pos = gis.viewport.favoriteWindow.getPosition();
 					w.setPosition(pos[0] + 5, pos[1] + 5);
-				}
+
+					if (!w.hasDestroyOnBlurHandler) {
+						gis.util.gui.window.addDestroyOnBlurHandler(w);
+					}
+
+                    gis.viewport.favoriteWindow.destroyOnBlur = false;
+				},
+                destroy: function() {
+                    gis.viewport.favoriteWindow.destroyOnBlur = true;
+                }
 			}
 		});
 
@@ -2796,6 +2807,7 @@ Ext.onReady( function() {
 				resizable: false,
 				modal: true,
 				items: nameTextfield,
+				destroyOnBlur: true,
 				bbar: [
 					cancelButton,
 					'->',
@@ -2804,6 +2816,12 @@ Ext.onReady( function() {
 				listeners: {
 					show: function() {
 						this.setPosition(favoriteWindow.x + 14, favoriteWindow.y + 67);
+
+                        if (!w.hasDestroyOnBlurHandler) {
+                            gis.util.gui.window.addDestroyOnBlurHandler(w);
+                        }
+
+                        gis.viewport.favoriteWindow.destroyOnBlur = true;
 
 						nameTextfield.focus(false, 500);
 					}
@@ -3160,6 +3178,7 @@ Ext.onReady( function() {
 			resizable: false,
 			modal: true,
 			width: windowWidth,
+			destroyOnBlur: true,
 			items: [
 				{
 					xtype: 'panel',
@@ -3180,8 +3199,12 @@ Ext.onReady( function() {
 				grid
 			],
 			listeners: {
-				show: function() {
+				show: function(w) {
 					this.setPosition(199, 33);
+
+					if (!w.hasDestroyOnBlurHandler) {
+						gis.util.gui.window.addDestroyOnBlurHandler(w);
+					}
 
 					searchTextfield.focus(false, 500);
 				}
@@ -3229,7 +3252,12 @@ Ext.onReady( function() {
 
             windowWidth = 450,
             windowBorder = 12,
-            bodyPadding = 2;
+            bodyPadding = 2,
+
+            legendBodyBorder = 1,
+            legendBodyPadding = 1,
+            fieldLabelWidth = 105,
+            gridPadding = 1;
 
 		legendSetStore = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name'],
@@ -3430,11 +3458,143 @@ Ext.onReady( function() {
 				addLegend,
 				reset,
 				data = [],
-                legendBodyBorder = 1,
-                legendBodyPadding = 1,
-                fieldLabelWidth = 105,
-                gridPadding = 1;
 
+                LegendEditWindow;
+
+            // edit legend panel
+            LegendEditWindow = function(record) {
+                var editLegendName,
+                    editStartValue,
+                    editEndValue,
+                    editColor,
+                    editCancel,
+                    editUpdate,
+                    showUpdateLegend,
+                    validateForm,
+                    editWindow;
+
+                editLegendName = Ext.create('Ext.form.field.Text', {
+                    cls: 'gis-textfield',
+                    width: windowWidth - windowBorder - bodyPadding - (2 * legendBodyBorder) - (2 * legendBodyPadding) + 4,
+                    height: 23,
+                    fieldStyle: 'padding-left: 3px; border-color: #bbb',
+                    labelStyle: 'padding-top: 5px; padding-left: 3px',
+                    fieldLabel: GIS.i18n.legend_name,
+                    value: record.data.name
+                });
+
+                editStartValue = Ext.create('Ext.form.field.Number', {
+                    width: 163 + 2,
+                    height: 23,
+                    allowDecimals: true,
+                    style: 'margin-bottom: 0px',
+                    value: record.data.startValue
+                });
+
+                editEndValue = Ext.create('Ext.form.field.Number', {
+                    width: 163 + 2,
+                    height: 23,
+                    allowDecimals: true,
+                    style: 'margin-bottom: 0px; margin-left: 1px',
+                    value: record.data.endValue
+                });
+
+                editColor = Ext.create('Ext.ux.button.ColorButton', {
+                    width: windowWidth - windowBorder - bodyPadding - (2 * legendBodyBorder) - (2 * legendBodyPadding) - fieldLabelWidth + 4,
+                    height: 23,
+                    style: 'border-radius: 1px',
+                    value: record.data.color.replace('#', '')
+                });
+
+                validateEditLegendForm = function() {
+                    if (!(editLegendName.getValue() && Ext.isNumber(editStartValue.getValue()) && Ext.isNumber(editEndValue.getValue()) && editColor.getValue())) {
+                        return;
+                    }
+
+                    if (editStartValue.getValue() >= editEndValue.getValue()) {
+                        return;
+                    }
+
+                    return true;
+                };
+
+                editCancel = Ext.create('Ext.button.Button', {
+                    text: 'Cancel',
+                    handler: function() {
+                        editWindow.destroy();
+                    }
+                });
+
+                editUpdate = Ext.create('Ext.button.Button', {
+                    text: 'Update',
+                    handler: function() {
+                        if (!validateEditLegendForm()) {
+                            return;
+                        }
+
+                        record.set('name', editLegendName.getValue());
+                        record.set('startValue', editStartValue.getValue());
+                        record.set('endValue', editEndValue.getValue());
+                        record.set('color', '#' + editColor.getValue());
+
+                        editWindow.destroy();
+                        window.isDirty = true;
+                        tmpLegendStore.sort('startValue', 'ASC');
+                    }
+                });
+
+                editWindow = Ext.create('Ext.window.Window', {
+                    title: 'Edit legend (' + record.data.name + ')',
+                    width: windowWidth,
+                    modal: true,
+                    shadow: true,
+                    resizable: false,
+                    bodyStyle: 'background: #fff; padding: 1px',
+                    bbar: [
+                        editCancel,
+                        '->',
+                        editUpdate
+                    ],
+                    items: [
+                        editLegendName,
+                        {
+                            layout: 'hbox',
+                            cls: 'gis-container-inner',
+                            bodyStyle: 'background: transparent',
+                            items: [
+                                {
+                                    html: GIS.i18n.start_end_value + ':',
+                                    width: fieldLabelWidth,
+                                    bodyStyle: 'background:transparent; padding-top:3px; padding-left:3px'
+                                },
+                                editStartValue,
+                                editEndValue
+                            ]
+                        },
+                        {
+                            layout: 'column',
+                            cls: 'gis-container-inner',
+                            bodyStyle: 'background: transparent',
+                            items: [
+                                {
+                                    html: GIS.i18n.legend_symbolizer + ':',
+                                    width: fieldLabelWidth,
+                                    bodyStyle: 'background:transparent; padding-top:3px; padding-left:3px'
+                                },
+                                editColor
+                            ]
+                        }
+                    ]
+                });
+
+                return editWindow;
+            };
+
+            showUpdateLegend = function(record) {
+                LegendEditWindow(record).showAt(window.getPosition()[0], window.getPosition()[1] + 55);
+            };
+
+            // legend panel
 			tmpLegendStore = Ext.create('Ext.data.ArrayStore', {
 				fields: ['id', 'name', 'startValue', 'endValue', 'color']
 			});
@@ -3519,6 +3679,8 @@ Ext.onReady( function() {
 						startValue.reset();
 						endValue.reset();
 						color.reset();
+
+                        window.isDirty = true;
 					}
 				}
 			});
@@ -3535,7 +3697,7 @@ Ext.onReady( function() {
 					{
 						dataIndex: 'name',
 						sortable: false,
-						width: 256
+						width: 236
 					},
 					{
 						sortable: false,
@@ -3557,8 +3719,18 @@ Ext.onReady( function() {
 					{
 						xtype: 'actioncolumn',
 						sortable: false,
-						width: 20,
+						width: 40,
 						items: [
+							{
+								iconCls: 'gis-grid-row-icon-edit',
+								getClass: function() {
+									return 'tooltip-legendset-edit';
+								},
+								handler: function(grid, rowIndex, colIndex, col, event) {
+									var record = this.up('grid').store.getAt(rowIndex);
+									showUpdateLegend(record);
+								}
+							},
 							{
 								iconCls: 'gis-grid-row-icon-delete',
 								getClass: function() {
@@ -3747,6 +3919,7 @@ Ext.onReady( function() {
 			legendSetPanel = new LegendSetPanel();
 			window.removeAll();
 			window.add(legendSetPanel);
+            window.isDirty = false;
 
 			info.show();
 			cancel.hide();
@@ -3862,6 +4035,7 @@ Ext.onReady( function() {
 			width: windowWidth,
 			modal: true,
 			items: new LegendSetPanel(),
+            destroyOnBlur: true,
 			bbar: {
 				height: 27,
 				items: [
@@ -3873,9 +4047,18 @@ Ext.onReady( function() {
 				]
 			},
 			listeners: {
-				show: function() {
+				show: function(w) {
 					this.setPosition(269, 33);
-				}
+
+					if (!w.hasDestroyOnBlurHandler) {
+						gis.util.gui.window.addDestroyOnBlurHandler(w);
+					}
+				},
+                beforeclose: function() {
+                    if (window.isDirty) {
+                        return confirm('The legend set has unsaved modifications. Close anyway?');
+                    }
+                }
 			}
 		});
 
@@ -3946,6 +4129,7 @@ Ext.onReady( function() {
             bodyStyle: 'padding:1px',
 			resizable: true,
 			modal: true,
+            destroyOnBlur: true,
 			items: [
 				name,
 				format
@@ -3955,8 +4139,12 @@ Ext.onReady( function() {
 				button
 			],
 			listeners: {
-				show: function() {
+				show: function(w) {
 					this.setPosition(253, 33);
+
+					if (!w.hasDestroyOnBlurHandler) {
+						gis.util.gui.window.addDestroyOnBlurHandler(w);
+					}
 				}
 			}
 		});
@@ -4014,6 +4202,7 @@ Ext.onReady( function() {
                 width: 500,
                 resizable: true,
                 modal: true,
+                destroyOnBlur: true,
                 items: [
                     textArea
                 ],
@@ -4028,8 +4217,12 @@ Ext.onReady( function() {
 					]
 				},
                 listeners: {
-                    show: function() {
+                    show: function(w) {
                         this.setPosition(325, 33);
+
+                        if (!w.hasDestroyOnBlurHandler) {
+                            gis.util.gui.window.addDestroyOnBlurHandler(w);
+                        }
 
 						document.body.oncontextmenu = true;
                     },
@@ -4047,6 +4240,69 @@ Ext.onReady( function() {
 
 		return;
     };
+
+	GIS.app.AboutWindow = function() {
+		return Ext.create('Ext.window.Window', {
+			title: GIS.i18n.about,
+			bodyStyle: 'background:#fff; padding:6px',
+			modal: true,
+            resizable: false,
+			destroyOnBlur: true,
+			listeners: {
+				show: function(w) {
+					Ext.Ajax.request({
+						url: gis.init.contextPath + '/api/system/info.json',
+						success: function(r) {
+							var info = Ext.decode(r.responseText),
+								divStyle = 'padding:3px',
+								html = '<div class="user-select">';
+
+							if (Ext.isObject(info)) {
+								html += '<div style="' + divStyle + '"><b>' + GIS.i18n.time_since_last_data_update + ': </b>' + info.intervalSinceLastAnalyticsTableSuccess + '</div>';
+								html += '<div style="' + divStyle + '"><b>' + GIS.i18n.version + ': </b>' + info.version + '</div>';
+								html += '<div style="' + divStyle + '"><b>' + GIS.i18n.revision + ': </b>' + info.revision + '</div>';
+                                html += '<div style="' + divStyle + '"><b>' + GIS.i18n.username + ': </b>' + gis.init.userAccount.username + '</div>';
+                                html += '</div>';
+							}
+							else {
+								html += 'No system info found';
+							}
+
+							w.update(html);
+						},
+						failure: function(r) {
+							html += r.status + '\n' + r.statusText + '\n' + r.responseText;
+
+							w.update(html);
+						},
+                        callback: function() {
+                            document.body.oncontextmenu = true;
+
+                            gis.util.gui.window.setAnchorPosition(w, gis.viewport.aboutButton);
+
+                            //if (!w.hasHideOnBlurHandler) {
+                                //ns.core.web.window.addHideOnBlurHandler(w);
+                            //}
+                        }
+					});
+
+					if (!w.hasDestroyOnBlurHandler) {
+						gis.util.gui.window.addDestroyOnBlurHandler(w);
+					}
+				},
+                hide: function() {
+                    document.body.oncontextmenu = function() {
+                        return false;
+                    };
+                },
+                destroy: function() {
+                    document.body.oncontextmenu = function() {
+                        return false;
+                    };
+                }
+			}
+		});
+	};
 
 	GIS.app.LayerWidgetEvent = function(layer) {
 
@@ -8481,6 +8737,7 @@ Ext.onReady( function() {
 			eastRegion,
 			downloadButton,
 			shareButton,
+            aboutButton,
 			defaultButton,
 			layersPanel,
 			resizeButton,
@@ -8638,6 +8895,10 @@ Ext.onReady( function() {
 					listeners: {
 						show: function(w) {
 							this.setPosition(215, 33);
+
+                            if (!w.hasDestroyOnBlurHandler) {
+                                gis.util.gui.window.addDestroyOnBlurHandler(w);
+                            }
 						}
 					}
 				});
@@ -8678,6 +8939,10 @@ Ext.onReady( function() {
 					listeners: {
 						show: function(w) {
                             this.setPosition(325, 33);
+
+                            if (!w.hasDestroyOnBlurHandler) {
+                                gis.util.gui.window.addDestroyOnBlurHandler(w);
+                            }
 
 							document.body.oncontextmenu = true;
 						},
@@ -8724,6 +8989,10 @@ Ext.onReady( function() {
 						show: function(w) {
                             this.setPosition(325, 33);
 
+                            if (!w.hasDestroyOnBlurHandler) {
+                                gis.util.gui.window.addDestroyOnBlurHandler(w);
+                            }
+
 							document.body.oncontextmenu = true;
 						},
 						hide: function() {
@@ -8763,6 +9032,20 @@ Ext.onReady( function() {
 						shareButton.xableItems();
 					}
 				}
+			}
+		});
+
+		aboutButton = Ext.create('Ext.button.Button', {
+			text: GIS.i18n.about,
+            menu: {},
+			handler: function() {
+                if (viewport.aboutWindow && viewport.aboutWindow.destroy) {
+					viewport.aboutWindow.destroy();
+					viewport.aboutWindow = null;
+				}
+
+				viewport.aboutWindow = GIS.app.AboutWindow();
+				viewport.aboutWindow.show();
 			}
 		});
 
@@ -9092,6 +9375,8 @@ Ext.onReady( function() {
 						}
 					});
 
+                    a.push(aboutButton);
+
 					a.push({
 						xtype: 'button',
 						text: GIS.i18n.home,
@@ -9355,6 +9640,7 @@ Ext.onReady( function() {
 			centerRegion: centerRegion,
 			downloadButton: downloadButton,
 			shareButton: shareButton,
+            aboutButton: aboutButton,
 			layersPanel: layersPanel,
 			items: [
 				centerRegion,
@@ -9463,8 +9749,6 @@ Ext.onReady( function() {
             adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
             objectStores: ['optionSets']
         });
-
-        dhis2.gis.store.open();
 
         // inject google maps
         GIS_GM = {
@@ -9758,80 +10042,80 @@ Ext.onReady( function() {
                                             success: function() {
                                                 var store = dhis2.gis.store;
 
-                                                // check if idb has any option sets
-                                                store.count('optionSets').done( function(count) {
+                                                store.open().done( function() {
 
-                                                    if (count === 0) {
-                                                        Ext.Ajax.request({
-                                                            url: contextPath + '/api/optionSets.json?fields=id,name,version,options[code,name]&paging=false',
-                                                            success: function(r) {
-                                                                var sets = Ext.decode(r.responseText).optionSets;
+                                                    // check if idb has any option sets
+                                                    store.getKeys('optionSets').done( function(keys) {
+                                                        if (keys.length === 0) {
+                                                            Ext.Ajax.request({
+                                                                url: contextPath + '/api/optionSets.json?fields=id,name,version,options[code,name]&paging=false',
+                                                                success: function(r) {
+                                                                    var sets = Ext.decode(r.responseText).optionSets;
 
-                                                                if (sets.length) {
-                                                                    store.setAll('optionSets', sets).done(fn);
-                                                                }
-                                                                else {
-                                                                    fn();
-                                                                }
-                                                            }
-                                                        });
-                                                    }
-                                                    else {
-                                                        Ext.Ajax.request({
-                                                            url: contextPath + '/api/optionSets.json?fields=id,version&paging=false',
-                                                            success: function(r) {
-                                                                var optionSets = Ext.decode(r.responseText).optionSets || [],
-                                                                    ids = [],
-                                                                    url = '',
-                                                                    callbacks = 0,
-                                                                    checkOptionSet,
-                                                                    updateStore;
-
-                                                                updateStore = function() {
-                                                                    if (++callbacks === optionSets.length) {
-                                                                        if (!ids.length) {
-                                                                            fn();
-                                                                            return;
-                                                                        }
-
-                                                                        for (var i = 0; i < ids.length; i++) {
-                                                                            url += '&filter=id:eq:' + ids[i];
-                                                                        }
-
-                                                                        Ext.Ajax.request({
-                                                                            url: contextPath + '/api/optionSets.json?fields=id,name,version,options[code,name]&paging=false' + url,
-                                                                            success: function(r) {
-                                                                                var sets = Ext.decode(r.responseText).optionSets;
-
-                                                                                store.setAll('optionSets', sets).done(fn);
-                                                                            }
-                                                                        });
+                                                                    if (sets.length) {
+                                                                        store.setAll('optionSets', sets).done(fn);
                                                                     }
-                                                                };
+                                                                    else {
+                                                                        fn();
+                                                                    }
+                                                                }
+                                                            });
+                                                        }
+                                                        else {
+                                                            Ext.Ajax.request({
+                                                                url: contextPath + '/api/optionSets.json?fields=id,version&paging=false',
+                                                                success: function(r) {
+                                                                    var optionSets = Ext.decode(r.responseText).optionSets || [],
+                                                                        ids = [],
+                                                                        url = '',
+                                                                        callbacks = 0,
+                                                                        checkOptionSet,
+                                                                        updateStore;
 
-                                                                registerOptionSet = function(optionSet) {
-                                                                    store.get('optionSets', optionSet.id).done( function(obj) {
-                                                                        if (!Ext.isObject(obj) || obj.version !== optionSet.version) {
-                                                                            ids.push(optionSet.id);
+                                                                    updateStore = function() {
+                                                                        if (++callbacks === optionSets.length) {
+                                                                            if (!ids.length) {
+                                                                                fn();
+                                                                                return;
+                                                                            }
+
+                                                                            for (var i = 0; i < ids.length; i++) {
+                                                                                url += '&filter=id:eq:' + ids[i];
+                                                                            }
+
+                                                                            Ext.Ajax.request({
+                                                                                url: contextPath + '/api/optionSets.json?fields=id,name,version,options[code,name]&paging=false' + url,
+                                                                                success: function(r) {
+                                                                                    var sets = Ext.decode(r.responseText).optionSets;
+
+                                                                                    store.setAll('optionSets', sets).done(fn);
+                                                                                }
+                                                                            });
                                                                         }
+                                                                    };
 
-                                                                        updateStore();
-                                                                    });
-                                                                };
+                                                                    registerOptionSet = function(optionSet) {
+                                                                        store.get('optionSets', optionSet.id).done( function(obj) {
+                                                                            if (!Ext.isObject(obj) || obj.version !== optionSet.version) {
+                                                                                ids.push(optionSet.id);
+                                                                            }
 
-                                                                if (optionSets.length) {
-                                                                    store.open().done( function() {
+                                                                            updateStore();
+                                                                        });
+                                                                    };
+
+                                                                    if (optionSets.length) {
                                                                         for (var i = 0; i < optionSets.length; i++) {
                                                                             registerOptionSet(optionSets[i]);
                                                                         }
-                                                                    });
+                                                                    }
+                                                                    else {
+                                                                        fn();
+                                                                    }
                                                                 }
-                                                                else {
-                                                                    fn();
-                                                                }
-                                                            }
-                                                        });
-                                                    }
+                                                            });
+                                                        }
+                                                    });
                                                 });
                                             }
                                         });

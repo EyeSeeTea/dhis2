@@ -509,13 +509,14 @@ Ext.onReady( function() {
 
 	// namespace
 	DV = {};
+    var NS = DV;
 
-	DV.instances = [];
-	DV.i18n = {};
-	DV.isDebug = false;
-	DV.isSessionStorage = ('sessionStorage' in window && window['sessionStorage'] !== null);
+	NS.instances = [];
+	NS.i18n = {};
+	NS.isDebug = false;
+	NS.isSessionStorage = ('sessionStorage' in window && window['sessionStorage'] !== null);
 
-	DV.getCore = function(ns) {
+	NS.getCore = function(ns) {
         var init = ns.init,
             conf = {},
             api = {},
@@ -523,6 +524,9 @@ Ext.onReady( function() {
             service = {},
             web = {},
             dimConf;
+
+        // tmp
+        ns.alert = function() {};
 
 		// conf
         (function() {
@@ -543,19 +547,19 @@ Ext.onReady( function() {
                 dimension: {
                     data: {
                         value: 'data',
-                        name: DV.i18n.data,
+                        name: NS.i18n.data,
                         dimensionName: 'dx',
                         objectName: 'dx'
                     },
                     indicator: {
                         value: 'indicator',
-                        name: DV.i18n.indicator,
+                        name: NS.i18n.indicator,
                         dimensionName: 'dx',
                         objectName: 'in'
                     },
                     dataElement: {
                         value: 'dataelement',
-                        name: DV.i18n.data_element,
+                        name: NS.i18n.data_element,
                         dimensionName: 'dx',
                         objectName: 'de'
                     },
@@ -567,18 +571,18 @@ Ext.onReady( function() {
                     },
                     dataSet: {
                         value: 'dataset',
-                        name: DV.i18n.dataset,
+                        name: NS.i18n.dataset,
                         dimensionName: 'dx',
                         objectName: 'ds'
                     },
                     category: {
-                        name: DV.i18n.assigned_categories,
+                        name: NS.i18n.assigned_categories,
                         dimensionName: 'co',
                         objectName: 'co',
                     },
                     period: {
                         value: 'period',
-                        name: DV.i18n.period,
+                        name: NS.i18n.period,
                         dimensionName: 'pe',
                         objectName: 'pe',
                     },
@@ -590,7 +594,7 @@ Ext.onReady( function() {
                     },
                     organisationUnit: {
                         value: 'organisationUnits',
-                        name: DV.i18n.organisation_units,
+                        name: NS.i18n.organisation_units,
                         dimensionName: 'ou',
                         objectName: 'ou',
                     },
@@ -651,17 +655,17 @@ Ext.onReady( function() {
 
 			conf.period = {
 				periodTypes: [
-					{id: 'Daily', name: DV.i18n.daily},
-					{id: 'Weekly', name: DV.i18n.weekly},
-					{id: 'Monthly', name: DV.i18n.monthly},
-					{id: 'BiMonthly', name: DV.i18n.bimonthly},
-					{id: 'Quarterly', name: DV.i18n.quarterly},
-					{id: 'SixMonthly', name: DV.i18n.sixmonthly},
-					{id: 'SixMonthlyApril', name: DV.i18n.sixmonthly_april},
-					{id: 'Yearly', name: DV.i18n.yearly},
-					{id: 'FinancialOct', name: DV.i18n.financial_oct},
-					{id: 'FinancialJuly', name: DV.i18n.financial_july},
-					{id: 'FinancialApril', name: DV.i18n.financial_april}
+					{id: 'Daily', name: NS.i18n.daily},
+					{id: 'Weekly', name: NS.i18n.weekly},
+					{id: 'Monthly', name: NS.i18n.monthly},
+					{id: 'BiMonthly', name: NS.i18n.bimonthly},
+					{id: 'Quarterly', name: NS.i18n.quarterly},
+					{id: 'SixMonthly', name: NS.i18n.sixmonthly},
+					{id: 'SixMonthlyApril', name: NS.i18n.sixmonthly_april},
+					{id: 'Yearly', name: NS.i18n.yearly},
+					{id: 'FinancialOct', name: NS.i18n.financial_oct},
+					{id: 'FinancialJuly', name: NS.i18n.financial_july},
+					{id: 'FinancialApril', name: NS.i18n.financial_april}
 				]
 			};
 
@@ -780,12 +784,12 @@ Ext.onReady( function() {
 
 				return function() {
 					if (!Ext.isObject(config)) {
-						ns.alert('Record: config is not an object: ' + config, true);
+						console.log('api.layout.Record: config is not an object: ' + config);
 						return;
 					}
 
 					if (!Ext.isString(config.id)) {
-						ns.alert('Record: id is not text: ' + config, true);
+						console.log('api.layout.Record: id is not text: ' + config, true);
 						return;
 					}
 
@@ -890,6 +894,8 @@ Ext.onReady( function() {
                 // userOrganisationUnitChildren: boolean (false)
 
                 // parentGraphMap: object
+
+                // displayProperty: string ('name') // 'name', 'shortname', null
 
                 getValidatedDimensionArray = function(dimensionArray) {
 					var dimensionArray = Ext.clone(dimensionArray);
@@ -996,19 +1002,19 @@ Ext.onReady( function() {
 
 							// Indicators as filter
 							if (layout.filters[i].dimension === dimConf.indicator.objectName) {
-								ns.alert(DV.i18n.indicators_cannot_be_specified_as_filter || 'Indicators cannot be specified as filter', true);
+								ns.alert(NS.i18n.indicators_cannot_be_specified_as_filter || 'Indicators cannot be specified as filter.');
 								return;
 							}
 
 							// Categories as filter
 							if (layout.filters[i].dimension === dimConf.category.objectName) {
-								ns.alert(DV.i18n.categories_cannot_be_specified_as_filter || 'Categories cannot be specified as filter', true);
+								ns.alert(NS.i18n.categories_cannot_be_specified_as_filter || 'Categories cannot be specified as filter.');
 								return;
 							}
 
 							// Data sets as filter
 							if (layout.filters[i].dimension === dimConf.dataSet.objectName) {
-								ns.alert(DV.i18n.data_sets_cannot_be_specified_as_filter || 'Data sets cannot be specified as filter', true);
+								ns.alert(NS.i18n.data_sets_cannot_be_specified_as_filter || 'Data sets cannot be specified as filter.');
 								return;
 							}
 						}
@@ -1016,31 +1022,31 @@ Ext.onReady( function() {
 
 					// dc and in
 					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.indicator.objectName]) {
-						ns.alert('Indicators and detailed data elements cannot be specified together', true);
+						ns.alert('Indicators and detailed data elements cannot be specified together.', true);
 						return;
 					}
 
 					// dc and de
 					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.dataElement.objectName]) {
-						ns.alert('Detailed data elements and totals cannot be specified together', true);
+						ns.alert('Detailed data elements and totals cannot be specified together.', true);
 						return;
 					}
 
 					// dc and ds
 					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.dataSet.objectName]) {
-						ns.alert('Data sets and detailed data elements cannot be specified together', true);
+						ns.alert('Data sets and detailed data elements cannot be specified together.', true);
 						return;
 					}
 
 					// dc and co
 					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.category.objectName]) {
-						ns.alert('Categories and detailed data elements cannot be specified together', true);
+						ns.alert('Categories and detailed data elements cannot be specified together.', true);
 						return;
 					}
 
                     // in and aggregation type
                     if (objectNameDimensionMap[dimConf.indicator.objectName] && config.aggregationType !== 'DEFAULT') {
-                        ns.alert('Indicators and aggregation types cannot be specified together', true);
+                        ns.alert('Indicators and aggregation types cannot be specified together.', true);
                         return;
                     }
 
@@ -1134,6 +1140,10 @@ Ext.onReady( function() {
 
                     layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
 
+                    if (Ext.isString(config.displayProperty)) {
+                        layout.displayProperty = config.displayProperty;
+                    }
+
                     // style
                     if (Ext.isObject(config.domainAxisStyle)) {
                         layout.domainAxisStyle = config.domainAxisStyle;
@@ -1216,12 +1226,12 @@ Ext.onReady( function() {
 					}
 
 					if (!(Ext.isArray(config.rows) && config.rows.length > 0)) {
-                        alert('No values found');
-						return;
+                        //console.log('No values found');
+						//return;
 					}
 
-					if (config.headers.length !== config.rows[0].length) {
-						console.log('Response: headers.length !== rows[0].length');
+					if (config.rows.length && config.headers.length !== config.rows[0].length) {
+						console.log('api.response.Response: headers.length !== rows[0].length');
 					}
 
 					return config;
@@ -1270,19 +1280,25 @@ Ext.onReady( function() {
                 return maxLength;
             };
 
-			support.prototype.array.sort = function(array, direction, key) {
-				// accepts [number], [string], [{prop: number}], [{prop: string}]
+			support.prototype.array.sort = function(array, direction, key, emptyFirst) {
+				// supports [number], [string], [{key: number}], [{key: string}], [[string]], [[number]]
 
 				if (!support.prototype.array.getLength(array)) {
 					return;
 				}
 
-				key = key || 'name';
+				key = !!key || Ext.isNumber(key) ? key : 'name';
 
 				array.sort( function(a, b) {
 
 					// if object, get the property values
-					if (Ext.isObject(a) && Ext.isObject(b) && key) {
+					if (Ext.isObject(a) && Ext.isObject(b)) {
+						a = a[key];
+						b = b[key];
+					}
+
+					// if array, get from the right index
+					if (Ext.isArray(a) && Ext.isArray(b)) {
 						a = a[key];
 						b = b[key];
 					}
@@ -1305,11 +1321,29 @@ Ext.onReady( function() {
 						return direction === 'DESC' ? b - a : a - b;
 					}
 
-					return 0;
+                    else if (a === undefined || a === null) {
+                        return emptyFirst ? -1 : 1;
+                    }
+
+                    else if (b === undefined || b === null) {
+                        return emptyFirst ? 1 : -1;
+                    }
+
+					return -1;
 				});
 
 				return array;
 			};
+
+            support.prototype.array.deleteObjectKey = function(array, key) {
+                if (!(Ext.isArray(array) && Ext.isDefined(key))) {
+                    return;
+                }
+
+                for (var i = 0; i < array.length; i++) {
+                    delete array[i][key];
+                }
+            };
 
 				// object
 			support.prototype.object = {};
@@ -1352,9 +1386,13 @@ Ext.onReady( function() {
 
                 // number
 			support.prototype.number = {};
-                        
+
 			support.prototype.number.prettyPrint = function(number, separator) {
 				separator = separator || 'space';
+
+                if (!(Ext.isNumber(number) || Ext.isString(number))) {
+                    return;
+                }
 
 				if (separator === 'none') {
 					return number;
@@ -1522,18 +1560,18 @@ Ext.onReady( function() {
 					dimensionNameIdsMap: {},
 
 						// for param string
-					dimensionNameSortedIdsMap: {}
+					dimensionNameSortedIdsMap: {},
 
 					// sort table by column
 					//sortableIdObjects: []
+
+                    dimensionNameAxisMap: {}
 				};
 
 				Ext.applyIf(xLayout, layout);
 
 				// columns, rows, filters
 				if (layout.columns) {
-                    //layout.columns = support.prototype.array.uniqueByProperty(layout.columns, 'dimension');
-
 					for (var i = 0, dim, items, xDim; i < layout.columns.length; i++) {
 						dim = layout.columns[i];
 						items = dim.items;
@@ -1541,13 +1579,11 @@ Ext.onReady( function() {
 
 						xDim.dimension = dim.dimension;
 						xDim.objectName = dim.dimension;
-						xDim.dimensionName = dimConf.objectNameMap.hasOwnProperty(dim.dimension) ? dimConf.objectNameMap[dim.dimension].dimensionName || dim.dimension : dim.dimension;
-
-						xDim.items = [];
-						xDim.ids = [];
+						xDim.dimensionName = dimConf.objectNameMap[dim.dimension].dimensionName;
 
 						if (items) {
 							xDim.items = items;
+							xDim.ids = [];
 
 							for (var j = 0; j < items.length; j++) {
 								xDim.ids.push(items[j].id);
@@ -1561,17 +1597,17 @@ Ext.onReady( function() {
 
 						xLayout.axisDimensions.push(xDim);
 						xLayout.axisObjectNames.push(xDim.objectName);
-						xLayout.axisDimensionNames.push(dimConf.objectNameMap.hasOwnProperty(xDim.objectName) ? dimConf.objectNameMap[xDim.objectName].dimensionName || xDim.objectName : xDim.objectName);
+						xLayout.axisDimensionNames.push(dimConf.objectNameMap[xDim.objectName].dimensionName);
 
 						xLayout.objectNameDimensionsMap[xDim.objectName] = xDim;
 						xLayout.objectNameItemsMap[xDim.objectName] = xDim.items;
 						xLayout.objectNameIdsMap[xDim.objectName] = xDim.ids;
+
+                        xLayout.dimensionNameAxisMap[xDim.dimensionName] = xLayout.columns;
 					}
 				}
 
 				if (layout.rows) {
-                    //layout.rows = support.prototype.array.uniqueByProperty(layout.rows, 'dimension');
-
 					for (var i = 0, dim, items, xDim; i < layout.rows.length; i++) {
 						dim = Ext.clone(layout.rows[i]);
 						items = dim.items;
@@ -1579,13 +1615,11 @@ Ext.onReady( function() {
 
 						xDim.dimension = dim.dimension;
 						xDim.objectName = dim.dimension;
-						xDim.dimensionName = dimConf.objectNameMap.hasOwnProperty(dim.dimension) ? dimConf.objectNameMap[dim.dimension].dimensionName || dim.dimension : dim.dimension;
-
-						xDim.items = [];
-						xDim.ids = [];
+						xDim.dimensionName = dimConf.objectNameMap[dim.dimension].dimensionName;
 
 						if (items) {
 							xDim.items = items;
+							xDim.ids = [];
 
 							for (var j = 0; j < items.length; j++) {
 								xDim.ids.push(items[j].id);
@@ -1599,17 +1633,17 @@ Ext.onReady( function() {
 
 						xLayout.axisDimensions.push(xDim);
 						xLayout.axisObjectNames.push(xDim.objectName);
-						xLayout.axisDimensionNames.push(dimConf.objectNameMap.hasOwnProperty(xDim.objectName) ? dimConf.objectNameMap[xDim.objectName].dimensionName || xDim.objectName : xDim.objectName);
+						xLayout.axisDimensionNames.push(dimConf.objectNameMap[xDim.objectName].dimensionName);
 
 						xLayout.objectNameDimensionsMap[xDim.objectName] = xDim;
 						xLayout.objectNameItemsMap[xDim.objectName] = xDim.items;
 						xLayout.objectNameIdsMap[xDim.objectName] = xDim.ids;
+
+                        xLayout.dimensionNameAxisMap[xDim.dimensionName] = xLayout.rows;
 					}
 				}
 
 				if (layout.filters) {
-                    //layout.filters = support.prototype.array.uniqueByProperty(layout.filters, 'dimension');
-
 					for (var i = 0, dim, items, xDim; i < layout.filters.length; i++) {
 						dim = layout.filters[i];
 						items = dim.items;
@@ -1617,13 +1651,11 @@ Ext.onReady( function() {
 
 						xDim.dimension = dim.dimension;
 						xDim.objectName = dim.dimension;
-						xDim.dimensionName = dimConf.objectNameMap.hasOwnProperty(dim.dimension) ? dimConf.objectNameMap[dim.dimension].dimensionName || dim.dimension : dim.dimension;
-
-						xDim.items = [];
-						xDim.ids = [];
+						xDim.dimensionName = dimConf.objectNameMap[dim.dimension].dimensionName;
 
 						if (items) {
 							xDim.items = items;
+							xDim.ids = [];
 
 							for (var j = 0; j < items.length; j++) {
 								xDim.ids.push(items[j].id);
@@ -1634,11 +1666,13 @@ Ext.onReady( function() {
 
 						xLayout.filterDimensions.push(xDim);
 						xLayout.filterObjectNames.push(xDim.objectName);
-						xLayout.filterDimensionNames.push(dimConf.objectNameMap.hasOwnProperty(xDim.objectName) ? dimConf.objectNameMap[xDim.objectName].dimensionName || xDim.objectName : xDim.objectName);
+						xLayout.filterDimensionNames.push(dimConf.objectNameMap[xDim.objectName].dimensionName);
 
 						xLayout.objectNameDimensionsMap[xDim.objectName] = xDim;
 						xLayout.objectNameItemsMap[xDim.objectName] = xDim.items;
 						xLayout.objectNameIdsMap[xDim.objectName] = xDim.ids;
+
+                        xLayout.dimensionNameAxisMap[xDim.dimensionName] = xLayout.filters;
 					}
 				}
 
@@ -2099,7 +2133,9 @@ Ext.onReady( function() {
 						idIndexOrder = [];
 
 					// idIndexOrder
-					for (var i = 0; i < axisDimensionNames.length; i++) {
+					for (var i = 0, dimName, index; i < axisDimensionNames.length; i++) {
+                        dimName = axisDimensionNames[i];
+                        //index = response.nameHeaderMap.hasOwnProperty(
 						idIndexOrder.push(response.nameHeaderMap[axisDimensionNames[i]].index);
 
 						// If co exists in response and is not added in layout, add co after dx
@@ -2164,7 +2200,7 @@ Ext.onReady( function() {
 
 				message = message || 'Loading..';
 
-				if (component.mask) {
+				if (component.mask && component.mask.destroy) {
 					component.mask.destroy();
 					component.mask = null;
 				}
@@ -2189,11 +2225,96 @@ Ext.onReady( function() {
 					return null;
 				}
 
-				if (component.mask) {
+				if (component.mask && component.mask.destroy) {
 					component.mask.destroy();
 					component.mask = null;
 				}
 			};
+
+			// window
+			web.window = {};
+
+			web.window.setAnchorPosition = function(w, target) {
+				var vpw = ns.app.viewport.getWidth(),
+					targetx = target ? target.getPosition()[0] : 4,
+					winw = w.getWidth(),
+					y = target ? target.getPosition()[1] + target.getHeight() + 4 : 33;
+
+				if ((targetx + winw) > vpw) {
+					w.setPosition((vpw - winw - 2), y);
+				}
+				else {
+					w.setPosition(targetx, y);
+				}
+			};
+
+			web.window.addHideOnBlurHandler = function(w) {
+				var maskElements = Ext.query('.x-mask'),
+                    el = Ext.get(maskElements[0]);
+
+				el.on('click', function() {
+					if (w.hideOnBlur) {
+						w.hide();
+					}
+				});
+
+				w.hasHideOnBlurHandler = true;
+			};
+
+			web.window.addDestroyOnBlurHandler = function(w) {
+				var maskElements = Ext.query('.x-mask'),
+                    el = Ext.get(maskElements[0]);
+
+				el.on('click', function() {
+					if (w.destroyOnBlur) {
+						w.destroy();
+					}
+				});
+
+				w.hasDestroyOnBlurHandler = true;
+			};
+
+			// message
+			web.message = {};
+
+			web.message.alert = function(msg, type) {
+                var config = {},
+                    window;
+
+                if (!msg) {
+                    return;
+                }
+
+                type = type || 'error';
+
+				config.title = type === 'error' ? NS.i18n.error : (type === 'warning' ? NS.i18n.warning : NS.i18n.info);
+				config.iconCls = 'ns-window-title-messagebox ' + type;
+
+                // html
+                config.html = msg + (msg.substr(msg.length - 1) === '.' ? '' : '.');
+
+                // bodyStyle
+                config.bodyStyle = 'padding: 10px; background: #fff; max-width: 350px; max-height: ' + ns.app.centerRegion.getHeight() / 2 + 'px';
+
+                // destroy handler
+                config.modal = true;
+                config.destroyOnBlur = true;
+
+                // listeners
+                config.listeners = {
+                    show: function(w) {
+                        w.setPosition(w.getPosition()[0], w.getPosition()[1] / 2);
+
+						if (!w.hasDestroyOnBlurHandler) {
+							web.window.addDestroyOnBlurHandler(w);
+						}
+                    }
+                };
+
+                window = Ext.create('Ext.window.Window', config);
+
+                window.show();
+            };
 
 			// analytics
 			web.analytics = {};
@@ -2206,7 +2327,8 @@ Ext.onReady( function() {
                     addCategoryDimension = false,
                     map = xLayout.dimensionNameItemsMap,
                     dx = dimConf.indicator.dimensionName,
-                    aggTypes = ['COUNT', 'SUM', 'STDDEV', 'VARIANCE', 'MIN', 'MAX'];
+                    aggTypes = ['COUNT', 'SUM', 'STDDEV', 'VARIANCE', 'MIN', 'MAX'],
+                    displayProperty = xLayout.displayProperty || init.userAccount.settings.keyAnalysisDisplayProperty || 'name';
 
                 for (var i = 0, dimName, items; i < axisDimensionNames.length; i++) {
                     dimName = axisDimensionNames[i];
@@ -2255,7 +2377,7 @@ Ext.onReady( function() {
 				}
 
                 // display property
-                paramString += '&displayProperty=' + init.userAccount.settings.keyAnalysisDisplayProperty.toUpperCase();
+                paramString += '&displayProperty=' + displayProperty.toUpperCase();
 
                 return paramString;
             };
@@ -2273,16 +2395,14 @@ Ext.onReady( function() {
 
                 msg += '\n\n' + 'Hint: A good way to reduce the number of items is to use relative periods and level/group organisation unit selection modes.';
 
-                ns.alert(msg);
+                ns.alert(msg, 'warning');
 			};
 
 			// chart
 			web.chart = {};
 
-			web.chart.createChart = function(ns, legendSet) {
-                var xLayout = ns.app.xLayout,
-                    xResponse = ns.app.xResponse,
-                    columnIds = xLayout.columnDimensionNames[0] ? xLayout.dimensionNameIdsMap[xLayout.columnDimensionNames[0]] : [],
+			web.chart.createChart = function(xLayout, xResponse, legendSet) {
+                var columnIds = xLayout.columnDimensionNames[0] ? xLayout.dimensionNameIdsMap[xLayout.columnDimensionNames[0]] : [],
                     failSafeColumnIds = [],
                     failSafeColumnIdMap = {},
                     createFailSafeColumnIds = function() {
@@ -2388,9 +2508,19 @@ Ext.onReady( function() {
 
                     // sort order
                     if (xLayout.sortOrder) {
-                        var sortingKey = isStacked ? dataTotalKey : failSafeColumnIds[0];
+                        var valueKey = isStacked ? dataTotalKey : failSafeColumnIds[0],
+                            sortKey = 'sorting_' + Ext.data.IdGenerator.get('uuid').generate();
 
-                        support.prototype.array.sort(data, xLayout.sortOrder === -1 ? 'ASC' : 'DESC', sortingKey);
+                        // create sort key
+                        for (var ii = 0, rec; ii < data.length; ii++) {
+                            rec = data[ii];
+                            rec[sortKey] = rec[valueKey] === '0.0' ? null : rec[valueKey];
+                        }
+
+                        support.prototype.array.sort(data, xLayout.sortOrder === -1 ? 'ASC' : 'DESC', sortKey, (xLayout.sortOrder === -1));
+
+                        // remove sort key
+                        support.prototype.array.deleteObjectKey(data, sortKey);
                     }
 
                     // trend lines
@@ -2412,7 +2542,7 @@ Ext.onReady( function() {
                             }
 
                             trendLineFields.push(regressionKey);
-                            xResponse.metaData.names[regressionKey] = DV.i18n.trend + ' (Total)';
+                            xResponse.metaData.names[regressionKey] = NS.i18n.trend + ' (Total)';
                         }
                         else {
                             for (var i = 0; i < failSafeColumnIds.length; i++) {
@@ -2429,7 +2559,7 @@ Ext.onReady( function() {
                                 }
 
                                 trendLineFields.push(regressionKey);
-                                xResponse.metaData.names[regressionKey] = DV.i18n.trend + (ns.dashboard ? '' : ' (' + xResponse.metaData.names[failSafeColumnIds[i]] + ')');
+                                xResponse.metaData.names[regressionKey] = NS.i18n.trend + (ns.dashboard ? '' : ' (' + xResponse.metaData.names[failSafeColumnIds[i]] + ')');
                             }
                         }
                     }
@@ -2542,7 +2672,7 @@ Ext.onReady( function() {
                         return Ext.Array.max(values);
                     };
 
-                    if (DV.isDebug) {
+                    if (NS.isDebug) {
                         console.log("data", data);
                         console.log("rangeFields", store.rangeFields);
                         console.log("domainFields", store.domainFields);
@@ -2799,50 +2929,59 @@ Ext.onReady( function() {
                 };
 
                 getDefaultSeriesTitle = function(store) {
-                    var a = [];
+                    var a = [],
+                        ls = Ext.isObject(xLayout.legendStyle) ? xLayout.legendStyle : null;
 
-                    if (Ext.isObject(xLayout.legendStyle) && Ext.isArray(xLayout.legendStyle.labelNames)) {
-                        return xLayout.legendStyle.labelNames;
+                    if (ls && Ext.isArray(ls.labelNames)) {
+                        return ls.labelNames;
                     }
                     else {
                         for (var i = 0, id, name, mxl, ids; i < store.rangeFields.length; i++) {
                             id = failSafeColumnIdMap[store.rangeFields[i]];
                             name = xResponse.metaData.names[id];
 
-                            //if (Ext.isString(name) && Ext.isObject(xLayout.legendStyle) && Ext.isNumber(xLayout.legendStyle.labelMaxLength)) {
-                                //var mxl = parseInt(xLayout.legendStyle.labelMaxLength);
+                            if (ls && ls.labelMaxLength) {
+                                var mxl = parseInt(ls.labelMaxLength);
 
-                                //name = name.length > mxl ? name.substr(0, mxl) + '..' : name;
-                            //}
+                                if (Ext.isNumber(mxl) && name.length > mxl) {
+                                    name = name.substr(0, mxl) + '..';
+                                }
+                            }
 
                             a.push(name);
                         }
                     }
 
-                    return getFormatedSeriesTitle(a);
+                    return ns.dashboard ? getFormatedSeriesTitle(a) : a;
 				};
 
                 getPieSeriesTitle = function(store) {
-                    var a = [];
+                    var a = [],
+                        ls = Ext.isObject(xLayout.legendStyle) ? xLayout.legendStyle : null;
 
-                    if (Ext.isObject(xLayout.legendStyle) && Ext.isArray(xLayout.legendStyle.labelNames)) {
-                        return xLayout.legendStyle.labelNames;
+                    if (ls && Ext.isArray(ls.labelNames)) {
+                        return ls.labelNames;
                     }
                     else {
-                        var id = store.domainFields[0];
+                        var id = store.domainFields[0],
+                            name;
 
                         store.each( function(r) {
-                            a.push(r.data[id]);
+                            name = r.data[id];
 
-                            //if (Ext.isString(name) && Ext.isObject(xLayout.legendStyle) && Ext.isNumber(xLayout.legendStyle.labelMaxLength)) {
-                                //var mxl = parseInt(xLayout.legendStyle.labelMaxLength);
+                            if (ls && ls.labelMaxLength) {
+                                var mxl = parseInt(ls.labelMaxLength);
 
-                                //name = name.length > mxl ? name.substr(0, mxl) + '..' : name;
-                            //}
+                                if (Ext.isNumber(mxl) && name.length > mxl) {
+                                    name = name.substr(0, mxl) + '..';
+                                }
+                            }
+
+                            a.push(name);
                         });
                     }
 
-                    return getFormatedSeriesTitle(a);
+                    return ns.dashboard ? getFormatedSeriesTitle(a) : a;
 				};
 
                 getDefaultSeries = function(store) {
@@ -2946,7 +3085,7 @@ Ext.onReady( function() {
                         },
                         showMarkers: false,
                         title: function() {
-                            var title = (Ext.isString(xLayout.targetLineTitle) ? xLayout.targetLineTitle : DV.i18n.target) + ' (' + xLayout.targetLineValue + ')',
+                            var title = (Ext.isString(xLayout.targetLineTitle) ? xLayout.targetLineTitle : NS.i18n.target) + ' (' + xLayout.targetLineValue + ')',
                                 ls = xLayout.legendStyle;
                             return ls && Ext.isNumber(ls.labelMaxLength) ? title.substr(0, ls.labelMaxLength) + '..' : title;
                         }()
@@ -2967,7 +3106,7 @@ Ext.onReady( function() {
                         },
                         showMarkers: false,
                         title: function() {
-                            var title = (Ext.isString(xLayout.baseLineTitle) ? xLayout.baseLineTitle : DV.i18n.base) + ' (' + xLayout.baseLineValue + ')',
+                            var title = (Ext.isString(xLayout.baseLineTitle) ? xLayout.baseLineTitle : NS.i18n.base) + ' (' + xLayout.baseLineValue + ')',
                                 ls = xLayout.legendStyle;
                             return ls && Ext.isNumber(ls.labelMaxLength) ? title.substr(0, ls.labelMaxLength) + '..' : title;
                         }()
@@ -3138,10 +3277,10 @@ Ext.onReady( function() {
                 };
 
                 getDefaultChartSizeHandler = function() {
-                    var width = ns.app.centerRegion.getWidth(),
-                        height = ns.app.centerRegion.getHeight();
-
                     return function() {
+                        var width = ns.app.centerRegion.getWidth(),
+                            height = ns.app.centerRegion.getHeight();
+                            
 						this.animate = false;
                         this.setWidth(ns.dashboard ? width : width - 15);
                         this.setHeight(ns.dashboard ? height : height - 40);
@@ -3187,7 +3326,7 @@ Ext.onReady( function() {
                             shadow: false,
                             insetPadding: ns.dashboard ? 17 : 35,
                             insetPaddingObject: {
-                                top: ns.dashboard ? 12 : 22,
+                                top: ns.dashboard ? 12 : 32,
                                 right: ns.dashboard ? (isLineBased ? 5 : 3) : (isLineBased ? 25 : 15),
                                 bottom: ns.dashboard ? 2 : 10,
                                 left: ns.dashboard ? (isLineBased ? 15 : 7) : (isLineBased ? 70 : 50)
@@ -3517,8 +3656,10 @@ Ext.onReady( function() {
                         label.font = labelFont;
                         label.fill = labelColor;
                         label.renderer = function(value) {
-                            var record = store.getAt(store.findExact(conf.finals.data.domain, value));
-                            return record.data[store.rangeFields[0]];
+                            var record = store.getAt(store.findExact(conf.finals.data.domain, value)),
+                                v = record.data[store.rangeFields[0]];
+
+                            return support.prototype.number.prettyPrint(v);
                         };
                     }
 
@@ -3542,7 +3683,10 @@ Ext.onReady( function() {
                             trackMouse: true,
                             cls: 'dv-chart-tips',
                             renderer: function(item) {
-                                this.update('<div style="text-align:center"><div style="font-size:17px; font-weight:bold">' + item.data[store.rangeFields[0]] + '</div><div style="font-size:10px">' + item.data[conf.finals.data.domain] + '</div></div>');
+                                var value = support.prototype.number.prettyPrint(item.data[store.rangeFields[0]]),
+                                    data = item.data[conf.finals.data.domain];
+
+                                this.update('<div style="text-align:center"><div style="font-size:17px; font-weight:bold">' + value + '</div><div style="font-size:10px">' + data + '</div></div>');
                             }
                         },
                         shadowAttributes: false,
@@ -3566,10 +3710,10 @@ Ext.onReady( function() {
                         store: store,
                         series: series,
                         insetPaddingObject: {
-                            top: 15,
-                            right: 2,
-                            bottom: 13,
-                            left: 7
+                            top: ns.dashboard ? 15 : 40,
+                            right: ns.dashboard ? 2 : 30,
+                            bottom: ns.dashboard ? 13: 30,
+                            left: ns.dashboard ? 7 : 30
                         }
                     });
 
@@ -3782,14 +3926,15 @@ Ext.onReady( function() {
 			}
 		}());
 
-		// instance
-		return {
-			conf: conf,
-			api: api,
-			support: support,
-			service: service,
-			web: web,
-			init: init
-		};
+		// alert
+        ns.alert = web.message.alert;
+
+		ns.conf = conf;
+		ns.api = api;
+		ns.support = support;
+		ns.service = service;
+		ns.web = web;
+
+		return ns;
     };
 });

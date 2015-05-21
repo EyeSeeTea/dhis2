@@ -179,28 +179,49 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
     };
     
     return {
-        
-        getAll: function(){
+        getProgramsByOu: function(ou, selectedProgram){
             var roles = SessionStorageService.get('USER_ROLES');
             var userRoles = roles && roles.userCredentials && roles.userCredentials.userRoles ? roles.userCredentials.userRoles : [];
-            var ou = SessionStorageService.get('SELECTED_OU');
             var def = $q.defer();
             
             ECStorageService.currentStore.open().done(function(){
                 ECStorageService.currentStore.getAll('programs').done(function(prs){
-                    var programs = [];                    
-                    angular.forEach(prs, function(pr){
+                    var programs = [];
+                    angular.forEach(prs, function(pr){                            
                         if(pr.organisationUnits.hasOwnProperty( ou.id ) && userHasValidRole(pr, userRoles)){
                             programs.push(pr);
                         }
                     });
+                    
+                    if(programs.length === 0){
+                        selectedProgram = null;
+                    }
+                    else if(programs.length === 1){
+                        selectedProgram = programs[0];
+                    } 
+                    else{
+                        if(selectedProgram){
+                            var continueLoop = true;
+                            for(var i=0; i<programs.length && continueLoop; i++){
+                                if(programs[i].id === selectedProgram.id){                                
+                                    selectedProgram = programs[i];
+                                    continueLoop = false;
+                                }
+                            }
+                            if(continueLoop){
+                                selectedProgram = null;
+                            }
+                        }
+                    }
+                    
                     $rootScope.$apply(function(){
-                        def.resolve(programs);
-                    });                    
+                        def.resolve({programs: programs, selectedProgram: selectedProgram});
+                    });                      
                 });
             });
+            
             return def.promise;
-        }        
+        }
     };
 })
 
@@ -277,12 +298,20 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
 .factory('DHIS2EventFactory', function($http, $q, ECStorageService, $rootScope) {   
     
     return {
-        getByStage: function(orgUnit, programStage, pager){
-        	var pgSize = pager ? pager.pageSize : 50;
-        	var pg = pager ? pager.page : 1;
-            pgSize = pgSize > 1 ? pgSize  : 1;
-            pg = pg > 1 ? pg : 1;              
-            var url = '../api/events.json?' + 'orgUnit=' + orgUnit + '&programStage=' + programStage + '&pageSize=' + pgSize + '&page=' + pg;
+        getByStage: function(orgUnit, programStage, pager, paging){
+            
+            var url = '../api/events.json?' + 'orgUnit=' + orgUnit + '&programStage=' + programStage;
+            
+            if(paging){
+                var pgSize = pager ? pager.pageSize : 50;
+                var pg = pager ? pager.page : 1;
+                pgSize = pgSize > 1 ? pgSize  : 1;
+                pg = pg > 1 ? pg : 1; 
+                url = url  + '&pageSize=' + pgSize + '&page=' + pg + '&totalPages=true';
+            }
+            else{
+                url = url  + '&skipPaging=true';
+            }
             
             var promise = $http.get( url ).then(function(response){                    
                 return response.data;        

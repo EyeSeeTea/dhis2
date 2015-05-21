@@ -31,6 +31,7 @@ package org.hisp.dhis.dxf2.events;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
+import java.util.Date;
 import java.util.HashSet;
 
 import org.hamcrest.CoreMatchers;
@@ -85,7 +86,7 @@ public class RegistrationMultiEventsServiceTest
     private SessionFactory sessionFactory;
     
     @Autowired 
-    private IdentifiableObjectManager _identifiableObjectManager;
+    private IdentifiableObjectManager identifiableObjectManager;
     
     @Autowired
     private UserService _userService;
@@ -118,7 +119,6 @@ public class RegistrationMultiEventsServiceTest
     protected void setUpTest()
         throws Exception
     {
-        identifiableObjectManager = _identifiableObjectManager;
         userService = _userService;
 
         organisationUnitA = createOrganisationUnit( 'A' );
@@ -327,6 +327,8 @@ public class RegistrationMultiEventsServiceTest
         enrollment.setOrgUnit( organisationUnitA.getUid() );
         enrollment.setProgram( program );
         enrollment.setTrackedEntityInstance( person );
+        enrollment.setDateOfEnrollment( new Date() );
+        enrollment.setDateOfIncident( new Date() );
 
         return enrollment;
     }

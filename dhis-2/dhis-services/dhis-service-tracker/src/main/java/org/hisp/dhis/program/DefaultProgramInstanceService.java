@@ -44,7 +44,6 @@ import org.hisp.dhis.sms.SmsSender;
 import org.hisp.dhis.sms.SmsServiceException;
 import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.system.grid.ListGrid;
-import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceReminder;
@@ -287,11 +286,11 @@ public class DefaultProgramInstanceService
         for ( Program program : programs )
         {
             List<TrackedEntityAttribute> atttributes = program.getTrackedEntityAttributes();
-            
+
             while ( iterAttribute.hasNext() )
             {
                 TrackedEntityAttributeValue attributeValue = iterAttribute.next();
-                
+
                 if ( !atttributes.contains( attributeValue.getAttribute() ) )
                 {
                     iterAttribute.remove();
@@ -471,7 +470,8 @@ public class DefaultProgramInstanceService
     public ProgramInstance enrollTrackedEntityInstance( TrackedEntityInstance entityInstance, Program program,
         Date enrollmentDate, Date dateOfIncident, OrganisationUnit organisationUnit )
     {
-        return enrollTrackedEntityInstance( CodeGenerator.generateCode(), entityInstance, program, enrollmentDate, dateOfIncident, organisationUnit );
+        return enrollTrackedEntityInstance( CodeGenerator.generateCode(), entityInstance, program, enrollmentDate,
+            dateOfIncident, organisationUnit );
     }
 
     @Override
@@ -510,21 +510,15 @@ public class DefaultProgramInstanceService
         addProgramInstance( programInstance );
 
         // ---------------------------------------------------------------------
-        // Generate events for program instance
+        // Generate event if program is single event and has program stage.
+        // At some point, programs of type single event should be removed.
         // ---------------------------------------------------------------------
 
-        for ( ProgramStage programStage : program.getProgramStages() )
+        if ( program.isSingleEvent() && program.getProgramStages().size() == 1 )
         {
-            if ( programStage.getAutoGenerateEvent() )
-            {
-                ProgramStageInstance programStageInstance = generateEvent( programInstance, programStage,
-                    programInstance.getEnrollmentDate(), programInstance.getDateOfIncident(), organisationUnit );
-
-                if ( programStageInstance != null )
-                {
-                    programStageInstanceService.addProgramStageInstance( programStageInstance );
-                }
-            }
+            ProgramStage programStage = program.getProgramStages().iterator().next();
+            programStageInstanceService.createProgramStageInstance( programInstance, programStage, enrollmentDate,
+                dateOfIncident, organisationUnit );
         }
 
         // -----------------------------------------------------------------
@@ -665,42 +659,6 @@ public class DefaultProgramInstanceService
     // Supportive methods
     // -------------------------------------------------------------------------
 
-    private ProgramStageInstance generateEvent( ProgramInstance programInstance, ProgramStage programStage,
-        Date enrollmentDate, Date dateOfIncident, OrganisationUnit orgunit )
-    {
-        ProgramStageInstance programStageInstance = null;
-
-        Date currentDate = new Date();
-        Date dateCreatedEvent;
-
-        if ( programStage.getGeneratedByEnrollmentDate() )
-        {
-            dateCreatedEvent = enrollmentDate;
-        }
-        else
-        {
-            dateCreatedEvent = dateOfIncident;
-        }
-
-        Date dueDate = DateUtils.getDateAfterAddition( dateCreatedEvent, programStage.getMinDaysFromStart() );
-
-        if ( !programInstance.getProgram().getIgnoreOverdueEvents() || dueDate.before( currentDate ) )
-        {
-            programStageInstance = new ProgramStageInstance();
-            programStageInstance.setProgramInstance( programInstance );
-            programStageInstance.setProgramStage( programStage );
-            programStageInstance.setDueDate( dueDate );
-
-            if ( programInstance.getProgram().isSingleEvent() )
-            {
-                programStageInstance.setOrganisationUnit( orgunit );
-                programStageInstance.setExecutionDate( dueDate );
-            }
-        }
-
-        return programStageInstance;
-    }
-
     private void getProgramStageInstancesReport( Grid grid, ProgramInstance programInstance, I18n i18n )
     {
         I18nFormat format = i18nManager.getI18nFormat();
@@ -836,7 +794,7 @@ public class DefaultProgramInstanceService
                 && rm.getWhenToSend() != null
                 && rm.getWhenToSend() == status
                 && (rm.getMessageType() == TrackedEntityInstanceReminder.MESSAGE_TYPE_DHIS_MESSAGE || rm
-                .getMessageType() == TrackedEntityInstanceReminder.MESSAGE_TYPE_BOTH) )
+                    .getMessageType() == TrackedEntityInstanceReminder.MESSAGE_TYPE_BOTH) )
             {
                 int id = messageService.sendMessage( programInstance.getProgram().getDisplayName(),
                     reminderService.getMessageFromTemplate( rm, programInstance, format ), null,

@@ -1,7 +1,5 @@
-package org.hisp.dhis.statistics;
-
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,65 +25,75 @@ package org.hisp.dhis.statistics;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.hisp.dhis.trackedentity.action.programrule;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import java.util.ArrayList;
+import java.util.List;
 
-import java.util.Map;
-
-import org.hisp.dhis.DhisSpringTest;
-import org.hisp.dhis.common.Objects;
-import org.hisp.dhis.dataelement.DataElementService;
-import org.junit.Test;
+import org.hisp.dhis.programrule.ProgramRule;
+import org.hisp.dhis.programrule.ProgramRuleService;
+import org.hisp.dhis.programrule.ProgramRuleVariable;
+import org.hisp.dhis.programrule.ProgramRuleVariableService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.opensymphony.xwork2.Action;
+
 /**
- * @author Lars Helge Overland
- * @version $Id$
+ * @author Chau Thu Tran
+ *
+ * @version $ ValidationProgramRuleAction.java Mar 29, 2015 10:19:42 PM $
  */
-public class StatisticsProviderTest
-    extends DhisSpringTest
+public class GetProgramRuleAction
+    implements Action
 {
-    @Autowired
-    private StatisticsProvider statisticsProvider;
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
 
     @Autowired
-    private DataElementService dataElementService;
+    private ProgramRuleService programRuleService;
+    
+    @Autowired
+    private ProgramRuleVariableService variableService;
 
     // -------------------------------------------------------------------------
-    // Fixture
+    // Input/Output
+    // -------------------------------------------------------------------------
+
+    private Integer id;
+
+    public void setId( Integer id )
+    {
+        this.id = id;
+    }
+
+    private ProgramRule programRule;
+
+    public ProgramRule getProgramRule()
+    {
+        return programRule;
+    }
+
+    private List<ProgramRuleVariable> ruleVariables;
+
+    public List<ProgramRuleVariable> getRuleVariables()
+    {
+        return ruleVariables;
+    }
+    
+    // -------------------------------------------------------------------------
+    // Action implementation
     // -------------------------------------------------------------------------
 
     @Override
-    public void setUpTest()
+    public String execute()
+        throws Exception
     {
-        dataElementService.addDataElement( createDataElement( 'A' ) );
-        dataElementService.addDataElement( createDataElement( 'B' ) );
-        dataElementService.addDataElement( createDataElement( 'C' ) );
-
-        dataElementService.addDataElementGroup( createDataElementGroup( 'A' ) );
-        dataElementService.addDataElementGroup( createDataElementGroup( 'B' ) );
+        programRule = programRuleService.getProgramRule( id );
+       
+        ruleVariables = new ArrayList<>( variableService.getProgramRuleVariable( programRule.getProgram() ));
+        
+        return SUCCESS;
     }
 
-    // -------------------------------------------------------------------------
-    // Tests
-    // -------------------------------------------------------------------------
-
-    @Test
-    public void testGetDataElementObjectCount()
-    {
-        Map<Objects, Integer> counts = statisticsProvider.getObjectCounts();
-
-        assertNotNull( counts );
-        assertEquals( new Integer( 3 ), counts.get( Objects.DATAELEMENT ) );
-    }
-
-    @Test
-    public void testGetDataElementGroupObjectCounts()
-    {
-        Map<Objects, Integer> counts = statisticsProvider.getObjectCounts();
-
-        assertNotNull( counts );
-        assertEquals( new Integer( 2 ), counts.get( Objects.DATAELEMENTGROUP ) );
-    }
 }

@@ -49,11 +49,13 @@ import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.IdentifiableProperty;
 import org.hisp.dhis.common.IllegalQueryException;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
+import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dxf2.common.IdSchemes;
 import org.hisp.dhis.dxf2.common.ImportOptions;
-import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
+import org.hisp.dhis.dxf2.events.report.EventRow;
+import org.hisp.dhis.dxf2.events.report.EventRows;
 import org.hisp.dhis.dxf2.importsummary.ImportConflict;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
@@ -79,6 +81,7 @@ import org.hisp.dhis.system.util.CachingMap;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.DebugUtils;
 import org.hisp.dhis.system.util.ValidationUtils;
+import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
 import org.hisp.dhis.trackedentitycomment.TrackedEntityComment;
 import org.hisp.dhis.trackedentitycomment.TrackedEntityCommentService;
@@ -133,9 +136,6 @@ public abstract class AbstractEventService
     @Autowired
     protected TrackedEntityInstanceService entityInstanceService;
     
-    @Autowired
-    private org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstanceService trackedEntityInstanceService;
-
     @Autowired
     protected TrackedEntityCommentService commentService;
 
@@ -422,18 +422,72 @@ public abstract class AbstractEventService
             }
         }
 
-        List<Event> eventList = eventStore.getEvents( params, organisationUnits );
+        if ( !params.isPaging() && !params.isSkipPaging() )
+        {
+            params.setDefaultPaging();
+        }
 
         Events events = new Events();
+        
+        if ( params.isPaging() )
+        {
+            int count = 0;
+            
+            if ( params.isTotalPages() )
+            {
+                count = eventStore.getEventCount( params, organisationUnits );
+            }
+            
+            Pager pager = new Pager( params.getPageWithDefault(), count, params.getPageSizeWithDefault() );
+            events.setPager( pager );
+        }
+        
+        List<Event> eventList = eventStore.getEvents( params, organisationUnits );
+
         events.setEvents( eventList );
 
         return events;
     }
     
     @Override
+    public EventRows getEventRows( EventSearchParams params )
+    {
+        List<OrganisationUnit> organisationUnits = new ArrayList<>();
+        
+        OrganisationUnit orgUnit = params.getOrgUnit();
+        OrganisationUnitSelectionMode orgUnitSelectionMode = params.getOrgUnitSelectionMode();
+        
+        if ( params.getOrgUnit() != null )
+        {
+            if ( OrganisationUnitSelectionMode.DESCENDANTS.equals( orgUnitSelectionMode ) )
+            {
+                organisationUnits.addAll( organisationUnitService.getOrganisationUnitWithChildren( orgUnit.getUid() ) );
+            }
+            else if ( OrganisationUnitSelectionMode.CHILDREN.equals( orgUnitSelectionMode ) )
+            {
+                organisationUnits.add( orgUnit );
+                organisationUnits.addAll( orgUnit.getChildren() );
+            }
+            else // SELECTED
+            {
+                organisationUnits.add( orgUnit );
+            }
+        }
+
+        EventRows eventRows = new EventRows();        
+        
+        
+        List<EventRow> eventRowList = eventStore.getEventRows( params, organisationUnits );
+
+        eventRows.setEventRows( eventRowList );
+
+        return eventRows;
+    }
+    
+    @Override
     public EventSearchParams getFromUrl( String program, String programStage, ProgramStatus programStatus, Boolean followUp, String orgUnit,
         OrganisationUnitSelectionMode orgUnitSelectionMode, String trackedEntityInstance, Date startDate, Date endDate, 
-        EventStatus status, Date lastUpdated, IdSchemes idSchemes, Integer page, Integer pageSize )
+        EventStatus status, Date lastUpdated, IdSchemes idSchemes, Integer page, Integer pageSize, boolean totalPages, boolean skipPaging )
     {
         EventSearchParams params = new EventSearchParams();
 
@@ -458,7 +512,7 @@ public abstract class AbstractEventService
             throw new IllegalQueryException( "Org unit is specified but does not exist: " + orgUnit );
         }
         
-        TrackedEntityInstance tei = trackedEntityInstanceService.getTrackedEntityInstance( trackedEntityInstance );
+        TrackedEntityInstance tei = entityInstanceService.getTrackedEntityInstance( trackedEntityInstance );
         
         if ( StringUtils.isNotEmpty( trackedEntityInstance ) && tei == null )
         {
@@ -479,6 +533,8 @@ public abstract class AbstractEventService
         params.setIdSchemes( idSchemes );
         params.setPage( page );
         params.setPageSize( pageSize );
+        params.setTotalPages( totalPages );
+        params.setSkipPaging( skipPaging );
         
         return params;
     }
@@ -553,7 +609,7 @@ public abstract class AbstractEventService
             dueDate = DateUtils.parseDate( event.getDueDate() );
         }
 
-        String storedBy = getStoredBy( event, null, currentUserService.getCurrentUsername() );
+        String storedBy = getStoredBy( event, null, currentUserService.getCurrentUser() );
 
         if ( event.getStatus() == EventStatus.ACTIVE )
         {
@@ -650,7 +706,7 @@ public abstract class AbstractEventService
             return;
         }
 
-        saveTrackedEntityComment( programStageInstance, event, getStoredBy( event, null, currentUserService.getCurrentUsername() ) );
+        saveTrackedEntityComment( programStageInstance, event, getStoredBy( event, null, currentUserService.getCurrentUser() ) );
     }
 
     @Override
@@ -845,13 +901,13 @@ public abstract class AbstractEventService
         return true;
     }
 
-    private String getStoredBy( Event event, ImportSummary importSummary, String defaultUsername )
+    private String getStoredBy( Event event, ImportSummary importSummary, User fallbackUser )
     {
         String storedBy = event.getStoredBy();
 
         if ( storedBy == null )
         {
-            storedBy = defaultUsername;
+            storedBy = User.getSafeUsername( fallbackUser );
         }
         else if ( storedBy.length() >= 31 )
         {
@@ -862,7 +918,7 @@ public abstract class AbstractEventService
                         + " is more than 31 characters, using current username instead" ) );
             }
 
-            storedBy = defaultUsername;
+            storedBy = User.getSafeUsername( fallbackUser );
         }
         return storedBy;
     }
@@ -981,7 +1037,7 @@ public abstract class AbstractEventService
 
         Date dueDate = DateUtils.parseDate( event.getDueDate() );
 
-        String storedBy = getStoredBy( event, importSummary, user.getUsername() );
+        String storedBy = getStoredBy( event, importSummary, user );
 
         if ( !dryRun )
         {

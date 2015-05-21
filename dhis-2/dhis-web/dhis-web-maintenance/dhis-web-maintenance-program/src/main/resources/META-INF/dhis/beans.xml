@@ -955,11 +955,6 @@
     <property name="systemSettingManager">
       <ref bean="org.hisp.dhis.setting.SystemSettingManager" />
     </property>
-    <property name="currentUserService">
-      <ref bean="org.hisp.dhis.user.CurrentUserService" />
-    </property>
-    <property name="notifier" ref="notifier" />
-    <property name="aggregateConditionTask" ref="aggregateQueryBuilder" />
   </bean>
 
   <!-- Program Indicator -->
@@ -1167,5 +1162,32 @@
     class="org.hisp.dhis.trackedentity.action.trackedentity.ValidateTrackedEntityAction"
     scope="prototype">
   </bean>
+  
+  <!-- Program Rule -->
+  
+  <bean
+    id="org.hisp.dhis.trackedentity.action.programrule.ValidateProgramRuleAction"
+    class="org.hisp.dhis.trackedentity.action.programrule.ValidateProgramRuleAction"
+    scope="prototype">
+  </bean>
+   
+   <bean
+    id="org.hisp.dhis.trackedentity.action.programrule.GetProgramRuleAction"
+    class="org.hisp.dhis.trackedentity.action.programrule.GetProgramRuleAction"
+    scope="prototype">
+  </bean>
+     
+  <bean
+    id="org.hisp.dhis.trackedentity.action.programrule.GetProgramRuleListAction"
+    class="org.hisp.dhis.trackedentity.action.programrule.GetProgramRuleListAction"
+    scope="prototype">
+  </bean>
+  
+  <bean
+    id="org.hisp.dhis.trackedentity.action.programrule.ShowAddProgramRuleFormAction"
+    class="org.hisp.dhis.trackedentity.action.programrule.ShowAddProgramRuleFormAction"
+    scope="prototype">
+  </bean>
+  
 
 </beans>

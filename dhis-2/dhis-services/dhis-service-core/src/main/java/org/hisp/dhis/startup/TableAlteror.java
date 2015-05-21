@@ -269,7 +269,8 @@ public class TableAlteror
         executeSql( "ALTER TABLE trackedentityattribute ALTER description TYPE text" );
         executeSql( "ALTER TABLE trackedentityattributegroup ALTER description TYPE text" );
         executeSql( "ALTER TABLE programrule ALTER condition TYPE text" );
-        
+        executeSql( "ALTER TABLE programruleaction ALTER content TYPE text" );
+        executeSql( "ALTER TABLE programruleaction ALTER data TYPE text" );
         
         executeSql( "ALTER TABLE minmaxdataelement RENAME minvalue TO minimumvalue" );
         executeSql( "ALTER TABLE minmaxdataelement RENAME maxvalue TO maximumvalue" );
@@ -415,7 +416,6 @@ public class TableAlteror
         executeSql( "ALTER TABLE validationrulegroup DROP COLUMN uuid" );
 
         // replace null with false for boolean fields
-
         executeSql( "update dataset set fieldcombinationrequired = false where fieldcombinationrequired is null" );
         executeSql( "update chart set hidelegend = false where hidelegend is null" );
         executeSql( "update chart set regression = false where regression is null" );
@@ -744,7 +744,7 @@ public class TableAlteror
         executeSql( "ALTER TABLE dataelementgroupset ALTER COLUMN datadimension SET NOT NULL" );
         executeSql( "UPDATE orgunitgroupset SET datadimension=true WHERE datadimension IS NULL" );
         executeSql( "ALTER TABLE orgunitgroupset ALTER COLUMN datadimension SET NOT NULL" );
-
+        
         // set attribute defaults
         executeSql( "UPDATE attribute SET dataelementattribute=false WHERE dataelementattribute IS NULL" );
         executeSql( "UPDATE attribute SET dataelementgroupattribute=false WHERE dataelementgroupattribute IS NULL" );
@@ -767,6 +767,9 @@ public class TableAlteror
         // update attribute.code, set to null if code=''
         executeSql( "UPDATE attribute SET code=NULL WHERE code=''" );
 
+        //update programruleaction:
+        executeSql( "ALTER TABLE programruleaction DROP COLUMN name" );
+        
         // data approval
         executeSql( "UPDATE dataapproval SET accepted=false WHERE accepted IS NULL" );
         executeSql( "ALTER TABLE dataapproval ALTER COLUMN accepted SET NOT NULL" );
@@ -806,10 +809,14 @@ public class TableAlteror
         // AttributeValue
         executeSql( "UPDATE attributevalue SET created=now() WHERE created IS NULL" );
         executeSql( "UPDATE attributevalue SET lastupdated=now() WHERE lastupdated IS NULL" );
+        executeSql( "ALTER TABLE attributevalue ALTER value TYPE text" );
         
         executeSql( "update dashboarditem set shape = 'normal' where shape is null" );
         
         executeSql( "update categoryoptioncombo set ignoreapproval = false where ignoreapproval is null" );
+
+        executeSql( "alter table version alter column versionkey set not null" );
+        executeSql( "alter table version add constraint version_versionkey_key unique(versionkey)" );
 
         upgradeDataValuesWithAttributeOptionCombo();
         upgradeCompleteDataSetRegistrationsWithAttributeOptionCombo();
@@ -853,6 +860,12 @@ public class TableAlteror
         executeSql( "update relativeperiods set thisquarter = false where thisquarter is null" );
         executeSql( "update relativeperiods set thissixmonth = false where thissixmonth is null" );
         executeSql( "update relativeperiods set thisweek = false where thisweek is null" );
+
+        executeSql( "update relativeperiods set lastmonth = false where lastmonth is null" );
+        executeSql( "update relativeperiods set lastbimonth = false where lastbimonth is null" );
+        executeSql( "update relativeperiods set lastquarter = false where lastquarter is null" );
+        executeSql( "update relativeperiods set lastsixmonth = false where lastsixmonth is null" );
+        executeSql( "update relativeperiods set lastweek = false where lastweek is null" );
     }
     
     private void upgradeDataValuesWithAttributeOptionCombo()

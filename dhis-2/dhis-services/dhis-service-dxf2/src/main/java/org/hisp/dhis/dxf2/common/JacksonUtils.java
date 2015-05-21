@@ -28,6 +28,14 @@ package org.hisp.dhis.dxf2.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.hisp.dhis.common.view.ExportView;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -37,17 +45,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
-import org.hisp.dhis.common.view.BasicView;
-import org.hisp.dhis.common.view.DetailedView;
-import org.hisp.dhis.common.view.DimensionalView;
-import org.hisp.dhis.common.view.ExportView;
-import org.hisp.dhis.common.view.ShortNameView;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -90,12 +87,8 @@ public class JacksonUtils
 
         // Register view classes
 
-        viewClasses.put( "default", BasicView.class );
-        viewClasses.put( "basic", BasicView.class );
-        viewClasses.put( "shortName", ShortNameView.class );
-        viewClasses.put( "detailed", DetailedView.class );
+        viewClasses.put( "default", ExportView.class );
         viewClasses.put( "export", ExportView.class );
-        viewClasses.put( "dimensional", DimensionalView.class );
     }
 
     /**

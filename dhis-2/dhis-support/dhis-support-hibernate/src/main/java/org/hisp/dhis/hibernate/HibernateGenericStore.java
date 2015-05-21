@@ -92,6 +92,14 @@ public class HibernateGenericStore<T>
     @Autowired
     protected CurrentUserService currentUserService;
 
+    /**
+     * Allows rewiring (e.g. by a unit test)
+     */
+    public void setCurrentUserService( CurrentUserService currentUserService )
+    {
+        this.currentUserService = currentUserService;
+    }
+
     @Autowired
     protected AclService aclService;
 
@@ -204,6 +212,7 @@ public class HibernateGenericStore<T>
         Disjunction disjunction = Restrictions.disjunction();
 
         disjunction.add( Restrictions.like( "c.publicAccess", access ) );
+        disjunction.add( Restrictions.isNull( "c.publicAccess" ) );
         disjunction.add( Restrictions.isNull( "c.user.id" ) );
         disjunction.add( Restrictions.eq( "c.user.id", user.getId() ) );
 

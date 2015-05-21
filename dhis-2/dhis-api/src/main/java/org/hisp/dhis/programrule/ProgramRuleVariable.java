@@ -28,6 +28,11 @@ package org.hisp.dhis.programrule;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
@@ -40,12 +45,6 @@ import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-
 /**
  * @author markusbekken
  */
@@ -53,13 +52,10 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 public class ProgramRuleVariable
     extends BaseIdentifiableObject
 {
-    private static final long serialVersionUID = -2807997671779497354L;
-
     /**
      * The program that the variable belongs to
      */
     private Program program;
-
 
     /**
      * The source of the variables content. Allowed values are:
@@ -87,10 +83,14 @@ public class ProgramRuleVariable
     private TrackedEntityAttribute attribute;
 
     /**
-     * The data element that is linked to the variable. Must de defined if the
+     * The data element that is linked to the variable. Must be defined if the
      * sourceType is one of the following:
-     * dataelement_newest_event_program_stage dataelement_newest_event_program
-     * dataelement_current_event
+     * <p/>
+     * <ul>
+     * <li>dataelement_newest_event_program_stage</li>
+     * <li>dataelement_newest_event_program</li>
+     * <li>dataelement_current_event</li>
+     * </ul>
      */
     private DataElement dataElement;
 
@@ -109,12 +109,12 @@ public class ProgramRuleVariable
         setAutoFields();
     }
 
-    public ProgramRuleVariable( String name, 
-            Program program, 
-            ProgramRuleVariableSourceType sourceType,
-            TrackedEntityAttribute attribute,
-            DataElement dataElement,
-            ProgramStage programStage)
+    public ProgramRuleVariable( String name,
+        Program program,
+        ProgramRuleVariableSourceType sourceType,
+        TrackedEntityAttribute attribute,
+        DataElement dataElement,
+        ProgramStage programStage )
     {
         this();
         this.name = name;
@@ -168,9 +168,9 @@ public class ProgramRuleVariable
         this.dataElement = dataElement;
     }
 
-    @JsonProperty
+    @JsonProperty( "trackedEntityAttribute" )
     @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "trackedEntityAttribute", namespace = DxfNamespaces.DXF_2_0 )
     public TrackedEntityAttribute getAttribute()
     {
         return attribute;
@@ -181,9 +181,9 @@ public class ProgramRuleVariable
         this.attribute = attribute;
     }
 
-    @JsonProperty
+    @JsonProperty( "programRuleVariableSourceType" )
     @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "programRuleVariableSourceType", namespace = DxfNamespaces.DXF_2_0 )
     public ProgramRuleVariableSourceType getSourceType()
     {
         return sourceType;
@@ -193,7 +193,7 @@ public class ProgramRuleVariable
     {
         this.sourceType = sourceType;
     }
-    
+
     @Override
     public void mergeWith( IdentifiableObject other, MergeStrategy strategy )
     {

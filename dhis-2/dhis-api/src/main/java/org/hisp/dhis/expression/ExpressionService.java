@@ -181,24 +181,6 @@ public interface ExpressionService
     Set<DataElement> getDataElementsInExpression( String expression );
 
     /**
-     * Returns all data elements included in the given expression string which
-     * represent data element totals.
-     * 
-     * @param expression the expression string.
-     * @return a set of data elements.
-     */
-    Set<DataElement> getDataElementTotalsInExpression( String expression );
-
-    /**
-     * Returns all data elements included in the given expression string which
-     * represent operands with data elements and category option combinations.
-     * 
-     * @param expression the expression string.
-     * @return a set of data elements.
-     */
-    Set<DataElement> getDataElementsWithOptionCombosInExpression( String expression );
-    
-    /**
      * Returns all OrganisationUnitGroups in the numerator and denominator
      * expressions in the given Indicators.
      * 
@@ -243,6 +225,24 @@ public interface ExpressionService
      * @return a set of data elements.
      */
     Set<DataElement> getDataElementsInIndicators( Collection<Indicator> indicators );
+
+    /**
+     * Returns all data elements which are present in the numerator and denominator
+     * of the given indicators which represent totals.
+     * 
+     * @param indicators the collection of indicators.
+     * @return a set of data elements.
+     */
+    Set<DataElement> getDataElementTotalsInIndicators( Collection<Indicator> indicators );
+
+    /**
+     * Returns all data elements which are present in the numerator and denominator
+     * of the given indicators which include category option combinations.
+     * 
+     * @param indicators the collection of indicators.
+     * @return a set of data elements.
+     */
+    Set<DataElement> getDataElementWithOptionCombosInIndicators( Collection<Indicator> indicators );
     
     /**
      * Filters indicators from the given collection where the numerator and /
@@ -296,38 +296,8 @@ public interface ExpressionService
     /**
      * Substitutes potential constant and days in the numerator and denominator
      * on all indicators in the given collection.
-     *  
-     * Populates the explodedNumerator and explodedDenominator property on all
-     * indicators in the given collection. This method uses
-     * explodeExpression( String ) internally to generate the exploded expressions.
-     * Replaces references to data element totals with references to all
-     * category option combos in the category combo for that data element.
-     * 
-     * This method will perform better compared to calling explodeExpression( String )
-     * multiple times outside a transactional context as the transactional
-     * overhead is avoided.
-     * 
-     * @param indicators the collection of indicators.
-     * @param days the number of days in aggregation period.
-     */
-    void explodeAndSubstituteExpressions( Collection<Indicator> indicators, Integer days );
-
-    /**
-     * Substitutes potential constant and days in the numerator and denominator
-     * on all indicators in the given collection.
      */
     void substituteExpressions( Collection<Indicator> indicators, Integer days );
-    
-    /**
-     * Populates the explodedNumerator and explodedDenominator property on all
-     * indicators in the given collection. This method uses
-     * explodeExpression( String ) internally to generate the exploded expressions.
-     * Replaces references to data element totals with references to all
-     * category option combos in the category combo for that data element.
-     * 
-     * @param indicators the collection of indicators.
-     */    
-    void explodeExpressions( Collection<Indicator> indicators );
     
     /**
      * Populates the explodedExpression property on the Expression object of all

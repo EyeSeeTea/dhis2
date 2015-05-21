@@ -28,6 +28,11 @@ package org.hisp.dhis.programrule;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
@@ -36,71 +41,76 @@ import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.DimensionalView;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataelement.DataElement;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import org.hisp.dhis.program.ProgramStageSection;
 
 /**
  * @author markusbekken
  */
-
+@JacksonXmlRootElement( localName = "programRuleAction", namespace = DxfNamespaces.DXF_2_0 )
 public class ProgramRuleAction
     extends BaseIdentifiableObject
 {
-    private static final long serialVersionUID = -2807997671779497354L;
-
     /**
      * The programRule that the action belongs to
      */
     private ProgramRule programRule;
-    
+
     /**
      * The type of action that is performed when the action is effectuated
-     * 
+     * <p/>
      * The actual action the ruleaction row is performing. Allowed values are:
-     *   displaytext
-     *       Shows a text in the rulebound widget with the matching location string.
-     *           location: the location code of the widget to display data in
-     *           content: A hardcoded string to display
-     *           data: a variable to be evaluated and displayed at the end of the string, can be null.
-     *   displaykeyvaluepair
-     *       Shows a key data box with a hardcoded name and a variable value.
-     *           location: the location code of the widget to display data in
-     *           content: A hardcoded string to display as title in the key data box
-     *           data: The variable to be evaluated and display in the lower half of the key data box.
-     *   hidefield
-     *       Hides a dataelement from the page, as long as the dataelement is not containing a value.
-     *           dataelement: the dataelement to hide.
-     *   assignvariable
-     *       Assigns/calculates a value that can be further used by other rules. Make sure the priorities is set so the rules that depend on the calculation is run after the assignvariable-rule.
-     *           content: the variable name to be assigned. “$severeanemia” for example.
-     *           data: the expression to be evaluated and assigned to the content field. Can contain a hardcoded value(f.ex. “true”) or an expression that is evaluated(for exampple “$hemoglobin < 7”). 
-     *   showwarning
-     *       Shows a validation warning connected to a designated dataelement
-     *           dataelement: the dataelement to show validationerror for
-     *           content: the validation error itself 
-     *   showerror
-     *       Shows a validation error connected to a designated dataelement
-     *           dataelement: the dataelement to show validationerror for
-     *           content: the validation error itself 
+     * displaytext
+     * Shows a text in the rulebound widget with the matching location string.
+     * location: the location code of the widget to display data in
+     * content: A hardcoded string to display
+     * data: a variable to be evaluated and displayed at the end of the string, can be null.
+     * displaykeyvaluepair
+     * Shows a key data box with a hardcoded name and a variable value.
+     * location: the location code of the widget to display data in
+     * content: A hardcoded string to display as title in the key data box
+     * data: The variable to be evaluated and display in the lower half of the key data box.
+     * hidefield
+     * Hides a dataelement from the page, as long as the dataelement is not containing a value.
+     * dataelement: the dataelement to hide.
+     * assignvariable
+     * Assigns/calculates a value that can be further used by other rules. Make sure the priorities is set so the rules that depend on the calculation is run after the assignvariable-rule.
+     * content: the variable name to be assigned. “$severeanemia” for example.
+     * data: the expression to be evaluated and assigned to the content field. Can contain a hardcoded value(f.ex. “true”) or an expression that is evaluated(for exampple “$hemoglobin < 7”).
+     * showwarning
+     * Shows a validation warning connected to a designated dataelement
+     * dataelement: the dataelement to show validationerror for
+     * content: the validation error itself
+     * showerror
+     * Shows a validation error connected to a designated dataelement
+     * dataelement: the dataelement to show validationerror for
+     * content: the validation error itself
      */
     private ProgramRuleActionType programRuleActionType;
-    
+
     /**
-     * the dataelement that is affected by the ruleAction. 
-     * Used for 
-     *       hidefield
-     *       showwarning
-     *       showerror
+     * The data element that is affected by the rule action.
+     * Used for:
+     * <p/>
+     * <ul>
+     * <li>hidefield</li>
+     * <li>showwarning</li>
+     * <li>showerror</li>
+     * </ul>
      */
     private DataElement dataElement;
-    
+
+    /**
+     * The program stage section that is affected by the rule action.
+     */
+    private ProgramStageSection programStageSection;
+
     /**
      * Used to determine which widget to display data for the two action types:
-     *       displaytext
-     *       displaykeydata
+     * <p/>
+     * <ul>
+     * <li>displaytext</li>
+     * <li>displaykeydata</li>
+     * </ul>
      */
     private String location;
 
@@ -108,7 +118,7 @@ public class ProgramRuleAction
      * Used by all the different actions. See “actions”
      */
     private String content;
-    
+
     /**
      * Used by all the different actions. See “actions”. The data field will be evaluated, so it can contain a rich expression.
      */
@@ -122,7 +132,7 @@ public class ProgramRuleAction
     {
         setAutoFields();
     }
-    
+
     public ProgramRuleAction( String name, ProgramRule programRule, ProgramRuleActionType programRuleActionType, DataElement dataElement, String location, String content, String data )
     {
         this();
@@ -134,11 +144,11 @@ public class ProgramRuleAction
         this.content = content;
         this.data = data;
     }
-    
+
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
-    
+
     @JsonProperty
     @JsonSerialize( as = BaseIdentifiableObject.class )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
@@ -179,6 +189,19 @@ public class ProgramRuleAction
     }
 
     @JsonProperty
+    @JsonSerialize( as = BaseIdentifiableObject.class )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public ProgramStageSection getProgramStageSection()
+    {
+        return programStageSection;
+    }
+
+    public void setProgramStageSection( ProgramStageSection programStageSection )
+    {
+        this.programStageSection = programStageSection;
+    }
+
+    @JsonProperty
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getLocation()
     {
@@ -213,7 +236,7 @@ public class ProgramRuleAction
     {
         this.data = data;
     }
-    
+
     @Override
     public void mergeWith( IdentifiableObject other, MergeStrategy strategy )
     {
@@ -228,6 +251,7 @@ public class ProgramRuleAction
                 programRule = programRuleAction.getProgramRule();
                 programRuleActionType = programRuleAction.getProgramRuleActionType();
                 dataElement = programRuleAction.getDataElement();
+                programStageSection = programRuleAction.getProgramStageSection();
                 location = programRuleAction.getLocation();
                 content = programRuleAction.getContent();
                 data = programRuleAction.getData();
@@ -237,9 +261,10 @@ public class ProgramRuleAction
                 programRule = programRuleAction.getProgramRule() == null ? programRule : programRuleAction.getProgramRule();
                 programRuleActionType = programRuleAction.getProgramRuleActionType() == null ? programRuleActionType : programRuleAction.getProgramRuleActionType();
                 dataElement = programRuleAction.getDataElement() == null ? dataElement : programRuleAction.getDataElement();
+                programStageSection = programRuleAction.getProgramStageSection() == null ? programStageSection : programRuleAction.getProgramStageSection();
                 location = programRuleAction.getLocation() == null ? location : programRuleAction.getLocation();
                 content = programRuleAction.getContent() == null ? content : programRuleAction.getContent();
-                data = programRuleAction.getData() == null ? data : programRuleAction.getData();            
+                data = programRuleAction.getData() == null ? data : programRuleAction.getData();
             }
         }
     }

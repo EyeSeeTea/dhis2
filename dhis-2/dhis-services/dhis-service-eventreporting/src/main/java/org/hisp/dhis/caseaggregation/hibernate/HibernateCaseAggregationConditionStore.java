@@ -72,6 +72,7 @@ import org.hisp.dhis.common.GridHeader;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
@@ -145,6 +146,9 @@ public class HibernateCaseAggregationConditionStore
     
     @Autowired
     private OrganisationUnitService orgunitService;
+
+    @Autowired
+    private DataElementCategoryService categoryService;
     
     // -------------------------------------------------------------------------
     // Implementation Methods
@@ -299,18 +303,18 @@ public class HibernateCaseAggregationConditionStore
                 
                 DataValue dataValue = dataValueService.getDataValue( dataElement, period, source, optionCombo );
                 
-                if ( dataValue == null && value != 0 )
+                if ( dataValue == null )
                 {
                     dataValue = new DataValue( dataElement, period, source, optionCombo, attributeOptionCombo );
                     dataValue.setValue( value + "" );
                     dataValue.setStoredBy( row.getString("storedby") );
                     dataValueService.addDataValue( dataValue );
                 }
-                else if ( dataValue != null && value == 0 )
+                else if ( dataValue != null && value == 0 && !dataElement.isZeroIsSignificant() )
                 {
                     dataValueService.deleteDataValue( dataValue );
                 }
-                else if ( dataValue != null && value != 0 )
+                else if ( dataValue != null )
                 {
                     dataValue.setValue( value + "" );
                     dataValueService.updateDataValue( dataValue );
@@ -327,9 +331,8 @@ public class HibernateCaseAggregationConditionStore
     public void insertAggregateValue( String sql, int dataElementId, int optionComboId, Collection<Integer> orgunitIds,
         Period period )
     {
-        try
+         try
         {
-            period = periodService.reloadPeriod( period );
             final String deleteDataValueSql = "delete from datavalue where dataelementid=" + dataElementId
                 + " and categoryoptioncomboid=" + optionComboId + " and sourceid in ("
                 + TextUtils.getCommaDelimitedString( orgunitIds ) + ") " + "and periodid = " + period.getId();
@@ -343,7 +346,7 @@ public class HibernateCaseAggregationConditionStore
             ex.printStackTrace();
         }
     }
-
+    
     @Override
     public String parseExpressionToSql( boolean isInsert, CaseAggregationCondition aggregationCondition,
         int attributeOptionComboId, Collection<Integer> orgunitIds )
@@ -365,22 +368,23 @@ public class HibernateCaseAggregationConditionStore
         String aggregateDeName, Integer optionComboId, String optionComboName,  int attributeOptioncomboId, Integer deSumId,
         Collection<Integer> orgunitIds )
     {
-        String sql = "SELECT '" + aggregateDeId + "' as dataelementid, '" + optionComboId
+        String select = "SELECT '" + aggregateDeId + "' as dataelementid, '" + optionComboId
             + "' as categoryoptioncomboid, '" + attributeOptioncomboId
             + "' as attributeoptioncomboid, ou.organisationunitid as sourceid, '" + PARAM_PERIOD_ID + "' as periodid,'"
             + CaseAggregationCondition.AUTO_STORED_BY + "' as storedby, ";
 
         if ( isInsert )
         {
-            sql = "INSERT INTO datavalue (dataelementid, categoryoptioncomboid, attributeoptioncomboid, sourceid, periodid, storedby, lastupdated, followup, created, value) "
-                + sql + " now(), false, now(), ";
+            select = "INSERT INTO datavalue (dataelementid, categoryoptioncomboid, attributeoptioncomboid, sourceid, periodid, storedby, lastupdated, followup, created, value) "
+                + select + " now(), false, now(), ";
         }
         else
         {
-            sql += "'" + PARAM_PERIOD_ISO_DATE + "' as periodIsoDate,'" + aggregateDeName + "' as dataelementname, '"
+            select += "'" + PARAM_PERIOD_ISO_DATE + "' as periodIsoDate,'" + aggregateDeName + "' as dataelementname, '"
                 + optionComboName + "' as categoryoptioncomboname, ou.name as organisationunitname, ";
         }
 
+        String sql = select + " ( select ";
         if ( operator.equals( CaseAggregationCondition.AGGRERATION_COUNT )
             || operator.equals( CaseAggregationCondition.AGGRERATION_SUM ) )
         {
@@ -408,23 +412,20 @@ public class HibernateCaseAggregationConditionStore
                     sql += " programinstance as pi ";
                     sql += " INNER JOIN trackedentityinstance p on p.trackedentityinstanceid=pi.trackedentityinstanceid ";
                     sql += " INNER JOIN programstageinstance psi ON pi.programinstanceid=psi.programinstanceid ";
-                    sql += " INNER JOIN organisationunit ou ON ou.organisationunitid=psi.organisationunitid ";
                 }
                 else if ( hasEntityInstance )
                 {
                     sql += " programinstance as pi INNER JOIN trackedentityinstance p on p.trackedentityinstanceid=pi.trackedentityinstanceid ";
-                    sql += " INNER JOIN organisationunit ou ON ou.organisationunitid=p.organisationunitid ";
                 }
                 else
                 {
                     sql += " programinstance as pi ";
                     sql += " INNER JOIN programstageinstance psi ON pi.programinstanceid=psi.programinstanceid ";
-                    sql += " INNER JOIN organisationunit ou ON ou.organisationunitid=psi.organisationunitid ";
                 }
 
                 sql += " WHERE " + createSQL( caseExpression, operator, orgunitIds );
 
-                sql += "GROUP BY ou.organisationunitid, ou.name";
+                sql += "GROUP BY ou.organisationunitid ) from organisationunit ou where ou.organisationunitid in ( " + TextUtils.getCommaDelimitedString( orgunitIds ) + " ) ";
             }
         }
         else
@@ -433,8 +434,6 @@ public class HibernateCaseAggregationConditionStore
             sql += "FROM trackedentitydatavalue pdv ";
             sql += "    INNER JOIN programstageinstance psi  ";
             sql += "            ON psi.programstageinstanceid = pdv.programstageinstanceid ";
-            sql += "    INNER JOIN organisationunit ou ";
-            sql += "            ON ou.organisationunitid=psi.organisationunitid ";
             sql += "WHERE executiondate >='" + PARAM_PERIOD_START_DATE + "'  ";
             sql += "    AND executiondate <='" + PARAM_PERIOD_END_DATE + "' AND pdv.dataelementid=" + deSumId;
 
@@ -443,15 +442,15 @@ public class HibernateCaseAggregationConditionStore
                 sql += " AND " + createSQL( caseExpression, operator, orgunitIds );
             }
 
-            sql += "GROUP BY ou.organisationunitid, ou.name";
+            sql += "GROUP BY ou.organisationunitid ) from organisationunit ou where ou.organisationunitid in ( " + TextUtils.getCommaDelimitedString( orgunitIds ) + " ) ";
             
         }
-        
+      
         return sql;
     }
 
     @Override
-    public void runAggregate( Collection<Integer> orgunitIds, CaseAggregateSchedule dataSet, Collection<Period> periods, int attributeOptioncomboId )
+    public void runAggregate( Collection<Integer> orgunitIds, CaseAggregateSchedule condition, Collection<Period> periods, int attributeOptioncomboId )
     {
         Collection<Integer> _orgunitIds = getServiceOrgunit();
 
@@ -465,19 +464,15 @@ public class HibernateCaseAggregationConditionStore
             orgunitIds.retainAll( _orgunitIds );
         }
         
-        if ( orgunitIds.size() > 0 )
+        if (  !orgunitIds.isEmpty()  )
         {
             String sql = "select caseaggregationconditionid, aggregationdataelementid, optioncomboid, "
-                + "cagg.aggregationexpression as caseexpression, cagg.operator as caseoperator, cagg.desum as desumid "
-                + "from caseaggregationcondition cagg inner join datasetmembers dm "
-                + "on cagg.aggregationdataelementid=dm.dataelementid inner join dataset ds "
-                + "on ds.datasetid = dm.datasetid inner join periodtype pt "
-                + "on pt.periodtypeid=ds.periodtypeid inner join dataelement de "
-                + "on de.dataelementid=dm.dataelementid where ds.datasetid = " + dataSet.getDataSetId();
-    
+                + "aggregationexpression as caseexpression, operator as caseoperator, desum as desumid "
+                + "from caseaggregationcondition where caseaggregationconditionid = " + condition.getCaseAggregateId();
+            
             SqlRowSet rs = jdbcTemplate.queryForRowSet( sql );
     
-             while ( rs.next() )
+            if ( rs.next() )
             {
                  String caseExpression = rs.getString( "caseexpression" );
                  int dataElementId = rs.getInt( "aggregationdataelementid" );
@@ -489,11 +484,7 @@ public class HibernateCaseAggregationConditionStore
                 for ( Period period : periods )
                 {
                     String insertSql = replacePeriodSql( insertParamsSql, period );
-                    
-                    if ( !orgunitIds.isEmpty() )
-                    { 
-                        insertAggregateValue( insertSql, dataElementId, optionComboId, _orgunitIds, period );
-                    }
+                    insertAggregateValue( insertSql, dataElementId, optionComboId, _orgunitIds, period );
                 }
     
             }
@@ -821,7 +812,7 @@ public class HibernateCaseAggregationConditionStore
         
         sql = sql.replaceAll( CaseAggregationCondition.CURRENT_DATE, "now()");
         
-        return sql + " ) ";
+        return sql + " )  and psi.organisationunitid=ou.organisationunitid ";
     }
 
     /**

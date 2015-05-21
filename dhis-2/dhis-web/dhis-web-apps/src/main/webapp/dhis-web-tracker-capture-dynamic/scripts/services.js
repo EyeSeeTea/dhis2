@@ -64,6 +64,29 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         return {year: moment(dateValue, calendarSetting.momentFormat).year(), month: moment(dateValue, calendarSetting.momentFormat).month(), week: moment(dateValue, calendarSetting.momentFormat).week(), day: moment(dateValue, calendarSetting.momentFormat).day()};
     };
     
+    function processPeriodsForEvent(periods,event){
+        //console.log('the event:  ', event.sortingDate, ' - ', periods);
+        var index = -1;
+        var occupied = null;
+        for(var i=0; i<periods.length && index === -1; i++){
+            //console.log(event.sortingDate, ' - ', periods[i].startDate, ' - ', periods[i].endDate);
+            if(moment(periods[i].endDate).isSame(event.sortingDate) ||
+                    moment(periods[i].startDate).isSame(event.sortingDate) ||
+                    moment(periods[i].endDate).isAfter(event.sortingDate) && moment(event.sortingDate).isAfter(periods[i].endDate)){
+                index = i;
+                occupied = angular.copy(periods[i]);
+                //console.log('Found it:  ', event.sortingDate, ' - ', periods[i].startDate, ' - ', periods[i].endDate);
+            }
+        }
+        
+        if(index !== -1){
+            periods.splice(index,1);
+        }
+        
+        //console.log('the returned period:  ', periods);
+        return {available: periods, occupied: occupied};
+    };
+    
     this.getPeriods = function(events, stage, enrollment){
      
         if(!stage){
@@ -88,7 +111,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         else{
 
             var startDate = DateUtils.format( moment(referenceDate, calendarSetting.momentFormat).add(offset, 'days') );
-            var periodOffset = splitDate(DateUtils.getToday()).year - splitDate(startDate).year;
+            var periodOffset = splitDate(startDate).year - splitDate(DateUtils.getToday()).year;
             var eventDateOffSet = moment(referenceDate, calendarSetting.momentFormat).add('d', offset)._d;
             eventDateOffSet = $filter('date')(eventDateOffSet, calendarSetting.keyDateFormat);        
             
@@ -99,18 +122,27 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 p.endDate = DateUtils.formatFromApiToUser(p.endDate);
                 p.startDate = DateUtils.formatFromApiToUser(p.startDate);
                 
-                if(moment(p.endDate).isAfter(eventDateOffSet)){
+                /*if(moment(p.endDate).isAfter(eventDateOffSet)){
                     availablePeriods[p.endDate] = p;
-                }                
+                }*/   
+                if(moment(p.endDate).isAfter(eventDateOffSet)){
+                    //availablePeriods[p.endDate] = p;
+                    availablePeriods.push( p );
+                }
             });                
 
             //get occupied periods
             angular.forEach(events, function(event){
-                var p = availablePeriods[event.sortingDate];
+                var ps = processPeriodsForEvent(availablePeriods, event);
+                availablePeriods = ps.available;
+                if(ps.occupied){
+                    occupiedPeriods.push(ps.occupied);
+                }
+                /*var p = availablePeriods[event.sortingDate];
                 if(p){
                     occupiedPeriods.push({event: event.event, name: p.name, stage: stage.id, eventDate: event.sortingDate});
                     delete availablePeriods[event.sortingDate];
-                }                    
+                }*/                    
             });
         }
         return {occupiedPeriods: occupiedPeriods, availablePeriods: availablePeriods};
@@ -315,7 +347,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             TCStorageService.currentStore.open().done(function(){
                 TCStorageService.currentStore.get('programStages', uid).done(function(pst){                    
                     $rootScope.$apply(function(){
-                        if(pst.name.startsWith("Table:")){
+                        if(pst.name.indexOf("Table:") === 0){
                             pst.displayEventsInTable = true;
                         }
                         def.resolve(pst);
@@ -336,7 +368,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 TCStorageService.currentStore.getAll('programStages').done(function(stages){   
                     angular.forEach(stages, function(stage){
                         if(stageIds.indexOf(stage.id) !== -1){  
-                            if(stage.name.startsWith("Table:")){
+                            if(stage.name.indexOf("Table:") === 0){
                                 stage.displayEventsInTable = true;
                             }
                             programStages.push(stage);                               
@@ -439,8 +471,9 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 })
 
 /* Factory for fetching OrgUnit */
-.factory('OrgUnitFactory', function($http) {    
-    var orgUnit, orgUnitPromise, rootOrgUnitPromise, myOrgUnitsPromise;    
+.factory('OrgUnitFactory', function($http, SessionStorageService) {    
+    var orgUnit, orgUnitPromise, rootOrgUnitPromise;
+    var roles = SessionStorageService.get('USER_ROLES');
     return {
         get: function(uid){            
             if( orgUnit !== uid ){
@@ -450,28 +483,29 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 });
             }
             return orgUnitPromise;
-        },        
-        getRoot: function(){
+        },    
+        getSearchTreeRoot: function(){
             if(!rootOrgUnitPromise){
-                rootOrgUnitPromise = $http.get( '../api/organisationUnits.json?filter=level:eq:1&fields=id,name,children[id,name,children[id,name]]&paging=false' ).then(function(response){
+                
+                var url = '../api/me.json?fields=organisationUnits[id,name,children[id,name,children[id,name]]]&paging=false';
+                
+                if( roles && roles.userCredentials && roles.userCredentials.userRoles && roles.userCredentials.userRoles.authorities ){
+                    if( roles.userCredentials.userRoles.authorities.indexOf('ALL') !== -1 || 
+                            roles.userCredentials.userRoles.authorities.indexOf('F_TRACKED_ENTITY_INSTANCE_SEARCH_IN_ALL_ORGUNITS') !== -1 ){                        
+                        url = '../api/organisationUnits.json?filter=level:eq:1&fields=id,name,children[id,name,children[id,name]]&paging=false';                        
+                    }
+                }                
+                rootOrgUnitPromise = $http.get( url ).then(function(response){
                     return response.data;
                 });
             }
             return rootOrgUnitPromise;
-        },
-        getMine: function(){
-            if(!myOrgUnitsPromise){
-                myOrgUnitsPromise = $http.get('../api/me/organisationUnits').then(function(response){
-                    return response.data;
-                });
-            }
-            return myOrgUnitsPromise;
         }
     }; 
 })
 
 /* service to deal with TEI registration and update */
-.service('RegistrationService', function(DialogService, TEIService, $q){
+.service('RegistrationService', function(TEIService, $q){
     return {
         registerOrUpdate: function(tei, optionSets, attributesById){
             if(tei){
@@ -536,13 +570,13 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             return promise;
         },
         getByEntity: function( entity ){
-            var promise = $http.get(  '../api/enrollments.json?trackedEntityInstance=' + entity ).then(function(response){
+            var promise = $http.get(  '../api/enrollments.json?trackedEntityInstance=' + entity + '&paging=false').then(function(response){
                 return convertFromApiToUser(response.data);
             });
             return promise;
         },
         getByEntityAndProgram: function( entity, program ){
-            var promise = $http.get(  '../api/enrollments.json?trackedEntityInstance=' + entity + '&program=' + program ).then(function(response){
+            var promise = $http.get(  '../api/enrollments.json?trackedEntityInstance=' + entity + '&program=' + program + '&paging=false').then(function(response){
                 return convertFromApiToUser(response.data);
             });
             return promise;
@@ -654,7 +688,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         get: function(entityUid, optionSets, attributesById){
             var promise = $http.get( '../api/trackedEntityInstances/' +  entityUid + '.json').then(function(response){
                 var tei = response.data;
-                angular.forEach(tei.attributes, function(att){
+                angular.forEach(tei.attributes, function(att){                    
                     if(attributesById[att.attribute]){
                         att.displayName = attributesById[att.attribute].name;
                     }
@@ -684,7 +718,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 var pg = pager ? pager.page : 1;
                 pgSize = pgSize > 1 ? pgSize  : 1;
                 pg = pg > 1 ? pg : 1;
-                url = url + '&pageSize=' + pgSize + '&page=' + pg;
+                url = url + '&pageSize=' + pgSize + '&page=' + pg + '&totalPages=true';
             }
             else{
                 url = url + '&paging=false';
@@ -895,8 +929,8 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                             val = DateUtils.formatFromUserToApi(val);
                         }                        
                     }
-                    if(type === 'optionSet' && 
-                            attsById[att.attribute] && 
+                    if(attsById[att.attribute] && 
+                            attsById[att.attribute].optionSetValue && 
                             attsById[att.attribute].optionSet && 
                             attsById[att.attribute].optionSet.id && 
                             optionSets[attsById[att.attribute].optionSet.id]){
@@ -995,18 +1029,33 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 })
 
 /* factory for handling event reports */
-.factory('EventReportService', function($http, $q) {   
+.factory('EventReportService', function($http) {   
     
     return {        
-        getEventReport: function(orgUnit, ouMode, program, startDate, endDate, programStatus, eventStatus, pager){ 
-            var pgSize = pager ? pager.pageSize : 50;
-        	var pg = pager ? pager.page : 1;
-            pgSize = pgSize > 1 ? pgSize  : 1;
-            pg = pg > 1 ? pg : 1; 
-            var url = '../api/events/eventRows.json?' + 'orgUnit=' + orgUnit + '&ouMode='+ ouMode + '&program=' + program + '&programStatus=' + programStatus + '&eventStatus='+ eventStatus + '&pageSize=' + pgSize + '&page=' + pg;
+        getEventReport: function(orgUnit, ouMode, program, startDate, endDate, programStatus, eventStatus, pager){
+            
+            var url = '../api/events/eventRows.json?' + 'orgUnit=' + orgUnit + '&ouMode='+ ouMode + '&program=' + program;
+            
+            if( programStatus ){
+                url = url + '&programStatus=' + programStatus;
+            }
+            
+            if( eventStatus ){
+                url = url + '&status=' + eventStatus;
+            }
+            
             if(startDate && endDate){
                 url = url + '&startDate=' + startDate + '&endDate=' + endDate ;
             }
+            
+            if( pager ){
+                var pgSize = pager ? pager.pageSize : 50;
+                var pg = pager ? pager.page : 1;
+                pgSize = pgSize > 1 ? pgSize  : 1;
+                pg = pg > 1 ? pg : 1;
+                url = url + '&pageSize=' + pgSize + '&page=' + pg + '&totalPages=true';
+            } 
+            
             var promise = $http.get( url ).then(function(response){
                 return response.data;
             });            
@@ -1287,6 +1336,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     this.attributesById = null;
     this.ouLevels = null;
     this.sortedTeiIds = [];
+    this.selectedTeiEvents = null;
     
     this.set = function(currentSelection){  
         this.currentSelection = currentSelection;        
@@ -1328,6 +1378,13 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     };
     this.getSortedTeiIds = function(){
         return this.sortedTeiIds;
+    };
+    
+    this.setSelectedTeiEvents = function(selectedTeiEvents){
+        this.selectedTeiEvents = selectedTeiEvents;
+    };
+    this.getSelectedTeiEvents = function(){
+        return this.selectedTeiEvents;
     };
 })
 
@@ -1378,7 +1435,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                                 var val = row[i];
                                 
                                 if(attributes[grid.headers[i].name] && 
-                                        attributes[grid.headers[i].name].valueType === 'optionSet' && 
+                                        attributes[grid.headers[i].name].optionSetValue && 
                                         optionSets &&    
                                         attributes[grid.headers[i].name].optionSet &&
                                         optionSets[attributes[grid.headers[i].name].optionSet.id] ){
@@ -1589,8 +1646,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                                 program: program.id,
                                 programStage: stage.id,
                                 orgUnit: orgUnit.id,
-                                enrollment: enrollment.enrollment,                                
-                                status: 'SCHEDULE'
+                                enrollment: enrollment.enrollment
                             };
                         if(stage.periodType){
                             var periods = getEventDuePeriod(null, stage, enrollment);
@@ -1610,6 +1666,8 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                             }
                         }
 
+                        newEvent.status = newEvent.eventDate ? 'ACTIVE' : 'SCHEDULE';
+                        
                         dhis2Events.events.push(newEvent);    
                     }
                 });
@@ -1633,7 +1691,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 if(dhis2Event[prStDe.dataElement.id]){                    
                     var value = dhis2Event[prStDe.dataElement.id];
                     
-                    if( value && prStDe.dataElement.type === 'string' && prStDe.dataElement.optionSet && optionSets[prStDe.dataElement.optionSet.id]){
+                    if( value && prStDe.dataElement.optionSetValue && prStDe.dataElement.optionSet && optionSets[prStDe.dataElement.optionSet.id]){
                         value = OptionSetService.getCode(optionSets[prStDe.dataElement.optionSet.id].options, value);
                     }                    
                     if( value && prStDe.dataElement.type === 'date'){
@@ -1751,7 +1809,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 
                 angular.forEach(programVariables, function(programVariable) {
                     var valueFound = false;
-                    if(programVariable.sourceType === "DATAELEMENT_NEWEST_EVENT_PROGRAM_STAGE"){
+                    if(programVariable.programRuleVariableSourceType === "DATAELEMENT_NEWEST_EVENT_PROGRAM_STAGE"){
                         if(programVariable.programStage) {
                             angular.forEach(eventsSortedPerProgramStage[programVariable.programStage.id], function(event) {
                                 if(angular.isDefined(event[programVariable.dataElement.id])
@@ -1767,7 +1825,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                         }
                         
                     }
-                    else if(programVariable.sourceType === "DATAELEMENT_NEWEST_EVENT_PROGRAM"){
+                    else if(programVariable.programRuleVariableSourceType === "DATAELEMENT_NEWEST_EVENT_PROGRAM"){
                         angular.forEach(allEventsSorted, function(event) {
                             if(angular.isDefined(event[programVariable.dataElement.id])
                                     && event[programVariable.dataElement.id] !== null ){
@@ -1776,14 +1834,14 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                              }
                         });
                     }
-                    else if(programVariable.sourceType === "DATAELEMENT_CURRENT_EVENT"){
+                    else if(programVariable.programRuleVariableSourceType === "DATAELEMENT_CURRENT_EVENT"){
                         if(angular.isDefined(currentEvent[programVariable.dataElement.id])
                                 && currentEvent[programVariable.dataElement.id] !== null ){
                             valueFound = true;
                             $scope.pushVariable(programVariable.name, currentEvent[programVariable.dataElement.id], allDes[programVariable.dataElement.id].dataElement.type, valueFound );
                         }      
                     }
-                    else if(programVariable.sourceType === "DATAELEMENT_PREVIOUS_EVENT"){
+                    else if(programVariable.programRuleVariableSourceType === "DATAELEMENT_PREVIOUS_EVENT"){
                         //Only continue checking for a value if there is more than one event.
                         if(allEventsSorted && allEventsSorted.length > 1) {
                             var previousvalue = null;
@@ -1808,20 +1866,20 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                             }
                         }
                     }
-                    else if(programVariable.sourceType === "TEI_ATTRIBUTE"){
+                    else if(programVariable.programRuleVariableSourceType === "TEI_ATTRIBUTE"){
                         angular.forEach($scope.selectedEntity.attributes , function(attribute) {
                             if(!valueFound) {
-                                if(attribute.attribute === programVariable.attribute.id) {
+                                if(attribute.attribute === programVariable.trackedEntityAttribute.id) {
                                     valueFound = true;
                                     $scope.pushVariable(programVariable.name, attribute.value, attribute.type, valueFound );
                                 }
                             }
                         });
                     }
-                    else if(programVariable.sourceType === "CALCULATED_VALUE"){
+                    else if(programVariable.programRuleVariableSourceType === "CALCULATED_VALUE"){
                         //We won't assign the calculated variables at this step. The rules execution will calculate and assign the variable.
                     }
-                    else if(programVariable.sourceType === "NUMBEROFEVENTS_PROGRAMSTAGE"){
+                    else if(programVariable.programRuleVariableSourceType === "NUMBEROFEVENTS_PROGRAMSTAGE"){
                         var numberOfEvents = 0;
                         if( programVariable.programStage && eventsSortedPerProgramStage[programVariable.programStage.id] ) {
                             numberOfEvents = eventsSortedPerProgramStage[programVariable.programStage.id].length;
@@ -1831,7 +1889,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                     }
                     else {
                         //Missing handing of ruletype
-                        $log.warn("Unknown sourceType:" + programVariable.sourceType);
+                        $log.warn("Unknown programRuleVariableSourceType:" + programVariable.programRuleVariableSourceType);
                     }
 
                    
