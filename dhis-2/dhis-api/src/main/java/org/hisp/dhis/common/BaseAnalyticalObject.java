@@ -56,7 +56,6 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.analytics.AggregationType;
-import org.hisp.dhis.dataapproval.DataApprovalLevel;
 import org.hisp.dhis.common.annotation.Scanned;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.DimensionalView;
@@ -143,8 +142,6 @@ public abstract class BaseAnalyticalObject
     protected int topLimit;
 
     protected AggregationType aggregationType;
-    
-    protected DataApprovalLevel dataApprovalLevel;
     
     // -------------------------------------------------------------------------
     // Analytical properties
@@ -792,13 +789,11 @@ public abstract class BaseAnalyticalObject
             {
                 relatives = object.getRelatives();
                 aggregationType = object.getAggregationType();
-                dataApprovalLevel = object.getDataApprovalLevel();
             }
             else if ( strategy.isMerge() )
             {
                 relatives = object.getRelatives() == null ? relatives : object.getRelatives();
                 aggregationType = object.getAggregationType() == null ? aggregationType : object.getAggregationType();
-                dataApprovalLevel = object.getDataApprovalLevel() == null ? dataApprovalLevel : object.getDataApprovalLevel();
             }
 
             indicators.addAll( object.getIndicators() );
@@ -1001,19 +996,6 @@ public abstract class BaseAnalyticalObject
     public void setAggregationType( AggregationType aggregationType )
     {
         this.aggregationType = aggregationType;
-    }
-
-    @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public DataApprovalLevel getDataApprovalLevel()
-    {
-        return dataApprovalLevel;
-    }
-
-    public void setDataApprovalLevel( DataApprovalLevel dataApprovalLevel )
-    {
-        this.dataApprovalLevel = dataApprovalLevel;
     }
 
     // -------------------------------------------------------------------------
