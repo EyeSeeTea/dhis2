@@ -1958,6 +1958,7 @@ Ext.onReady( function() {
             if (!hasDimension('dy')) {
                 addDimension({
                     id: 'dy',
+                    dimension: 'dy',
                     name: NS.i18n.data
                 }, rowStore);
             }
