@@ -453,8 +453,6 @@ input[type=date]::-webkit-inner-spin-button, input[type=date]::-webkit-outer-spi
 
 .dashboard-widget-container {
     height: auto;
-    overflow-x:auto;
-    overflow-y:auto;
 }
 
 .widget-link {
