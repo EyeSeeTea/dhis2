@@ -30,6 +30,7 @@ trackerCapture.controller('DataEntryController',
     $scope.eventPeriods = [];
     $scope.currentPeriod = [];
     $scope.filterEvents = true;
+	$scope.showHelpText = {};
     $scope.errorMessages = {};
     $scope.warningMessages = {};
     $scope.hiddenFields = {};

@@ -1969,6 +1969,60 @@ Ext.onReady( function() {
                             support.prototype.array.sort(objects, 'ASC', 'sortingId');
                             header.ids = Ext.Array.pluck(objects, 'id');
                         }
+                        else if (header.type === 'java.lang.Boolean') {
+							var objects = [];
+
+                            for (var k = 0, id, fullId, name, isHierarchy; k < response.rows.length; k++) {
+                                id = response.rows[k][i] || emptyId;
+
+                                // hide NA data
+                                if (xLayout.hideNaData && id === emptyId) {
+                                    continue;
+                                }
+
+                                fullId = header.name + id;
+                                isHierarchy = service.layout.isHierarchy(xLayout, response, id);
+
+                                // add dimension name prefix if not pe/ou
+                                name = isMeta ? '' : header.column + ' ';
+
+                                // add hierarchy if ou and showHierarchy
+                                name = isHierarchy ? service.layout.getHierarchyName(ouHierarchy, names, id) : (names[id] || id);
+
+                                names[fullId] = name;
+
+                                // update rows
+                                response.rows[k][i] = fullId;
+
+                                // update ou hierarchy
+                                if (isHierarchy) {
+									ouHierarchy[fullId] = ouHierarchy[id];
+								}
+
+                                // update boolean metadata
+                                response.metaData.booleanNames[id] = booleanNameMap[id];
+                                response.metaData.booleanNames[fullId] = booleanNameMap[id];
+
+								objects.push({
+									id: fullId,
+									sortingId: id
+								});
+                            }
+
+                            // sort
+                            objects.sort(function(a, b) {
+                                if (a.sortingId === emptyId) {
+                                    return 1;
+                                }
+                                else if (b.sortingId === emptyId) {
+                                    return -1;
+                                }
+
+                                return a.sortingId - b.sortingId;
+                            });
+
+                            header.ids = Ext.Array.pluck(objects, 'id');
+                        }
                         else if (header.name === 'pe') {
                             var selectedItems = xLayout.dimensionNameIdsMap['pe'],
                                 isRelative = false;
@@ -2016,15 +2070,9 @@ Ext.onReady( function() {
 									ouHierarchy[fullId] = ouHierarchy[id];
 								}
 
-                                // update boolean metadata
-                                if (header.type === 'java.lang.Boolean') {
-                                    response.metaData.booleanNames[id] = booleanNameMap[id];
-                                    response.metaData.booleanNames[fullId] = booleanNameMap[id];
-                                }
-
 								objects.push({
 									id: fullId,
-									sortingId: header.name === 'pe' ? fullId : name
+									sortingId: name
 								});
                             }
 
@@ -3335,6 +3383,10 @@ Ext.onReady( function() {
 					rows = xResponse.rows,
                     names = xResponse.metaData.names,
                     optionNames = xResponse.metaData.optionNames,
+                    booleanNames = {
+                        'true': NS.i18n.yes,
+                        'false': NS.i18n.no
+                    },
                     pager = xResponse.metaData.pager,
                     count = pager.page * pager.pageSize - pager.pageSize
 					cls = 'pivot',
@@ -3372,8 +3424,8 @@ Ext.onReady( function() {
 					for (var j = 0, str, header, name; j < dimensionHeaders.length; j++) {
 						header = dimensionHeaders[j];
 						str = row[header.index];
-                        //str = names.hasOwnProperty(str) ? names[str] : str;
-                        str = optionNames[header.name + str] || optionNames[str] || names[str] || str;
+
+                        str = optionNames[header.name + str] || optionNames[str] || booleanNames[str] || names[str] || str;
 						name = web.report.query.format(str);
 
 						//if (header.name === 'ouname' && layout.showHierarchy) {

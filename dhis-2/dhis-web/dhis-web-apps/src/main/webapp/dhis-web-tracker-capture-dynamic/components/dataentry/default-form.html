@@ -16,6 +16,10 @@
         <tr class="col-md-12" ng-repeat="prStDe in currentStage.programStageDataElements" ng-if="!isHidden(prStDe.dataElement.id)">
             <td class="col-md-5">
                 {{prStDe.dataElement.formName ? prStDe.dataElement.formName : prStDe.dataElement.name}}
+                <a ng-if="prStDes[prStDe.dataElement.id].dataElement.description" Title="{{prStDes[prStDe.dataElement.id].dataElement.description}}" ng-init="showHelpText[prStDe.dataElement.id] = false;" ng-click="showHelpText[prStDe.dataElement.id] = !showHelpText[prStDe.dataElement.id]">
+                    <span class="glyphicon glyphicon-info-sign" ></span>
+                    <span ng-show="showHelpText[prStDe.dataElement.id]" ><br>{{prStDes[prStDe.dataElement.id].dataElement.description}}</span>
+                </a>     
             </td>
             <td class="col-md-5">
                 <ng-form name="dataEntryInnerForm">
@@ -156,7 +160,10 @@
                         <tr class="col-md-12" ng-repeat="de in section.programStageDataElements" ng-if="!isHidden(de.dataElement.id)">
                             <td class="col-md-5">
                                 {{prStDes[de.dataElement.id].dataElement.formName ? prStDes[de.dataElement.id].dataElement.formName : prStDes[de.dataElement.id].dataElement.name}}
-                                <a ng-if="prStDes[de.dataElement.id].dataElement" tooltip="{{prStDes[de.dataElement.id].dataElement}}" ng-click="alert({{prStDes[de.dataElement.id].dataElement}})" title="More information"><span class="glyphicon glyphicon-info-sign" ></span></a>
+                                <a ng-if="prStDes[de.dataElement.id].dataElement.description" Title="{{prStDes[de.dataElement.id].dataElement.description}}" ng-init="showHelpText[de.dataElement.id] = false;" ng-click="showHelpText[de.dataElement.id] = !showHelpText[de.dataElement.id]">
+                                    <span class="glyphicon glyphicon-info-sign" ></span>
+                                    <span ng-show="showHelpText[de.dataElement.id]" ><br>{{prStDes[de.dataElement.id].dataElement.description}}</span>
+                                </a>                            
                             </td>
                             <td class="col-md-5">
                                 <ng-form name="dataEntryInnerForm">
@@ -164,8 +171,8 @@
                                         <div ng-switch-when="int">
                                             <input type="text"
                                                    ng-class='getInputNotifcationClass(prStDes[de.dataElement.id].dataElement.id,false)'
-                                                   ng-model="currentEvent[de.dataElement.id]" 
-												   ng-required={{prStDes[de.dataElement.id].compulsory}}
+                                                   ng-model="currentEvent[prStDes[de.dataElement.id].dataElement.id]" 
+                                                   ng-required={{prStDes[de.dataElement.id].compulsory}}
                                                    ng-disabled="selectedEnrollment.status !== 'ACTIVE' || currentEvent.editingNotAllowed" 
                                                    ng-blur="saveDatavalue(prStDes[de.dataElement.id])" 
                                                    name="foo"/>
