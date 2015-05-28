@@ -29,7 +29,7 @@ package org.hisp.dhis.system.filter;
  */
 
 import org.hisp.dhis.indicator.IndicatorGroup;
-import org.hisp.dhis.util.Filter;
+import org.hisp.dhis.commons.filter.Filter;
 
 /**
  * @author Lars Helge Overland

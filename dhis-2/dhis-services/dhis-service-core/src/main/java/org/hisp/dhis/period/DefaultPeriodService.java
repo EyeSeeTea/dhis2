@@ -41,7 +41,7 @@ import java.util.Set;
 
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.system.util.DateUtils;
-import org.hisp.dhis.util.Filter;
+import org.hisp.dhis.commons.filter.Filter;
 import org.hisp.dhis.util.FilterUtils;
 import org.springframework.transaction.annotation.Transactional;
 

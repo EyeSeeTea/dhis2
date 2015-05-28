@@ -28,7 +28,7 @@ package org.hisp.dhis.util;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.comparator.FileLastModifiedComparator;
+import org.hisp.dhis.commons.comparator.FileLastModifiedComparator;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

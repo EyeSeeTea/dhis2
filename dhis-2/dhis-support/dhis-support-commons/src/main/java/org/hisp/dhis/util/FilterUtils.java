@@ -28,6 +28,8 @@ package org.hisp.dhis.util;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.commons.filter.Filter;
+
 import java.util.Collection;
 import java.util.Iterator;
 

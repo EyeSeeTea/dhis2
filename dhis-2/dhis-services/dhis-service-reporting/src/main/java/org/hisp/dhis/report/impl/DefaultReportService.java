@@ -50,7 +50,7 @@ import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.reporttable.ReportTableService;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.util.Encoder;
-import org.hisp.dhis.util.Filter;
+import org.hisp.dhis.commons.filter.Filter;
 import org.hisp.dhis.util.FilterUtils;
 import org.hisp.dhis.util.JRExportUtils;
 import org.hisp.dhis.util.StreamUtils;

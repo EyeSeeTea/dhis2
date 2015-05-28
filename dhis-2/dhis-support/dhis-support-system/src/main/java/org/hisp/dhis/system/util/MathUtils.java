@@ -40,8 +40,8 @@ import org.apache.commons.validator.routines.DoubleValidator;
 import org.apache.commons.validator.routines.IntegerValidator;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.expression.Operator;
-import org.hisp.dhis.math.OneIfZeroOrPositiveFunction;
-import org.hisp.dhis.math.ZeroIfNegativeFunction;
+import org.hisp.dhis.commons.math.OneIfZeroOrPositiveFunction;
+import org.hisp.dhis.commons.math.ZeroIfNegativeFunction;
 import org.nfunk.jep.JEP;
 
 /**

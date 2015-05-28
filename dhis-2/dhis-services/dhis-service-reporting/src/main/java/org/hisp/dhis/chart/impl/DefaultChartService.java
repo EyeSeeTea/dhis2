@@ -87,7 +87,7 @@ import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.RelativePeriods;
 import org.hisp.dhis.system.grid.GridUtils;
 import org.hisp.dhis.system.util.MathUtils;
-import org.hisp.dhis.util.Filter;
+import org.hisp.dhis.commons.filter.Filter;
 import org.hisp.dhis.util.FilterUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
