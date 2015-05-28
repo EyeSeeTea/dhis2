@@ -37,7 +37,12 @@ import org.apache.commons.logging.LogFactory;
 public class ExceptionUtils
 {
     private static final Log log = LogFactory.getLog( ExceptionUtils.class );
-    
+
+    /**
+     * Throws a new RuntimeException if the given condition holds (is true).
+     * @param condition the condition.
+     * @param message the message of the Exception.
+     */
     public static void throwException( boolean condition, String message )
     {
         if ( condition )
@@ -45,7 +50,12 @@ public class ExceptionUtils
             throw new RuntimeException( message );
         }
     }
-    
+
+    /**
+     * Logs the given error message if the condition holds (is true).
+     * @param condition the condition.
+     * @param message the error message.
+     */
     public static void logException( boolean condition, String message )
     {
         if ( condition )

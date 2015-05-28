@@ -32,15 +32,27 @@ import java.util.HashMap;
 import java.util.concurrent.Callable;
 
 /**
+ * Map which allows storing a {@link java.util.concurrent.Callable<V>}
+ * and caches its return value on the first call to {@link #get(Object, Callable)}.
+ * Subsequent calls returns the cached value.
+ *
  * @author Lars Helge Overland
  */
 public class CachingMap<K, V>
     extends HashMap<K, V>
 {
+    /**
+     * Returns the cached value if available or executes the Callable and returns
+     * the value, which is also cached.
+     *
+     * @param key the key.
+     * @param callable the Callable.
+     * @return the return value of the Callable, either from cache or immediate execution.
+     */
     public V get( K key, Callable<V> callable )
     {
         V value = super.get( key );
-                
+
         if ( value == null )
         {
             try

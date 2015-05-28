@@ -80,7 +80,7 @@ import org.hisp.dhis.util.Encoder;
 import org.hisp.dhis.util.ListUtils;
 import org.hisp.dhis.util.StreamUtils;
 import org.hisp.dhis.util.TextUtils;
-import org.hisp.dhis.velocity.VelocityManager;
+import org.hisp.dhis.system.velocity.VelocityManager;
 import org.htmlparser.Node;
 import org.htmlparser.NodeFilter;
 import org.htmlparser.Parser;

@@ -29,6 +29,8 @@ package org.hisp.dhis.util.functional;
  */
 
 /**
+ * Function with four parameters.
+ *
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public interface Function4<A1, A2, A3, A4>

@@ -34,17 +34,31 @@ import java.util.Collection;
  * Executes a collection of StartupRoutines when the system is started.
  * 
  * @author <a href="mailto:torgeilo@gmail.com">Torgeir Lorange Ostby</a>
- * @version $Id: StartupRoutineExecutor.java 3217 2007-04-02 08:54:21Z torgeilo $
  */
 public interface StartupRoutineExecutor
     extends StartupRoutine
 {
     String ID = StartupRoutineExecutor.class.getName();
 
+    /**
+     * Executes the StartupRoutines for testing.
+     *
+     * @throws Exception on execution failure.
+     */
     void executeForTesting()
         throws Exception;
-    
+
+    /**
+     * Adds a StartupRoutine for execution on system startup.
+     *
+     * @param routine the StartupRoutine to add.
+     */
     void addStartupRoutine( StartupRoutine routine );
 
+    /**
+     * Adds a Collection of StartupRoutines for execution on system startup.
+     *
+     * @param routines the Collection of StartupRotines to add.
+     */
     void addStartupRoutines( Collection<StartupRoutine> routines );
 }

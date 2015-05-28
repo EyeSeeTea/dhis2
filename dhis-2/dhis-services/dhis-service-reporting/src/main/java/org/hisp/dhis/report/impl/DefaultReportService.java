@@ -54,7 +54,7 @@ import org.hisp.dhis.util.Filter;
 import org.hisp.dhis.util.FilterUtils;
 import org.hisp.dhis.util.JRExportUtils;
 import org.hisp.dhis.util.StreamUtils;
-import org.hisp.dhis.velocity.VelocityManager;
+import org.hisp.dhis.system.velocity.VelocityManager;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.transaction.annotation.Transactional;
 

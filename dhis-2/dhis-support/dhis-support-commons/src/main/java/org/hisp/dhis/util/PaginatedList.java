@@ -57,6 +57,9 @@ public class PaginatedList<T>
     
     /**
      * Sets page size.
+     *
+     * @param pageSize the page size.
+     * @return this PaginatedList.
      */
     public PaginatedList<T> setPageSize( int pageSize )
     {
@@ -69,6 +72,9 @@ public class PaginatedList<T>
      * Sets the number of pages. The page size will be calculated and set in
      * order to provide the appropriate total number of pages. The resulting
      * number of pages can be lower than the given argument but not higher.
+     *
+     * @param pages the number of pages.
+     * @return this PaginatedList
      */
     public PaginatedList<T> setNumberOfPages( int pages )
     {
@@ -81,6 +87,8 @@ public class PaginatedList<T>
      * Returns the next page in the list. The page size is defined by the argument
      * given in the constructor. If there is no more pages, null is returned. The
      * returned page is not guaranteed to have the same size as the page size.
+     *
+     * @return the next page.
      */
     public List<T> nextPage()
     {
@@ -110,6 +118,8 @@ public class PaginatedList<T>
     
     /**
      * Returns the number of pages in the list.
+     *
+     * @return the number of pages.
      */
     public int pageCount()
     {
@@ -122,6 +132,8 @@ public class PaginatedList<T>
     
     /**
      * Returns a list of all pages.
+     *
+     * @return a List of all pages.
      */
     public List<List<T>> getPages()
     {

@@ -44,7 +44,7 @@ import org.apache.commons.mail.HtmlEmail;
 import org.hisp.dhis.configuration.ConfigurationService;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.util.DebugUtils;
-import org.hisp.dhis.velocity.VelocityManager;
+import org.hisp.dhis.system.velocity.VelocityManager;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserSettingService;
 import org.springframework.scheduling.annotation.Async;

@@ -29,6 +29,8 @@ package org.hisp.dhis.util.functional;
  */
 
 /**
+ * Function with five parameters.
+ *
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public interface Function5<A1, A2, A3, A4, A5>

@@ -30,7 +30,6 @@ package org.hisp.dhis.util;
 
 /**
  * @author Torgeir Lorange Ostby
- * @version $Id: PathUtils.java 2869 2007-02-20 14:26:09Z andegje $
  */
 public class PathUtils
 {
@@ -43,11 +42,21 @@ public class PathUtils
         return clazz.getName().replace( PACKAGE_SEPARATOR, FILE_SEPARATOR );
     }
 
+    /**
+     * Converts the fully qualified class name to a UNIX path.
+     * @param clazzName the classname, separated by '.'.
+     * @return the UNIX path, separated by '/'.
+     */
     public static String getClassPath( String clazzName )
     {
         return clazzName.replace( PACKAGE_SEPARATOR, FILE_SEPARATOR );
     }
 
+    /**
+     * Gets the parent path of the given UNIX path.
+     * @param path the path.
+     * @return the parent path.
+     */
     public static String getParent( String path )
     {
         int i = path.lastIndexOf( FILE_SEPARATOR );
@@ -60,6 +69,12 @@ public class PathUtils
         return path.substring( 0, i );
     }
 
+    /**
+     * Adds a child to the given UNIX path.
+     * @param parent the parent path.
+     * @param child the child path to add.
+     * @return the path with the child appended.
+     */
     public static String addChild( String parent, String child )
     {
         if ( parent.endsWith( String.valueOf( FILE_SEPARATOR ) ) )

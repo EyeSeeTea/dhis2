@@ -30,12 +30,11 @@ package org.hisp.dhis.util;
 
 /**
  * @author Torgeir Lorange Ostby
- * @version $Id: SystemUtils.java 5154 2008-05-15 12:42:37Z larshelg $
  */
 public class SystemUtils
 {
     private static final int FACTOR_MB = 1024 * 1024;
-    
+
     public static boolean isRunningForUse()
     {
         try
@@ -49,12 +48,20 @@ public class SystemUtils
 
         return false;
     }
-    
+
+    /**
+     * Gets the number of CPU cores available to this JVM.
+     * @return the number of available CPU cores.
+     */
     public static int getCpuCores()
     {
         return Runtime.getRuntime().availableProcessors();
     }
-    
+
+    /**
+     * Gets a String containing info of available and used memory of this JVM.
+     * @return an info string.
+     */
     public static String getMemoryString()
     {
         return "Mem Total in JVM: " + ( Runtime.getRuntime().totalMemory() / FACTOR_MB ) + 

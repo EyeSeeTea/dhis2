@@ -43,7 +43,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Supports PDF and XLS exports.
+ * Supports PDF, HMTL and XLS exports.
  * 
  * @author Lars Helge Overland
  */
@@ -59,7 +59,15 @@ public class JRExportUtils
         put( TYPE_PDF, new JRPdfExportProvider() );
         put( TYPE_HTML, new JRHtmlExportProvider() );
     } };
-    
+
+    /**
+     * Export the provided JasperPrint the format given by type.
+     *
+     * @param type the type to export to. XLS, PDF and HTML are supported.
+     * @param out the OutputStream to export to.
+     * @param jasperPrint the JasperPrint to export.
+     * @throws JRException on export failure.
+     */
     public static void export( String type, OutputStream out, JasperPrint jasperPrint )
         throws JRException
     {

@@ -45,7 +45,7 @@ import org.hisp.dhis.email.EmailService;
 import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.i18n.locale.LocaleManager;
 import org.hisp.dhis.setting.SystemSettingManager;
-import org.hisp.dhis.velocity.VelocityManager;
+import org.hisp.dhis.system.velocity.VelocityManager;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserGroup;

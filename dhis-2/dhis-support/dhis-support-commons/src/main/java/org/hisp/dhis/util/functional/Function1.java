@@ -29,6 +29,8 @@ package org.hisp.dhis.util.functional;
  */
 
 /**
+ * Function with one parameter.
+ *
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public interface Function1<A1>

@@ -34,7 +34,6 @@ import com.vividsolutions.jts.geom.Polygon;
 import org.apache.commons.lang3.StringUtils;
 import org.geotools.geojson.geom.GeometryJSON;
 import org.geotools.referencing.GeodeticCalculator;
-import org.opengis.feature.type.FeatureType;
 
 import java.awt.geom.Point2D;
 import java.io.IOException;
@@ -102,7 +101,11 @@ public class GeoUtils
     }
     
     /**
-     * Creates the distance between two points.
+     * Computes the distance between two points.
+     *
+     * @param from the origin point.
+     * @param to the end point.
+     * @return the orthodromic distance between the given points.
      */
     public static double getDistanceBetweenTwoPoints( Point2D from, Point2D to)
     {                        
@@ -115,6 +118,10 @@ public class GeoUtils
 
     /**
      * Get GeometryJSON point.
+     *
+     * @param longitude the longitude.
+     * @param latitude the latitude.
+     * @return the GeoJSON representation of the given point.
      */
     public static Point getGeoJsonPoint( double longitude, double latitude )
         throws IOException
@@ -131,6 +138,10 @@ public class GeoUtils
 
     /**
      * Check if GeometryJSON point created with this coordinate is valid.
+     *
+     * @param latitude the latitude.
+     * @param longitude the longitude.
+     * @return true if the point is valid or false.
      */
     public static boolean checkGeoJsonPointValid( double longitude, double latitude )
     {
@@ -146,6 +157,11 @@ public class GeoUtils
 
     /**
      * Check if the point coordinate falls within the polygon/MultiPolygon Shape
+     *
+     * @param longitude the longitude.
+     * @param latitude the latitude.
+     * @param multiPolygonJson the GeoJSON coordinates of the MultiPolygon
+     * @param featureType the featureType of the MultiPolygon.
      */
     public static boolean checkPointWithMultiPolygon( double longitude, double latitude, 
         String multiPolygonJson, String featureType )
@@ -183,7 +199,12 @@ public class GeoUtils
             return false;
         }
     }
-    
+
+    /**
+     * Escapes the String encoded SVG.
+     * @param svg the String encoded SVG.
+     * @return the escaped representation.
+     */
     public static final String replaceUnsafeSvgText( String svg )
     {
         if ( svg == null )

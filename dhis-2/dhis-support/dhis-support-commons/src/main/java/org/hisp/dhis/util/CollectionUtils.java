@@ -49,7 +49,14 @@ public class CollectionUtils
 {
     public static String[] STRING_ARR = new String[0];
     public static String[][] STRING_2D_ARR = new String[0][];
-    
+
+    /**
+     * Applies the given Function1 on each member of the Collection.
+     *
+     * @param collection the Collection.
+     * @param function the Function1.
+     * @param <T> the type.
+     */
     public static <T> void forEach( Collection<T> collection, Function1<T> function )
     {
         for ( T object : collection )
@@ -63,6 +70,13 @@ public class CollectionUtils
         }
     }
 
+    /**
+     * Filters the given Collection on the given Predicate.
+     *
+     * @param collection the Collection.
+     * @param predicate the Predicate.
+     * @param <T> the type.
+     */
     public static <T> void filter( Collection<T> collection, Predicate<T> predicate )
     {
         Iterator<T> iterator = collection.iterator();
@@ -77,19 +91,41 @@ public class CollectionUtils
             }
         }
     }
-    
+
+    /**
+     * Returns the intersection of the given Collections.
+     *
+     * @param c1 the first Collection.
+     * @param c2 the second Collection.
+     * @param <T> the type.
+     * @return the intersection of the Collections.
+     */
     public static <T> Collection<T> intersection( Collection<T> c1, Collection<T> c2 )
     {
         Set<T> set1 = new HashSet<>( c1 );
         set1.retainAll( new HashSet<>( c2 ) );
         return set1;
     }
-    
+
+    /**
+     * Returns the Collection if it is not null or a new, empty Collection otherwise.
+     *
+     * @param collection the Collection.
+     * @param <T> the type.
+     * @return the given Collection or a new, empty Collection.
+     */
     public static <T> Collection<T> emptyIfNull( Collection<T> collection )
     {
         return collection != null ? collection : new HashSet<T>();
     }
 
+    /**
+     * Returns the given arguments as an ordered List.
+     *
+     * @param items the items.
+     * @param <T> the type.
+     * @return an ordered List of the supplied items.
+     */
     @SafeVarargs
     public static <T> List<T> asList( final T... items )
     {
@@ -103,6 +139,13 @@ public class CollectionUtils
         return list;
     }
 
+    /**
+     * Returns the given arguments as a Set.
+     *
+     * @param items the items.
+     * @param <T> the type.
+     * @return a Set of the supplied items.
+     */
     @SafeVarargs
     public static final <T> Set<T> asSet( final T... items )
     {
@@ -150,6 +193,10 @@ public class CollectionUtils
     /**
      * Creates a map with the elements of the collection as values using the
      * specified keyMethod to obtain the key from the elements.
+     *
+     * @param collection the Collection.
+     * @param keyMethod the name of the method to obtain the key.
+     * @return Map of the elements.
      */
     @SuppressWarnings( "unchecked" )
     public static <K, T> Map<K, T> createMap( Collection<T> collection, String keyMethod )
@@ -195,6 +242,10 @@ public class CollectionUtils
     /**
      * Creates a list of values extracted from the provided list using the
      * specified value method, keeping the order of the provided list.
+     *
+     * @param list the List.
+     * @param valueMethod the name of the method to obtain the value.
+     * @return an ordered List of the obtained values.
      */
     @SuppressWarnings( "unchecked" )
     public static <K, T> List<K> createList( List<T> list, String valueMethod )

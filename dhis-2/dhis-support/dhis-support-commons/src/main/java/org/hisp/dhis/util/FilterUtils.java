@@ -36,6 +36,14 @@ import java.util.Iterator;
  */
 public class FilterUtils
 {
+    /**
+     * Filter the given Collection using the provided Filter.
+     *
+     * @param collection the Collection.
+     * @param filter the Filter.
+     * @param <T> the type of the Collection members.
+     * @return the filtered Collection.
+     */
     public static <T> Collection<T> filter( Collection<T> collection, Filter<T> filter )
     {
         if ( collection == null || filter == null )

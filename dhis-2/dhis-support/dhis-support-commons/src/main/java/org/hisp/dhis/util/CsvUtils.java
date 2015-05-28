@@ -108,7 +108,7 @@ public class CsvUtils
      * Appends a separator to the value and returns the value as a byte array.
      * 
      * @param value the value.
-     * @return a byte araray.
+     * @return a byte array.
      */
     public static byte[] getCsvValue( String value )
     {
@@ -120,11 +120,22 @@ public class CsvUtils
         return getCsvEndValue( value + SEPARATOR );
     }
 
+    /**
+     * Returns the string representation of the given value as a byte array.
+     * @param value the value.
+     * @return a byte array.
+     */
     public static byte[] getCsvEndValue( int value )
     {
         return getCsvEndValue( String.valueOf( value ) );
     }
 
+    /**
+     * Returns the value as a byte array.
+     *
+     * @param value the value as a String.
+     * @return a byte array.
+     */
     public static byte[] getCsvEndValue( String value )
     {
         if ( value == null )

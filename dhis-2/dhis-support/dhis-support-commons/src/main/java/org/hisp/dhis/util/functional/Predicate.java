@@ -29,6 +29,8 @@ package org.hisp.dhis.util.functional;
  */
 
 /**
+ * Predicate on {@link T}.
+ *
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public interface Predicate<T>

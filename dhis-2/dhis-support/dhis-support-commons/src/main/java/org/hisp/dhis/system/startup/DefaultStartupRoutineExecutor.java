@@ -44,7 +44,6 @@ import org.apache.commons.logging.LogFactory;
  * <code>-Ddhis.skip.startup=true</code>
  * 
  * @author <a href="mailto:torgeilo@gmail.com">Torgeir Lorange Ostby</a>
- * @version $Id: DefaultStartupRoutineExecutor.java 5781 2008-10-01 12:12:48Z larshelg $
  */
 public class DefaultStartupRoutineExecutor
     extends AbstractStartupRoutine

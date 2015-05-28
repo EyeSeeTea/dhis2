@@ -29,6 +29,7 @@ package org.hisp.dhis.util.functional;
  */
 
 /**
+ * Function with 0 parameters.
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public interface Function0

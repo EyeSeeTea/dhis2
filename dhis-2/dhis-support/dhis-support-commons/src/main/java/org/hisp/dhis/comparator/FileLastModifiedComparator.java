@@ -32,15 +32,16 @@ import java.io.File;
 import java.util.Comparator;
 
 /**
+ * Comparator which compares Files based on their last modification time.
+ *
  * @author Tran Thanh Tri
- * @version $Id: Feature.java 28-04-2008 16:06:00 $
  */
 public class FileLastModifiedComparator
     implements Comparator<File>
 {
     @Override
     public int compare( File o1, File o2 )
-    {                
+    {
         return (int) (o1.lastModified() - o2.lastModified());
     }
 }

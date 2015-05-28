@@ -63,8 +63,8 @@ public interface StartupRoutine
     int getRunlevel();
     
     /**
-     * 
-     * @return
+     * Returns whether this StartupRoutine is to be skipped in tests or not.
+     * @return true if this StartupRoutine is skipped in tests, false otherwise.
      */
     boolean skipInTests();
 }

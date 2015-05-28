@@ -29,6 +29,8 @@ package org.hisp.dhis.util.functional;
  */
 
 /**
+ * Function with two parameters.
+ *
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public interface Function2<A1, A2>
