@@ -31,6 +31,7 @@ package org.hisp.dhis.util;
 import org.hisp.dhis.util.functional.Function1;
 import org.hisp.dhis.util.functional.Predicate;
 
+import java.lang.reflect.Method;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -144,5 +145,96 @@ public class CollectionUtils
         }
 
         return map;
+    }
+
+    /**
+     * Creates a map with the elements of the collection as values using the
+     * specified keyMethod to obtain the key from the elements.
+     */
+    @SuppressWarnings( "unchecked" )
+    public static <K, T> Map<K, T> createMap( Collection<T> collection, String keyMethod )
+    {
+        Map<K, T> map = new HashMap<>( collection.size() );
+
+        if ( collection.isEmpty() )
+        {
+            return map;
+        }
+
+        Class<?> elementClass = collection.iterator().next().getClass();
+
+        Method getKeyMethod;
+
+        try
+        {
+            getKeyMethod = elementClass.getMethod( keyMethod, new Class[0] );
+        }
+        catch ( Exception e )
+        {
+            throw new RuntimeException( "Failed to get key method", e );
+        }
+
+        for ( T element : collection )
+        {
+            K key;
+            try
+            {
+                key = (K) getKeyMethod.invoke( element, (Object[]) null );
+            }
+            catch ( Exception e )
+            {
+                throw new RuntimeException( "Failed to get key", e );
+            }
+
+            map.put( key, element );
+        }
+
+        return map;
+    }
+
+    /**
+     * Creates a list of values extracted from the provided list using the
+     * specified value method, keeping the order of the provided list.
+     */
+    @SuppressWarnings( "unchecked" )
+    public static <K, T> List<K> createList( List<T> list, String valueMethod )
+    {
+        List<K> valueList = new ArrayList<>( list.size() );
+
+        if ( list.isEmpty() )
+        {
+            return valueList;
+        }
+
+        Class<?> elementClass = list.iterator().next().getClass();
+
+        Method getValueMethod;
+
+        try
+        {
+            getValueMethod = elementClass.getMethod( valueMethod, new Class[0] );
+        }
+        catch ( Exception e )
+        {
+            throw new RuntimeException( "Failed to get key method", e );
+        }
+
+        for ( T element : list )
+        {
+            K value;
+
+            try
+            {
+                value = (K) getValueMethod.invoke( element, (Object[]) null );
+            }
+            catch ( Exception e )
+            {
+                throw new RuntimeException( "Failed to get key", e );
+            }
+
+            valueList.add( value );
+        }
+
+        return valueList;
     }
 }
