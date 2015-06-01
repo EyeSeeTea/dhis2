@@ -223,6 +223,20 @@ trackerCapture.controller('DataEntryController',
         $scope.schedulingEnabled = !$scope.schedulingEnabled;
     };
     
+    $scope.stageCanBeShownAsTable = function(stage) {
+        if(stage.programStageDataElements && stage.programStageDataElements.length < 7) {
+            return true;
+        }
+        return false;
+    };
+    
+    $scope.toggleStageTableDisplay = function(stage) {
+        stage.displayEventsInTable = !stage.displayEventsInTable;
+        if(this.currentStage === stage) {
+            $scope.getDataEntryForm();
+        }
+    };
+    
     $scope.stageNeedsEvent = function(stage){  
         
         //In case the event is a table, we sould always allow adding more events(rows)

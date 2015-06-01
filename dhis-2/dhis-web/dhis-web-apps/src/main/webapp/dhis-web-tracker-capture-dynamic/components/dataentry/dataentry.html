@@ -34,6 +34,9 @@
                             
                             <!-- event add/filter icon begins -->
                             <span class='pull-right'>
+                                <span ng-if="stageCanBeShownAsTable(stage)">
+                                    <a href title="{{'toggle_table_view'| translate}}" ng-click="toggleStageTableDisplay(stage)" style="vertical-align:middle"><i class="fa fa-bars"></i></a>
+                                </span>
                                 <span ng-if="stageNeedsEvent(stage)">
                                     <a href title="{{'create_new_event'| translate}}" ng-click="showCreateEvent(stage)" style="vertical-align:middle"><i class="fa fa-plus"></i></a>
                                 </span>
