@@ -161,6 +161,87 @@ public class DefaultDataValueSetService
     // DataValueSet implementation
     //--------------------------------------------------------------------------
 
+    @Override
+    public DataExportParams getFromUrl( Set<String> dataSets, String period, Date startDate, Date endDate, 
+        Set<String> organisationUnits, boolean includeChildren, IdSchemes idSchemes )
+    {
+        DataExportParams params = new DataExportParams();
+        
+        if ( dataSets != null )
+        {
+            for ( String ds : dataSets )
+            {
+                params.getDataSets().add( identifiableObjectManager.get( DataSet.class, ds ) );
+            }
+        }
+        
+        if ( period != null )
+        {
+            Period period_ = PeriodType.getPeriodFromIsoString( period );
+            
+            if ( period_ != null )
+            {
+                params.setPeriod( periodService.reloadPeriod( period_ ) );
+            }
+        }
+        
+        if ( organisationUnits != null )
+        {
+            for ( String ou : organisationUnits )
+            {
+                params.getOrganisationUnits().add( identifiableObjectManager.get( OrganisationUnit.class, ou ) );
+            }
+        }
+
+        params.setStartDate( startDate );
+        params.setEndDate( endDate );
+        params.setIncludeChildren( includeChildren );
+        params.setIdSchemes( idSchemes );
+        
+        return params;
+    }
+    
+    @Override
+    public void validate( DataExportParams params )
+    {
+        String violation = null;
+        
+        if ( params == null )
+        {
+            throw new IllegalArgumentException( "Params cannot be null" );
+        }
+        
+        if ( params.getDataSets().isEmpty() )
+        {
+            violation = "At least one valid data set must be specified";
+        }
+        
+        if ( params.getPeriod() == null && ( params.getStartDate() == null || params.getEndDate() == null ) )
+        {
+            violation = "A valid period or start/end dates must be specified";
+        }
+        
+        if ( params.getOrganisationUnits().isEmpty() )
+        {
+            violation = "At least one valid organisation unit must be specified";
+        }
+        
+        for ( OrganisationUnit unit : params.getOrganisationUnits() )
+        {
+            if ( !organisationUnitService.isInUserHierarchy( unit ) )
+            {
+                violation = "Organisation unit is not inside hierarchy of current user: " + unit.getUid();
+            }
+        }
+
+        if ( violation != null )
+        {
+            log.warn( "Validation failed: " + violation );
+            
+            throw new IllegalArgumentException( violation );
+        }
+    }
+    
     //--------------------------------------------------------------------------
     // Write
     //--------------------------------------------------------------------------
@@ -368,6 +449,10 @@ public class DefaultDataValueSetService
 
         dataValueSetStore.writeDataValueSetCsv( ds, null, null, null, pe, ou, writer, idSchemes );
     }
+
+    //--------------------------------------------------------------------------
+    // Template
+    //--------------------------------------------------------------------------
 
     @Override
     public RootNode getDataValueSetTemplate( DataSet dataSet, Period period, List<String> orgUnits,

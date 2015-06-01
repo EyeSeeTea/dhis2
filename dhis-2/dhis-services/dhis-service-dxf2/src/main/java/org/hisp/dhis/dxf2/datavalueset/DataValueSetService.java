@@ -48,6 +48,11 @@ import java.util.Set;
  */
 public interface DataValueSetService
 {
+    DataExportParams getFromUrl( Set<String> dataSets, String period, Date startDate, Date endDate, 
+        Set<String> organisationUnits, boolean includeChildren, IdSchemes idSchemes );
+    
+    void validate( DataExportParams params );
+    
     void writeDataValueSetXml( String dataSet, String period, String orgUnit, OutputStream out, IdSchemes idSchemes );
 
     void writeDataValueSetXml( Set<String> dataSets, Date startDate, Date endDate, Set<String> orgUnits, boolean includeChildren, OutputStream out, IdSchemes idSchemes );
