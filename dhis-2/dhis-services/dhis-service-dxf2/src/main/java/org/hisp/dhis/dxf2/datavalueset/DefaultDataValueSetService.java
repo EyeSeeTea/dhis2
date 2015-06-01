@@ -28,8 +28,8 @@ package org.hisp.dhis.dxf2.datavalueset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static com.google.common.collect.Sets.newHashSet;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
+import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
 import static org.hisp.dhis.common.IdentifiableProperty.UUID;
 import static org.hisp.dhis.system.notification.NotificationLevel.ERROR;
 import static org.hisp.dhis.system.notification.NotificationLevel.INFO;
@@ -40,6 +40,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -84,7 +85,6 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
-import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.scheduling.TaskId;
 import org.hisp.dhis.system.callable.CategoryOptionComboAclCallable;
 import org.hisp.dhis.system.callable.IdentifiableObjectCallable;
@@ -107,9 +107,6 @@ public class DefaultDataValueSetService
 {
     private static final Log log = LogFactory.getLog( DefaultDataValueSetService.class );
 
-    private static final String ERROR_INVALID_DATA_SET = "Invalid data set: ";
-    private static final String ERROR_INVALID_PERIOD = "Invalid period: ";
-    private static final String ERROR_INVALID_ORG_UNIT = "Invalid org unit: ";
     private static final String ERROR_OBJECT_NEEDED_TO_COMPLETE = "Must be provided to complete data set";
 
     @Autowired
@@ -162,34 +159,29 @@ public class DefaultDataValueSetService
     //--------------------------------------------------------------------------
 
     @Override
-    public DataExportParams getFromUrl( Set<String> dataSets, String period, Date startDate, Date endDate, 
+    public DataExportParams getFromUrl( Set<String> dataSets, Set<String> periods, Date startDate, Date endDate, 
         Set<String> organisationUnits, boolean includeChildren, IdSchemes idSchemes )
     {
         DataExportParams params = new DataExportParams();
         
         if ( dataSets != null )
         {
-            for ( String ds : dataSets )
-            {
-                params.getDataSets().add( identifiableObjectManager.get( DataSet.class, ds ) );
-            }
+            params.getDataSets().addAll( identifiableObjectManager.getByUid( DataSet.class, dataSets ) );
         }
         
-        if ( period != null )
+        if ( periods != null )
         {
-            Period period_ = PeriodType.getPeriodFromIsoString( period );
-            
-            if ( period_ != null )
-            {
-                params.setPeriod( periodService.reloadPeriod( period_ ) );
-            }
+            params.getPeriods().addAll( periodService.reloadIsoPeriods( new ArrayList<String>( periods ) ) );
         }
         
         if ( organisationUnits != null )
         {
-            for ( String ou : organisationUnits )
+            params.getOrganisationUnits().addAll( identifiableObjectManager.getByUid( OrganisationUnit.class, organisationUnits ) );
+            
+            if ( includeChildren )
             {
-                params.getOrganisationUnits().add( identifiableObjectManager.get( OrganisationUnit.class, ou ) );
+                params.setOrganisationUnits( new HashSet<OrganisationUnit>( 
+                    organisationUnitService.getOrganisationUnitsWithChildren( getUids( params.getOrganisationUnits() ) ) ) );
             }
         }
 
@@ -216,9 +208,9 @@ public class DefaultDataValueSetService
             violation = "At least one valid data set must be specified";
         }
         
-        if ( params.getPeriod() == null && ( params.getStartDate() == null || params.getEndDate() == null ) )
+        if ( params.getPeriods().isEmpty() && ( params.getStartDate() == null || params.getEndDate() == null ) )
         {
-            violation = "A valid period or start/end dates must be specified";
+            violation = "At least one valid period or start/end dates must be specified";
         }
         
         if ( params.getOrganisationUnits().isEmpty() )
@@ -247,38 +239,19 @@ public class DefaultDataValueSetService
     //--------------------------------------------------------------------------
 
     @Override
-    public void writeDataValueSetXml( String dataSet, String period, String orgUnit, OutputStream out, IdSchemes idSchemes )
+    public void writeDataValueSetXml( DataExportParams params, OutputStream out )
     {
-        DataSet dataSet_ = dataSetService.getDataSet( dataSet );
-        Period period_ = PeriodType.getPeriodFromIsoString( period );
-        OrganisationUnit orgUnit_ = organisationUnitService.getOrganisationUnit( orgUnit );
-
-        if ( dataSet_ == null )
-        {
-            throw new IllegalArgumentException( ERROR_INVALID_DATA_SET + dataSet );
-        }
-
-        if ( period_ == null )
-        {
-            throw new IllegalArgumentException( ERROR_INVALID_PERIOD + period );
-        }
-
-        if ( orgUnit_ == null )
-        {
-            throw new IllegalArgumentException( ERROR_INVALID_ORG_UNIT + orgUnit );
-        }
+        validate( params );
 
         DataElementCategoryOptionCombo optionCombo = categoryService.getDefaultDataElementCategoryOptionCombo(); //TODO
 
         CompleteDataSetRegistration registration = registrationService
-            .getCompleteDataSetRegistration( dataSet_, period_, orgUnit_, optionCombo );
+            .getCompleteDataSetRegistration( params.getFirstDataSet(), params.getFirstPeriod(), params.getFirstOrganisationUnit(), optionCombo );
 
         Date completeDate = registration != null ? registration.getDate() : null;
 
-        period_ = periodService.reloadPeriod( period_ );
-
-        dataValueSetStore.writeDataValueSetXml( newHashSet( dataSet_ ), completeDate, period_, orgUnit_, newHashSet( period_ ),
-            newHashSet( orgUnit_ ), out, idSchemes );
+        dataValueSetStore.writeDataValueSetXml( params.getDataSets(), completeDate, params.getFirstPeriod(), params.getFirstOrganisationUnit(), 
+            params.getPeriods(), params.getOrganisationUnits(), out, params.getIdSchemes() );
     }
 
     @Override
@@ -313,38 +286,19 @@ public class DefaultDataValueSetService
     }
 
     @Override
-    public void writeDataValueSetJson( String dataSet, String period, String orgUnit, OutputStream outputStream, IdSchemes idSchemes )
+    public void writeDataValueSetJson( DataExportParams params, OutputStream out )
     {
-        DataSet dataSet_ = dataSetService.getDataSet( dataSet );
-        Period period_ = PeriodType.getPeriodFromIsoString( period );
-        OrganisationUnit orgUnit_ = organisationUnitService.getOrganisationUnit( orgUnit );
-
-        if ( dataSet_ == null )
-        {
-            throw new IllegalArgumentException( ERROR_INVALID_DATA_SET + dataSet );
-        }
-
-        if ( period_ == null )
-        {
-            throw new IllegalArgumentException( ERROR_INVALID_PERIOD + period );
-        }
-
-        if ( orgUnit_ == null )
-        {
-            throw new IllegalArgumentException( ERROR_INVALID_ORG_UNIT + orgUnit );
-        }
+        validate( params );
 
         DataElementCategoryOptionCombo optionCombo = categoryService.getDefaultDataElementCategoryOptionCombo(); //TODO
 
         CompleteDataSetRegistration registration = registrationService
-            .getCompleteDataSetRegistration( dataSet_, period_, orgUnit_, optionCombo );
+            .getCompleteDataSetRegistration( params.getFirstDataSet(), params.getFirstPeriod(), params.getFirstOrganisationUnit(), optionCombo );
 
         Date completeDate = registration != null ? registration.getDate() : null;
 
-        period_ = periodService.reloadPeriod( period_ );
-
-        dataValueSetStore.writeDataValueSetJson( newHashSet( dataSet_ ), completeDate, period_, orgUnit_, newHashSet( period_ ),
-            newHashSet( orgUnit_ ), outputStream, idSchemes );
+        dataValueSetStore.writeDataValueSetJson( params.getDataSets(), completeDate, params.getFirstPeriod(), params.getFirstOrganisationUnit(), 
+            params.getPeriods(), params.getOrganisationUnits(), out, params.getIdSchemes() );
     }
 
     @Override
@@ -385,38 +339,19 @@ public class DefaultDataValueSetService
     }
 
     @Override
-    public void writeDataValueSetCsv( String dataSet, String period, String orgUnit, Writer writer, IdSchemes idSchemes )
+    public void writeDataValueSetCsv( DataExportParams params, Writer writer )
     {
-        DataSet dataSet_ = dataSetService.getDataSet( dataSet );
-        Period period_ = PeriodType.getPeriodFromIsoString( period );
-        OrganisationUnit orgUnit_ = organisationUnitService.getOrganisationUnit( orgUnit );
-
-        if ( dataSet_ == null )
-        {
-            throw new IllegalArgumentException( ERROR_INVALID_DATA_SET + dataSet );
-        }
-
-        if ( period_ == null )
-        {
-            throw new IllegalArgumentException( ERROR_INVALID_PERIOD + period );
-        }
-
-        if ( orgUnit_ == null )
-        {
-            throw new IllegalArgumentException( ERROR_INVALID_ORG_UNIT + orgUnit );
-        }
-
+        validate( params );
+        
         DataElementCategoryOptionCombo optionCombo = categoryService.getDefaultDataElementCategoryOptionCombo(); //TODO
 
         CompleteDataSetRegistration registration = registrationService
-            .getCompleteDataSetRegistration( dataSet_, period_, orgUnit_, optionCombo );
+            .getCompleteDataSetRegistration( params.getFirstDataSet(), params.getFirstPeriod(), params.getFirstOrganisationUnit(), optionCombo );
 
         Date completeDate = registration != null ? registration.getDate() : null;
 
-        period_ = periodService.reloadPeriod( period_ );
-
-        dataValueSetStore.writeDataValueSetCsv( newHashSet( dataSet_ ), completeDate, period_, orgUnit_, newHashSet( period_ ),
-            newHashSet( orgUnit_ ), writer, idSchemes );
+        dataValueSetStore.writeDataValueSetCsv( params.getDataSets(), completeDate, params.getFirstPeriod(), params.getFirstOrganisationUnit(), 
+            params.getPeriods(), params.getOrganisationUnits(), writer, params.getIdSchemes() );
     }
 
     @Override

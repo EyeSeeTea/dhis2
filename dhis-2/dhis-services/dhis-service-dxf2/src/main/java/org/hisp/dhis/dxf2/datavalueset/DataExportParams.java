@@ -42,15 +42,15 @@ import org.hisp.dhis.period.Period;
  */
 public class DataExportParams
 {
-    private Set<DataSet> dataSets = new HashSet<DataSet>();
+    private Set<DataSet> dataSets = new HashSet<>();
     
-    private Period period;
+    private Set<Period> periods = new HashSet<>();
     
     private Date startDate;
     
     private Date endDate;
     
-    private Set<OrganisationUnit> organisationUnits = new HashSet<OrganisationUnit>();
+    private Set<OrganisationUnit> organisationUnits = new HashSet<>();
 
     private boolean includeChildren;
     
@@ -62,6 +62,25 @@ public class DataExportParams
 
     public DataExportParams()
     {
+    }
+
+    // -------------------------------------------------------------------------
+    // Logic
+    // -------------------------------------------------------------------------
+
+    public DataSet getFirstDataSet()
+    {
+        return dataSets != null && !dataSets.isEmpty() ? dataSets.iterator().next() : null;
+    }
+    
+    public Period getFirstPeriod()
+    {
+        return periods != null && !periods.isEmpty() ? periods.iterator().next() : null;
+    }
+    
+    public OrganisationUnit getFirstOrganisationUnit()
+    {
+        return organisationUnits != null && !organisationUnits.isEmpty() ? organisationUnits.iterator().next() : null;
     }
     
     // -------------------------------------------------------------------------
@@ -78,14 +97,14 @@ public class DataExportParams
         this.dataSets = dataSets;
     }
 
-    public Period getPeriod()
+    public Set<Period> getPeriods()
     {
-        return period;
+        return periods;
     }
 
-    public void setPeriod( Period period )
+    public void setPeriods( Set<Period> periods )
     {
-        this.period = period;
+        this.periods = periods;
     }
 
     public Date getStartDate()
