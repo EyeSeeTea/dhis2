@@ -87,15 +87,8 @@ public class DataValueSetController
 
         DataExportParams params = dataValueSetService.getFromUrl( dataSet, Sets.newHashSet( period ), 
             startDate, endDate, orgUnit, children, idSchemes );
-        
-        if ( params.isSingleDataValueSet() )
-        {
-            dataValueSetService.writeDataValueSetXml( params, response.getOutputStream() );
-        }
-        else
-        {
-            dataValueSetService.writeDataValueSetXml( dataSet, startDate, endDate, orgUnit, children, response.getOutputStream(), idSchemes );
-        }
+
+        dataValueSetService.writeDataValueSetXml( params, response.getOutputStream() );
     }
 
     @RequestMapping( method = RequestMethod.GET, produces = CONTENT_TYPE_JSON )
@@ -113,14 +106,7 @@ public class DataValueSetController
         DataExportParams params = dataValueSetService.getFromUrl( dataSet, Sets.newHashSet( period ), 
             startDate, endDate, orgUnit, children, idSchemes );
         
-        if ( params.isSingleDataValueSet() )
-        {
-            dataValueSetService.writeDataValueSetJson( params, response.getOutputStream() );
-        }
-        else
-        {
-            dataValueSetService.writeDataValueSetJson( dataSet, startDate, endDate, orgUnit, children, response.getOutputStream(), idSchemes );
-        }
+        dataValueSetService.writeDataValueSetJson( params, response.getOutputStream() );
     }
 
     @RequestMapping( method = RequestMethod.GET, produces = CONTENT_TYPE_CSV )
@@ -139,14 +125,7 @@ public class DataValueSetController
         DataExportParams params = dataValueSetService.getFromUrl( dataSet, Sets.newHashSet( period ), 
             startDate, endDate, orgUnit, children, idSchemes );
         
-        if ( params.isSingleDataValueSet() )
-        {
-            dataValueSetService.writeDataValueSetCsv( params, response.getWriter() );
-        }
-        else
-        {
-            dataValueSetService.writeDataValueSetCsv( dataSet, startDate, endDate, orgUnit, children, response.getWriter(), idSchemes );
-        }
+        dataValueSetService.writeDataValueSetCsv( params, response.getWriter() );
     }
 
     // -------------------------------------------------------------------------
