@@ -28,8 +28,17 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import static org.hisp.dhis.webapi.utils.ContextUtils.CONTENT_TYPE_CSV;
+import static org.hisp.dhis.webapi.utils.ContextUtils.CONTENT_TYPE_JSON;
+import static org.hisp.dhis.webapi.utils.ContextUtils.CONTENT_TYPE_XML;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Date;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.hisp.dhis.dxf2.common.IdSchemes;
 import org.hisp.dhis.dxf2.common.ImportOptions;
 import org.hisp.dhis.dxf2.common.JacksonUtils;
@@ -48,15 +57,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.common.collect.Sets;
 
-import javax.servlet.http.HttpServletResponse;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Date;
-import java.util.Set;
-
-import static org.hisp.dhis.webapi.utils.ContextUtils.*;
-
 /**
  * @author Lars Helge Overland
  */
@@ -65,8 +65,6 @@ import static org.hisp.dhis.webapi.utils.ContextUtils.*;
 public class DataValueSetController
 {
     public static final String RESOURCE_PATH = "/dataValueSets";
-
-    private static final Log log = LogFactory.getLog( DataValueSetController.class );
 
     @Autowired
     private DataValueSetService dataValueSetService;
@@ -90,21 +88,12 @@ public class DataValueSetController
         DataExportParams params = dataValueSetService.getFromUrl( dataSet, Sets.newHashSet( period ), 
             startDate, endDate, orgUnit, children, idSchemes );
         
-        boolean isSingleDataValueSet = dataSet.size() == 1 && period != null && orgUnit.size() == 1;
-
-        if ( isSingleDataValueSet )
+        if ( params.isSingleDataValueSet() )
         {
-            String ds = dataSet.iterator().next();
-            String ou = orgUnit.iterator().next();
-
-            log.debug( "Get XML data value set for data set: " + ds + ", period: " + period + ", org unit: " + ou );
-
             dataValueSetService.writeDataValueSetXml( params, response.getOutputStream() );
         }
         else
         {
-            log.debug( "Get XML bulk data value set for start date: " + startDate + ", end date: " + endDate );
-
             dataValueSetService.writeDataValueSetXml( dataSet, startDate, endDate, orgUnit, children, response.getOutputStream(), idSchemes );
         }
     }
@@ -124,21 +113,12 @@ public class DataValueSetController
         DataExportParams params = dataValueSetService.getFromUrl( dataSet, Sets.newHashSet( period ), 
             startDate, endDate, orgUnit, children, idSchemes );
         
-        boolean isSingleDataValueSet = dataSet.size() == 1 && period != null && orgUnit.size() == 1;
-
-        if ( isSingleDataValueSet )
+        if ( params.isSingleDataValueSet() )
         {
-            String ds = dataSet.iterator().next();
-            String ou = orgUnit.iterator().next();
-
-            log.debug( "Get JSON data value set for data set: " + ds + ", period: " + period + ", org unit: " + ou );
-
             dataValueSetService.writeDataValueSetJson( params, response.getOutputStream() );
         }
         else
         {
-            log.debug( "Get JSON bulk data value set for start date: " + startDate + ", end date: " + endDate );
-
             dataValueSetService.writeDataValueSetJson( dataSet, startDate, endDate, orgUnit, children, response.getOutputStream(), idSchemes );
         }
     }
@@ -159,21 +139,12 @@ public class DataValueSetController
         DataExportParams params = dataValueSetService.getFromUrl( dataSet, Sets.newHashSet( period ), 
             startDate, endDate, orgUnit, children, idSchemes );
         
-        boolean isSingleDataValueSet = dataSet.size() == 1 && period != null && orgUnit.size() == 1;
-
-        if ( isSingleDataValueSet )
+        if ( params.isSingleDataValueSet() )
         {
-            String ds = dataSet.iterator().next();
-            String ou = orgUnit.iterator().next();
-
-            log.debug( "Get CSV data value set for data set: " + ds + ", period: " + period + ", org unit: " + ou );
-
             dataValueSetService.writeDataValueSetCsv( params, response.getWriter() );
         }
         else
         {
-            log.debug( "Get CSV bulk data value set for start date: " + startDate + ", end date: " + endDate );
-
             dataValueSetService.writeDataValueSetCsv( dataSet, startDate, endDate, orgUnit, children, response.getWriter(), idSchemes );
         }
     }
@@ -189,8 +160,6 @@ public class DataValueSetController
     {
         ImportSummary summary = dataValueSetService.saveDataValueSet( in, importOptions );
 
-        log.debug( "Data values set saved" );
-
         response.setContentType( CONTENT_TYPE_XML );
         JacksonUtils.toXml( response.getOutputStream(), summary );
     }
@@ -202,8 +171,6 @@ public class DataValueSetController
     {
         ImportSummary summary = dataValueSetService.saveDataValueSetJson( in, importOptions );
 
-        log.debug( "Data values set saved" );
-
         response.setContentType( CONTENT_TYPE_JSON );
         JacksonUtils.toJson( response.getOutputStream(), summary );
     }
@@ -214,8 +181,6 @@ public class DataValueSetController
         HttpServletResponse response, InputStream in, Model model ) throws IOException
     {
         ImportSummary summary = dataValueSetService.saveDataValueSetCsv( in, importOptions );
-
-        log.debug( "Data values set saved" );
 
         response.setContentType( CONTENT_TYPE_XML );
         JacksonUtils.toXml( response.getOutputStream(), summary );
