@@ -19,13 +19,13 @@
 			  <table style="width:100%">
 		        <tr>
 					<td>
-						<input type='text' id='txtSearchValue' name='txtSearchValue' onKeyUp="filterExpressionSelect(event, this.value, 'dataElements');" placeholder="$i18n.getString('filter')" />
-						<input type='button' value='$i18n.getString("clear")' onClick="setFieldValue('txtSearchValue', '');" />			
+						<input type='text' id='expression-de-search' onKeyUp="filterExpressionSelect(event, this.value, 'expression-data-elements');" placeholder="$i18n.getString('filter')" />
+						<input type='button' value='$i18n.getString("clear")' onClick="setFieldValue('expression-de-search', '');" />			
 					</td>
 		        </tr>
 		        <tr>
 					<td>
-						<select multiple id="dataElements" name="dataElements" size="7" style="width:100%" ondblclick="insertDataElement(this);"></select>
+						<select multiple id="expression-data-elements" name="expression-data-elements" size="7" style="width:100%" ondblclick="insertDataElement(this);"></select>
 					</td>
 				</tr>
 		      </table>
@@ -37,13 +37,13 @@
 				<table style="width:100%">
 		        <tr>
 					<td>
-						<input type='text' id='txtSearchAttrValue' name='txtSearchAttrValue' onKeyUp="filterExpressionSelect(event, this.value, 'attributes');" placeholder="$i18n.getString('filter')" />
-						<input type='button' value='$i18n.getString("clear")' onClick="setFieldValue('txtSearchAttrValue', '');" />			
+						<input type='text' id='expression-attr-search' onKeyUp="filterExpressionSelect(event, this.value, 'expression-attributes');" placeholder="$i18n.getString('filter')" />
+						<input type='button' value='$i18n.getString("clear")' onClick="setFieldValue('expression-attr-search', '');" />			
 					</td>
 		        </tr>
 		        <tr>
 					<td>
-						<select multiple id="attributes" name="attributes" size="7" style="width:100%" ondblclick="insertData(this,'A');">
+						<select multiple id="expression-attributes" name="expression-attributes" size="7" style="width:100%" ondblclick="insertData(this,'A');">
 							#foreach( $programAttribute in $program.programAttributes )
 								#if( $programAttribute.attribute.valueType=='number' )
 									<option value='$programAttribute.attribute.uid'>$encoder.htmlEncode($programAttribute.attribute.displayName)</option>
@@ -59,13 +59,13 @@
 				<table style="width:100%">
 				  <tr>
 				    <td>
-					  <input type='text' id='txtSearchPropertyValue' name='txtSearchValue' onKeyUp="filterExpressionSelect(event, this.value, 'programProperty');" placeholder="$i18n.getString('filter')" />
-					  <input type='button' value='$i18n.getString("clear")' onClick="setFieldValue('txtSearchPropertyValue', '');" />			
+					  <input type='text' id='expression-var-search' onKeyUp="filterExpressionSelect(event, this.value, 'expression-variables');" placeholder="$i18n.getString('filter')" />
+					  <input type='button' value='$i18n.getString("clear")' onClick="setFieldValue('expression-var-search', '');" />			
 					</td>
 		        </tr>
 				<tr>
 					<td>
-						<select multiple id="programProperty" name="programProperty" size="7" style="width:100%" ondblclick="insertInfo(this, false);" >
+						<select multiple id="expression-variables" name="expression-variables" size="7" style="width:100%" ondblclick="insertInfo(this, false);" >
 							<option value="V{incident_date}">$i18n.getString( "incident_date" )</option>
 							<option value="V{enrollment_date}">$i18n.getString( "date_of_enrollment" )</option>
 							<option value="V{current_date}">$i18n.getString( "current_date" )</option>
@@ -83,13 +83,13 @@
 				<table style="width:100%">
 		        <tr>
 					<td>
-						<input type='text' id='txtSearchContsValue' name='txtSearchAttrValue' onKeyUp="filterExpressionSelect(event, this.value, 'constants');" placeholder="$i18n.getString('filter')" />
-						<input type='button' value='$i18n.getString("clear")' onClick="setFieldValue('txtSearchContsValue', '');" />			
+						<input type='text' id='expression-const-search' onKeyUp="filterExpressionSelect(event, this.value, 'expression-constants');" placeholder="$i18n.getString('filter')" />
+						<input type='button' value='$i18n.getString("clear")' onClick="setFieldValue('expression-const-search', '');" />			
 					</td>
 		        </tr>
 		        <tr>
 					<td>
-						<select multiple id="constants" name="constants" size="7" style="width:100%" ondblclick="insertData(this,'C');">
+						<select multiple id="expression-constants" name="expression-constants" size="7" style="width:100%" ondblclick="insertData(this,'C');">
 							#foreach( $constant in $constants )
 								<option value='$constant.uid'>$encoder.htmlEncode($constant.displayName)</option>
 							#end
@@ -112,7 +112,7 @@
 		</td>
 	</tr>	
 	<tr>
-		<td>
+		<td style="padding-top:4px">
 			<a class="greyButtonLink" href="javascript:insertOperator( '(' )" title="$i18n.getString( 'left_brackets' )">&#40;</a>
 			<a class="greyButtonLink" href="javascript:insertOperator( ')' )" title="$i18n.getString( 'right_brackets' )">&#41;</a>
 			<a class="greyButtonLink" href="javascript:insertOperator( '*' )" title="$i18n.getString( 'multiply' )">&#42;</a>
@@ -126,7 +126,7 @@
     </tr>	
 	<tr>
 		<td>
-			<div id='aggregationDescription' style="padding: 5px 0 20px 0">$!encoder.htmlEncode($!description)</div>			
+			<div id='expression-description' style="padding: 5px 0 20px 0">$!encoder.htmlEncode($!description)</div>			
 			<input type="hidden" id="checkExpression" name="checkExpression" title="$i18n.getString('expression_is_not_well_formed')" class="{validate:{required:true}}"  />
 		</td>
 	</tr>

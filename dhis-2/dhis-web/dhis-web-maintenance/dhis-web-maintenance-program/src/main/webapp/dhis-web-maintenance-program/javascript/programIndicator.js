@@ -58,7 +58,7 @@ function filterExpressionSelect( event, value, fieldName ) {
 }
 
 function getTrackedEntityDataElements() {
-  clearListById('dataElements');
+  clearListById('expression-data-elements');
   clearListById('deSumId');
   var programStageId = getFieldValue('programStageId');
 
@@ -68,7 +68,7 @@ function getTrackedEntityDataElements() {
       programStageId: programStageId
     }
     , function( json ) {
-      var dataElements = jQuery('#dataElements');
+      var dataElements = jQuery('#expression-data-elements');
       for( i in json.dataElements ) {
         if( json.dataElements[i].type == 'int' || json.dataElements[i].type == 'date' ) {
           dataElements.append("<option value='" + json.dataElements[i].id + "' title='" + json.dataElements[i].name + "' suggested='" + json.dataElements[i].optionset + "'>" + json.dataElements[i].name + "</option>");
@@ -115,7 +115,7 @@ function getConditionDescription() {
 	var expression = getFieldValue('expression');
 	if( expression == '' )
 	{
-		setInnerHTML('aggregationDescription', '');
+		setInnerHTML('expression-description', '');
 	}
 	else
 	{
@@ -124,11 +124,11 @@ function getConditionDescription() {
 		}, function( json ) {
 			if( json.valid ){
 				setFieldValue('checkExpression', json.message);
-				setInnerHTML('aggregationDescription', json.description);
+				setInnerHTML('expression-description', json.description);
 			}
 			else {
 				setFieldValue('checkExpression','');
-				setInnerHTML('aggregationDescription', json.message);
+				setInnerHTML('expression-description', json.message);
 			}
 		});
 	}
