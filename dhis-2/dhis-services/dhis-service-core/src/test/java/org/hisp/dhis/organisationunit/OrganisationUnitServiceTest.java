@@ -28,7 +28,6 @@ package org.hisp.dhis.organisationunit;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.system.util.CollectionUtils.asSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -41,11 +40,15 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.hisp.dhis.DhisSpringTest;
+import org.hisp.dhis.user.User;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.google.common.collect.Sets;
 
 /**
  * @author Kristian Nordal
@@ -362,13 +365,13 @@ public class OrganisationUnitServiceTest
         OrganisationUnit unit4 = createOrganisationUnit( '4' );
         organisationUnitService.addOrganisationUnit( unit4 );
         
-        assertTrue( unit1.isDescendant( asSet( unit1 ) ) );
-        assertTrue( unit2.isDescendant( asSet( unit1 ) ) );
-        assertTrue( unit3.isDescendant( asSet( unit1 ) ) );
-        assertTrue( unit2.isDescendant( asSet( unit1, unit3 ) ) );
+        assertTrue( unit1.isDescendant( Sets.newHashSet( unit1 ) ) );
+        assertTrue( unit2.isDescendant( Sets.newHashSet( unit1 ) ) );
+        assertTrue( unit3.isDescendant( Sets.newHashSet( unit1 ) ) );
+        assertTrue( unit2.isDescendant( Sets.newHashSet( unit1, unit3 ) ) );
         
-        assertFalse( unit2.isDescendant( asSet( unit3 ) ) );
-        assertFalse( unit4.isDescendant( asSet( unit1 ) ) );
+        assertFalse( unit2.isDescendant( Sets.newHashSet( unit3 ) ) );
+        assertFalse( unit4.isDescendant( Sets.newHashSet( unit1 ) ) );
     }
 
     @Test
@@ -938,7 +941,7 @@ public class OrganisationUnitServiceTest
     }
 
     @Test
-    public void getMaxLevels()
+    public void testGetMaxLevels()
     {
         assertEquals( 0, organisationUnitService.getMaxOfOrganisationUnitLevels() );
 
@@ -949,5 +952,54 @@ public class OrganisationUnitServiceTest
         organisationUnitService.addOrganisationUnitLevel( levelB );
 
         assertEquals( 2, organisationUnitService.getMaxOfOrganisationUnitLevels() );
+    }
+    
+    @Test
+    public void testIsInUserHierarchy()
+    {
+        OrganisationUnit ouA = createOrganisationUnit( 'A' );
+        OrganisationUnit ouB = createOrganisationUnit( 'B', ouA );
+        OrganisationUnit ouC = createOrganisationUnit( 'C', ouA );
+        OrganisationUnit ouD = createOrganisationUnit( 'D', ouB );
+        OrganisationUnit ouE = createOrganisationUnit( 'E', ouB );
+        OrganisationUnit ouF = createOrganisationUnit( 'F', ouC );
+        OrganisationUnit ouG = createOrganisationUnit( 'G', ouC );
+
+        ouA.getChildren().add( ouB );
+        ouA.getChildren().add( ouC );
+        ouB.getChildren().add( ouD );
+        ouB.getChildren().add( ouE );
+        ouC.getChildren().add( ouF );
+        ouC.getChildren().add( ouG );
+
+        organisationUnitService.addOrganisationUnit( ouA );
+        organisationUnitService.addOrganisationUnit( ouB );
+        organisationUnitService.addOrganisationUnit( ouC );
+        organisationUnitService.addOrganisationUnit( ouD );
+        organisationUnitService.addOrganisationUnit( ouE );
+        organisationUnitService.addOrganisationUnit( ouF );
+        organisationUnitService.addOrganisationUnit( ouG );
+
+        User user = createUser( 'A' );
+        Set<OrganisationUnit> organisationUnits = Sets.newHashSet( ouB );
+        user.setOrganisationUnits( organisationUnits );
+
+        assertTrue( user.isInUserHierarchy( ouB ) );
+        assertTrue( user.isInUserHierarchy( ouD ) );
+        assertTrue( user.isInUserHierarchy( ouE ) );
+        
+        assertFalse( user.isInUserHierarchy( ouA ) );
+        assertFalse( user.isInUserHierarchy( ouC ) );
+        assertFalse( user.isInUserHierarchy( ouF ) );
+        assertFalse( user.isInUserHierarchy( ouG ) );
+        
+        assertTrue( organisationUnitService.isInUserHierarchy( ouB.getUid(), organisationUnits ) );
+        assertTrue( organisationUnitService.isInUserHierarchy( ouD.getUid(), organisationUnits ) );
+        assertTrue( organisationUnitService.isInUserHierarchy( ouE.getUid(), organisationUnits ) );
+
+        assertFalse( organisationUnitService.isInUserHierarchy( ouA.getUid(), organisationUnits ) );
+        assertFalse( organisationUnitService.isInUserHierarchy( ouC.getUid(), organisationUnits ) );
+        assertFalse( organisationUnitService.isInUserHierarchy( ouF.getUid(), organisationUnits ) );
+        assertFalse( organisationUnitService.isInUserHierarchy( ouG.getUid(), organisationUnits ) );        
     }
 }

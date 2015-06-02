@@ -41,24 +41,24 @@ import org.hisp.dhis.common.IdentifiableProperty;
 public class IdentifiableObjectCallable<T extends IdentifiableObject>
     implements Callable<T>
 {
-    private IdentifiableObjectManager manager;
-    private Class<T> clazz;
-    private IdentifiableProperty property;
-    private String uid;
+    protected IdentifiableObjectManager manager;
+    protected Class<T> clazz;
+    protected IdentifiableProperty property;
+    protected String id;
     
-    public IdentifiableObjectCallable( IdentifiableObjectManager manager, Class<T> clazz, String uid )
+    public IdentifiableObjectCallable( IdentifiableObjectManager manager, Class<T> clazz, String id )
     {
         this.manager = manager;
         this.clazz = clazz;
-        this.uid = uid;
+        this.id = id;
     }
 
-    public IdentifiableObjectCallable( IdentifiableObjectManager manager, Class<T> clazz, IdentifiableProperty property, String uid )
+    public IdentifiableObjectCallable( IdentifiableObjectManager manager, Class<T> clazz, IdentifiableProperty property, String id )
     {
         this.manager = manager;
         this.clazz = clazz;
         this.property = property;
-        this.uid = uid;
+        this.id = id;
     }
     
     @Override
@@ -67,17 +67,17 @@ public class IdentifiableObjectCallable<T extends IdentifiableObject>
     {
         if ( property == null )
         {
-            return manager.get( clazz, uid );
+            return manager.get( clazz, id );
         }
         else
         {
-            return manager.getObject( clazz, property, uid );
+            return manager.getObject( clazz, property, id );
         }
     }
     
-    public IdentifiableObjectCallable<T> setUid( String uid )
+    public IdentifiableObjectCallable<T> setId( String id )
     {
-        this.uid = uid;
+        this.id = id;
         return this;
     }
 }

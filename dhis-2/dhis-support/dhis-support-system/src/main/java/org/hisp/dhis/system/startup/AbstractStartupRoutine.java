@@ -33,7 +33,6 @@ package org.hisp.dhis.system.startup;
  * runlevel property which should be used in bean mappings.
  * 
  * @author <a href="mailto:torgeilo@gmail.com">Torgeir Lorange Ostby</a>
- * @version $Id: AbstractStartupRoutine.java 5781 2008-10-01 12:12:48Z larshelg $
  */
 public abstract class AbstractStartupRoutine
     implements StartupRoutine

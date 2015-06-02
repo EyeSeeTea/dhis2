@@ -37,13 +37,16 @@ import javax.servlet.ServletContextListener;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.system.util.DebugUtils;
+import org.hisp.dhis.util.DebugUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 /**
+ * Implementation of {@link javax.servlet.ServletContextListener} which hooks
+ * into the context initialization and executes the configured
+ * {@link StartupRoutineExecutor}.
+ *
  * @author <a href="mailto:torgeilo@gmail.com">Torgeir Lorange Ostby</a>
- * @version $Id: StartupListener.java 3217 2007-04-02 08:54:21Z torgeilo $
  */
 public class StartupListener
     implements ServletContextListener

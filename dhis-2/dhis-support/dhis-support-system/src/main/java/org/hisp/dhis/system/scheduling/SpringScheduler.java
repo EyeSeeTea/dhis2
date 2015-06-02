@@ -40,6 +40,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 
 /**
+ * {@link Scheduler} implementation for use within the Spring framework.
  * @author Lars Helge Overland
  */
 public class SpringScheduler

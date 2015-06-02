@@ -29,6 +29,8 @@ package org.hisp.dhis.system.scheduling;
  */
 
 /**
+ * Scheduler for managing the scheduling and execution of tasks.
+ *
  * @author Lars Helge Overland
  */
 public interface Scheduler

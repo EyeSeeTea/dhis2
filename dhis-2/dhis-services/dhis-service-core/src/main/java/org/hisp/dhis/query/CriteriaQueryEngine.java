@@ -37,12 +37,10 @@ import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
 import org.hisp.dhis.schema.Property;
 import org.hisp.dhis.schema.Schema;
-import org.hisp.dhis.system.util.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,12 +48,12 @@ import java.util.Map;
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class CriteriaQueryEngine<T extends IdentifiableObject> implements QueryEngine<T>
+public class CriteriaQueryEngine<T> implements QueryEngine<T>
 {
     @Autowired
-    private final List<HibernateGenericStore<? extends IdentifiableObject>> hibernateGenericStores = new ArrayList<>();
+    private final List<HibernateGenericStore<T>> hibernateGenericStores = new ArrayList<>();
 
-    private Map<Class<?>, HibernateGenericStore<? extends IdentifiableObject>> stores = new HashMap<>();
+    private Map<Class<?>, HibernateGenericStore<T>> stores = new HashMap<>();
 
     @Override
     @SuppressWarnings( "unchecked" )
@@ -93,7 +91,7 @@ public class CriteriaQueryEngine<T extends IdentifiableObject> implements QueryE
 
         // create a copy of this query using only the restrictions
         Query countQuery = Query.from( query.getSchema() );
-        countQuery.add( query.getRestrictions() );
+        countQuery.add( query.getCriterions() );
 
         if ( schema == null )
         {
@@ -133,8 +131,15 @@ public class CriteriaQueryEngine<T extends IdentifiableObject> implements QueryE
             criteria.setMaxResults( query.getMaxResults() );
         }
 
-        for ( Restriction restriction : query.getRestrictions() )
+        for ( org.hisp.dhis.query.Criterion criterion : query.getCriterions() )
         {
+            if ( !Restriction.class.isInstance( criterion ) )
+            {
+                continue;
+            }
+
+            Restriction restriction = (Restriction) criterion;
+
             if ( !restrictions.containsKey( restriction.getOperator() ) )
             {
                 restrictions.put( restriction.getOperator(), new ArrayList<Restriction>() );
@@ -170,6 +175,7 @@ public class CriteriaQueryEngine<T extends IdentifiableObject> implements QueryE
         return criteria;
     }
 
+    @SuppressWarnings( "unchecked" )
     private Criterion getHibernateCriterion( Schema schema, Restriction restriction )
     {
         if ( restriction == null || restriction.getOperator() == null )
@@ -183,7 +189,7 @@ public class CriteriaQueryEngine<T extends IdentifiableObject> implements QueryE
 
         for ( Object parameter : restriction.getParameters() )
         {
-            parameters.add( getValue( property, parameter ) );
+            parameters.add( QueryUtils.getValue( property.getKlass(), parameter ) );
         }
 
         if ( parameters.isEmpty() )
@@ -276,7 +282,7 @@ public class CriteriaQueryEngine<T extends IdentifiableObject> implements QueryE
             return;
         }
 
-        for ( HibernateGenericStore<? extends IdentifiableObject> store : hibernateGenericStores )
+        for ( HibernateGenericStore<T> store : hibernateGenericStores )
         {
             stores.put( store.getClazz(), store );
         }
@@ -286,69 +292,5 @@ public class CriteriaQueryEngine<T extends IdentifiableObject> implements QueryE
     {
         initStoreMap();
         return stores.get( klass );
-    }
-
-    private Object getValue( Property property, Object objectValue )
-    {
-        Class<?> klass = property.getKlass();
-
-        if ( !String.class.isInstance( objectValue ) )
-        {
-            return objectValue;
-        }
-
-        String value = (String) objectValue;
-
-        if ( klass.isInstance( value ) )
-        {
-            return value;
-        }
-
-        if ( Boolean.class.isAssignableFrom( klass ) )
-        {
-            try
-            {
-                return Boolean.valueOf( value );
-            }
-            catch ( Exception ignored )
-            {
-            }
-        }
-        else if ( Integer.class.isAssignableFrom( klass ) )
-        {
-            try
-            {
-                return Integer.valueOf( value );
-            }
-            catch ( Exception ignored )
-            {
-            }
-        }
-        else if ( Float.class.isAssignableFrom( klass ) )
-        {
-            try
-            {
-                return Float.valueOf( value );
-            }
-            catch ( Exception ignored )
-            {
-            }
-        }
-        else if ( Double.class.isAssignableFrom( klass ) )
-        {
-            try
-            {
-                return Double.valueOf( value );
-            }
-            catch ( Exception ignored )
-            {
-            }
-        }
-        else if ( Date.class.isAssignableFrom( klass ) )
-        {
-            return DateUtils.parseDate( value );
-        }
-
-        return null;
     }
 }

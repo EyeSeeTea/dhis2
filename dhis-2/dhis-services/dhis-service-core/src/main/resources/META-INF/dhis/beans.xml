@@ -15,7 +15,7 @@
 
   <bean id="org.hisp.dhis.schema.SchemaService" class="org.hisp.dhis.schema.DefaultSchemaService" />
 
-  <bean id="org.hisp.dhis.query.QueryEngine" class="org.hisp.dhis.query.CriteriaQueryEngine" />
+  <bean id="org.hisp.dhis.query.CriteriaQueryEngine" class="org.hisp.dhis.query.CriteriaQueryEngine" />
 
   <bean id="org.hisp.dhis.query.QueryService" class="org.hisp.dhis.query.DefaultQueryService" />
 
@@ -85,7 +85,7 @@
   </bean>
 
   <bean id="org.hisp.dhis.filter.MetaDataFilterStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
-    <property name="clazz" value="org.hisp.dhis.filter.MetaDataFilter" />
+    <property name="clazz" value="org.hisp.dhis.commons.filter.MetaDataFilter" />
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="cacheable" value="true" />
   </bean>
@@ -530,6 +530,7 @@
     <property name="categoryOptionGroupStore" ref="org.hisp.dhis.dataelement.CategoryOptionGroupStore" />
     <property name="categoryOptionGroupSetStore" ref="org.hisp.dhis.dataelement.CategoryOptionGroupSetStore" />
     <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
+    <property name="idObjectManager" ref="org.hisp.dhis.common.IdentifiableObjectManager" />
     <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
   </bean>
 
@@ -671,7 +672,7 @@
     <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
   </bean>
 
-  <bean id="org.hisp.dhis.filter.MetaDataFilterService" class="org.hisp.dhis.filter.DefaultMetaDataFilterService">
+  <bean id="org.hisp.dhis.filter.MetaDataFilterService" class="org.hisp.dhis.commons.filter.DefaultMetaDataFilterService">
     <property name="metaDataFilterStore" ref="org.hisp.dhis.filter.MetaDataFilterStore" />
     <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
   </bean>
@@ -743,9 +744,10 @@
         <value>lesotho</value>
         <value>liberia</value>
         <value>malawi</value>
+        <value>mongolia</value>
+        <value>mozambique</value>
         <value>myanmar</value>
         <value>mali</value>
-        <value>mozambique</value>
         <value>msf</value>
         <value>msi</value>
         <value>namibia</value>

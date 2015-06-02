@@ -42,12 +42,19 @@ import java.util.Date;
 public final class QueryUtils
 {
     @SuppressWarnings( "unchecked" )
-    static public <T> T getValue( Class<T> klass, String value )
+    static public <T> T getValue( Class<T> klass, Object objectValue )
     {
-        if ( klass.isInstance( value ) )
+        if ( klass.isInstance( objectValue ) )
         {
-            return (T) value;
+            return (T) objectValue;
         }
+
+        if ( !String.class.isInstance( objectValue ) )
+        {
+            return (T) objectValue;
+        }
+
+        String value = (String) objectValue;
 
         if ( Boolean.class.isAssignableFrom( klass ) )
         {
@@ -95,7 +102,7 @@ public final class QueryUtils
         }
         else if ( Enum.class.isAssignableFrom( klass ) )
         {
-            Optional<? extends Enum<?>> enumValue = Enums.getIfPresent( (Class<? extends Enum>) klass, value );
+            Optional<? extends Enum<?>> enumValue = (Optional<? extends Enum<?>>) Enums.getIfPresent( (Class<? extends Enum>) klass, value );
 
             if ( enumValue.isPresent() )
             {
@@ -104,7 +111,7 @@ public final class QueryUtils
         }
         else if ( Collection.class.isAssignableFrom( klass ) )
         {
-            if ( value == null || !value.startsWith( "[" ) || !value.endsWith( "]" ) )
+            if ( !value.startsWith( "[" ) || !value.endsWith( "]" ) )
             {
                 return null;
             }

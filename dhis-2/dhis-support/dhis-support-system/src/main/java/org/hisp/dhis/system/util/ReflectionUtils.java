@@ -29,9 +29,10 @@ package org.hisp.dhis.system.util;
  */
 
 import javassist.util.proxy.ProxyFactory;
+
 import org.hibernate.collection.spi.PersistentCollection;
-import org.hisp.dhis.system.util.functional.Function1;
-import org.hisp.dhis.system.util.functional.Predicate;
+import org.hisp.dhis.util.functional.Function1;
+import org.hisp.dhis.util.functional.Predicate;
 import org.springframework.util.StringUtils;
 
 import java.lang.annotation.Annotation;
@@ -49,8 +50,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import static org.hisp.dhis.system.util.PredicateUtils.alwaysTrue;
 
 /**
  * @author Lars Helge Overland
@@ -502,11 +501,6 @@ public class ReflectionUtils
 
             currentType = currentType.getSuperclass();
         }
-    }
-
-    public static Collection<Field> collectFields( Class<?> clazz )
-    {
-        return collectFields( clazz, alwaysTrue );
     }
 
     public static Collection<Field> collectFields( Class<?> clazz, Predicate<Field> predicate )
