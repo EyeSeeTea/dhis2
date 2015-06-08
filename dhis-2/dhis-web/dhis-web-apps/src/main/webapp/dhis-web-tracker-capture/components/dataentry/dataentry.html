@@ -3,6 +3,8 @@
         {{dataentryWidget.title| translate}}        
 
         <span class="pull-right widget-link">
+            
+            <a href ng-click="toggleEventsTableDisplay()" title="{{showEventsAsTables ? 'toggle_table_view_off' : 'toggle_table_view_on'| translate}}" ng-show="stagesCanBeShownAsTable"><span ng-if="!showEventsAsTables"><i class="fa fa-bars vertical-center"></i></span><span ng-if="showEventsAsTables"><i class="fa fa-square vertical-center"></i></span></a>
             <a href ng-click="filterEvents = !filterEvents" title="{{filterEvents ? 'list_events' : 'filter_events'| translate}}" ng-show="eventFilteringRequired"><span ng-if="!filterEvents"><i class="fa fa-filter vertical-center"></i></span><span ng-if="filterEvents"><i class="fa fa-list vertical-center"></i></span></a>
             <a href ng-click="toggleLegend()" title="{{'event_color_legend'| translate}}" class="small-horizonal-spacing"><i class="fa fa-info-circle vertical-center"></i></a>
             <a class="small-horizonal-spacing" href ng-click="expandCollapse(dataentryWidget)">
@@ -34,9 +36,7 @@
                             
                             <!-- event add/filter icon begins -->
                             <span class='pull-right'>
-                                <span ng-if="stageCanBeShownAsTable(stage)">
-                                    <a href title="{{'toggle_table_view'| translate}}" ng-click="toggleStageTableDisplay(stage)" style="vertical-align:middle"><i class="fa fa-bars"></i></a>
-                                </span>
+
                                 <span ng-if="stageNeedsEvent(stage)">
                                     <a href title="{{'create_new_event'| translate}}" ng-click="showCreateEvent(stage)" style="vertical-align:middle"><i class="fa fa-plus"></i></a>
                                 </span>

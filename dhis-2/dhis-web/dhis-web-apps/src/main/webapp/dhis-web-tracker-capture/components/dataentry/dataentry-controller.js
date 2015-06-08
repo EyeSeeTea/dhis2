@@ -30,6 +30,9 @@ trackerCapture.controller('DataEntryController',
     $scope.eventPeriods = [];
     $scope.currentPeriod = [];
     $scope.filterEvents = true;
+    $scope.showEventsAsTables = false;
+    //variable is set while looping through the program stages later.
+    $scope.stagesCanBeShownAsTable = false;
     $scope.showHelpText = {};
 	$scope.hiddenFields = {};
     
@@ -123,6 +126,11 @@ trackerCapture.controller('DataEntryController',
                     
                     $scope.stagesById[stage.id] = stage;
                     $scope.eventsByStage[stage.id] = [];
+                    
+                    //If one of the stages has less than 7 data elements, allow sorting as table:
+                    if(stage.programStageDataElements.length < 7) {
+                        $scope.stagesCanBeShownAsTable = true;
+                    }
                 });
                 
                 $scope.programStages = orderByFilter($scope.programStages, '-sortOrder').reverse();
@@ -194,11 +202,16 @@ trackerCapture.controller('DataEntryController',
         return false;
     };
     
-    $scope.toggleStageTableDisplay = function(stage) {
-        stage.displayEventsInTable = !stage.displayEventsInTable;
-        if(this.currentStage === stage) {
-            $scope.getDataEntryForm();
-        }
+    $scope.toggleEventsTableDisplay = function() {
+        $scope.showEventsAsTables = !$scope.showEventsAsTables;
+        angular.forEach($scope.programStages, function(stage){
+            if(stage.programStageDataElements.length < 7) {
+                stage.displayEventsInTable = $scope.showEventsAsTables;
+                if($scope.currentStage === stage) {
+                    $scope.getDataEntryForm();
+                }
+            }
+        });
     };
     
     $scope.stageNeedsEvent = function(stage){  
@@ -269,7 +282,7 @@ trackerCapture.controller('DataEntryController',
                 $scope.eventsByStage[newEvent.programStage].push(newEvent);
                 $scope.currentEvent = newEvent;
                 sortEventsByStage('ADD');
-                $scope.showDataEntry(newEvent, false);
+                $scope.showDataEntry(newEvent, true);
             }            
         }, function () {
         });

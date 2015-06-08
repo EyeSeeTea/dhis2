@@ -62,7 +62,7 @@ trackerCapture.controller('DashboardController',
         $scope.widgetsChanged = [];
         $scope.dashboardStatus = [];
         $scope.dashboardWidgetsOrder = {biggerWidgets: [], smallerWidgets: []};
-        $scope.orderChanged = false;        
+        $scope.orderChanged = false;
         
             
 	    //Get widget configuration and order ascending based on index
