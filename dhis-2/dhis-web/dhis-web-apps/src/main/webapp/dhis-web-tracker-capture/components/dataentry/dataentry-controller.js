@@ -276,12 +276,15 @@ trackerCapture.controller('DataEntryController',
                 }
                 
                 //Have to make sure the event is preprocessed - this does not happen unless "Dashboardwidgets" is invoked.
-                newEvent = processEvent(newEvent,stage);
+                newEvent = EventUtils.processEvent(newEvent, stage, $scope.optionSets, $scope.prStDes);
+                
                 
                 $scope.eventsByStage[newEvent.programStage].push(newEvent);
                 $scope.currentEvent = newEvent;
                 sortEventsByStage('ADD');
-                $scope.showDataEntry(newEvent, true);
+
+                $scope.currentEvent = null;
+                $scope.showDataEntry(newEvent, false);
             }            
         }, function () {
         });

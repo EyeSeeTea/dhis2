@@ -32,7 +32,7 @@
                                    ng-model="eventRow[prStDe.dataElement.id]" 
                                    ng-required={{prStDe.compulsory}}
                                    ng-disabled="selectedEnrollment.status !== 'ACTIVE' || eventRow.editingNotAllowed" 
-                                   ng-blur="saveDatavalueForEvent(prStDe,eventRow)" 
+                                   ng-blur="saveDatavalueForEvent(prStDe,innerform.foo,eventRow)" 
                                    name="foo"/>
                             <span ng-show="dataEntryOuterForm.submitted && dataEntryInnerForm.foo.$invalid" class="error">{{'number_required'| translate}}</span>
                         </div>
@@ -47,7 +47,7 @@
                                         typeahead="option.name as option.name for option in optionSets[prStDe.dataElement.optionSet.id].options | filter:$viewValue | limitTo:20" 
                                         typeahead-open-on-focus
                                         typeahead-editable="false"
-                                        ng-blur="saveDatavalueForEvent(prStDe,eventRow,eventRow[prStDe.dataElement.id])"
+                                        ng-blur="saveDatavalueForEvent(prStDe,innerform.foo,eventRow)"
                                         name="foo"/>
                                     <span ng-show="dataEntryOuterForm.submitted && dataEntryInnerForm.foo.$invalid || !eventRow[prStDe.dataElement.id] && currentElement.id === prStDe.dataElement.id" class="error">{{'invalid'| translate}}</span>
                                 </div>
@@ -59,7 +59,7 @@
                                             ng-required={{prStDe.compulsory}} 
                                             ng-disabled="selectedEnrollment.status !== 'ACTIVE' || eventRow.editingNotAllowed" 
                                             ng-model="eventRow[prStDe.dataElement.id]"
-                                            ng-change="saveDatavalueForEvent(prStDe,eventRow)" 
+                                            ng-change="saveDatavalueForEvent(prStDe,null,eventRow)" 
                                             value=""> {{'no_value' | translate}}<br>                                       
                                     </label><br>
                                     <span ng-repeat="option in optionSets[prStDe.dataElement.optionSet.id].options">
@@ -70,7 +70,7 @@
                                                 ng-required={{prStDe.compulsory}} 
                                                 ng-disabled="selectedEnrollment.status !== 'ACTIVE' || eventRow.editingNotAllowed" 
                                                 ng-model="eventRow[prStDe.dataElement.id]"
-                                                ng-change="saveDatavalueForEvent(prStDe,eventRow)" 
+                                                ng-change="saveDatavalueForEvent(prStDe,null,eventRow)" 
                                                 value={{option.name}}> {{option.name}}
                                         </label><br>
                                     </span>
@@ -82,7 +82,7 @@
                                     ng-model="eventRow[prStDe.dataElement.id]" 
                                     ng-required={{prStDe.compulsory}} 
                                     ng-disabled="selectedEnrollment.status !== 'ACTIVE' || eventRow.editingNotAllowed" 
-                                    ng-blur="saveDatavalueForEvent(prStDe,eventRow)" 
+                                    ng-blur="saveDatavalueForEvent(prStDe,innerform.foo,eventRow)" 
                                     name="foo"/>
                             </div>
                         </div>
@@ -91,7 +91,7 @@
                                     ng-model="eventRow[prStDe.dataElement.id]" 
                                     ng-required={{prStDe.compulsory}} 
                                     ng-disabled="selectedEnrollment.status !== 'ACTIVE' || eventRow.editingNotAllowed" 
-                                    ng-change="saveDatavalueForEvent(prStDe,eventRow)" 
+                                    ng-change="saveDatavalueForEvent(prStDe,innerform.foo,eventRow)" 
                                     name="foo">
                                 <option value="">{{'please_select'| translate}}</option>                        
                                 <option value="false">{{'no'| translate}}</option>
@@ -107,7 +107,7 @@
                                    ng-model="eventRow[prStDe.dataElement.id]"
                                    ng-required={{prStDe.compulsory}}  
                                    ng-disabled="selectedEnrollment.status !== 'ACTIVE' || eventRow.editingNotAllowed" 
-                                   blur-or-change="saveDatavalueForEvent(prStDe,eventRow)"
+                                   blur-or-change="saveDatavalueForEvent(prStDe,innerform.foo,eventRow)"
                                    name="foo"/>
                         </div>
                         <div ng-switch-when="trueOnly">
@@ -116,7 +116,7 @@
                                    ng-model="eventRow[prStDe.dataElement.id]"                                                               
                                    ng-required={{prStDe.compulsory}} 
                                    ng-disabled="selectedEnrollment.status !== 'ACTIVE' || eventRow.editingNotAllowed" 
-                                   ng-change="saveDatavalueForEvent(prStDe,eventRow)" 
+                                   ng-change="saveDatavalueForEvent(prStDe,innerform.foo,eventRow)" 
                                    name="foo"/>
                         </div>
                     </div>
