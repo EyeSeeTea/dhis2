@@ -30,6 +30,7 @@ package org.hisp.dhis.dxf2.datavalueset;
 
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getIdentifiers;
 import static org.hisp.dhis.system.util.DateUtils.getLongGmtDateString;
+import static org.hisp.dhis.system.util.DateUtils.getMediumDateString;
 import static org.hisp.dhis.util.TextUtils.getCommaDelimitedString;
 
 import java.io.OutputStream;
@@ -41,6 +42,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.amplecode.staxwax.factory.XMLFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.calendar.Calendar;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataset.DataSet;
@@ -61,6 +64,8 @@ import com.csvreader.CsvWriter;
 public class SpringDataValueSetStore
     implements DataValueSetStore
 {
+    private static final Log log = LogFactory.getLog( SpringDataValueSetStore.class );
+    
     private static final char CSV_DELIM = ',';
 
     @Autowired
@@ -175,7 +180,7 @@ public class SpringDataValueSetStore
         String ouScheme = idSchemes.getOrgUnitIdScheme().toString().toLowerCase();
         String ocScheme = idSchemes.getCategoryOptionComboIdScheme().toString().toLowerCase();
 
-        return
+        String sql =
             "select de." + deScheme + " as deid, pe.startdate as pestart, pt.name as ptname, ou." + ouScheme + " as ouid, " +
             "coc." + ocScheme + " as cocid, aoc." + ocScheme + " as aocid, " +
             "dv.value, dv.storedby, dv.created, dv.lastupdated, dv.comment, dv.followup " +
@@ -187,8 +192,30 @@ public class SpringDataValueSetStore
             "join categoryoptioncombo coc on (dv.categoryoptioncomboid=coc.categoryoptioncomboid) " +
             "join categoryoptioncombo aoc on (dv.attributeoptioncomboid=aoc.categoryoptioncomboid) " +
             "where de.dataelementid in (" + getCommaDelimitedString( getIdentifiers( getDataElements( params.getDataSets() ) ) ) + ") " +
-            "and dv.periodid in (" + getCommaDelimitedString( getIdentifiers( params.getPeriods() ) ) + ") " +
-            "and dv.sourceid in (" + getCommaDelimitedString( getIdentifiers( params.getOrganisationUnits() ) ) + ")";
+            "and dv.sourceid in (" + getCommaDelimitedString( getIdentifiers( params.getOrganisationUnits() ) ) + ") ";
+        
+        if ( params.hasStartEndDate() )
+        {
+            sql += "and (pe.startdate >= '" + getMediumDateString( params.getStartDate() ) + "' and pe.enddate <= '" + getMediumDateString( params.getEndDate() ) + "') ";
+        }
+        else
+        {
+            sql += "and dv.periodid in (" + getCommaDelimitedString( getIdentifiers( params.getPeriods() ) ) + ") ";
+        }
+        
+        if ( params.hasLastUpdated() )
+        {
+            sql += "and dv.lastupdated >= '" + getLongGmtDateString( params.getLastUpdated() ) + "' ";
+        }
+        
+        if ( params.hasLimit() )
+        {
+            sql += "limit " + params.getLimit();
+        }
+        
+        log.debug( "Get data value set SQL: " + sql );
+        
+        return sql;
     }
 
     private Set<DataElement> getDataElements( Set<DataSet> dataSets )

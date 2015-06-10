@@ -31,6 +31,7 @@ package org.hisp.dhis.importexport.action.util;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.xerces.impl.io.MalformedByteSequenceException;
 import org.hisp.dhis.dxf2.common.ImportOptions;
 import org.hisp.dhis.dxf2.gml.GmlImportService;
 import org.hisp.dhis.dxf2.gml.GmlPreProcessingResult;
@@ -93,35 +94,54 @@ public class ImportMetaDataGmlTask
 
         GmlPreProcessingResult gmlPreProcessingResult = gmlImportService.preProcessGml( inputStream );
 
-        if ( !gmlPreProcessingResult.isSuccess() )
+        if ( gmlPreProcessingResult.isSuccess() )
+        {
+            gmlImportService.importGml( gmlPreProcessingResult.getResultMetaData(), userUid, importOptions, taskId );
+        }
+        else
         {
             Throwable throwable = gmlPreProcessingResult.getThrowable();
-            String message = createErrorMessage( throwable );
 
-            notifier.notify( taskId, NotificationLevel.ERROR, message, false );
-            log.error( "GML import failed: " + message, throwable );
-
-            return;
+            notifier.notify( taskId, NotificationLevel.ERROR, createNotifierErrorMessage( throwable ), false );
+            log.error( "GML import failed during pre-processing", throwable );
         }
-
-        gmlImportService.importGml( gmlPreProcessingResult.getResultMetaData(), userUid, importOptions, taskId );
     }
 
-    private String createErrorMessage( Throwable throwable )
+    private String createNotifierErrorMessage( Throwable throwable )
     {
-        String message = "";
+        StringBuilder sb = new StringBuilder( "GML import failed: " );
+
         Throwable rootThrowable = ExceptionUtils.getRootCause( throwable );
 
         if ( rootThrowable instanceof SAXParseException )
         {
             SAXParseException e = (SAXParseException) rootThrowable;
-            message += "Syntax error on line " + e.getLineNumber() + ". " + e.getMessage();
+            sb.append( e.getMessage() );
+
+            if ( e.getLineNumber() >= 0 )
+            {
+                sb.append( " On line " ).append( e.getLineNumber() );
+
+                if ( e.getColumnNumber() >= 0 )
+                {
+                    sb.append( " column " ).append( e.getColumnNumber() );
+                }
+            }
+        }
+        else if ( rootThrowable instanceof MalformedByteSequenceException )
+        {
+            sb.append( "Malformed GML file." );
         }
         else
         {
-            message += rootThrowable.getMessage();
+            sb.append( rootThrowable.getMessage() );
         }
 
-        return HtmlUtils.htmlEscape( message );
+        if ( sb.charAt( sb.length() - 1 ) != '.' )
+        {
+            sb.append( '.' );
+        }
+
+        return HtmlUtils.htmlEscape( sb.toString() );
     }
 }

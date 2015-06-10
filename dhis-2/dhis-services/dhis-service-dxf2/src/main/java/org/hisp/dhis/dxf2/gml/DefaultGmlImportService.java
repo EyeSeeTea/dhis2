@@ -28,12 +28,22 @@ package org.hisp.dhis.dxf2.gml;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.base.Function;
-import com.google.common.base.Strings;
-import com.google.common.collect.Iterators;
-import com.google.common.collect.Maps;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+
 import org.apache.commons.io.IOUtils;
-import org.hibernate.Hibernate;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.IdentifiableProperty;
 import org.hisp.dhis.common.MergeStrategy;
@@ -48,19 +58,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import com.google.common.base.Function;
+import com.google.common.base.Strings;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Maps;
 
 /**
  * @author Halvdan Hoem Grelland
@@ -150,81 +151,6 @@ public class DefaultGmlImportService
         return GmlPreProcessingResult.success( metaData );
     }
 
-    // TODO Remove this (and refactor unit test to use preProcessGml)
-    @Override
-    public MetaData fromGml( InputStream inputStream )
-        throws IOException, TransformerException
-    {
-        InputStream dxfStream;
-        MetaData metaData;
-
-        try
-        {
-            dxfStream = transformGml( inputStream );
-        }
-        catch (Exception e)
-        {
-            dxfStream = null;
-        }
-
-        if(dxfStream != null)
-        {
-            metaData = renderService.fromXml( dxfStream, MetaData.class );
-            dxfStream.close();
-        }
-        else
-        {
-            return null;
-        }
-
-        Map<String, OrganisationUnit> uidMap  = Maps.newHashMap(), codeMap = Maps.newHashMap(), nameMap = Maps.newHashMap();
-
-        matchAndFilterOnIdentifiers( metaData.getOrganisationUnits(), uidMap, codeMap, nameMap );
-
-        Map<String, OrganisationUnit> persistedUidMap  = getMatchingPersistedOrgUnits( uidMap.keySet(),  IdentifiableProperty.UID );
-        Map<String, OrganisationUnit> persistedCodeMap = getMatchingPersistedOrgUnits( codeMap.keySet(), IdentifiableProperty.CODE );
-        Map<String, OrganisationUnit> persistedNameMap = getMatchingPersistedOrgUnits( nameMap.keySet(), IdentifiableProperty.NAME );
-
-        Iterator<OrganisationUnit> persistedIterator = Iterators.concat( persistedUidMap.values().iterator(),
-            persistedCodeMap.values().iterator(), persistedNameMap.values().iterator() );
-
-        while ( persistedIterator.hasNext() )
-        {
-            OrganisationUnit persisted = persistedIterator.next(), imported = null;
-
-            if ( !Strings.isNullOrEmpty( persisted.getUid() ) && uidMap.containsKey( persisted.getUid() ) )
-            {
-                imported = uidMap.get( persisted.getUid() );
-            }
-            else if ( !Strings.isNullOrEmpty( persisted.getCode() ) && codeMap.containsKey( persisted.getCode() ) )
-            {
-                imported = codeMap.get( persisted.getCode() );
-            }
-            else if ( !Strings.isNullOrEmpty( persisted.getName() ) && nameMap.containsKey( persisted.getName() ) )
-            {
-                imported = nameMap.get( persisted.getName() );
-            }
-
-            if ( imported == null || imported.getCoordinates() == null || imported.getFeatureType() == null )
-            {
-                continue; // Failed to dereference a persisted entity for this org unit or geo data incomplete/missing, therefore ignore
-            }
-
-            mergeNonGeoData( persisted, imported );
-        }
-
-        return metaData;
-    }
-
-    @Transactional
-    @Override
-    public void importGml( InputStream inputStream, String userUid, ImportOptions importOptions, TaskId taskId )
-        throws IOException, TransformerException
-    {
-        importService.importMetaData( userUid, fromGml( inputStream ), importOptions, taskId );
-    }
-
-    @Transactional
     @Override
     public void importGml( MetaData metaData, String userUid, ImportOptions importOptions, TaskId taskId )
     {

@@ -28,6 +28,7 @@ package org.hisp.dhis.dxf2.datavalueset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -47,9 +48,17 @@ public class DataExportParams
     
     private Set<Period> periods = new HashSet<>();
     
+    private Date startDate;
+    
+    private Date endDate;
+    
     private Set<OrganisationUnit> organisationUnits = new HashSet<>();
 
     private boolean includeChildren;
+    
+    private Date lastUpdated;
+    
+    private Integer limit;
     
     private IdSchemes idSchemes;
 
@@ -75,9 +84,24 @@ public class DataExportParams
         return periods != null && !periods.isEmpty() ? periods.iterator().next() : null;
     }
     
+    public boolean hasStartEndDate()
+    {
+        return startDate != null && endDate != null;
+    }
+    
     public OrganisationUnit getFirstOrganisationUnit()
     {
         return organisationUnits != null && !organisationUnits.isEmpty() ? organisationUnits.iterator().next() : null;
+    }
+    
+    public boolean hasLastUpdated()
+    {
+        return lastUpdated != null;
+    }
+    
+    public boolean hasLimit()
+    {
+        return limit != null;
     }
     
     /**
@@ -124,6 +148,26 @@ public class DataExportParams
         this.periods = periods;
     }
 
+    public Date getStartDate()
+    {
+        return startDate;
+    }
+
+    public void setStartDate( Date startDate )
+    {
+        this.startDate = startDate;
+    }
+
+    public Date getEndDate()
+    {
+        return endDate;
+    }
+
+    public void setEndDate( Date endDate )
+    {
+        this.endDate = endDate;
+    }
+
     public Set<OrganisationUnit> getOrganisationUnits()
     {
         return organisationUnits;
@@ -142,6 +186,26 @@ public class DataExportParams
     public void setIncludeChildren( boolean includeChildren )
     {
         this.includeChildren = includeChildren;
+    }
+
+    public Date getLastUpdated()
+    {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated( Date lastUpdated )
+    {
+        this.lastUpdated = lastUpdated;
+    }
+
+    public Integer getLimit()
+    {
+        return limit;
+    }
+
+    public void setLimit( Integer limit )
+    {
+        this.limit = limit;
     }
 
     public IdSchemes getIdSchemes()
