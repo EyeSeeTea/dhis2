@@ -37,15 +37,70 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
+ * Handles the transformation, sanitation and merging of geospatial
+ * data for OrganisationUnits through processing and importing GML files.
+ *
  * @author Halvdan Hoem Grelland
  */
 public interface GmlImportService
 {
     String ID = GmlImportService.class.getName();
 
+    /**
+     * Transform a GML document to MetaData containing the relevant updates
+     * to geospatial features (e.g. coordinates, featuretypes). The process
+     * filters the input against the database and merges in essential fields
+     * needed for the meta data importer to only update the geospatial fields
+     * and not nullify any 'missing' fields.
+     *
+     * @param inputStream the GML document to import.
+     * @return a MetaData object reflecting the database content with the GML file changes merged in.
+     * @throws IOException on failure to read the InputStream.
+     * @throws TransformerException on failure to parse and transform the GML content.
+     */
     MetaData fromGml( InputStream inputStream )
         throws IOException, TransformerException;
 
-    public void importGml( InputStream inputStream, String userUid, ImportOptions importOptions, TaskId taskId )
+    /**
+     * Pre-process a GML document. The process, in short, entails the following:
+     * <ol>
+     *     <li>Parse the GML payload and transform it into DXF2 format</li>
+     *     <li>Get the given identifiers (uid, code or name) from the parsed payload and fetch
+     *     the corresponding entities from the DB</li>
+     *     <li>Merge the geospatial data given in the input GML into DB entities and return</li>
+     * </ol>
+     *
+     * The result of this process in returned in a {@link GmlPreProcessingResult} which
+     * encapsulates the returned {@link MetaData} object or the exception in cause of parse
+     * failure due to IO errors or malformed input.
+     *
+     * @param gmlInputStream the InputStream providing the GML input.
+     * @return a GmlPreProcessingResult representing the end result of the process.
+     */
+    GmlPreProcessingResult preProcessGml( InputStream gmlInputStream );
+
+    /**
+     * Imports GML data and merges the geospatial data updates into the database.
+     * See {@link #fromGml(InputStream)} for details on the underlying process.
+     *
+     * @param inputStream the GML document to import.
+     * @param userUid the UID of the user performing the import (task owner).
+     * @param importOptions the ImportOptions for the MetaData importer.
+     * @param taskId the TaskId of the process.
+     * @throws IOException on failure to read the InputStream.
+     * @throws TransformerException on failure to parse and transform the GML content.
+     */
+    void importGml( InputStream inputStream, String userUid, ImportOptions importOptions, TaskId taskId )
         throws IOException, TransformerException;
+
+    /**
+     * Imports a MetaData object containing geospatial updates.
+     * The MetaData should be retrieved using {@link #fromGml(InputStream)}.
+     *
+     * @param metaData the MetaData reflecting the geospatial updates.
+     * @param userUid the UID of the user performing the import (task owner).
+     * @param importOptions the ImportOptions for the MetaData importer.
+     * @param taskId the TaskId of the process.
+     */
+    void importGml( MetaData metaData, String userUid, ImportOptions importOptions, TaskId taskId );
 }

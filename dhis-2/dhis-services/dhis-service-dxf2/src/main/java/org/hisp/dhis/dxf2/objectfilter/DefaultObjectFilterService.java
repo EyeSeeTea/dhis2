@@ -164,28 +164,13 @@ public class DefaultObjectFilterService implements ObjectFilterService
         return true;
     }
 
-    /**
-     * Filters through every operator treating multiple of same operator as OR.
-     */
     private boolean evaluateFilterOps( Object value, FilterOps filterOps )
     {
-        for ( String operator : filterOps.getFilters().keySet() )
+        for ( Op op : filterOps.getFilters() )
         {
-            boolean include = false;
+            OpStatus status = op.evaluate( value );
 
-            List<Op> ops = filterOps.getFilters().get( operator );
-
-            for ( Op op : ops )
-            {
-                OpStatus status = op.evaluate( value );
-
-                if ( OpStatus.INCLUDE.equals( status ) )
-                {
-                    include = true;
-                }
-            }
-
-            if ( !include )
+            if ( OpStatus.EXCLUDE.equals( status ) )
             {
                 return true;
             }

@@ -65,17 +65,14 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     };
     
     function processPeriodsForEvent(periods,event){
-        //console.log('the event:  ', event.sortingDate, ' - ', periods);
         var index = -1;
         var occupied = null;
         for(var i=0; i<periods.length && index === -1; i++){
-            //console.log(event.sortingDate, ' - ', periods[i].startDate, ' - ', periods[i].endDate);
             if(moment(periods[i].endDate).isSame(event.sortingDate) ||
                     moment(periods[i].startDate).isSame(event.sortingDate) ||
                     moment(periods[i].endDate).isAfter(event.sortingDate) && moment(event.sortingDate).isAfter(periods[i].endDate)){
                 index = i;
                 occupied = angular.copy(periods[i]);
-                //console.log('Found it:  ', event.sortingDate, ' - ', periods[i].startDate, ' - ', periods[i].endDate);
             }
         }
         
@@ -83,7 +80,6 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             periods.splice(index,1);
         }
         
-        //console.log('the returned period:  ', periods);
         return {available: periods, occupied: occupied};
     };
     
@@ -122,11 +118,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 p.endDate = DateUtils.formatFromApiToUser(p.endDate);
                 p.startDate = DateUtils.formatFromApiToUser(p.startDate);
                 
-                /*if(moment(p.endDate).isAfter(eventDateOffSet)){
-                    availablePeriods[p.endDate] = p;
-                }*/   
-                if(moment(p.endDate).isAfter(eventDateOffSet)){
-                    //availablePeriods[p.endDate] = p;
+                if(moment(p.endDate).isAfter(eventDateOffSet)){                    
                     availablePeriods.push( p );
                 }
             });                
@@ -138,11 +130,6 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 if(ps.occupied){
                     occupiedPeriods.push(ps.occupied);
                 }
-                /*var p = availablePeriods[event.sortingDate];
-                if(p){
-                    occupiedPeriods.push({event: event.event, name: p.name, stage: stage.id, eventDate: event.sortingDate});
-                    delete availablePeriods[event.sortingDate];
-                }*/                    
             });
         }
         return {occupiedPeriods: occupiedPeriods, availablePeriods: availablePeriods};
@@ -914,7 +901,15 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 }                
             }
             else{
-                if(val){
+                if(val){                    
+                    if( type === 'number' ){
+                        if(dhis2.validation.isNumber(val)){                            
+                            val = new Number(val);
+                        }
+                        else{
+                            val = new Number('0');
+                        }
+                    }
                     if(type === 'date'){
                         if(destination === 'USER'){
                             val = DateUtils.formatFromApiToUser(val);
@@ -1028,7 +1023,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     return {        
         getEventReport: function(orgUnit, ouMode, program, startDate, endDate, programStatus, eventStatus, pager){
             
-            var url = '../api/events/eventRows.json?' + 'orgUnit=' + orgUnit + '&ouMode='+ ouMode + '&program=' + program;
+            var url = '../api/events/eventRows.json?' + 'orgUnit=' + orgUnit + '&ouMode='+ ouMode + '&program=' + program + '&addAttributes=true';
             
             if( programStatus ){
                 url = url + '&programStatus=' + programStatus;
@@ -1462,8 +1457,8 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             var columns = attributes ? angular.copy(attributes) : [];
        
             //also add extra columns which are not part of attributes (orgunit for example)
-            columns.push({id: 'orgUnitName', name: $translate('registering_unit'), valueType: 'string', displayInListNoProgram: false});
-            columns.push({id: 'created', name: $translate('registration_date'), valueType: 'date', displayInListNoProgram: false});
+            columns.push({id: 'orgUnitName', name: $translate.instant('registering_unit'), valueType: 'string', displayInListNoProgram: false});
+            columns.push({id: 'created', name: $translate.instant('registration_date'), valueType: 'date', displayInListNoProgram: false});
 
             //generate grid column for the selected program/attributes
             angular.forEach(columns, function(column){
@@ -1541,6 +1536,45 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         dueDate = moment(referenceDate, calendarSetting.momentFormat).add('d', offset)._d;
         dueDate = $filter('date')(dueDate, calendarSetting.keyDateFormat);        
         return dueDate;
+    };
+    
+    function formatDataElementValue(val, dataElement, optionSets, destination){
+                               
+        if(val && dataElement.type === 'int' ){
+            if( dhis2.validation.isNumber(val)  ){                            
+                val = parseInt(val);
+                //val = new Number(val);
+            }
+        }
+        if(val && dataElement.optionSetValue && optionSets[dataElement.optionSet.id].options  ){
+            if(destination === 'USER'){
+                val = OptionSetService.getName(optionSets[dataElement.optionSet.id].options, val);
+            }
+            else{
+                val = OptionSetService.getCode(optionSets[dataElement.optionSet.id].options, val);
+            }
+            
+        }
+        if(val && dataElement.type === 'date'){
+            if(destination === 'USER'){
+                val = DateUtils.formatFromApiToUser(val);
+            }
+            else{
+                val = DateUtils.formatFromUserToApi(val);
+            }            
+        }
+        if(dataElement.type === 'trueOnly'){
+            
+            if(destination === 'USER'){
+                val = val === 'true' ? true : '';
+            }
+            else{
+                val = val === true ? 'true' : '';
+            }            
+        }
+         
+        return val;
+        
     };
     
     var getEventDuePeriod = function(eventsByStage, programStage, enrollment){ 
@@ -1683,23 +1717,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 
             angular.forEach(programStage.programStageDataElements, function(prStDe){
                 if(dhis2Event[prStDe.dataElement.id]){                    
-                    var value = dhis2Event[prStDe.dataElement.id];
-                    
-                    if( value && prStDe.dataElement.optionSetValue && prStDe.dataElement.optionSet && optionSets[prStDe.dataElement.optionSet.id]){
-                        value = OptionSetService.getCode(optionSets[prStDe.dataElement.optionSet.id].options, value);
-                    }                    
-                    if( value && prStDe.dataElement.type === 'date'){
-                        value = DateUtils.formatFromUserToApi(value);
-                    }
-                    if( prStDe.dataElement.type === 'trueOnly' ){
-                        if(value){
-                            value = 'true';
-                        }
-                        else{
-                            value = '';
-                        }
-                    }
-                    
+                    var value = formatDataElementValue(dhis2Event[prStDe.dataElement.id], prStDe.dataElement, optionSets, 'API');                    
                     var val = {value: value, dataElement: prStDe.dataElement.id};
                     if(dhis2Event.providedElsewhere[prStDe.dataElement.id]){
                         val.providedElsewhere = dhis2Event.providedElsewhere[prStDe.dataElement.id];
@@ -1718,6 +1736,39 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             }
             
             return e;
+        },
+        processEvent: function(event, stage, optionSets, prStDes){
+            event.providedElsewhere = {};
+            angular.forEach(event.dataValues, function(dataValue){
+                
+                var prStDe = prStDes[dataValue.dataElement];
+
+                if( prStDe ){                
+                    var val = dataValue.value;
+                    if(prStDe.dataElement){
+                        val = formatDataElementValue(val, prStDe.dataElement, optionSets, 'USER');                        
+                    }    
+                    event[dataValue.dataElement] = val;
+                    if(dataValue.providedElsewhere){
+                        event.providedElsewhere[dataValue.dataElement] = dataValue.providedElsewhere;
+                    }
+                }
+
+            });        
+
+            if(stage.captureCoordinates){
+                event.coordinate = {latitude: event.coordinate.latitude ? event.coordinate.latitude : '',
+                                         longitude: event.coordinate.longitude ? event.coordinate.longitude : ''};
+            }        
+
+            event.allowProvidedElsewhereExists = false;        
+            for(var i=0; i<stage.programStageDataElements.length; i++){
+                if(stage.programStageDataElements[i].allowProvidedElsewhere){
+                    event.allowProvidedElsewhereExists = true;
+                    break;
+                }
+            }
+            return event;
         }
     }; 
 })

@@ -15,12 +15,8 @@ jQuery( document ).ready( function()
 	checkValueIsExist( "name", "validateProgramIndicator.action",{id:getFieldValue('id')} );	
 	checkValueIsExist( "shortName", "validateProgramIndicator.action",{id:getFieldValue('id')} );	
 	checkValueIsExist( "code", "validateProgramIndicator.action",{id:getFieldValue('id')} );
-		
-	setFieldValue('checkExpression',$('#aggregationDescription').html() );
 });
 </script>
-
-#set($program = $programIndicator.program)
 
 <h3>$i18n.getString( "update_program_indicator" ) #openHelp( "program_indicator" )</h3>
 		
@@ -37,7 +33,7 @@ jQuery( document ).ready( function()
       </tr>
     </thead>
 	<tr>
-		<td><label for="name">$i18n.getString( "name" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+		<td style="width:80px"><label for="name">$i18n.getString( "name" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 		<td><input type="text" id="name" name="name" value='$encoder.htmlEncode($programIndicator.name)'></td>
 		<td></td>
 	</tr>	
@@ -77,27 +73,15 @@ jQuery( document ).ready( function()
 		</td>
 		<td></td>
 	</tr>
-	<tr>
-			<td><label for="programStageId">$i18n.getString( "program_stage" ) </label></td>
-			<td>
-				<select id="programStageId" name="programStageId" onChange="getTrackedEntityDataElements();">
-					<option value=''>[$i18n.getString('please_select')]</option>
-					#foreach( $programStage in $programIndicator.program.programStages )
-					<option value='$programStage.uid'>$encoder.htmlEncode($programStage.displayName)</option>
-					#end
-				</select>
-			</td>
-			<td></td>
-		</tr>
 </table>
 <br>
 	
 #parse( "/dhis-web-maintenance-program/programIndicatorForm.vm" )
 
-<p>
+<div style="margin-top:25px">
 	<input type="submit" value="$i18n.getString( 'update' )" style="width:10em">
 	<input type="button" value="$i18n.getString( 'cancel' )" style="width:10em" onclick="window.location.href='programIndicator.action?programId=$programIndicator.program.id'" >
-</p>
+</div>
 
 </form>
 

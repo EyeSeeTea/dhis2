@@ -34,8 +34,8 @@ import org.hisp.dhis.dxf2.objectfilter.ops.Op;
 import java.util.Map;
 
 /**
-* @author Morten Olav Hansen <mortenoh@gmail.com>
-*/
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
+ */
 public class Filters
 {
     private Map<String, Object> filters = Maps.newHashMap();
@@ -57,6 +57,11 @@ public class Filters
         {
             Op op = OpFactory.create( operator );
 
+            if ( op == null )
+            {
+                return;
+            }
+
             if ( op.wantValue() )
             {
                 if ( value == null )
@@ -67,7 +72,7 @@ public class Filters
                 op.setValue( value );
             }
 
-            filterOps.addFilter( operator, op );
+            filterOps.getFilters().add( op );
         }
     }
 

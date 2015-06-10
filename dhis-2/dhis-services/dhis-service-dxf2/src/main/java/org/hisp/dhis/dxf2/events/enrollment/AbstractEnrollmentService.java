@@ -30,18 +30,21 @@ package org.hisp.dhis.dxf2.events.enrollment;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.hibernate.SessionFactory;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.common.QueryOperator;
+import org.hisp.dhis.dbms.DbmsManager;
 import org.hisp.dhis.dxf2.events.event.Note;
 import org.hisp.dhis.dxf2.events.trackedentity.Attribute;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstanceService;
 import org.hisp.dhis.dxf2.importsummary.ImportConflict;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
+import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
 import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -50,10 +53,10 @@ import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
+import org.hisp.dhis.system.callable.IdentifiableObjectSearchCallable;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.MathUtils;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
-import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueService;
@@ -61,6 +64,7 @@ import org.hisp.dhis.trackedentitycomment.TrackedEntityComment;
 import org.hisp.dhis.trackedentitycomment.TrackedEntityCommentService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.UserService;
+import org.hisp.dhis.util.CachingMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
@@ -92,9 +96,6 @@ public abstract class AbstractEnrollmentService
     protected org.hisp.dhis.trackedentity.TrackedEntityInstanceService teiService;
 
     @Autowired
-    protected TrackedEntityAttributeService trackedEntityAttributeService;
-
-    @Autowired
     protected TrackedEntityAttributeValueService trackedEntityAttributeValueService;
 
     @Autowired
@@ -111,6 +112,15 @@ public abstract class AbstractEnrollmentService
 
     @Autowired
     protected UserService userService;
+
+    @Autowired
+    protected DbmsManager dbmsManager;
+
+    private CachingMap<String, OrganisationUnit> organisationUnitCache = new CachingMap<>();
+
+    private CachingMap<String, Program> programCache = new CachingMap<>();
+
+    private CachingMap<String, TrackedEntityAttribute> trackedEntityAttributeCache = new CachingMap<>();
 
     // -------------------------------------------------------------------------
     // READ
@@ -337,6 +347,27 @@ public abstract class AbstractEnrollmentService
     // -------------------------------------------------------------------------
 
     @Override
+    public ImportSummaries addEnrollments( List<Enrollment> enrollments )
+    {
+        ImportSummaries importSummaries = new ImportSummaries();
+        int counter = 0;
+
+        for ( Enrollment enrollment : enrollments )
+        {
+            importSummaries.addImportSummary( addEnrollment( enrollment ) );
+
+            if ( counter % FLUSH_FREQUENCY == 0 )
+            {
+                dbmsManager.clearSession();
+            }
+
+            counter++;
+        }
+
+        return importSummaries;
+    }
+
+    @Override
     public ImportSummary addEnrollment( Enrollment enrollment )
     {
         ImportSummary importSummary = new ImportSummary();
@@ -416,6 +447,27 @@ public abstract class AbstractEnrollmentService
     // -------------------------------------------------------------------------
     // UPDATE
     // -------------------------------------------------------------------------
+
+    @Override
+    public ImportSummaries updateEnrollments( List<Enrollment> enrollments )
+    {
+        ImportSummaries importSummaries = new ImportSummaries();
+        int counter = 0;
+
+        for ( Enrollment enrollment : enrollments )
+        {
+            importSummaries.addImportSummary( updateEnrollment( enrollment ) );
+
+            if ( counter % FLUSH_FREQUENCY == 0 )
+            {
+                dbmsManager.clearSession();
+            }
+
+            counter++;
+        }
+
+        return importSummaries;
+    }
 
     @Override
     public ImportSummary updateEnrollment( Enrollment enrollment )
@@ -664,7 +716,7 @@ public abstract class AbstractEnrollmentService
 
         for ( String key : attributeValueMap.keySet() )
         {
-            TrackedEntityAttribute attribute = trackedEntityAttributeService.getTrackedEntityAttribute( key );
+            TrackedEntityAttribute attribute = getTrackedEntityAttribute( key );
 
             if ( attribute != null )
             {
@@ -700,36 +752,10 @@ public abstract class AbstractEnrollmentService
         return entityInstance;
     }
 
-    private Program getProgram( String id )
-    {
-        Program program = programService.getProgram( id );
-
-        if ( program == null )
-        {
-            throw new IllegalArgumentException( "Program does not exist." );
-        }
-
-        return program;
-
-    }
-
-    private OrganisationUnit getOrganisationUnit( String id )
-    {
-        OrganisationUnit organisationUnit = manager.search( OrganisationUnit.class, id );
-
-        if ( organisationUnit == null )
-        {
-            throw new IllegalArgumentException( "OrganisationUnit does not exist." );
-        }
-
-        return organisationUnit;
-    }
-
     private List<ImportConflict> validateAttributeType( Attribute attribute )
     {
         List<ImportConflict> importConflicts = Lists.newArrayList();
-        TrackedEntityAttribute teAttribute = trackedEntityAttributeService.getTrackedEntityAttribute( attribute
-            .getAttribute() );
+        TrackedEntityAttribute teAttribute = getTrackedEntityAttribute( attribute.getAttribute() );
 
         if ( teAttribute == null )
         {
@@ -795,5 +821,20 @@ public abstract class AbstractEnrollmentService
 
             programInstanceService.updateProgramInstance( programInstance );
         }
+    }
+
+    private OrganisationUnit getOrganisationUnit( String id )
+    {
+        return organisationUnitCache.get( id, new IdentifiableObjectSearchCallable<>( manager, OrganisationUnit.class, id ) );
+    }
+
+    private Program getProgram( String id )
+    {
+        return programCache.get( id, new IdentifiableObjectSearchCallable<>( manager, Program.class, id ) );
+    }
+
+    private TrackedEntityAttribute getTrackedEntityAttribute( String id )
+    {
+        return trackedEntityAttributeCache.get( id, new IdentifiableObjectSearchCallable<>( manager, TrackedEntityAttribute.class, id ) );
     }
 }

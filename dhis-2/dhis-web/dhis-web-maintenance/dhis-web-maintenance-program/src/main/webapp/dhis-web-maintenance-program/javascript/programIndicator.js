@@ -39,9 +39,27 @@ function removeProgramIndicator( context ) {
   removeItem(context.id, context.name, i18n_confirm_delete, 'removeProgramIndicator.action');
 }
 
-function getTrackedEntityDataElements() {
-  clearListById('dataElements');
-  clearListById('deSumId');
+function filterExpressionSelect( event, value, fieldName ) {
+	var field = byId(fieldName);
+	
+	for ( var index = 0; index < field.options.length; index++ )
+    {
+		var option = field.options[index];
+		
+		if ( value.length == 0 || option.text.toLowerCase().indexOf( value.toLowerCase() ) != -1 )
+		{
+			option.style.display = "block";
+		}
+		else
+		{
+			option.style.display = "none";
+		}
+    }	    
+}
+
+function getTrackedEntityDataElements( type ) {
+  var fieldId = type + '-data-elements';
+  clearListById(fieldId);
   var programStageId = getFieldValue('programStageId');
 
   jQuery.getJSON('getTrackedEntityDataElements.action',
@@ -50,7 +68,7 @@ function getTrackedEntityDataElements() {
       programStageId: programStageId
     }
     , function( json ) {
-      var dataElements = jQuery('#dataElements');
+      var dataElements = jQuery('#' + fieldId);
       for( i in json.dataElements ) {
         if( json.dataElements[i].type == 'int' || json.dataElements[i].type == 'date' ) {
           dataElements.append("<option value='" + json.dataElements[i].id + "' title='" + json.dataElements[i].name + "' suggested='" + json.dataElements[i].optionset + "'>" + json.dataElements[i].name + "</option>");
@@ -59,61 +77,67 @@ function getTrackedEntityDataElements() {
     });
 }
 
-function insertDataElement( element ) {
-  var programStageId = getFieldValue('programStageId');
-  var dataElementId = element.options[element.selectedIndex].value;
+function insertDataElement( type ) {
+  var psFieldId = type + '-program-stage',
+      deFieldId = type + '-data-elements',
+      areaId = type,
+      programStageId = getFieldValue(psFieldId),
+      dataElementId = getFieldValue(deFieldId);
 
-  insertTextCommon('expression', "#{" + programStageId + "." + dataElementId + "}");
-  getConditionDescription();
+  insertTextCommon(areaId, "#{" + programStageId + "." + dataElementId + "}");
+  getExpressionDescription( type );
 }
 
-function insertData( element, key ){
-   var attributeId = element.options[element.selectedIndex].value;
+function insertAttribute( type ){
+  var atFieldId = type + '-attributes',
+      areaId = type,
+      attributeId = getFieldValue(atFieldId);
 
-  insertTextCommon('expression', key + "{" + attributeId + "}");
-  getConditionDescription();
+  insertTextCommon(areaId, "A{" + attributeId + "}");
+  getExpressionDescription( type );
 }
 
-function insertInfo( element, isProgramStageProperty ) {
-  var id = "";
-  if( isProgramStageProperty ) {
-    id = getFieldValue('programStageId');
-  }
-  else {
-    id = getFieldValue('programId');
-  }
+function insertVariable( type ){
+  var varFieldId = type + '-variables',
+      areaId = type,
+      variableId = getFieldValue(varFieldId);
 
-  value = element.options[element.selectedIndex].value.replace('*', id);
-  insertTextCommon('expression', value);
-  getConditionDescription();
+  insertTextCommon(areaId, "V{" + variableId + "}");
+  getExpressionDescription( type );
 }
 
-function insertOperator( value ) {
-  insertTextCommon('expression', ' ' + value + ' ');
-  getConditionDescription();
+function insertConstant( type ){
+  var coFieldId = type + '-constants',
+      areaId = type,
+      constantId = getFieldValue(coFieldId);
+
+  insertTextCommon(areaId, "C{" + constantId + "}");
+  getExpressionDescription( type );
 }
 
-function getConditionDescription() {
-	var  expression = getFieldValue('expression');
-	if( expression == '' )
+function insertOperator( type, value ) {
+  insertTextCommon(type, ' ' + value + ' ');
+  getExpressionDescription( type );
+}
+
+function getExpressionDescription( type ) {
+	var expression = getFieldValue( type );
+	
+	if( !expression || expression == '' )
 	{
-		setInnerHTML('aggregationDescription', '');
+		setInnerHTML(type + '-description', '');
 	}
 	else
 	{
-	  $.postJSON('getProgramIndicatorDescription.action',
-		{
-		  expression: expression
+		$.getJSON('../api/programIndicators/' + type + '/description', {
+			expression: expression
 		}, function( json ) {
-			if( json.response =='error' ){
-				setFieldValue('checkExpression','');
-				$('#aggregationDescription').css('color','red');
+			if( 'OK' == json.status ){
+				setInnerHTML(type + '-description', json.description);
 			}
-			else{
-				setFieldValue('checkExpression', json.message);
-				$('#aggregationDescription').css('color','black');
+			else {
+				setInnerHTML(type + '-description', json.message);
 			}
-			setInnerHTML('aggregationDescription', json.message);
 		});
 	}
 }

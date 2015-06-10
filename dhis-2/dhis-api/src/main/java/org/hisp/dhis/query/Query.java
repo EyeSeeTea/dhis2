@@ -40,13 +40,9 @@ import java.util.List;
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class Query
+public class Query extends Criteria
 {
-    private final Schema schema;
-
     private List<Order> orders = new ArrayList<>();
-
-    private List<Criterion> criterions = new ArrayList<>();
 
     private Integer firstResult;
 
@@ -59,7 +55,7 @@ public class Query
 
     private Query( Schema schema )
     {
-        this.schema = schema;
+        super( schema );
     }
 
     public Schema getSchema()
@@ -70,11 +66,6 @@ public class Query
     public List<Order> getOrders()
     {
         return orders;
-    }
-
-    public List<Criterion> getCriterions()
-    {
-        return criterions;
     }
 
     public Integer getFirstResult()
@@ -99,41 +90,6 @@ public class Query
         return this;
     }
 
-    // Builder
-    public Query add( Criterion... criterions )
-    {
-        for ( Criterion criterion : criterions )
-        {
-            if ( !Restriction.class.isInstance( criterion ) )
-            {
-                continue;
-            }
-
-            Restriction restriction = (Restriction) criterion;
-
-            if ( !schema.haveProperty( restriction.getPath() ) )
-            {
-                continue;
-            }
-
-            if ( restriction.getParameters().size() > restriction.getOperator().getMax()
-                || restriction.getParameters().size() < restriction.getOperator().getMin() )
-            {
-                continue;
-            }
-
-            this.criterions.add( restriction );
-        }
-
-        return this;
-    }
-
-    public Query add( Collection<Criterion> criterions )
-    {
-        this.criterions.addAll( criterions );
-        return this;
-    }
-
     public Query addOrder( Order... orders )
     {
         for ( Order order : orders )
@@ -151,6 +107,32 @@ public class Query
     {
         this.orders.addAll( orders );
         return this;
+    }
+
+    public Disjunction addDisjunction()
+    {
+        Disjunction disjunction = new Disjunction( schema );
+        add( disjunction );
+
+        return disjunction;
+    }
+
+    public Disjunction disjunction()
+    {
+        return new Disjunction( schema );
+    }
+
+    public Conjunction addConjunction()
+    {
+        Conjunction conjunction = new Conjunction( schema );
+        add( conjunction );
+
+        return conjunction;
+    }
+
+    public Conjunction conjunction()
+    {
+        return new Conjunction( schema );
     }
 
     public Query forceDefaultOrder()

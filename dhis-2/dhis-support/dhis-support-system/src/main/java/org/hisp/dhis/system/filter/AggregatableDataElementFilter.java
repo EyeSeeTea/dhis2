@@ -29,12 +29,13 @@ package org.hisp.dhis.system.filter;
  */
 
 
-import java.util.HashSet;
 import java.util.Set;
 
+import org.hisp.dhis.commons.filter.Filter;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementDomain;
-import org.hisp.dhis.commons.filter.Filter;
+
+import com.google.common.collect.Sets;
 
 /**
  * @author Lars Helge Overland
@@ -42,19 +43,13 @@ import org.hisp.dhis.commons.filter.Filter;
 public class AggregatableDataElementFilter
     implements Filter<DataElement>
 {
-    private static Set<String> types;
+    public static final AggregatableDataElementFilter INSTANCE = new AggregatableDataElementFilter();
     
-    static
-    {
-        types = new HashSet<>();
-        types.add( DataElement.VALUE_TYPE_BOOL );
-        types.add( DataElement.VALUE_TYPE_INT );
-        types.add( DataElement.VALUE_TYPE_STRING );
-    }
-
+    private static Set<String> TYPES = Sets.newHashSet( DataElement.VALUE_TYPE_BOOL, DataElement.VALUE_TYPE_INT, DataElement.VALUE_TYPE_STRING );
+    
     @Override
     public boolean retain( DataElement object )
     {
-        return object != null && types.contains( object.getType() ) && DataElementDomain.AGGREGATE.equals( object.getDomainType() );
+        return object != null && TYPES.contains( object.getType() ) && DataElementDomain.AGGREGATE.equals( object.getDomainType() );
     }
 }

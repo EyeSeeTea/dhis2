@@ -31,6 +31,7 @@ package org.hisp.dhis.trackedentity.action.programindicator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramIndicator;
 import org.hisp.dhis.program.ProgramIndicatorService;
@@ -121,6 +122,13 @@ public class AddProgramIndicatorAction
         this.expression = expression;
     }
 
+    private String filter;
+
+    public void setFilter( String filter )
+    {
+        this.filter = filter;
+    }
+
     private String rootDate;
 
     public void setRootDate( String rootDate )
@@ -143,6 +151,7 @@ public class AddProgramIndicatorAction
         {
             Pattern pattern = Pattern.compile( "[(+|-|*|\\)]+" );
             Matcher matcher = pattern.matcher( expression );
+            
             if ( matcher.find() && matcher.start() != 0 )
             {
                 expression = "+" + expression;
@@ -150,12 +159,19 @@ public class AddProgramIndicatorAction
         }
 
         Program program = programService.getProgram( programId );
-        ProgramIndicator programIndicator = new ProgramIndicator( name, description, program, valueType, expression );
-        programIndicator.setShortName( shortName );
-        programIndicator.setCode( code );
-        programIndicator.setRootDate( rootDate );
+        
+        ProgramIndicator indicator = new ProgramIndicator();
+        indicator.setName( StringUtils.trimToNull( name ) );
+        indicator.setShortName( StringUtils.trimToNull( shortName ) );
+        indicator.setCode( StringUtils.trimToNull( code ) );
+        indicator.setDescription( StringUtils.trimToNull( description ) );
+        indicator.setProgram( program );
+        indicator.setValueType( StringUtils.trimToNull( valueType ) );
+        indicator.setExpression( StringUtils.trimToNull( expression ) );
+        indicator.setFilter( StringUtils.trimToNull( filter ) );
+        indicator.setRootDate( StringUtils.trimToNull( rootDate ) );
 
-        programIndicatorService.addProgramIndicator( programIndicator );
+        programIndicatorService.addProgramIndicator( indicator );
 
         return SUCCESS;
     }

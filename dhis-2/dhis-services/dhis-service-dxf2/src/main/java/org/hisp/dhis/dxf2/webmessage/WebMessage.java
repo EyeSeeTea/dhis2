@@ -28,29 +28,30 @@ package org.hisp.dhis.dxf2.webmessage;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.DxfNamespaces;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.google.common.base.MoreObjects;
+import org.hisp.dhis.common.DxfNamespaces;
+import org.springframework.http.HttpStatus;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @JacksonXmlRootElement( localName = "webMessage", namespace = DxfNamespaces.DXF_2_0 )
 @JsonPropertyOrder( {
-    "status", "code", "httpStatusCode", "message", "devMessage", "response"
+    "status", "code", "httpStatus", "httpStatusCode", "message", "devMessage", "response"
 } )
 public class WebMessage
 {
     /**
-     * Message status, currently two statuses are available: OK, ERROR.
+     * Message status, currently two statuses are available: OK, ERROR. Default
+     * value is OK.
      *
      * @see WebMessageStatus
      */
-    protected WebMessageStatus status;
+    protected WebMessageStatus status = WebMessageStatus.OK;
 
     /**
      * Internal code for this message. Should be used to help with third party clients which
@@ -59,9 +60,14 @@ public class WebMessage
     protected Integer code;
 
     /**
-     * HTTP status code.
+     * HTTP status.
      */
-    protected Integer httpStatusCode;
+    protected String httpStatus = HttpStatus.OK.getReasonPhrase();
+
+    /**
+     * HTTP status code. Default value is 200.
+     */
+    protected Integer httpStatusCode = HttpStatus.OK.value();
 
     /**
      * Non-technical message, should be simple and could possibly be used to display message
@@ -83,9 +89,12 @@ public class WebMessage
      */
     protected WebMessageResponse response;
 
+    // -------------------------------------------------------------------------
+    // Constructors
+    // -------------------------------------------------------------------------     
+
     public WebMessage()
     {
-        this.status = WebMessageStatus.OK;
     }
 
     public WebMessage( WebMessageStatus status )
@@ -96,8 +105,26 @@ public class WebMessage
     public WebMessage( WebMessageStatus status, Integer httpStatusCode )
     {
         this.status = status;
-        this.httpStatusCode = httpStatusCode;
+        setHttpStatusCode( httpStatusCode );
     }
+
+    // -------------------------------------------------------------------------
+    // Logic
+    // -------------------------------------------------------------------------     
+
+    public boolean okStatus()
+    {
+        return WebMessageStatus.OK.equals( status );
+    }
+
+    public boolean errorStatus()
+    {
+        return WebMessageStatus.ERROR.equals( status );
+    }
+
+    // -------------------------------------------------------------------------
+    // Get and set methods
+    // -------------------------------------------------------------------------     
 
     @JsonProperty
     @JacksonXmlProperty( isAttribute = true )
@@ -125,6 +152,13 @@ public class WebMessage
 
     @JsonProperty
     @JacksonXmlProperty( isAttribute = true )
+    public String getHttpStatus()
+    {
+        return httpStatus;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( isAttribute = true )
     public Integer getHttpStatusCode()
     {
         return httpStatusCode;
@@ -132,6 +166,14 @@ public class WebMessage
 
     public void setHttpStatusCode( Integer httpStatusCode )
     {
+        try
+        {
+            this.httpStatus = HttpStatus.valueOf( httpStatusCode ).getReasonPhrase();
+        }
+        catch ( IllegalArgumentException ignored )
+        {
+        }
+
         this.httpStatusCode = httpStatusCode;
     }
 

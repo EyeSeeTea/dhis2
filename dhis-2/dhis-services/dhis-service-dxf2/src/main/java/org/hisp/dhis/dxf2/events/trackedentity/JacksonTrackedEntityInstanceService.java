@@ -42,6 +42,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -169,15 +170,8 @@ public class JacksonTrackedEntityInstanceService extends AbstractTrackedEntityIn
             }
         }
 
-        for ( TrackedEntityInstance trackedEntityInstance : create.getTrackedEntityInstances() )
-        {
-            importSummaries.addImportSummary( addTrackedEntityInstance( trackedEntityInstance ) );
-        }
-
-        for ( TrackedEntityInstance trackedEntityInstance : update.getTrackedEntityInstances() )
-        {
-            importSummaries.addImportSummary( updateTrackedEntityInstance( trackedEntityInstance ) );
-        }
+        importSummaries.addImportSummaries( addTrackedEntityInstances( create.getTrackedEntityInstances() ) );
+        importSummaries.addImportSummaries( updateTrackedEntityInstances( update.getTrackedEntityInstances() ) );
 
         return importSummaries;
     }

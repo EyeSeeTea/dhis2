@@ -31,6 +31,7 @@ package org.hisp.dhis.trackedentity.action.programindicator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.program.ProgramIndicator;
 import org.hisp.dhis.program.ProgramIndicatorService;
 
@@ -72,6 +73,13 @@ public class UpdateProgramIndicatorAction
         this.name = name;
     }
 
+    private String shortName;
+
+    public void setShortName( String shortName )
+    {
+        this.shortName = shortName;
+    }
+
     private String code;
 
     public void setCode( String code )
@@ -100,18 +108,18 @@ public class UpdateProgramIndicatorAction
         this.expression = expression;
     }
 
+    private String filter;
+
+    public void setFilter( String filter )
+    {
+        this.filter = filter;
+    }
+
     private String rootDate;
 
     public void setRootDate( String rootDate )
     {
         this.rootDate = rootDate;
-    }
-
-    private String shortName;
-
-    public void setShortName( String shortName )
-    {
-        this.shortName = shortName;
     }
 
     private Integer programId;
@@ -136,25 +144,27 @@ public class UpdateProgramIndicatorAction
         {
             Pattern pattern = Pattern.compile( "[(+|-|*|\\)]+" );
             Matcher matcher = pattern.matcher( expression );
+            
             if ( matcher.find() && matcher.start() != 0 )
             {
                 expression = "+" + expression;
             }
         }
 
-        ProgramIndicator programIndicator = programIndicatorService.getProgramIndicator( id );
+        ProgramIndicator indicator = programIndicatorService.getProgramIndicator( id );
 
-        programIndicator.setName( name );
-        programIndicator.setShortName( shortName );
-        programIndicator.setCode( code );
-        programIndicator.setDescription( description );
-        programIndicator.setExpression( expression );
-        programIndicator.setValueType( valueType );
-        programIndicator.setRootDate( rootDate );
+        indicator.setName( StringUtils.trimToNull( name ) );
+        indicator.setShortName( StringUtils.trimToNull( shortName ) );
+        indicator.setCode( StringUtils.trimToNull( code ) );
+        indicator.setDescription( StringUtils.trimToNull( description ) );
+        indicator.setValueType( StringUtils.trimToNull( valueType ) );
+        indicator.setExpression( StringUtils.trimToNull( expression ) );
+        indicator.setFilter( StringUtils.trimToNull( filter ) );
+        indicator.setRootDate( StringUtils.trimToNull( rootDate ) );
 
-        programIndicatorService.updateProgramIndicator( programIndicator );
+        programIndicatorService.updateProgramIndicator( indicator );
 
-        programId = programIndicator.getProgram().getId();
+        programId = indicator.getProgram().getId();
 
         return SUCCESS;
     }

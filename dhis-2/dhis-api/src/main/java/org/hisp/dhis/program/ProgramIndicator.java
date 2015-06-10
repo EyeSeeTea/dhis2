@@ -77,12 +77,16 @@ public class ProgramIndicator
     public static final String VALID = "valid";
 
     public static final String EXPRESSION_NOT_WELL_FORMED = "expression_not_well_formed";
+    public static final String INVALID_IDENTIFIERS_IN_EXPRESSION = "invalid_identifiers_in_expression";
+    public static final String FILTER_NOT_EVALUATING_TO_TRUE_OR_FALSE = "filter_not_evaluating_to_true_or_false";
 
     private Program program;
     
     private String valueType;
 
     private String expression;
+    
+    private String filter;
 
     private String rootDate;
 
@@ -93,17 +97,6 @@ public class ProgramIndicator
     public ProgramIndicator()
     {
         setAutoFields();
-    }
-
-    public ProgramIndicator( String name, String description, Program program, String valueType, String expression )
-    {
-        this();
-        this.name = name;
-        this.description = description;
-        this.program = program;
-        program.getProgramIndicators().add( this );
-        this.valueType = valueType;
-        this.expression = expression;
     }
 
     // -------------------------------------------------------------------------
@@ -148,6 +141,19 @@ public class ProgramIndicator
     public void setExpression( String expression )
     {
         this.expression = expression;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getFilter()
+    {
+        return filter;
+    }
+
+    public void setFilter( String filter )
+    {
+        this.filter = filter;
     }
 
     @JsonProperty

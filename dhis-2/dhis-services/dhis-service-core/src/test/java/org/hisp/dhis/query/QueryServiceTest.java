@@ -28,13 +28,7 @@ package org.hisp.dhis.query;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Collection;
-import java.util.Iterator;
-
+import com.google.common.collect.Lists;
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
@@ -42,11 +36,13 @@ import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.schema.Schema;
 import org.hisp.dhis.schema.SchemaService;
 import org.jfree.data.time.Year;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.common.collect.Lists;
+import java.util.Collection;
+import java.util.Iterator;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -66,11 +62,22 @@ public class QueryServiceTest
     private void createDataElements()
     {
         DataElement dataElementA = createDataElement( 'A' );
+        dataElementA.setNumberType( DataElement.VALUE_TYPE_NUMBER );
+
         DataElement dataElementB = createDataElement( 'B' );
+        dataElementB.setNumberType( DataElement.VALUE_TYPE_BOOL );
+
         DataElement dataElementC = createDataElement( 'C' );
+        dataElementC.setNumberType( DataElement.VALUE_TYPE_INT );
+
         DataElement dataElementD = createDataElement( 'D' );
+        dataElementD.setNumberType( DataElement.VALUE_TYPE_NUMBER );
+
         DataElement dataElementE = createDataElement( 'E' );
+        dataElementE.setNumberType( DataElement.VALUE_TYPE_BOOL );
+
         DataElement dataElementF = createDataElement( 'F' );
+        dataElementF.setNumberType( DataElement.VALUE_TYPE_INT );
 
         dataElementA.setCreated( Year.parseYear( "2001" ).getStart() );
         dataElementB.setCreated( Year.parseYear( "2002" ).getStart() );
@@ -350,12 +357,11 @@ public class QueryServiceTest
     }
 
     @Test
-    @Ignore
     public void getInQuery()
     {
         createDataElements();
         Query query = Query.from( schemaService.getDynamicSchema( DataElement.class ) );
-        query.add( Restrictions.in( "id", "deabcdefghD", "deabcdefghF" ) );
+        query.add( Restrictions.in( "id", Lists.newArrayList( "deabcdefghD", "deabcdefghF" ) ) );
         Result result = queryService.query( query );
 
         assertEquals( 2, result.size() );
@@ -500,5 +506,177 @@ public class QueryServiceTest
         assertEquals( "deabcdefghD", result.getItems().get( 3 ).getUid() );
         assertEquals( "deabcdefghE", result.getItems().get( 4 ).getUid() );
         assertEquals( "deabcdefghF", result.getItems().get( 5 ).getUid() );
+    }
+
+    @Test
+    public void testDoubleEqConjunction()
+    {
+        createDataElements();
+        Query query = Query.from( schemaService.getDynamicSchema( DataElement.class ) );
+
+        Conjunction conjunction = query.conjunction();
+        conjunction.add( Restrictions.eq( "id", "deabcdefghD" ) );
+        conjunction.add( Restrictions.eq( "id", "deabcdefghF" ) );
+        query.add( conjunction );
+
+        Result result = queryService.query( query );
+
+        assertEquals( 0, result.size() );
+    }
+
+    @Test
+    public void testNumberTypeNumber()
+    {
+        createDataElements();
+        Query query = Query.from( schemaService.getDynamicSchema( DataElement.class ) );
+
+        Disjunction disjunction = query.disjunction();
+        disjunction.add( Restrictions.eq( "numberType", DataElement.VALUE_TYPE_NUMBER ) );
+        query.add( disjunction );
+
+        Result result = queryService.query( query );
+
+        assertEquals( 2, result.size() );
+
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghA" ) );
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghD" ) );
+    }
+
+    @Test
+    public void testNumberTypeBoolOrInt()
+    {
+        createDataElements();
+        Query query = Query.from( schemaService.getDynamicSchema( DataElement.class ) );
+
+        Disjunction disjunction = query.disjunction();
+        disjunction.add( Restrictions.eq( "numberType", DataElement.VALUE_TYPE_BOOL ) );
+        disjunction.add( Restrictions.eq( "numberType", DataElement.VALUE_TYPE_INT ) );
+        query.add( disjunction );
+
+        Result result = queryService.query( query );
+
+        assertEquals( 4, result.size() );
+
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghB" ) );
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghC" ) );
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghE" ) );
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghF" ) );
+    }
+
+    @Test
+    public void testNumberTypeBoolOrIntOrNumber()
+    {
+        createDataElements();
+        Query query = Query.from( schemaService.getDynamicSchema( DataElement.class ) );
+
+        Disjunction disjunction = query.disjunction();
+        disjunction.add( Restrictions.eq( "numberType", DataElement.VALUE_TYPE_NUMBER ) );
+        disjunction.add( Restrictions.eq( "numberType", DataElement.VALUE_TYPE_BOOL ) );
+        disjunction.add( Restrictions.eq( "numberType", DataElement.VALUE_TYPE_INT ) );
+        query.add( disjunction );
+
+        Result result = queryService.query( query );
+
+        assertEquals( 6, result.size() );
+
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghA" ) );
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghB" ) );
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghC" ) );
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghD" ) );
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghE" ) );
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghF" ) );
+    }
+
+    @Test
+    public void testDoubleEqDisjunction()
+    {
+        createDataElements();
+        Query query = Query.from( schemaService.getDynamicSchema( DataElement.class ) );
+
+        Disjunction disjunction = query.disjunction();
+        disjunction.add( Restrictions.eq( "id", "deabcdefghD" ) );
+        disjunction.add( Restrictions.eq( "id", "deabcdefghF" ) );
+        query.add( disjunction );
+
+        Result result = queryService.query( query );
+
+        assertEquals( 2, result.size() );
+
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghD" ) );
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghF" ) );
+    }
+
+    @Test
+    public void testDateRange()
+    {
+        createDataElements();
+        Query query = Query.from( schemaService.getDynamicSchema( DataElement.class ) );
+
+        query.add( Restrictions.ge( "created", Year.parseYear( "2002" ).getStart() ) );
+        query.add( Restrictions.le( "created", Year.parseYear( "2004" ).getStart() ) );
+
+        Result result = queryService.query( query );
+
+        assertEquals( 3, result.size() );
+
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghB" ) );
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghC" ) );
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghD" ) );
+    }
+
+    @Test
+    public void testDateRangeWithConjunction()
+    {
+        createDataElements();
+        Query query = Query.from( schemaService.getDynamicSchema( DataElement.class ) );
+
+        Conjunction conjunction = query.conjunction();
+        conjunction.add( Restrictions.ge( "created", Year.parseYear( "2002" ).getStart() ) );
+        conjunction.add( Restrictions.le( "created", Year.parseYear( "2004" ).getStart() ) );
+        query.add( conjunction );
+
+        Result result = queryService.query( query );
+
+        assertEquals( 3, result.size() );
+
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghB" ) );
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghC" ) );
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghD" ) );
+    }
+
+    @Test
+    public void testIsNull()
+    {
+        createDataElements();
+        Query query = Query.from( schemaService.getDynamicSchema( DataElement.class ) );
+        query.add( Restrictions.isNull( "categoryCombo" ) );
+
+        Result result = queryService.query( query );
+
+        assertEquals( 6, result.size() );
+
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghA" ) );
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghB" ) );
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghC" ) );
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghD" ) );
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghE" ) );
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghF" ) );
+    }
+
+    @Test
+    public void testIsNullUrl()
+    {
+        createDataElements();
+        Query query = queryService.getQueryFromUrl( DataElement.class, Lists.newArrayList( "categoryCombo:null" ), Lists.<Order>newArrayList() );
+        Result result = queryService.query( query );
+
+        assertEquals( 6, result.size() );
+
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghA" ) );
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghB" ) );
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghC" ) );
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghD" ) );
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghE" ) );
+        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghF" ) );
     }
 }

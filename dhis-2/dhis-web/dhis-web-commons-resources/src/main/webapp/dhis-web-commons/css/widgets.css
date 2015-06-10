@@ -49,6 +49,7 @@ div#rightBar
   padding-top: 9px;
   padding-bottom: 9px;
   overflow: auto;
+  box-shadow: #ccc 0 1px 1px 0;
 }
 
 #hideRightBar
@@ -173,6 +174,14 @@ div#helpContent ul, ol
 div.thingy 
 {
   clear: both;
+}
+
+.leftBarIcon
+{
+  height: 16px;
+  width: 16px;
+  color: #666;
+  font-size: 10pt;
 }
 
 #showLeftBar
@@ -897,7 +906,7 @@ input:-moz-placeholder
 
 .message 
 {
-    border: 1px solid #ccc;
+    border: 1px solid #ddd;
     border-radius: 3px;
     width: 450px;
     padding: 9px;

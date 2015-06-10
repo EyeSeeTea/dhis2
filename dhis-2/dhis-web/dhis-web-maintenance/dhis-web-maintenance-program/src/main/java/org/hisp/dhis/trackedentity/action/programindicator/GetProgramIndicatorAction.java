@@ -35,15 +35,19 @@ import java.util.List;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.constant.Constant;
 import org.hisp.dhis.constant.ConstantService;
+import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramIndicator;
 import org.hisp.dhis.program.ProgramIndicatorService;
+import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.system.filter.AggregatableTrackedEntityAttributeValueFilter;
+import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
+import org.hisp.dhis.util.FilterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
- * @version $ DeleteProgramIndicatorAction Apr 16, 2013 3:24:51 PM $
  */
 public class GetProgramIndicatorAction
     implements Action
@@ -61,6 +65,9 @@ public class GetProgramIndicatorAction
 
     @Autowired
     private ConstantService constantService;
+    
+    @Autowired
+    private ProgramService programService;
 
     // -------------------------------------------------------------------------
     // Setters
@@ -72,6 +79,13 @@ public class GetProgramIndicatorAction
     {
         this.id = id;
     }
+    
+    private Integer programId;
+
+    public void setProgramId( Integer programId )
+    {
+        this.programId = programId;
+    }
 
     private ProgramIndicator programIndicator;
 
@@ -80,14 +94,42 @@ public class GetProgramIndicatorAction
         return programIndicator;
     }
 
-    private String description;
-
-    public String getDescription()
+    private Program program;
+    
+    public Program getProgram()
     {
-        return description;
+        return program;
     }
 
-    private List<Constant> constants;
+    private String expressionDescription;
+    
+    public String getExpressionDescription()
+    {
+        return expressionDescription;
+    }
+
+    private String filterDescription;
+    
+    public String getFilterDescription()
+    {
+        return filterDescription;
+    }
+
+    private String filter;
+    
+    public String getFilter()
+    {
+        return filter;
+    }
+
+    private List<TrackedEntityAttribute> attributes = new ArrayList<>();
+    
+    public List<TrackedEntityAttribute> getAttributes()
+    {
+        return attributes;
+    }
+
+    private List<Constant> constants = new ArrayList<>();
 
     public List<Constant> getConstants()
     {
@@ -102,15 +144,27 @@ public class GetProgramIndicatorAction
     public String execute()
         throws Exception
     {
-        programIndicator = programIndicatorService.getProgramIndicator( id );
-
-        description = programIndicatorService.getExpressionDescription( programIndicator.getExpression() );
-
-        constants = new ArrayList<>( constantService.getAllConstants() );
+        if ( id != null )
+        {
+            programIndicator = programIndicatorService.getProgramIndicator( id );
+            program = programIndicator.getProgram();
+            expressionDescription = programIndicatorService.getExpressionDescription( programIndicator.getExpression() );
+            filterDescription = programIndicatorService.getExpressionDescription( programIndicator.getFilter() );
+            filter = programIndicatorService.getExpressionDescription( programIndicator.getFilter() );
+            attributes = new ArrayList<>( program.getTrackedEntityAttributes() );
+        }
+        else if ( programId != null )
+        {            
+            program = programService.getProgram( programId );
+            attributes = new ArrayList<>( program.getTrackedEntityAttributes() );
+        }
         
+        constants = new ArrayList<>( constantService.getAllConstants() );
+
+        FilterUtils.filter( attributes, AggregatableTrackedEntityAttributeValueFilter.INSTANCE );
+        Collections.sort( attributes, IdentifiableObjectNameComparator.INSTANCE );
         Collections.sort( constants, IdentifiableObjectNameComparator.INSTANCE );
         
         return SUCCESS;
     }
-
 }
