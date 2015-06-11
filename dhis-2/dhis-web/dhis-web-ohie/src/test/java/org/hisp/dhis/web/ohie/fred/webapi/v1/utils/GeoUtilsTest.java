@@ -28,10 +28,9 @@ package org.hisp.dhis.web.ohie.fred.webapi.v1.utils;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Locale;
-
 import org.junit.Assert;
 import org.junit.Test;
+import java.util.Locale;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -45,7 +44,9 @@ public class GeoUtilsTest
         Double lng = 2.0d;
 
         String coordinatesString = String.format(Locale.ENGLISH, "[%f, %f]", lat, lng );
-        
+
+        String coordinatesString = String.format( Locale.ENGLISH, "[%f, %f]", lat, lng );
+
         GeoUtils.Coordinates coordinates = GeoUtils.parseCoordinates( coordinatesString, GeoUtils.CoordinateOrder.COORDINATE_LATLNG );
 
         Assert.assertEquals( lat, coordinates.lat );
@@ -58,8 +59,8 @@ public class GeoUtilsTest
         Double lat = 1.0d;
         Double lng = 2.0d;
 
-        String coordinatesString = String.format(Locale.ENGLISH, "[%f, %f]", lng, lat );
-        
+        String coordinatesString = String.format( Locale.ENGLISH, "[%f, %f]", lng, lat );
+
         GeoUtils.Coordinates coordinates = GeoUtils.parseCoordinates( coordinatesString, GeoUtils.CoordinateOrder.COORDINATE_LNGLAT );
 
         Assert.assertEquals( lat, coordinates.lat );
