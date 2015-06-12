@@ -43,8 +43,6 @@ public class GeoUtilsTest
         Double lat = 1.0d;
         Double lng = 2.0d;
 
-        String coordinatesString = String.format(Locale.ENGLISH, "[%f, %f]", lat, lng );
-
         String coordinatesString = String.format( Locale.ENGLISH, "[%f, %f]", lat, lng );
 
         GeoUtils.Coordinates coordinates = GeoUtils.parseCoordinates( coordinatesString, GeoUtils.CoordinateOrder.COORDINATE_LATLNG );

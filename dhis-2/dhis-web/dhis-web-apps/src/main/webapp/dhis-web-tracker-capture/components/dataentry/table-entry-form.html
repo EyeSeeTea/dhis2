@@ -24,17 +24,19 @@
                 <span ng-if="invalidDate === eventRow.event" class="error">{{'date_required'| translate}}</span>
             </td>
             <td class="col-md-2" ng-repeat="prStDe in currentStage.programStageDataElements" ng-if="!isHidden(prStDe.dataElement.id)">
-                <ng-form name="dataEntryInnerForm">
+                <ng-form name="innerform">
                     <div ng-switch="prStDe.dataElement.type">
                         <div ng-switch-when="int">
-                            <input type="text"
+                            <input type="number"
+                                   number-type={{prStDe.dataElement.numberType}}
                                    ng-class='getInputNotifcationClass(prStDe.dataElement.id,false,eventRow)'
                                    ng-model="eventRow[prStDe.dataElement.id]" 
+                                   d2-number-validator
                                    ng-required={{prStDe.compulsory}}
                                    ng-disabled="selectedEnrollment.status !== 'ACTIVE' || eventRow.editingNotAllowed" 
                                    ng-blur="saveDatavalueForEvent(prStDe,innerform.foo,eventRow)" 
                                    name="foo"/>
-                            <span ng-show="dataEntryOuterForm.submitted && dataEntryInnerForm.foo.$invalid" class="error">{{'number_required'| translate}}</span>
+                            <span ng-show="dataEntryOuterForm.submitted && innerform.foo.$invalid" class="error">{{'number_required'| translate}}</span>
                         </div>
                         <div ng-switch-when="string">
                             <div ng-if="prStDe.dataElement.optionSet">
@@ -49,7 +51,7 @@
                                         typeahead-editable="false"
                                         ng-blur="saveDatavalueForEvent(prStDe,innerform.foo,eventRow)"
                                         name="foo"/>
-                                    <span ng-show="dataEntryOuterForm.submitted && dataEntryInnerForm.foo.$invalid || !eventRow[prStDe.dataElement.id] && currentElement.id === prStDe.dataElement.id" class="error">{{'invalid'| translate}}</span>
+                                    <span ng-show="dataEntryOuterForm.submitted && innerform.foo.$invalid || !eventRow[prStDe.dataElement.id] && currentElement.id === prStDe.dataElement.id" class="error">{{'invalid'| translate}}</span>
                                 </div>
                                 <div ng-if="selectedProgram.dataEntryMethod && optionSets[prStDe.dataElement.optionSet.id].options.length < 7">
                                     <label>
@@ -129,7 +131,7 @@
                         {{errorMessages[prStDe.dataElement.id]}}
                     </div>
                 </ng-form>
-                <span ng-show="dataEntryOuterForm.submitted && dataEntryInnerForm.foo.$invalid" class="error">{{'required'| translate}}</span>
+                <span ng-show="dataEntryOuterForm.submitted && innerform.foo.$invalid" class="error">{{'required'| translate}}</span>
             </td>
             <!--<td class="col-md-2" ng-if="allowProvidedElsewhereExists">                
                 <div class="align-center" ng-show="prStDe.allowProvidedElsewhere">

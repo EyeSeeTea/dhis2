@@ -219,8 +219,8 @@ public class DefaultAclService implements AclService
     {
         Schema schema = schemaService.getSchema( klass );
 
-        return schema != null &&
-            (schema.getAuthorityByType( AuthorityType.READ ) == null || canAccess( user, schema.getAuthorityByType( AuthorityType.READ ) ));
+        return schema == null || schema.getAuthorityByType( AuthorityType.READ ) == null
+            || canAccess( user, schema.getAuthorityByType( AuthorityType.READ ) );
     }
 
     @Override

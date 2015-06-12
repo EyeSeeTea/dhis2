@@ -61,7 +61,7 @@ trackerCapture.controller('DashboardController',
         $scope.widgetsChanged = [];
         $scope.dashboardStatus = [];
         $scope.dashboardWidgetsOrder = {biggerWidgets: [], smallerWidgets: []};
-        $scope.orderChanged = false;
+        $scope.orderChanged = false;        
         
         DashboardLayoutService.get().then(function(response){
             $scope.dashboardLayouts = response;
