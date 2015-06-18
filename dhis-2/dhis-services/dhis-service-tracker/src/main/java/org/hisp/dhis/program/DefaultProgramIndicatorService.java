@@ -28,7 +28,6 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.common.DimensionalObject.DIMENSION_SEP;
 import static org.hisp.dhis.i18n.I18nUtils.i18n;
 
 import java.util.Collection;
@@ -46,6 +45,7 @@ import org.hisp.dhis.constant.Constant;
 import org.hisp.dhis.constant.ConstantService;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.MathUtils;
@@ -226,20 +226,21 @@ public class DefaultProgramIndicatorService
         while ( matcher.find() )
         {
             String key = matcher.group( 1 );
-            String uid = matcher.group( 2 );
             
             Double value = null;
 
+            //TODO query by program stage
+            
             if ( ProgramIndicator.KEY_DATAELEMENT.equals( key ) )
             {
                 String de = matcher.group( 3 );
                 
-                String mapKey = uid + DIMENSION_SEP + de;
-                
-                value = valueMap.get( mapKey );
+                value = valueMap.get( de );
             }
             else if ( ProgramIndicator.KEY_ATTRIBUTE.equals( key ) || ProgramIndicator.KEY_CONSTANT.equals( key ) )
             {
+                String uid = matcher.group( 2 );
+                
                 value = valueMap.get( uid );
             }
             
@@ -454,11 +455,29 @@ public class DefaultProgramIndicatorService
     }
 
     @Override
-    public Set<ProgramStageDataElement> getProgramStageDataElementsInExpression( ProgramIndicator indicator )
+    public Set<DataElement> getDataElementsInIndicators( Set<ProgramIndicator> indicators )
+    {
+        Set<DataElement> dataElements = new HashSet<>();
+        
+        for ( ProgramIndicator indicator : indicators )
+        {
+            Set<ProgramStageDataElement> psds = getProgramStageDataElementsInExpression( indicator.getExpression() );
+            
+            for ( ProgramStageDataElement psd : psds )
+            {
+                dataElements.add( psd.getDataElement() );
+            }
+        }
+        
+        return dataElements;
+    }
+    
+    @Override
+    public Set<ProgramStageDataElement> getProgramStageDataElementsInExpression( String expression )
     {
         Set<ProgramStageDataElement> elements = new HashSet<>();
         
-        Matcher matcher = ProgramIndicator.DATAELEMENT_PATTERN.matcher( indicator.getExpression() );
+        Matcher matcher = ProgramIndicator.DATAELEMENT_PATTERN.matcher( expression );
         
         while ( matcher.find() )
         {
@@ -478,11 +497,24 @@ public class DefaultProgramIndicatorService
     }
 
     @Override
-    public Set<TrackedEntityAttribute> getAttributesInExpression( ProgramIndicator indicator )
+    public Set<TrackedEntityAttribute> getAttributesInIndicators( Set<ProgramIndicator> indicators )
+    {
+        Set<TrackedEntityAttribute> attributes = new HashSet<>();
+        
+        for ( ProgramIndicator indicator : indicators )
+        {
+            attributes.addAll( getAttributesInExpression( indicator.getExpression() ) );
+        }
+        
+        return attributes;
+    }
+    
+    @Override
+    public Set<TrackedEntityAttribute> getAttributesInExpression( String expression )
     {
         Set<TrackedEntityAttribute> attributes = new HashSet<>();
 
-        Matcher matcher = ProgramIndicator.ATTRIBUTE_PATTERN.matcher( indicator.getExpression() );
+        Matcher matcher = ProgramIndicator.ATTRIBUTE_PATTERN.matcher( expression );
         
         while ( matcher.find() )
         {
@@ -497,6 +529,41 @@ public class DefaultProgramIndicatorService
         }
         
         return attributes;        
+    }
+
+    @Override
+    public Set<Constant> getConstantsInIndicators( Set<ProgramIndicator> indicators )
+    {
+        Set<Constant> constants = new HashSet<>();
+        
+        for ( ProgramIndicator indicator : indicators )
+        {
+            constants.addAll( getConstantsInExpression( indicator.getExpression() ) );
+        }
+        
+        return constants;
+    }
+    
+    @Override
+    public Set<Constant> getConstantsInExpression( String expression )
+    {
+        Set<Constant> constants = new HashSet<>();
+
+        Matcher matcher = ExpressionService.CONSTANT_PATTERN.matcher( expression );
+        
+        while ( matcher.find() )
+        {
+            String co = matcher.group( 1 );
+            
+            Constant constant = constantService.getConstant( co );
+            
+            if ( constant != null )
+            {
+                constants.add( constant );
+            }
+        }
+        
+        return constants;        
     }
     
     // -------------------------------------------------------------------------
