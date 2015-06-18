@@ -151,7 +151,7 @@ public interface ExpressionService
      * @param constantMap the mapping between the constant uid and value to use
      *        in the calculation.
      * @param orgUnitCountMap the mapping between organisation unit group uid and
-     *        count of org units to use in the calculation.
+     *        count of organisation units to use in the calculation.
      * @param days the number of days to use in the calculation.
      * @return the calculated value as a double.
      */
