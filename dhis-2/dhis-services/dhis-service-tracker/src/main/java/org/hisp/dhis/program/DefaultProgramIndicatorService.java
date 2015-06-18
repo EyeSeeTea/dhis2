@@ -502,8 +502,7 @@ public class DefaultProgramIndicatorService
                 if ( programStage != null && dataElement != null )
                 {
                     ProgramStageInstance psi = programStageInstance != null ?
-                        programStageInstance :
-                        programStageInstanceService.getProgramStageInstance( programInstance, programStage );
+                        programStageInstance : programStageInstanceService.getProgramStageInstance( programInstance, programStage );
 
                     TrackedEntityDataValue dataValue = dataValueService.getTrackedEntityDataValue( psi, dataElement );
 
