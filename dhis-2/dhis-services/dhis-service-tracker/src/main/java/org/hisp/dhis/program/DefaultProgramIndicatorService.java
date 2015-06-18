@@ -28,6 +28,7 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.common.DimensionalObject.DIMENSION_SEP;
 import static org.hisp.dhis.i18n.I18nUtils.i18n;
 
 import java.util.Collection;
@@ -39,6 +40,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 
+import org.hisp.dhis.commons.util.ExpressionUtils;
+import org.hisp.dhis.commons.util.TextUtils;
 import org.hisp.dhis.constant.Constant;
 import org.hisp.dhis.constant.ConstantService;
 import org.hisp.dhis.dataelement.DataElement;
@@ -46,8 +49,6 @@ import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.MathUtils;
-import org.hisp.dhis.commons.util.ExpressionUtils;
-import org.hisp.dhis.commons.util.TextUtils;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
@@ -183,14 +184,6 @@ public class DefaultProgramIndicatorService
     }
 
     @Override
-    public String getProgramIndicatorValue( ProgramIndicator programIndicator, ProgramStageInstance programStageInstance )
-    {
-        Double value = getValue( programIndicator, null, programStageInstance );
-
-        return value != null ? String.valueOf( value ) : null;
-    }
-    
-    @Override
     public String getProgramIndicatorValue( ProgramIndicator programIndicator, ProgramInstance programInstance )
     {
         Double value = getValue( programIndicator, programInstance, null );
@@ -221,6 +214,48 @@ public class DefaultProgramIndicatorService
         return null;
     }
 
+    @Override
+    public Double getProgramIndicatorValue( ProgramIndicator indicator, Map<String, Double> valueMap )
+    {
+        StringBuffer buffer = new StringBuffer();
+
+        String expression = indicator.getExpression();
+        
+        Matcher matcher = ProgramIndicator.EXPRESSION_PATTERN.matcher( expression );
+        
+        while ( matcher.find() )
+        {
+            String key = matcher.group( 1 );
+            String uid = matcher.group( 2 );
+            
+            Double value = null;
+
+            if ( ProgramIndicator.KEY_DATAELEMENT.equals( key ) )
+            {
+                String de = matcher.group( 3 );
+                
+                String mapKey = uid + DIMENSION_SEP + de;
+                
+                value = valueMap.get( mapKey );
+            }
+            else if ( ProgramIndicator.KEY_ATTRIBUTE.equals( key ) || ProgramIndicator.KEY_CONSTANT.equals( key ) )
+            {
+                value = valueMap.get( uid );
+            }
+            
+            if ( value == null )
+            {
+                return null;
+            }
+            
+            matcher.appendReplacement( buffer, Matcher.quoteReplacement( String.valueOf( value ) ) );
+        }
+
+        expression = TextUtils.appendTail( matcher, buffer );
+
+        return MathUtils.calculateExpression( expression );
+    }
+    
     @Override
     public Map<String, String> getProgramIndicatorValues( ProgramInstance programInstance )
     {
@@ -469,9 +504,9 @@ public class DefaultProgramIndicatorService
     // -------------------------------------------------------------------------
 
     /**
-     * Get value for the given arguments. If programStageInstance argument is null, 
-     * the program stage instance will be retrieved based on the given program
-     * instance in combination with the program stage from the indicator expression.
+     * Get indicator value for the given arguments. If programStageInstance 
+     * argument is null, the program stage instance will be retrieved based on 
+     * the given program instance in combination with the program stage from the indicator expression.
      * 
      * @param indicator the indicator, must be not null.
      * @param programInstance the program instance, can be null.

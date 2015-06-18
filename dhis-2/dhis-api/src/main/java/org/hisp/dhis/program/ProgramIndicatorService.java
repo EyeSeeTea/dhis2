@@ -103,16 +103,6 @@ public interface ProgramIndicatorService
     List<ProgramIndicator> getAllProgramIndicators();
 
     /**
-     * Calculate a program indicator value based on program stage instance and an
-     * indicator.
-     *
-     * @param programIndicator ProgramIndicator
-     * @param programInstance  ProgramInstance
-     * @return Indicator value
-     */
-    String getProgramIndicatorValue( ProgramIndicator programIndicator, ProgramStageInstance programStageInstance );
-    
-    /**
      * Calculate a program indicator value based on program instance and an
      * indicator.
      *
@@ -122,6 +112,14 @@ public interface ProgramIndicatorService
      */
     String getProgramIndicatorValue( ProgramIndicator programIndicator, ProgramInstance programInstance );
 
+    /**
+     * Calculate a program indicator value based on the given arguments.
+     * 
+     * @param valueMap map containing keys for program stage-data elements,
+     *        attributes and constants with corresponding values.
+     */
+    Double getProgramIndicatorValue( ProgramIndicator indicator, Map<String, Double> valueMap );
+    
     /**
      * Get indicator values of all program indicators defined for a TrackedEntityInstance
      *
