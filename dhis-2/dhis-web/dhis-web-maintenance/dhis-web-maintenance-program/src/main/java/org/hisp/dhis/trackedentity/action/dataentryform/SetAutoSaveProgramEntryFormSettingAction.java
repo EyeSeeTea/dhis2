@@ -35,9 +35,9 @@ import com.opensymphony.xwork2.Action;
 /**
  * @author Chau Thu Tran
  * 
- * @version SetAutoSaveTrackedEntityFormSettingAction.java 02:10:07 PM Apr 05, 2013 $
+ * @version SetAutoSaveProgramEntryFormSettingAction.java 02:10:07 PM Apr 05, 2013 $
  */
-public class SetAutoSaveTrackedEntityFormSettingAction
+public class SetAutoSaveProgramEntryFormSettingAction
     implements Action
 {
     // -------------------------------------------------------------------------

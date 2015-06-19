@@ -28,21 +28,24 @@ package org.hisp.dhis.trackedentity.action.dataentryform;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.dataentryform.DataEntryForm;
 import org.hisp.dhis.dataentryform.DataEntryFormService;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
  * 
- * @version ShowTrackedEntityFormAction.java 10:35:08 AM Jan 31, 2013 $
+ * @version SaveProgramEntryFormAction.java 10:26:09 AM Jan 31, 2013 $
  */
-public class ShowTrackedEntityFormAction
+public class SaveProgramEntryFormAction
     implements Action
 {
     // -------------------------------------------------------------------------
-    // Dependency
+    // Dependencies
     // -------------------------------------------------------------------------
 
     private DataEntryFormService dataEntryFormService;
@@ -52,22 +55,43 @@ public class ShowTrackedEntityFormAction
         this.dataEntryFormService = dataEntryFormService;
     }
 
+    private ProgramService programService;
+
+    public void setProgramService( ProgramService programService )
+    {
+        this.programService = programService;
+    }
+
     // -------------------------------------------------------------------------
     // Getters & Setters
     // -------------------------------------------------------------------------
+    
+    private String name;
 
-    private Integer dataEntryFormId;
-
-    public void setDataEntryFormId( Integer dataEntryFormId )
+    public void setName( String name )
     {
-        this.dataEntryFormId = dataEntryFormId;
+        this.name = name;
     }
 
-    private String dataEntryFormCode;
+    private String designTextarea;
 
-    public String getDataEntryFormCode()
+    public void setDesignTextarea( String designTextarea )
     {
-        return dataEntryFormCode;
+        this.designTextarea = designTextarea;
+    }
+
+    private Integer programId;
+
+    public void setProgramId( Integer programId )
+    {
+        this.programId = programId;
+    }
+
+    private String message;
+
+    public String getMessage()
+    {
+        return message;
     }
 
     // -------------------------------------------------------------------------
@@ -78,15 +102,33 @@ public class ShowTrackedEntityFormAction
     public String execute()
         throws Exception
     {
-        if ( dataEntryFormId != null )
-        {
-            DataEntryForm dataEntryForm = dataEntryFormService.getDataEntryForm( dataEntryFormId );
+        name = StringUtils.trimToNull( name );
+        designTextarea = StringUtils.trimToNull( designTextarea );
+        
+        Program program = programService.getProgram( programId );
+        DataEntryForm dataEntryForm = program.getDataEntryForm();
 
-            if ( dataEntryForm != null )
-            {
-                dataEntryFormCode = dataEntryForm.getHtmlCode();
-            }
+        // ---------------------------------------------------------------------
+        // Save data-entry-form
+        // ---------------------------------------------------------------------
+        
+        if ( dataEntryForm == null )
+        {
+            dataEntryForm = new DataEntryForm( name, designTextarea );
+            program.setDataEntryForm( dataEntryForm );
+            
+            programService.updateProgram( program );
         }
+        else
+        {
+            dataEntryForm.setName( name );
+            dataEntryForm.setHtmlCode( designTextarea );
+            dataEntryFormService.updateDataEntryForm( dataEntryForm );
+        }
+
+        Integer dataEntryFormId = dataEntryFormService.getDataEntryFormByName( name ).getId();
+
+        message = dataEntryFormId + "";
 
         return SUCCESS;
     }

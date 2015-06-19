@@ -28,48 +28,46 @@ package org.hisp.dhis.trackedentity.action.dataentryform;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramService;
-import org.hisp.dhis.trackedentity.TrackedEntityForm;
-import org.hisp.dhis.trackedentity.TrackedEntityFormService;
+import org.hisp.dhis.dataentryform.DataEntryForm;
+import org.hisp.dhis.dataentryform.DataEntryFormService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
  * 
- * @version RemoveTrackedEntityFormAction.java 10:13:10 AM Jan 31, 2013 $
+ * @version ShowProgramEntryFormAction.java 10:35:08 AM Jan 31, 2013 $
  */
-public class RemoveTrackedEntityFormAction
+public class ShowProgramEntryFormAction
     implements Action
 {
     // -------------------------------------------------------------------------
-    // Dependencies
+    // Dependency
     // -------------------------------------------------------------------------
 
-    private TrackedEntityFormService formService;
+    private DataEntryFormService dataEntryFormService;
 
-    public void setFormService( TrackedEntityFormService formService )
+    public void setDataEntryFormService( DataEntryFormService dataEntryFormService )
     {
-        this.formService = formService;
-    }
-
-    private ProgramService programService;
-
-    public void setProgramService( ProgramService programService )
-    {
-        this.programService = programService;
+        this.dataEntryFormService = dataEntryFormService;
     }
 
     // -------------------------------------------------------------------------
-    // Getters & setters
+    // Getters & Setters
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private Integer dataEntryFormId;
 
-    public void setId( Integer id )
+    public void setDataEntryFormId( Integer dataEntryFormId )
     {
-        this.id = id;
+        this.dataEntryFormId = dataEntryFormId;
+    }
+
+    private String dataEntryFormCode;
+
+    public String getDataEntryFormCode()
+    {
+        return dataEntryFormCode;
     }
 
     // -------------------------------------------------------------------------
@@ -80,26 +78,16 @@ public class RemoveTrackedEntityFormAction
     public String execute()
         throws Exception
     {
-        TrackedEntityForm registrationForm = null;
-
-        if ( id != null )
+        if ( dataEntryFormId != null )
         {
-            Program program = programService.getProgram( id );
+            DataEntryForm dataEntryForm = dataEntryFormService.getDataEntryForm( dataEntryFormId );
 
-            registrationForm = formService.getFormsWithProgram( program );
-            
-            program.increaseVersion();
-        }
-        else
-        {
-            registrationForm = formService.getFormsWithoutProgram();
+            if ( dataEntryForm != null )
+            {
+                dataEntryFormCode = dataEntryForm.getHtmlCode();
+            }
         }
 
-        if ( registrationForm != null )
-        {
-           formService.deleteTrackedEntityForm( registrationForm );
-        }
-        
         return SUCCESS;
     }
 }
