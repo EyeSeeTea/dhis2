@@ -22,7 +22,7 @@
     <many-to-one name="programIndicator" class="org.hisp.dhis.program.ProgramIndicator" 
         column="programindicatorid" foreign-key="fk_datadimension_programindicatorid" />
   
-    <many-to-one name="trackedEntityAttribute" class="org.hisp.dhis.trackedentityattribute.TrackedEntityAttribute" 
+    <many-to-one name="trackedEntityAttribute" class="org.hisp.dhis.trackedentity.TrackedEntityAttribute" 
         column="trackedentityattributeid" foreign-key="fk_datadimension_trackedentityattributeid" />
   
   </class>
