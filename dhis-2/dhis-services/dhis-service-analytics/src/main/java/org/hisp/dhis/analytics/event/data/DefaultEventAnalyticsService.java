@@ -37,7 +37,6 @@ import static org.hisp.dhis.common.DimensionalObjectUtils.DIMENSION_NAME_SEP;
 import static org.hisp.dhis.common.DimensionalObjectUtils.ITEM_SEP;
 import static org.hisp.dhis.common.DimensionalObjectUtils.getDimensionFromParam;
 import static org.hisp.dhis.common.DimensionalObjectUtils.getDimensionItemsFromParam;
-import static org.hisp.dhis.common.DimensionalObjectUtils.toDimension;
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
 import static org.hisp.dhis.common.NameableObjectUtils.asTypedList;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.getParentGraphMap;
@@ -510,7 +509,7 @@ public class DefaultEventAnalyticsService
             for ( DimensionalObject dimension : ListUtils.union( object.getColumns(), object.getRows() ) )
             {
                 DimensionalObject dimObj = analyticsService.
-                    getDimension( toDimension( dimension.getDimension() ), getUids( dimension.getItems() ), date, format, true );
+                    getDimension( dimension.getDimension(), getUids( dimension.getItems() ), date, format, true );
                 
                 if ( dimObj != null )
                 {
@@ -525,7 +524,7 @@ public class DefaultEventAnalyticsService
             for ( DimensionalObject filter : object.getFilters() )
             {
                 DimensionalObject dimObj = analyticsService.
-                    getDimension( toDimension( filter.getDimension() ), getUids( filter.getItems() ), date, format, true );
+                    getDimension( filter.getDimension(), getUids( filter.getItems() ), date, format, true );
                 
                 if ( dimObj != null )
                 {

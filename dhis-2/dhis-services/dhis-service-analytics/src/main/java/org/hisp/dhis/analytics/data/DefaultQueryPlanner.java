@@ -31,13 +31,9 @@ package org.hisp.dhis.analytics.data;
 import static org.hisp.dhis.analytics.AggregationType.SUM;
 import static org.hisp.dhis.analytics.DataQueryParams.LEVEL_PREFIX;
 import static org.hisp.dhis.common.DimensionalObject.CATEGORYOPTIONCOMBO_DIM_ID;
-import static org.hisp.dhis.common.DimensionalObject.DATAELEMENT_DIM_ID;
-import static org.hisp.dhis.common.DimensionalObject.DATASET_DIM_ID;
-import static org.hisp.dhis.common.DimensionalObject.INDICATOR_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.DATA_X_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
-import static org.hisp.dhis.common.DimensionalObject.PROGRAM_ATTRIBUTE_DIM_ID;
-import static org.hisp.dhis.common.DimensionalObject.PROGRAM_DATAELEMENT_DIM_ID;
 import static org.hisp.dhis.dataelement.DataElement.AGGREGATION_OPERATOR_AVERAGE;
 import static org.hisp.dhis.dataelement.DataElement.AGGREGATION_OPERATOR_AVERAGE_SUM;
 import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_BOOL;
@@ -129,12 +125,12 @@ public class DefaultQueryPlanner
             violation = "At least one period must be specified as dimension or filter";
         }
         
-        if ( params.getFilters().contains( new BaseDimensionalObject( INDICATOR_DIM_ID ) ) )
+        if ( !params.getFilterIndicators().isEmpty() )
         {
             violation = "Indicators cannot be specified as filter";
         }
 
-        if ( params.getFilters().contains( new BaseDimensionalObject( DATASET_DIM_ID ) ) )
+        if ( params.getFilterDataSets().isEmpty() )
         {
             violation = "Data sets cannot be specified as filter";
         }
@@ -149,22 +145,22 @@ public class DefaultQueryPlanner
             violation = "Dimensions cannot be specified more than once: " + params.getDuplicateDimensions();
         }
         
-        if ( params.hasDimensionOrFilter( DATASET_DIM_ID ) && !params.getDataElementGroupSets().isEmpty() )
+        if ( !params.getAllDataSets().isEmpty() && !params.getDataElementGroupSets().isEmpty() )
         {
             violation = "Data sets and data element group sets cannot be specified simultaneously";
         }
         
-        if ( params.hasDimensionOrFilter( CATEGORYOPTIONCOMBO_DIM_ID ) && !params.hasDimensionOrFilter( DATAELEMENT_DIM_ID ) )
+        if ( params.hasDimensionOrFilter( CATEGORYOPTIONCOMBO_DIM_ID ) && params.getAllDataElements().isEmpty() )
         {
             violation = "Category option combos cannot be specified when data elements are not specified";
         }
         
-        if ( params.hasDimensionOrFilter( PROGRAM_DATAELEMENT_DIM_ID ) && !params.hasProgram() )
+        if ( !params.getAllProgramDataElements().isEmpty() && !params.hasProgram() )
         {
             violation = "Program must be specified when tracker data elements are specified";
         }
 
-        if ( params.hasDimensionOrFilter( PROGRAM_ATTRIBUTE_DIM_ID ) && !params.hasProgram() )
+        if ( !params.getAllProgramAttributes().isEmpty() && !params.hasProgram() )
         {
             violation = "Program must be specified when program attributes are specified";
         }
@@ -191,7 +187,7 @@ public class DefaultQueryPlanner
         {
             for ( String column : columns )
             {
-                if ( !params.hasDimensionCollapseDx( column ) )
+                if ( !params.hasDimension( column ) )
                 {
                     violation = "Column must be present as dimension in query: " + column;
                 }
@@ -202,7 +198,7 @@ public class DefaultQueryPlanner
         {
             for ( String row : rows )
             {
-                if ( !params.hasDimensionCollapseDx( row ) )
+                if ( !params.hasDimension( row ) )
                 {
                     violation = "Row must be present as dimension in query: " + row;
                 }
@@ -299,18 +295,7 @@ public class DefaultQueryPlanner
         // Group by data element
         // ---------------------------------------------------------------------
         
-        queryGroups = splitByDimension( queryGroups, DATAELEMENT_DIM_ID, optimalQueries );
-
-        if ( queryGroups.isOptimal( optimalQueries ) )
-        {
-            return queryGroups;
-        }
-
-        // ---------------------------------------------------------------------
-        // Group by data set
-        // ---------------------------------------------------------------------
-        
-        queryGroups = splitByDimension( queryGroups, DATASET_DIM_ID, optimalQueries );
+        queryGroups = splitByDimension( queryGroups, DATA_X_DIM_ID, optimalQueries );
 
         if ( queryGroups.isOptimal( optimalQueries ) )
         {

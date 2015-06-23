@@ -312,7 +312,7 @@ public class EventAnalyticsServiceTest
         
         assertNotNull( dim );
         assertEquals( tea.getDimension(), dim.getDimension() );
-        assertEquals( DimensionType.PROGRAM_ATTRIBUTE, dim.getDimensionType() );
+        assertEquals( DimensionType.DATA_X, dim.getDimensionType() );
         assertEquals( AnalyticsType.EVENT, dim.getAnalyticsType() );
         assertEquals( tead.getFilter(), dim.getFilter() );
         

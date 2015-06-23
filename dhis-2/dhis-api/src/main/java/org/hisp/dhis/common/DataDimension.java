@@ -31,7 +31,6 @@ package org.hisp.dhis.common;
 import java.util.Set;
 
 import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementDomain;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.indicator.Indicator;
@@ -133,40 +132,6 @@ public class DataDimension
         else if ( trackedEntityAttribute != null )
         {
             return trackedEntityAttribute;
-        }
-        
-        throw new IllegalStateException( "Data dimension is null" );
-    }
-    
-    public DimensionType getDimensionType()
-    {
-        if ( indicator != null )
-        {
-            return DimensionType.INDICATOR;
-        }
-        else if ( dataElement != null && DataElementDomain.AGGREGATE.equals( dataElement.getDomainType() ) )
-        {
-            return DimensionType.DATAELEMENT;
-        }
-        else if ( dataElementOperand != null )
-        {
-            return DimensionType.DATAELEMENT_OPERAND;
-        }
-        else if ( dataSet != null )
-        {
-            return DimensionType.DATASET;
-        }
-        else if ( programIndicator != null )
-        {
-            return DimensionType.PROGRAM_INDICATOR;
-        }
-        else if ( trackedEntityAttribute != null )
-        {
-            return DimensionType.PROGRAM_ATTRIBUTE;
-        }
-        else if ( dataElement != null && DataElementDomain.TRACKER.equals( dataElement.getDomainType() ) )
-        {
-            return DimensionType.PROGRAM_DATAELEMENT;
         }
         
         throw new IllegalStateException( "Data dimension is null" );

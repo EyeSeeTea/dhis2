@@ -35,6 +35,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementDomain;
+
 /**
  * @author Lars Helge Overland
  */
@@ -166,6 +169,40 @@ public class NameableObjectUtils
         return list;
     }
 
+    public static <T extends NameableObject> List<NameableObject> getFilteredByClass( Class<T> clazz, List<NameableObject> objects )
+    {
+        List<NameableObject> list = new ArrayList<>();
+        
+        for ( NameableObject object : objects )
+        {
+            if ( object != null && object.getClass().isAssignableFrom( clazz ) )
+            {
+                list.add( object );
+            }
+        }
+        
+        return list;
+    }
+
+    public static <T extends NameableObject> List<NameableObject> getDataElements( DataElementDomain domainType, List<NameableObject> objects )
+    {
+        List<NameableObject> list = new ArrayList<>();
+
+        List<NameableObject> dataElements = getFilteredByClass( DataElement.class, objects );
+        
+        for ( NameableObject object : dataElements )
+        {
+            if ( domainType.equals( ((DataElement) object).getDomainType() ) )
+            {
+                list.add( object );
+            }
+        }
+        
+        return list;
+    }
+    
+    
+    
     /**
      * Returns a mapping between the UID and the nameable objects.
      *

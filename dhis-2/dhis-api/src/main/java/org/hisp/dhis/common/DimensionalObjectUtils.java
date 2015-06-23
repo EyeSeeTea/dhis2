@@ -28,9 +28,6 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.common.DimensionalObject.DATA_DIMS;
-import static org.hisp.dhis.common.DimensionalObject.DATA_X_DIM_ID;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -63,6 +60,7 @@ public class DimensionalObjectUtils
      * @param identifier the identifier.
      * @return a dimension identifier.
      */
+    /*
     public static String toDimension( String identifier )
     {
         if ( DATA_DIMS.contains( identifier ) )
@@ -71,7 +69,7 @@ public class DimensionalObjectUtils
         }
         
         return identifier;
-    }
+    }*/
     
     /**
      * Creates a unique list of dimension identifiers based on the given list
@@ -88,7 +86,8 @@ public class DimensionalObjectUtils
         {
             for ( DimensionalObject dimension : dimensions )
             {
-                String dim = toDimension( dimension.getDimension() );
+                //String dim = toDimension( dimension.getDimension() );
+                String dim = dimension.getDimension(); //TODO check
                 
                 if ( dim != null && !dims.contains( dim ) )
                 {

@@ -33,11 +33,12 @@ package org.hisp.dhis.common;
  */
 public enum DimensionType
 {
+    /*
     INDICATOR,
     DATAELEMENT,
     DATASET,
     DATAELEMENT_OPERAND,
-    PROGRAM_INDICATOR,
+    PROGRAM_INDICATOR,*/
     PROGRAM_DATAELEMENT,
     PROGRAM_ATTRIBUTE,
     DATA_X,

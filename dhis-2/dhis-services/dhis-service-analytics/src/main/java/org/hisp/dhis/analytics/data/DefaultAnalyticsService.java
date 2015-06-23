@@ -42,20 +42,12 @@ import static org.hisp.dhis.analytics.DataQueryParams.DISPLAY_NAME_PERIOD;
 import static org.hisp.dhis.analytics.DataQueryParams.DX_INDEX;
 import static org.hisp.dhis.analytics.DataQueryParams.KEY_DE_GROUP;
 import static org.hisp.dhis.common.DimensionalObject.CATEGORYOPTIONCOMBO_DIM_ID;
-import static org.hisp.dhis.common.DimensionalObject.DATAELEMENT_DIM_ID;
-import static org.hisp.dhis.common.DimensionalObject.DATASET_DIM_ID;
-import static org.hisp.dhis.common.DimensionalObject.DATA_DIMS;
 import static org.hisp.dhis.common.DimensionalObject.DATA_X_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.DIMENSION_SEP;
-import static org.hisp.dhis.common.DimensionalObject.INDICATOR_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.LATITUDE_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.LONGITUDE_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
-import static org.hisp.dhis.common.DimensionalObject.PROGRAM_ATTRIBUTE_DIM_ID;
-import static org.hisp.dhis.common.DimensionalObject.PROGRAM_DATAELEMENT_DIM_ID;
-import static org.hisp.dhis.common.DimensionalObject.PROGRAM_INDICATOR_DIM_ID;
-import static org.hisp.dhis.common.DimensionalObjectUtils.toDimension;
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getLocalPeriodIdentifier;
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getLocalPeriodIdentifiers;
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
@@ -348,7 +340,7 @@ public class DefaultAnalyticsService
                     {
                         List<DimensionItem> row = new ArrayList<>( dimensionItems );
 
-                        row.add( DX_INDEX, new DimensionItem( INDICATOR_DIM_ID, indicator ) );
+                        row.add( DX_INDEX, new DimensionItem( DATA_X_DIM_ID, indicator ) );
 
                         Double roundedValue = indicator.hasDecimals() ? MathUtils.getRounded( value, indicator.getDecimals() ) : MathUtils.getRounded( value );
                         
@@ -509,7 +501,7 @@ public class DefaultAnalyticsService
                     {
                         List<DimensionItem> row = new ArrayList<>( dimensionItems );
 
-                        row.add( DX_INDEX, new DimensionItem( PROGRAM_INDICATOR_DIM_ID, indicator ) );
+                        row.add( DX_INDEX, new DimensionItem( DATA_X_DIM_ID, indicator ) );
                         
                         Double roundedValue = MathUtils.getRounded( value );
                         
@@ -979,17 +971,17 @@ public class DefaultAnalyticsService
 
             for ( DimensionalObject column : object.getColumns() )
             {
-                params.addDimension( getDimension( toDimension( column.getDimension() ), getUids( column.getItems() ), date, format, false ) );
+                params.addDimension( getDimension( column.getDimension(), getUids( column.getItems() ), date, format, false ) );
             }
 
             for ( DimensionalObject row : object.getRows() )
             {
-                params.addDimension( getDimension( toDimension( row.getDimension() ), getUids( row.getItems() ), date, format, false ) );
+                params.addDimension( getDimension( row.getDimension(), getUids( row.getItems() ), date, format, false ) );
             }
 
             for ( DimensionalObject filter : object.getFilters() )
             {
-                params.getFilters().add( getDimension( toDimension( filter.getDimension() ), getUids( filter.getItems() ), date, format, false ) );
+                params.getFilters().add( getDimension( filter.getDimension(), getUids( filter.getItems() ), date, format, false ) );
             }
         }
 
@@ -1440,7 +1432,7 @@ public class DefaultAnalyticsService
     {
         Map<String, String> metaData = new HashMap<>();
 
-        List<NameableObject> des = params.getDimensionOrFilter( DATAELEMENT_DIM_ID );
+        List<NameableObject> des = params.getAllDataElements();
 
         if ( des != null && !des.isEmpty() )
         {

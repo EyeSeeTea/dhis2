@@ -28,9 +28,19 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.common.DimensionalObjectUtils.getUniqueDimensions;
+
+import java.io.IOException;
+import java.util.Date;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.chart.ChartService;
 import org.hisp.dhis.common.DimensionService;
+import org.hisp.dhis.commons.util.CodecUtils;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
@@ -46,7 +56,6 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.schema.descriptors.ChartSchemaDescriptor;
-import org.hisp.dhis.commons.util.CodecUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.hisp.dhis.webapi.utils.ContextUtils.CacheStrategy;
@@ -58,15 +67,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Date;
-import java.util.Set;
-
-import static org.hisp.dhis.common.DimensionalObjectUtils.getUniqueDimensions;
-import static org.hisp.dhis.common.DimensionalObjectUtils.toDimension;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -307,12 +307,12 @@ public class ChartController
 
         if ( chart.getColumns() != null )
         {
-            chart.setSeries( toDimension( chart.getColumns().get( 0 ).getDimension() ) );
+            chart.setSeries( chart.getColumns().get( 0 ).getDimension() );
         }
 
         if ( chart.getRows() != null )
         {
-            chart.setCategory( toDimension( chart.getRows().get( 0 ).getDimension() ) );
+            chart.setCategory( chart.getRows().get( 0 ).getDimension() );
         }
 
         chart.getFilterDimensions().addAll( getUniqueDimensions( chart.getFilters() ) );
