@@ -56,6 +56,8 @@ public class DataDimension
     
     private DataElement dataElement;
     
+    private DataElementOperand dataElementOperand;
+    
     private DataSet dataSet;
     
     private ProgramIndicator programIndicator;
@@ -81,6 +83,10 @@ public class DataDimension
         else if ( object.getClass().isAssignableFrom( DataElement.class ) )
         {
             dimension.setDataElement( (DataElement) object );
+        }
+        else if ( object.getClass().isAssignableFrom( DataElementOperand.class ) )
+        {
+            dimension.setDataElementOperand( (DataElementOperand) object );
         }
         else if ( object.getClass().isAssignableFrom( DataSet.class ) )
         {
@@ -112,6 +118,10 @@ public class DataDimension
         {
             return dataElement;
         }
+        else if ( dataElementOperand != null )
+        {
+            return dataElementOperand;
+        }
         else if ( dataSet != null )
         {
             return dataSet;
@@ -137,6 +147,10 @@ public class DataDimension
         else if ( dataElement != null && DataElementDomain.AGGREGATE.equals( dataElement.getDomainType() ) )
         {
             return DimensionType.DATAELEMENT;
+        }
+        else if ( dataElementOperand != null )
+        {
+            return DimensionType.DATAELEMENT_OPERAND;
         }
         else if ( dataSet != null )
         {
@@ -190,6 +204,16 @@ public class DataDimension
     public void setDataElement( DataElement dataElement )
     {
         this.dataElement = dataElement;
+    }
+
+    public DataElementOperand getDataElementOperand()
+    {
+        return dataElementOperand;
+    }
+
+    public void setDataElementOperand( DataElementOperand dataElementOperand )
+    {
+        this.dataElementOperand = dataElementOperand;
     }
 
     public DataSet getDataSet()
