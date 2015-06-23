@@ -256,6 +256,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                             newInputField = '<input type="text" ' +
                                     this.getAttributesAsString(attributes) +
                                     ' ng-model="currentEvent.' + fieldId + '"' +
+                                    ' style="width:100%;" ' +
                                     ' input-field-id="' + fieldId + '"' +
                                     ' d2-date ' +
                                     ' d2-date-validator ' +
@@ -323,7 +324,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                                 ' blur-or-change="saveDatavalue(prStDes.' + fieldId + ', outerForm.' + fieldId + ')"' +
                                                 commonInputFieldProperty + ' >';
                                     }
-                                    else if (prStDe.dataElement.type.type === "trueOnly") {
+                                    else if (prStDe.dataElement.type === "trueOnly") {
                                         newInputField = '<input type="checkbox" ' +
                                                 ' ng-change="saveDatavalue(prStDes.' + fieldId + ', outerForm.' + fieldId + ')"' +
                                                 commonInputFieldProperty + ' >';
@@ -345,16 +346,16 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             }
             return null;
         },
-        getForTrackedEntity: function (trackedEntity, target) {
-            if (!trackedEntity) {
+        getForTrackedEntity: function (trackedEntityForm, target) {
+            if (!trackedEntityForm) {
                 return null;
             }
 
-            var htmlCode = trackedEntity.dataEntryForm ? trackedEntity.dataEntryForm.htmlCode : null;
+            var htmlCode = trackedEntityForm.htmlCode ? trackedEntityForm.htmlCode : null;
             if (htmlCode) {
 
                 var trackedEntityFormAttributes = [];
-                angular.forEach(trackedEntity.attributes, function (att) {
+                angular.forEach(trackedEntityForm.attributes, function (att) {
                     trackedEntityFormAttributes[att.id] = att;
                 });
 
@@ -456,7 +457,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                         programId = attributes['programid'];
                         if (programId === 'enrollmentDate') {
                             fieldName = 'dateOfEnrollment';
-                            var enMaxDate = trackedEntity.selectEnrollmentDatesInFuture ? '' : 0;
+                            var enMaxDate = trackedEntityForm.selectEnrollmentDatesInFuture ? '' : 0;
                             newInputField = '<input type="text" ' +
                                     ' name="' + fieldName + '"' +
                                     ' element-id="' + i + '"' +
@@ -469,9 +470,9 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                     ' max-date="' + enMaxDate + '"' +
                                     ' ng-required="true"> ';
                         }
-                        if (programId === 'dateOfIncident' && trackedEntity.displayIncidentDate) {
+                        if (programId === 'dateOfIncident' && trackedEntityForm.displayIncidentDate) {
                             fieldName = 'dateOfIncident';
-                            var inMaxDate = trackedEntity.selectIncidentDatesInFuture ? '' : 0;
+                            var inMaxDate = trackedEntityForm.selectIncidentDatesInFuture ? '' : 0;
                             newInputField = '<input type="text" ' +
                                     ' name="' + fieldName + '"' +
                                     ' element-id="' + i + '"' +
@@ -888,8 +889,11 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                     //add context variables:
                     //last parameter "valuefound" is always true for event date
                     pushVariable('incident_date', executingEvent.eventDate, 'date', true, 'V' );
-                    pushVariable('enrollment_date', selectedEnrollment.dateOfEnrollment, 'date', true, 'V' );
                     pushVariable('current_date', DateUtils.getToday(), 'date', true, 'V' );
+                    if(selectedEnrollment){
+                        pushVariable('enrollment_date', selectedEnrollment.dateOfEnrollment, 'date', true, 'V' );
+                    }
+                    
                     //pushVariable('value_count', executingEvent.eventDate, 'date', true, 'V' );
                     //pushVariable('zero_pos_value_count', executingEvent.eventDate, 'date', true, 'V' );
 
@@ -910,11 +914,10 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 /* service for executing tracker rules and broadcasting results */
 .service('TrackerRulesExecutionService', function(TrackerRulesFactory, MetaDataFactory, VariableService, $rootScope, $log, $q, $filter, orderByFilter){
     return {
-        executeRules: function(programid, executingEvent, allEventsByStage, allDataElements, selectedEntity, selectedEnrollment ) {
+        executeRules: function(programid, executingEvent, allEventsByStage, allDataElements, selectedEntity, selectedEnrollment, verbose ) {
             //When debugging rules, the caller should provide a variable for wether or not the rules is being debugged.
             //hard coding this for now:
             var debug = true;
-            var verbose = true;
             
             var variablesHash = {};
             
