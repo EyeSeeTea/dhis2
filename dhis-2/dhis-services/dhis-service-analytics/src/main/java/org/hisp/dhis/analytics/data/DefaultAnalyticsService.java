@@ -44,6 +44,7 @@ import static org.hisp.dhis.analytics.DataQueryParams.KEY_DE_GROUP;
 import static org.hisp.dhis.common.DimensionalObject.CATEGORYOPTIONCOMBO_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.DATAELEMENT_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.DATASET_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.DATA_DIMS;
 import static org.hisp.dhis.common.DimensionalObject.DATA_X_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.DIMENSION_SEP;
 import static org.hisp.dhis.common.DimensionalObject.INDICATOR_DIM_ID;
@@ -54,7 +55,6 @@ import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PROGRAM_ATTRIBUTE_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PROGRAM_DATAELEMENT_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PROGRAM_INDICATOR_DIM_ID;
-import static org.hisp.dhis.common.DimensionalObject.DATA_DIMS;
 import static org.hisp.dhis.common.DimensionalObjectUtils.toDimension;
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getLocalPeriodIdentifier;
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getLocalPeriodIdentifiers;
@@ -102,6 +102,7 @@ import org.hisp.dhis.common.AnalyticalObject;
 import org.hisp.dhis.common.BaseDimensionalObject;
 import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.common.CombinationGenerator;
+import org.hisp.dhis.common.DataDimension;
 import org.hisp.dhis.common.DimensionType;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.DimensionalObjectUtils;
@@ -126,12 +127,10 @@ import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.dataelement.DataElementDomain;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementGroupSet;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataelement.DataElementOperandService;
-import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.indicator.Indicator;
@@ -153,7 +152,6 @@ import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.grid.ListGrid;
 import org.hisp.dhis.system.util.MathUtils;
 import org.hisp.dhis.system.util.SystemUtils;
-import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.util.Timer;
@@ -938,7 +936,7 @@ public class DefaultAnalyticsService
 
         if ( filterParams != null && !filterParams.isEmpty() )
         {
-            params.addFilters( getDimensionalObjects( filterParams, format ) );
+            params.getFilters().addAll( getDimensionalObjects( filterParams, format ) );
         }
 
         if ( measureCriteria != null && !measureCriteria.isEmpty() )
@@ -981,17 +979,17 @@ public class DefaultAnalyticsService
 
             for ( DimensionalObject column : object.getColumns() )
             {
-                params.addDimensions( getDimension( toDimension( column.getDimension() ), getUids( column.getItems() ), date, format, false ) );
+                params.addDimension( getDimension( toDimension( column.getDimension() ), getUids( column.getItems() ), date, format, false ) );
             }
 
             for ( DimensionalObject row : object.getRows() )
             {
-                params.addDimensions( getDimension( toDimension( row.getDimension() ), getUids( row.getItems() ), date, format, false ) );
+                params.addDimension( getDimension( toDimension( row.getDimension() ), getUids( row.getItems() ), date, format, false ) );
             }
 
             for ( DimensionalObject filter : object.getFilters() )
             {
-                params.addFilters( getDimension( toDimension( filter.getDimension() ), getUids( filter.getItems() ), date, format, false ) );
+                params.getFilters().add( getDimension( toDimension( filter.getDimension() ), getUids( filter.getItems() ), date, format, false ) );
             }
         }
 
@@ -1012,7 +1010,7 @@ public class DefaultAnalyticsService
 
                 if ( dimension != null && items != null )
                 {
-                    list.addAll( getDimension( dimension, items, null, format, false ) );
+                    list.add( getDimension( dimension, items, null, format, false ) );
                 }
             }
         }
@@ -1024,27 +1022,17 @@ public class DefaultAnalyticsService
     // TODO optimize so that org unit levels + boundary are used in query instead of fetching all org units one by one
 
     @Override
-    public List<DimensionalObject> getDimension( String dimension, List<String> items, Date relativePeriodDate, I18nFormat format, boolean allowNull )
+    public DimensionalObject getDimension( String dimension, List<String> items, Date relativePeriodDate, I18nFormat format, boolean allowNull )
     {
         final boolean allItems = items.isEmpty();
         
         if ( DATA_X_DIM_ID.equals( dimension ) )
         {
-            List<DimensionalObject> dataDimensions = new ArrayList<>();
-            List<DataElementGroup> dataElementGroups = new ArrayList<>();
-            
-            List<NameableObject> indicators = new ArrayList<>();
-            List<NameableObject> dataElements = new ArrayList<>();
-            List<NameableObject> dataSets = new ArrayList<>();
-            List<NameableObject> operandDataElements = new ArrayList<>();
-            List<NameableObject> programIndicators = new ArrayList<>();
-            List<NameableObject> programDataElements = new ArrayList<>();
-            List<NameableObject> programAttributes = new ArrayList<>();
+            List<NameableObject> dataDimensionItems = new ArrayList<>();
 
-            itemLoop:
             for ( String uid : items )
             {
-                if ( uid != null && uid.startsWith( KEY_DE_GROUP ) )
+                if ( uid.startsWith( KEY_DE_GROUP ) )
                 {
                     String groupUid = DimensionalObjectUtils.getUidFromGroupParam( uid );
                     
@@ -1052,127 +1040,37 @@ public class DefaultAnalyticsService
                     
                     if ( group != null )
                     {
-                        dataElementGroups.add( group );
+                        dataDimensionItems.addAll( group.getMembers() );
                     }
+                }
+                else if ( CodeGenerator.isValidCode( uid ) )
+                {
+                    NameableObject item = idObjectManager.get( DataDimension.DATA_DIMENSION_CLASSES, uid );
                     
-                    continue itemLoop;
-                }
-                
-                Indicator in = idObjectManager.get( Indicator.class, uid );
-
-                if ( in != null )
-                {
-                    indicators.add( in );
-                    continue itemLoop;
-                }
-
-                DataElement de = idObjectManager.get( DataElement.class, uid );
-
-                if ( de != null && DataElementDomain.AGGREGATE.equals( de.getDomainType() ) )
-                {
-                    dataElements.add( de );
-                    continue itemLoop;
-                }
-                
-                else if ( de != null && DataElementDomain.TRACKER.equals( de.getDomainType() ) )
-                {
-                    programDataElements.add( de );
-                    continue itemLoop;
-                }
-
-                DataSet ds = idObjectManager.get( DataSet.class, uid );
-
-                if ( ds != null )
-                {
-                    dataSets.add( ds );
-                    continue itemLoop;
-                }
-
-                DataElementOperand dc = operandService.getDataElementOperandByUid( uid );
-
-                if ( dc != null )
-                {
-                    operandDataElements.add( dc.getDataElement() );
-                    continue itemLoop;
-                }
-                
-                ProgramIndicator pi = idObjectManager.get( ProgramIndicator.class, uid );
-                
-                if ( pi != null )
-                {
-                    programIndicators.add( pi );
-                    continue itemLoop;
-                }
-                
-                TrackedEntityAttribute pa = idObjectManager.get( TrackedEntityAttribute.class, uid );
-                
-                if ( pa != null )
-                {
-                    programAttributes.add( pa );
-                    continue itemLoop;
-                }
-
-                throw new IllegalQueryException( "Data dimension option identifier does not reference any option: " + uid );
-            }
-            
-            if ( !dataElementGroups.isEmpty() )
-            {
-                for ( DataElementGroup group : dataElementGroups )
-                {
-                    dataElements.addAll( group.getMembers() );
+                    if ( item != null )
+                    {
+                        dataDimensionItems.add( item );
+                    }
                 }
             }
             
-            if ( !indicators.isEmpty() )
-            {
-                dataDimensions.add( new BaseDimensionalObject( INDICATOR_DIM_ID, DimensionType.INDICATOR, indicators ) );
-            }
-
-            if ( !dataElements.isEmpty() )
-            {
-                dataDimensions.add( new BaseDimensionalObject( DATAELEMENT_DIM_ID, DimensionType.DATAELEMENT, dataElements ) );
-            }
-
-            if ( !dataSets.isEmpty() )
-            {
-                dataDimensions.add( new BaseDimensionalObject( DATASET_DIM_ID, DimensionType.DATASET, dataSets ) );
-            }
-
-            if ( !operandDataElements.isEmpty() )
-            {
-                dataDimensions.add( new BaseDimensionalObject( DATAELEMENT_DIM_ID, DimensionType.DATAELEMENT, operandDataElements ) );
-                dataDimensions.add( new BaseDimensionalObject( CATEGORYOPTIONCOMBO_DIM_ID, DimensionType.CATEGORY_OPTION_COMBO, new ArrayList<NameableObject>() ) );
-            }
-            
-            if ( !programIndicators.isEmpty() )
-            {
-                dataDimensions.add( new BaseDimensionalObject( PROGRAM_INDICATOR_DIM_ID, DimensionType.PROGRAM_INDICATOR, programIndicators ) );
-            }
-            
-            if ( !programDataElements.isEmpty() )
-            {
-                dataDimensions.add( new BaseDimensionalObject( PROGRAM_DATAELEMENT_DIM_ID, DimensionType.PROGRAM_DATAELEMENT, programDataElements ) );
-            }
-
-            if ( !programAttributes.isEmpty() )
-            {
-                dataDimensions.add( new BaseDimensionalObject( PROGRAM_ATTRIBUTE_DIM_ID, DimensionType.PROGRAM_ATTRIBUTE, programAttributes ) );
-            }
-            
-            if ( indicators.isEmpty() && dataElements.isEmpty() && dataSets.isEmpty() && operandDataElements.isEmpty() && 
-                programDataElements.isEmpty() && programAttributes.isEmpty() && programIndicators.isEmpty() )
+            if ( dataDimensionItems.isEmpty() )
             {
                 throw new IllegalQueryException( "Dimension dx is present in query without any valid dimension options" );
             }
 
-            return dataDimensions;
+            DimensionalObject object = new BaseDimensionalObject( dimension, DimensionType.DATA_X, null, DISPLAY_NAME_DATA_X, dataDimensionItems );
+            
+            return object;
+            
+            //TODO proper handling of operands and option combinations
         }
 
         if ( CATEGORYOPTIONCOMBO_DIM_ID.equals( dimension ) )
         {
             DimensionalObject object = new BaseDimensionalObject( dimension, DimensionType.CATEGORY_OPTION_COMBO, null, DISPLAY_NAME_CATEGORYOPTIONCOMBO, new ArrayList<NameableObject>() );
 
-            return Lists.newArrayList( object );
+            return object;
         }
 
         if ( PERIOD_DIM_ID.equals( dimension ) )
@@ -1220,7 +1118,7 @@ public class DefaultAnalyticsService
 
             DimensionalObject object = new BaseDimensionalObject( dimension, DimensionType.PERIOD, null, DISPLAY_NAME_PERIOD, asList( periodList ) );
 
-            return Lists.newArrayList( object );
+            return object;
         }
 
         if ( ORGUNIT_DIM_ID.equals( dimension ) )
@@ -1305,21 +1203,21 @@ public class DefaultAnalyticsService
 
             DimensionalObject object = new BaseDimensionalObject( dimension, DimensionType.ORGANISATIONUNIT, null, DISPLAY_NAME_ORGUNIT, orgUnits );
 
-            return Lists.newArrayList( object );
+            return object;
         }
 
         if ( LONGITUDE_DIM_ID.contains( dimension ) )
         {
             DimensionalObject object = new BaseDimensionalObject( dimension, DimensionType.STATIC, null, DISPLAY_NAME_LONGITUDE, new ArrayList<NameableObject>() );
 
-            return Lists.newArrayList( object );
+            return object;
         }
 
         if ( LATITUDE_DIM_ID.contains( dimension ) )
         {
             DimensionalObject object = new BaseDimensionalObject( dimension, DimensionType.STATIC, null, DISPLAY_NAME_LATITUDE, new ArrayList<NameableObject>() );
 
-            return Lists.newArrayList( object );
+            return object;
         }
 
         OrganisationUnitGroupSet ougs = idObjectManager.get( OrganisationUnitGroupSet.class, dimension );
@@ -1330,7 +1228,7 @@ public class DefaultAnalyticsService
 
             DimensionalObject object = new BaseDimensionalObject( dimension, DimensionType.ORGANISATIONUNIT_GROUPSET, null, ougs.getDisplayName(), ous, allItems );
 
-            return Lists.newArrayList( object );
+            return object;
         }
 
         DataElementGroupSet degs = idObjectManager.get( DataElementGroupSet.class, dimension );
@@ -1341,7 +1239,7 @@ public class DefaultAnalyticsService
 
             DimensionalObject object = new BaseDimensionalObject( dimension, DimensionType.DATAELEMENT_GROUPSET, null, degs.getDisplayName(), des, allItems );
 
-            return Lists.newArrayList( object );
+            return object;
         }
 
         CategoryOptionGroupSet cogs = idObjectManager.get( CategoryOptionGroupSet.class, dimension );
@@ -1352,7 +1250,7 @@ public class DefaultAnalyticsService
 
             DimensionalObject object = new BaseDimensionalObject( dimension, DimensionType.CATEGORYOPTION_GROUPSET, null, cogs.getDisplayName(), cogz, allItems );
 
-            return Lists.newArrayList( object );
+            return object;
         }
 
         DataElementCategory dec = idObjectManager.get( DataElementCategory.class, dimension );
@@ -1363,7 +1261,7 @@ public class DefaultAnalyticsService
 
             DimensionalObject object = new BaseDimensionalObject( dimension, DimensionType.CATEGORY, null, dec.getDisplayName(), decos, allItems );
 
-            return Lists.newArrayList( object );
+            return object;
         }
 
         if ( allowNull )

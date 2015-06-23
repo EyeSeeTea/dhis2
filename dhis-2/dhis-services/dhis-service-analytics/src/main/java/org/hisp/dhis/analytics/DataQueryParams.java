@@ -1159,32 +1159,33 @@ public class DataQueryParams
     }
     
     /**
-     * Adds the given dimension to the dimensions of this query. If the dimension
-     * is a data dimensions it will be added to the beginning of the list of dimensions.
+     * Adds the given dimensions to the dimensions of this query. If the dimension
+     * is a data dimension it will be added to the beginning of the list of dimensions.
      */
     public void addDimensions( List<DimensionalObject> dimension )
     {
         for ( DimensionalObject dim : dimension )
         {
-            if ( DATA_DIMS.contains( dim.getDimension() ) )
-            {
-                dimensions.add( 0, dim );
-            }
-            else
-            {
-                dimensions.add( dim );
-            }
+            addDimension( dim );
         }
     }
-    
+
     /**
-     * Adds the given filters to the filters of this query.
+     * Adds the given dimension to the dimensions of this query. If the dimension
+     * is a data dimension it will be added to the beginning of the list of dimensions.
      */
-    public void addFilters( List<DimensionalObject> filters )
+    public void addDimension( DimensionalObject dimension )
     {
-        this.filters.addAll( filters );
+        if ( DATA_DIMS.contains( dimension.getDimension() ) )
+        {
+            dimensions.add( 0, dimension );
+        }
+        else
+        {
+            dimensions.add( dimension );
+        }
     }
-    
+        
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------

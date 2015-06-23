@@ -169,7 +169,7 @@ public class DimensionServiceTest
     {
         ReportTable reportTable = new ReportTable();
         
-        reportTable.getColumns().add( new BaseDimensionalObject( DimensionalObject.DATAELEMENT_DIM_ID, DimensionType.DATAELEMENT, Lists.newArrayList( deA, deB ) ) );
+        reportTable.getColumns().add( new BaseDimensionalObject( DimensionalObject.DATA_X_DIM_ID, DimensionType.DATA_X, Lists.newArrayList( deA, deB ) ) );
         reportTable.getRows().add( new BaseDimensionalObject( DimensionalObject.ORGUNIT_DIM_ID, DimensionType.ORGANISATIONUNIT, Lists.newArrayList( ouA, ouB, ouC, ouD, ouE ) ) );
         reportTable.getFilters().add( new BaseDimensionalObject( DimensionalObject.PERIOD_DIM_ID, DimensionType.PERIOD, Lists.newArrayList( peA, peB ) ) );
         
@@ -185,7 +185,7 @@ public class DimensionServiceTest
     {
         ReportTable reportTable = new ReportTable();
 
-        reportTable.getColumns().add( new BaseDimensionalObject( DimensionalObject.DATAELEMENT_DIM_ID, DimensionType.DATAELEMENT, Lists.newArrayList( deA, deB ) ) );
+        reportTable.getColumns().add( new BaseDimensionalObject( DimensionalObject.DATA_X_DIM_ID, DimensionType.DATA_X, Lists.newArrayList( deA, deB ) ) );
         reportTable.getRows().add( new BaseDimensionalObject( DimensionalObject.ORGUNIT_DIM_ID, DimensionType.ORGANISATIONUNIT, Lists.newArrayList( ouUser ) ) );
         reportTable.getFilters().add( new BaseDimensionalObject( DimensionalObject.PERIOD_DIM_ID, DimensionType.PERIOD, Lists.newArrayList( peA ) ) );
         
@@ -202,7 +202,7 @@ public class DimensionServiceTest
     {
         ReportTable reportTable = new ReportTable();
 
-        reportTable.getColumns().add( new BaseDimensionalObject( DimensionalObject.DATAELEMENT_DIM_ID, DimensionType.DATAELEMENT, Lists.newArrayList( deA, deB ) ) );
+        reportTable.getColumns().add( new BaseDimensionalObject( DimensionalObject.DATA_X_DIM_ID, DimensionType.DATA_X, Lists.newArrayList( deA, deB ) ) );
         reportTable.getRows().add( new BaseDimensionalObject( DimensionalObject.ORGUNIT_DIM_ID, DimensionType.ORGANISATIONUNIT, Lists.newArrayList( ouLevel2, ouA ) ) );
         reportTable.getFilters().add( new BaseDimensionalObject( DimensionalObject.PERIOD_DIM_ID, DimensionType.PERIOD, Lists.newArrayList( peA ) ) );
         
@@ -219,7 +219,7 @@ public class DimensionServiceTest
     {
         ReportTable reportTable = new ReportTable();
         
-        reportTable.getColumns().add( new BaseDimensionalObject( DimensionalObject.DATAELEMENT_DIM_ID, DimensionType.DATAELEMENT, Lists.newArrayList( deA, deB ) ) );
+        reportTable.getColumns().add( new BaseDimensionalObject( DimensionalObject.DATA_X_DIM_ID, DimensionType.DATA_X, Lists.newArrayList( deA, deB ) ) );
         reportTable.getRows().add( new BaseDimensionalObject( DimensionalObject.ORGUNIT_DIM_ID, DimensionType.ORGANISATIONUNIT, Lists.newArrayList( ouA, ouB, ouC, ouD, ouE ) ) );
         reportTable.getFilters().add( new BaseDimensionalObject( DimensionalObject.PERIOD_DIM_ID, DimensionType.PERIOD, Lists.newArrayList( peLast12Months ) ) );
         
@@ -236,7 +236,7 @@ public class DimensionServiceTest
     {
         ReportTable reportTable = new ReportTable();
         
-        reportTable.getColumns().add( new BaseDimensionalObject( DimensionalObject.DATAELEMENT_DIM_ID, DimensionType.DATAELEMENT, Lists.newArrayList( deA, deB ) ) );
+        reportTable.getColumns().add( new BaseDimensionalObject( DimensionalObject.DATA_X_DIM_ID, DimensionType.DATA_X, Lists.newArrayList( deA, deB ) ) );
         reportTable.getRows().add( ouGroupSetA );
         reportTable.getFilters().add( new BaseDimensionalObject( DimensionalObject.PERIOD_DIM_ID, DimensionType.PERIOD, Lists.newArrayList( peA, peB ) ) );
         
