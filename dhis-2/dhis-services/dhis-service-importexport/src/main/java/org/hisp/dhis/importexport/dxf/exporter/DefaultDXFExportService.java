@@ -46,7 +46,6 @@ import java.util.zip.ZipOutputStream;
 import org.amplecode.staxwax.factory.XMLFactory;
 import org.amplecode.staxwax.writer.XMLWriter;
 import org.hibernate.SessionFactory;
-import org.hisp.dhis.chart.ChartService;
 import org.hisp.dhis.constant.ConstantService;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
@@ -56,7 +55,6 @@ import org.hisp.dhis.importexport.ExportPipeThread;
 import org.hisp.dhis.importexport.ExportService;
 import org.hisp.dhis.importexport.dxf.converter.CategoryCategoryOptionAssociationConverter;
 import org.hisp.dhis.importexport.dxf.converter.CategoryComboCategoryAssociationConverter;
-import org.hisp.dhis.importexport.dxf.converter.ChartConverter;
 import org.hisp.dhis.importexport.dxf.converter.ConstantConverter;
 import org.hisp.dhis.importexport.dxf.converter.DataElementCategoryComboConverter;
 import org.hisp.dhis.importexport.dxf.converter.DataElementCategoryConverter;
@@ -184,13 +182,6 @@ public class DefaultDXFExportService
         this.reportService = reportService;
     }
 
-    private ChartService chartService;
-
-    public void setChartService( ChartService chartService )
-    {
-        this.chartService = chartService;
-    }
-
     // -------------------------------------------------------------------------
     // ExportService implementation
     // -------------------------------------------------------------------------
@@ -272,7 +263,6 @@ public class DefaultDXFExportService
             thread.registerXMLConverter( new PeriodConverter( periodService ) );
 
             thread.registerXMLConverter( new ReportConverter( reportService ) );
-            thread.registerXMLConverter( new ChartConverter( chartService ) );
 
             thread.start();
 

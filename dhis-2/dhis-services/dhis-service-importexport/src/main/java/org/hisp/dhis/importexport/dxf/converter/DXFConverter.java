@@ -35,7 +35,6 @@ import org.amplecode.staxwax.writer.XMLWriter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.cache.HibernateCacheManager;
-import org.hisp.dhis.chart.ChartService;
 import org.hisp.dhis.common.ProcessState;
 import org.hisp.dhis.constant.Constant;
 import org.hisp.dhis.constant.ConstantService;
@@ -214,13 +213,6 @@ public class DXFConverter
     public void setReportService( ReportService reportService )
     {
         this.reportService = reportService;
-    }
-
-    private ChartService chartService;
-
-    public void setChartService( ChartService chartService )
-    {
-        this.chartService = chartService;
     }
 
     private BatchHandlerFactory batchHandlerFactory;
@@ -827,20 +819,6 @@ public class DXFConverter
                 converterInvoker.invokeRead( converter, reader, params );
 
                 log.info( "Imported Reports" );
-            }
-            else if ( reader.isStartElement( ChartConverter.COLLECTION_NAME ) )
-            {
-                log.debug("Starting Charts import");
-
-                state.setMessage( "importing_charts" );
-
-                XMLConverter converter = new ChartConverter( chartService, importObjectService, indicatorService,
-                    organisationUnitService, objectMappingGenerator.getIndicatorMapping( params
-                        .skipMapping() ), objectMappingGenerator.getOrganisationUnitMapping( params.skipMapping() ) );
-
-                converterInvoker.invokeRead( converter, reader, params );
-
-                log.info( "Imported Charts" );
             }
         }
 

@@ -389,9 +389,9 @@ public class AnalyticsServiceTest
         chart.setCategory( DimensionalObject.ORGUNIT_DIM_ID );
         chart.getFilterDimensions().add( DimensionalObject.PERIOD_DIM_ID );
         
-        chart.getDataElements().add( deA );
-        chart.getDataElements().add( deB );
-        chart.getDataElements().add( deC );
+        chart.addDataDimension( deA );
+        chart.addDataDimension( deB );
+        chart.addDataDimension( deC );
         
         chart.getOrganisationUnits().add( ouA );
         chart.getOrganisationUnits().add( ouB );
@@ -416,9 +416,9 @@ public class AnalyticsServiceTest
         chart.setCategory( ouGroupSetA.getUid() );
         chart.getFilterDimensions().add( DimensionalObject.PERIOD_DIM_ID );
         
-        chart.getDataElements().add( deA );
-        chart.getDataElements().add( deB );
-        chart.getDataElements().add( deC );
+        chart.addDataDimension( deA );
+        chart.addDataDimension( deB );
+        chart.addDataDimension( deC );
         
         chart.getOrganisationUnitGroups().add( ouGroupA );
         chart.getOrganisationUnitGroups().add( ouGroupB );
@@ -444,9 +444,9 @@ public class AnalyticsServiceTest
         chart.setCategory( ouGroupSetA.getUid() );
         chart.getFilterDimensions().add( DimensionalObject.PERIOD_DIM_ID );
         
-        chart.getDataElements().add( deA );
-        chart.getDataElements().add( deE );
-        chart.getDataElements().add( deF );
+        chart.addDataDimension( deA );
+        chart.addDataDimension( deE );
+        chart.addDataDimension( deF );
         
         chart.getOrganisationUnitGroups().add( ouGroupA );
         chart.getOrganisationUnitGroups().add( ouGroupB );

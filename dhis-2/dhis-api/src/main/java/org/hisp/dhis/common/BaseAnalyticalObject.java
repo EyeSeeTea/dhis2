@@ -85,6 +85,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.google.common.collect.ImmutableList;
 
 /**
  * This class contains associations to dimensional meta-data. Should typically
@@ -298,7 +299,8 @@ public abstract class BaseAnalyticalObject
     }
     
     /**
-     * Returns all data elements in the data dimensions.
+     * Returns all data elements in the data dimensions. The returned list is
+     * immutable.
      */
     @JsonIgnore
     public List<DataElement> getDataElements()
@@ -313,7 +315,7 @@ public abstract class BaseAnalyticalObject
             }
         }
         
-        return objects;
+        return ImmutableList.copyOf( objects );
     }
 
     /**
@@ -332,7 +334,7 @@ public abstract class BaseAnalyticalObject
             }
         }
         
-        return objects;
+        return ImmutableList.copyOf( objects );
     }
 
     /**
