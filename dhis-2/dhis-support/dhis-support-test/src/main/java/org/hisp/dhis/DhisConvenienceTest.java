@@ -1063,7 +1063,7 @@ public abstract class DhisConvenienceTest
         chart.setAutoFields();
 
         chart.setName( "Chart" + uniqueCharacter );
-        chart.setIndicators( indicators );
+        chart.addAllDataDimensions( indicators );
         chart.setPeriods( periods );
         chart.setOrganisationUnits( units );
         chart.setDimensions( DimensionalObject.DATA_X_DIM_ID, DimensionalObject.PERIOD_DIM_ID,

@@ -274,7 +274,7 @@ public class DefaultChartService
         chart.setType( TYPE_LINE );
         chart.setDimensions( DimensionalObject.DATA_X_DIM_ID, DimensionalObject.PERIOD_DIM_ID, DimensionalObject.ORGUNIT_DIM_ID );
         chart.setHideLegend( true );
-        chart.getIndicators().add( indicator );
+        chart.addDataDimension( indicator );
         chart.setPeriods( periods );
         chart.getOrganisationUnits().add( unit );
         chart.setHideSubtitle( title );
@@ -300,7 +300,7 @@ public class DefaultChartService
         chart.setType( TYPE_COLUMN );
         chart.setDimensions( DimensionalObject.DATA_X_DIM_ID, DimensionalObject.ORGUNIT_DIM_ID, DimensionalObject.PERIOD_DIM_ID );
         chart.setHideLegend( true );
-        chart.getIndicators().add( indicator );
+        chart.addDataDimension( indicator );
         chart.setPeriods( periods );
         chart.setOrganisationUnits( parent.getSortedChildren() );
         chart.setHideSubtitle( title );

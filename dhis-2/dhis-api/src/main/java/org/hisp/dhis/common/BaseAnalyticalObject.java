@@ -29,13 +29,9 @@ package org.hisp.dhis.common;
  */
 
 import static org.hisp.dhis.common.DimensionalObject.CATEGORYOPTIONCOMBO_DIM_ID;
-import static org.hisp.dhis.common.DimensionalObject.DATAELEMENT_DIM_ID;
-import static org.hisp.dhis.common.DimensionalObject.DATAELEMENT_OPERAND_ID;
-import static org.hisp.dhis.common.DimensionalObject.DATASET_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.DATA_COLLAPSED_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.DATA_X_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.DIMENSION_SEP;
-import static org.hisp.dhis.common.DimensionalObject.INDICATOR_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.STATIC_DIMS;
@@ -68,7 +64,6 @@ import org.hisp.dhis.dataelement.DataElementCategoryDimension;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementOperand;
-import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -118,6 +113,7 @@ public abstract class BaseAnalyticalObject
     // Persisted properties
     // -------------------------------------------------------------------------
     
+    /*
     @Scanned
     protected List<Indicator> indicators = new ArrayList<>();
 
@@ -129,7 +125,11 @@ public abstract class BaseAnalyticalObject
 
     @Scanned
     protected List<DataSet> dataSets = new ArrayList<>();
-
+    */
+    
+    @Scanned
+    protected List<DataDimension> dataDimensions = new ArrayList<>();
+    
     @Scanned
     protected List<OrganisationUnit> organisationUnits = new ArrayList<>();
 
@@ -254,6 +254,85 @@ public abstract class BaseAnalyticalObject
         {
             this.transientOrganisationUnits.add( organisationUnit );
         }
+    }    
+
+    /**
+     * Returns dimension items for data dimensions.
+     */
+    public List<NameableObject> getDataDimensionItems()
+    {
+        List<NameableObject> items = new ArrayList<>();
+        
+        for ( DataDimension dataDim : dataDimensions )
+        {
+            items.add( dataDim.getNameableObject() );
+        }
+        
+        return items;
+    }
+    
+    /**
+     * Adds a data dimension object.
+     * 
+     * @return true if a data dimension was added, false if not.
+     */
+    public boolean addDataDimension( NameableObject object )
+    {
+        if ( object != null && DataDimension.DATA_DIMENSION_CLASSES.contains( object.getClass() ) )
+        {
+            return dataDimensions.add( DataDimension.create( object ) );
+        }
+        
+        return false;
+    }
+
+    /**
+     * Adds all given data dimension objects.
+     */
+    public void addAllDataDimensions( Collection<? extends NameableObject> objects )
+    {
+        for ( NameableObject object : objects )
+        {
+            addDataDimension( object );
+        }
+    }
+    
+    /**
+     * Returns all data elements in the data dimensions.
+     */
+    @JsonIgnore
+    public List<DataElement> getDataElements()
+    {
+        List<DataElement> objects = new ArrayList<>();
+        
+        for ( DataDimension dim : dataDimensions )
+        {
+            if ( dim.getDataElement() != null )
+            {
+                objects.add( dim.getDataElement() );
+            }
+        }
+        
+        return objects;
+    }
+
+    /**
+     * Returns all data elements in the data dimensions.
+     */
+    @JsonIgnore
+    public List<Indicator> getIndicators()
+    {
+        List<Indicator> objects = new ArrayList<>();
+        
+        for ( DataDimension dim : dataDimensions )
+        {
+            if ( dim.getIndicator() != null )
+            {
+                objects.add( dim.getIndicator() );
+            }
+        }
+        
+        return objects;
     }
 
     /**
@@ -282,10 +361,7 @@ public abstract class BaseAnalyticalObject
 
         if ( DATA_X_DIM_ID.equals( dimension ) )
         {
-            items.addAll( indicators );
-            items.addAll( dataElements );
-            items.addAll( dataElementOperands );
-            items.addAll( dataSets );
+            items.addAll( getDataDimensionItems() );
 
             type = DimensionType.DATA_X;
         }
@@ -458,8 +534,7 @@ public abstract class BaseAnalyticalObject
 
     /**
      * Assembles a list of DimensionalObjects based on the concrete objects in
-     * this BaseAnalyticalObject. Explodes the dx dimension into the in|de|dc|ds
-     * concrete objects and returns them as separate DimensionalObjects.
+     * this BaseAnalyticalObject.
      * <p/>
      * Merges fixed and relative periods into the pe dimension, where the
      * RelativePeriods object is represented by enums (e.g. LAST_MONTH). Merges
@@ -479,25 +554,7 @@ public abstract class BaseAnalyticalObject
 
         if ( DATA_X_DIM_ID.equals( dimension ) )
         {
-            if ( !indicators.isEmpty() )
-            {
-                objects.add( new BaseDimensionalObject( INDICATOR_DIM_ID, DimensionType.INDICATOR, indicators ) );
-            }
-
-            if ( !dataElements.isEmpty() )
-            {
-                objects.add( new BaseDimensionalObject( DATAELEMENT_DIM_ID, DimensionType.DATAELEMENT, dataElements ) );
-            }
-
-            if ( !dataElementOperands.isEmpty() )
-            {
-                objects.add( new BaseDimensionalObject( DATAELEMENT_OPERAND_ID, DimensionType.DATAELEMENT_OPERAND, dataElementOperands ) );
-            }
-
-            if ( !dataSets.isEmpty() )
-            {
-                objects.add( new BaseDimensionalObject( DATASET_DIM_ID, DimensionType.DATASET, dataSets ) );
-            }
+            objects.add( new BaseDimensionalObject( dimension, DimensionType.DATA_X, getDataDimensionItems() ) );
         }
         else if ( PERIOD_DIM_ID.equals( dimension ) && (!periods.isEmpty() || hasRelativePeriods()) )
         {
@@ -792,10 +849,7 @@ public abstract class BaseAnalyticalObject
      */
     public void clear()
     {
-        indicators.clear();
-        dataElements.clear();
-        dataElementOperands.clear();
-        dataSets.clear();
+        dataDimensions.clear();
         periods.clear();
         relatives = null;
         organisationUnits.clear();
@@ -834,10 +888,7 @@ public abstract class BaseAnalyticalObject
                 aggregationType = object.getAggregationType() == null ? aggregationType : object.getAggregationType();
             }
 
-            indicators.addAll( object.getIndicators() );
-            dataElements.addAll( object.getDataElements() );
-            dataElementOperands.addAll( object.getDataElementOperands() );
-            dataSets.addAll( object.getDataSets() );
+            dataDimensions.addAll( object.getDataDimensions() );
             periods.addAll( object.getPeriods() );
             organisationUnits.addAll( object.getOrganisationUnits() );
             dataElementGroups.addAll( object.getDataElementGroups() );
@@ -863,62 +914,17 @@ public abstract class BaseAnalyticalObject
     // -------------------------------------------------------------------------
 
     @JsonProperty
-    @JsonSerialize( contentAs = BaseNameableObject.class )
     @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlElementWrapper( localName = "indicators", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "indicator", namespace = DxfNamespaces.DXF_2_0 )
-    public List<Indicator> getIndicators()
+    @JacksonXmlElementWrapper( localName = "dataDimensions", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "dataDimension", namespace = DxfNamespaces.DXF_2_0 )
+    public List<DataDimension> getDataDimensions()
     {
-        return indicators;
+        return dataDimensions;
     }
 
-    public void setIndicators( List<Indicator> indicators )
+    public void setDataDimensions( List<DataDimension> dataDimensions )
     {
-        this.indicators = indicators;
-    }
-
-    @JsonProperty
-    @JsonSerialize( contentAs = BaseNameableObject.class )
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlElementWrapper( localName = "dataElements", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "dataElement", namespace = DxfNamespaces.DXF_2_0 )
-    public List<DataElement> getDataElements()
-    {
-        return dataElements;
-    }
-
-    public void setDataElements( List<DataElement> dataElements )
-    {
-        this.dataElements = dataElements;
-    }
-
-    @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlElementWrapper( localName = "dataElementOperands", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "dataElementOperand", namespace = DxfNamespaces.DXF_2_0 )
-    public List<DataElementOperand> getDataElementOperands()
-    {
-        return dataElementOperands;
-    }
-
-    public void setDataElementOperands( List<DataElementOperand> dataElementOperands )
-    {
-        this.dataElementOperands = dataElementOperands;
-    }
-
-    @JsonProperty
-    @JsonSerialize( contentAs = BaseNameableObject.class )
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlElementWrapper( localName = "dataSets", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "dataSet", namespace = DxfNamespaces.DXF_2_0 )
-    public List<DataSet> getDataSets()
-    {
-        return dataSets;
-    }
-
-    public void setDataSets( List<DataSet> dataSets )
-    {
-        this.dataSets = dataSets;
+        this.dataDimensions = dataDimensions;
     }
 
     @JsonProperty

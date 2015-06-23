@@ -85,14 +85,12 @@ import org.hisp.dhis.importexport.dxf.converter.OrganisationUnitLevelConverter;
 import org.hisp.dhis.importexport.dxf.converter.OrganisationUnitRelationshipConverter;
 import org.hisp.dhis.importexport.dxf.converter.PeriodConverter;
 import org.hisp.dhis.importexport.dxf.converter.ReportConverter;
-import org.hisp.dhis.importexport.dxf.converter.ReportTableConverter;
 import org.hisp.dhis.importexport.dxf.converter.ValidationRuleConverter;
 import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.report.ReportService;
-import org.hisp.dhis.reporttable.ReportTableService;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.validation.ValidationRuleService;
 
@@ -186,13 +184,6 @@ public class DefaultDXFExportService
         this.reportService = reportService;
     }
 
-    private ReportTableService reportTableService;
-
-    public void setReportTableService( ReportTableService reportTableService )
-    {
-        this.reportTableService = reportTableService;
-    }
-
     private ChartService chartService;
 
     public void setChartService( ChartService chartService )
@@ -281,7 +272,6 @@ public class DefaultDXFExportService
             thread.registerXMLConverter( new PeriodConverter( periodService ) );
 
             thread.registerXMLConverter( new ReportConverter( reportService ) );
-            thread.registerXMLConverter( new ReportTableConverter( reportTableService ) );
             thread.registerXMLConverter( new ChartConverter( chartService ) );
 
             thread.start();

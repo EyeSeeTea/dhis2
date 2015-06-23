@@ -35,7 +35,6 @@ import org.hisp.dhis.dataelement.DataElementDomain;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.indicator.Indicator;
-import org.hisp.dhis.legend.LegendSet;
 import org.hisp.dhis.program.ProgramIndicator;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 
@@ -62,14 +61,6 @@ public class DataDimension
     private ProgramIndicator programIndicator;
     
     private TrackedEntityAttribute trackedEntityAttribute;
-
-    // -------------------------------------------------------------------------
-    // Context properties
-    // -------------------------------------------------------------------------
-
-    private LegendSet legendSet;
-    
-    private String filter;
 
     // -------------------------------------------------------------------------
     // Constructor
@@ -103,16 +94,6 @@ public class DataDimension
         {
             dimension.setTrackedEntityAttribute( (TrackedEntityAttribute) object );
         }
-        
-        return dimension;
-    }
-
-    public static DataDimension create( NameableObject object, LegendSet legendSet, String filter )
-    {
-        DataDimension dimension = DataDimension.create( object );
-        
-        dimension.setLegendSet( legendSet );
-        dimension.setFilter( filter );
         
         return dimension;
     }
@@ -177,13 +158,6 @@ public class DataDimension
         throw new IllegalStateException( "Data dimension is null" );
     }
     
-    public String getUid()
-    {
-        NameableObject object = getNameableObject();
-        
-        return object != null ? object.getUid() : null;
-    }
-    
     // -------------------------------------------------------------------------
     // Get and set methods
     // -------------------------------------------------------------------------
@@ -246,25 +220,5 @@ public class DataDimension
     public void setTrackedEntityAttribute( TrackedEntityAttribute trackedEntityAttribute )
     {
         this.trackedEntityAttribute = trackedEntityAttribute;
-    }
-
-    public LegendSet getLegendSet()
-    {
-        return legendSet;
-    }
-
-    public void setLegendSet( LegendSet legendSet )
-    {
-        this.legendSet = legendSet;
-    }
-
-    public String getFilter()
-    {
-        return filter;
-    }
-
-    public void setFilter( String filter )
-    {
-        this.filter = filter;
     }
 }
