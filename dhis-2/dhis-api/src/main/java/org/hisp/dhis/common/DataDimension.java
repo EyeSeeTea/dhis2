@@ -32,6 +32,7 @@ import java.util.Set;
 
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementDomain;
+import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.legend.LegendSet;
@@ -44,7 +45,7 @@ import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 public class DataDimension
 {
     public static final Set<Class<IdentifiableObject>> DATA_DIMENSION_CLASSES = IdentifiableObjectUtils.asTypedClassSet(   
-        Indicator.class, DataElement.class, DataSet.class, ProgramIndicator.class, TrackedEntityAttribute.class );
+        Indicator.class, DataElement.class, DataElementOperand.class, DataSet.class, ProgramIndicator.class, TrackedEntityAttribute.class );
     
     private int id;
     
@@ -174,6 +175,13 @@ public class DataDimension
         }
         
         throw new IllegalStateException( "Data dimension is null" );
+    }
+    
+    public String getUid()
+    {
+        NameableObject object = getNameableObject();
+        
+        return object != null ? object.getUid() : null;
     }
     
     // -------------------------------------------------------------------------
