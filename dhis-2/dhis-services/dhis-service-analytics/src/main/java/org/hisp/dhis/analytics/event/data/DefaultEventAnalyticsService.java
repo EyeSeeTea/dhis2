@@ -433,11 +433,11 @@ public class DefaultEventAnalyticsService
             {
                 String dimensionId = getDimensionFromParam( dim );
                 List<String> items = getDimensionItemsFromParam( dim );                
-                List<DimensionalObject> dimObj = analyticsService.getDimension( dimensionId, items, null, format, true );
+                DimensionalObject dimObj = analyticsService.getDimension( dimensionId, items, null, format, true );
                 
                 if ( dimObj != null )
                 {
-                    params.getDimensions().addAll( dimObj );
+                    params.getDimensions().add( dimObj );
                 }
                 else
                 {
@@ -452,11 +452,11 @@ public class DefaultEventAnalyticsService
             {
                 String dimensionId = getDimensionFromParam( dim );
                 List<String> items = getDimensionItemsFromParam( dim );                
-                List<DimensionalObject> dimObj = analyticsService.getDimension( dimensionId, items, null, format, true );
+                DimensionalObject dimObj = analyticsService.getDimension( dimensionId, items, null, format, true );
                 
                 if ( dimObj != null )
                 {
-                    params.getFilters().addAll( dimObj );
+                    params.getFilters().add( dimObj );
                 }
                 else
                 {
@@ -509,12 +509,12 @@ public class DefaultEventAnalyticsService
 
             for ( DimensionalObject dimension : ListUtils.union( object.getColumns(), object.getRows() ) )
             {
-                List<DimensionalObject> dimObj = analyticsService.
+                DimensionalObject dimObj = analyticsService.
                     getDimension( toDimension( dimension.getDimension() ), getUids( dimension.getItems() ), date, format, true );
                 
                 if ( dimObj != null )
                 {
-                    params.getDimensions().addAll( dimObj );
+                    params.getDimensions().add( dimObj );
                 }
                 else
                 {
@@ -524,12 +524,12 @@ public class DefaultEventAnalyticsService
             
             for ( DimensionalObject filter : object.getFilters() )
             {
-                List<DimensionalObject> dimObj = analyticsService.
+                DimensionalObject dimObj = analyticsService.
                     getDimension( toDimension( filter.getDimension() ), getUids( filter.getItems() ), date, format, true );
                 
                 if ( dimObj != null )
                 {
-                    params.getFilters().addAll( dimObj );
+                    params.getFilters().add( dimObj );
                 }
                 else
                 {
