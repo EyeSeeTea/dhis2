@@ -20,31 +20,48 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 /* Service to fetch/store dasboard widgets */
 .service('DashboardLayoutService', function($http) {
     
+    
     var w = {};
     w.enrollmentWidget = {title: 'enrollment', view: "components/enrollment/enrollment.html", show: true, expand: true, parent: 'biggerWidget', order: 0};
-    w.indicatorWidget = {title: 'indicators', view: "components/rulebound/rulebound.html", show: true, expand: true, parent: 'biggerWidget', order: 1, code:'indicators'};
+    w.indicatorWidget = {title: 'indicators', view: "components/rulebound/rulebound.html", show: true, expand: true, parent: 'biggerWidget', order: 1};
     w.dataentryWidget = {title: 'dataentry', view: "components/dataentry/dataentry.html", show: true, expand: true, parent: 'biggerWidget', order: 2};
     w.reportWidget = {title: 'report', view: "components/report/tei-report.html", show: true, expand: true, parent: 'biggerWidget', order: 3};
     w.selectedWidget = {title: 'current_selections', view: "components/selected/selected.html", show: false, expand: true, parent: 'smallerWidget', order: 0};
-    w.profileWidget = {title: 'profile', view: "components/profile/profile.html", show: true, expand: true, parent: 'smallerWidget', order: 1};
-    w.relationshipWidget = {title: 'relationships', view: "components/relationship/relationship.html", show: true, expand: true, parent: 'smallerWidget', order: 2};
-    w.notesWidget = {title: 'notes', view: "components/notes/notes.html", show: true, expand: true, parent: 'smallerWidget', order: 3};            
+    w.feedbackWidget = {title: 'feedback', view: "components/rulebound/rulebound.html", show: true, expand: true, parent: 'smallerWidget', order: 1};
+    w.profileWidget = {title: 'profile', view: "components/profile/profile.html", show: true, expand: true, parent: 'smallerWidget', order: 2};
+    w.relationshipWidget = {title: 'relationships', view: "components/relationship/relationship.html", show: true, expand: true, parent: 'smallerWidget', order: 3};
+    w.notesWidget = {title: 'notes', view: "components/notes/notes.html", show: true, expand: true, parent: 'smallerWidget', order: 4};            
     var defaultLayout = new Object();
     defaultLayout['DEFAULT'] = {widgets: w, program: 'DEFAULT'};
     
+    var getDefaultLayout = function(customLayout){
+        var dashboardLayout = {customLayout: customLayout, defaultLayout: defaultLayout};        
+        var promise = $http.get(  '../api/systemSettings/keyTrackerDashboardDefaultLayout' ).then(function(response){
+            angular.extend(dashboardLayout.defaultLayout, response.data);
+            return dashboardLayout;
+        }, function(){
+            return dashboardLayout;
+        });
+        return promise;        
+    };
+    
     return {
-        saveLayout: function(dashboardLayout){
+        saveLayout: function(dashboardLayout, saveAsDefault){
             var layout = JSON.stringify(dashboardLayout);
-            var promise = $http.post( '../api/userSettings/dhis2-tracker-dashboard?value=' + layout, '', {headers: {'Content-Type': 'text/plain;charset=utf-8'}}).then(function(response){
+            var url = '../api/userSettings/keyTrackerDashboardLayout?value=';            
+            if(saveAsDefault){
+                url = '../api/systemSettings/keyTrackerDashboardDefaultLayout?value=';
+            }
+            var promise = $http.post( url + layout, '', {headers: {'Content-Type': 'text/plain;charset=utf-8'}}).then(function(response){
                 return response.data;
             });
             return promise;            
         },
-        get: function(){            
-            var promise = $http.get(  '../api/userSettings/dhis2-tracker-dashboard' ).then(function(response){                
-                return response.data === "" ? defaultLayout : response.data;
+        get: function(){
+            var promise = $http.get(  '../api/userSettings/keyTrackerDashboardLayout' ).then(function(response){
+                return getDefaultLayout(response.data);
             }, function(){
-                return defaultLayout;
+                return getDefaultLayout(null);
             });
             return promise;
         }
@@ -992,14 +1009,14 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     return {        
         getEventReport: function(orgUnit, ouMode, program, startDate, endDate, programStatus, eventStatus, pager){
             
-            var url = '../api/events/eventRows.json?' + 'orgUnit=' + orgUnit + '&ouMode='+ ouMode + '&program=' + program + '&addAttributes=true';
+            var url = '../api/events/eventRows.json?' + 'orgUnit=' + orgUnit + '&ouMode='+ ouMode + '&program=' + program;
             
             if( programStatus ){
                 url = url + '&programStatus=' + programStatus;
             }
             
             if( eventStatus ){
-                url = url + '&status=' + eventStatus;
+                url = url + '&eventStatus=' + eventStatus;
             }
             
             if(startDate && endDate){
