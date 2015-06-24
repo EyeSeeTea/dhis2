@@ -72,12 +72,12 @@ import org.hisp.dhis.system.filter.DataElementWithAggregationFilter;
 import org.hisp.dhis.system.filter.OrganisationUnitAboveOrEqualToLevelFilter;
 import org.hisp.dhis.system.filter.PastAndCurrentPeriodFilter;
 import org.hisp.dhis.system.notification.Notifier;
-import org.hisp.dhis.util.Clock;
-import org.hisp.dhis.util.ConcurrentUtils;
-import org.hisp.dhis.util.ConversionUtils;
-import org.hisp.dhis.util.FilterUtils;
-import org.hisp.dhis.util.PaginatedList;
-import org.hisp.dhis.util.SystemUtils;
+import org.hisp.dhis.commons.util.Clock;
+import org.hisp.dhis.commons.util.ConcurrentUtils;
+import org.hisp.dhis.commons.util.ConversionUtils;
+import org.hisp.dhis.commons.filter.FilterUtils;
+import org.hisp.dhis.commons.collection.PaginatedList;
+import org.hisp.dhis.system.util.SystemUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -240,11 +240,11 @@ public class DefaultDataMartEngine
         // Get objects
         // ---------------------------------------------------------------------
 
-        final Collection<Indicator> indicators = indicatorService.getIndicators( indicatorIds );
-        final Collection<Period> periods = periodService.getPeriods( periodIds );
+        final List<Indicator> indicators = indicatorService.getIndicators( indicatorIds );
+        final List<Period> periods = periodService.getPeriods( periodIds );        
         final List<OrganisationUnit> organisationUnits = new ArrayList<>( organisationUnitService.getOrganisationUnits( organisationUnitIds ) );
-        final Collection<OrganisationUnitGroup> organisationUnitGroups = organisationUnitGroupService.getOrganisationUnitGroups( organisationUnitGroupIds );
-        final Collection<DataElement> dataElements = dataElementService.getDataElements( dataElementIds );
+        final List<OrganisationUnitGroup> organisationUnitGroups = organisationUnitGroupService.getOrganisationUnitGroups( organisationUnitGroupIds );
+        final List<DataElement> dataElements = dataElementService.getDataElements( dataElementIds );
 
         final Map<String, Integer> dataElementUidIdMap = dataElementService.getDataElementUidIdMap();
         final Map<String, Integer> categoryOptionComboUidIdMap = categoryService.getDataElementCategoryOptionComboUidIdMap();
@@ -283,7 +283,7 @@ public class DefaultDataMartEngine
         // ---------------------------------------------------------------------
         
         final Collection<DataElementOperand> dataElementOperands = categoryService.getOperands( dataElements );
-        final List<DataElementOperand> indicatorOperands = new ArrayList<>( categoryService.populateOperands( expressionService.getOperandsInIndicators( indicators ) ) );
+        final List<DataElementOperand> indicatorOperands = categoryService.populateOperands( expressionService.getOperandsInIndicators( indicators ) );
         
         Set<DataElementOperand> allOperands = new HashSet<>();
         allOperands.addAll( dataElementOperands );
@@ -315,7 +315,7 @@ public class DefaultDataMartEngine
         // ---------------------------------------------------------------------
         // Create crosstabtable
         // ---------------------------------------------------------------------
-
+        
         final Collection<Integer> intersectingPeriodIds = ConversionUtils.getIdentifiers( Period.class, periodService.getIntersectionPeriods( periods ) );
         final Set<Integer> childrenIds = organisationUnitService.getOrganisationUnitHierarchy().getChildren( organisationUnitIds );
         final List<List<Integer>> childrenPages = new PaginatedList<>( childrenIds ).setNumberOfPages( cpuCores ).getPages();

@@ -28,7 +28,6 @@ package org.hisp.dhis.trackedentity.action.trackedentityinstancereminder;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.hisp.dhis.program.ProgramStageService;
@@ -103,7 +102,7 @@ public class ShowAddProgramStageReminderAction
     {
         programStage = programStageService.getProgramStage( id );
 
-        userGroups = new ArrayList<>( userGroupService.getAllUserGroups() );
+        userGroups = userGroupService.getAllUserGroups();
 
         attributes = programStage.getProgram().getTrackedEntityAttributes();
 

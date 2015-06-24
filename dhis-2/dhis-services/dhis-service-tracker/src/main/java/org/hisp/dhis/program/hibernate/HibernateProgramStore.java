@@ -28,7 +28,7 @@ package org.hisp.dhis.program.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
+import java.util.List;
 
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
@@ -51,14 +51,14 @@ public class HibernateProgramStore
 
     @SuppressWarnings( "unchecked" )
     @Override
-    public Collection<Program> getByType( int type )
+    public List<Program> getByType( int type )
     {
         return getCriteria( Restrictions.eq( "type", type ) ).list();
     }
 
     @SuppressWarnings( "unchecked" )
     @Override
-    public Collection<Program> get( OrganisationUnit organisationUnit )
+    public List<Program> get( OrganisationUnit organisationUnit )
     {
         Criteria criteria = getCriteria();
         criteria.createAlias( "organisationUnits", "orgunit" );
@@ -68,7 +68,7 @@ public class HibernateProgramStore
 
     @SuppressWarnings( "unchecked" )
     @Override
-    public Collection<Program> get( int type, OrganisationUnit organisationUnit )
+    public List<Program> get( int type, OrganisationUnit organisationUnit )
     {
         Criteria criteria1 = getCriteria();
         criteria1.createAlias( "organisationUnits", "orgunit" );
@@ -79,7 +79,7 @@ public class HibernateProgramStore
 
     @Override
     @SuppressWarnings( "unchecked" )
-    public Collection<Program> getByTrackedEntity( TrackedEntity trackedEntity )
+    public List<Program> getByTrackedEntity( TrackedEntity trackedEntity )
     {
         return getCriteria( Restrictions.eq( "trackedEntity", trackedEntity ) ).list();
     }

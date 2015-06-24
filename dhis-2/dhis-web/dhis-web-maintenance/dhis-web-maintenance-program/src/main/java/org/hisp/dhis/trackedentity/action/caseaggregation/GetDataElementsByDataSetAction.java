@@ -28,7 +28,6 @@ package org.hisp.dhis.trackedentity.action.caseaggregation;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -109,8 +108,7 @@ public class GetDataElementsByDataSetAction
 
         query = StringUtils.trimToNull( query );
 
-        dataElements = new ArrayList<>( dataElementService.getDataElements( dataSet, query,
-            MAX_DATAELEMENTS_DISPLAYED ) );
+        dataElements = dataElementService.getDataElements( dataSet, query, MAX_DATAELEMENTS_DISPLAYED );
 
         Collections.sort( dataElements, IdentifiableObjectNameComparator.INSTANCE );
 

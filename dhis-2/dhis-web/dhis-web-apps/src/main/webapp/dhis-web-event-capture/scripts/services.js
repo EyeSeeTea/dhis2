@@ -1,4 +1,4 @@
-/* global angular */
+/* global angular, dhis2 */
 
 'use strict';
 
@@ -10,7 +10,7 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
     var store = new dhis2.storage.Store({
         name: 'dhis2ec',
         adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
-        objectStores: ['programs', 'programStages', 'geoJsons', 'optionSets', 'events', 'programValidations', 'ouLevels']
+        objectStores: ['programs', 'programStages', 'geoJsons', 'optionSets', 'events', 'programValidations', 'programRules', 'programRuleVariables', 'programIndicators', 'ouLevels', 'constants']
     });
     return{
         currentStore: store
@@ -82,35 +82,8 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
 })
 
 /* Factory to fetch optionSets */
-.factory('OptionSetService', function($q, $rootScope, ECStorageService) { 
+.factory('OptionSetService', function() { 
     return {
-        getAll: function(){
-            
-            var def = $q.defer();
-            
-            ECStorageService.currentStore.open().done(function(){
-                ECStorageService.currentStore.getAll('optionSets').done(function(optionSets){
-                    $rootScope.$apply(function(){
-                        def.resolve(optionSets);
-                    });                    
-                });
-            });            
-            
-            return def.promise;            
-        },
-        get: function(uid){
-            
-            var def = $q.defer();
-            
-            ECStorageService.currentStore.open().done(function(){
-                ECStorageService.currentStore.get('optionSets', uid).done(function(optionSet){                    
-                    $rootScope.$apply(function(){
-                        def.resolve(optionSet);
-                    });
-                });
-            });                        
-            return def.promise;            
-        },        
         getCode: function(options, key){
             if(options){
                 for(var i=0; i<options.length; i++){
@@ -131,39 +104,6 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
                 }
             }            
             return key;
-        }
-    };
-})
-
-/* Factory to fetch geojsons */
-.factory('GeoJsonFactory', function($q, $rootScope, ECStorageService) { 
-    return {
-        getAll: function(){
-
-            var def = $q.defer();
-            
-            ECStorageService.currentStore.open().done(function(){
-                ECStorageService.currentStore.getAll('geoJsons').done(function(geoJsons){
-                    $rootScope.$apply(function(){
-                        def.resolve(geoJsons);
-                    });                    
-                });
-            });
-            
-            return def.promise;            
-        },
-        get: function(level){
-            
-            var def = $q.defer();
-            
-            ECStorageService.currentStore.open().done(function(){
-                ECStorageService.currentStore.get('geoJsons', level).done(function(geoJson){                    
-                    $rootScope.$apply(function(){
-                        def.resolve(geoJson);
-                    });
-                });
-            });                        
-            return def.promise;            
         }
     };
 })
@@ -234,36 +174,16 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
     };
 })
 
-/* Factory to fetch programStages */
-.factory('ProgramStageFactory', function($q, $rootScope, ECStorageService) {  
+/* factory for handling program related meta-data */
+.factory('MetaDataFactory', function($q, $rootScope, ECStorageService) {  
     
     return {        
-        get: function(uid){
+        get: function(store, uid){
             
             var def = $q.defer();
             
             ECStorageService.currentStore.open().done(function(){
-                ECStorageService.currentStore.get('programStages', uid).done(function(pst){                    
-                    $rootScope.$apply(function(){
-                        def.resolve(pst);
-                    });
-                });
-            });                        
-            return def.promise;            
-        }        
-    };        
-})
-
-/* Service to fetch and process programValidations */
-.service('ProgramValidationService', function($q, $rootScope, ECStorageService) {  
-    
-    return {        
-        get: function(uid){
-            
-            var def = $q.defer();
-            
-            ECStorageService.currentStore.open().done(function(){
-                ECStorageService.currentStore.get('programValidations', uid).done(function(pv){                    
+                ECStorageService.currentStore.get(store, uid).done(function(pv){                    
                     $rootScope.$apply(function(){
                         def.resolve(pv);
                     });
@@ -271,34 +191,34 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
             });                        
             return def.promise;
         },
-        getByProgram: function(program){
+        getByProgram: function(store, program){
             var def = $q.defer();
-            var programValidations = [];
+            var objs = [];
             
             ECStorageService.currentStore.open().done(function(){
-                ECStorageService.currentStore.getAll('programValidations').done(function(pvs){   
-                    angular.forEach(pvs, function(pv){
-                        if(pv.program.id === program){                            
-                            programValidations.push(pv);                               
+                ECStorageService.currentStore.getAll(store, program).done(function(data){   
+                    angular.forEach(data, function(o){
+                        if(o.program.id === program){                            
+                            objs.push(o);                               
                         }                        
                     });
                     $rootScope.$apply(function(){
-                        def.resolve(programValidations);
+                        def.resolve(objs);
                     });
                 });                
             });            
             return def.promise;
         },
-        getExpression: function(str){
-            if( !str ){
-                return null;
-            }
-            
-            var expression = str.substring(1, str.length-1);
-            
-            if(expression){
-                
-            }
+        getAll: function(store){
+            var def = $q.defer();            
+            ECStorageService.currentStore.open().done(function(){
+                ECStorageService.currentStore.getAll(store).done(function(objs){                       
+                    $rootScope.$apply(function(){
+                        def.resolve(objs);
+                    });
+                });                
+            });            
+            return def.promise;
         }
     };        
 })
@@ -397,6 +317,80 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
             return promise;
         }
     };    
+})
+
+    /* Returns a function for getting rules for a specific program */
+.factory('TrackerRulesFactory', function($q,$rootScope,ECStorageService){
+    return{
+        getOldProgramStageRules :function(programUid, programstageUid) {
+            var rules = this.getProgramRules(programUid);
+            
+            //Only keep the rules actually matching the program stage we are in, or rules with no program stage defined.
+            var programStageRules = [];
+            angular.forEach(rules, function(rule) {
+                if(rule.programstage_uid == null || rule.programstage_uid == "" || rule.programstage_uid == programstageUid) {
+                   programStageRules.push(rule);
+                }
+            });
+            
+            return programStageRules;
+        },
+        
+        getProgramStageRules : function(programUid, programStageUid){
+            var def = $q.defer();
+            
+            ECStorageService.currentStore.open().done(function(){
+                ECStorageService.currentStore.getAll('programRules').done(function(rules){                    
+                    //The array will ultimately be returned to the caller.
+                    var programRulesArray = [];
+                    //Loop through and add the rules belonging to this program and program stage
+                    angular.forEach(rules, function(rule){
+                       if(rule.program.id == programUid) {
+                           if(!rule.programStage || !rule.programStage.id || rule.programStage.id == programStageUid) {
+                                programRulesArray.push(rule);
+                            }
+                       }
+                    });
+
+                    $rootScope.$apply(function(){
+                        def.resolve(programRulesArray);
+                    });
+                });     
+            });
+                        
+            return def.promise;
+        }
+    };  
+})
+
+/* Returns user defined variable names and their corresponding UIDs and types for a specific program */
+.factory('TrackerRuleVariableFactory', function($rootScope, $q, ECStorageService){
+    return{
+        getProgramRuleVariables : function(programUid){
+            var def = $q.defer();
+
+            ECStorageService.currentStore.open().done(function(){
+                
+                ECStorageService.currentStore.getAll('programRuleVariables').done(function(variables){
+                    
+                    //The array will ultimately be returned to the caller.
+                    var programRuleVariablesArray = [];
+                    //Loop through and add the variables belonging to this program
+                    angular.forEach(variables, function(variable){
+                       if(variable.program.id == programUid) {
+                            programRuleVariablesArray.push(variable);
+                       }
+                    });
+
+                    $rootScope.$apply(function(){
+                        def.resolve(programRuleVariablesArray);
+                    });
+                });
+            });
+                        
+            return def.promise;
+        }
+    };
 })
 
 /* service for dealing with events */

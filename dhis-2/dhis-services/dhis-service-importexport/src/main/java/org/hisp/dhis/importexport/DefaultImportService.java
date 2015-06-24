@@ -39,13 +39,14 @@ import java.util.zip.ZipFile;
 
 import org.amplecode.staxwax.factory.XMLFactory;
 import org.amplecode.staxwax.reader.XMLReader;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.ProcessState;
 import org.hisp.dhis.importexport.dxf.converter.DXFConverter;
 import org.hisp.dhis.importexport.zip.ZipAnalyzer;
 import org.hisp.dhis.system.process.OutputHolderState;
-import org.hisp.dhis.util.StreamUtils;
+import org.hisp.dhis.commons.util.StreamUtils;
 
 /**
  * @author bobj
@@ -102,7 +103,7 @@ public class DefaultImportService
                 
                 BufferedOutputStream ostream = new BufferedOutputStream( new FileOutputStream( tempZipFile ) ); // Save it to disk                
 
-                StreamUtils.streamcopy( bufin, ostream );
+                IOUtils.copy( bufin, ostream );
 
                 bufin.close();
 

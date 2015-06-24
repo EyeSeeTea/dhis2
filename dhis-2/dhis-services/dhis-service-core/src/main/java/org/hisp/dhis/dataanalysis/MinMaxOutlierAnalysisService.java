@@ -31,6 +31,7 @@ package org.hisp.dhis.dataanalysis;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -47,9 +48,9 @@ import org.hisp.dhis.minmax.MinMaxDataElementService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.system.filter.DataElementTypeFilter;
-import org.hisp.dhis.util.ConversionUtils;
+import org.hisp.dhis.commons.util.ConversionUtils;
 import org.hisp.dhis.commons.filter.Filter;
-import org.hisp.dhis.util.FilterUtils;
+import org.hisp.dhis.commons.filter.FilterUtils;
 import org.hisp.dhis.system.util.MathUtils;
 import org.joda.time.DateTime;
 
@@ -95,7 +96,7 @@ public class MinMaxOutlierAnalysisService
     // -------------------------------------------------------------------------
 
     @Override
-    public Collection<DeflatedDataValue> analyse( Collection<OrganisationUnit> organisationUnits,
+    public List<DeflatedDataValue> analyse( Collection<OrganisationUnit> organisationUnits,
         Collection<DataElement> dataElements, Collection<Period> periods, Double stdDevFactor, Date from )
     {
         Set<DataElement> elements = new HashSet<>( dataElements );

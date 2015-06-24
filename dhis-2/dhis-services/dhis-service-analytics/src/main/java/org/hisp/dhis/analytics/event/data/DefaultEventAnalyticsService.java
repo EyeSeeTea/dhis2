@@ -43,7 +43,6 @@ import static org.hisp.dhis.common.NameableObjectUtils.asTypedList;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.getParentGraphMap;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.getParentNameGraphMap;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -78,6 +77,7 @@ import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.common.QueryFilter;
 import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.common.QueryOperator;
+import org.hisp.dhis.commons.collection.ListUtils;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.i18n.I18nFormat;
@@ -92,7 +92,6 @@ import org.hisp.dhis.program.ProgramStageService;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.grid.ListGrid;
 import org.hisp.dhis.system.util.DateUtils;
-import org.hisp.dhis.util.ListUtils;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 import org.hisp.dhis.user.CurrentUserService;
@@ -101,6 +100,7 @@ import org.hisp.dhis.util.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.Lists;
 
 /**
  * @author Lars Helge Overland
@@ -117,7 +117,7 @@ public class DefaultEventAnalyticsService
     private static final String ITEM_ORG_UNIT_CODE = "oucode";
     private static final String COL_NAME_EVENTDATE = "executiondate";
 
-    private static final List<String> SORTABLE_ITEMS = Arrays.asList( 
+    private static final List<String> SORTABLE_ITEMS = Lists.newArrayList( 
         ITEM_EXECUTION_DATE, ITEM_ORG_UNIT_NAME, ITEM_ORG_UNIT_CODE );
 
     @Autowired
@@ -178,12 +178,7 @@ public class DefaultEventAnalyticsService
         // Headers
         // ---------------------------------------------------------------------
 
-        for ( DimensionalObject dimension : params.getDimensions() )
-        {
-            grid.addHeader( new GridHeader( dimension.getDimension(), dimension.getDisplayName(), String.class.getName(), false, true ) );
-        }
-
-        if ( params.isCollapseDataDimensions() )
+        if ( params.isCollapseDataDimensions() || params.isAggregateData() )
         {
             grid.addHeader( new GridHeader( DimensionalObject.DATA_COLLAPSED_DIM_ID, DataQueryParams.DISPLAY_NAME_DATA_X, String.class.getName(), false, true ) );
         }
@@ -197,6 +192,11 @@ public class DefaultEventAnalyticsService
 
                 grid.addHeader( new GridHeader( item.getItem().getUid(), item.getItem().getName(), item.getTypeAsString(), false, true, item.getOptionSetUid(), legendSet ) );
             }
+        }
+
+        for ( DimensionalObject dimension : params.getDimensions() )
+        {
+            grid.addHeader( new GridHeader( dimension.getDimension(), dimension.getDisplayName(), String.class.getName(), false, true ) );
         }
 
         grid.addHeader( new GridHeader( "value", "Value", Double.class.getName(), false, false ) );
@@ -371,7 +371,8 @@ public class DefaultEventAnalyticsService
     @Override
     public EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate,
         Set<String> dimension, Set<String> filter, String value, AggregationType aggregationType, boolean skipMeta, boolean skipRounding, boolean hierarchyMeta, 
-        boolean showHierarchy, SortOrder sortOrder, Integer limit, EventOutputType outputType, boolean collapseDataDimensions, DisplayProperty displayProperty, I18nFormat format )
+        boolean showHierarchy, SortOrder sortOrder, Integer limit, EventOutputType outputType, boolean collapseDataDimensions, 
+        boolean aggregateData, DisplayProperty displayProperty, I18nFormat format )
     {
         EventQueryParams params = getFromUrl( program, stage, startDate, endDate, dimension, filter, null, null, null,
             skipMeta, hierarchyMeta, false, displayProperty, null, null, format );
@@ -384,7 +385,7 @@ public class DefaultEventAnalyticsService
         params.setLimit( limit );
         params.setOutputType( MoreObjects.firstNonNull( outputType, EventOutputType.EVENT ) );
         params.setCollapseDataDimensions( collapseDataDimensions );
-        params.setAggregate( true );
+        params.setAggregateData( aggregateData );
 
         return params;
     }
@@ -491,7 +492,6 @@ public class DefaultEventAnalyticsService
         params.setDisplayProperty( displayProperty );
         params.setPage( page );
         params.setPageSize( pageSize );
-        params.setAggregate( false );
         
         return params;
     }
@@ -609,7 +609,7 @@ public class DefaultEventAnalyticsService
 
         if ( params.hasValueDimension() )
         {
-            map.put( params.getValue().getUid(), NameableObjectUtils.getProperty( params.getValue(), params.getDisplayProperty() ) );
+            map.put( params.getValue().getUid(), NameableObjectUtils.getDisplayProperty( params.getValue(), params.getDisplayProperty() ) );
         }
         
         map.putAll( getUidNameMap( params.getItems(), params.getDisplayProperty() ) );
@@ -627,7 +627,7 @@ public class DefaultEventAnalyticsService
         
         for ( QueryItem item : queryItems )
         {
-            map.put( item.getItem().getUid(), NameableObjectUtils.getProperty( item.getItem(), displayProperty ) );
+            map.put( item.getItem().getUid(), NameableObjectUtils.getDisplayProperty( item.getItem(), displayProperty ) );
         }
         
         return map;
@@ -652,17 +652,10 @@ public class DefaultEventAnalyticsService
                     objects.addAll( unit.getAncestors() );
                 }
                 
-                if ( DisplayProperty.SHORTNAME.equals( displayProperty ) )
-                {
-                    map.putAll( NameableObjectUtils.getUidShortNameMap( objects ) );
-                }
-                else // NAME
-                {
-                    map.putAll( IdentifiableObjectUtils.getUidNameMap( objects ) );
-                }
+                map.putAll( NameableObjectUtils.getUidDisplayPropertyMap( objects, displayProperty ) );
             }
             
-            map.put( dimension.getDimension(), NameableObjectUtils.getProperty( dimension, displayProperty ) );
+            map.put( dimension.getDimension(), NameableObjectUtils.getDisplayProperty( dimension, displayProperty ) );
         }
 
         return map;

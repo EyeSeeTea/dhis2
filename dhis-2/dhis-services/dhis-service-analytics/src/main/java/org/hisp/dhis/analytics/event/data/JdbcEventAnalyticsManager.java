@@ -38,12 +38,11 @@ import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
 import static org.hisp.dhis.system.util.DateUtils.getMediumDateString;
-import static org.hisp.dhis.util.TextUtils.getQuotedCommaDelimitedString;
-import static org.hisp.dhis.util.TextUtils.removeLastComma;
-import static org.hisp.dhis.util.TextUtils.removeLastOr;
-import static org.hisp.dhis.util.TextUtils.trimEnd;
+import static org.hisp.dhis.commons.util.TextUtils.getQuotedCommaDelimitedString;
+import static org.hisp.dhis.commons.util.TextUtils.removeLastComma;
+import static org.hisp.dhis.commons.util.TextUtils.removeLastOr;
+import static org.hisp.dhis.commons.util.TextUtils.trimEnd;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -67,6 +66,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+
+import com.google.common.collect.Lists;
 
 /**
  * TODO could use row_number() and filtering for paging, but not supported on MySQL.
@@ -103,14 +104,7 @@ public class JdbcEventAnalyticsManager
         // Criteria
         // ---------------------------------------------------------------------
 
-        if ( params.spansMultiplePartitions() )
-        {
-            sql += getFromWhereMultiplePartitionsClause( params, Arrays.asList( "psi" ) );
-        }
-        else
-        {
-            sql += getFromWhereClause( params, params.getPartitions().getSinglePartition() );
-        }
+        sql += getFromWhereClause( params, Lists.newArrayList( "psi" ) );
 
         // ---------------------------------------------------------------------
         // Group by
@@ -160,23 +154,30 @@ public class JdbcEventAnalyticsManager
     {
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet( sql );
 
-        log.info( "Analytics event aggregate SQL: " + sql );
+        log.debug( "Analytics event aggregate SQL: " + sql );
         
         while ( rowSet.next() )
         {            
             grid.addRow();
+
+            if ( params.isAggregateData() )
+            {
+                grid.addValue( params.getValue().getUid() );
+            }
+            else
+            {
+                for ( QueryItem queryItem : params.getItems() )
+                {
+                    String itemValue = rowSet.getString( queryItem.getItemName() );
+                    String gridValue = params.isCollapseDataDimensions() ? getCollapsedDataItemValue( params, queryItem, itemValue ) : itemValue;
+                    grid.addValue( gridValue );
+                }
+            }
             
             for ( DimensionalObject dimension : params.getDimensions() )
             {
                 String dimensionValue = rowSet.getString( dimension.getDimensionName() );
                 grid.addValue( dimensionValue );
-            }
-            
-            for ( QueryItem queryItem : params.getItems() )
-            {
-                String itemValue = rowSet.getString( queryItem.getItemName() );
-                String gridValue = params.isCollapseDataDimensions() ? getCollapsedDataItemValue( params, queryItem, itemValue ) : itemValue;
-                grid.addValue( gridValue );
             }
             
             if ( params.hasValueDimension() )
@@ -195,7 +196,7 @@ public class JdbcEventAnalyticsManager
     @Override
     public Grid getEvents( EventQueryParams params, Grid grid, int maxLimit )
     {
-        List<String> fixedCols = Arrays.asList( "psi", "ps", "executiondate", "longitude", "latitude", "ouname", "oucode" );
+        List<String> fixedCols = Lists.newArrayList( "psi", "ps", "executiondate", "longitude", "latitude", "ouname", "oucode" );
         
         String sql = "select " + getSelectString( fixedCols ) + getSelectColumns( params ) + " ";
 
@@ -203,14 +204,7 @@ public class JdbcEventAnalyticsManager
         // Criteria
         // ---------------------------------------------------------------------
 
-        if ( params.spansMultiplePartitions() )
-        {
-            sql += getFromWhereMultiplePartitionsClause( params, fixedCols );
-        }
-        else
-        {
-            sql += getFromWhereClause( params, params.getPartitions().getSinglePartition() );
-        }
+        sql += getFromWhereClause( params, fixedCols );
         
         // ---------------------------------------------------------------------
         // Sorting
@@ -288,15 +282,8 @@ public class JdbcEventAnalyticsManager
     {
         String sql = "select count(psi) ";
         
-        if ( params.spansMultiplePartitions() )
-        {
-            sql += getFromWhereMultiplePartitionsClause( params, Arrays.asList( "psi" ) );
-        }
-        else
-        {
-            sql += getFromWhereClause( params, params.getPartitions().getSinglePartition() );
-        }
-        
+        sql += getFromWhereClause( params, Lists.newArrayList( "psi" ) );
+                
         int count = 0;
         
         try
@@ -402,6 +389,18 @@ public class JdbcEventAnalyticsManager
         return removeLastComma( sql );
     }
 
+    private String getFromWhereClause( EventQueryParams params, List<String> fixedColumns )
+    {
+        if ( params.spansMultiplePartitions() )
+        {
+            return getFromWhereMultiplePartitionsClause( params, fixedColumns );
+        }
+        else
+        {
+            return getFromWhereSinglePartitionClause( params, params.getPartitions().getSinglePartition() );
+        }
+    }
+    
     private String getFromWhereMultiplePartitionsClause( EventQueryParams params, List<String> fixedColumns )
     {
         String sql = "from (";
@@ -410,7 +409,7 @@ public class JdbcEventAnalyticsManager
         {
             sql += "select " + getSelectString( fixedColumns ) + getSelectColumns( params );
             
-            sql += " " + getFromWhereClause( params, partition );
+            sql += " " + getFromWhereSinglePartitionClause( params, partition );
             
             sql += "union all ";
         }
@@ -420,7 +419,7 @@ public class JdbcEventAnalyticsManager
         return sql;
     }
     
-    private String getFromWhereClause( EventQueryParams params, String partition )
+    private String getFromWhereSinglePartitionClause( EventQueryParams params, String partition )
     {
         String sql = "from " + partition + " ";
 
@@ -468,20 +467,17 @@ public class JdbcEventAnalyticsManager
         // ---------------------------------------------------------------------
 
         for ( DimensionalObject dim : params.getDimensionsAndFilters( DimensionType.ORGANISATIONUNIT_GROUPSET ) )
-        {
-            if ( !dim.isAllItems() )
-            {
-                String col = statementBuilder.columnQuote( dim.getDimensionName() );
+        {            
+            String col = statementBuilder.columnQuote( dim.getDimensionName() );
                 
-                sql += "and " + col + " in (" + getQuotedCommaDelimitedString( getUids( dim.getItems() ) ) + ") ";
-            }
+            sql += "and " + col + " in (" + getQuotedCommaDelimitedString( getUids( dim.getItems() ) ) + ") ";
         }
 
         // ---------------------------------------------------------------------
         // Program stage
         // ---------------------------------------------------------------------
 
-        if ( params.getProgramStage() != null )
+        if ( params.hasProgramStage() )
         {
             sql += "and ps = '" + params.getProgramStage().getUid() + "' ";
         }

@@ -40,7 +40,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.system.filter.OrganisationUnitWithValidCoordinatesFilter;
-import org.hisp.dhis.util.FilterUtils;
+import org.hisp.dhis.commons.filter.FilterUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.hisp.dhis.webapi.webdomain.GeoFeature;
@@ -56,7 +56,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -139,7 +138,7 @@ public class GeoFeatureController
         set.add( ou );
 
         DataQueryParams params = analyticsService.getFromUrl( set, null, AggregationType.SUM, null,
-            false, false, false, false, false, false, displayProperty, null, null, null );
+            false, false, false, false, false, false, displayProperty, null, null, null, null, null );
 
         DimensionalObject dim = params.getDimension( DimensionalObject.ORGUNIT_DIM_ID );
 
@@ -154,7 +153,7 @@ public class GeoFeatureController
             return null;
         }
 
-        Collection<OrganisationUnitGroupSet> groupSets = includeGroupSets ? organisationUnitGroupService.getAllOrganisationUnitGroupSets() : null;
+        List<OrganisationUnitGroupSet> groupSets = includeGroupSets ? organisationUnitGroupService.getAllOrganisationUnitGroupSets() : null;
 
         List<GeoFeature> features = new ArrayList<>();
 

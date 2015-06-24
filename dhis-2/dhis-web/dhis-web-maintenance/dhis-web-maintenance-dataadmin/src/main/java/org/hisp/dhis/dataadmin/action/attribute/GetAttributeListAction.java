@@ -30,7 +30,6 @@ package org.hisp.dhis.dataadmin.action.attribute;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -90,15 +89,15 @@ public class GetAttributeListAction
         {
             this.paging = createPaging( attributeService.getAttributeCountByName( key ) );
 
-            attributes = new ArrayList<>( attributeService.getAttributesBetweenByName( key,
-                paging.getStartPos(), paging.getPageSize() ) );
+            attributes = attributeService.getAttributesBetweenByName( key,
+                paging.getStartPos(), paging.getPageSize() );
         }
         else
         {
             this.paging = createPaging( attributeService.getAttributeCount() );
 
-            attributes = new ArrayList<>( attributeService.getAttributesBetween( paging.getStartPos(),
-                paging.getPageSize() ) );
+            attributes = attributeService.getAttributesBetween( paging.getStartPos(),
+                paging.getPageSize() );
         }
 
         Collections.sort( attributes, IdentifiableObjectNameComparator.INSTANCE );

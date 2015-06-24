@@ -52,7 +52,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.commons.filter.Filter;
-import org.hisp.dhis.util.FilterUtils;
+import org.hisp.dhis.commons.filter.FilterUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.joda.time.DateTime;
 import org.springframework.transaction.annotation.Transactional;
@@ -220,7 +220,7 @@ public class DefaultDataSetService
     }
 
     @Override
-    public Collection<DataSet> getDataSetsBySources( Collection<OrganisationUnit> sources )
+    public List<DataSet> getDataSetsBySources( Collection<OrganisationUnit> sources )
     {
         return i18n( i18nService, dataSetStore.getDataSetsBySources( sources ) );
     }
@@ -242,21 +242,21 @@ public class DefaultDataSetService
     }
 
     @Override
-    public Collection<DataSet> getAllDataSets()
+    public List<DataSet> getAllDataSets()
     {
         return i18n( i18nService, dataSetStore.getAll() );
     }
 
     @Override
-    public Collection<DataSet> getDataSetsByPeriodType( PeriodType periodType )
+    public List<DataSet> getDataSetsByPeriodType( PeriodType periodType )
     {
         return i18n( i18nService, dataSetStore.getDataSetsByPeriodType( periodType ) );
     }
 
     @Override
-    public Collection<DataSet> getDataSets( final Collection<Integer> identifiers )
+    public List<DataSet> getDataSets( final Collection<Integer> identifiers )
     {
-        Collection<DataSet> dataSets = getAllDataSets();
+        List<DataSet> dataSets = getAllDataSets();
 
         return identifiers == null ? dataSets : FilterUtils.filter( dataSets, new Filter<DataSet>()
         {
@@ -309,7 +309,7 @@ public class DefaultDataSetService
     @Override
     public PeriodType getPeriodType( DataElement dataElement, Collection<Integer> dataSetIdentifiers )
     {
-        Collection<DataSet> dataSets = getDataSets( dataSetIdentifiers );
+        List<DataSet> dataSets = getDataSets( dataSetIdentifiers );
 
         for ( DataSet dataSet : dataSets )
         {
@@ -341,9 +341,9 @@ public class DefaultDataSetService
     }
 
     @Override
-    public Collection<DataElement> getDistinctDataElements( Collection<Integer> dataSetIdentifiers )
+    public Set<DataElement> getDistinctDataElements( Collection<Integer> dataSetIdentifiers )
     {
-        Collection<DataSet> dataSets = getDataSets( dataSetIdentifiers );
+        List<DataSet> dataSets = getDataSets( dataSetIdentifiers );
 
         Set<DataElement> dataElements = new HashSet<>();
 
@@ -368,19 +368,19 @@ public class DefaultDataSetService
     }
 
     @Override
-    public Collection<DataElement> getDataElements( DataSet dataSet )
+    public Set<DataElement> getDataElements( DataSet dataSet )
     {
         return i18n( i18nService, dataSet.getDataElements() );
     }
 
     @Override
-    public Collection<DataSet> getDataSetsForMobile( OrganisationUnit source )
+    public List<DataSet> getDataSetsForMobile( OrganisationUnit source )
     {
         return i18n( i18nService, dataSetStore.getDataSetsForMobile( source ) );
     }
 
     @Override
-    public Collection<DataSet> getDataSetsForMobile()
+    public List<DataSet> getDataSetsForMobile()
     {
         return i18n( i18nService, dataSetStore.getDataSetsForMobile() );
     }
@@ -398,13 +398,13 @@ public class DefaultDataSetService
     }
 
     @Override
-    public Collection<DataSet> getDataSetsBetween( int first, int max )
+    public List<DataSet> getDataSetsBetween( int first, int max )
     {
         return getObjectsBetween( i18nService, dataSetStore, first, max );
     }
 
     @Override
-    public Collection<DataSet> getDataSetsBetweenByName( String name, int first, int max )
+    public List<DataSet> getDataSetsBetweenByName( String name, int first, int max )
     {
         return getObjectsBetweenByName( i18nService, dataSetStore, name, first, max );
     }
@@ -444,19 +444,19 @@ public class DefaultDataSetService
     }
 
     @Override
-    public Collection<LockException> getAllLockExceptions()
+    public List<LockException> getAllLockExceptions()
     {
         return lockExceptionStore.getAll();
     }
 
     @Override
-    public Collection<LockException> getLockExceptionsBetween( int first, int max )
+    public List<LockException> getLockExceptionsBetween( int first, int max )
     {
         return lockExceptionStore.getAllOrderedName( first, max );
     }
 
     @Override
-    public Collection<LockException> getLockExceptionCombinations()
+    public List<LockException> getLockExceptionCombinations()
     {
         return lockExceptionStore.getCombinations();
     }

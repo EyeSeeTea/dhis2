@@ -35,6 +35,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.google.common.base.MoreObjects;
 
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.DimensionalView;
@@ -65,6 +66,11 @@ public class BaseDimensionalObject
      * The dimensional items for this dimension.
      */
     private List<NameableObject> items = new ArrayList<>();
+    
+    /**
+     * Indicates whether all available items in this dimension are included.
+     */
+    private boolean allItems;
 
     /**
      * The legend set for this dimension.
@@ -109,11 +115,15 @@ public class BaseDimensionalObject
 
     public BaseDimensionalObject( String dimension, DimensionType dimensionType, String dimensionName, String displayName, List<? extends NameableObject> items )
     {
-        this.uid = dimension;
-        this.dimensionType = dimensionType;
+        this( dimension, dimensionType, items );
         this.dimensionName = dimensionName;
         this.displayName = displayName;
-        this.items = new ArrayList<>( items );
+    }
+
+    public BaseDimensionalObject( String dimension, DimensionType dimensionType, String dimensionName, String displayName, List<? extends NameableObject> items, boolean allItems )
+    {
+        this( dimension, dimensionType, dimensionName, displayName, items );
+        this.allItems = allItems;
     }
 
     public BaseDimensionalObject( String dimension, DimensionType dimensionType, String dimensionName, String displayName, LegendSet legendSet, String filter )
@@ -131,21 +141,15 @@ public class BaseDimensionalObject
     // -------------------------------------------------------------------------
 
     @Override
-    public boolean isAllItems()
-    {
-        return items != null && items.isEmpty();
-    }
-
-    @Override
     public boolean hasItems()
     {
-        return items != null && !items.isEmpty();
+        return !getItems().isEmpty();
     }
     
     @Override
     public boolean hasLegendSet()
     {
-        return legendSet != null;
+        return getLegendSet() != null;
     }
 
     @Override
@@ -158,9 +162,9 @@ public class BaseDimensionalObject
     public AnalyticsType getAnalyticsType()
     {
         return
-            DimensionType.TRACKED_ENTITY_ATTRIBUTE.equals( dimensionType ) ||
-                DimensionType.TRACKED_ENTITY_DATAELEMENT.equals( dimensionType ) ?
-                AnalyticsType.EVENT : AnalyticsType.AGGREGATE;
+            DimensionType.PROGRAM_ATTRIBUTE.equals( dimensionType ) ||
+            DimensionType.PROGRAM_DATAELEMENT.equals( dimensionType ) ?
+            AnalyticsType.EVENT : AnalyticsType.AGGREGATE;
     }
 
     /**
@@ -231,6 +235,21 @@ public class BaseDimensionalObject
     {
         this.items = items;
     }
+
+    @Override
+    @JsonProperty
+    @JsonView( { DimensionalView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isAllItems()
+    {
+        return allItems;
+    }
+
+    public void setAllItems( boolean allItems )
+    {
+        this.allItems = allItems;
+    }
+
 
     @Override
     @JsonProperty
@@ -312,6 +331,14 @@ public class BaseDimensionalObject
     @Override
     public String toString()
     {
-        return "[" + uid + ", type: " + dimensionType + ", items: " + items + ", legend set: " + legendSet + ", filter: " + filter + "]";
+        return MoreObjects.toStringHelper( this )
+            .add( "Dimension", uid )
+            .add( "type", dimensionType )
+            .add( "dimension name", dimensionName )
+            .add( "display name", displayName )
+            .add( "items", items )
+            .add( "all items", allItems )
+            .add( "legend set", legendSet )
+            .add( "filter", filter ).toString();
     }
 }

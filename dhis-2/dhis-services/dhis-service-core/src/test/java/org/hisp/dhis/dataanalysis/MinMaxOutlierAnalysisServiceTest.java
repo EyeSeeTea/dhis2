@@ -31,9 +31,9 @@ package org.hisp.dhis.dataanalysis;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Resource;
@@ -55,13 +55,13 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
-import org.hisp.dhis.util.ListUtils;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.google.common.collect.Lists;
+
 /**
  * @author eirikmi
- * @version $Id: MinMaxOutlierAnalysisServiceTest.java 883 2009-05-15 00:42:45Z daghf $
  */
 public class MinMaxOutlierAnalysisServiceTest
     extends DhisSpringTest
@@ -192,13 +192,13 @@ public class MinMaxOutlierAnalysisServiceTest
         minMaxDataElement = new MinMaxDataElement( organisationUnitA, dataElementA, categoryOptionCombo, -40, 40, false );
         minMaxDataElementService.addMinMaxDataElement( minMaxDataElement );
                 
-        Collection<Period> periods = new ArrayList<>();
+        List<Period> periods = new ArrayList<>();
         periods.add( periodI );
         periods.add( periodJ );
         periods.add( periodA );
         periods.add( periodE );
 
-        Collection<DeflatedDataValue> result = minMaxOutlierAnalysisService.analyse( ListUtils.getCollection( organisationUnitA ), dataElementsA, periods, null, from );
+        List<DeflatedDataValue> result = minMaxOutlierAnalysisService.analyse( Lists.newArrayList( organisationUnitA ), dataElementsA, periods, null, from );
 
         assertEquals( 2, result.size() );
     }

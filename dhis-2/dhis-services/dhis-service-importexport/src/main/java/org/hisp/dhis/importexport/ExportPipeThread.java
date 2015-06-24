@@ -33,12 +33,13 @@ import java.util.List;
 import java.util.zip.ZipOutputStream;
 
 import org.amplecode.staxwax.writer.XMLWriter;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
 import org.hisp.dhis.importexport.mapping.NameMappingUtil;
 import org.hisp.dhis.system.process.OpenSessionThread;
-import org.hisp.dhis.util.StreamUtils;
+import org.hisp.dhis.commons.util.StreamUtils;
 
 /**
  * @author Lars Helge Overland
@@ -193,7 +194,7 @@ public class ExportPipeThread
         {
             writer.closeWriter();
             
-            StreamUtils.closeOutputStream( zipOutputStream );
+            IOUtils.closeQuietly( zipOutputStream );
             
             NameMappingUtil.clearMapping();
         }

@@ -32,12 +32,13 @@ import java.util.zip.ZipOutputStream;
 
 import jxl.write.WritableWorkbook;
 
+import org.apache.commons.io.IOUtils;
 import org.hibernate.SessionFactory;
 import org.hisp.dhis.importexport.ExportParams;
 import org.hisp.dhis.importexport.XLSConverter;
 import org.hisp.dhis.system.process.OpenSessionThread;
 import org.hisp.dhis.system.util.ExcelUtils;
-import org.hisp.dhis.util.StreamUtils;
+import org.hisp.dhis.commons.util.StreamUtils;
 
 /**
  * @author Dang Duy Hieu
@@ -125,7 +126,7 @@ public class XLSExportPipeThread
         finally
         {
             StreamUtils.closeZipEntry( outputStream );
-            StreamUtils.closeOutputStream( outputStream );
+            IOUtils.closeQuietly( outputStream );
         }
     }
 }

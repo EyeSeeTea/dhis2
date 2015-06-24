@@ -35,9 +35,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -498,7 +498,7 @@ public class ExpressionServiceTest
         Map<String, Double> constantMap = new HashMap<>();
         constantMap.put( constantA.getUid(), 2.0 );
         
-        assertEquals( 200d, expressionService.getIndicatorValue( indicatorA, period, valueMap, constantMap, null, null ), DELTA );        
+        assertEquals( 200d, expressionService.getIndicatorValue( indicatorA, period, valueMap, constantMap, null ), DELTA );        
     }
     
     // -------------------------------------------------------------------------
@@ -574,7 +574,7 @@ public class ExpressionServiceTest
         expressionService.addExpression( exprA );
         expressionService.addExpression( exprB );
 
-        Collection<Expression> expressions = expressionService.getAllExpressions();
+        List<Expression> expressions = expressionService.getAllExpressions();
 
         assertTrue( expressions.size() == 2 );
         assertTrue( expressions.contains( exprA ) );

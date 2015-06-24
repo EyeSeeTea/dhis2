@@ -136,7 +136,7 @@ public interface ReportService
      *
      * @param first the start index.
      * @param max   the maximum number of reports.
-     * @return a collection of reports.
+     * @return a list of reports.
      */
     List<Report> getReportsBetween( int first, int max );
 
@@ -146,7 +146,7 @@ public interface ReportService
      *
      * @param first the start index.
      * @param max   the maximum number of reports.
-     * @return a collection of reports.
+     * @return a List of reports.
      */
     List<Report> getReportsBetweenByName( String name, int first, int max );
 
@@ -160,7 +160,7 @@ public interface ReportService
     /**
      * Retrieves all Reports.
      *
-     * @return a Collection of Reports.
+     * @return a List of Reports.
      */
     List<Report> getAllReports();
 
@@ -178,7 +178,7 @@ public interface ReportService
      * @param identifiers the Collection of identifiers.
      * @return a Collection of Reports.
      */
-    Collection<Report> getReports( final Collection<Integer> identifiers );
+    List<Report> getReports( final Collection<Integer> identifiers );
 
     /**
      * Retrieves Reports with the given uids.

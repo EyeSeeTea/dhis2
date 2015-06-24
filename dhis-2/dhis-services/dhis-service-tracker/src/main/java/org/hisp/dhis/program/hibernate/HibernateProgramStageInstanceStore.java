@@ -53,7 +53,7 @@ import org.hisp.dhis.program.ProgramStageInstanceStore;
 import org.hisp.dhis.program.SchedulingProgramObject;
 import org.hisp.dhis.system.grid.GridUtils;
 import org.hisp.dhis.system.grid.ListGrid;
-import org.hisp.dhis.util.TextUtils;
+import org.hisp.dhis.commons.util.TextUtils;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceReminder;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceReminderService;
@@ -99,7 +99,7 @@ public class HibernateProgramStageInstanceStore
 
     @Override
     @SuppressWarnings( "unchecked" )
-    public Collection<ProgramStageInstance> get( Collection<ProgramInstance> programInstances, EventStatus status )
+    public List<ProgramStageInstance> get( Collection<ProgramInstance> programInstances, EventStatus status )
     {
         return getCriteria( 
             Restrictions.in( "programInstance", programInstances ), 

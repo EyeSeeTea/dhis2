@@ -28,7 +28,7 @@ package org.hisp.dhis.dataset.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.util.TextUtils.equalsNullSafe;
+import static org.hisp.dhis.commons.util.TextUtils.equalsNullSafe;
 
 import java.util.HashSet;
 import java.util.List;
@@ -348,6 +348,8 @@ public class UpdateDataSetAction
 
         if ( !( equalsNullSafe( name, dataSet.getName() ) &&
             periodType.equals( dataSet.getPeriodType() ) &&
+            expiryDays == dataSet.getExpiryDays() &&
+            openFuturePeriods == dataSet.getOpenFuturePeriods() &&
             dataElements.equals( dataSet.getDataElements() ) &&
             indicators.equals( dataSet.getIndicators() ) &&
             renderAsTabs == dataSet.isRenderAsTabs() ) )

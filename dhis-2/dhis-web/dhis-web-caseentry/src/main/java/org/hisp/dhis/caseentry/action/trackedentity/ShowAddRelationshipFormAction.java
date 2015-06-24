@@ -28,7 +28,6 @@ package org.hisp.dhis.caseentry.action.trackedentity;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -149,7 +148,7 @@ public class ShowAddRelationshipFormAction
 
         organisationUnit = selectionManager.getSelectedOrganisationUnit();
         
-        relationshipTypes = new ArrayList<>( relationshipTypeService.getAllRelationshipTypes() );
+        relationshipTypes = relationshipTypeService.getAllRelationshipTypes();
 
         attributes = attributeService.getAllTrackedEntityAttributes();
         

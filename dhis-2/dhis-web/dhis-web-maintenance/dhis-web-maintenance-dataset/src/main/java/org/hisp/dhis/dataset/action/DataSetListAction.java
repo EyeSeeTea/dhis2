@@ -30,7 +30,6 @@ package org.hisp.dhis.dataset.action;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -96,15 +95,13 @@ public class DataSetListAction
         {
             this.paging = createPaging( dataSetService.getDataSetCountByName( key ) );
 
-            dataSets = new ArrayList<>( dataSetService.getDataSetsBetweenByName( key, paging.getStartPos(),
-                paging.getPageSize() ) );
+            dataSets = dataSetService.getDataSetsBetweenByName( key, paging.getStartPos(), paging.getPageSize() );
         }
         else
         {
             this.paging = createPaging( dataSetService.getDataSetCount() );
 
-            dataSets = new ArrayList<>( dataSetService.getDataSetsBetween( paging.getStartPos(), paging
-                .getPageSize() ) );
+            dataSets = dataSetService.getDataSetsBetween( paging.getStartPos(), paging.getPageSize() );
         }
 
         Collections.sort( dataSets, new IdentifiableObjectNameComparator() );

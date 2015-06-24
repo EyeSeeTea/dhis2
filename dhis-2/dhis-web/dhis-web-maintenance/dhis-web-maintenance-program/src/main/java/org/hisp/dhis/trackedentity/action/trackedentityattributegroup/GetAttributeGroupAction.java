@@ -28,7 +28,6 @@ package org.hisp.dhis.trackedentity.action.trackedentityattributegroup;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -104,7 +103,7 @@ public class GetAttributeGroupAction
     {
         attributeGroup = attributeGroupService.getTrackedEntityAttributeGroup( id );
 
-        attributes = new ArrayList<>( attributeService.getTrackedEntityAttributesWithoutGroup() );
+        attributes = attributeService.getTrackedEntityAttributesWithoutGroup();
 
         Collections.sort( attributes, IdentifiableObjectNameComparator.INSTANCE );
 

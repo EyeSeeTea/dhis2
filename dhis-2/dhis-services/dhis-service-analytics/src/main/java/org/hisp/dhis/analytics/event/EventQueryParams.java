@@ -29,7 +29,8 @@ package org.hisp.dhis.analytics.event;
  */
 
 import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
-import static org.hisp.dhis.common.DimensionalObject.PROGRAM_INDICATOR_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.PROGRAM_ATTRIBUTE_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.PROGRAM_DATAELEMENT_DIM_ID;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -45,13 +46,13 @@ import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.NameableObjectUtils;
 import org.hisp.dhis.common.QueryItem;
+import org.hisp.dhis.commons.collection.ListUtils;
+import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.legend.Legend;
 import org.hisp.dhis.option.OptionSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramStage;
-import org.hisp.dhis.util.ListUtils;
+import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 
 /**
  * @author Lars Helge Overland
@@ -59,10 +60,6 @@ import org.hisp.dhis.util.ListUtils;
 public class EventQueryParams
     extends DataQueryParams
 {
-    private Program program;
-    
-    private ProgramStage programStage;
-    
     private Date startDate;
     
     private Date endDate;
@@ -92,12 +89,8 @@ public class EventQueryParams
     private boolean collapseDataDimensions;
     
     private boolean coordinatesOnly;
-    
-    // -------------------------------------------------------------------------
-    // Transient properties
-    // -------------------------------------------------------------------------
-    
-    private transient boolean aggregate;
+
+    private boolean aggregateData;
     
     // -------------------------------------------------------------------------
     // Constructors
@@ -106,12 +99,12 @@ public class EventQueryParams
     public EventQueryParams()
     {
     }
-    
+
     @Override
     public EventQueryParams instance()
     {
         EventQueryParams params = new EventQueryParams();
-
+        
         params.dimensions = new ArrayList<>( this.dimensions );
         params.filters = new ArrayList<>( this.filters );
         params.displayProperty = this.displayProperty;
@@ -138,9 +131,52 @@ public class EventQueryParams
         params.outputType = this.outputType;
         params.collapseDataDimensions = this.collapseDataDimensions;
         params.coordinatesOnly = this.coordinatesOnly;
+        params.aggregateData = this.aggregateData;
         
         params.periodType = this.periodType;
-        params.aggregate = this.aggregate;
+        
+        return params;
+    }
+    
+    public static EventQueryParams fromDataQueryParams( DataQueryParams dataQueryParams )
+    {
+        //TODO indicator filter
+        
+        EventQueryParams params = new EventQueryParams();
+        
+        dataQueryParams.copyTo( params );
+        
+        for ( NameableObject object : dataQueryParams.getProgramDataElements() )
+        {
+            DataElement element = (DataElement) object;            
+            QueryItem item = new QueryItem( element, element.getLegendSet(), element.getType(), element.getOptionSet() );
+            params.getItems().add( item );
+        }
+
+        for ( NameableObject object : dataQueryParams.getProgramAttributes() )
+        {
+            TrackedEntityAttribute element = (TrackedEntityAttribute) object;            
+            QueryItem item = new QueryItem( element, element.getLegendSet(), element.getValueType(), element.getOptionSet() );
+            params.getItems().add( item );
+        }
+
+        for ( NameableObject object : dataQueryParams.getFilterProgramDataElements() )
+        {
+            DataElement element = (DataElement) object;            
+            QueryItem item = new QueryItem( element, element.getLegendSet(), element.getType(), element.getOptionSet() );            
+            params.getItemFilters().add( item );
+        }
+
+        for ( NameableObject object : dataQueryParams.getFilterProgramAttributes() )
+        {
+            TrackedEntityAttribute element = (TrackedEntityAttribute) object;            
+            QueryItem item = new QueryItem( element, element.getLegendSet(), element.getValueType(), element.getOptionSet() );            
+            params.getItemFilters().add( item );
+        }
+
+        params.setAggregateData( true );
+        params.removeDimensionOrFilter( PROGRAM_DATAELEMENT_DIM_ID );
+        params.removeDimensionOrFilter( PROGRAM_ATTRIBUTE_DIM_ID );
         
         return params;
     }
@@ -261,17 +297,6 @@ public class EventQueryParams
         return !items.isEmpty() || !itemFilters.isEmpty();
     }
 
-    /**
-     * Indicates whether program indicators are present as dimension or filter.
-     */
-    public boolean hasProgramIndicators()
-    {
-        List<NameableObject> dimOpts = getDimensionOptions( PROGRAM_INDICATOR_DIM_ID );
-        List<NameableObject> filterOpts = getFilterOptions( PROGRAM_INDICATOR_DIM_ID );
-        
-        return ( dimOpts != null && !dimOpts.isEmpty() ) || ( filterOpts != null && !filterOpts.isEmpty() );
-    }
-    
     public boolean hasStartEndDate()
     {
         return startDate != null && endDate != null;
@@ -366,26 +391,6 @@ public class EventQueryParams
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
-
-    public Program getProgram()
-    {
-        return program;
-    }
-
-    public void setProgram( Program program )
-    {
-        this.program = program;
-    }
-
-    public ProgramStage getProgramStage()
-    {
-        return programStage;
-    }
-
-    public void setProgramStage( ProgramStage programStage )
-    {
-        this.programStage = programStage;
-    }
 
     public Date getStartDate()
     {
@@ -549,13 +554,13 @@ public class EventQueryParams
         this.coordinatesOnly = coordinatesOnly;
     }
 
-    public boolean isAggregate()
+    public boolean isAggregateData()
     {
-        return aggregate;
+        return aggregateData;
     }
 
-    public void setAggregate( boolean aggregate )
+    public void setAggregateData( boolean aggregateData )
     {
-        this.aggregate = aggregate;
+        this.aggregateData = aggregateData;
     }
 }

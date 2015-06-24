@@ -29,9 +29,12 @@ package org.hisp.dhis.program;
  */
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.hisp.dhis.constant.Constant;
+import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 
 /**
@@ -97,31 +100,29 @@ public interface ProgramIndicatorService
     /**
      * Returns all {@link ProgramIndicator}.
      *
-     * @return a collection of all ProgramIndicator, or an empty collection if
+     * @return a List of all ProgramIndicator, or an empty List if
      * there are no ProgramIndicators.
      */
-    Collection<ProgramIndicator> getAllProgramIndicators();
+    List<ProgramIndicator> getAllProgramIndicators();
 
-    /**
-     * Calculate a program indicator value based on program stage instance and an
-     * indicator.
-     *
-     * @param programInstance  ProgramInstance
-     * @param programIndicator ProgramIndicator
-     * @return Indicator value
-     */
-    String getProgramIndicatorValue( ProgramStageInstance programStageInstance, ProgramIndicator programIndicator );
-    
     /**
      * Calculate a program indicator value based on program instance and an
      * indicator.
      *
-     * @param programInstance  ProgramInstance
      * @param programIndicator ProgramIndicator
+     * @param programInstance  ProgramInstance
      * @return Indicator value
      */
-    String getProgramIndicatorValue( ProgramInstance programInstance, ProgramIndicator programIndicator );
+    String getProgramIndicatorValue( ProgramIndicator programIndicator, ProgramInstance programInstance );
 
+    /**
+     * Calculate a program indicator value based on the given arguments.
+     * 
+     * @param valueMap map containing keys for data elements, attributes and 
+     *        constants with corresponding values.
+     */
+    Double getProgramIndicatorValue( ProgramIndicator indicator, Map<String, Double> valueMap );
+    
     /**
      * Get indicator values of all program indicators defined for a TrackedEntityInstance
      *
@@ -159,20 +160,53 @@ public interface ProgramIndicatorService
     String filterIsValid( String filter );
     
     /**
-     * Get all {@link ProgramStageDataElement} part of the expression of the 
-     * given indicator.
+     * Returns all {@link DataElement} part of the given collection
+     * of {@link ProgramIndicator}.
      * 
-     * @param indicator the ProgramIndicator.
+     * @param indicators the ProgramIndicators.
+     * @return a set of DataElements.
+     */
+    Set<DataElement> getDataElementsInIndicators( Collection<ProgramIndicator> indicators );
+    
+    /**
+     * Get all {@link ProgramStageDataElement} part of the expression.
+     * 
+     * @param expression the expression.
      * @return a set of ProgramStageDataElements.
      */
-    Set<ProgramStageDataElement> getProgramStageDataElementsInExpression( ProgramIndicator indicator );
+    Set<ProgramStageDataElement> getProgramStageDataElementsInExpression( String expression );
 
     /**
-     * Get all {@link TrackedEntityAttribute} part of the expression of the 
-     * given indicator.
+     * Returns all {@link TrackedEntityAttribute} part of the given collection
+     * of {@link ProgramIndicator}.
      * 
-     * @param indicator the ProgramIndicator.
+     * @param indicators the ProgramIndicators.
      * @return a set of TrackedEntityAttributes.
      */
-    Set<TrackedEntityAttribute> getAttributesInExpression( ProgramIndicator indicator );
+    Set<TrackedEntityAttribute> getAttributesInIndicators( Collection<ProgramIndicator> indicators );
+
+    /**
+     * Get all {@link TrackedEntityAttribute} part of the expression.
+     * 
+     * @param expression the expression.
+     * @return a set of TrackedEntityAttributes.
+     */
+    Set<TrackedEntityAttribute> getAttributesInExpression( String expression );
+
+    /**
+     * Returns all {@link Constant} part of the given collection of 
+     * {@link ProgramIndicator}.
+     * 
+     * @param indicators the ProgramIndicators.
+     * @return a set of Constants.
+     */
+    Set<Constant> getConstantsInIndicators( Collection<ProgramIndicator> indicators );
+    
+    /**
+     * Get all {@link Constant} part of the expression of the expression.
+     * 
+     * @param expression the expression.
+     * @return a set of Constants.
+     */
+    Set<Constant> getConstantsInExpression( String expression );
 }

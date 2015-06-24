@@ -30,7 +30,6 @@ package org.hisp.dhis.oum.action.organisationunitgroupset;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -92,13 +91,13 @@ public class GetGroupSetListAction
         {
             this.paging = createPaging( organisationUnitGroupService.getOrganisationUnitGroupSetCountByName( key ) );
             
-            organisationUnitGroupSets = new ArrayList<>( organisationUnitGroupService.getOrganisationUnitGroupSetsBetweenByName( key, paging.getStartPos(), paging.getPageSize() ) );
+            organisationUnitGroupSets = organisationUnitGroupService.getOrganisationUnitGroupSetsBetweenByName( key, paging.getStartPos(), paging.getPageSize() );
         }
         else
         {
             this.paging = createPaging( organisationUnitGroupService.getOrganisationUnitGroupSetCount() );
             
-            organisationUnitGroupSets = new ArrayList<>( organisationUnitGroupService.getOrganisationUnitGroupSetsBetween( paging.getStartPos(), paging.getPageSize() ) );
+            organisationUnitGroupSets = organisationUnitGroupService.getOrganisationUnitGroupSetsBetween( paging.getStartPos(), paging.getPageSize() );
         }
 
         Collections.sort( organisationUnitGroupSets, IdentifiableObjectNameComparator.INSTANCE );

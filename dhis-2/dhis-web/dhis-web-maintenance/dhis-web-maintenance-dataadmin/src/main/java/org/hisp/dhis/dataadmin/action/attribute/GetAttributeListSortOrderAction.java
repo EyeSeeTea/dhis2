@@ -28,7 +28,6 @@ package org.hisp.dhis.dataadmin.action.attribute;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -73,7 +72,7 @@ public class GetAttributeListSortOrderAction
     @Override
     public String execute()
     {
-        attributes = new ArrayList<>( attributeService.getAllAttributes() );
+        attributes = attributeService.getAllAttributes();
 
         Collections.sort( attributes, new AttributeSortOrderComparator() );
 

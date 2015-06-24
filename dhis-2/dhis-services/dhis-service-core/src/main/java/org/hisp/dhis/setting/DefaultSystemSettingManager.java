@@ -109,7 +109,7 @@ public class DefaultSystemSettingManager
     }
 
     @Override
-    public Collection<SystemSetting> getAllSystemSettings()
+    public List<SystemSetting> getAllSystemSettings()
     {
         return systemSettingStore.getAll();
     }
@@ -184,12 +184,6 @@ public class DefaultSystemSettingManager
     public boolean accountRecoveryEnabled()
     {
         return (Boolean) getSystemSetting( KEY_ACCOUNT_RECOVERY, false );
-    }
-
-    @Override
-    public boolean accountInviteEnabled()
-    {
-        return (Boolean) getSystemSetting( KEY_ACCOUNT_INVITE, false );
     }
 
     @Override

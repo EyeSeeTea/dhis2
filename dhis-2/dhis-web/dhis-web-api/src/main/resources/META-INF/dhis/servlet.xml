@@ -31,9 +31,9 @@
       <ref bean="csvMessageConverter" />
       <ref bean="pdfMessageConverter" />
       <ref bean="excelMessageConverter" />
-      <bean class="org.springframework.http.converter.StringHttpMessageConverter"/>
-      <bean class="org.springframework.http.converter.ByteArrayHttpMessageConverter"/>
-      <bean class="org.springframework.http.converter.FormHttpMessageConverter"/>
+      <bean class="org.springframework.http.converter.StringHttpMessageConverter" />
+      <bean class="org.springframework.http.converter.ByteArrayHttpMessageConverter" />
+      <bean class="org.springframework.http.converter.FormHttpMessageConverter" />
       <bean class="org.hisp.dhis.api.mobile.support.DataStreamSerializableMessageConverter" />
       <ref bean="org.hisp.dhis.webapi.utils.RenderServiceMessageConverter" />
     </mvc:message-converters>
@@ -135,7 +135,5 @@
         <bean class="org.hisp.dhis.webapi.view.CsvGridView" />
       </list>
     </property>
-
   </bean>
-
 </beans>

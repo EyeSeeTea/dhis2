@@ -28,18 +28,17 @@ package org.hisp.dhis.setting;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.hisp.dhis.calendar.CalendarService;
 import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.QuarterlyPeriodType;
 import org.hisp.dhis.period.YearlyPeriodType;
-
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Set;
 
 /**
  * @author Stian Strandli
@@ -85,7 +84,6 @@ public interface SystemSettingManager
     final String KEY_SCHEDULE_AGGREGATE_QUERY_BUILDER_TASK_STRATEGY = "scheduleAggregateQueryBuilderTackStrategy";
     final String KEY_CONFIGURATION = "keyConfig";
     final String KEY_ACCOUNT_RECOVERY = "keyAccountRecovery";
-    final String KEY_ACCOUNT_INVITE = "keyAccountInvite";
     final String KEY_LAST_MONITORING_RUN = "keyLastMonitoringRun";
     final String KEY_GOOGLE_ANALYTICS_UA = "googleAnalyticsUA";
     final String KEY_CREDENTIALS_EXPIRES = "credentialsExpires";
@@ -164,7 +162,7 @@ public interface SystemSettingManager
 
     Serializable getSystemSetting( String name, Serializable defaultValue );
 
-    Collection<SystemSetting> getAllSystemSettings();
+    List<SystemSetting> getAllSystemSettings();
 
     void deleteSystemSetting( String name );
 
@@ -185,8 +183,6 @@ public interface SystemSettingManager
     String getInstanceBaseUrl();
 
     boolean accountRecoveryEnabled();
-
-    boolean accountInviteEnabled();
 
     boolean selfRegistrationNoRecaptcha();
 

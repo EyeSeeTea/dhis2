@@ -28,10 +28,9 @@ package org.hisp.dhis.analytics.table;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.util.TextUtils.removeLast;
+import static org.hisp.dhis.commons.util.TextUtils.removeLast;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -41,20 +40,20 @@ import java.util.concurrent.Future;
 
 import org.hisp.dhis.analytics.AnalyticsTable;
 import org.hisp.dhis.common.ValueType;
+import org.hisp.dhis.commons.collection.ListUtils;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.system.util.DateUtils;
-import org.hisp.dhis.util.ListUtils;
 import org.hisp.dhis.system.util.MathUtils;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.collect.Lists;
 
 /**
  * @author Lars Helge Overland
@@ -62,9 +61,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class JdbcEventAnalyticsTableManager
     extends AbstractJdbcTableManager
 {
-    @Autowired
-    private ProgramService programService;
-
     // -------------------------------------------------------------------------
     // Implementation
     // -------------------------------------------------------------------------
@@ -101,7 +97,7 @@ public class JdbcEventAnalyticsTableManager
             
             for ( Integer id : programs )
             {
-                Program program = programService.getProgram( id );
+                Program program = idObjectManager.getNoAcl( Program.class, id );
                 
                 AnalyticsTable table = new AnalyticsTable( baseName, null, period, program );
                 List<String[]> dimensionColumns = getDimensionColumns( table );
@@ -324,7 +320,7 @@ public class JdbcEventAnalyticsTableManager
         String[] oun = { quote( "ouname" ), "character varying(230) not null", "ou.name" };
         String[] ouc = { quote( "oucode" ), "character varying(50)", "ou.code" };
 
-        columns.addAll( Arrays.asList( psi, pi, ps, ed, longitude, latitude, ou, oun, ouc ) );
+        columns.addAll( Lists.newArrayList( psi, pi, ps, ed, longitude, latitude, ou, oun, ouc ) );
 
         if ( table.hasProgram() && table.getProgram().isRegistration() )
         {

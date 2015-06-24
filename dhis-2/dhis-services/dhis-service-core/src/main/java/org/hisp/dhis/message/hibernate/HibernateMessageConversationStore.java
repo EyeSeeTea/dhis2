@@ -30,17 +30,16 @@ package org.hisp.dhis.message.hibernate;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.List;
 
 import org.hibernate.Query;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.hisp.dhis.commons.util.SqlHelper;
 import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.message.MessageConversation;
 import org.hisp.dhis.message.MessageConversationStore;
 import org.hisp.dhis.message.UserMessage;
-import org.hisp.dhis.util.SqlHelper;
 import org.hisp.dhis.user.User;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -133,7 +132,7 @@ public class HibernateMessageConversationStore
 
     @Override
     @SuppressWarnings( "unchecked" )
-    public Collection<MessageConversation> getMessageConversations( String[] uids )
+    public List<MessageConversation> getMessageConversations( String[] uids )
     {
         return getSharingCriteria()
             .add( Restrictions.in( "uid", uids ) )

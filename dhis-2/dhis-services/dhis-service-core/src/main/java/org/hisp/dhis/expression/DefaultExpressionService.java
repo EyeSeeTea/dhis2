@@ -37,6 +37,7 @@ import static org.hisp.dhis.system.util.MathUtils.calculateExpression;
 import static org.hisp.dhis.system.util.MathUtils.isEqual;
 import static org.hisp.dhis.expression.MissingValueStrategy.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -65,7 +66,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.MathUtils;
-import org.hisp.dhis.util.TextUtils;
+import org.hisp.dhis.commons.util.TextUtils;
 import org.hisp.dhis.validation.ValidationRule;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -155,7 +156,7 @@ public class DefaultExpressionService
 
     @Override
     @Transactional
-    public Collection<Expression> getAllExpressions()
+    public List<Expression> getAllExpressions()
     {
         return expressionStore.getAll();
     }
@@ -166,12 +167,14 @@ public class DefaultExpressionService
     
     @Override
     public Double getIndicatorValue( Indicator indicator, Period period, Map<DataElementOperand, Double> valueMap,
-        Map<String, Double> constantMap, Map<String, Integer> orgUnitCountMap, Integer days )
+        Map<String, Double> constantMap, Map<String, Integer> orgUnitCountMap )
     {
         if ( indicator == null || indicator.getExplodedNumeratorFallback() == null || indicator.getExplodedDenominatorFallback() == null )
         {
             return null;
         }
+        
+        Integer days = period != null ? period.getDaysInPeriod() : null;
         
         final String denominatorExpression = generateExpression( indicator.getExplodedDenominatorFallback(), 
             valueMap, constantMap, orgUnitCountMap, days, NEVER_SKIP );
@@ -449,7 +452,7 @@ public class DefaultExpressionService
 
     @Override
     @Transactional
-    public void filterInvalidIndicators( Collection<Indicator> indicators )
+    public void filterInvalidIndicators( List<Indicator> indicators )
     {
         if ( indicators != null )
         {
@@ -972,9 +975,9 @@ public class DefaultExpressionService
 
     @Override
     @Transactional
-    public Set<DataElementOperand> getOperandsInIndicators( Collection<Indicator> indicators )
+    public List<DataElementOperand> getOperandsInIndicators( List<Indicator> indicators )
     {
-        final Set<DataElementOperand> operands = new HashSet<>();
+        final List<DataElementOperand> operands = new ArrayList<>();
         
         for ( Indicator indicator : indicators )
         {

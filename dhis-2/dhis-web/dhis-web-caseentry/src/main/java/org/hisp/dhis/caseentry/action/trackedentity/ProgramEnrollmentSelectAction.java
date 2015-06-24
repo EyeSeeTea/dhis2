@@ -28,7 +28,6 @@ package org.hisp.dhis.caseentry.action.trackedentity;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -92,7 +91,7 @@ public class ProgramEnrollmentSelectAction
         return entityInstance;
     }
 
-    private Collection<Program> programs = new ArrayList<>();
+    private Collection<Program> programs;
 
     public Collection<Program> getPrograms()
     {
@@ -112,7 +111,7 @@ public class ProgramEnrollmentSelectAction
 
         // Get all programs
 
-        programs = new ArrayList<>( programService.getProgramsByCurrentUser( orgunit ) );
+        programs = programService.getProgramsByCurrentUser( orgunit );
         programs.retainAll( programService.getProgramsByTrackedEntity( entityInstance.getTrackedEntity() ) );
         programs.removeAll( programService.getPrograms( Program.SINGLE_EVENT_WITHOUT_REGISTRATION ) );
 

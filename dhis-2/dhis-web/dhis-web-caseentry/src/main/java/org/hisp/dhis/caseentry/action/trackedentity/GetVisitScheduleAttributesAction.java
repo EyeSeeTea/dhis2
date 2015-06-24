@@ -28,7 +28,6 @@ package org.hisp.dhis.caseentry.action.trackedentity;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -58,7 +57,7 @@ public class GetVisitScheduleAttributesAction
     // Getter && Setter
     // -------------------------------------------------------------------------
     
-    private List<TrackedEntityAttribute> attributes = new ArrayList<>();
+    private List<TrackedEntityAttribute> attributes;
     
     public List<TrackedEntityAttribute> getAttributes()
     {
@@ -72,8 +71,7 @@ public class GetVisitScheduleAttributesAction
     @Override
     public String execute()
     {
-        attributes = new ArrayList<>(
-            attributeService.getTrackedEntityAttributesByDisplayOnVisitSchedule( true ) );
+        attributes = attributeService.getTrackedEntityAttributesByDisplayOnVisitSchedule( true );
         Collections.sort( attributes, new TrackedEntityAttributeSortOrderComparator() );
         
         return SUCCESS;

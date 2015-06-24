@@ -35,7 +35,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,8 +46,9 @@ import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.DimensionalObjectUtils;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.util.ListUtils;
 import org.junit.Test;
+
+import com.google.common.collect.Lists;
 
 /**
  * @author Lars Helge Overland
@@ -65,7 +65,7 @@ public class DataQueryParamsTest
     @Test
     public void testGetDimensionItemsFromParam()
     {
-        List<String> expected = new ArrayList<>( Arrays.asList( "D348asd782j", "kj78HnH6hgT", "9ds9dS98s2" ) );
+        List<String> expected = new ArrayList<>( Lists.newArrayList( "D348asd782j", "kj78HnH6hgT", "9ds9dS98s2" ) );
         
         assertEquals( expected, DimensionalObjectUtils.getDimensionItemsFromParam( "de:D348asd782j;kj78HnH6hgT;9ds9dS98s2" ) );        
     }
@@ -116,11 +116,11 @@ public class DataQueryParamsTest
     {
         DataQueryParams params = new DataQueryParams();
         params.getDimensions().add( new BaseDimensionalObject( DimensionalObject.INDICATOR_DIM_ID, DimensionType.INDICATOR, null, null, 
-            ListUtils.getList( createIndicator( 'A', null ), createIndicator( 'B', null ) ) ) );
+            Lists.newArrayList( createIndicator( 'A', null ), createIndicator( 'B', null ) ) ) );
         params.getDimensions().add( new BaseDimensionalObject( DimensionalObject.ORGUNIT_DIM_ID, DimensionType.ORGANISATIONUNIT, null, null,
-            ListUtils.getList( createOrganisationUnit( 'A' ), createOrganisationUnit( 'B' ) ) ) );
+            Lists.newArrayList( createOrganisationUnit( 'A' ), createOrganisationUnit( 'B' ) ) ) );
         params.getFilters().add( new BaseDimensionalObject( DimensionalObject.PERIOD_DIM_ID, DimensionType.PERIOD, null, null,
-            ListUtils.getList( createPeriod( "201201" ), createPeriod( "201202" ) ) ) );
+            Lists.newArrayList( createPeriod( "201201" ), createPeriod( "201202" ) ) ) );
 
         assertEquals( 2, params.getDimensions().size() );
         assertEquals( 1, params.getFilters().size() );

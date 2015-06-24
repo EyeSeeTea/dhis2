@@ -28,15 +28,28 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.collect.Sets;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Set;
+
 import org.hibernate.SessionFactory;
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.acl.AccessStringHelper;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.hibernate.exception.CreateAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.DeleteAccessDeniedException;
+import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserGroup;
@@ -45,12 +58,7 @@ import org.hisp.dhis.user.UserService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.GregorianCalendar;
-import java.util.List;
-
-import static org.junit.Assert.*;
+import com.google.common.collect.Sets;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -96,6 +104,21 @@ public class IdentifiableObjectManagerTest
 
         assertEquals( dataElementGroupA, identifiableObjectManager.getObject( dataElementGroupIdA, DataElementGroup.class.getSimpleName() ) );
         assertEquals( dataElementGroupB, identifiableObjectManager.getObject( dataElementGroupIdB, DataElementGroup.class.getSimpleName() ) );
+    }
+
+    @Test
+    public void testGetWithClasses()
+    {
+        DataElement dataElementA = createDataElement( 'A' );
+        DataElement dataElementB = createDataElement( 'B' );
+
+        dataElementService.addDataElement( dataElementA );
+        dataElementService.addDataElement( dataElementB );
+        
+        Set<Class<IdentifiableObject>> classes = IdentifiableObjectUtils.asTypedClassSet( DataElement.class, DataSet.class, Indicator.class );
+        
+        assertEquals( dataElementA, identifiableObjectManager.get( classes, dataElementA.getUid() ) );
+        assertEquals( dataElementB, identifiableObjectManager.get( classes, dataElementB.getUid() ) );
     }
 
     @Test
@@ -583,11 +606,11 @@ public class IdentifiableObjectManagerTest
         identifiableObjectManager.save( dataElementD );
 
         List<String> uids = Arrays.asList( dataElementA.getUid(), dataElementC.getUid(), dataElementB.getUid(), dataElementD.getUid() );
-        
+
         List<DataElement> expected = new ArrayList<>( Arrays.asList( dataElementA, dataElementC, dataElementB, dataElementD ) );
-        
+
         List<DataElement> actual = new ArrayList<>( identifiableObjectManager.getByUidOrdered( DataElement.class, uids ) );
-        
+
         assertEquals( expected, actual );
     }
 }

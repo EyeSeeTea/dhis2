@@ -28,7 +28,6 @@ package org.hisp.dhis.caseentry.action.trackedentity;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -94,7 +93,7 @@ public class ShowActivityPlanFormAction
     {
         organisationUnit = selectionManager.getSelectedOrganisationUnit();
 
-        programs = new ArrayList<>( programService.getAllPrograms() );
+        programs = programService.getAllPrograms();
         programs.retainAll( programService.getProgramsByCurrentUser() );
         programs.removeAll( programService.getPrograms( Program.SINGLE_EVENT_WITHOUT_REGISTRATION ) );
 
