@@ -29,8 +29,6 @@ package org.hisp.dhis.analytics.event;
  */
 
 import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
-import static org.hisp.dhis.common.DimensionalObject.PROGRAM_ATTRIBUTE_DIM_ID;
-import static org.hisp.dhis.common.DimensionalObject.PROGRAM_DATAELEMENT_DIM_ID;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -42,6 +40,7 @@ import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.analytics.EventOutputType;
 import org.hisp.dhis.analytics.Partitions;
 import org.hisp.dhis.analytics.SortOrder;
+import org.hisp.dhis.common.DataDimension.DataDimensionType;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.NameableObjectUtils;
@@ -175,8 +174,7 @@ public class EventQueryParams
         }
 
         params.setAggregateData( true );
-        params.removeDimensionOrFilter( PROGRAM_DATAELEMENT_DIM_ID );
-        params.removeDimensionOrFilter( PROGRAM_ATTRIBUTE_DIM_ID );
+        params.removeDataDimensionOrFilter( DataDimensionType.PROGRAM_DATA_ELEMENT ).removeDataDimensionOrFilter( DataDimensionType.PROGRAM_ATTRIBUTE );
         
         return params;
     }
