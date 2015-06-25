@@ -1566,7 +1566,7 @@ public class DataQueryParams
      * @param dataDimensionType the data dimension type.
      * @param options the data dimension options.
      */
-    private void setDataDimensionOptions( DataDimensionType dataDimensionType, List<NameableObject> options )
+    private void setDataDimensionOptions( DataDimensionType dataDimensionType, List<? extends NameableObject> options )
     {
         List<NameableObject> existing = DimensionalObjectUtils.getByDataDimensionType( dataDimensionType, getDimensionOptions( DATA_X_DIM_ID ) );
         DimensionalObject dim = getDimension( DATA_X_DIM_ID );
@@ -1612,7 +1612,7 @@ public class DataQueryParams
         return ImmutableList.copyOf( DimensionalObjectUtils.getByDataDimensionType( DataDimensionType.INDICATOR, getDimensionOptions( DATA_X_DIM_ID ) ) );
     }
     
-    public void setIndicators( List<NameableObject> indicators )
+    public void setIndicators( List<? extends NameableObject> indicators )
     {
         setDataDimensionOptions( DataDimensionType.INDICATOR, indicators );
     }
@@ -1622,7 +1622,7 @@ public class DataQueryParams
         return ImmutableList.copyOf( DimensionalObjectUtils.getByDataDimensionType( DataDimensionType.AGGREGATE_DATA_ELEMENT, getDimensionOptions( DATA_X_DIM_ID ) ) );
     }
     
-    public void setDataElements( List<NameableObject> dataElements )
+    public void setDataElements( List<? extends NameableObject> dataElements )
     {
         setDataDimensionOptions( DataDimensionType.AGGREGATE_DATA_ELEMENT, dataElements );
     }
@@ -1632,7 +1632,7 @@ public class DataQueryParams
         return ImmutableList.copyOf( DimensionalObjectUtils.getByDataDimensionType( DataDimensionType.DATA_SET, getDimensionOptions( DATA_X_DIM_ID ) ) );
     }
 
-    public void setDataSets( List<NameableObject> dataSets )
+    public void setDataSets( List<? extends NameableObject> dataSets )
     {
         setDataDimensionOptions( DataDimensionType.DATA_SET, dataSets );
     }
