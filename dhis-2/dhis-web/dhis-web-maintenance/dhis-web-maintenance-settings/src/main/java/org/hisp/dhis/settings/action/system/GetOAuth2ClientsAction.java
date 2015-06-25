@@ -1,4 +1,4 @@
-package org.hisp.dhis.schema.descriptors;
+package org.hisp.dhis.settings.action.system;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,37 +28,46 @@ package org.hisp.dhis.schema.descriptors;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.collect.Lists;
+import com.opensymphony.xwork2.Action;
 import org.hisp.dhis.oauth2.OAuth2Client;
-import org.hisp.dhis.schema.Authority;
-import org.hisp.dhis.schema.AuthorityType;
-import org.hisp.dhis.schema.Schema;
-import org.hisp.dhis.schema.SchemaDescriptor;
-import org.springframework.stereotype.Component;
+import org.hisp.dhis.oauth2.OAuth2ClientService;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@Component
-public class OAuth2ClientSchemaDescriptor implements SchemaDescriptor
+public class GetOAuth2ClientsAction implements Action
 {
-    public static final String SINGULAR = "oAuth2Client";
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
 
-    public static final String PLURAL = "oAuth2Clients";
+    @Autowired
+    private OAuth2ClientService clientService;
 
-    public static final String API_ENDPOINT = "/" + PLURAL;
+    // -------------------------------------------------------------------------
+    // Input & Output
+    // -------------------------------------------------------------------------
+
+    private List<OAuth2Client> clients;
+
+    public List<OAuth2Client> getClients()
+    {
+        return clients;
+    }
+
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
 
     @Override
-    public Schema getSchema()
+    public String execute() throws Exception
     {
-        Schema schema = new Schema( OAuth2Client.class, SINGULAR, PLURAL );
-        schema.setRelativeApiEndpoint( API_ENDPOINT );
-        schema.setOrder( 1030 );
+        clients = new ArrayList<>( clientService.getOAuth2Clients() );
 
-        schema.getAuthorities().add( new Authority( AuthorityType.READ, Lists.newArrayList( "F_OAUTH2_CLIENT_MANAGE" ) ) );
-        schema.getAuthorities().add( new Authority( AuthorityType.CREATE, Lists.newArrayList( "F_OAUTH2_CLIENT_MANAGE" ) ) );
-        schema.getAuthorities().add( new Authority( AuthorityType.DELETE, Lists.newArrayList( "F_OAUTH2_CLIENT_MANAGE" ) ) );
-
-        return schema;
+        return SUCCESS;
     }
 }
