@@ -130,7 +130,7 @@ public class DefaultQueryPlanner
             violation = "Indicators cannot be specified as filter";
         }
 
-        if ( params.getFilterDataSets().isEmpty() )
+        if ( !params.getFilterDataSets().isEmpty() )
         {
             violation = "Data sets cannot be specified as filter";
         }
