@@ -39,7 +39,12 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hisp.dhis.common.DataDimension.DataDimensionType;
 import org.hisp.dhis.common.comparator.ObjectStringValueComparator;
+import org.hisp.dhis.dataelement.DataElement;
+
+import static org.hisp.dhis.common.DataDimension.DATA_DIMENSION_TYPE_CLASS_MAP;
+import static org.hisp.dhis.common.DataDimension.DATA_DIMENSION_TYPE_DOMAIN_MAP;
 
 /**
  * @author Lars Helge Overland
@@ -53,24 +58,7 @@ public class DimensionalObjectUtils
     private static final Pattern INT_PATTERN = Pattern.compile( "^(0|-?[1-9]\\d*)$" );
 
     public static final String TITLE_ITEM_SEP = ", ";
-    
-    /**
-     * Converts a concrete dimensional class identifier to a dimension identifier.
-     * 
-     * @param identifier the identifier.
-     * @return a dimension identifier.
-     */
-    /*
-    public static String toDimension( String identifier )
-    {
-        if ( DATA_DIMS.contains( identifier ) )
-        {
-            return DATA_X_DIM_ID;
-        }
         
-        return identifier;
-    }*/
-    
     /**
      * Creates a unique list of dimension identifiers based on the given list
      * of DimensionalObjects.
@@ -99,6 +87,36 @@ public class DimensionalObjectUtils
         return dims;
     }
 
+    /**
+     * Returns a list of data dimension options which match the given data 
+     * dimension type.
+     * 
+     * @param dimensionType the data dimension type.
+     * @param dataDimensionOptions the data dimension options.
+     * @return list of nameable objects.
+     */
+    public static List<NameableObject> getByDataDimensionType( DataDimensionType dimensionType, List<NameableObject> dataDimensionOptions )
+    {
+        List<NameableObject> list = new ArrayList<>();
+        
+        for ( NameableObject object : dataDimensionOptions )
+        {
+            if ( !object.getClass().equals( DATA_DIMENSION_TYPE_CLASS_MAP.get( dimensionType ) ) )
+            {
+                continue;
+            }
+            
+            if ( object.getClass().equals( DataElement.class ) && !( ((DataElement) object).getDomainType().equals( DATA_DIMENSION_TYPE_DOMAIN_MAP.get( dimensionType ) ) ) )
+            {
+                continue;
+            }
+            
+            list.add( object );
+        }
+        
+        return list;
+    }
+    
     /**
      * Creates a list of dimension identifiers based on the given list of 
      * DimensionalObjects.

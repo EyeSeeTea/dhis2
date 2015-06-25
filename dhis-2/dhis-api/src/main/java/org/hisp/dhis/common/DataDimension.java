@@ -28,22 +28,43 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Map;
 import java.util.Set;
 
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementDomain;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.program.ProgramIndicator;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+
 /**
 * @author Lars Helge Overland
 */
 public class DataDimension
 {
-    public static final Set<Class<IdentifiableObject>> DATA_DIMENSION_CLASSES = IdentifiableObjectUtils.asTypedClassSet(   
-        Indicator.class, DataElement.class, DataElementOperand.class, DataSet.class, ProgramIndicator.class, TrackedEntityAttribute.class );
+    public enum DataDimensionType
+    {
+        INDICATOR, AGGREGATE_DATA_ELEMENT, DATA_ELEMENT_OPERAND, DATA_SET, 
+        PROGRAM_INDICATOR, PROGRAM_DATA_ELEMENT, PROGRAM_ATTRIBUTE;
+    }
+   
+    public static final Set<Class<? extends IdentifiableObject>> DATA_DIMENSION_CLASSES = ImmutableSet.<Class<? extends IdentifiableObject>>builder().
+        add( Indicator.class ).add( DataElement.class ).add( DataElementOperand.class ).
+        add( DataSet.class ).add( ProgramIndicator.class ).add( TrackedEntityAttribute.class ).build();
+    
+    public static final Map<DataDimensionType, Class<? extends NameableObject>> DATA_DIMENSION_TYPE_CLASS_MAP = ImmutableMap.<DataDimensionType, Class<? extends NameableObject>>builder().
+        put( DataDimensionType.INDICATOR, Indicator.class ).put( DataDimensionType.AGGREGATE_DATA_ELEMENT, DataElement.class ).
+        put( DataDimensionType.DATA_ELEMENT_OPERAND, DataElementOperand.class ).put( DataDimensionType.DATA_SET, DataSet.class ).
+        put( DataDimensionType.PROGRAM_INDICATOR, ProgramIndicator.class ).put( DataDimensionType.PROGRAM_ATTRIBUTE, TrackedEntityAttribute.class ).
+        put( DataDimensionType.PROGRAM_DATA_ELEMENT, DataElement.class ).build();
+    
+    public static final Map<DataDimensionType, DataElementDomain> DATA_DIMENSION_TYPE_DOMAIN_MAP = ImmutableMap.<DataDimension.DataDimensionType, DataElementDomain>builder().
+        put( DataDimensionType.AGGREGATE_DATA_ELEMENT, DataElementDomain.AGGREGATE ).put( DataDimensionType.PROGRAM_DATA_ELEMENT, DataElementDomain.TRACKER ).build();
     
     private int id;
     
