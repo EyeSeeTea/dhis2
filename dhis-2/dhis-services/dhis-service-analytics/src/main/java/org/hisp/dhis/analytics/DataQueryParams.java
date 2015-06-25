@@ -1552,12 +1552,17 @@ public class DataQueryParams
     private void setDataDimensionOptions( DataDimensionType dataDimensionType, List<? extends NameableObject> options )
     {
         List<NameableObject> existing = DimensionalObjectUtils.getByDataDimensionType( dataDimensionType, getDimensionOptions( DATA_X_DIM_ID ) );
-        DimensionalObject dim = getDimension( DATA_X_DIM_ID );
+        DimensionalObject dimension = getDimension( DATA_X_DIM_ID );
         
-        if ( dim != null )
+        if ( dimension == null )
         {
-            dim.getItems().removeAll( existing );
-            dim.getItems().addAll( options );
+            dimension = new BaseDimensionalObject( DATA_X_DIM_ID, DimensionType.DATA_X, null, DISPLAY_NAME_DATA_X, options );
+            addDimension( dimension );
+        }
+        else
+        {        
+            dimension.getItems().removeAll( existing );
+            dimension.getItems().addAll( options );
         }
     }
     
