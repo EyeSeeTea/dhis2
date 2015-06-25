@@ -1558,7 +1558,22 @@ public class DataQueryParams
     {
         return !getDimensionOrFilter( key ).isEmpty();
     }
-        
+
+    /**
+     * Sets the given list of data dimension options. Replaces existing options
+     * of the given data dimension type.
+     * 
+     * @param dataDimensionType the data dimension type.
+     * @param options the data dimension options.
+     */
+    private void setDataDimensionOptions( DataDimensionType dataDimensionType, List<NameableObject> options )
+    {
+        List<NameableObject> existing = DimensionalObjectUtils.getByDataDimensionType( dataDimensionType, getDimensionOptions( DATA_X_DIM_ID ) );
+        DimensionalObject dim = getDimension( DATA_X_DIM_ID );
+        dim.getItems().removeAll( existing );
+        dim.getItems().addAll( options );
+    }
+    
     // -------------------------------------------------------------------------
     // Get and set helpers for dimensions and filters
     // -------------------------------------------------------------------------
@@ -1597,16 +1612,31 @@ public class DataQueryParams
         return ImmutableList.copyOf( DimensionalObjectUtils.getByDataDimensionType( DataDimensionType.INDICATOR, getDimensionOptions( DATA_X_DIM_ID ) ) );
     }
     
+    public void setIndicators( List<NameableObject> indicators )
+    {
+        setDataDimensionOptions( DataDimensionType.INDICATOR, indicators );
+    }
+    
     public List<NameableObject> getDataElements()
     {
         return ImmutableList.copyOf( DimensionalObjectUtils.getByDataDimensionType( DataDimensionType.AGGREGATE_DATA_ELEMENT, getDimensionOptions( DATA_X_DIM_ID ) ) );
+    }
+    
+    public void setDataElements( List<NameableObject> dataElements )
+    {
+        setDataDimensionOptions( DataDimensionType.AGGREGATE_DATA_ELEMENT, dataElements );
     }
     
     public List<NameableObject> getDataSets()
     {
         return ImmutableList.copyOf( DimensionalObjectUtils.getByDataDimensionType( DataDimensionType.DATA_SET, getDimensionOptions( DATA_X_DIM_ID ) ) );
     }
-        
+
+    public void setDataSets( List<NameableObject> dataSets )
+    {
+        setDataDimensionOptions( DataDimensionType.DATA_SET, dataSets );
+    }
+    
     public List<NameableObject> getPeriods()
     {
         return getDimensionOptions( PERIOD_DIM_ID );
