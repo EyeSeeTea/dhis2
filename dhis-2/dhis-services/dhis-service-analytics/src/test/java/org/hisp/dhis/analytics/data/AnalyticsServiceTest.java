@@ -460,7 +460,7 @@ public class AnalyticsServiceTest
         assertEquals( 1, params.getDataElements().size() );
         assertEquals( 2, params.getProgramDataElements().size() );
         assertEquals( 1, params.getFilterPeriods().size() );
-        assertEquals( 3, params.getDimensions().size() );
+        assertEquals( 2, params.getDimensions().size() );
         assertEquals( 1, params.getFilters().size() );
         assertEquals( 3, params.getDimensionOptions( ouGroupSetA.getUid() ).size() );
     }

@@ -165,7 +165,6 @@ public class DefaultAnalyticsService
     private static final int PERCENT = 100;
     private static final int MAX_QUERIES = 8;
 
-    //TODO make sure data x dims are successive
     //TODO completeness on time
 
     @Autowired
