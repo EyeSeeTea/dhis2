@@ -52,12 +52,12 @@
 
     <property name="baseLineLabel" />
 
-	<list name="dataDimensions" table="chart_datadimensions" cascade="all, delete-orphan">
+	<list name="dataDimensionItems" table="chart_datadimensionitems" cascade="all, delete-orphan">
 	  <cache usage="read-write" />
-	  <key column="chartid" foreign-key="fk_chart_datadimensions_chartid" />
+	  <key column="chartid" foreign-key="fk_chart_datadimensionitems_chartid" />
 	  <list-index column="sort_order" base="0" />
-	  <many-to-many column="datadimensionid" class="org.hisp.dhis.common.DataDimension"
-        foreign-key="fk_chart_datadimensions_datadimensionid" />
+	  <many-to-many column="datadimensionitemid" class="org.hisp.dhis.common.DataDimensionItem"
+        foreign-key="fk_chart_datadimensionitems_datadimensionitemid" />
 	</list>
 	
     <list name="organisationUnits" table="chart_organisationunits">
