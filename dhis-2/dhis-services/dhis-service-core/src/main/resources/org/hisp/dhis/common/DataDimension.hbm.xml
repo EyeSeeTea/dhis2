@@ -4,9 +4,9 @@
   "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
-  <class name="org.hisp.dhis.common.DataDimension" table="datadimension">
+  <class name="org.hisp.dhis.common.DataDimensionItem" table="datadimensionitem">
   
-    <id name="id" column="datadimensionid">
+    <id name="id" column="datadimensionitemid">
       <generator class="native" />
     </id>
 
