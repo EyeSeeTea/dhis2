@@ -924,7 +924,7 @@ public abstract class BaseAnalyticalObject
         return dataDimensionItems;
     }
 
-    public void setDataDimensions( List<DataDimensionItem> dataDimensionItems )
+    public void setDataDimensionItems( List<DataDimensionItem> dataDimensionItems )
     {
         this.dataDimensionItems = dataDimensionItems;
     }

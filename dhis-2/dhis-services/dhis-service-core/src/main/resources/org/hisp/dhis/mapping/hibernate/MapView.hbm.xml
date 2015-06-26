@@ -20,12 +20,12 @@
 
     <property name="layer" not-null="true" />
 
-	<list name="dataDimensions" table="mapview_datadimensions" cascade="all, delete-orphan">
+	<list name="dataDimensionItems" table="mapview_datadimensionitems" cascade="all, delete-orphan">
 	  <cache usage="read-write" />
-	  <key column="mapviewid" foreign-key="fk_mapview_datadimensions_mapviewid" />
+	  <key column="mapviewid" foreign-key="fk_mapview_datadimensionitems_mapviewid" />
 	  <list-index column="sort_order" base="0" />
-	  <many-to-many column="datadimensionid" class="org.hisp.dhis.common.DataDimension"
-        foreign-key="fk_mapview_datadimensions_datadimensionid" />
+	  <many-to-many column="datadimensionitemid" class="org.hisp.dhis.common.DataDimensionItem"
+        foreign-key="fk_mapview_datadimensionitems_datadimensionitemid" />
 	</list>
 
     <list name="organisationUnits" table="mapview_organisationunits">

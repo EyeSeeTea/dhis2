@@ -21,12 +21,12 @@
 
     <property name="cumulative" />
 
-	<list name="dataDimensions" table="reporttable_datadimensions" cascade="all, delete-orphan">
+	<list name="dataDimensionItems" table="reporttable_datadimensionitems" cascade="all, delete-orphan">
 	  <cache usage="read-write" />
-	  <key column="reporttableid" foreign-key="fk_reporttable_datadimensions_reporttableid" />
+	  <key column="reporttableid" foreign-key="fk_reporttable_datadimensionitems_reporttableid" />
 	  <list-index column="sort_order" base="0" />
-	  <many-to-many column="datadimensionid" class="org.hisp.dhis.common.DataDimension"
-        foreign-key="fk_reporttable_datadimensions_datadimensionid" />
+	  <many-to-many column="datadimensionitemid" class="org.hisp.dhis.common.DataDimensionItem"
+        foreign-key="fk_reporttable_datadimensionitems_datadimensionitemid" />
 	</list>
 
     <list name="organisationUnits" table="reporttable_organisationunits">
