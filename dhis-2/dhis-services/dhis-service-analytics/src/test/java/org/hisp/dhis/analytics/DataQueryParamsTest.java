@@ -45,7 +45,10 @@ import org.hisp.dhis.common.DimensionType;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.DimensionalObjectUtils;
 import org.hisp.dhis.common.NameableObject;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.period.Period;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.google.common.collect.Lists;
@@ -56,6 +59,41 @@ import com.google.common.collect.Lists;
 public class DataQueryParamsTest
     extends DhisConvenienceTest
 {
+    private DataElement deA;
+    private DataElement deB;
+    private DataElement deC;
+    
+    private DataSet dsA;
+    private DataSet dsB;
+
+    @Before
+    public void setUpTest()
+    {
+        deA = createDataElement( 'A' );
+        deB = createDataElement( 'B' );
+        deC = createDataElement( 'C' );
+        
+        dsA = createDataSet( 'A', null );
+        dsB = createDataSet( 'B', null );
+    }
+    
+    @Test
+    public void testSetGetDataElements()
+    {
+        List<? extends NameableObject> dataElements = Lists.newArrayList( deA, deB, deC );
+        List<? extends NameableObject> dataSets = Lists.newArrayList( dsA, dsB );
+        
+        DataQueryParams params = new DataQueryParams();
+        params.setDataElements( dataElements );
+        params.setDataSets( dataSets );
+        
+        assertEquals( 3, params.getDataElements().size() );
+        assertTrue( params.getDataElements().containsAll( dataElements ) );
+
+        assertEquals( 2, params.getDataSets().size() );
+        assertTrue( params.getDataSets().containsAll( dataSets ) );
+    }
+    
     @Test
     public void testGetDimensionFromParam()
     {
