@@ -87,6 +87,19 @@ public class DimensionalObjectUtils
         return dims;
     }
 
+    public static List<DimensionalObject> getCopies( List<DimensionalObject> dimensions )
+    {
+        List<DimensionalObject> list = new ArrayList<>();
+        
+        for ( DimensionalObject dimension : dimensions )
+        {
+            DimensionalObject object = ((BaseDimensionalObject) dimension).instance();
+            list.add( object );
+        }
+        
+        return list;
+    }
+    
     /**
      * Returns a list of data dimension options which match the given data 
      * dimension item type.

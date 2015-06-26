@@ -237,8 +237,8 @@ public class DataQueryParams
     
     public <T extends DataQueryParams> T copyTo( T params )
     {        
-        params.dimensions = new ArrayList<>( this.dimensions );
-        params.filters = new ArrayList<>( this.filters );
+        params.dimensions = DimensionalObjectUtils.getCopies( this.dimensions );
+        params.filters = DimensionalObjectUtils.getCopies( this.filters );
         params.aggregationType = this.aggregationType;
         params.measureCriteria = this.measureCriteria;
         params.skipMeta = this.skipMeta;
