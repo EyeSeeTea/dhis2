@@ -189,9 +189,9 @@ public class MapView
     @Override
     public String getName()
     {
-        if ( !dataDimensions.isEmpty() && dataDimensions.get( 0 ).getNameableObject() != null )
+        if ( !dataDimensionItems.isEmpty() && dataDimensionItems.get( 0 ).getNameableObject() != null )
         {
-            return dataDimensions.get( 0 ).getNameableObject().getName();
+            return dataDimensionItems.get( 0 ).getNameableObject().getName();
         }
         
         return uid;

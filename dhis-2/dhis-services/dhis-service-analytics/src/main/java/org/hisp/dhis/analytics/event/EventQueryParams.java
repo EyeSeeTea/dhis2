@@ -40,7 +40,7 @@ import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.analytics.EventOutputType;
 import org.hisp.dhis.analytics.Partitions;
 import org.hisp.dhis.analytics.SortOrder;
-import org.hisp.dhis.common.DataDimension.DataDimensionType;
+import org.hisp.dhis.common.DataDimensionItem.DataDimensionItemType;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.NameableObjectUtils;
@@ -174,7 +174,7 @@ public class EventQueryParams
         }
 
         params.setAggregateData( true );
-        params.removeDataDimensionOrFilter( DataDimensionType.PROGRAM_DATA_ELEMENT ).removeDataDimensionOrFilter( DataDimensionType.PROGRAM_ATTRIBUTE );
+        params.removeDataDimensionOrFilter( DataDimensionItemType.PROGRAM_DATA_ELEMENT ).removeDataDimensionOrFilter( DataDimensionItemType.PROGRAM_ATTRIBUTE );
         
         return params;
     }

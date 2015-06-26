@@ -261,9 +261,9 @@ public class ReportTable
         String reportingPeriodName )
     {
         this.name = name;
-        addAllDataDimensions( dataElements );
-        addAllDataDimensions( indicators );
-        addAllDataDimensions( dataSets );
+        addAllDataDimensionItems( dataElements );
+        addAllDataDimensionItems( indicators );
+        addAllDataDimensionItems( dataSets );
         this.periods = periods;
         this.organisationUnits = organisationUnits;
         this.relatives = relatives;

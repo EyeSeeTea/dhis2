@@ -28,6 +28,9 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.common.DataDimensionItem.DATA_DIMENSION_TYPE_CLASS_MAP;
+import static org.hisp.dhis.common.DataDimensionItem.DATA_DIMENSION_TYPE_DOMAIN_MAP;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -39,12 +42,9 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hisp.dhis.common.DataDimension.DataDimensionType;
+import org.hisp.dhis.common.DataDimensionItem.DataDimensionItemType;
 import org.hisp.dhis.common.comparator.ObjectStringValueComparator;
 import org.hisp.dhis.dataelement.DataElement;
-
-import static org.hisp.dhis.common.DataDimension.DATA_DIMENSION_TYPE_CLASS_MAP;
-import static org.hisp.dhis.common.DataDimension.DATA_DIMENSION_TYPE_DOMAIN_MAP;
 
 /**
  * @author Lars Helge Overland
@@ -89,24 +89,24 @@ public class DimensionalObjectUtils
 
     /**
      * Returns a list of data dimension options which match the given data 
-     * dimension type.
+     * dimension item type.
      * 
-     * @param dimensionType the data dimension type.
+     * @param itemType the data dimension item type.
      * @param dataDimensionOptions the data dimension options.
      * @return list of nameable objects.
      */
-    public static List<NameableObject> getByDataDimensionType( DataDimensionType dimensionType, List<NameableObject> dataDimensionOptions )
+    public static List<NameableObject> getByDataDimensionType( DataDimensionItemType itemType, List<NameableObject> dataDimensionOptions )
     {
         List<NameableObject> list = new ArrayList<>();
         
         for ( NameableObject object : dataDimensionOptions )
         {
-            if ( !object.getClass().equals( DATA_DIMENSION_TYPE_CLASS_MAP.get( dimensionType ) ) )
+            if ( !object.getClass().equals( DATA_DIMENSION_TYPE_CLASS_MAP.get( itemType ) ) )
             {
                 continue;
             }
             
-            if ( object.getClass().equals( DataElement.class ) && !( ((DataElement) object).getDomainType().equals( DATA_DIMENSION_TYPE_DOMAIN_MAP.get( dimensionType ) ) ) )
+            if ( object.getClass().equals( DataElement.class ) && !( ((DataElement) object).getDomainType().equals( DATA_DIMENSION_TYPE_DOMAIN_MAP.get( itemType ) ) ) )
             {
                 continue;
             }

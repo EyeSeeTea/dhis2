@@ -129,7 +129,7 @@ public abstract class BaseAnalyticalObject
     */
     
     @Scanned
-    protected List<DataDimension> dataDimensions = new ArrayList<>();
+    protected List<DataDimensionItem> dataDimensionItems = new ArrayList<>();
     
     @Scanned
     protected List<OrganisationUnit> organisationUnits = new ArrayList<>();
@@ -260,13 +260,13 @@ public abstract class BaseAnalyticalObject
     /**
      * Returns dimension items for data dimensions.
      */
-    public List<NameableObject> getDataDimensionItems()
+    public List<NameableObject> getDataDimensionNameableObjects()
     {
         List<NameableObject> items = new ArrayList<>();
         
-        for ( DataDimension dataDim : dataDimensions )
+        for ( DataDimensionItem item : dataDimensionItems )
         {
-            items.add( dataDim.getNameableObject() );
+            items.add( item.getNameableObject() );
         }
         
         return items;
@@ -279,9 +279,9 @@ public abstract class BaseAnalyticalObject
      */
     public boolean addDataDimensionItem( NameableObject object )
     {
-        if ( object != null && DataDimension.DATA_DIMENSION_CLASSES.contains( object.getClass() ) )
+        if ( object != null && DataDimensionItem.DATA_DIMENSION_CLASSES.contains( object.getClass() ) )
         {
-            return dataDimensions.add( DataDimension.create( object ) );
+            return dataDimensionItems.add( DataDimensionItem.create( object ) );
         }
         
         return false;
@@ -307,11 +307,11 @@ public abstract class BaseAnalyticalObject
     {
         List<DataElement> objects = new ArrayList<>();
         
-        for ( DataDimension dim : dataDimensions )
+        for ( DataDimensionItem item : dataDimensionItems )
         {
-            if ( dim.getDataElement() != null )
+            if ( item.getDataElement() != null )
             {
-                objects.add( dim.getDataElement() );
+                objects.add( item.getDataElement() );
             }
         }
         
@@ -326,11 +326,11 @@ public abstract class BaseAnalyticalObject
     {
         List<Indicator> objects = new ArrayList<>();
         
-        for ( DataDimension dim : dataDimensions )
+        for ( DataDimensionItem items : dataDimensionItems )
         {
-            if ( dim.getIndicator() != null )
+            if ( items.getIndicator() != null )
             {
-                objects.add( dim.getIndicator() );
+                objects.add( items.getIndicator() );
             }
         }
         
@@ -363,7 +363,7 @@ public abstract class BaseAnalyticalObject
 
         if ( DATA_X_DIM_ID.equals( dimension ) )
         {
-            items.addAll( getDataDimensionItems() );
+            items.addAll( getDataDimensionNameableObjects() );
 
             type = DimensionType.DATA_X;
         }
@@ -556,7 +556,7 @@ public abstract class BaseAnalyticalObject
 
         if ( DATA_X_DIM_ID.equals( dimension ) )
         {
-            objects.add( new BaseDimensionalObject( dimension, DimensionType.DATA_X, getDataDimensionItems() ) );
+            objects.add( new BaseDimensionalObject( dimension, DimensionType.DATA_X, getDataDimensionNameableObjects() ) );
         }
         else if ( PERIOD_DIM_ID.equals( dimension ) && (!periods.isEmpty() || hasRelativePeriods()) )
         {
@@ -851,7 +851,7 @@ public abstract class BaseAnalyticalObject
      */
     public void clear()
     {
-        dataDimensions.clear();
+        dataDimensionItems.clear();
         periods.clear();
         relatives = null;
         organisationUnits.clear();
@@ -890,7 +890,7 @@ public abstract class BaseAnalyticalObject
                 aggregationType = object.getAggregationType() == null ? aggregationType : object.getAggregationType();
             }
 
-            dataDimensions.addAll( object.getDataDimensions() );
+            dataDimensionItems.addAll( object.getDataDimensionItems() );
             periods.addAll( object.getPeriods() );
             organisationUnits.addAll( object.getOrganisationUnits() );
             dataElementGroups.addAll( object.getDataElementGroups() );
@@ -919,14 +919,14 @@ public abstract class BaseAnalyticalObject
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlElementWrapper( localName = "dataDimensions", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "dataDimension", namespace = DxfNamespaces.DXF_2_0 )
-    public List<DataDimension> getDataDimensions()
+    public List<DataDimensionItem> getDataDimensionItems()
     {
-        return dataDimensions;
+        return dataDimensionItems;
     }
 
-    public void setDataDimensions( List<DataDimension> dataDimensions )
+    public void setDataDimensions( List<DataDimensionItem> dataDimensionItems )
     {
-        this.dataDimensions = dataDimensions;
+        this.dataDimensionItems = dataDimensionItems;
     }
 
     @JsonProperty

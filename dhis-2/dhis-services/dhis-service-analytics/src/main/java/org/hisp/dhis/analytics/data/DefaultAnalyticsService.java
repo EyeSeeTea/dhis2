@@ -94,7 +94,7 @@ import org.hisp.dhis.common.AnalyticalObject;
 import org.hisp.dhis.common.BaseDimensionalObject;
 import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.common.CombinationGenerator;
-import org.hisp.dhis.common.DataDimension;
+import org.hisp.dhis.common.DataDimensionItem;
 import org.hisp.dhis.common.DimensionType;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.DimensionalObjectUtils;
@@ -108,7 +108,7 @@ import org.hisp.dhis.common.IllegalQueryException;
 import org.hisp.dhis.common.MapMap;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.NameableObjectUtils;
-import org.hisp.dhis.common.DataDimension.DataDimensionType;
+import org.hisp.dhis.common.DataDimensionItem.DataDimensionItemType;
 import org.hisp.dhis.commons.collection.ListUtils;
 import org.hisp.dhis.commons.collection.UniqueArrayList;
 import org.hisp.dhis.commons.util.DebugUtils;
@@ -296,7 +296,7 @@ public class DefaultAnalyticsService
         if ( !params.getIndicators().isEmpty() )
         {
             DataQueryParams dataSourceParams = params.instance();
-            dataSourceParams.retainDataDimension( DataDimensionType.INDICATOR );
+            dataSourceParams.retainDataDimension( DataDimensionItemType.INDICATOR );
 
             List<Indicator> indicators = asTypedList( dataSourceParams.getIndicators() );
 
@@ -366,7 +366,7 @@ public class DefaultAnalyticsService
         if ( !params.getDataElements().isEmpty() )
         {
             DataQueryParams dataSourceParams = params.instance();
-            dataSourceParams.retainDataDimension( DataDimensionType.AGGREGATE_DATA_ELEMENT );
+            dataSourceParams.retainDataDimension( DataDimensionItemType.AGGREGATE_DATA_ELEMENT );
 
             Map<String, Object> aggregatedDataMap = getAggregatedDataValueMapObjectTyped( dataSourceParams );
 
@@ -396,7 +396,7 @@ public class DefaultAnalyticsService
 
             DataQueryParams dataSourceParams = params.instance();
             dataSourceParams.ignoreDataApproval(); // No approval for reporting rates
-            dataSourceParams.retainDataDimension( DataDimensionType.DATA_SET );
+            dataSourceParams.retainDataDimension( DataDimensionItemType.DATA_SET );
             dataSourceParams.setAggregationType( AggregationType.COUNT );
 
             if ( !COMPLETENESS_DIMENSION_TYPES.containsAll( dataSourceParams.getDimensionTypes() ) )
@@ -469,7 +469,7 @@ public class DefaultAnalyticsService
         if ( !params.getProgramIndicators().isEmpty() )
         {
             DataQueryParams dataSourceParams = params.instance();
-            dataSourceParams.retainDataDimension( DataDimensionType.PROGRAM_INDICATOR );
+            dataSourceParams.retainDataDimension( DataDimensionItemType.PROGRAM_INDICATOR );
             
             List<ProgramIndicator> indicators = asTypedList( dataSourceParams.getProgramIndicators() );
             
@@ -527,7 +527,7 @@ public class DefaultAnalyticsService
         if ( !params.getProgramDataElements().isEmpty() || !params.getProgramAttributes().isEmpty() )
         {
             DataQueryParams dataSourceParams = params.instance();
-            dataSourceParams.retainDataDimension( DataDimensionType.PROGRAM_DATA_ELEMENT );
+            dataSourceParams.retainDataDimension( DataDimensionItemType.PROGRAM_DATA_ELEMENT );
             
             EventQueryParams eventQueryParams = EventQueryParams.fromDataQueryParams( dataSourceParams );
             
@@ -1038,7 +1038,7 @@ public class DefaultAnalyticsService
                 }
                 else if ( CodeGenerator.isValidCode( uid ) )
                 {
-                    NameableObject item = idObjectManager.get( DataDimension.DATA_DIMENSION_CLASSES, uid );
+                    NameableObject item = idObjectManager.get( DataDimensionItem.DATA_DIMENSION_CLASSES, uid );
                     
                     if ( item != null )
                     {

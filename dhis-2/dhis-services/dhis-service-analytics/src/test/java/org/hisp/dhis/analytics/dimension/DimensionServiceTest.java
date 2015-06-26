@@ -175,7 +175,7 @@ public class DimensionServiceTest
         
         dimensionService.mergeAnalyticalObject( reportTable );
         
-        assertEquals( 2, reportTable.getDataDimensions().size() );
+        assertEquals( 2, reportTable.getDataDimensionItems().size() );
         assertEquals( 2, reportTable.getPeriods().size() );
         assertEquals( 5, reportTable.getOrganisationUnits().size() );
     }
@@ -191,7 +191,7 @@ public class DimensionServiceTest
         
         dimensionService.mergeAnalyticalObject( reportTable );
         
-        assertEquals( 2, reportTable.getDataDimensions().size() );
+        assertEquals( 2, reportTable.getDataDimensionItems().size() );
         assertEquals( 1, reportTable.getPeriods().size() );
         assertEquals( 0, reportTable.getOrganisationUnits().size() );
         assertTrue( reportTable.isUserOrganisationUnit() );        
@@ -208,7 +208,7 @@ public class DimensionServiceTest
         
         dimensionService.mergeAnalyticalObject( reportTable );
         
-        assertEquals( 2, reportTable.getDataDimensions().size() );
+        assertEquals( 2, reportTable.getDataDimensionItems().size() );
         assertEquals( 1, reportTable.getPeriods().size() );
         assertEquals( 1, reportTable.getOrganisationUnits().size() );
         assertEquals( Integer.valueOf( 2 ), reportTable.getOrganisationUnitLevels().get( 0 ) );
@@ -225,7 +225,7 @@ public class DimensionServiceTest
         
         dimensionService.mergeAnalyticalObject( reportTable );
         
-        assertEquals( 2, reportTable.getDataDimensions().size() );
+        assertEquals( 2, reportTable.getDataDimensionItems().size() );
         assertEquals( 0, reportTable.getPeriods().size() );
         assertTrue( reportTable.getRelatives().isLast12Months() );
         assertEquals( 5, reportTable.getOrganisationUnits().size() );
@@ -242,7 +242,7 @@ public class DimensionServiceTest
         
         dimensionService.mergeAnalyticalObject( reportTable );
         
-        assertEquals( 2, reportTable.getDataDimensions().size() );
+        assertEquals( 2, reportTable.getDataDimensionItems().size() );
         assertEquals( 2, reportTable.getPeriods().size() );
         assertEquals( 3, reportTable.getOrganisationUnitGroups().size() );
     }    

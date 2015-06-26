@@ -54,7 +54,7 @@ import java.util.Map;
 import org.hisp.dhis.acl.AclService;
 import org.hisp.dhis.common.BaseAnalyticalObject;
 import org.hisp.dhis.common.BaseDimensionalObject;
-import org.hisp.dhis.common.DataDimension;
+import org.hisp.dhis.common.DataDimensionItem;
 import org.hisp.dhis.common.DimensionService;
 import org.hisp.dhis.common.DimensionType;
 import org.hisp.dhis.common.DimensionalObject;
@@ -437,9 +437,9 @@ public class DefaultDimensionService
                 {
                     for ( String uid : uids )
                     {
-                        NameableObject dataObject = identifiableObjectManager.get( DataDimension.DATA_DIMENSION_CLASSES, uid );
+                        NameableObject dataObject = identifiableObjectManager.get( DataDimensionItem.DATA_DIMENSION_CLASSES, uid );
                         
-                        object.getDataDimensions().add( DataDimension.create( dataObject ) );
+                        object.getDataDimensionItems().add( DataDimensionItem.create( dataObject ) );
                     }
                 }
                 /*

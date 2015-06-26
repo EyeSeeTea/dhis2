@@ -220,7 +220,7 @@ public class DefaultMappingService
         Indicator indicator = indicatorService.getIndicator( indicatorUid );
         OrganisationUnit unit = organisationUnitService.getOrganisationUnit( organisationUnitUid );
 
-        mapView.addDataDimension( indicator );
+        mapView.addDataDimensionItem( indicator );
         mapView.getPeriods().add( period );
         mapView.getOrganisationUnits().add( unit );
         mapView.getOrganisationUnitLevels().add( level );

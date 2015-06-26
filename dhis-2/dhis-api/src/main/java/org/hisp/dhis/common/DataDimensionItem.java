@@ -45,9 +45,9 @@ import com.google.common.collect.ImmutableSet;
 /**
 * @author Lars Helge Overland
 */
-public class DataDimension
+public class DataDimensionItem
 {
-    public enum DataDimensionType
+    public enum DataDimensionItemType
     {
         INDICATOR, AGGREGATE_DATA_ELEMENT, DATA_ELEMENT_OPERAND, DATA_SET, 
         PROGRAM_INDICATOR, PROGRAM_DATA_ELEMENT, PROGRAM_ATTRIBUTE;
@@ -57,14 +57,14 @@ public class DataDimension
         add( Indicator.class ).add( DataElement.class ).add( DataElementOperand.class ).
         add( DataSet.class ).add( ProgramIndicator.class ).add( TrackedEntityAttribute.class ).build();
     
-    public static final Map<DataDimensionType, Class<? extends NameableObject>> DATA_DIMENSION_TYPE_CLASS_MAP = ImmutableMap.<DataDimensionType, Class<? extends NameableObject>>builder().
-        put( DataDimensionType.INDICATOR, Indicator.class ).put( DataDimensionType.AGGREGATE_DATA_ELEMENT, DataElement.class ).
-        put( DataDimensionType.DATA_ELEMENT_OPERAND, DataElementOperand.class ).put( DataDimensionType.DATA_SET, DataSet.class ).
-        put( DataDimensionType.PROGRAM_INDICATOR, ProgramIndicator.class ).put( DataDimensionType.PROGRAM_ATTRIBUTE, TrackedEntityAttribute.class ).
-        put( DataDimensionType.PROGRAM_DATA_ELEMENT, DataElement.class ).build();
+    public static final Map<DataDimensionItemType, Class<? extends NameableObject>> DATA_DIMENSION_TYPE_CLASS_MAP = ImmutableMap.<DataDimensionItemType, Class<? extends NameableObject>>builder().
+        put( DataDimensionItemType.INDICATOR, Indicator.class ).put( DataDimensionItemType.AGGREGATE_DATA_ELEMENT, DataElement.class ).
+        put( DataDimensionItemType.DATA_ELEMENT_OPERAND, DataElementOperand.class ).put( DataDimensionItemType.DATA_SET, DataSet.class ).
+        put( DataDimensionItemType.PROGRAM_INDICATOR, ProgramIndicator.class ).put( DataDimensionItemType.PROGRAM_ATTRIBUTE, TrackedEntityAttribute.class ).
+        put( DataDimensionItemType.PROGRAM_DATA_ELEMENT, DataElement.class ).build();
     
-    public static final Map<DataDimensionType, DataElementDomain> DATA_DIMENSION_TYPE_DOMAIN_MAP = ImmutableMap.<DataDimension.DataDimensionType, DataElementDomain>builder().
-        put( DataDimensionType.AGGREGATE_DATA_ELEMENT, DataElementDomain.AGGREGATE ).put( DataDimensionType.PROGRAM_DATA_ELEMENT, DataElementDomain.TRACKER ).build();
+    public static final Map<DataDimensionItemType, DataElementDomain> DATA_DIMENSION_TYPE_DOMAIN_MAP = ImmutableMap.<DataDimensionItemType, DataElementDomain>builder().
+        put( DataDimensionItemType.AGGREGATE_DATA_ELEMENT, DataElementDomain.AGGREGATE ).put( DataDimensionItemType.PROGRAM_DATA_ELEMENT, DataElementDomain.TRACKER ).build();
     
     private int id;
     
@@ -88,13 +88,13 @@ public class DataDimension
     // Constructor
     // -------------------------------------------------------------------------
 
-    public DataDimension()
+    public DataDimensionItem()
     {
     }
 
-    public static DataDimension create( NameableObject object )
+    public static DataDimensionItem create( NameableObject object )
     {
-        DataDimension dimension = new DataDimension();
+        DataDimensionItem dimension = new DataDimensionItem();
         
         if ( object.getClass().isAssignableFrom( Indicator.class ) )
         {
