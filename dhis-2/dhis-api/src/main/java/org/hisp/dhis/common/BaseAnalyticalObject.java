@@ -277,7 +277,7 @@ public abstract class BaseAnalyticalObject
      * 
      * @return true if a data dimension was added, false if not.
      */
-    public boolean addDataDimension( NameableObject object )
+    public boolean addDataDimensionItem( NameableObject object )
     {
         if ( object != null && DataDimension.DATA_DIMENSION_CLASSES.contains( object.getClass() ) )
         {
@@ -290,11 +290,11 @@ public abstract class BaseAnalyticalObject
     /**
      * Adds all given data dimension objects.
      */
-    public void addAllDataDimensions( Collection<? extends NameableObject> objects )
+    public void addAllDataDimensionItems( Collection<? extends NameableObject> objects )
     {
         for ( NameableObject object : objects )
         {
-            addDataDimension( object );
+            addDataDimensionItem( object );
         }
     }
     
