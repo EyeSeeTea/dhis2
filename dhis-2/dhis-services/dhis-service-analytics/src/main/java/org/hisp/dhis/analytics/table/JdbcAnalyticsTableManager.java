@@ -349,7 +349,7 @@ public class JdbcAnalyticsTableManager
             columns.add( col );
         }
         
-        String[] de = { quote( "de" ), "character(11) not null", "de.uid" };
+        String[] de = { quote( "dx" ), "character(11) not null", "de.uid" };
         String[] co = { quote( "co" ), "character(11) not null", "co.uid" };
         String[] ou = { quote( "ou" ), "character(11) not null", "ou.uid" };
         String[] level = { quote( "level" ), "integer", "ous.level" };
