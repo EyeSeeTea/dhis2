@@ -832,7 +832,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                         if(!valueFound) {
                             if(attribute.attribute === programVariable.trackedEntityAttribute.id) {
                                 valueFound = true;
-                                variables = pushVariable(variables, programVariable.name, attribute.value, attribute.type, valueFound, '#' );
+                                variables = pushVariable(variables, programVariable.name, attribute.value, attribute.type, valueFound, 'A' );
                             }
                         }
                     });
@@ -866,7 +866,12 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                             variables = pushVariable(variables, programVariable.name, "", "string",false, '#' );
                         }
                     }
+                    else if (programVariable.trackedEntityAttribute) {
+                        //The variable is an attribute, set correct prefix and a blank value
+                        variables = pushVariable(variables, programVariable.name, "", "string",false, 'A' );
+                    }
                     else {
+                        //Fallback for calculated(assigned) values:
                         variables = pushVariable(variables, programVariable.name, "", "string",false, '#' );
                     }
                 }
@@ -899,7 +904,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
     var replaceVariables = function(expression, variablesHash){
         //replaces the variables in an expression with actual variable values.                
 
-        //Check if the expression contains variables at all(any dollar signs):
+        //Check if the expression contains program rule variables at all(any dollar signs):
         if(expression.indexOf('#{') !== -1) {
             //Find every variable name in the expression;
             var variablespresent = expression.match(/#{\w+.?\w*}/g);
@@ -921,7 +926,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             });
         }
 
-        //Check if the expression contains program variables
+        //Check if the expression contains environment  variables
         if(expression.indexOf('V{') !== -1) {
             //Find every variable name in the expression;
             var variablespresent = expression.match(/V{\w+.?\w*}/g);
@@ -939,6 +944,28 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                 else {
                     $log.warn("Expression " + expression + " conains context variable " + variablepresent 
                             + " - but this variable is not defined." );
+                } 
+            });
+        }
+        
+        //Check if the expression contains attribute variables:
+        if(expression.indexOf('A{') !== -1) {
+            //Find every attribute in the expression;
+            var variablespresent = expression.match(/A{\w+.?\w*}/g);
+            //Replace each matched variable:
+            angular.forEach(variablespresent, function(variablepresent) {
+                //First strip away any prefix and postfix signs from the variable name:
+                variablepresent = variablepresent.replace("A{","").replace("}","");
+
+                if(angular.isDefined(variablesHash[variablepresent]) &&
+                        variablesHash[variablepresent].variablePrefix === 'A') {
+                    //Replace all occurrences of the variable name(hence using regex replacement):
+                    expression = expression.replace(new RegExp("A{" + variablepresent + "}", 'g'),
+                        variablesHash[variablepresent].variableValue);
+                }
+                else {
+                    $log.warn("Expression " + expression + " conains attribute " + variablepresent 
+                            + " - but this attribute is not defined." );
                 } 
             });
         }
@@ -1200,7 +1227,8 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                 }
 
                                 //Even if the variable is not defined: we assign it:
-                                if(variablesHash[variabletoassign].variableValue !== $rootScope.ruleeffects[executingEvent.event][action.id].data){
+                                if(variablesHash[variabletoassign] && 
+                                        variablesHash[variabletoassign].variableValue !== $rootScope.ruleeffects[executingEvent.event][action.id].data){
                                     //If the variable was actually updated, we assume that there is an updated ruleeffect somewhere:
                                     updatedEffectsExits = true;
                                     //Then we assign the new value:
