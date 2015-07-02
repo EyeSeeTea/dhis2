@@ -31,6 +31,8 @@ package org.hisp.dhis.common;
 import java.util.Map;
 import java.util.Set;
 
+import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementDomain;
 import org.hisp.dhis.dataelement.DataElementOperand;
@@ -39,12 +41,19 @@ import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.program.ProgramIndicator;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 /**
 * @author Lars Helge Overland
 */
+@JacksonXmlRootElement( localName = "dataDimensionItem", namespace = DxfNamespaces.DXF_2_0 )
 public class DataDimensionItem
 {
     public enum DataDimensionItemType
@@ -162,6 +171,7 @@ public class DataDimensionItem
     // Get and set methods
     // -------------------------------------------------------------------------
 
+    @JsonIgnore
     public int getId()
     {
         return id;
@@ -172,6 +182,10 @@ public class DataDimensionItem
         this.id = id;
     }
 
+    @JsonProperty
+    @JsonSerialize( as = BaseNameableObject.class )
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Indicator getIndicator()
     {
         return indicator;
@@ -182,6 +196,10 @@ public class DataDimensionItem
         this.indicator = indicator;
     }
 
+    @JsonProperty
+    @JsonSerialize( as = BaseNameableObject.class )
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public DataElement getDataElement()
     {
         return dataElement;
@@ -192,6 +210,10 @@ public class DataDimensionItem
         this.dataElement = dataElement;
     }
 
+    @JsonProperty
+    @JsonSerialize( as = BaseNameableObject.class )
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public DataElementOperand getDataElementOperand()
     {
         return dataElementOperand;
@@ -202,6 +224,10 @@ public class DataDimensionItem
         this.dataElementOperand = dataElementOperand;
     }
 
+    @JsonProperty
+    @JsonSerialize( as = BaseNameableObject.class )
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public DataSet getDataSet()
     {
         return dataSet;
@@ -212,6 +238,10 @@ public class DataDimensionItem
         this.dataSet = dataSet;
     }
 
+    @JsonProperty
+    @JsonSerialize( as = BaseNameableObject.class )
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public ProgramIndicator getProgramIndicator()
     {
         return programIndicator;
@@ -222,6 +252,10 @@ public class DataDimensionItem
         this.programIndicator = programIndicator;
     }
 
+    @JsonProperty
+    @JsonSerialize( as = BaseNameableObject.class )
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public TrackedEntityAttribute getTrackedEntityAttribute()
     {
         return trackedEntityAttribute;
