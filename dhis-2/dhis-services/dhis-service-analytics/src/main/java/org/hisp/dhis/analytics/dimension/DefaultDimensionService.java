@@ -442,24 +442,6 @@ public class DefaultDimensionService
                         object.getDataDimensionItems().add( DataDimensionItem.create( dataObject ) );
                     }
                 }
-                /*
-                if ( INDICATOR.equals( type ) )
-                {
-                    object.getIndicators().addAll( identifiableObjectManager.getByUidOrdered( Indicator.class, uids ) );
-                }
-                else if ( DATAELEMENT.equals( type ) )
-                {
-                    object.getDataElements().addAll( identifiableObjectManager.getByUidOrdered( DataElement.class, uids ) );
-                }
-                else if ( DATAELEMENT_OPERAND.equals( type ) )
-                {
-                    object.getDataElementOperands().addAll( operandService.getDataElementOperandsByUid( uids ) );
-                }
-                else if ( DATASET.equals( type ) )
-                {
-                    object.getDataSets().addAll( identifiableObjectManager.getByUidOrdered( DataSet.class, uids ) );
-                }
-                */
                 else if ( PERIOD.equals( type ) )
                 {
                     List<RelativePeriodEnum> enums = new ArrayList<>();

@@ -101,6 +101,7 @@ import org.hisp.dhis.common.DimensionalObjectUtils;
 import org.hisp.dhis.common.DisplayProperty;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
+import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.common.IdentifiableProperty;
@@ -150,8 +151,10 @@ import org.hisp.dhis.user.User;
 import org.hisp.dhis.util.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * @author Lars Helge Overland
@@ -1212,6 +1215,17 @@ public class DefaultAnalyticsService
             return object;
         }
 
+        final Set<Class<? extends IdentifiableObject>> DYNAMIC_DIM_CLASSES = ImmutableSet.<Class<? extends IdentifiableObject>>builder().
+            add( OrganisationUnitGroupSet.class ).add( DataElementGroupSet.class ).add( CategoryOptionGroupSet.class ).add( DataElementCategory.class ).build();
+        
+        DimensionalObject dimObject = idObjectManager.get( DYNAMIC_DIM_CLASSES, dimension );
+        
+        if ( dimObject != null && dimObject.isDataDimension() )
+        {
+            List<NameableObject> dimItems = !allItems ? asList( idObjectManager.getByUidOrdered( dimObject.getClass(), items ) ) : dimObject.getItems();
+        }
+        
+        
         OrganisationUnitGroupSet ougs = idObjectManager.get( OrganisationUnitGroupSet.class, dimension );
 
         if ( ougs != null && ougs.isDataDimension() )

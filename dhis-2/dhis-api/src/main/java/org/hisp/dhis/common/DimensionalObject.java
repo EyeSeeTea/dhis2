@@ -29,7 +29,6 @@ package org.hisp.dhis.common;
  */
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +39,8 @@ import org.hisp.dhis.dataelement.DataElementGroupSet;
 import org.hisp.dhis.legend.LegendSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
+
+import com.google.common.collect.ImmutableMap;
 
 /**
 * @author Lars Helge Overland
@@ -64,8 +65,7 @@ public interface DimensionalObject
 
     final String LONGITUDE_DIM_ID = "longitude";
     final String LATITUDE_DIM_ID = "latitude";
-
-    //final List<String> DATA_DIMS = Arrays.asList( INDICATOR_DIM_ID, DATAELEMENT_DIM_ID, DATAELEMENT_OPERAND_ID, DATASET_DIM_ID, PROGRAM_INDICATOR_DIM_ID, PROGRAM_DATAELEMENT_DIM_ID, PROGRAM_ATTRIBUTE_DIM_ID );    
+   
     final List<String> STATIC_DIMS = Arrays.asList( 
         LONGITUDE_DIM_ID, LATITUDE_DIM_ID );
     
@@ -75,14 +75,21 @@ public interface DimensionalObject
         PERIOD_DIM_ID, "Period",
         ORGUNIT_DIM_ID, "Organisation unit" );
     
-    final Map<DimensionType, Class<? extends DimensionalObject>> DYNAMIC_DIMENSION_TYPE_CLASS_MAP = new HashMap<DimensionType, Class<? extends DimensionalObject>>() { {
-        put( DimensionType.CATEGORY, DataElementCategory.class );
-        put( DimensionType.DATAELEMENT_GROUPSET, DataElementGroupSet.class );
-        put( DimensionType.ORGANISATIONUNIT_GROUPSET, OrganisationUnitGroupSet.class );
-        put( DimensionType.CATEGORYOPTION_GROUPSET, CategoryOptionGroupSet.class );
-        put( DimensionType.PROGRAM_ATTRIBUTE, TrackedEntityAttribute.class );
-        put( DimensionType.PROGRAM_DATAELEMENT, DataElement.class );        
-    } };
+    final Map<DimensionType, Class<? extends DimensionalObject>> DYNAMIC_DIMENSION_TYPE_CLASS_MAP = ImmutableMap.<DimensionType, Class<? extends DimensionalObject>>builder().
+        put( DimensionType.CATEGORY, DataElementCategory.class ).
+        put( DimensionType.DATAELEMENT_GROUPSET, DataElementGroupSet.class ).
+        put( DimensionType.ORGANISATIONUNIT_GROUPSET, OrganisationUnitGroupSet.class ).
+        put( DimensionType.CATEGORYOPTION_GROUPSET, CategoryOptionGroupSet.class ).
+        put( DimensionType.PROGRAM_ATTRIBUTE, TrackedEntityAttribute.class ).
+        put( DimensionType.PROGRAM_DATAELEMENT, DataElement.class ).build();              
+        
+    final Map<Class<? extends DimensionalObject>, DimensionType> CLASS_DYNAMIC_DIMENSION_TYPE_MAP = ImmutableMap.<Class<? extends DimensionalObject>, DimensionType>builder().
+        put( DataElementCategory.class, DimensionType.CATEGORY ).
+        put( DataElementGroupSet.class, DimensionType.DATAELEMENT_GROUPSET ).
+        put( OrganisationUnitGroupSet.class, DimensionType.ORGANISATIONUNIT_GROUPSET ).
+        put( CategoryOptionGroupSet.class, DimensionType.CATEGORYOPTION_GROUPSET ).
+        put( TrackedEntityAttribute.class, DimensionType.PROGRAM_ATTRIBUTE ).
+        put( DataElement.class, DimensionType.PROGRAM_DATAELEMENT ).build();
     
     /**
      * Gets the dimension identifier.
