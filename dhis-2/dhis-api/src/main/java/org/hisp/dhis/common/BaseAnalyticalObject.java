@@ -114,20 +114,6 @@ public abstract class BaseAnalyticalObject
     // Persisted properties
     // -------------------------------------------------------------------------
     
-    /*
-    @Scanned
-    protected List<Indicator> indicators = new ArrayList<>();
-
-    @Scanned
-    protected List<DataElement> dataElements = new ArrayList<>();
-
-    @Scanned
-    protected List<DataElementOperand> dataElementOperands = new ArrayList<>();
-
-    @Scanned
-    protected List<DataSet> dataSets = new ArrayList<>();
-    */
-    
     @Scanned
     protected List<DataDimensionItem> dataDimensionItems = new ArrayList<>();
     

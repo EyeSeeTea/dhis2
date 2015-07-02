@@ -32,11 +32,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
+import org.hisp.dhis.dataelement.DataElementCategoryOption;
+import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementGroupSet;
 import org.hisp.dhis.legend.LegendSet;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 
@@ -82,15 +86,13 @@ public interface DimensionalObject
         put( DimensionType.CATEGORYOPTION_GROUPSET, CategoryOptionGroupSet.class ).
         put( DimensionType.PROGRAM_ATTRIBUTE, TrackedEntityAttribute.class ).
         put( DimensionType.PROGRAM_DATAELEMENT, DataElement.class ).build();              
+
+    final Map<Class<? extends DimensionalObject>, Class<? extends NameableObject>> DIMENSION_CLASS_ITEM_CLASS_MAP = ImmutableMap.<Class<? extends DimensionalObject>, Class<? extends NameableObject>>builder().
+        put( DataElementCategory.class, DataElementCategoryOption.class ).
+        put( DataElementGroupSet.class, DataElementGroup.class ).
+        put( OrganisationUnitGroupSet.class, OrganisationUnitGroup.class ).
+        put( CategoryOptionGroupSet.class, CategoryOptionGroup.class ).build();
         
-    final Map<Class<? extends DimensionalObject>, DimensionType> CLASS_DYNAMIC_DIMENSION_TYPE_MAP = ImmutableMap.<Class<? extends DimensionalObject>, DimensionType>builder().
-        put( DataElementCategory.class, DimensionType.CATEGORY ).
-        put( DataElementGroupSet.class, DimensionType.DATAELEMENT_GROUPSET ).
-        put( OrganisationUnitGroupSet.class, DimensionType.ORGANISATIONUNIT_GROUPSET ).
-        put( CategoryOptionGroupSet.class, DimensionType.CATEGORYOPTION_GROUPSET ).
-        put( TrackedEntityAttribute.class, DimensionType.PROGRAM_ATTRIBUTE ).
-        put( DataElement.class, DimensionType.PROGRAM_DATAELEMENT ).build();
-    
     /**
      * Gets the dimension identifier.
      */

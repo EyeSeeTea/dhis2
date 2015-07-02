@@ -95,13 +95,13 @@ import org.hisp.dhis.common.BaseDimensionalObject;
 import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.common.CombinationGenerator;
 import org.hisp.dhis.common.DataDimensionItem;
+import org.hisp.dhis.common.DataDimensionItem.DataDimensionItemType;
 import org.hisp.dhis.common.DimensionType;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.DimensionalObjectUtils;
 import org.hisp.dhis.common.DisplayProperty;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
-import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.common.IdentifiableProperty;
@@ -109,20 +109,14 @@ import org.hisp.dhis.common.IllegalQueryException;
 import org.hisp.dhis.common.MapMap;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.NameableObjectUtils;
-import org.hisp.dhis.common.DataDimensionItem.DataDimensionItemType;
 import org.hisp.dhis.commons.collection.ListUtils;
 import org.hisp.dhis.commons.collection.UniqueArrayList;
 import org.hisp.dhis.commons.util.DebugUtils;
 import org.hisp.dhis.constant.ConstantService;
-import org.hisp.dhis.dataelement.CategoryOptionGroup;
-import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
 import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementGroup;
-import org.hisp.dhis.dataelement.DataElementGroupSet;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataelement.DataElementOperandService;
 import org.hisp.dhis.expression.ExpressionService;
@@ -130,7 +124,6 @@ import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
@@ -151,10 +144,8 @@ import org.hisp.dhis.user.User;
 import org.hisp.dhis.util.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 /**
  * @author Lars Helge Overland
@@ -1215,58 +1206,16 @@ public class DefaultAnalyticsService
             return object;
         }
 
-        final Set<Class<? extends IdentifiableObject>> DYNAMIC_DIM_CLASSES = ImmutableSet.<Class<? extends IdentifiableObject>>builder().
-            add( OrganisationUnitGroupSet.class ).add( DataElementGroupSet.class ).add( CategoryOptionGroupSet.class ).add( DataElementCategory.class ).build();
-        
-        DimensionalObject dimObject = idObjectManager.get( DYNAMIC_DIM_CLASSES, dimension );
-        
+        DimensionalObject dimObject = idObjectManager.get( DataQueryParams.DYNAMIC_DIM_CLASSES, dimension );
+
         if ( dimObject != null && dimObject.isDataDimension() )
         {
-            List<NameableObject> dimItems = !allItems ? asList( idObjectManager.getByUidOrdered( dimObject.getClass(), items ) ) : dimObject.getItems();
-        }
-        
-        
-        OrganisationUnitGroupSet ougs = idObjectManager.get( OrganisationUnitGroupSet.class, dimension );
-
-        if ( ougs != null && ougs.isDataDimension() )
-        {
-            List<NameableObject> ous = !allItems ? asList( idObjectManager.getByUidOrdered( OrganisationUnitGroup.class, items ) ) : ougs.getItems();
-
-            DimensionalObject object = new BaseDimensionalObject( dimension, DimensionType.ORGANISATIONUNIT_GROUPSET, null, ougs.getDisplayName(), ous, allItems );
-
-            return object;
-        }
-
-        DataElementGroupSet degs = idObjectManager.get( DataElementGroupSet.class, dimension );
-
-        if ( degs != null && degs.isDataDimension() )
-        {
-            List<NameableObject> des = !allItems ? asList( idObjectManager.getByUidOrdered( DataElementGroup.class, items ) ) : degs.getItems();
-
-            DimensionalObject object = new BaseDimensionalObject( dimension, DimensionType.DATAELEMENT_GROUPSET, null, degs.getDisplayName(), des, allItems );
-
-            return object;
-        }
-
-        CategoryOptionGroupSet cogs = idObjectManager.get( CategoryOptionGroupSet.class, dimension );
-
-        if ( cogs != null && cogs.isDataDimension() )
-        {
-            List<NameableObject> cogz = !allItems ? asList( idObjectManager.getByUidOrdered( CategoryOptionGroup.class, items ) ) : cogs.getItems();
-
-            DimensionalObject object = new BaseDimensionalObject( dimension, DimensionType.CATEGORYOPTION_GROUPSET, null, cogs.getDisplayName(), cogz, allItems );
-
-            return object;
-        }
-
-        DataElementCategory dec = idObjectManager.get( DataElementCategory.class, dimension );
-
-        if ( dec != null && dec.isDataDimension() )
-        {
-            List<NameableObject> decos = !allItems ? asList( idObjectManager.getByUidOrdered( DataElementCategoryOption.class, items ) ) : dec.getItems();
-
-            DimensionalObject object = new BaseDimensionalObject( dimension, DimensionType.CATEGORY, null, dec.getDisplayName(), decos, allItems );
-
+            Class<? extends NameableObject> itemClass = DimensionalObject.DIMENSION_CLASS_ITEM_CLASS_MAP.get( dimObject.getClass() );
+            
+            List<NameableObject> dimItems = !allItems ? asList( idObjectManager.getByUidOrdered( itemClass, items ) ) : dimObject.getItems();
+            
+            DimensionalObject object = new BaseDimensionalObject( dimension, dimObject.getDimensionType(), null, dimObject.getDisplayName(), dimItems, allItems );
+            
             return object;
         }
 
