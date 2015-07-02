@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.events.trackedentity;
+package org.hisp.dhis.settings.action.system;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,60 +28,46 @@ package org.hisp.dhis.dxf2.events.trackedentity;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
-import org.hisp.dhis.dxf2.importsummary.ImportSummary;
-import org.hisp.dhis.importexport.ImportStrategy;
+import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.oauth2.OAuth2Client;
+import org.hisp.dhis.oauth2.OAuth2ClientService;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface TrackedEntityInstanceService
+public class GetOAuth2ClientsAction implements Action
 {
-    int FLUSH_FREQUENCY = 20;
-
     // -------------------------------------------------------------------------
-    // READ
+    // Dependencies
     // -------------------------------------------------------------------------
 
-    List<TrackedEntityInstance> getTrackedEntityInstances( List<org.hisp.dhis.trackedentity.TrackedEntityInstance> trackedEntityInstances );
-
-    TrackedEntityInstance getTrackedEntityInstance( String uid );
-
-    TrackedEntityInstance getTrackedEntityInstance( org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance );
-
-    TrackedEntityInstance getTrackedEntityInstance( org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance, boolean expandRelative );
+    @Autowired
+    private OAuth2ClientService clientService;
 
     // -------------------------------------------------------------------------
-    // CREATE
+    // Input & Output
     // -------------------------------------------------------------------------
 
-    ImportSummaries addTrackedEntityInstanceXml( InputStream inputStream, ImportStrategy strategy ) throws IOException;
+    private List<OAuth2Client> clients;
 
-    ImportSummaries addTrackedEntityInstanceJson( InputStream inputStream, ImportStrategy strategy ) throws IOException;
-
-    ImportSummaries addTrackedEntityInstances( List<TrackedEntityInstance> trackedEntityInstances );
-
-    ImportSummary addTrackedEntityInstance( TrackedEntityInstance trackedEntityInstance );
-
-    // -------------------------------------------------------------------------
-    // UPDATE
-    // -------------------------------------------------------------------------
-
-    ImportSummary updateTrackedEntityInstanceXml( String id, InputStream inputStream ) throws IOException;
-
-    ImportSummary updateTrackedEntityInstanceJson( String id, InputStream inputStream ) throws IOException;
-
-    ImportSummaries updateTrackedEntityInstances( List<TrackedEntityInstance> trackedEntityInstances );
-
-    ImportSummary updateTrackedEntityInstance( TrackedEntityInstance trackedEntityInstance );
+    public List<OAuth2Client> getClients()
+    {
+        return clients;
+    }
 
     // -------------------------------------------------------------------------
-    // DELETE
+    // Action implementation
     // -------------------------------------------------------------------------
 
-    void deleteTrackedEntityInstance( TrackedEntityInstance trackedEntityInstance );
+    @Override
+    public String execute() throws Exception
+    {
+        clients = new ArrayList<>( clientService.getOAuth2Clients() );
+
+        return SUCCESS;
+    }
 }
