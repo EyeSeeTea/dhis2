@@ -57,6 +57,7 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.IdentifiableProperty;
 import org.hisp.dhis.dataelement.CategoryComboMap;
 import org.hisp.dhis.dataelement.CategoryComboMap.CategoryComboMapException;
@@ -127,6 +128,10 @@ public class DefaultADXDataService
     {
         this.dataSetService = dataSetService;
     }
+    
+    @Autowired
+    private IdentifiableObjectManager identifiableObjectManager;
+
 
     // -------------------------------------------------------------------------
     // Public methods
@@ -221,7 +226,7 @@ public class DefaultADXDataService
         {
             log.debug( "No attributeOptionCombo present.  Check dataSet for attribute categorycombo");
             
-            DataSet dataSet = getDataSetByIdentifier( groupAttributes.get( "dataSet"), dataElementIdScheme );
+            DataSet dataSet = identifiableObjectManager.getObject( DataSet.class, dataElementIdScheme, groupAttributes.get( "dataSet"));
             groupAttributes.put( "dataSet", dataSet.getUid());
             DataElementCategoryCombo attributeCombo = dataSet.getCategoryCombo();
             attributesToDXF("attributeOptionCombo", attributeCombo, groupAttributes, dataElementIdScheme);
@@ -262,7 +267,7 @@ public class DefaultADXDataService
 
         dxfWriter.writeStartElement( "dataValue" );
         
-        DataElement dataElement = getDataElementByIdentifier( dvAttributes.get( "dataElement"), dataElementIdScheme );
+        DataElement dataElement = identifiableObjectManager.getObject( DataElement.class, dataElementIdScheme, dvAttributes.get( "dataElement") );
         DataElementCategoryCombo categoryCombo = dataElement.getCategoryCombo();
             
         attributesToDXF("categoryOptionCombo", categoryCombo, dvAttributes, dataElementIdScheme);
@@ -379,50 +384,6 @@ public class DefaultADXDataService
         log.debug("dxf attributes: " + attributes);
     }
     
-    // -------------------------------------------------------------------------
-    // The following methods are very general and should probably be implemented elsewhere
-    // -------------------------------------------------------------------------
-
-    protected DataSet getDataSetByIdentifier(String id, IdentifiableProperty scheme) throws ADXException
-    {
-        DataSet dataSet = null;
-        switch (scheme) {
-            case CODE:
-                dataSet = dataSetService.getDataSetByCode( id );
-                break;
-            case UID:
-                dataSet = dataSetService.getDataSet(id );
-                break;
-            default:
-                throw new ADXException("Only CODE or UID supported for dataSet identifier");
-        }
-        
-        if (dataSet==null)
-            throw new ADXException("No dataSet matching " + id);
-        
-        return dataSet;
-    }
-
-    protected DataElement getDataElementByIdentifier(String id, IdentifiableProperty scheme) throws ADXException
-    {
-        DataElement dataElement = null;
-        switch (scheme) {
-            case CODE:
-                dataElement = dataElementService.getDataElementByCode( id );
-                break;
-            case UID:
-                dataElement = dataElementService.getDataElement(id );
-                break;
-            default:
-                throw new ADXException("Only CODE or UID supported for dataElement identifier");
-        }
-        
-        if (dataElement==null)
-            throw new ADXException("No dataElement matching " + id);
-        
-        return dataElement;
-    }
-
     // TODO  this should be part of staxwax library
     protected Map<String, String> readAttributes( XMLReader staxWaxReader ) throws XMLStreamException
     {
