@@ -95,7 +95,6 @@ public class DataQueryParams
     public static final String VALUE_ID = "value";    
     public static final String LEVEL_PREFIX = "uidlevel";
     public static final String KEY_DE_GROUP = "DE_GROUP-";
-    public static final String KEY_OPERAND = "OPERAND-";
     
     public static final String DISPLAY_NAME_DATA_X = "Data";
     public static final String DISPLAY_NAME_CATEGORYOPTIONCOMBO = "Category";
@@ -1640,6 +1639,11 @@ public class DataQueryParams
     public List<NameableObject> getDataElements()
     {
         return ImmutableList.copyOf( DimensionalObjectUtils.getByDataDimensionType( DataDimensionItemType.AGGREGATE_DATA_ELEMENT, getDimensionOptions( DATA_X_DIM_ID ) ) );
+    }
+    
+    public List<NameableObject> getDataElementOperands()
+    {
+        return ImmutableList.copyOf( DimensionalObjectUtils.getByDataDimensionType( DataDimensionItemType.DATA_ELEMENT_OPERAND, getDimensionOptions( DATA_X_DIM_ID ) ) );
     }
     
     public void setDataElements( List<? extends NameableObject> dataElements )

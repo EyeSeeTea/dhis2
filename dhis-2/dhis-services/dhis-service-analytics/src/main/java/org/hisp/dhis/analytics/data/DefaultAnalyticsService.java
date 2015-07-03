@@ -41,7 +41,6 @@ import static org.hisp.dhis.analytics.DataQueryParams.DISPLAY_NAME_ORGUNIT;
 import static org.hisp.dhis.analytics.DataQueryParams.DISPLAY_NAME_PERIOD;
 import static org.hisp.dhis.analytics.DataQueryParams.DX_INDEX;
 import static org.hisp.dhis.analytics.DataQueryParams.KEY_DE_GROUP;
-import static org.hisp.dhis.analytics.DataQueryParams.KEY_OPERAND;
 import static org.hisp.dhis.common.DimensionalObject.CATEGORYOPTIONCOMBO_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.DATA_X_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.DIMENSION_SEP;
@@ -370,6 +369,17 @@ public class DefaultAnalyticsService
                 grid.addValues( entry.getKey().split( DIMENSION_SEP ) );
                 grid.addValue( params.isSkipRounding() ? entry.getValue() : getRounded( entry.getValue() ) );
             }
+        }
+    }
+    
+    private void addDataElementOperands( DataQueryParams params, Grid grid )
+    {
+        if ( !params.getDataElementOperands().isEmpty() )
+        {
+            DataQueryParams dataSourceParams = params.instance();
+            dataSourceParams.retainDataDimension( DataDimensionItemType.DATA_ELEMENT_OPERAND );
+            
+            //TODO
         }
     }
     
@@ -1029,10 +1039,6 @@ public class DefaultAnalyticsService
                     {
                         dataDimensionItems.addAll( group.getMembers() );
                     }
-                }
-                else if ( uid.startsWith( KEY_OPERAND ) )
-                {
-                    
                 }
                 else if ( CodeGenerator.isValidCode( uid ) )
                 {

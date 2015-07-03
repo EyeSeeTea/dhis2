@@ -475,7 +475,7 @@ public class TextUtils
      * 
      * @param string the string to split.
      * @param separator the character to split on.
-     * @param index the index in the resulting array of the string to return.
+     * @param index the index of the string in the resulting array to return.
      * @return a string.
      */
     public static String splitSafe( String string, String separator, int index )

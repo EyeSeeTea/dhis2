@@ -54,5 +54,7 @@ public interface DataElementOperandService
     
     DataElementOperand getDataElementOperand( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombo );
     
+    DataElementOperand getDataElementOperand( String dataElementUid, String categoryOptionComboUid );
+    
     DataElementOperand getOrAddDataElementOperand( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombo );
 }

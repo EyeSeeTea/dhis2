@@ -153,6 +153,20 @@ public class DefaultDataElementOperandService
     {
         return dataElementOperandStore.get( dataElement, categoryOptionCombo );
     }
+    
+    @Override
+    public DataElementOperand getDataElementOperand( String dataElementUid, String categoryOptionComboUid )
+    {
+        DataElement dataElement = dataElementService.getDataElement( dataElementUid );
+        DataElementCategoryOptionCombo categoryOptionCombo = categoryService.getDataElementCategoryOptionCombo( categoryOptionComboUid );
+        
+        if ( dataElement == null || categoryOptionCombo == null )
+        {
+            return null;
+        }
+        
+        return new DataElementOperand( dataElement, categoryOptionCombo );
+    }
 
     @Override
     public DataElementOperand getOrAddDataElementOperand( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombo )
