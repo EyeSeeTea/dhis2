@@ -124,6 +124,7 @@ public class TextUtilsTest
     public void testSplitSafe()
     {
         assertEquals( "green", TextUtils.splitSafe( "red-green-blue", "-", 1 ) );
+        assertEquals( "green", TextUtils.splitSafe( "red.green.blue", "\\.", 1 ) );
         assertEquals( "red", TextUtils.splitSafe( "red-green-blue", "-", 0 ) );
         assertEquals( "blue", TextUtils.splitSafe( "red-green-blue", "-", 2 ) );
         assertNull( TextUtils.splitSafe( "red-green-blue", "-", 3 ) );
