@@ -78,8 +78,8 @@ public class ListUtils
      * Removes from the given list the elements at the given indexes. Ignores
      * indexes which are out of bounds of list.
      * 
+     * @param list the list to operate on.
      * @param indexes the list to remove elements from.
-     * @param indexes the indexes for the elements to remove.
      */
     public static <T> void removeAll( List<T> list, Integer... indexes )
     {
