@@ -29,6 +29,8 @@ package org.hisp.dhis.commons.util;
  */
 
 /**
+ * Utility class with methods for writing and reading CSV content.
+ * 
  * @author Lars Helge Overland
  */
 public class CsvUtils

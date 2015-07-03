@@ -37,6 +37,8 @@ import org.apache.commons.jexl2.MapContext;
 import java.util.Map;
 
 /**
+ * Utility class for expression language based on JEXL.
+ * 
  * @author Lars Helge Overland
  */
 public class ExpressionUtils

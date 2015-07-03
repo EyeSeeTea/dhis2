@@ -39,6 +39,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * Utility class with methods for managing strings.
+ * 
  * @author Lars Helge Overland
  */
 public class TextUtils
