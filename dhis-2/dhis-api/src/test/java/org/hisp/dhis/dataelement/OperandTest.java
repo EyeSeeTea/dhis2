@@ -42,7 +42,7 @@ import org.junit.Test;
 public class OperandTest
 {
     @Test
-    public void getRelevantAggregationLevel()
+    public void testGetRelevantAggregationLevel()
     {
         DataElementOperand operand = new DataElementOperand( "a", "a", "Operand", null, null, new ArrayList<Integer>(), 0 );
         
@@ -59,7 +59,7 @@ public class OperandTest
     }
     
     @Test
-    public void aggregationLevelIsValid()
+    public void testAggregationLevelIsValid()
     {
         DataElementOperand operand = new DataElementOperand( "a", "a", "Operand", null, null, new ArrayList<Integer>(), 0 );
         
@@ -84,5 +84,15 @@ public class OperandTest
 
         assertTrue( operand.aggregationLevelIsValid( 6, 6 ) );
         assertTrue( operand.aggregationLevelIsValid( 6, 7 ) );
+    }
+    
+    @Test
+    public void testValidFullOperand()
+    {
+        assertTrue( DataElementOperand.isValidFullOperand( "d4HjsAHkj42.G142kJ2k3Gj" ) );
+        
+        assertFalse( DataElementOperand.isValidFullOperand( "d4HjsAHkj42" ) );
+        assertFalse( DataElementOperand.isValidFullOperand( "14HjsAHkj42.G142kJ2k3Gj" ) );
+        assertFalse( DataElementOperand.isValidFullOperand( "d4HjsAHkj42-G142kJ2k3Gj" ) );
     }
 }

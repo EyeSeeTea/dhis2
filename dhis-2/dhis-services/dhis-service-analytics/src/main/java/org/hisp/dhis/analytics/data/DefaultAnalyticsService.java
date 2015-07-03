@@ -63,6 +63,7 @@ import static org.hisp.dhis.organisationunit.OrganisationUnit.getParentNameGraph
 import static org.hisp.dhis.period.PeriodType.getPeriodTypeFromIsoString;
 import static org.hisp.dhis.reporttable.ReportTable.IRT2D;
 import static org.hisp.dhis.reporttable.ReportTable.addIfEmpty;
+import static org.hisp.dhis.commons.util.TextUtils.splitSafe;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -1038,6 +1039,16 @@ public class DefaultAnalyticsService
                     if ( group != null )
                     {
                         dataDimensionItems.addAll( group.getMembers() );
+                    }
+                }
+                else if ( DataElementOperand.isValidFullOperand( uid ) )
+                {
+                    DataElementOperand operand = operandService.getDataElementOperand( 
+                        splitSafe( uid, DataElementOperand.SEPARATOR, 1 ), splitSafe( uid, DataElementOperand.SEPARATOR, 2 ) );
+                    
+                    if ( operand != null )
+                    {
+                        dataDimensionItems.add( operand );
                     }
                 }
                 else if ( CodeGenerator.isValidCode( uid ) )

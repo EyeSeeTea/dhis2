@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.BaseNameableObject;
@@ -47,6 +48,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This object can act both as a hydrated persisted object and as a wrapper
@@ -62,6 +64,8 @@ import java.util.regex.Matcher;
 public class DataElementOperand
     extends BaseNameableObject
 {
+    public static final Pattern OPERAND_FULL_PATTERN = Pattern.compile( "([a-zA-Z]\\w{10})\\.([a-zA-Z]\\w{10})" );
+    
     public static final String SEPARATOR = ".";
     public static final String NAME_TOTAL = "(Total)";
 
@@ -364,6 +368,17 @@ public class DataElementOperand
     public boolean isTotal()
     {
         return operandType != null && operandType.equals( TYPE_TOTAL );
+    }
+    
+    /**
+     * Indicates whether the given string is a valid full operand expression.
+     * 
+     * @param expression the expression.
+     * @return true if valid full operand expression, false if not.
+     */
+    public static boolean isValidFullOperand( String expression )
+    {
+        return expression != null && OPERAND_FULL_PATTERN.matcher( expression ).matches();
     }
 
     /**
