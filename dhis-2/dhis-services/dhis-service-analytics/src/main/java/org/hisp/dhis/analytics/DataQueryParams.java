@@ -278,7 +278,7 @@ public class DataQueryParams
      */
     public DataQueryParams conform()
     {
-        if ( !getDataElements().isEmpty() && getIndicators().isEmpty() && getDataSets().isEmpty() )
+        if ( !( !getDataElements().isEmpty() && getDataElementOperands().isEmpty() && getIndicators().isEmpty() && getDataSets().isEmpty() ) )
         {
             removeDimension( CATEGORYOPTIONCOMBO_DIM_ID );
         }

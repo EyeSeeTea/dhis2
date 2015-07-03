@@ -30,6 +30,8 @@ package org.hisp.dhis.common;
 
 import static org.hisp.dhis.common.DataDimensionItem.DATA_DIMENSION_TYPE_CLASS_MAP;
 import static org.hisp.dhis.common.DataDimensionItem.DATA_DIMENSION_TYPE_DOMAIN_MAP;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,6 +49,7 @@ import org.hisp.dhis.common.DataDimensionItem.DataDimensionItemType;
 import org.hisp.dhis.common.comparator.ObjectStringValueComparator;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementOperand;
+import org.junit.Test;
 
 import com.google.common.collect.Sets;
 
@@ -60,7 +63,8 @@ public class DimensionalObjectUtils
     public static final String ITEM_SEP = "-";
     
     private static final Pattern INT_PATTERN = Pattern.compile( "^(0|-?[1-9]\\d*)$" );
-
+    private static final Pattern DIMENSIONAL_OPERAND_PATTERN = Pattern.compile( "([a-zA-Z]\\w{10})-([a-zA-Z]\\w{10})" );
+    
     public static final String TITLE_ITEM_SEP = ", ";
         
     /**
@@ -390,6 +394,17 @@ public class DimensionalObjectUtils
     }
 
     /**
+     * Indicates whether the given string is a valid full operand expression.
+     * 
+     * @param expression the expression.
+     * @return true if valid full operand expression, false if not.
+     */
+    public static boolean isValidDimensionalOperand( String expression )
+    {
+        return expression != null && DIMENSIONAL_OPERAND_PATTERN.matcher( expression ).matches();
+    }
+
+    /**
      * Gets a set of unique data elements based on the given collection of operands.
      * 
      * @param operands the collection of operands.
@@ -424,5 +439,15 @@ public class DimensionalObjectUtils
         }
         
         return set;
+    }
+    
+    @Test
+    public void testValidFullOperand()
+    {
+        assertTrue( DimensionalObjectUtils.isValidDimensionalOperand( "d4HjsAHkj42-G142kJ2k3Gj" ) );
+        
+        assertFalse( DimensionalObjectUtils.isValidDimensionalOperand( "d4HjsAHkj42" ) );
+        assertFalse( DimensionalObjectUtils.isValidDimensionalOperand( "14HjsAHkj42-G142kJ2k3Gj" ) );
+        assertFalse( DimensionalObjectUtils.isValidDimensionalOperand( "d4HjsAHkj42.G142kJ2k3Gj" ) );
     }
 }

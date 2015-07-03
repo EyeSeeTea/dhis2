@@ -375,16 +375,27 @@ public class DefaultAnalyticsService
         }
     }
     
+    /**
+     * Adds data element operand values to the given grid based on the given data
+     * query parameters.
+     * 
+     * @param params the data query parameters.
+     * @param grid the grid.
+     */
     private void addDataElementOperands( DataQueryParams params, Grid grid )
     {
         if ( !params.getDataElementOperands().isEmpty() )
         {
             DataQueryParams dataSourceParams = params.instance();
             
+            // -----------------------------------------------------------------
+            // Replace operands with data element and option combo dimensions
+            // -----------------------------------------------------------------
+            
             List<DataElementOperand> operands = asTypedList( params.getDataElementOperands() );
             List<NameableObject> dataElements = Lists.newArrayList( DimensionalObjectUtils.getDataElements( operands ) );
             List<NameableObject> categoryOptionCombos = Lists.newArrayList( DimensionalObjectUtils.getCategoryOptionCombos( operands ) );
-            
+
             //TODO check if data was dim or filter
             dataSourceParams.setDimensionOptions( DATA_X_DIM_ID, DimensionType.DATA_X, null, dataElements );
             dataSourceParams.setCategoryOptionCombos( categoryOptionCombos );
@@ -393,8 +404,12 @@ public class DefaultAnalyticsService
 
             for ( Map.Entry<String, Object> entry : aggregatedDataMap.entrySet() )
             {
+                // -------------------------------------------------------------
+                // Merge data element and option combo into operand column
+                // -------------------------------------------------------------
+
                 List<String> values = Lists.newArrayList( entry.getKey().split( DIMENSION_SEP ) );
-                String operand = values.get( 0 ) + DataElementOperand.SEPARATOR + values.get( 1 );
+                String operand = values.get( 0 ) + DIMENSION_SEP + values.get( 1 );
                 values.remove( 0 );
                 values.set( 0, operand );                
                 
@@ -1062,10 +1077,10 @@ public class DefaultAnalyticsService
                         dataDimensionItems.addAll( group.getMembers() );
                     }
                 }
-                else if ( DataElementOperand.isValidFullOperand( uid ) )
+                else if ( DimensionalObjectUtils.isValidDimensionalOperand( uid ) )
                 {
                     DataElementOperand operand = operandService.getDataElementOperand( 
-                        splitSafe( uid, "\\" + DataElementOperand.SEPARATOR, 0 ), splitSafe( uid, "\\" + DataElementOperand.SEPARATOR, 1 ) );
+                        splitSafe( uid, DIMENSION_SEP, 0 ), splitSafe( uid, DIMENSION_SEP, 1 ) );
                     
                     if ( operand != null )
                     {
