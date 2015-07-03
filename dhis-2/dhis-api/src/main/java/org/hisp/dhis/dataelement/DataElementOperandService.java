@@ -53,4 +53,6 @@ public interface DataElementOperandService
     List<DataElementOperand> getAllDataElementOperands( int first, int max );
     
     DataElementOperand getDataElementOperand( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombo );
+    
+    DataElementOperand getOrAddDataElementOperand( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombo );
 }

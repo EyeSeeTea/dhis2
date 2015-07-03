@@ -466,5 +466,32 @@ public class TextUtils
     {
         matcher.appendTail( sb );
         return sb.toString();
-    }    
+    }
+    
+    /**
+     * Gets the string at the given index of the array produced by splitting
+     * the given string on the given separator. Returns null if the given string
+     * is null or if the given index is out of bounds of the array.
+     * 
+     * @param string the string to split.
+     * @param separator the character to split on.
+     * @param index the index in the resulting array of the string to return.
+     * @return a string.
+     */
+    public static String splitSafe( String string, String separator, int index )
+    {
+        if ( string == null )
+        {
+            return null;
+        }
+        
+        String[] split = string.split( separator );
+        
+        if ( index >= 0 && split.length > index && split[index] != null )
+        {
+            return String.valueOf( split[index] );
+        }
+        
+        return null;
+    }
 }

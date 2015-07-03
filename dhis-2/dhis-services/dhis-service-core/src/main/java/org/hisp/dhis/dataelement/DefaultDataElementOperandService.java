@@ -147,10 +147,25 @@ public class DefaultDataElementOperandService
     {
         return dataElementOperandStore.getAllOrderedName( first, max );
     }
-
+    
     @Override
     public DataElementOperand getDataElementOperand( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombo )
     {
         return dataElementOperandStore.get( dataElement, categoryOptionCombo );
+    }
+
+    @Override
+    public DataElementOperand getOrAddDataElementOperand( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombo )
+    {
+        DataElementOperand operand = getDataElementOperand( dataElement, categoryOptionCombo );
+        
+        if ( operand == null )
+        {
+            operand = new DataElementOperand( dataElement, categoryOptionCombo );
+            
+            addDataElementOperand( operand );
+        }
+        
+        return operand;
     }
 }
