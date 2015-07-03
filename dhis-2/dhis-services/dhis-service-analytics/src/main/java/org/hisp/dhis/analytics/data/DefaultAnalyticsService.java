@@ -1044,7 +1044,7 @@ public class DefaultAnalyticsService
                 else if ( DataElementOperand.isValidFullOperand( uid ) )
                 {
                     DataElementOperand operand = operandService.getDataElementOperand( 
-                        splitSafe( uid, DataElementOperand.SEPARATOR, 1 ), splitSafe( uid, DataElementOperand.SEPARATOR, 2 ) );
+                        splitSafe( uid, DataElementOperand.SEPARATOR, 0 ), splitSafe( uid, DataElementOperand.SEPARATOR, 1 ) );
                     
                     if ( operand != null )
                     {
