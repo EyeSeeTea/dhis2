@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.concurrent.Callable;
 
 /**
- * Map which allows storing a {@link java.util.concurrent.Callable<V>}
+ * Map which allows storing a {@link java.util.concurrent.Callable}
  * and caches its return value on the first call to get(Object, Callable).
  * Subsequent calls returns the cached value.
  *
