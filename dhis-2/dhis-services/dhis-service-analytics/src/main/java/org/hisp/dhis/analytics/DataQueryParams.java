@@ -329,52 +329,6 @@ public class DataQueryParams
     }
     
     /**
-     * Creates a list of dimensions for use as headers. Will replace any of
-     * the indicator, data element, data set or program data element dimensions 
-     * with the common data x dimension. If the category option combo dimension 
-     * is given but not the data element dimension, the former will be removed.
-     */
-    /*
-    public List<DimensionalObject> getHeaderDimensions()
-    {
-        List<DimensionalObject> list = new ArrayList<>( dimensions );
-        
-        ListIterator<DimensionalObject> iter = list.listIterator();
-        
-        dimensions : while ( iter.hasNext() )
-        {
-            if ( DATA_DIMS.contains( iter.next().getDimension() ) )
-            {
-                iter.set( new BaseDimensionalObject( DATA_X_DIM_ID, DimensionType.DATA_X, null, DISPLAY_NAME_DATA_X, new ArrayList<NameableObject>() ) );
-                break dimensions;
-            }
-        }
-        
-        list.removeAll( Lists.newArrayList( 
-            new BaseDimensionalObject( INDICATOR_DIM_ID ),
-            new BaseDimensionalObject( DATAELEMENT_DIM_ID ),
-            new BaseDimensionalObject( DATASET_DIM_ID ),
-            new BaseDimensionalObject( PROGRAM_INDICATOR_DIM_ID ),
-            new BaseDimensionalObject( PROGRAM_DATAELEMENT_DIM_ID ),
-            new BaseDimensionalObject( PROGRAM_ATTRIBUTE_DIM_ID ) ) );
-        
-        return list;
-    }*/
-    
-    /**
-     * Creates a list of dimensions used to query. 
-     */
-    /*
-    public List<DimensionalObject> getQueryDimensions()
-    {
-        List<DimensionalObject> list = new ArrayList<>( dimensions );
-        
-        list.remove( new BaseDimensionalObject( INDICATOR_DIM_ID ) );
-        
-        return list;
-    }*/
-    
-    /**
      * Creates a list of dimension indexes which are relevant to completeness queries.
      */
     public List<Integer> getCompletenessDimensionIndexes()
@@ -1744,9 +1698,9 @@ public class DataQueryParams
         setDimensionOptions( category.getUid(), DimensionType.CATEGORY, null, new ArrayList<>( category.getItems() ) );
     }
     
-    public void enableCategoryOptionCombos()
+    public void setCategoryOptionCombos( List<? extends NameableObject> categoryOptionCombos )
     {
-        setDimensionOptions( CATEGORYOPTIONCOMBO_DIM_ID, DimensionType.CATEGORY_OPTION_COMBO, null, new ArrayList<NameableObject>() );
+        setDimensionOptions( CATEGORYOPTIONCOMBO_DIM_ID, DimensionType.CATEGORY_OPTION_COMBO, null, asList( categoryOptionCombos ) );
     }
     
     public boolean isCategoryOptionCombosEnabled()

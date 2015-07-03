@@ -38,6 +38,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.commons.collections.ListUtils;
@@ -45,6 +46,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.common.DataDimensionItem.DataDimensionItemType;
 import org.hisp.dhis.common.comparator.ObjectStringValueComparator;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementOperand;
+
+import com.google.common.collect.Sets;
 
 /**
  * @author Lars Helge Overland
@@ -308,7 +312,7 @@ public class DimensionalObjectUtils
         
         return null;
     }
-
+    
     /**
      * Sets items on the given dimension based on the unique values of the matching 
      * column in the given grid. Items are BaseNameableObjects where the name, 
@@ -383,5 +387,42 @@ public class DimensionalObjectUtils
         }
         
         return StringUtils.join( filterItems, TITLE_ITEM_SEP );
+    }
+
+    /**
+     * Gets a set of unique data elements based on the given collection of operands.
+     * 
+     * @param operands the collection of operands.
+     * @return a set of data elements.
+     */
+    public static Set<NameableObject> getDataElements( Collection<DataElementOperand> operands )
+    {
+        Set<NameableObject> set = Sets.newHashSet();
+        
+        for ( DataElementOperand operand : operands )
+        {
+            set.add( operand.getDataElement() );
+        }
+        
+        return set;
+    }
+    
+    /**
+     * Gets a set of unique category option combos based on the given collection
+     * of operands.
+     * 
+     * @param operands the collection of operands.
+     * @return a set of category option combos.
+     */
+    public static Set<NameableObject> getCategoryOptionCombos( Collection<DataElementOperand> operands )
+    {
+        Set<NameableObject> set = Sets.newHashSet();
+        
+        for ( DataElementOperand operand : operands )
+        {
+            set.add( operand.getCategoryOptionCombo() );
+        }
+        
+        return set;
     }
 }

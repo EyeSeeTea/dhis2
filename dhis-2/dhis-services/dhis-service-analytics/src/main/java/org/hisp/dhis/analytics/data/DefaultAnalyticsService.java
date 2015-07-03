@@ -63,6 +63,7 @@ import static org.hisp.dhis.organisationunit.OrganisationUnit.getParentNameGraph
 import static org.hisp.dhis.period.PeriodType.getPeriodTypeFromIsoString;
 import static org.hisp.dhis.reporttable.ReportTable.IRT2D;
 import static org.hisp.dhis.reporttable.ReportTable.addIfEmpty;
+import static org.hisp.dhis.commons.util.TextUtils.splitSafe;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -244,6 +245,8 @@ public class DefaultAnalyticsService
         addIndicatorValues( params, grid );
 
         addDataElementValues( params, grid );
+        
+        addDataElementOperands( params, grid );
 
         addDataSetValues( params, grid );
         
@@ -377,9 +380,28 @@ public class DefaultAnalyticsService
         if ( !params.getDataElementOperands().isEmpty() )
         {
             DataQueryParams dataSourceParams = params.instance();
-            dataSourceParams.retainDataDimension( DataDimensionItemType.DATA_ELEMENT_OPERAND );
             
-            //TODO
+            List<DataElementOperand> operands = asTypedList( params.getDataElementOperands() );
+            List<NameableObject> dataElements = Lists.newArrayList( DimensionalObjectUtils.getDataElements( operands ) );
+            List<NameableObject> categoryOptionCombos = Lists.newArrayList( DimensionalObjectUtils.getCategoryOptionCombos( operands ) );
+            
+            //TODO check if data was dim or filter
+            dataSourceParams.setDimensionOptions( DATA_X_DIM_ID, DimensionType.DATA_X, null, dataElements );
+            dataSourceParams.setCategoryOptionCombos( categoryOptionCombos );
+
+            Map<String, Object> aggregatedDataMap = getAggregatedDataValueMapObjectTyped( dataSourceParams );
+
+            for ( Map.Entry<String, Object> entry : aggregatedDataMap.entrySet() )
+            {
+                List<String> values = Lists.newArrayList( entry.getKey().split( DIMENSION_SEP ) );
+                String operand = values.get( 0 ) + DataElementOperand.SEPARATOR + values.get( 1 );
+                values.remove( 0 );
+                values.set( 0, operand );                
+                
+                grid.addRow();
+                grid.addValues( values.toArray() );
+                grid.addValue( params.isSkipRounding() ? entry.getValue() : getRounded( entry.getValue() ) );
+            }
         }
     }
     
@@ -1038,6 +1060,16 @@ public class DefaultAnalyticsService
                     if ( group != null )
                     {
                         dataDimensionItems.addAll( group.getMembers() );
+                    }
+                }
+                else if ( DataElementOperand.isValidFullOperand( uid ) )
+                {
+                    DataElementOperand operand = operandService.getDataElementOperand( 
+                        splitSafe( uid, "\\" + DataElementOperand.SEPARATOR, 0 ), splitSafe( uid, "\\" + DataElementOperand.SEPARATOR, 1 ) );
+                    
+                    if ( operand != null )
+                    {
+                        dataDimensionItems.add( operand );
                     }
                 }
                 else if ( CodeGenerator.isValidCode( uid ) )
