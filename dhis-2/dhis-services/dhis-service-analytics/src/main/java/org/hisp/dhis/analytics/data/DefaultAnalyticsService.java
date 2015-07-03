@@ -401,7 +401,7 @@ public class DefaultAnalyticsService
             for ( Map.Entry<String, Object> entry : aggregatedDataMap.entrySet() )
             {
                 List<String> values = Lists.newArrayList( entry.getKey().split( DIMENSION_SEP ) );
-                String operand = values.get( 0 ) + DataElementOperand.SEPARATOR + values.get( 1 );
+                String operand = values.get( 0 ) + DIMENSION_SEP + values.get( 1 );
                 values.remove( 0 );
                 values.set( 0, operand );                
                 
