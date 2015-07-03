@@ -375,6 +375,13 @@ public class DefaultAnalyticsService
         }
     }
     
+    /**
+     * Adds data element operand values to the given grid based on the given data
+     * query parameters.
+     * 
+     * @param params the data query parameters.
+     * @param grid the grid.
+     */
     private void addDataElementOperands( DataQueryParams params, Grid grid )
     {
         if ( !params.getDataElementOperands().isEmpty() )
@@ -1062,10 +1069,10 @@ public class DefaultAnalyticsService
                         dataDimensionItems.addAll( group.getMembers() );
                     }
                 }
-                else if ( DataElementOperand.isValidFullOperand( uid ) )
+                else if ( DimensionalObjectUtils.isValidDimensionalOperand( uid ) )
                 {
                     DataElementOperand operand = operandService.getDataElementOperand( 
-                        splitSafe( uid, "\\" + DataElementOperand.SEPARATOR, 0 ), splitSafe( uid, "\\" + DataElementOperand.SEPARATOR, 1 ) );
+                        splitSafe( uid, DIMENSION_SEP, 0 ), splitSafe( uid, DIMENSION_SEP, 1 ) );
                     
                     if ( operand != null )
                     {

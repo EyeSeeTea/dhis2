@@ -85,14 +85,4 @@ public class OperandTest
         assertTrue( operand.aggregationLevelIsValid( 6, 6 ) );
         assertTrue( operand.aggregationLevelIsValid( 6, 7 ) );
     }
-    
-    @Test
-    public void testValidFullOperand()
-    {
-        assertTrue( DataElementOperand.isValidFullOperand( "d4HjsAHkj42.G142kJ2k3Gj" ) );
-        
-        assertFalse( DataElementOperand.isValidFullOperand( "d4HjsAHkj42" ) );
-        assertFalse( DataElementOperand.isValidFullOperand( "14HjsAHkj42.G142kJ2k3Gj" ) );
-        assertFalse( DataElementOperand.isValidFullOperand( "d4HjsAHkj42-G142kJ2k3Gj" ) );
-    }
 }
