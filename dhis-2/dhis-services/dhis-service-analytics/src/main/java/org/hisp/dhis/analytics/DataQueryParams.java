@@ -60,12 +60,14 @@ import org.hisp.dhis.common.DimensionType;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.DimensionalObjectUtils;
 import org.hisp.dhis.common.DisplayProperty;
+import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableProperty;
 import org.hisp.dhis.common.ListMap;
 import org.hisp.dhis.common.MapMap;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.commons.collection.CollectionUtils;
 import org.hisp.dhis.commons.collection.ListUtils;
+import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
@@ -81,6 +83,7 @@ import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.system.util.MathUtils;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -102,9 +105,10 @@ public class DataQueryParams
 
     public static final int DX_INDEX = 0;
     public static final int CO_IN_INDEX = 1;
+
+    public static final Set<Class<? extends IdentifiableObject>> DYNAMIC_DIM_CLASSES = ImmutableSet.<Class<? extends IdentifiableObject>>builder().
+        add( OrganisationUnitGroupSet.class ).add( DataElementGroupSet.class ).add( CategoryOptionGroupSet.class ).add( DataElementCategory.class ).build();
     
-    public static final List<String> FIXED_DIMS = Lists.newArrayList( 
-        DATA_X_DIM_ID, PERIOD_DIM_ID, ORGUNIT_DIM_ID );
     private static final List<String> DIMENSION_PERMUTATION_IGNORE_DIMS = Lists.newArrayList( 
         DATA_X_DIM_ID, CATEGORYOPTIONCOMBO_DIM_ID );    
     public static final List<DimensionType> COMPLETENESS_DIMENSION_TYPES = Lists.newArrayList( 
@@ -1635,6 +1639,11 @@ public class DataQueryParams
     public List<NameableObject> getDataElements()
     {
         return ImmutableList.copyOf( DimensionalObjectUtils.getByDataDimensionType( DataDimensionItemType.AGGREGATE_DATA_ELEMENT, getDimensionOptions( DATA_X_DIM_ID ) ) );
+    }
+    
+    public List<NameableObject> getDataElementOperands()
+    {
+        return ImmutableList.copyOf( DimensionalObjectUtils.getByDataDimensionType( DataDimensionItemType.DATA_ELEMENT_OPERAND, getDimensionOptions( DATA_X_DIM_ID ) ) );
     }
     
     public void setDataElements( List<? extends NameableObject> dataElements )

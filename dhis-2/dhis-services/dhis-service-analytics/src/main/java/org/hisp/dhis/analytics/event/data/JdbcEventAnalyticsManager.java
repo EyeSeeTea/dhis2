@@ -37,11 +37,11 @@ import static org.hisp.dhis.analytics.AggregationType.VARIANCE;
 import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
-import static org.hisp.dhis.system.util.DateUtils.getMediumDateString;
 import static org.hisp.dhis.commons.util.TextUtils.getQuotedCommaDelimitedString;
 import static org.hisp.dhis.commons.util.TextUtils.removeLastComma;
 import static org.hisp.dhis.commons.util.TextUtils.removeLastOr;
 import static org.hisp.dhis.commons.util.TextUtils.trimEnd;
+import static org.hisp.dhis.system.util.DateUtils.getMediumDateString;
 
 import java.util.List;
 

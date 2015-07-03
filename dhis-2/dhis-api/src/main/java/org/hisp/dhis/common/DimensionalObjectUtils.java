@@ -74,8 +74,7 @@ public class DimensionalObjectUtils
         {
             for ( DimensionalObject dimension : dimensions )
             {
-                //String dim = toDimension( dimension.getDimension() );
-                String dim = dimension.getDimension(); //TODO check
+                String dim = dimension.getDimension();
                 
                 if ( dim != null && !dims.contains( dim ) )
                 {

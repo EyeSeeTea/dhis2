@@ -38,7 +38,7 @@ import static org.hisp.dhis.chart.BaseChart.TYPE_STACKED_BAR;
 import static org.hisp.dhis.chart.BaseChart.TYPE_STACKED_COLUMN;
 import static org.hisp.dhis.chart.BaseChart.TYPE_METER;
 import static org.hisp.dhis.common.DimensionalObject.DIMENSION_SEP;
-import static org.hisp.dhis.commons.util.ConversionUtils.getArray;
+import static org.hisp.dhis.commons.collection.ListUtils.getArray;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
