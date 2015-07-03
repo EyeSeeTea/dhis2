@@ -388,10 +388,14 @@ public class DefaultAnalyticsService
         {
             DataQueryParams dataSourceParams = params.instance();
             
+            // -----------------------------------------------------------------
+            // Replace operands with data element and option combo dimensions
+            // -----------------------------------------------------------------
+            
             List<DataElementOperand> operands = asTypedList( params.getDataElementOperands() );
             List<NameableObject> dataElements = Lists.newArrayList( DimensionalObjectUtils.getDataElements( operands ) );
             List<NameableObject> categoryOptionCombos = Lists.newArrayList( DimensionalObjectUtils.getCategoryOptionCombos( operands ) );
-            
+
             //TODO check if data was dim or filter
             dataSourceParams.setDimensionOptions( DATA_X_DIM_ID, DimensionType.DATA_X, null, dataElements );
             dataSourceParams.setCategoryOptionCombos( categoryOptionCombos );
@@ -400,6 +404,10 @@ public class DefaultAnalyticsService
 
             for ( Map.Entry<String, Object> entry : aggregatedDataMap.entrySet() )
             {
+                // -------------------------------------------------------------
+                // Merge data element and option combo into operand column
+                // -------------------------------------------------------------
+
                 List<String> values = Lists.newArrayList( entry.getKey().split( DIMENSION_SEP ) );
                 String operand = values.get( 0 ) + DIMENSION_SEP + values.get( 1 );
                 values.remove( 0 );
