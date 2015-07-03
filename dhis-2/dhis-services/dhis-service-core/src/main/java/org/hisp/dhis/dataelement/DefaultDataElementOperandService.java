@@ -135,22 +135,7 @@ public class DefaultDataElementOperandService
 
         return list;
     }
-
-    @Override
-    public DataElementOperand getDataElementOperand( DataElementOperand dataElementOperand )
-    {
-        for ( DataElementOperand operand : getAllDataElementOperands() )
-        {
-            if ( operand.getDataElement().equals( dataElementOperand.getDataElement() )
-                && operand.getCategoryOptionCombo().equalsOnName( dataElementOperand.getCategoryOptionCombo() ) )
-            {
-                return operand;
-            }
-        }
-
-        return null;
-    }
-
+    
     @Override
     public List<DataElementOperand> getAllDataElementOperands()
     {
@@ -164,41 +149,8 @@ public class DefaultDataElementOperandService
     }
 
     @Override
-    public List<DataElementOperand> getDataElementOperandByDataElements( Collection<DataElement> dataElements )
+    public DataElementOperand getDataElementOperand( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombo )
     {
-        List<DataElementOperand> operands = new ArrayList<>();
-
-        for ( DataElementOperand operand : getAllDataElementOperands() )
-        {
-            if ( dataElements.contains( operand.getDataElement() ) )
-            {
-                operands.add( operand );
-            }
-        }
-
-        return operands;
-    }
-
-    @Override
-    public List<DataElementOperand> getDataElementOperandByOptionCombos(
-        Collection<DataElementCategoryOptionCombo> optionCombos )
-    {
-        List<DataElementOperand> operands = new ArrayList<>();
-
-        for ( DataElementOperand operand : getAllDataElementOperands() )
-        {
-            if ( optionCombos.contains( operand.getCategoryOptionCombo() ) )
-            {
-                operands.add( operand );
-            }
-        }
-
-        return operands;
-    }
-
-    @Override
-    public List<DataElementOperand> getDataElementOperandByDataElementGroup( DataElementGroup dataElementGroup )
-    {
-        return dataElementOperandStore.getByDataElementGroup( dataElementGroup );
+        return dataElementOperandStore.get( dataElement, categoryOptionCombo );
     }
 }

@@ -48,15 +48,9 @@ public interface DataElementOperandService
 
     List<DataElementOperand> getDataElementOperandsByUid( Collection<String> uids );
 
-    DataElementOperand getDataElementOperand( DataElementOperand dataElementOperand );
-
     List<DataElementOperand> getAllDataElementOperands();
 
-    List<DataElementOperand> getAllDataElementOperands(int first, int max);
-
-    List<DataElementOperand> getDataElementOperandByDataElements( Collection<DataElement> dataElements );
-
-    List<DataElementOperand> getDataElementOperandByOptionCombos( Collection<DataElementCategoryOptionCombo> optionCombos );
-
-    List<DataElementOperand> getDataElementOperandByDataElementGroup( DataElementGroup dataElementGroup );
+    List<DataElementOperand> getAllDataElementOperands( int first, int max );
+    
+    DataElementOperand getDataElementOperand( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombo );
 }
