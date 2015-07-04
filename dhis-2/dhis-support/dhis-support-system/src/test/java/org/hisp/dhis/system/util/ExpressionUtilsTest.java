@@ -57,6 +57,7 @@ public class ExpressionUtilsTest
         assertFalse( ExpressionUtils.isTrue( "\"a\" == \"b\"", null ) );
         assertFalse( ExpressionUtils.isTrue( "'b' == 'c'", null ) );
         assertFalse( ExpressionUtils.isTrue( "'goat' == 'cow'", null ) );
+        assertFalse( ExpressionUtils.isTrue( "'goat' == goat", null ) );
     }
     
     @Test
@@ -82,6 +83,7 @@ public class ExpressionUtilsTest
         assertFalse( ExpressionUtils.isTrue( "v3 == 'cow'", vars ) );
         assertFalse( ExpressionUtils.isTrue( "v4 == 'goat'", vars ) );
         assertFalse( ExpressionUtils.isTrue( "v4 == \"goat\"", vars ) );
+        assertFalse( ExpressionUtils.isTrue( "v4 == horse", vars ) );
     }
     
     @Test

@@ -64,7 +64,7 @@ public class ExpressionUtils
         Expression exp = JEXL.createExpression( expression );
         
         JexlContext context = vars != null ? new MapContext( vars ) : new MapContext();
-                
+        
         return exp.evaluate( context );
     }
 
