@@ -34,6 +34,8 @@ import static org.hisp.dhis.common.DimensionalObject.CATEGORYOPTIONCOMBO_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.DATA_X_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
+import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
+import static org.hisp.dhis.common.NameableObjectUtils.asTypedList;
 import static org.hisp.dhis.dataelement.DataElement.AGGREGATION_OPERATOR_AVERAGE;
 import static org.hisp.dhis.dataelement.DataElement.AGGREGATION_OPERATOR_AVERAGE_SUM;
 import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_BOOL;
@@ -62,6 +64,7 @@ import org.hisp.dhis.common.ListMap;
 import org.hisp.dhis.common.MaintenanceModeException;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.commons.collection.PaginatedList;
+import org.hisp.dhis.commons.filter.FilterUtils;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -69,6 +72,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.setting.SystemSettingManager;
+import org.hisp.dhis.system.filter.AggregatableDataElementFilter;
 import org.hisp.dhis.system.util.MathUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -109,6 +113,9 @@ public class DefaultQueryPlanner
         {
             throw new IllegalQueryException( "Params cannot be null" );
         }
+
+        List<DataElement> dataElements = asTypedList( params.getDataElements() );
+        List<DataElement> nonAggregatableDataElements = FilterUtils.inverseFilter( dataElements, AggregatableDataElementFilter.INSTANCE );
         
         if ( params.getDimensions().isEmpty() )
         {
@@ -165,6 +172,11 @@ public class DefaultQueryPlanner
             violation = "Program must be specified when program attributes are specified";
         }
         
+        if ( !nonAggregatableDataElements.isEmpty() )
+        {
+            violation = "All data elements must be of a type that allows aggregation: " + getUids( nonAggregatableDataElements );
+        }
+                
         if ( violation != null )
         {
             log.warn( "Analytics validation failed: " + violation );
