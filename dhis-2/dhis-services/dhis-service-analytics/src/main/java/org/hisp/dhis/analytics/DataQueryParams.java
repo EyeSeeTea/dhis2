@@ -1568,10 +1568,17 @@ public class DataQueryParams
     public DataQueryParams removeDataDimensionOrFilter( DataDimensionItemType dataDimensionType )
     {
         DimensionalObject dimension = getDimension( DATA_X_DIM_ID );
-        dimension.getItems().removeAll( DimensionalObjectUtils.getByDataDimensionType( dataDimensionType, dimension.getItems() ) );
-
         DimensionalObject filter = getFilter( DATA_X_DIM_ID );
-        filter.getItems().removeAll( DimensionalObjectUtils.getByDataDimensionType( dataDimensionType, filter.getItems() ) );
+        
+        if ( dimension != null )
+        {
+            dimension.getItems().removeAll( DimensionalObjectUtils.getByDataDimensionType( dataDimensionType, dimension.getItems() ) );
+        }
+        
+        if ( filter != null )
+        {
+            filter.getItems().removeAll( DimensionalObjectUtils.getByDataDimensionType( dataDimensionType, filter.getItems() ) );
+        }
         
         return this;
     }

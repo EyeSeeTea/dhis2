@@ -98,10 +98,13 @@ public class DimensionalObjectUtils
     {
         List<DimensionalObject> list = new ArrayList<>();
         
-        for ( DimensionalObject dimension : dimensions )
+        if ( dimensions != null )
         {
-            DimensionalObject object = ((BaseDimensionalObject) dimension).instance();
-            list.add( object );
+            for ( DimensionalObject dimension : dimensions )
+            {
+                DimensionalObject object = ((BaseDimensionalObject) dimension).instance();
+                list.add( object );
+            }
         }
         
         return list;
