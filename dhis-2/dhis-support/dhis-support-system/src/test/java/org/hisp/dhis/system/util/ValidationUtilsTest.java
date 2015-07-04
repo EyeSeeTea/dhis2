@@ -200,5 +200,6 @@ public class ValidationUtilsTest
         
         assertFalse( programIndicatorFilterIsValid( "a7Jhda72jJH = 4; select * from datavalue" ) );
         assertFalse( programIndicatorFilterIsValid( "a7Jhda72jJH = 4; j72HF5Rd2Fd > 2" ) );
+        assertFalse( programIndicatorFilterIsValid( "delete from datavalue" ) );
     }
 }
