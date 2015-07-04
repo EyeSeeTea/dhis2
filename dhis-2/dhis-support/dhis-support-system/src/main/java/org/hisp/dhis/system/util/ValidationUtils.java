@@ -91,18 +91,18 @@ public class ValidationUtils
             return false;
         }
 
-        charCheck: for ( int i = 0; i < filter.length(); i++ ) 
+        check: for ( int i = 0; i < filter.length(); i++ ) 
         {
             char ch = filter.charAt( i );
             
             if ( Character.isWhitespace( ch ) || Character.isLetterOrDigit( ch ) )
             {
-                continue charCheck;
+                continue check;
             }
             
             if ( SQL_VALID_SPECIAL_CHARS.contains( ch ) )
             {
-                continue charCheck;
+                continue check;
             }
             
             return false;
