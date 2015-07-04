@@ -36,6 +36,7 @@ import static org.hisp.dhis.system.util.ValidationUtils.getLongitude;
 import static org.hisp.dhis.system.util.ValidationUtils.isValidHexColor;
 import static org.hisp.dhis.system.util.ValidationUtils.passwordIsValid;
 import static org.hisp.dhis.system.util.ValidationUtils.dataValueIsZeroAndInsignificant;
+import static org.hisp.dhis.system.util.ValidationUtils.programIndicatorFilterIsValid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -178,7 +179,8 @@ public class ValidationUtilsTest
     }
 
     @Test
-    public void testIsValidHexColor() {
+    public void testIsValidHexColor() 
+    {
         assertFalse( isValidHexColor( "abcpqr" ) );
         assertFalse( isValidHexColor( "#qwerty" ) );
         assertFalse( isValidHexColor( "FFAB#O") );
@@ -189,5 +191,14 @@ public class ValidationUtilsTest
         assertTrue( isValidHexColor( "ffAAb4" ) );
         assertTrue( isValidHexColor( "#4a6" ) );
         assertTrue( isValidHexColor ( "abc" ) );
+    }
+    
+    @Test
+    public void testProgramIndicatorFilterIsValid()
+    {
+        assertTrue( programIndicatorFilterIsValid( "a7Jhda72jJH = 4 and j72HF5Rd2Fd > 2" ) );
+        
+        assertFalse( programIndicatorFilterIsValid( "a7Jhda72jJH = 4; select * from datavalue" ) );
+        assertFalse( programIndicatorFilterIsValid( "a7Jhda72jJH = 4; j72HF5Rd2Fd > 2" ) );
     }
 }

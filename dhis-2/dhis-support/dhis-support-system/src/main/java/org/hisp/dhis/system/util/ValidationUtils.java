@@ -28,18 +28,33 @@ package org.hisp.dhis.system.util;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.dataelement.DataElement.AGGREGATION_OPERATOR_AVERAGE;
+import static org.hisp.dhis.dataelement.DataElement.AGGREGATION_OPERATOR_AVERAGE_SUM;
+import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_BOOL;
+import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_DATE;
+import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_INT;
+import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_NEGATIVE_INT;
+import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_NUMBER;
+import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_PERCENTAGE;
+import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_POSITIVE_INT;
+import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_TRUE_ONLY;
+import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_UNIT_INTERVAL;
+import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_ZERO_OR_POSITIVE_INT;
+
+import java.awt.geom.Point2D;
+import java.util.Locale;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.commons.validator.routines.DateValidator;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.datavalue.DataValue;
+import org.hisp.dhis.sqlview.SqlView;
 
-import java.awt.geom.Point2D;
-import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static org.hisp.dhis.dataelement.DataElement.*;
+import com.google.common.collect.Sets;
 
 /**
  * @author Lars Helge Overland
@@ -58,6 +73,40 @@ public class ValidationUtils
     private static int LAT_MAX = 90;
     private static int LAT_MIN = -90;
 
+    private static final Set<Character> SQL_VALID_SPECIAL_CHARS = Sets.newHashSet( '&', '|', '=', '!', '<', '>', '/', '%' );
+
+    public static boolean programIndicatorFilterIsValid( String filter )
+    {
+        if ( filter == null )
+        {
+            return true;
+        }
+
+        if ( filter.matches( SqlView.getIllegalKeywordsRegex() ) )
+        {
+            return false;
+        }
+
+        charCheck: for ( int i = 0; i < filter.length(); i++ ) 
+        {
+            char ch = filter.charAt( i );
+            
+            if ( Character.isWhitespace( ch ) || Character.isLetterOrDigit( ch ) )
+            {
+                continue charCheck;
+            }
+            
+            if ( SQL_VALID_SPECIAL_CHARS.contains( ch ) )
+            {
+                continue charCheck;
+            }
+            
+            return false;
+        }
+        
+        return true;
+    }
+    
     /**
      * Validates whether an email string is valid.
      *
