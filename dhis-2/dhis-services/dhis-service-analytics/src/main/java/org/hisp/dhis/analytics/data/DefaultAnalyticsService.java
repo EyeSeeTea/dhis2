@@ -1079,8 +1079,7 @@ public class DefaultAnalyticsService
                 }
                 else if ( DimensionalObjectUtils.isValidDimensionalOperand( uid ) )
                 {
-                    DataElementOperand operand = operandService.getDataElementOperand( 
-                        splitSafe( uid, DIMENSION_SEP, 0 ), splitSafe( uid, DIMENSION_SEP, 1 ) );
+                    DataElementOperand operand = operandService.getDataElementOperand( splitSafe( uid, DIMENSION_SEP, 0 ), splitSafe( uid, DIMENSION_SEP, 1 ) );
                     
                     if ( operand != null )
                     {

@@ -63,6 +63,7 @@ import org.hisp.dhis.common.IllegalQueryException;
 import org.hisp.dhis.common.ListMap;
 import org.hisp.dhis.common.MaintenanceModeException;
 import org.hisp.dhis.common.NameableObject;
+import org.hisp.dhis.commons.collection.ListUtils;
 import org.hisp.dhis.commons.collection.PaginatedList;
 import org.hisp.dhis.commons.filter.FilterUtils;
 import org.hisp.dhis.dataelement.DataElement;
@@ -114,8 +115,8 @@ public class DefaultQueryPlanner
             throw new IllegalQueryException( "Params cannot be null" );
         }
 
-        List<DataElement> dataElements = asTypedList( params.getDataElements() );
-        List<DataElement> nonAggregatableDataElements = FilterUtils.inverseFilter( dataElements, AggregatableDataElementFilter.INSTANCE );
+        List<NameableObject> dataElements = ListUtils.union( params.getDataElements(), params.getProgramDataElements() );
+        List<DataElement> nonAggDataElements = FilterUtils.inverseFilter( asTypedList( dataElements, DataElement.class ), AggregatableDataElementFilter.INSTANCE );
         
         if ( params.getDimensions().isEmpty() )
         {
@@ -172,9 +173,9 @@ public class DefaultQueryPlanner
             violation = "Program must be specified when program attributes are specified";
         }
         
-        if ( !nonAggregatableDataElements.isEmpty() )
+        if ( !nonAggDataElements.isEmpty() )
         {
-            violation = "Data elements must be of a type that allows aggregation: " + getUids( nonAggregatableDataElements );
+            violation = "Data elements must be of a type that allows aggregation: " + getUids( nonAggDataElements );
         }
                 
         if ( violation != null )
