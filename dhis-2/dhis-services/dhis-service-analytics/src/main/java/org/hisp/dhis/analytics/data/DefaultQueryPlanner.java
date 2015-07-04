@@ -174,7 +174,7 @@ public class DefaultQueryPlanner
         
         if ( !nonAggregatableDataElements.isEmpty() )
         {
-            violation = "All data elements must be of a type that allows aggregation: " + getUids( nonAggregatableDataElements );
+            violation = "Data elements must be of a type that allows aggregation: " + getUids( nonAggregatableDataElements );
         }
                 
         if ( violation != null )
