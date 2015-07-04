@@ -93,11 +93,6 @@ public class ValidationUtils
             return false;
         }
 
-        if ( filter.matches( SqlView.getProtectedTablesRegex() ) )
-        {
-            return false;
-        }
-
         check: for ( int i = 0; i < filter.length(); i++ ) 
         {
             char ch = filter.charAt( i );
