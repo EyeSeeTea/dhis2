@@ -34,6 +34,7 @@ import org.apache.commons.jexl2.JexlEngine;
 import org.apache.commons.jexl2.JexlException;
 import org.apache.commons.jexl2.MapContext;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -44,11 +45,25 @@ import java.util.Map;
 public class ExpressionUtils
 {
     private static final JexlEngine JEXL = new JexlEngine();
+    
+    private static final Map<String, String> EL_SQL_MAP = new HashMap<>();
 
     static 
     {
         JEXL.setCache( 512 );
         JEXL.setSilent( false );
+        
+        EL_SQL_MAP.put( "&&", "and" );
+        EL_SQL_MAP.put( "\\|\\|", "or" );
+        EL_SQL_MAP.put( "==", "=" );
+        EL_SQL_MAP.put( "eq", "=" );
+        EL_SQL_MAP.put( "ne", "!=" );
+        EL_SQL_MAP.put( "lt", "<" );
+        EL_SQL_MAP.put( "le", "<=" );
+        EL_SQL_MAP.put( "gt", ">" );
+        EL_SQL_MAP.put( "ge", ">=" );
+        EL_SQL_MAP.put( "div", "/" );
+        EL_SQL_MAP.put( "mod", "%" );   
     }
     
     /**
@@ -103,5 +118,26 @@ public class ExpressionUtils
         {
             return false;
         }
+    }
+    
+    /**
+     * Converts the given expression into a valid SQL clause.
+     * 
+     * @param expression the expression.
+     * @return an SQL clause.
+     */
+    public static String asSql( String expression )
+    {
+        if ( expression == null )
+        {
+            return null;
+        }
+        
+        for ( String key : EL_SQL_MAP.keySet() )
+        {
+            expression = expression.replaceAll( key, EL_SQL_MAP.get( key ) );
+        }
+        
+        return expression;
     }
 }

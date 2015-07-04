@@ -30,6 +30,7 @@ package org.hisp.dhis.system.util;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -104,5 +105,18 @@ public class ExpressionUtilsTest
         assertFalse( ExpressionUtils.isBoolean( "4", null ) );
         assertFalse( ExpressionUtils.isBoolean( "3 + 2", null ) );
         assertFalse( ExpressionUtils.isBoolean( "someinvalid expr", null ) );
+    }
+    
+    @Test
+    public void testAsSql()
+    {
+        assertEquals( "2 > 1 and 3 < 4", ExpressionUtils.asSql( "2 > 1 && 3 < 4" ) );
+        assertEquals( "2 > 1 or 3 < 4", ExpressionUtils.asSql( "2 > 1 || 3 < 4" ) );
+        assertEquals( "'a' = 1", ExpressionUtils.asSql( "'a' == 1" ) );
+        assertEquals( "'a' = 3", ExpressionUtils.asSql( "'a' eq 3" ) );
+        assertEquals( "5 != 3", ExpressionUtils.asSql( "5 ne 3" ) );
+        assertEquals( "2 < 3", ExpressionUtils.asSql( "2 lt 3" ) );
+        assertEquals( "10 / 2", ExpressionUtils.asSql( "10 div 2" ) );
+        assertEquals( "10 % 2", ExpressionUtils.asSql( "10 mod 2" ) );
     }
 }
