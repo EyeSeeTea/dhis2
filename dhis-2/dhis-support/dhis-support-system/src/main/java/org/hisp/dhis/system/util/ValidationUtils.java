@@ -58,7 +58,6 @@ import com.google.common.collect.Sets;
 
 /**
  * @author Lars Helge Overland
- * @version $Id$
  */
 public class ValidationUtils
 {
@@ -83,6 +82,11 @@ public class ValidationUtils
         }
 
         if ( filter.matches( SqlView.getIllegalKeywordsRegex() ) )
+        {
+            return false;
+        }
+
+        if ( filter.matches( SqlView.getProtectedTablesRegex() ) )
         {
             return false;
         }
