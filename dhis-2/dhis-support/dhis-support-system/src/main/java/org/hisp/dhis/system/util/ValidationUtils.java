@@ -72,7 +72,7 @@ public class ValidationUtils
     private static int LAT_MAX = 90;
     private static int LAT_MIN = -90;
 
-    private static final Set<Character> SQL_VALID_SPECIAL_CHARS = Sets.newHashSet( '&', '|', '=', '!', '<', '>', '/', '%' );
+    private static final Set<Character> SQL_VALID_CHARS = Sets.newHashSet( '&', '|', '=', '!', '<', '>', '/', '%' );
 
     /**
      * Validates whether a program indicator filter contains malicious code such
@@ -102,7 +102,7 @@ public class ValidationUtils
                 continue check;
             }
             
-            if ( SQL_VALID_SPECIAL_CHARS.contains( ch ) )
+            if ( SQL_VALID_CHARS.contains( ch ) )
             {
                 continue check;
             }
