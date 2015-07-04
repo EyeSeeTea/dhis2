@@ -319,45 +319,93 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
     };    
 })
 
-    /* Returns a function for getting rules for a specific program */
-.factory('TrackerRulesFactory', function($q,$rootScope,ECStorageService){
-    return{
-        getOldProgramStageRules :function(programUid, programstageUid) {
-            var rules = this.getProgramRules(programUid);
-            
-            //Only keep the rules actually matching the program stage we are in, or rules with no program stage defined.
-            var programStageRules = [];
-            angular.forEach(rules, function(rule) {
-                if(rule.programstage_uid == null || rule.programstage_uid == "" || rule.programstage_uid == programstageUid) {
-                   programStageRules.push(rule);
-                }
-            });
-            
-            return programStageRules;
-        },
-        
-        getProgramStageRules : function(programUid, programStageUid){
-            var def = $q.defer();
-            
-            ECStorageService.currentStore.open().done(function(){
-                ECStorageService.currentStore.getAll('programRules').done(function(rules){                    
-                    //The array will ultimately be returned to the caller.
-                    var programRulesArray = [];
-                    //Loop through and add the rules belonging to this program and program stage
-                    angular.forEach(rules, function(rule){
-                       if(rule.program.id == programUid) {
-                           if(!rule.programStage || !rule.programStage.id || rule.programStage.id == programStageUid) {
-                                programRulesArray.push(rule);
+/* Returns a function for getting rules for a specific program */
+.factory('TrackerRulesFactory', function($q,MetaDataFactory){
+    return{        
+        getRules : function(programUid){            
+            var def = $q.defer();            
+            MetaDataFactory.getAll('constants').then(function(constants) {
+                MetaDataFactory.getByProgram('programIndicators',programUid).then(function(pis){                    
+                    var variables = [];
+                    var programRules = [];
+                    angular.forEach(pis, function(pi){                    
+                        var newAction = {
+                                id:pi.id,
+                                content:pi.displayDescription ? pi.displayDescription : pi.name,
+                                data:pi.expression,
+                                programRuleActionType:'DISPLAYKEYVALUEPAIR',
+                                location:'indicators'
+                            };
+                        var newRule = {
+                                name:pi.name,
+                                id: pi.id,
+                                shortname:pi.shortname,
+                                code:pi.code,
+                                program:pi.program,
+                                description:pi.description,
+                                condition:pi.filter ? pi.filter : 'true',
+                                programRuleActions: [newAction]
+                            };
+
+                        programRules.push(newRule);
+
+                        var variablesInCondition = newRule.condition.match(/#{\w+.?\w*}/g);
+                        var variablesInData = newAction.data.match(/#{\w+.?\w*}/g);
+
+                        var pushDirectAddressedVariable = function(variableWithCurls) {
+                            var variableName = variableWithCurls.replace("#{","").replace("}","");
+                            var variableNameParts = variableName.split('.');
+
+
+                            if(variableNameParts.length === 2) {
+                                //this is a programstage and dataelement specification. translate to program variable:
+                                variables.push({
+                                    name:variableName,
+                                    programRuleVariableSourceType:'DATAELEMENT_NEWEST_EVENT_PROGRAM_STAGE',
+                                    dataElement:variableNameParts[1],
+                                    programStage:variableNameParts[0],
+                                    program:programUid
+                                });
                             }
-                       }
+                            else if(variableNameParts.length === 1)
+                            {
+                                //This is an attribute - let us translate to program variable:
+                                variables.push({
+                                    name:variableName,
+                                    programRuleVariableSourceType:'TEI_ATTRIBUTE',
+                                    trackedEntityAttribute:variableNameParts[0],
+                                    program:programUid
+                                });
+                            }
+
+                        };
+
+                        angular.forEach(variablesInCondition, function(variableInCondition) {
+                            pushDirectAddressedVariable(variableInCondition);
+                        });
+
+                        angular.forEach(variablesInData, function(variableInData) {
+                            pushDirectAddressedVariable(variableInData);
+                        });
                     });
 
-                    $rootScope.$apply(function(){
-                        def.resolve(programRulesArray);
+                    var programIndicators = {rules:programRules, variables:variables};
+                    
+                    MetaDataFactory.getByProgram('programValidations',programUid).then(function(programValidations){                    
+                        MetaDataFactory.getByProgram('programRuleVariables',programUid).then(function(programVariables){                    
+                            MetaDataFactory.getByProgram('programRules',programUid).then(function(prs){
+                                var programRules = [];
+                                angular.forEach(prs, function(rule){
+                                    rule.actions = [];
+                                    rule.programStageId = rule.programStage && rule.programStage.id ? rule.programStage.id : null;
+                                    programRules.push(rule);
+                                });                                
+                                def.resolve({constants: constants, programIndicators: programIndicators, programValidations: programValidations, programVariables: programVariables, programRules: programRules});
+                            });
+                        });
                     });
-                });     
-            });
-                        
+                }); 
+            });                        
             return def.promise;
         }
     };  

@@ -91,6 +91,7 @@ import org.hisp.dhis.program.ProgramStageInstanceService;
 import org.hisp.dhis.program.ProgramStageSection;
 import org.hisp.dhis.program.ProgramStageSectionService;
 import org.hisp.dhis.program.ProgramStageService;
+import org.hisp.dhis.program.ProgramType;
 import org.hisp.dhis.program.comparator.ProgramStageInstanceVisitDateComparator;
 import org.hisp.dhis.relationship.Relationship;
 import org.hisp.dhis.relationship.RelationshipService;
@@ -316,7 +317,7 @@ public class ActivityReportingServiceImpl
         TrackedEntityInstanceQueryParams param = new TrackedEntityInstanceQueryParams();
         param.addOrganisationUnit( unit );
 
-        Grid trackedEntityDrid = entityInstanceService.getTrackedEntityInstances( param );
+        Grid trackedEntityDrid = entityInstanceService.getTrackedEntityInstancesGrid( param );
         List<List<Object>> entityInstanceList = trackedEntityDrid.getRows();
 
         for ( List<Object> entityInstance : entityInstanceList )
@@ -353,7 +354,7 @@ public class ActivityReportingServiceImpl
         TrackedEntityInstanceQueryParams param = new TrackedEntityInstanceQueryParams();
         param.addOrganisationUnit( unit );
 
-        Grid trackedEntityDrid = entityInstanceService.getTrackedEntityInstances( param );
+        Grid trackedEntityDrid = entityInstanceService.getTrackedEntityInstancesGrid( param );
         List<List<Object>> entityInstanceList = trackedEntityDrid.getRows();
 
         for ( List<Object> entityInstance : entityInstanceList )
@@ -684,7 +685,7 @@ public class ActivityReportingServiceImpl
 
                 programStageInstance.setDueDate( dueDate );
 
-                if ( program.isSingleEvent() )
+                if ( program.isWithoutRegistration() )
                 {
                     programStageInstance.setExecutionDate( dueDate );
                 }
@@ -995,7 +996,7 @@ public class ActivityReportingServiceImpl
                 mobileProgramStage.setCompleted( eachProgramStageInstance.isCompleted() );
 
                 // is single event
-                mobileProgramStage.setSingleEvent( programInstance.getProgram().isSingleEvent() );
+                mobileProgramStage.setSingleEvent( programInstance.getProgram().isWithoutRegistration() );
 
                 // Set all data elements
                 mobileProgramStage.setDataElements( getDataElementsForMobile( programStage, eachProgramStageInstance ) );
@@ -1165,26 +1166,25 @@ public class ActivityReportingServiceImpl
     }
 
     @Override
-    public org.hisp.dhis.api.mobile.model.LWUITmodel.Program getAllProgramByOrgUnit( int orgUnitId, String programType )
+    public org.hisp.dhis.api.mobile.model.LWUITmodel.Program getAllProgramByOrgUnit( int orgUnitId, String type )
         throws NotAllowedException
     {
         String programsInfo = "";
 
-        int programTypeInt = Integer.valueOf( programType );
-
         OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( orgUnitId );
 
         List<Program> tempPrograms = null;
-
-        if ( programTypeInt == Program.SINGLE_EVENT_WITHOUT_REGISTRATION )
+        ProgramType programType = ProgramType.fromValue( type );
+        
+        if ( programType == ProgramType.WITHOUT_REGISTRATION )
         {
             tempPrograms = new ArrayList<>(
-                programService.getProgramsByCurrentUser( Program.SINGLE_EVENT_WITHOUT_REGISTRATION ) );
+                programService.getProgramsByCurrentUser( ProgramType.WITHOUT_REGISTRATION ) );
         }
-        else if ( programTypeInt == Program.MULTIPLE_EVENTS_WITH_REGISTRATION )
+        else if ( programType == ProgramType.WITH_REGISTRATION )
         {
             tempPrograms = new ArrayList<>(
-                programService.getProgramsByCurrentUser( Program.MULTIPLE_EVENTS_WITH_REGISTRATION ) );
+                programService.getProgramsByCurrentUser( ProgramType.WITH_REGISTRATION ) );
         }
 
         List<Program> programs = new ArrayList<>();
@@ -1235,7 +1235,7 @@ public class ActivityReportingServiceImpl
         else
         {
             Program program = programService.getProgram( Integer.parseInt( programInfo ) );
-            if ( program.isSingleEvent() )
+            if ( program.isWithoutRegistration() )
             {
                 return getMobileProgramWithoutData( program );
             }
@@ -1747,7 +1747,7 @@ public class ActivityReportingServiceImpl
             }
         }
 
-        Grid trackedEntityInstanceGrid = entityInstanceService.getTrackedEntityInstances( param );
+        Grid trackedEntityInstanceGrid = entityInstanceService.getTrackedEntityInstancesGrid( param );
         List<List<Object>> listOfTrackedEntityInstance = trackedEntityInstanceGrid.getRows();
 
         if ( listOfTrackedEntityInstance.size() == 0 )
@@ -1861,7 +1861,7 @@ public class ActivityReportingServiceImpl
         param.setEventStartDate( fromDate );
         param.setEventEndDate( toDate );
 
-        Grid programStageInstanceGrid = entityInstanceService.getTrackedEntityInstances( param );
+        Grid programStageInstanceGrid = entityInstanceService.getTrackedEntityInstancesGrid( param );
         List<List<Object>> rows = programStageInstanceGrid.getRows();
 
         if ( rows.size() == 0 )
@@ -2191,7 +2191,7 @@ public class ActivityReportingServiceImpl
         param.setEventStartDate( fromDate );
         param.setEventEndDate( toDate );
 
-        Grid programStageInstanceGrid = entityInstanceService.getTrackedEntityInstances( param );
+        Grid programStageInstanceGrid = entityInstanceService.getTrackedEntityInstancesGrid( param );
         List<List<Object>> listOfListProgramStageInstance = programStageInstanceGrid.getRows();
 
         if ( listOfListProgramStageInstance.size() == 0 )

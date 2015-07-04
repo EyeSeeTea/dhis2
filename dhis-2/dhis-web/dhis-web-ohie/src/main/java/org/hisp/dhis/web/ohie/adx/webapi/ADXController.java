@@ -1,4 +1,4 @@
-package org.hisp.dhis.importexport.action.util;
+package org.hisp.dhis.web.ohie.adx.webapi;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,55 +28,52 @@ package org.hisp.dhis.importexport.action.util;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.dxf2.common.ImportOptions;
-import org.hisp.dhis.dxf2.gml.GmlImportService;
-import org.hisp.dhis.importexport.ImportStrategy;
-import org.hisp.dhis.scheduling.TaskId;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.InputStream;
+import org.hisp.dhis.dxf2.adx.ADXDataService;
+import org.hisp.dhis.dxf2.common.JacksonUtils;
+import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
+
+import static org.hisp.dhis.webapi.utils.ContextUtils.*;
 
 /**
- * @author Halvdan Hoem Grelland
+ *
+ * @author bobj
  */
-public class ImportMetaDataGmlTask
-    implements Runnable
+
+@Controller
+@RequestMapping( value = ADXController.RESOURCE_PATH )
+public class ADXController
 {
-    private TaskId taskId;
+    public static final String RESOURCE_PATH = "/dataValueSets";
 
-    private String userUid;
+    private static final Log log = LogFactory.getLog( ADXController.class );
 
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
+    @Autowired
+    private ADXDataService adxService;
 
-    private GmlImportService gmlImportService;
-
-    private ImportOptions importOptions;
-
-    private InputStream inputStream;
-
-    // -------------------------------------------------------------------------
-    // Constructors
-    // -------------------------------------------------------------------------
-
-    public ImportMetaDataGmlTask( String userUid, GmlImportService gmlImportService,
-        ImportOptions importOptions, InputStream inputStream, TaskId taskId )
+    @RequestMapping( method = RequestMethod.POST, consumes = "application/xml" )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_DATAVALUE_ADD')" )
+    public void postXMLDataValueSet( ImportOptions importOptions,
+        HttpServletResponse response, InputStream in, Model model ) throws IOException
     {
-        this.userUid = userUid;
-        this.gmlImportService = gmlImportService;
-        this.importOptions = importOptions;
-        this.inputStream = inputStream;
-        this.taskId = taskId;
+        ImportSummaries importSummaries = adxService.postData( in, importOptions );
+        
+        log.debug( "Data values set saved" );
+
+        response.setContentType( CONTENT_TYPE_XML );
+        JacksonUtils.toXml( response.getOutputStream(), importSummaries );
     }
 
-    // -------------------------------------------------------------------------
-    // Runnable implementation
-    // -------------------------------------------------------------------------
-
-    @Override
-    public void run()
-    {
-        importOptions.setImportStrategy( ImportStrategy.UPDATE.name() );
-        gmlImportService.importGml( inputStream, userUid, importOptions, taskId );
-    }
 }

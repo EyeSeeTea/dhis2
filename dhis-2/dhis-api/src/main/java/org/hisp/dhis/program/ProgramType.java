@@ -1,7 +1,5 @@
-package org.hisp.dhis.trackedentity;
-
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,40 +25,41 @@ package org.hisp.dhis.trackedentity;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-import org.hisp.dhis.common.GenericIdentifiableObjectStore;
-import org.hisp.dhis.program.Program;
-import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
-
-import java.util.List;
-import java.util.Map;
+package org.hisp.dhis.program;
 
 /**
- * @author Abyot Asalefew Gizaw
- * @version $Id$
+ * @author Chau Thu Tran
+ *
+ * @version $ ProgramType.java Jul 1, 2015 3:09:12 PM $
  */
-public interface TrackedEntityInstanceStore
-    extends GenericIdentifiableObjectStore<TrackedEntityInstance>
+public enum ProgramType
 {
-    final String ID = TrackedEntityInstanceStore.class.getName();
+    WITH_REGISTRATION("with_registration"), 
+    WITHOUT_REGISTRATION("without_registration");
+    
+    private final String value;
 
-    final int MAX_RESULTS = 50000;
+    private ProgramType( String value )
+    {
+        this.value = value;
+    }
 
-    int countTrackedEntityInstances( TrackedEntityInstanceQueryParams params );
+    public static ProgramType fromValue( String value )
+    {
+       for ( ProgramType programType : ProgramType.values() )
+        {
+            if ( programType.value.equalsIgnoreCase( value ) )
+            {
+                return programType;
+            }
+        }
 
-    List<TrackedEntityInstance> getTrackedEntityInstances( TrackedEntityInstanceQueryParams params );
-
-    List<Map<String, String>> getTrackedEntityInstancesGrid( TrackedEntityInstanceQueryParams params );
-
-    int getTrackedEntityInstanceCount( TrackedEntityInstanceQueryParams params );
-
-    /**
-     * Returns null if valid, a descriptive, non-null string if invalid.
-     *
-     * @param instance
-     * @param attributeValue
-     * @param program
-     * @return
-     */
-    String validate( TrackedEntityInstance instance, TrackedEntityAttributeValue attributeValue, Program program );
+        return null;
+    }
+    
+    public String getValue()
+    {
+        return value;
+    }
+    
 }

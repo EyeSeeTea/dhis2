@@ -1,7 +1,5 @@
-package org.hisp.dhis.trackedentity;
-
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,40 +25,21 @@ package org.hisp.dhis.trackedentity;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.hisp.dhis.program;
 
-import org.hisp.dhis.common.GenericIdentifiableObjectStore;
-import org.hisp.dhis.program.Program;
-import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
-
-import java.util.List;
-import java.util.Map;
+import org.hisp.dhis.hibernate.EnumUserType;
+import org.hisp.dhis.program.ProgramType;
 
 /**
- * @author Abyot Asalefew Gizaw
- * @version $Id$
+ * @author Chau Thu Tran
+ *
+ * @version $ ProgramTypeUserType.java Jul 1, 2015 3:32:02 PM $
  */
-public interface TrackedEntityInstanceStore
-    extends GenericIdentifiableObjectStore<TrackedEntityInstance>
+public class ProgramTypeUserType
+    extends EnumUserType<ProgramType>
 {
-    final String ID = TrackedEntityInstanceStore.class.getName();
-
-    final int MAX_RESULTS = 50000;
-
-    int countTrackedEntityInstances( TrackedEntityInstanceQueryParams params );
-
-    List<TrackedEntityInstance> getTrackedEntityInstances( TrackedEntityInstanceQueryParams params );
-
-    List<Map<String, String>> getTrackedEntityInstancesGrid( TrackedEntityInstanceQueryParams params );
-
-    int getTrackedEntityInstanceCount( TrackedEntityInstanceQueryParams params );
-
-    /**
-     * Returns null if valid, a descriptive, non-null string if invalid.
-     *
-     * @param instance
-     * @param attributeValue
-     * @param program
-     * @return
-     */
-    String validate( TrackedEntityInstance instance, TrackedEntityAttributeValue attributeValue, Program program );
+    public ProgramTypeUserType()
+    {
+        super( ProgramType.class );
+    }
 }

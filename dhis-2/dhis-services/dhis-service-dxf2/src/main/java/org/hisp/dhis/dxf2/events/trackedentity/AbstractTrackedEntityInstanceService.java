@@ -35,6 +35,7 @@ import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.common.QueryOperator;
+import org.hisp.dhis.commons.collection.CachingMap;
 import org.hisp.dhis.dbms.DbmsManager;
 import org.hisp.dhis.dxf2.importsummary.ImportConflict;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
@@ -53,7 +54,6 @@ import org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueService;
 import org.hisp.dhis.user.UserService;
-import org.hisp.dhis.commons.collection.CachingMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
@@ -108,6 +108,19 @@ public abstract class AbstractTrackedEntityInstanceService
     // -------------------------------------------------------------------------
 
     @Override
+    public List<TrackedEntityInstance> getTrackedEntityInstances( List<org.hisp.dhis.trackedentity.TrackedEntityInstance> trackedEntityInstances )
+    {
+        List<TrackedEntityInstance> teiItems = new ArrayList<>();
+
+        for ( org.hisp.dhis.trackedentity.TrackedEntityInstance trackedEntityInstance : trackedEntityInstances )
+        {
+            teiItems.add( getTrackedEntityInstance( trackedEntityInstance ) );
+        }
+
+        return teiItems;
+    }
+
+    @Override
     public TrackedEntityInstance getTrackedEntityInstance( String uid )
     {
         return getTrackedEntityInstance( teiService.getTrackedEntityInstance( uid ) );
@@ -132,6 +145,7 @@ public abstract class AbstractTrackedEntityInstanceService
         trackedEntityInstance.setOrgUnit( entityInstance.getOrganisationUnit().getUid() );
         trackedEntityInstance.setTrackedEntity( entityInstance.getTrackedEntity().getUid() );
         trackedEntityInstance.setCreated( entityInstance.getCreated().toString() );
+        trackedEntityInstance.setLastUpdated( entityInstance.getLastUpdated().toString() );
 
         Collection<Relationship> relationships = relationshipService.getRelationshipsForTrackedEntityInstance( entityInstance );
 
@@ -430,7 +444,7 @@ public abstract class AbstractTrackedEntityInstanceService
             params.setOrganisationUnitMode( OrganisationUnitSelectionMode.ALL );
         }
 
-        Grid instances = teiService.getTrackedEntityInstances( params );
+        Grid instances = teiService.getTrackedEntityInstancesGrid( params );
 
         if ( instances.getHeight() == 0 || (tei != null && instances.getHeight() == 1 && instances.getRow( 0 ).contains( tei.getUid() )) )
         {
