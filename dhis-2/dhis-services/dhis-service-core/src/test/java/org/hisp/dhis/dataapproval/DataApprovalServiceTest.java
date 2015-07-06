@@ -86,6 +86,9 @@ public class DataApprovalServiceTest
     private DataApprovalLevelService dataApprovalLevelService;
 
     @Autowired
+    private DataApprovalWorkflowService dataApprovalWorkflowService;
+
+    @Autowired
     private PeriodService periodService;
 
     @Autowired
@@ -117,6 +120,7 @@ public class DataApprovalServiceTest
 
     private DataSet dataSetA;
     private DataSet dataSetB;
+    private DataSet dataSetC;
 
     private Period periodA; // Monthly: Jan
     private Period periodB; // Monthly: Feb
@@ -143,6 +147,11 @@ public class DataApprovalServiceTest
     private DataApprovalLevel level1EFGH;
     private DataApprovalLevel level2ABCD;
     private DataApprovalLevel level3ABCD;
+
+    private DataApprovalWorkflow workflow1;
+    private DataApprovalWorkflow workflow12;
+    private DataApprovalWorkflow workflow3;
+    private DataApprovalWorkflow workflow1234;
 
     private User userA;
     private User userB;
@@ -203,12 +212,15 @@ public class DataApprovalServiceTest
 
         dataSetA = createDataSet( 'A', periodType );
         dataSetB = createDataSet( 'B', periodType );
+        dataSetC = createDataSet( 'C', periodType );
 
         dataSetA.setCategoryCombo( categoryService.getDefaultDataElementCategoryCombo() );
         dataSetB.setCategoryCombo( categoryService.getDefaultDataElementCategoryCombo() );
+        dataSetC.setCategoryCombo( categoryService.getDefaultDataElementCategoryCombo() );
 
         dataSetService.addDataSet( dataSetA );
         dataSetService.addDataSet( dataSetB );
+        dataSetService.addDataSet( dataSetC );
 
         periodA = createPeriod( "201401" ); // Monthly: Jan
         periodB = createPeriod( "201402" ); // Monthly: Feb
@@ -269,6 +281,11 @@ public class DataApprovalServiceTest
         level2 = new DataApprovalLevel( "level2", 2, null );
         level3 = new DataApprovalLevel( "level3", 3, null );
         level4 = new DataApprovalLevel( "level4", 4, null );
+
+        workflow1 = new DataApprovalWorkflow( "workflow1", newHashSet( level1 ) );
+        workflow12 = new DataApprovalWorkflow( "workflow12", newHashSet( level1, level2 ) );
+        workflow3 = new DataApprovalWorkflow( "workflow3", newHashSet( level3 ) );
+        workflow1234 = new DataApprovalWorkflow( "workflow1234", newHashSet( level1, level2, level3, level4 ) );
 
         userA = createUser( 'A' );
         userB = createUser( 'B' );
@@ -434,9 +451,13 @@ public class DataApprovalServiceTest
     {
         dataApprovalLevelService.addDataApprovalLevel( level1, 1 );
         dataApprovalLevelService.addDataApprovalLevel( level2, 2 );
+        dataApprovalWorkflowService.addDataApprovalWorkflow( workflow12 );
 
-        dataSetA.setApproveData( true );
-        dataSetB.setApproveData( true );
+        dataSetA.setDataApprovalWorkflow( workflow12 );
+        dataSetB.setDataApprovalWorkflow( workflow12 );
+
+        dataSetService.updateDataSet( dataSetA );
+        dataSetService.updateDataSet( dataSetB );
 
         organisationUnitA.addDataSet( dataSetA );
         organisationUnitB.addDataSet( dataSetA );
@@ -525,8 +546,10 @@ public class DataApprovalServiceTest
     public void testAddDuplicateDataApproval() throws Exception
     {
         dataApprovalLevelService.addDataApprovalLevel( level1 );
+        dataApprovalWorkflowService.addDataApprovalWorkflow( workflow1 );
 
-        dataSetA.setApproveData( true );
+        dataSetA.setDataApprovalWorkflow( workflow1 );
+        dataSetService.updateDataSet( dataSetA );
 
         organisationUnitA.addDataSet( dataSetA );
 
@@ -550,8 +573,10 @@ public class DataApprovalServiceTest
     {
         dataApprovalLevelService.addDataApprovalLevel( level1 );
         dataApprovalLevelService.addDataApprovalLevel( level2 );
+        dataApprovalWorkflowService.addDataApprovalWorkflow( workflow12 );
 
-        dataSetA.setApproveData( true );
+        dataSetA.setDataApprovalWorkflow( workflow12 );
+        dataSetService.updateDataSet( dataSetA );
 
         organisationUnitA.addDataSet( dataSetA );
         organisationUnitB.addDataSet( dataSetA );
@@ -566,7 +591,8 @@ public class DataApprovalServiceTest
         DataApproval dataApprovalA = new DataApproval( level1, dataSetA, periodA, organisationUnitA, defaultCombo, NOT_ACCEPTED, date, userA );
         DataApproval dataApprovalB = new DataApproval( level2, dataSetA, periodA, organisationUnitB, defaultCombo, NOT_ACCEPTED, date, userB );
 
-        dataSetA.setApproveData( true );
+        dataSetA.setDataApprovalWorkflow( workflow12 );
+        dataSetService.updateDataSet( dataSetA );
 
         dataApprovalService.approveData( newArrayList( dataApprovalB ) );
         dataApprovalService.approveData( newArrayList( dataApprovalA ) );
@@ -592,6 +618,7 @@ public class DataApprovalServiceTest
         dataApprovalLevelService.addDataApprovalLevel( level2 );
         dataApprovalLevelService.addDataApprovalLevel( level3 );
         dataApprovalLevelService.addDataApprovalLevel( level4 );
+        dataApprovalWorkflowService.addDataApprovalWorkflow( workflow1234 );
 
         Set<OrganisationUnit> units = newHashSet( organisationUnitA );
 
@@ -609,7 +636,8 @@ public class DataApprovalServiceTest
 
         // Enabled for data set, and associated with the organisation units.
 
-        dataSetA.setApproveData( true );
+        dataSetA.setDataApprovalWorkflow( workflow1234 );
+        dataSetService.updateDataSet( dataSetA );
 
         organisationUnitA.addDataSet( dataSetA );
         organisationUnitB.addDataSet( dataSetA );
@@ -693,7 +721,9 @@ public class DataApprovalServiceTest
         assertEquals( DataApprovalState.APPROVED_ABOVE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitF, defaultCombo ).getState() );
 
         // Disable approval for data set.
-        dataSetA.setApproveData( false );
+        dataSetA.setDataApprovalWorkflow( null );
+        dataSetService.updateDataSet( dataSetA );
+
         assertEquals( DataApprovalState.UNAPPROVABLE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitA, defaultCombo ).getState() );
         assertEquals( DataApprovalState.UNAPPROVABLE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitB, defaultCombo ).getState() );
         assertEquals( DataApprovalState.UNAPPROVABLE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitC, defaultCombo ).getState() );
@@ -706,6 +736,7 @@ public class DataApprovalServiceTest
     public void testGetDataApprovalStateAbove() throws Exception
     {
         dataApprovalLevelService.addDataApprovalLevel( level3 );
+        dataApprovalWorkflowService.addDataApprovalWorkflow( workflow3 );
 
         Set<OrganisationUnit> units = newHashSet( organisationUnitA );
 
@@ -713,7 +744,8 @@ public class DataApprovalServiceTest
         setDependency( dataApprovalService, "currentUserService", currentUserService, CurrentUserService.class );
         setDependency( dataApprovalLevelService, "currentUserService", currentUserService, CurrentUserService.class );
 
-        dataSetA.setApproveData( true );
+        dataSetA.setDataApprovalWorkflow( workflow3 );
+        dataSetService.updateDataSet( dataSetA );
 
         organisationUnitC.addDataSet( dataSetA );
         organisationUnitD.addDataSet( dataSetA );
@@ -735,6 +767,7 @@ public class DataApprovalServiceTest
         dataApprovalLevelService.addDataApprovalLevel( level2 );
         dataApprovalLevelService.addDataApprovalLevel( level3 );
         dataApprovalLevelService.addDataApprovalLevel( level4 );
+        dataApprovalWorkflowService.addDataApprovalWorkflow( workflow1234 );
 
         Set<OrganisationUnit> units = newHashSet( organisationUnitA );
 
@@ -742,7 +775,8 @@ public class DataApprovalServiceTest
         setDependency( dataApprovalService, "currentUserService", currentUserService, CurrentUserService.class );
         setDependency( dataApprovalLevelService, "currentUserService", currentUserService, CurrentUserService.class );
 
-        dataSetA.setApproveData( true );
+        dataSetA.setDataApprovalWorkflow( workflow1234 );
+        dataSetService.updateDataSet( dataSetA );
 
         organisationUnitD.addDataSet( dataSetA );
         organisationUnitF.addDataSet( dataSetA );
@@ -795,6 +829,7 @@ public class DataApprovalServiceTest
         dataApprovalLevelService.addDataApprovalLevel( level2 );
         dataApprovalLevelService.addDataApprovalLevel( level3 );
         dataApprovalLevelService.addDataApprovalLevel( level4 );
+        dataApprovalWorkflowService.addDataApprovalWorkflow( workflow1234 );
 
         Set<OrganisationUnit> units = newHashSet( organisationUnitA );
 
@@ -802,7 +837,8 @@ public class DataApprovalServiceTest
         setDependency( dataApprovalService, "currentUserService", currentUserService, CurrentUserService.class );
         setDependency( dataApprovalLevelService, "currentUserService", currentUserService, CurrentUserService.class );
 
-        dataSetA.setApproveData( true );
+        dataSetA.setDataApprovalWorkflow( workflow1234 );
+        dataSetService.updateDataSet( dataSetA );
 
         organisationUnitA.addDataSet( dataSetA );
         organisationUnitD.addDataSet( dataSetA );
@@ -823,8 +859,10 @@ public class DataApprovalServiceTest
         dataApprovalLevelService.addDataApprovalLevel( level2 );
         dataApprovalLevelService.addDataApprovalLevel( level3 );
         dataApprovalLevelService.addDataApprovalLevel( level4 );
+        dataApprovalWorkflowService.addDataApprovalWorkflow( workflow1234 );
 
-        dataSetA.setApproveData( true );
+        dataSetA.setDataApprovalWorkflow( workflow1234 );
+        dataSetService.updateDataSet( dataSetA );
 
         organisationUnitA.addDataSet( dataSetA );
         organisationUnitB.addDataSet( dataSetA );
@@ -934,8 +972,10 @@ public class DataApprovalServiceTest
         dataApprovalLevelService.addDataApprovalLevel( level2 );
         dataApprovalLevelService.addDataApprovalLevel( level3 );
         dataApprovalLevelService.addDataApprovalLevel( level4 );
+        dataApprovalWorkflowService.addDataApprovalWorkflow( workflow1234 );
 
-        dataSetA.setApproveData( true );
+        dataSetA.setDataApprovalWorkflow( workflow1234 );
+        dataSetService.updateDataSet( dataSetA );
 
         organisationUnitA.addDataSet( dataSetA );
         organisationUnitB.addDataSet( dataSetA );
@@ -1014,8 +1054,10 @@ public class DataApprovalServiceTest
         dataApprovalLevelService.addDataApprovalLevel( level2 );
         dataApprovalLevelService.addDataApprovalLevel( level3 );
         dataApprovalLevelService.addDataApprovalLevel( level4 );
+        dataApprovalWorkflowService.addDataApprovalWorkflow( workflow1234 );
 
-        dataSetA.setApproveData( true );
+        dataSetA.setDataApprovalWorkflow( workflow1234 );
+        dataSetService.updateDataSet( dataSetA );
 
         organisationUnitA.addDataSet( dataSetA );
         organisationUnitB.addDataSet( dataSetA );
@@ -1084,8 +1126,10 @@ public class DataApprovalServiceTest
         dataApprovalLevelService.addDataApprovalLevel( level2 );
         dataApprovalLevelService.addDataApprovalLevel( level3 );
         dataApprovalLevelService.addDataApprovalLevel( level4 );
+        dataApprovalWorkflowService.addDataApprovalWorkflow( workflow1234 );
 
-        dataSetA.setApproveData( true );
+        dataSetA.setDataApprovalWorkflow( workflow1234 );
+        dataSetService.updateDataSet( dataSetA );
 
         organisationUnitA.addDataSet( dataSetA );
         organisationUnitB.addDataSet( dataSetA );
@@ -1121,8 +1165,10 @@ public class DataApprovalServiceTest
         dataApprovalLevelService.addDataApprovalLevel( level2 );
         dataApprovalLevelService.addDataApprovalLevel( level3 );
         dataApprovalLevelService.addDataApprovalLevel( level4 );
+        dataApprovalWorkflowService.addDataApprovalWorkflow( workflow1234 );
 
-        dataSetA.setApproveData( true );
+        dataSetA.setDataApprovalWorkflow( workflow1234 );
+        dataSetService.updateDataSet( dataSetA );
 
         organisationUnitA.addDataSet( dataSetA );
         organisationUnitB.addDataSet( dataSetA );
@@ -1193,8 +1239,10 @@ public class DataApprovalServiceTest
         dataApprovalLevelService.addDataApprovalLevel( level2 );
         dataApprovalLevelService.addDataApprovalLevel( level3 );
         dataApprovalLevelService.addDataApprovalLevel( level4 );
+        dataApprovalWorkflowService.addDataApprovalWorkflow( workflow1234 );
 
-        dataSetA.setApproveData( true );
+        dataSetA.setDataApprovalWorkflow( workflow1234 );
+        dataSetService.updateDataSet( dataSetA );
 
         organisationUnitA.addDataSet( dataSetA );
         organisationUnitB.addDataSet( dataSetA );
@@ -1265,8 +1313,10 @@ public class DataApprovalServiceTest
         dataApprovalLevelService.addDataApprovalLevel( level2 );
         dataApprovalLevelService.addDataApprovalLevel( level3 );
         dataApprovalLevelService.addDataApprovalLevel( level4 );
+        dataApprovalWorkflowService.addDataApprovalWorkflow( workflow1234 );
 
-        dataSetA.setApproveData( true );
+        dataSetA.setDataApprovalWorkflow( workflow1234 );
+        dataSetService.updateDataSet( dataSetA );
 
         organisationUnitA.addDataSet( dataSetA );
         organisationUnitB.addDataSet( dataSetA );
@@ -1336,8 +1386,10 @@ public class DataApprovalServiceTest
         dataApprovalLevelService.addDataApprovalLevel( level2 );
         dataApprovalLevelService.addDataApprovalLevel( level3 );
         dataApprovalLevelService.addDataApprovalLevel( level4 );
+        dataApprovalWorkflowService.addDataApprovalWorkflow( workflow1234 );
 
-        dataSetA.setApproveData( true );
+        dataSetA.setDataApprovalWorkflow( workflow1234 );
+        dataSetService.updateDataSet( dataSetA );
 
         organisationUnitA.addDataSet( dataSetA );
         organisationUnitB.addDataSet( dataSetA );
@@ -1413,6 +1465,7 @@ public class DataApprovalServiceTest
         dataApprovalLevelService.addDataApprovalLevel( level1EFGH, 2 );
         dataApprovalLevelService.addDataApprovalLevel( level2ABCD, 3 );
         dataApprovalLevelService.addDataApprovalLevel( level3ABCD, 4 );
+        dataApprovalWorkflowService.addDataApprovalWorkflow( workflow1234 );
 
         Set<OrganisationUnit> units = newHashSet( organisationUnitA );
 
@@ -1421,7 +1474,8 @@ public class DataApprovalServiceTest
         setDependency( dataApprovalLevelService, "currentUserService", currentUserService, CurrentUserService.class );
         setDependency( organisationUnitService, "currentUserService", currentUserService, CurrentUserService.class );
 
-        dataSetA.setApproveData( true );
+        dataSetA.setDataApprovalWorkflow( workflow1234 );
+        dataSetService.updateDataSet( dataSetA );
 
         organisationUnitA.addDataSet( dataSetA );
         organisationUnitB.addDataSet( dataSetA );
@@ -1549,8 +1603,6 @@ public class DataApprovalServiceTest
     {
         setUpCategories();
 
-        dataSetA.setApproveData( true );
-
         organisationUnitA.addDataSet( dataSetA );
         organisationUnitB.addDataSet( dataSetA );
 
@@ -1562,9 +1614,16 @@ public class DataApprovalServiceTest
 
         Date date = new Date();
 
+        dataApprovalLevelService.addDataApprovalLevel( level1EFGH );
+
+        DataApprovalWorkflow workflowA = new DataApprovalWorkflow( "workflowA", newHashSet( level1EFGH ) );
+        dataApprovalWorkflowService.addDataApprovalWorkflow( workflowA );
+
+        dataSetA.setDataApprovalWorkflow( workflowA );
+        dataSetService.updateDataSet( dataSetA );
+
         DataApproval dab = new DataApproval( level1EFGH, dataSetA, periodA, organisationUnitA, null, NOT_ACCEPTED, date, userA );
 
-        dataApprovalLevelService.addDataApprovalLevel( level1EFGH );
         dataApprovalService.approveData( newArrayList( dab ) );
 
         assertEquals( DataApprovalState.UNAPPROVED_ABOVE, dataApprovalService.getDataApprovalStatusAndPermissions( dataSetA, periodA, organisationUnitA, defaultCombo ).getState() );
@@ -1596,6 +1655,13 @@ public class DataApprovalServiceTest
         assertNull( dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitB, optionComboAE ).getDataApprovalLevel() );
 
         dataApprovalLevelService.addDataApprovalLevel( level1ABCD );
+
+        DataApprovalWorkflow workflowB = new DataApprovalWorkflow( "workflowB", newHashSet( level1ABCD, level1EFGH ) );
+        dataApprovalWorkflowService.addDataApprovalWorkflow( workflowB );
+
+        dataSetA.setDataApprovalWorkflow( workflowB );
+        dataSetService.updateDataSet( dataSetA );
+
         dataApprovalService.approveData( newArrayList( new DataApproval( level1ABCD, dataSetA, periodA, organisationUnitA, null, NOT_ACCEPTED, date, userA ) ) );
 
         assertEquals( DataApprovalState.UNAPPROVED_ABOVE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitA, defaultCombo ).getState() );
@@ -1657,6 +1723,13 @@ public class DataApprovalServiceTest
         assertEquals( level1ABCD, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitB, optionComboAE ).getDataApprovalLevel() );
 
         dataApprovalLevelService.addDataApprovalLevel( level1 );
+
+        DataApprovalWorkflow workflowC = new DataApprovalWorkflow( "workflowB", newHashSet( level1, level1ABCD, level1EFGH ) );
+        dataApprovalWorkflowService.addDataApprovalWorkflow( workflowC );
+
+        dataSetA.setDataApprovalWorkflow( workflowB );
+        dataSetService.updateDataSet( dataSetA );
+
         dataApprovalService.approveData( newArrayList( new DataApproval( level1, dataSetA, periodA, organisationUnitA, defaultCombo, NOT_ACCEPTED, date, userA ) ) );
 
         assertEquals( DataApprovalState.APPROVED_HERE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitA, defaultCombo ).getState() );
@@ -1697,7 +1770,11 @@ public class DataApprovalServiceTest
         dataApprovalLevelService.addDataApprovalLevel( level2 );
         dataApprovalLevelService.addDataApprovalLevel( level3ABCD );
 
-        dataSetA.setApproveData( true );
+        DataApprovalWorkflow workflowA = new DataApprovalWorkflow( "workflowA", newHashSet( level2, level3ABCD ) );
+        dataApprovalWorkflowService.addDataApprovalWorkflow( workflowA );
+
+        dataSetA.setDataApprovalWorkflow( workflowA );
+        dataSetService.updateDataSet( dataSetA );
 
         organisationUnitC.addDataSet( dataSetA );
         organisationUnitE.addDataSet( dataSetA );
@@ -1749,6 +1826,48 @@ public class DataApprovalServiceTest
         assertEquals( DataApprovalState.UNAPPROVED_READY, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitC, null ).getState() );
         assertEquals( DataApprovalState.APPROVED_HERE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitE, null ).getState() );
         assertEquals( DataApprovalState.UNAPPROVED_READY, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitB, defaultCombo ).getState() );
+    }
+
+    @Test
+    public void testWorkflows() throws Exception
+    {
+        dataApprovalLevelService.addDataApprovalLevel( level1 );
+        dataApprovalLevelService.addDataApprovalLevel( level2 );
+        dataApprovalLevelService.addDataApprovalLevel( level3 );
+        dataApprovalLevelService.addDataApprovalLevel( level4 );
+
+        dataApprovalWorkflowService.addDataApprovalWorkflow( workflow1234 );
+        dataApprovalWorkflowService.addDataApprovalWorkflow( workflow12 );
+        dataApprovalWorkflowService.addDataApprovalWorkflow( workflow3 );
+
+        dataSetA.setDataApprovalWorkflow( workflow1234 );
+        dataSetB.setDataApprovalWorkflow( workflow12 );
+        dataSetC.setDataApprovalWorkflow( workflow3 );
+
+        dataSetService.updateDataSet( dataSetA );
+        dataSetService.updateDataSet( dataSetB );
+        dataSetService.updateDataSet( dataSetC );
+
+        Set<OrganisationUnit> units = newHashSet( organisationUnitC );
+
+        CurrentUserService currentUserService = new MockCurrentUserService( units, null, AUTH_APPR_LEVEL, DataApproval.AUTH_APPROVE );
+        setDependency( dataApprovalService, "currentUserService", currentUserService, CurrentUserService.class );
+        setDependency( dataApprovalLevelService, "currentUserService", currentUserService, CurrentUserService.class );
+        setDependency( organisationUnitService, "currentUserService", currentUserService, CurrentUserService.class );
+
+        assertEquals( "UNAPPROVED_WAITING level=null approve=F unapprove=F accept=F unaccept=F read=T", statusAndPermissions( dataSetA, periodA, organisationUnitC, defaultCombo ) );
+        assertEquals( "UNAPPROVED_ABOVE level=null approve=F unapprove=F accept=F unaccept=F read=T", statusAndPermissions( dataSetB, periodA, organisationUnitC, defaultCombo ) );
+        assertEquals( "UNAPPROVED_READY level=null approve=T unapprove=F accept=F unaccept=F read=T", statusAndPermissions( dataSetC, periodA, organisationUnitC, defaultCombo ) );
+
+        Date date = new Date();
+
+        dataApprovalStore.addDataApproval( new DataApproval( level4, dataSetA, periodA, organisationUnitC, defaultCombo, NOT_ACCEPTED, date, userA ) );
+        dataApprovalStore.addDataApproval( new DataApproval( level2, dataSetB, periodA, organisationUnitC, defaultCombo, NOT_ACCEPTED, date, userA ) );
+        dataApprovalStore.addDataApproval( new DataApproval( level3, dataSetC, periodA, organisationUnitC, defaultCombo, NOT_ACCEPTED, date, userA ) );
+
+        assertEquals( "APPROVED_HERE level=4 approve=T unapprove=F accept=F unaccept=F read=T", statusAndPermissions( dataSetA, periodA, organisationUnitC, defaultCombo ) );
+        assertEquals( "APPROVED_HERE level=2 approve=F unapprove=F accept=F unaccept=F read=T", statusAndPermissions( dataSetB, periodA, organisationUnitC, defaultCombo ) );
+        assertEquals( "APPROVED_HERE level=3 approve=F unapprove=T accept=F unaccept=F read=T", statusAndPermissions( dataSetC, periodA, organisationUnitC, defaultCombo ) );
     }
 
     /**

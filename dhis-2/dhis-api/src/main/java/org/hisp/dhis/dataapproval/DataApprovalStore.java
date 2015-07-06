@@ -94,12 +94,13 @@ public interface DataApprovalStore
      * combos the user is allowed to see. If the list is constrained to a given
      * attribute category combination, then only a single value is returned.
      *
-     * @param dataSets Data sets to look within
+     * @param workflow Data approval workflow to check
+     * @param dataSets Data sets to look within (must all have same workflow)
      * @param period Period to look within
      * @param orgUnit Organisation unit to look for (null means all)
      * @param attributeOptionCombo Attribute option combo (null means all)
      * @return data approval status objects
      */
-    List<DataApprovalStatus> getDataApprovals( Set<DataSet> dataSets, Period period,
+    List<DataApprovalStatus> getDataApprovals( DataApprovalWorkflow workflow, Set<DataSet> dataSets, Period period,
         OrganisationUnit orgUnit, DataElementCategoryOptionCombo attributeOptionCombo );
 }

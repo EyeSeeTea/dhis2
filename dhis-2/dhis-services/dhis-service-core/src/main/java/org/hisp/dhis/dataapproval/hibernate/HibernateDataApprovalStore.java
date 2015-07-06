@@ -61,6 +61,7 @@ import org.hisp.dhis.dataapproval.DataApprovalLevelService;
 import org.hisp.dhis.dataapproval.DataApprovalState;
 import org.hisp.dhis.dataapproval.DataApprovalStatus;
 import org.hisp.dhis.dataapproval.DataApprovalStore;
+import org.hisp.dhis.dataapproval.DataApprovalWorkflow;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
@@ -187,7 +188,7 @@ public class HibernateDataApprovalStore
     }
 
     @Override
-    public List<DataApprovalStatus> getDataApprovals( Set<DataSet> dataSets, Period period,
+    public List<DataApprovalStatus> getDataApprovals( DataApprovalWorkflow workflow, Set<DataSet> dataSets, Period period,
         OrganisationUnit orgUnit, DataElementCategoryOptionCombo attributeOptionCombo )
     {
         final CachingMap<Integer, DataElementCategoryOptionCombo> optionComboCache = new CachingMap<>();
@@ -198,7 +199,7 @@ public class HibernateDataApprovalStore
         Set<DataSet> validDataSets = new HashSet<DataSet>();
         for ( DataSet set : dataSets )
         {
-            if ( set.isApproveData() )
+            if ( set.getDataApprovalWorkflow() != null )
             {
                 validDataSets.add( set );
             }
@@ -259,7 +260,7 @@ public class HibernateDataApprovalStore
 
             for ( DataSet ds : validDataSets )
             {
-                if ( ds.isApproveData() && ( maySeeDefaultCategoryCombo || ds.getCategoryCombo() != defaultCategoryCombo ) )
+                if ( ds.getDataApprovalWorkflow() != null && ( maySeeDefaultCategoryCombo || ds.getCategoryCombo() != defaultCategoryCombo ) )
                 {
                     catComboIds.add( ds.getCategoryCombo().getId() );
                 }
@@ -275,7 +276,7 @@ public class HibernateDataApprovalStore
             categoryComboIds = TextUtils.getCommaDelimitedString( catComboIds );
         }
 
-        List<DataApprovalLevel> approvalLevels = dataApprovalLevelService.getAllDataApprovalLevels();
+        List<DataApprovalLevel> approvalLevels = workflow.getMembersSortedByLevel();
 
         if ( CollectionUtils.isEmpty( approvalLevels ) )
         {

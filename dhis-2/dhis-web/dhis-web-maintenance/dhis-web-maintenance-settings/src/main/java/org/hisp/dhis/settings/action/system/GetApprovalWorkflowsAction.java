@@ -1,5 +1,4 @@
-package org.hisp.dhis.reporting.dataapproval.action;
-
+package org.hisp.dhis.settings.action.system;
 /*
  * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
@@ -28,48 +27,41 @@ package org.hisp.dhis.reporting.dataapproval.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.period.PeriodType.getAvailablePeriodTypes;
+import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
+import org.hisp.dhis.dataapproval.DataApprovalWorkflow;
+import org.hisp.dhis.dataapproval.DataApprovalWorkflowService;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
-import org.hisp.dhis.dataelement.DataElementCategoryService;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetService;
-import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.commons.filter.Filter;
-import org.hisp.dhis.commons.filter.FilterUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.opensymphony.xwork2.Action;
-
-public class GetDataApprovalOptionsAction
+/**
+ * @author Jim Grace
+ */
+public class GetApprovalWorkflowsAction
     implements Action
 {
-    @Autowired
-    private DataElementCategoryService categoryService;
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
 
-    @Autowired
-    private DataSetService dataSetService;
-    
+    private DataApprovalWorkflowService dataApprovalWorkflowService;
+
+    public void setDataApprovalWorkflowService( DataApprovalWorkflowService dataApprovalWorkflowService )
+    {
+        this.dataApprovalWorkflowService = dataApprovalWorkflowService;
+    }
+
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
 
-    private List<DataSet> dataSets;
+    private List<DataApprovalWorkflow> dataApprovalWorkflows;
 
-    public List<DataSet> getDataSets()
+    public List<DataApprovalWorkflow> getDataApprovalWorkflows()
     {
-        return dataSets;
-    }
-
-    private List<PeriodType> periodTypes;
-
-    public List<PeriodType> getPeriodTypes()
-    {
-        return periodTypes;
+        return dataApprovalWorkflows;
     }
 
     // -------------------------------------------------------------------------
@@ -78,25 +70,11 @@ public class GetDataApprovalOptionsAction
 
     @Override
     public String execute()
-        throws Exception
     {
-        dataSets = new ArrayList<>( dataSetService.getAllDataSets() );
-        periodTypes = getAvailablePeriodTypes();
+        dataApprovalWorkflows = new ArrayList<>( dataApprovalWorkflowService.getAllDataApprovalWorkflows() );
 
-        FilterUtils.filter( dataSets, new DataSetApproveDataFilter() );
-        
-        Collections.sort( dataSets, IdentifiableObjectNameComparator.INSTANCE );
-        
+        Collections.sort( dataApprovalWorkflows, IdentifiableObjectNameComparator.INSTANCE );
+
         return SUCCESS;
-    }
-
-    class DataSetApproveDataFilter
-        implements Filter<DataSet>
-    {
-        @Override
-        public boolean retain( DataSet dataSet )
-        {
-            return dataSet != null && dataSet.getDataApprovalWorkflow() != null;
-        }        
     }
 }

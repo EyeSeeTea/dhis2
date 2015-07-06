@@ -399,7 +399,7 @@ public class DefaultResourceTableService
             values.add( dataSet != null ? dataSet.getId() : null );
             values.add( dataSet != null ? dataSet.getUid() : null );
             values.add( dataSet != null ? dataSet.getName() : null );
-            values.add( dataSet != null && dataSet.isApproveData() ? null : APPROVAL_LEVEL_HIGHEST );
+            values.add( dataSet != null && dataSet.getDataApprovalWorkflow() != null ? null : APPROVAL_LEVEL_HIGHEST );
             values.add( periodType != null ? periodType.getId() : null );
             values.add( periodType != null ? periodType.getName() : null );
 

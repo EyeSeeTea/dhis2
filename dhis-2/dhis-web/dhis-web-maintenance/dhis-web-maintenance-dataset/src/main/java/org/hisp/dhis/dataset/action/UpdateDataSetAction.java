@@ -36,6 +36,8 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.attribute.AttributeService;
+import org.hisp.dhis.dataapproval.DataApprovalWorkflow;
+import org.hisp.dhis.dataapproval.DataApprovalWorkflowService;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
@@ -98,6 +100,13 @@ public class UpdateDataSetAction
     public void setCategoryService( DataElementCategoryService categoryService )
     {
         this.categoryService = categoryService;
+    }
+
+    private DataApprovalWorkflowService dataApprovalWorkflowService;
+
+    public void setDataApprovalWorkflowService( DataApprovalWorkflowService dataApprovalWorkflowService )
+    {
+        this.dataApprovalWorkflowService = dataApprovalWorkflowService;
     }
 
     private SectionService sectionService;
@@ -188,11 +197,11 @@ public class UpdateDataSetAction
         this.notifyCompletingUser = notifyCompletingUser;
     }
 
-    private boolean approveData;
+    private Integer dataApprovalWorkflowId;
 
-    public void setApproveData( boolean approveData )
+    public void setDataApprovalWorkflowId( Integer dataApprovalWorkflowId )
     {
-        this.approveData = approveData;
+        this.dataApprovalWorkflowId = dataApprovalWorkflowId;
     }
 
     private boolean skipAggregation;
@@ -369,7 +378,6 @@ public class UpdateDataSetAction
         dataSet.setValidCompleteOnly( validCompleteOnly );
         dataSet.setNoValueRequiresComment( noValueRequiresComment );
         dataSet.setNotifyCompletingUser( notifyCompletingUser );
-        dataSet.setApproveData( approveData );
         dataSet.setMobile( mobile );
         dataSet.setSkipOffline( skipOffline );
         dataSet.setDataElementDecoration( dataElementDecoration );
@@ -381,6 +389,11 @@ public class UpdateDataSetAction
         if ( categoryComboId != null )
         {
             dataSet.setCategoryCombo( categoryService.getDataElementCategoryCombo( categoryComboId ) );
+        }
+
+        if ( dataApprovalWorkflowId != null )
+        {
+            dataSet.setDataApprovalWorkflow( dataApprovalWorkflowService.getDataApprovalWorkflow( dataApprovalWorkflowId ) );
         }
 
         if ( jsonAttributeValues != null )

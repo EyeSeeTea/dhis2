@@ -28,6 +28,7 @@ package org.hisp.dhis.dataapproval;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static com.google.common.collect.Sets.newHashSet;
 import static org.hisp.dhis.setting.SystemSettingManager.KEY_ACCEPTANCE_REQUIRED_FOR_APPROVAL;
 import static org.hisp.dhis.setting.SystemSettingManager.KEY_HIDE_UNAPPROVED_DATA_IN_ANALYTICS;
 import static org.junit.Assert.assertArrayEquals;
@@ -96,6 +97,9 @@ public class DataApprovalServiceCategoryOptionGroupTest
 
     @Autowired
     private DataApprovalLevelService dataApprovalLevelService;
+
+    @Autowired
+    private DataApprovalWorkflowService dataApprovalWorkflowService;
 
     @Autowired
     private PeriodService periodService;
@@ -199,7 +203,11 @@ public class DataApprovalServiceCategoryOptionGroupTest
     private DataApprovalLevel agencyLevel3;
     private DataApprovalLevel partnerLevel4;
 
+    private DataApprovalWorkflow workflowAll;
+    private DataApprovalWorkflow workflowAgency;
+
     private DataSet dataSetA;
+    private DataSet dataSetB;
 
     private Period periodA;
 
@@ -438,11 +446,11 @@ public class DataApprovalServiceCategoryOptionGroupTest
         categoryService.saveCategoryOptionGroup( partner2 );
 
         setPrivateAccess( agencyA, globalUsers, brazilInteragencyUsers, chinaInteragencyUsers, indiaInteragencyUsers,
-                brazilAgencyAUsers, chinaAgencyAUsers, indiaAgencyAUsers );
+            brazilAgencyAUsers, chinaAgencyAUsers, indiaAgencyAUsers );
         setPrivateAccess( agencyB, globalUsers, chinaInteragencyUsers, chinaAgencyBUsers );
         setPrivateAccess( partner1, globalUsers, brazilInteragencyUsers, chinaInteragencyUsers, indiaInteragencyUsers,
-                brazilAgencyAUsers, chinaAgencyAUsers, indiaAgencyAUsers,
-                brazilPartner1Users, chinaPartner1Users, indiaPartner1Users );
+            brazilAgencyAUsers, chinaAgencyAUsers, indiaAgencyAUsers,
+            brazilPartner1Users, chinaPartner1Users, indiaPartner1Users );
         setPrivateAccess( partner2, globalUsers, chinaInteragencyUsers, chinaAgencyAUsers, chinaPartner2Users );
 
         agencies = new CategoryOptionGroupSet( "Agencies" );
@@ -452,11 +460,11 @@ public class DataApprovalServiceCategoryOptionGroupTest
         categoryService.saveCategoryOptionGroupSet( agencies );
 
         setPrivateAccess( agencies, globalUsers, brazilInteragencyUsers, chinaInteragencyUsers, indiaInteragencyUsers,
-                brazilAgencyAUsers, chinaAgencyAUsers, chinaAgencyBUsers, chinaAgencyBUsers, indiaAgencyAUsers );
+            brazilAgencyAUsers, chinaAgencyAUsers, chinaAgencyBUsers, chinaAgencyBUsers, indiaAgencyAUsers );
 
         setPrivateAccess( partners, globalUsers, brazilInteragencyUsers, chinaInteragencyUsers, indiaInteragencyUsers,
-                brazilAgencyAUsers, chinaAgencyAUsers, chinaAgencyBUsers, chinaAgencyBUsers, indiaAgencyAUsers,
-                brazilPartner1Users, chinaPartner1Users, chinaPartner2Users, indiaPartner1Users);
+            brazilAgencyAUsers, chinaAgencyAUsers, chinaAgencyBUsers, chinaAgencyBUsers, indiaAgencyAUsers,
+            brazilPartner1Users, chinaPartner1Users, chinaPartner2Users, indiaPartner1Users );
 
         agencies.addCategoryOptionGroup( agencyA );
         agencies.addCategoryOptionGroup( agencyB );
@@ -486,10 +494,21 @@ public class DataApprovalServiceCategoryOptionGroupTest
         dataApprovalLevelService.addDataApprovalLevel( agencyLevel3, 3 );
         dataApprovalLevelService.addDataApprovalLevel( partnerLevel4, 4 );
 
+        workflowAll = new DataApprovalWorkflow( "workflowAll", newHashSet( globalLevel1, countryLevel2, agencyLevel3, partnerLevel4 ) );
+        workflowAgency = new DataApprovalWorkflow( "workflowAgency", newHashSet( globalLevel1, countryLevel2, agencyLevel3 ) );
+
+        dataApprovalWorkflowService.addDataApprovalWorkflow( workflowAll );
+        dataApprovalWorkflowService.addDataApprovalWorkflow( workflowAgency );
+
         dataSetA = createDataSet( 'A', PeriodType.getPeriodTypeByName( "Monthly" ) );
         dataSetA.setCategoryCombo( mechanismCategoryCombo );
-        dataSetA.setApproveData( true );
+        dataSetA.setDataApprovalWorkflow( workflowAll );
         dataSetService.addDataSet( dataSetA );
+
+        dataSetB = createDataSet( 'B', PeriodType.getPeriodTypeByName( "Monthly" ) );
+        dataSetB.setCategoryCombo( mechanismCategoryCombo );
+        dataSetB.setDataApprovalWorkflow( workflowAgency );
+        dataSetService.addDataSet( dataSetB );
 
         periodA = createPeriod( "201801" );
         periodService.addPeriod( periodA );
@@ -547,12 +566,14 @@ public class DataApprovalServiceCategoryOptionGroupTest
 
         DataApprovalPermissions p = status.getPermissions();
 
-        return approval + " " + status.getState().toString()
-                + " approve=" + ( p.isMayApprove() ? "T" : "F" )
+        return approval + " "
+            + ( status.getState() == null ? "state=null" : status.getState().toString() )
+            + ( p == null ? " permissions=null" :
+                " approve=" + ( p.isMayApprove() ? "T" : "F" )
                 + " unapprove=" + ( p.isMayUnapprove() ? "T" : "F" )
                 + " accept=" + ( p.isMayAccept() ? "T" : "F" )
                 + " unaccept=" + ( p.isMayUnaccept() ? "T" : "F" )
-                + " read=" + ( p.isMayReadData() ? "T" : "F" );
+                + " read=" + ( p.isMayReadData() ? "T" : "F" ) );
     }
     
     private String[] getUserApprovalsAndPermissions( CurrentUserService mockUserService, DataSet dataSet, Period period, OrganisationUnit orgUnit )

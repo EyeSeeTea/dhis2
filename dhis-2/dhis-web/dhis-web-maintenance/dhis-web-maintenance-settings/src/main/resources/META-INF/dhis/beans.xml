@@ -91,6 +91,19 @@
     <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
   </bean>
 
+  <bean id="org.hisp.dhis.settings.action.system.GetApprovalWorkflowsAction"
+        class="org.hisp.dhis.settings.action.system.GetApprovalWorkflowsAction"
+        scope="prototype">
+    <property name="dataApprovalWorkflowService" ref="org.hisp.dhis.dataapproval.DataApprovalWorkflowService" />
+  </bean>
+
+  <bean id="org.hisp.dhis.settings.action.system.GetEditApprovalWorkflowParameters"
+        class="org.hisp.dhis.settings.action.system.GetEditApprovalWorkflowParameters"
+        scope="prototype">
+    <property name="dataApprovalWorkflowService" ref="org.hisp.dhis.dataapproval.DataApprovalWorkflowService" />
+    <property name="dataApprovalLevelService" ref="org.hisp.dhis.dataapproval.DataApprovalLevelService" />
+  </bean>
+
   <bean id="org.hisp.dhis.settings.action.system.ValidateApprovalLevelAction"
     class="org.hisp.dhis.settings.action.system.ValidateApprovalLevelAction"
     scope="prototype" />

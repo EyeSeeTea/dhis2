@@ -34,6 +34,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.attribute.AttributeService;
+import org.hisp.dhis.dataapproval.DataApprovalWorkflowService;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
@@ -86,6 +87,13 @@ public class AddDataSetAction
     public void setCategoryService( DataElementCategoryService categoryService )
     {
         this.categoryService = categoryService;
+    }
+
+    private DataApprovalWorkflowService dataApprovalWorkflowService;
+
+    public void setDataApprovalWorkflowService( DataApprovalWorkflowService dataApprovalWorkflowService )
+    {
+        this.dataApprovalWorkflowService = dataApprovalWorkflowService;
     }
 
     private UserService userService;
@@ -176,11 +184,11 @@ public class AddDataSetAction
         this.notifyCompletingUser = notifyCompletingUser;
     }
 
-    private boolean approveData;
+    private Integer dataApprovalWorkflowId;
 
-    public void setApproveData( boolean approveData )
+    public void setDataApprovalWorkflowId( Integer dataApprovalWorkflowId )
     {
-        this.approveData = approveData;
+        this.dataApprovalWorkflowId = dataApprovalWorkflowId;
     }
 
     private boolean skipAggregation;
@@ -335,6 +343,11 @@ public class AddDataSetAction
             dataSet.setCategoryCombo( categoryService.getDataElementCategoryCombo( categoryComboId ) );
         }
 
+        if ( dataApprovalWorkflowId != null )
+        {
+            dataSet.setDataApprovalWorkflow( dataApprovalWorkflowService.getDataApprovalWorkflow( dataApprovalWorkflowId ) );
+        }
+
         dataSet.setDescription( StringUtils.trimToNull( description ) );
         dataSet.setVersion( 1 );
         dataSet.setMobile( false );
@@ -345,7 +358,6 @@ public class AddDataSetAction
         dataSet.setValidCompleteOnly( validCompleteOnly );
         dataSet.setNoValueRequiresComment( noValueRequiresComment );
         dataSet.setNotifyCompletingUser( notifyCompletingUser );
-        dataSet.setApproveData( approveData );
         dataSet.setMobile( mobile );
         dataSet.setSkipOffline( skipOffline );
         dataSet.setDataElementDecoration( dataElementDecoration );

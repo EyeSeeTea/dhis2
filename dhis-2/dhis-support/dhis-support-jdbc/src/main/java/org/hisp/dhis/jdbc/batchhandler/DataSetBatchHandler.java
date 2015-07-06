@@ -131,7 +131,7 @@ public class DataSetBatchHandler
         statementBuilder.setValue( dataSet.getExpiryDays() );
         statementBuilder.setValue( dataSet.getTimelyDays() );
         statementBuilder.setValue( dataSet.isNotifyCompletingUser() );
-        statementBuilder.setValue( dataSet.isApproveData() );
+        statementBuilder.setValue( dataSet.getDataApprovalWorkflow() );
         statementBuilder.setValue( dataSet.isSkipAggregation() );
         statementBuilder.setValue( dataSet.isFieldCombinationRequired() );
         statementBuilder.setValue( dataSet.isValidCompleteOnly() );

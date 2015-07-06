@@ -162,6 +162,29 @@
       <param name="onExceptionReturn">plainTextError</param>
     </action>
 
+    <!-- Approval workflows -->
+
+    <action name="systemApprovalWorkflows" class="org.hisp.dhis.settings.action.system.GetApprovalWorkflowsAction">
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="page">/dhis-web-maintenance-settings/systemApprovalWorkflows.vm</param>
+      <param name="menu">/dhis-web-maintenance-settings/settingsMenu.vm</param>
+      <param name="requiredAuthorities">F_SYSTEM_SETTING</param>
+    </action>
+
+    <action name="showAddApprovalWorkflowForm" class="org.hisp.dhis.settings.action.system.GetEditApprovalWorkflowParameters">
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="page">/dhis-web-maintenance-settings/addApprovalWorkflow.vm</param>
+      <param name="javascripts">javascripts/addApprovalWorkflow.js</param>
+      <param name="anyAuthorities">F_SYSTEM_SETTING</param>
+    </action>
+
+    <action name="showEditApprovalWorkflowForm" class="org.hisp.dhis.settings.action.system.GetEditApprovalWorkflowParameters">
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="page">/dhis-web-maintenance-settings/editApprovalWorkflow.vm</param>
+      <param name="javascripts">javascripts/editApprovalWorkflow.js</param>
+      <param name="anyAuthorities">F_SYSTEM_SETTING</param>
+    </action>
+
     <!-- Synchronization -->
 
     <action name="systemSynchronizationSettings" class="org.hisp.dhis.settings.action.system.GetSynchronizationSettingsAction">
