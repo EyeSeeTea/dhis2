@@ -487,7 +487,6 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     public void postXmlObject( ImportOptions importOptions, HttpServletRequest request, HttpServletResponse response )
         throws Exception
     {
-        System.out.println("POST-xml " + request.getQueryString());
         if ( !aclService.canCreate( currentUserService.getCurrentUser(), getEntityClass() ) )
         {
             throw new CreateAccessDeniedException( "You don't have the proper permissions to create this object." );
@@ -518,7 +517,6 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     public void postJsonObject( ImportOptions importOptions, HttpServletRequest request, HttpServletResponse response )
         throws Exception
     {
-        System.out.println("POST-json " + request.getQueryString());
         if ( !aclService.canCreate( currentUserService.getCurrentUser(), getEntityClass() ) )
         {
             throw new CreateAccessDeniedException( "You don't have the proper permissions to create this object." );
