@@ -29,16 +29,20 @@ package org.hisp.dhis.program.hibernate;
  */
 
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.hisp.dhis.commons.util.SqlHelper;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
+import org.hisp.dhis.program.ProgramInstanceQueryParams;
 import org.hisp.dhis.program.ProgramInstanceStore;
+import org.hisp.dhis.program.ProgramStatus;
 import org.hisp.dhis.program.SchedulingProgramObject;
-import org.hisp.dhis.commons.util.TextUtils;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceReminder;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceReminderService;
@@ -48,8 +52,14 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+
+import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
+import static org.hisp.dhis.commons.util.TextUtils.getQuotedCommaDelimitedString;
+import static org.hisp.dhis.system.util.DateUtils.getMediumDateString;
 
 /**
  * @author Abyot Asalefew
@@ -61,19 +71,123 @@ public class HibernateProgramInstanceStore
     @Autowired
     private TrackedEntityInstanceReminderService reminderService;
 
+    private static final Map<ProgramStatus, Integer> PROGRAM_STATUS_MAP = new HashMap<ProgramStatus, Integer>()
+    {
+        {
+            put( ProgramStatus.ACTIVE, ProgramInstance.STATUS_ACTIVE );
+            put( ProgramStatus.COMPLETED, ProgramInstance.STATUS_COMPLETED );
+            put( ProgramStatus.CANCELLED, ProgramInstance.STATUS_CANCELLED );
+        }
+    };
+
     // -------------------------------------------------------------------------
     // Implemented methods
     // -------------------------------------------------------------------------
 
     @Override
-    @SuppressWarnings("unchecked")
+    public int countProgramInstances( ProgramInstanceQueryParams params )
+    {
+        String hql = buildProgramInstanceHql( params );
+        Query query = getQuery( hql );
+
+        return ((Number) query.iterate().next()).intValue();
+    }
+
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public List<ProgramInstance> getProgramInstances( ProgramInstanceQueryParams params )
+    {
+        String hql = buildProgramInstanceHql( params );
+        Query query = getQuery( hql );
+
+        if ( params.isPaging() )
+        {
+            query.setFirstResult( params.getOffset() );
+            query.setMaxResults( params.getPageSizeWithDefault() );
+        }
+
+        return query.list();
+    }
+
+    private String buildProgramInstanceHql( ProgramInstanceQueryParams params )
+    {
+        String hql = "from ProgramInstance pi";
+        SqlHelper hlp = new SqlHelper( true );
+
+        if ( params.hasLastUpdated() )
+        {
+            hql += hlp.whereAnd() + "pi.lastUpdated >= '" + getMediumDateString( params.getLastUpdated() ) + "'";
+        }
+
+        if ( params.hasTrackedEntityInstance() )
+        {
+            hql += hlp.whereAnd() + "pi.entityInstance.uid = '" + params.getTrackedEntityInstance().getUid() + "'";
+        }
+
+        if ( params.hasTrackedEntity() )
+        {
+            hql += hlp.whereAnd() + "pi.entityInstance.trackedEntity.uid = '" + params.getTrackedEntity().getUid() + "'";
+        }
+
+        if ( params.hasOrganisationUnits() )
+        {
+            if ( params.isOrganisationUnitMode( OrganisationUnitSelectionMode.DESCENDANTS ) )
+            {
+                String ouClause = "(";
+                SqlHelper orHlp = new SqlHelper( true );
+
+                for ( OrganisationUnit organisationUnit : params.getOrganisationUnits() )
+                {
+                    ouClause += orHlp.or() + "pi.organisationUnit.path LIKE '" + organisationUnit.getPath() + "%'";
+                }
+
+                ouClause += ")";
+
+                hql += hlp.whereAnd() + ouClause;
+            }
+            else
+            {
+                hql += hlp.whereAnd() + "pi.organisationUnit.uid in (" + getQuotedCommaDelimitedString( getUids( params.getOrganisationUnits() ) ) + ")";
+            }
+        }
+
+        if ( params.hasProgram() )
+        {
+            hql += hlp.whereAnd() + "pi.program.uid = '" + params.getProgram().getUid() + "'";
+        }
+
+        if ( params.hasProgramStatus() )
+        {
+            hql += hlp.whereAnd() + "pi.status = " + PROGRAM_STATUS_MAP.get( params.getProgramStatus() );
+        }
+
+        if ( params.hasFollowUp() )
+        {
+            hql += hlp.whereAnd() + "pi.followup = " + params.getFollowUp();
+        }
+
+        if ( params.hasProgramStartDate() )
+        {
+            hql += hlp.whereAnd() + "pi.enrollmentDate >= '" + getMediumDateString( params.getProgramStartDate() ) + "'";
+        }
+
+        if ( params.hasProgramEndDate() )
+        {
+            hql += hlp.whereAnd() + "pi.enrollmentDate <= '" + getMediumDateString( params.getProgramEndDate() ) + "'";
+        }
+
+        return hql;
+    }
+
+    @Override
+    @SuppressWarnings( "unchecked" )
     public List<ProgramInstance> get( Program program )
     {
         return getCriteria( Restrictions.eq( "program", program ) ).list();
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<ProgramInstance> get( Collection<Program> programs )
     {
         if ( programs == null || programs.isEmpty() )
@@ -85,7 +199,7 @@ public class HibernateProgramInstanceStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<ProgramInstance> get( Collection<Program> programs, OrganisationUnit organisationUnit )
     {
         if ( programs == null || programs.isEmpty() )
@@ -100,7 +214,7 @@ public class HibernateProgramInstanceStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<ProgramInstance> get( Collection<Program> programs, OrganisationUnit organisationUnit, int status )
     {
         if ( programs == null || programs.isEmpty() )
@@ -116,14 +230,14 @@ public class HibernateProgramInstanceStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<ProgramInstance> get( Program program, Integer status )
     {
         return getCriteria( Restrictions.eq( "program", program ), Restrictions.eq( "status", status ) ).list();
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<ProgramInstance> get( Collection<Program> programs, Integer status )
     {
         if ( programs == null || programs.isEmpty() )
@@ -135,21 +249,21 @@ public class HibernateProgramInstanceStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<ProgramInstance> get( TrackedEntityInstance entityInstance, Integer status )
     {
         return getCriteria( Restrictions.eq( "entityInstance", entityInstance ), Restrictions.eq( "status", status ) ).list();
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<ProgramInstance> get( TrackedEntityInstance entityInstance, Program program )
     {
         return getCriteria( Restrictions.eq( "entityInstance", entityInstance ), Restrictions.eq( "program", program ) ).list();
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<ProgramInstance> get( TrackedEntityInstance entityInstance, Program program, Integer status )
     {
         return getCriteria( Restrictions.eq( "entityInstance", entityInstance ), Restrictions.eq( "program", program ),
@@ -157,7 +271,7 @@ public class HibernateProgramInstanceStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<ProgramInstance> get( Program program, OrganisationUnit organisationUnit, Integer min, Integer max )
     {
         Criteria criteria = getCriteria(
@@ -180,7 +294,7 @@ public class HibernateProgramInstanceStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<ProgramInstance> get( Program program, Collection<Integer> orgunitIds, Date startDate,
         Date endDate, Integer min, Integer max )
     {
@@ -259,7 +373,7 @@ public class HibernateProgramInstanceStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<ProgramInstance> getByStatus( Integer status, Program program, Collection<Integer> orgunitIds,
         Date startDate, Date endDate, Integer min, Integer max )
     {
@@ -300,7 +414,7 @@ public class HibernateProgramInstanceStore
         SqlRowSet rs = jdbcTemplate.queryForRowSet( sql );
 
         Collection<SchedulingProgramObject> schedulingProgramObjects = new HashSet<>();
-        
+
         while ( rs.next() )
         {
             String message = rs.getString( "templatemessage" );
@@ -313,7 +427,7 @@ public class HibernateProgramInstanceStore
                     + " INNER JOIN trackedentityattribute tea on tea.trackedentityattributeid=teav.trackedentityattributeid "
                     + " INNER JOIN programinstance ps on teav.trackedentityinstanceid=ps.trackedentityinstanceid "
                     + " INNER JOIN programstageinstance psi on ps.programinstanceid=psi.programinstanceid "
-                    + " where tea.uid in ( " + TextUtils.getQuotedCommaDelimitedString( attributeUids ) + ") "
+                    + " where tea.uid in ( " + getQuotedCommaDelimitedString( attributeUids ) + ") "
                     + " and ps.programinstanceid=" + programInstanceId );
             while ( attributeValueRow.next() )
             {
@@ -348,7 +462,7 @@ public class HibernateProgramInstanceStore
 
             schedulingProgramObjects.add( schedulingProgramObject );
         }
-        
+
         return schedulingProgramObjects;
     }
 

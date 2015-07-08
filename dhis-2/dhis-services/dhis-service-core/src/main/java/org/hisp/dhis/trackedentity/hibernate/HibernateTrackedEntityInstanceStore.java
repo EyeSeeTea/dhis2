@@ -58,8 +58,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getIdentifiers;
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
@@ -131,21 +133,33 @@ public class HibernateTrackedEntityInstanceStore
     private String buildTrackedEntityInstanceHql( TrackedEntityInstanceQueryParams params )
     {
         String hql = "from TrackedEntityInstance tei";
-
-        if ( params.hasTrackedEntity() || params.hasOrganisationUnits() || params.hasFilters() )
-        {
-            hql += " where ";
-        }
+        SqlHelper hlp = new SqlHelper( true );
 
         if ( params.hasTrackedEntity() )
         {
-            hql += "tei.trackedEntity.uid='" + params.getTrackedEntity().getUid() + "'";
-            hql += params.hasOrganisationUnits() ? " and " : "";
+            hql += hlp.whereAnd() + "tei.trackedEntity.uid='" + params.getTrackedEntity().getUid() + "'";
         }
 
         if ( params.hasOrganisationUnits() )
         {
-            hql += "tei.organisationUnit.uid in (" + getQuotedCommaDelimitedString( getUids( params.getOrganisationUnits() ) ) + ")";
+            if ( params.isOrganisationUnitMode( OrganisationUnitSelectionMode.DESCENDANTS ) )
+            {
+                String ouClause = "(";
+                SqlHelper orHlp = new SqlHelper( true );
+
+                for ( OrganisationUnit organisationUnit : params.getOrganisationUnits() )
+                {
+                    ouClause += orHlp.or() + "tei.organisationUnit.path LIKE '" + organisationUnit.getPath() + "%'";
+                }
+
+                ouClause += ")";
+
+                hql += hlp.whereAnd() + ouClause;
+            }
+            else
+            {
+                hql += hlp.whereAnd() + "tei.organisationUnit.uid in (" + getQuotedCommaDelimitedString( getUids( params.getOrganisationUnits() ) ) + ")";
+            }
         }
 
         if ( params.hasFilters() )
@@ -170,6 +184,34 @@ public class HibernateTrackedEntityInstanceStore
 
                 }
             }
+        }
+
+        if ( params.hasProgram() )
+        {
+            hql += hlp.whereAnd() + "exists (from ProgramInstance pi where pi.entityInstance=tei";
+            hql += hlp.whereAnd() + "pi.program.uid = '" + params.getProgram().getUid() + "'";
+
+            if ( params.hasProgramStatus() )
+            {
+                hql += hlp.whereAnd() + "pi.status = " + PROGRAM_STATUS_MAP.get( params.getProgramStatus() );
+            }
+
+            if ( params.hasFollowUp() )
+            {
+                hql += hlp.whereAnd() + "pi.followup = " + params.getFollowUp();
+            }
+
+            if ( params.hasProgramStartDate() )
+            {
+                hql += hlp.whereAnd() + "pi.enrollmentDate >= '" + getMediumDateString( params.getProgramStartDate() ) + "'";
+            }
+
+            if ( params.hasProgramEndDate() )
+            {
+                hql += hlp.whereAnd() + "pi.enrollmentDate <= '" + getMediumDateString( params.getProgramEndDate() ) + "'";
+            }
+
+            hql += ")";
         }
 
         return hql;
@@ -320,7 +362,11 @@ public class HibernateTrackedEntityInstanceStore
             sql += hlp.whereAnd() + " tei.trackedentityid = " + params.getTrackedEntity().getId() + " ";
         }
 
-        if ( params.isOrganisationUnitMode( OrganisationUnitSelectionMode.DESCENDANTS ) )
+        if ( params.isOrganisationUnitMode( OrganisationUnitSelectionMode.ALL ) )
+        {
+            // No restriction
+        }
+        else if ( params.isOrganisationUnitMode( OrganisationUnitSelectionMode.DESCENDANTS ) )
         {
             SetMap<Integer, OrganisationUnit> levelOuMap = params.getLevelOrgUnitMap();
 
@@ -332,11 +378,20 @@ public class HibernateTrackedEntityInstanceStore
 
             sql = removeLastOr( sql );
         }
-        else if ( params.isOrganisationUnitMode( OrganisationUnitSelectionMode.ALL ) )
+        else if ( params.isOrganisationUnitMode( OrganisationUnitSelectionMode.CHILDREN ) )
         {
+            Set<OrganisationUnit> orgUnits = new HashSet<>();
+
+            for ( OrganisationUnit orgUnit : params.getOrganisationUnits() )
+            {
+                orgUnits.add( orgUnit );
+                orgUnits.addAll( orgUnit.getChildren() );
+            }
+
+            sql += hlp.whereAnd() + " tei.organisationunitid in ("
+                + getCommaDelimitedString( getIdentifiers( orgUnits ) ) + ") ";
         }
-        else
-        // SELECTED (default)
+        else // SELECTED (default)        
         {
             sql += hlp.whereAnd() + " tei.organisationunitid in ("
                 + getCommaDelimitedString( getIdentifiers( params.getOrganisationUnits() ) ) + ") ";
@@ -409,6 +464,8 @@ public class HibernateTrackedEntityInstanceStore
 
             sql = removeLastAnd( sql ) + ") ";
         }
+
+        System.err.println( "sql: " + sql );
 
         return sql;
     }

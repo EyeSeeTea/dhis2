@@ -29,6 +29,8 @@ package org.hisp.dhis.program;
  */
 
 import org.hisp.dhis.common.Grid;
+import org.hisp.dhis.common.IllegalQueryException;
+import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
@@ -36,6 +38,7 @@ import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Abyot Asalefew
@@ -82,6 +85,67 @@ public interface ProgramInstanceService
      * @return the ProgramInstance with the given UID, or null if no match.
      */
     ProgramInstance getProgramInstance( String uid );
+
+    /**
+     * Returns a ProgramInstanceQueryParams based on the given input.
+     *
+     * @param ou                    the set of organisation unit identifiers.
+     * @param ouMode                the OrganisationUnitSelectionMode.
+     * @param lastUpdated           the last updated for PI.
+     * @param program               the Program identifier.
+     * @param programStatus         the ProgramStatus in the given program.
+     * @param programStartDate      the start date for enrollment in the given
+     *                              Program.
+     * @param programEndDate        the end date for enrollment in the given Program.
+     * @param trackedEntity         the TrackedEntity uid.
+     * @param trackedEntityInstance the TrackedEntityInstance uid.
+     * @param followUp              indicates follow up status in the given Program.
+     * @param page                  the page number.
+     * @param pageSize              the page size.
+     * @param totalPages            indicates whether to include the total number of pages.
+     * @param skipPaging            whether to skip paging.
+     * @return a ProgramInstanceQueryParams.
+     */
+    ProgramInstanceQueryParams getFromUrl( Set<String> ou, OrganisationUnitSelectionMode ouMode, Date lastUpdated, String program,
+        ProgramStatus programStatus, Date programStartDate, Date programEndDate, String trackedEntity, String trackedEntityInstance,
+        Boolean followUp, Integer page, Integer pageSize, boolean totalPages, boolean skipPaging );
+
+    /**
+     * Returns a list with program instance values based on the given
+     * ProgramInstanceQueryParams.
+     *
+     * @param params the ProgramInstanceQueryParams.
+     * @return List of PIs matching the params
+     */
+    List<ProgramInstance> getProgramInstances( ProgramInstanceQueryParams params );
+
+    /**
+     * Returns the number of program instance matches based on the given
+     * ProgramInstanceQueryParams.
+     *
+     * @param params the ProgramInstanceQueryParams.
+     * @return Number of PIs matching the params
+     */
+    int countProgramInstances( ProgramInstanceQueryParams params );
+
+    /**
+     * Decides whether current user is authorized to perform the given query.
+     * IllegalQueryException is thrown if not.
+     *
+     * @param params the ProgramInstanceQueryParams.
+     */
+    void decideAccess( ProgramInstanceQueryParams params );
+
+    /**
+     * Validates the given ProgramInstanceQueryParams. The params is
+     * considered valid if no exception are thrown and the method returns
+     * normally.
+     *
+     * @param params the ProgramInstanceQueryParams.
+     * @throws IllegalQueryException if the given params is invalid.
+     */
+    void validate( ProgramInstanceQueryParams params )
+        throws IllegalQueryException;
 
     /**
      * Retrieve program instances on a program
@@ -247,21 +311,6 @@ public interface ProgramInstanceService
         Collection<Integer> orgunitIds, Date startDate, Date endDate );
 
     /**
-     * Retrieve program instances with a certain status on a program and an
-     * orgunit ids list for a period
-     *
-     * @param status     of program-instance, include STATUS_ACTIVE,
-     *                   STATUS_COMPLETED and STATUS_CANCELLED
-     * @param program    ProgramInstance
-     * @param orgunitIds A list of orgunit ids
-     * @param startDate  The start date for retrieving on enrollment-date
-     * @param endDate    The end date for retrieving on enrollment-date
-     * @return ProgramInstance list
-     */
-    List<ProgramInstance> getProgramInstancesByStatus( Integer status, Program program,
-        Collection<Integer> orgunitIds, Date startDate, Date endDate, Integer min, Integer max );
-
-    /**
      * Get the number of program instances of a program which have a certain
      * status and an orgunit ids list for a period
      *
@@ -276,18 +325,17 @@ public interface ProgramInstanceService
     int countProgramInstancesByStatus( Integer status, Program program, Collection<Integer> orgunitIds, Date startDate,
         Date endDate );
 
-
     /**
      * Retrieve scheduled list of entityInstances registered
      *
      * @return A SchedulingProgramObject list
      */
-    Collection<SchedulingProgramObject> getScheduleMesssages();
+    Collection<SchedulingProgramObject> getScheduledMessages();
 
     /**
      * Enroll a TrackedEntityInstance into a program. Must be run inside a transaction.
      *
-     * @param uid UID to use for new instance
+     * @param uid            UID to use for new instance
      * @param entityInstance TrackedEntityInstance
      * @param program        Program
      * @param enrollmentDate The date of enrollment

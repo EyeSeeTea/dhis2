@@ -28,9 +28,13 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
+import org.hisp.dhis.common.IllegalQueryException;
+import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.i18n.I18n;
@@ -39,22 +43,27 @@ import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.message.MessageConversation;
 import org.hisp.dhis.message.MessageService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.sms.SmsSender;
 import org.hisp.dhis.sms.SmsServiceException;
 import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.system.grid.ListGrid;
+import org.hisp.dhis.trackedentity.TrackedEntity;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceReminder;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceReminderService;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
+import org.hisp.dhis.trackedentity.TrackedEntityService;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueService;
 import org.hisp.dhis.trackedentitycomment.TrackedEntityComment;
 import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValue;
 import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValueService;
 import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.user.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -66,6 +75,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import static org.hisp.dhis.common.OrganisationUnitSelectionMode.*;
+
 /**
  * @author Abyot Asalefew
  */
@@ -73,86 +84,50 @@ import java.util.Set;
 public class DefaultProgramInstanceService
     implements ProgramInstanceService
 {
+    private static final Log log = LogFactory.getLog( DefaultProgramInstanceService.class );
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
     private ProgramInstanceStore programInstanceStore;
 
-    public void setProgramInstanceStore( ProgramInstanceStore programInstanceStore )
-    {
-        this.programInstanceStore = programInstanceStore;
-    }
-
+    @Autowired
     private TrackedEntityAttributeValueService attributeValueService;
 
-    public void setAttributeValueService( TrackedEntityAttributeValueService attributeValueService )
-    {
-        this.attributeValueService = attributeValueService;
-    }
-
-    public void setDataValueService( TrackedEntityDataValueService dataValueService )
-    {
-        this.dataValueService = dataValueService;
-    }
-
+    @Autowired
     private TrackedEntityDataValueService dataValueService;
 
+    @Autowired
     private ProgramService programService;
 
-    public void setProgramService( ProgramService programService )
-    {
-        this.programService = programService;
-    }
-
+    @Autowired
     private SmsSender smsSender;
 
-    public void setSmsSender( SmsSender smsSender )
-    {
-        this.smsSender = smsSender;
-    }
-
+    @Autowired
     private CurrentUserService currentUserService;
 
-    public void setCurrentUserService( CurrentUserService currentUserService )
-    {
-        this.currentUserService = currentUserService;
-    }
-
+    @Autowired
     private TrackedEntityInstanceReminderService reminderService;
 
-    public void setReminderService( TrackedEntityInstanceReminderService reminderService )
-    {
-        this.reminderService = reminderService;
-    }
-
+    @Autowired
     private MessageService messageService;
 
-    public void setMessageService( MessageService messageService )
-    {
-        this.messageService = messageService;
-    }
-
+    @Autowired
     private ProgramStageInstanceService programStageInstanceService;
 
-    public void setProgramStageInstanceService( ProgramStageInstanceService programStageInstanceService )
-    {
-        this.programStageInstanceService = programStageInstanceService;
-    }
-
+    @Autowired
     private TrackedEntityInstanceService trackedEntityInstanceService;
 
-    public void setTrackedEntityInstanceService( TrackedEntityInstanceService trackedEntityInstanceService )
-    {
-        this.trackedEntityInstanceService = trackedEntityInstanceService;
-    }
+    @Autowired
+    private OrganisationUnitService organisationUnitService;
 
+    @Autowired
+    private TrackedEntityService trackedEntityService;
+
+    @Autowired
     private I18nManager i18nManager;
-
-    public void setI18nManager( I18nManager i18nManager )
-    {
-        this.i18nManager = i18nManager;
-    }
 
     // -------------------------------------------------------------------------
     // Implementation methods
@@ -186,6 +161,208 @@ public class DefaultProgramInstanceService
     public void updateProgramInstance( ProgramInstance programInstance )
     {
         programInstanceStore.update( programInstance );
+    }
+
+    @Override
+    public ProgramInstanceQueryParams getFromUrl( Set<String> ou, OrganisationUnitSelectionMode ouMode, Date lastUpdated, String program, ProgramStatus programStatus,
+        Date programStartDate, Date programEndDate, String trackedEntity, String trackedEntityInstance, Boolean followUp, Integer page, Integer pageSize, boolean totalPages, boolean skipPaging )
+    {
+        ProgramInstanceQueryParams params = new ProgramInstanceQueryParams();
+
+        if ( ou != null )
+        {
+            for ( String orgUnit : ou )
+            {
+                OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( orgUnit );
+
+                if ( organisationUnit == null )
+                {
+                    throw new IllegalQueryException( "Organisation unit does not exist: " + orgUnit );
+                }
+
+                params.getOrganisationUnits().add( organisationUnit );
+            }
+        }
+
+        Program pr = program != null ? programService.getProgram( program ) : null;
+
+        if ( program != null && pr == null )
+        {
+            throw new IllegalQueryException( "Program does not exist: " + program );
+        }
+
+        TrackedEntity te = trackedEntity != null ? trackedEntityService.getTrackedEntity( trackedEntity ) : null;
+
+        if ( trackedEntity != null && te == null )
+        {
+            throw new IllegalQueryException( "Tracked entity does not exist: " + program );
+        }
+
+        TrackedEntityInstance tei = trackedEntityInstance != null ? trackedEntityInstanceService.getTrackedEntityInstance( trackedEntityInstance ) : null;
+
+        if ( trackedEntityInstance != null && tei == null )
+        {
+            throw new IllegalQueryException( "Tracked entity instance does not exist: " + program );
+        }
+
+        params.setProgram( pr );
+        params.setProgramStatus( programStatus );
+        params.setFollowUp( followUp );
+        params.setLastUpdated( lastUpdated );
+        params.setProgramStartDate( programStartDate );
+        params.setProgramEndDate( programEndDate );
+        params.setTrackedEntity( te );
+        params.setTrackedEntityInstance( tei );
+        params.setOrganisationUnitMode( ouMode );
+        params.setPage( page );
+        params.setPageSize( pageSize );
+        params.setTotalPages( totalPages );
+        params.setSkipPaging( skipPaging );
+
+        return params;
+    }
+
+    // TODO consider security
+    @Override
+    public List<ProgramInstance> getProgramInstances( ProgramInstanceQueryParams params )
+    {
+        decideAccess( params );
+        validate( params );
+
+        User user = currentUserService.getCurrentUser();
+
+        if ( user != null && params.isOrganisationUnitMode( OrganisationUnitSelectionMode.ACCESSIBLE ) )
+        {
+            params.setOrganisationUnits( user.getDataViewOrganisationUnitsWithFallback() );
+            params.setOrganisationUnitMode( OrganisationUnitSelectionMode.DESCENDANTS );
+        }
+        else if ( params.isOrganisationUnitMode( CHILDREN ) )
+        {
+            Set<OrganisationUnit> organisationUnits = new HashSet<>();
+            organisationUnits.addAll( params.getOrganisationUnits() );
+
+            for ( OrganisationUnit organisationUnit : params.getOrganisationUnits() )
+            {
+                organisationUnits.addAll( organisationUnit.getChildren() );
+            }
+
+            params.setOrganisationUnits( organisationUnits );
+        }
+
+        for ( OrganisationUnit organisationUnit : params.getOrganisationUnits() )
+        {
+            if ( !organisationUnit.hasLevel() )
+            {
+                organisationUnit.setLevel( organisationUnitService.getLevelOfOrganisationUnit( organisationUnit.getId() ) );
+            }
+        }
+
+        if ( !params.isPaging() && !params.isSkipPaging() )
+        {
+            params.setDefaultPaging();
+        }
+
+        return programInstanceStore.getProgramInstances( params );
+    }
+
+    @Override
+    public int countProgramInstances( ProgramInstanceQueryParams params )
+    {
+        decideAccess( params );
+        validate( params );
+
+        User user = currentUserService.getCurrentUser();
+
+        if ( user != null && params.isOrganisationUnitMode( OrganisationUnitSelectionMode.ACCESSIBLE ) )
+        {
+            params.setOrganisationUnits( user.getDataViewOrganisationUnitsWithFallback() );
+            params.setOrganisationUnitMode( OrganisationUnitSelectionMode.DESCENDANTS );
+        }
+        else if ( params.isOrganisationUnitMode( CHILDREN ) )
+        {
+            Set<OrganisationUnit> organisationUnits = new HashSet<>();
+            organisationUnits.addAll( params.getOrganisationUnits() );
+
+            for ( OrganisationUnit organisationUnit : params.getOrganisationUnits() )
+            {
+                organisationUnits.addAll( organisationUnit.getChildren() );
+            }
+
+            params.setOrganisationUnits( organisationUnits );
+        }
+
+        for ( OrganisationUnit organisationUnit : params.getOrganisationUnits() )
+        {
+            if ( !organisationUnit.hasLevel() )
+            {
+                organisationUnit.setLevel( organisationUnitService.getLevelOfOrganisationUnit( organisationUnit.getId() ) );
+            }
+        }
+
+        params.setSkipPaging( true );
+
+        return programInstanceStore.countProgramInstances( params );
+    }
+
+    @Override
+    public void decideAccess( ProgramInstanceQueryParams params )
+    {
+
+    }
+
+    @Override
+    public void validate( ProgramInstanceQueryParams params ) throws IllegalQueryException
+    {
+        String violation = null;
+
+        if ( params == null )
+        {
+            throw new IllegalQueryException( "Params cannot be null" );
+        }
+
+        User user = currentUserService.getCurrentUser();
+
+        if ( !params.hasOrganisationUnits() && !(params.isOrganisationUnitMode( ALL ) || params.isOrganisationUnitMode( ACCESSIBLE )) )
+        {
+            violation = "At least one organisation unit must be specified";
+        }
+
+        if ( params.isOrganisationUnitMode( ACCESSIBLE ) && (user == null || !user.hasDataViewOrganisationUnitWithFallback()) )
+        {
+            violation = "Current user must be associated with at least one organisation unit when selection mode is ACCESSIBLE";
+        }
+
+        if ( params.hasProgram() && params.hasTrackedEntity() )
+        {
+            violation = "Program and tracked entity cannot be specified simultaneously";
+        }
+
+        if ( params.hasProgramStatus() && !params.hasProgram() )
+        {
+            violation = "Program must be defined when program status is defined";
+        }
+
+        if ( params.hasFollowUp() && !params.hasProgram() )
+        {
+            violation = "Program must be defined when follow up status is defined";
+        }
+
+        if ( params.hasProgramStartDate() && !params.hasProgram() )
+        {
+            violation = "Program must be defined when program start date is specified";
+        }
+
+        if ( params.hasProgramEndDate() && !params.hasProgram() )
+        {
+            violation = "Program must be defined when program end date is specified";
+        }
+
+        if ( violation != null )
+        {
+            log.warn( "Validation failed: " + violation );
+
+            throw new IllegalQueryException( violation );
+        }
     }
 
     @Override
@@ -268,30 +445,27 @@ public class DefaultProgramInstanceService
     @Override
     public List<Grid> getProgramInstanceReport( TrackedEntityInstance instance, I18n i18n )
     {
-
         List<Grid> grids = new ArrayList<>();
 
         // ---------------------------------------------------------------------
         // Dynamic attributes
         // ---------------------------------------------------------------------
 
-        Collection<Program> programs = programService
-            .getProgramsByCurrentUser( ProgramType.WITH_REGISTRATION );
+        Collection<Program> programs = programService.getProgramsByCurrentUser( ProgramType.WITH_REGISTRATION );
         programs.addAll( programService.getProgramsByCurrentUser( ProgramType.WITH_REGISTRATION ) );
 
-        Collection<TrackedEntityAttributeValue> attributeValues = attributeValueService
-            .getTrackedEntityAttributeValues( instance );
+        Collection<TrackedEntityAttributeValue> attributeValues = attributeValueService.getTrackedEntityAttributeValues( instance );
         Iterator<TrackedEntityAttributeValue> iterAttribute = attributeValues.iterator();
 
         for ( Program program : programs )
         {
-            List<TrackedEntityAttribute> atttributes = program.getTrackedEntityAttributes();
+            List<TrackedEntityAttribute> attributes = program.getTrackedEntityAttributes();
 
             while ( iterAttribute.hasNext() )
             {
                 TrackedEntityAttributeValue attributeValue = iterAttribute.next();
 
-                if ( !atttributes.contains( attributeValue.getAttribute() ) )
+                if ( !attributes.contains( attributeValue.getAttribute() ) )
                 {
                     iterAttribute.remove();
                 }
@@ -448,14 +622,7 @@ public class DefaultProgramInstanceService
     }
 
     @Override
-    public List<ProgramInstance> getProgramInstancesByStatus( Integer status, Program program,
-        Collection<Integer> orgunitIds, Date startDate, Date endDate, Integer min, Integer max )
-    {
-        return programInstanceStore.getByStatus( status, program, orgunitIds, startDate, endDate, min, max );
-    }
-
-    @Override
-    public Collection<SchedulingProgramObject> getScheduleMesssages()
+    public Collection<SchedulingProgramObject> getScheduledMessages()
     {
         Collection<SchedulingProgramObject> result = programInstanceStore
             .getSendMesssageEvents( TrackedEntityInstanceReminder.ENROLLEMENT_DATE_TO_COMPARE );
@@ -794,7 +961,7 @@ public class DefaultProgramInstanceService
                 && rm.getWhenToSend() != null
                 && rm.getWhenToSend() == status
                 && (rm.getMessageType() == TrackedEntityInstanceReminder.MESSAGE_TYPE_DHIS_MESSAGE || rm
-                    .getMessageType() == TrackedEntityInstanceReminder.MESSAGE_TYPE_BOTH) )
+                .getMessageType() == TrackedEntityInstanceReminder.MESSAGE_TYPE_BOTH) )
             {
                 int id = messageService.sendMessage( programInstance.getProgram().getDisplayName(),
                     reminderService.getMessageFromTemplate( rm, programInstance, format ), null,
