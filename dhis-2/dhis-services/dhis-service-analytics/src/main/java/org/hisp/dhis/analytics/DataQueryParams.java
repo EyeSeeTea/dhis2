@@ -1589,24 +1589,6 @@ public class DataQueryParams
         return this;
     }
     
-    public DataQueryParams removeDataDimensionOrFilter( DataDimensionItemType dataDimensionType )
-    {
-        DimensionalObject dimension = getDimension( DATA_X_DIM_ID );
-        DimensionalObject filter = getFilter( DATA_X_DIM_ID );
-        
-        if ( dimension != null )
-        {
-            dimension.getItems().removeAll( DimensionalObjectUtils.getByDataDimensionType( dataDimensionType, dimension.getItems() ) );
-        }
-        
-        if ( filter != null )
-        {
-            filter.getItems().removeAll( DimensionalObjectUtils.getByDataDimensionType( dataDimensionType, filter.getItems() ) );
-        }
-        
-        return this;
-    }
-    
     // -------------------------------------------------------------------------
     // Get and set helpers for dimensions
     // -------------------------------------------------------------------------

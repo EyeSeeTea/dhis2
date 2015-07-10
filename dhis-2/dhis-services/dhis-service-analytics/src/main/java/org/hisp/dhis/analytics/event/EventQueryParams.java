@@ -28,6 +28,7 @@ package org.hisp.dhis.analytics.event;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.common.DimensionalObject.DATA_X_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
 
 import java.util.ArrayList;
@@ -40,7 +41,6 @@ import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.analytics.EventOutputType;
 import org.hisp.dhis.analytics.Partitions;
 import org.hisp.dhis.analytics.SortOrder;
-import org.hisp.dhis.common.DataDimensionItem.DataDimensionItemType;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.NameableObjectUtils;
@@ -177,7 +177,7 @@ public class EventQueryParams
         }
 
         params.setAggregateData( true );
-        params.removeDataDimensionOrFilter( DataDimensionItemType.PROGRAM_DATA_ELEMENT ).removeDataDimensionOrFilter( DataDimensionItemType.PROGRAM_ATTRIBUTE );
+        params.removeDimension( DATA_X_DIM_ID );
         
         return params;
     }
