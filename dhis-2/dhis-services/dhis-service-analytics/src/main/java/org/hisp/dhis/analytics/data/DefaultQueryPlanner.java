@@ -167,6 +167,11 @@ public class DefaultQueryPlanner
         {
             violation = "Category option combos cannot be specified when data elements are not specified";
         }
+
+        if ( !params.getProgramIndicators().isEmpty() && !params.hasProgram() )
+        {
+            violation = "Program must be specified when program indicators are specified";
+        }
         
         if ( !params.getAllProgramDataElements().isEmpty() && !params.hasProgram() )
         {
