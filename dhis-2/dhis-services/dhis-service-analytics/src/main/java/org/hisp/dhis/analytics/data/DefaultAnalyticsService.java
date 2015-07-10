@@ -53,6 +53,7 @@ import static org.hisp.dhis.common.IdentifiableObjectUtils.getLocalPeriodIdentif
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
 import static org.hisp.dhis.common.NameableObjectUtils.asList;
 import static org.hisp.dhis.common.NameableObjectUtils.asTypedList;
+import static org.hisp.dhis.commons.util.TextUtils.splitSafe;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_LEVEL;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_ORGUNIT_GROUP;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT;
@@ -63,7 +64,6 @@ import static org.hisp.dhis.organisationunit.OrganisationUnit.getParentNameGraph
 import static org.hisp.dhis.period.PeriodType.getPeriodTypeFromIsoString;
 import static org.hisp.dhis.reporttable.ReportTable.IRT2D;
 import static org.hisp.dhis.reporttable.ReportTable.addIfEmpty;
-import static org.hisp.dhis.commons.util.TextUtils.splitSafe;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -146,7 +146,6 @@ import org.hisp.dhis.util.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 /**
  * @author Lars Helge Overland
@@ -1315,30 +1314,35 @@ public class DefaultAnalyticsService
      */
     private Map<String, Map<String, Double>> getProgramPermutationOperandValueMap( DataQueryParams params )
     {
-        List<ProgramIndicator> programIndicators = asTypedList( params.getProgramIndicators() );
-        List<NameableObject> dataElements = asList( programIndicatorService.getDataElementsInIndicators( programIndicators ) );
-        List<NameableObject> attributes = asList( programIndicatorService.getAttributesInIndicators( programIndicators ) );
-        List<NameableObject> dataItems = ListUtils.union( dataElements, attributes );
+        List<DataQueryParams> queries = queryPlanner.groupByFilterExpression( params );
         
-        if ( !dataElements.isEmpty() || !attributes.isEmpty() )
-        {
-            DataQueryParams dataSourceParams = params.instance().removeDimension( DATA_X_DIM_ID );
+        Map<String, Map<String, Double>> permutationMap = new HashMap<>();
+        
+        for ( DataQueryParams query : queries )
+        {            
+            List<ProgramIndicator> programIndicators = asTypedList( query.getProgramIndicators() );
+            List<NameableObject> dataElements = asList( programIndicatorService.getDataElementsInIndicators( programIndicators ) );
+            List<NameableObject> attributes = asList( programIndicatorService.getAttributesInIndicators( programIndicators ) );
+            List<NameableObject> dataItems = ListUtils.union( dataElements, attributes );
             
-            dataSourceParams.getDimensions().add( DX_INDEX, new BaseDimensionalObject( 
-                DATA_X_DIM_ID, DimensionType.DATA_X, dataItems ) );
-            
-            EventQueryParams eventQueryParams = EventQueryParams.fromDataQueryParams( dataSourceParams );
-            
-            Grid grid = eventAnalyticsService.getAggregatedEventData( eventQueryParams );
-            
-            Map<String, Double> valueMap = grid.getAsMap( grid.getWidth() - 1, DIMENSION_SEP );
-            
-            Map<String, Map<String, Double>> permutationMap = DataQueryParams.getPermutationProgramValueMap( valueMap );
-            
-            return permutationMap;
+            if ( !dataElements.isEmpty() || !attributes.isEmpty() )
+            {
+                DataQueryParams dataSourceParams = query.instance().removeDimension( DATA_X_DIM_ID );
+                
+                dataSourceParams.getDimensions().add( DX_INDEX, new BaseDimensionalObject( 
+                    DATA_X_DIM_ID, DimensionType.DATA_X, dataItems ) );
+                
+                EventQueryParams eventQueryParams = EventQueryParams.fromDataQueryParams( dataSourceParams );
+                
+                Grid grid = eventAnalyticsService.getAggregatedEventData( eventQueryParams );
+                
+                Map<String, Double> valueMap = grid.getAsMap( grid.getWidth() - 1, DIMENSION_SEP );
+                
+                permutationMap.putAll( DataQueryParams.getPermutationProgramValueMap( valueMap ) );
+            }
         }
         
-        return Maps.newHashMap();
+        return permutationMap;
     }
     
     /**

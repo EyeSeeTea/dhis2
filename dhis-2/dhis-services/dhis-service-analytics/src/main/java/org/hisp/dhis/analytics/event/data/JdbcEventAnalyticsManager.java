@@ -57,11 +57,13 @@ import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.QueryFilter;
 import org.hisp.dhis.common.QueryItem;
+import org.hisp.dhis.commons.util.ExpressionUtils;
 import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.legend.Legend;
 import org.hisp.dhis.option.Option;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.system.util.MathUtils;
+import org.hisp.dhis.system.util.ValidationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -507,7 +509,20 @@ public class JdbcEventAnalyticsManager
                 }
             }
         }
+
+        // ---------------------------------------------------------------------
+        // Filter expression
+        // ---------------------------------------------------------------------
+
+        if ( params.hasFilterExpression() && ValidationUtils.filterExpressionIsValid( params.getFilterExpression() ) )
+        {
+            sql += "and " + ExpressionUtils.asSql( params.getFilterExpression() );
+        }
         
+        // ---------------------------------------------------------------------
+        // Coordinates
+        // ---------------------------------------------------------------------
+
         if ( params.isCoordinatesOnly() )
         {
             sql += "and (longitude is not null and latitude is not null) ";

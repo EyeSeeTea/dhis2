@@ -226,6 +226,11 @@ public class DataQueryParams
      */
     protected transient Map<OrganisationUnit, Integer> dataApprovalLevels = new HashMap<>();
     
+    /**
+     * Filter expression.
+     */
+    protected transient String filterExpression;
+    
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -263,6 +268,7 @@ public class DataQueryParams
         params.dataPeriodType = this.dataPeriodType;
         params.skipPartitioning = this.skipPartitioning;
         params.dataApprovalLevels = new HashMap<>( this.dataApprovalLevels );
+        params.filterExpression = this.filterExpression;
         
         return params;
     }
@@ -969,6 +975,14 @@ public class DataQueryParams
         return programStage != null;
     }
     
+    /**
+     * Indicates whether this object has a filter expression.
+     */
+    public boolean hasFilterExpression()
+    {
+        return filterExpression != null;
+    }
+    
     // -------------------------------------------------------------------------
     // Static methods
     // -------------------------------------------------------------------------
@@ -1008,7 +1022,7 @@ public class DataQueryParams
     }
     
     /**
-     * Returns a mapping of permutation keys and mappings of identifiers and values
+     * Returns a mapping of permutation keys and mappings of data identifiers and values
      * based on the given mapping of dimension option keys and values.
      */
     public static Map<String, Map<String, Double>> getPermutationProgramValueMap( Map<String, Double> valueMap )
@@ -1424,6 +1438,16 @@ public class DataQueryParams
         this.dataApprovalLevels = dataApprovalLevels;
     }
 
+    public String getFilterExpression()
+    {
+        return filterExpression;
+    }
+
+    public void setFilterExpression( String filterExpression )
+    {
+        this.filterExpression = filterExpression;
+    }
+
     // -------------------------------------------------------------------------
     // Get and set helpers for dimensions or filter
     // -------------------------------------------------------------------------
@@ -1621,6 +1645,36 @@ public class DataQueryParams
     {
         setDataDimensionOptions( DataDimensionItemType.DATA_SET, dataSets );
     }
+
+    public List<NameableObject> getProgramIndicators()
+    {
+        return ImmutableList.copyOf( DimensionalObjectUtils.getByDataDimensionType( DataDimensionItemType.PROGRAM_INDICATOR, getDimensionOptions( DATA_X_DIM_ID ) ) );
+    }
+    
+    public void setProgramIndicators( List<? extends NameableObject> programIndicators )
+    {
+        setDataDimensionOptions( DataDimensionItemType.PROGRAM_INDICATOR, programIndicators );
+    }
+
+    public List<NameableObject> getProgramDataElements()
+    {
+        return ImmutableList.copyOf( DimensionalObjectUtils.getByDataDimensionType( DataDimensionItemType.PROGRAM_DATA_ELEMENT, getDimensionOptions( DATA_X_DIM_ID ) ) );
+    }
+    
+    public void setProgramDataElements( List<? extends NameableObject> programDataElements )
+    {
+        setDataDimensionOptions( DataDimensionItemType.PROGRAM_DATA_ELEMENT, programDataElements );
+    }
+    
+    public List<NameableObject> getProgramAttributes()
+    {
+        return ImmutableList.copyOf( DimensionalObjectUtils.getByDataDimensionType( DataDimensionItemType.PROGRAM_ATTRIBUTE, getDimensionOptions( DATA_X_DIM_ID ) ) );
+    }
+    
+    public void setProgramAttributes( List<? extends NameableObject> programAttributes )
+    {
+        setDataDimensionOptions( DataDimensionItemType.PROGRAM_ATTRIBUTE, programAttributes );
+    }
     
     public List<NameableObject> getPeriods()
     {
@@ -1652,21 +1706,6 @@ public class DataQueryParams
         setOrganisationUnits( getList( organisationUnit ) );
     }
 
-    public List<NameableObject> getProgramIndicators()
-    {
-        return ImmutableList.copyOf( DimensionalObjectUtils.getByDataDimensionType( DataDimensionItemType.PROGRAM_INDICATOR, getDimensionOptions( DATA_X_DIM_ID ) ) );
-    }
-
-    public List<NameableObject> getProgramDataElements()
-    {
-        return ImmutableList.copyOf( DimensionalObjectUtils.getByDataDimensionType( DataDimensionItemType.PROGRAM_DATA_ELEMENT, getDimensionOptions( DATA_X_DIM_ID ) ) );
-    }
-    
-    public List<NameableObject> getProgramAttributes()
-    {
-        return ImmutableList.copyOf( DimensionalObjectUtils.getByDataDimensionType( DataDimensionItemType.PROGRAM_ATTRIBUTE, getDimensionOptions( DATA_X_DIM_ID ) ) );
-    }
-    
     public List<DimensionalObject> getDataElementGroupSets()
     {
         List<DimensionalObject> list = new ArrayList<>();

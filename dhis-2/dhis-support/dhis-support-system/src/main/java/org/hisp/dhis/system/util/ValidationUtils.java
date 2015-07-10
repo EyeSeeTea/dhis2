@@ -76,13 +76,13 @@ public class ValidationUtils
     private static final Set<Character> SQL_VALID_CHARS = Sets.newHashSet( '&', '|', '=', '!', '<', '>', '/', '%' );
 
     /**
-     * Validates whether a program indicator filter contains malicious code such
-     * as SQL injection attempts.
+     * Validates whether a filter expression contains malicious code such as SQL 
+     * injection attempts.
      * 
      * @param filter the filter string.
      * @return true if the filter string is valid, false otherwise.
      */
-    public static boolean programIndicatorFilterIsValid( String filter )
+    public static boolean filterExpressionIsValid( String filter )
     {
         if ( filter == null )
         {

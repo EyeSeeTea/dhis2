@@ -72,6 +72,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.program.ProgramIndicator;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.filter.AggregatableDataElementFilter;
 import org.hisp.dhis.system.util.MathUtils;
@@ -177,7 +178,7 @@ public class DefaultQueryPlanner
         {
             violation = "Data elements must be of a type that allows aggregation: " + getUids( nonAggDataElements );
         }
-                
+        
         if ( violation != null )
         {
             log.warn( "Analytics validation failed: " + violation );
@@ -483,7 +484,7 @@ public class DefaultQueryPlanner
         
         return queries;        
     }
-    
+
     @Override
     public List<DataQueryParams> groupByOrgUnitLevel( DataQueryParams params )
     {
@@ -527,9 +528,40 @@ public class DefaultQueryPlanner
             log.debug( "Split on org unit level: " + queries.size() );
         }
         
-        return queries;    
+        return queries;
     }
 
+    @Override
+    public List<DataQueryParams> groupByFilterExpression( DataQueryParams params )
+    {
+        List<DataQueryParams> queries = new ArrayList<>();
+        
+        if ( !params.getProgramIndicators().isEmpty() )
+        {
+            ListMap<String, NameableObject> filterProgramIndicatorMap = getFilterProgramIndicatorMap( params.getProgramIndicators() );
+            
+            for ( String filter : filterProgramIndicatorMap.keySet() )
+            {
+                DataQueryParams query = params.instance();
+                query.setProgramIndicators( filterProgramIndicatorMap.get( filter ) );
+                query.setFilterExpression( filter );
+                queries.add( query );
+            }
+        }
+        else
+        {
+            queries.add( params.instance() );
+            return queries;
+        }
+
+        if ( queries.size() > 1 )
+        {
+            log.debug( "Split on filter expression: " + queries.size() );
+        }
+        
+        return queries;
+    }
+    
     private List<DataQueryParams> groupByDataType( DataQueryParams params )
     {
         List<DataQueryParams> queries = new ArrayList<>();
@@ -716,7 +748,7 @@ public class DefaultQueryPlanner
      * Creates a mapping between level and organisation unit for the given organisation
      * units.
      */
-    private ListMap<Integer, NameableObject> getLevelOrgUnitMap( Collection<NameableObject> orgUnits )
+    private ListMap<Integer, NameableObject> getLevelOrgUnitMap( List<NameableObject> orgUnits )
     {
         ListMap<Integer, NameableObject> map = new ListMap<>();
         
@@ -735,9 +767,29 @@ public class DefaultQueryPlanner
     }
     
     /**
+     * Creates a mapping between filter and program indicator for the given
+     * program indicators.
+     */
+    private ListMap<String, NameableObject> getFilterProgramIndicatorMap( List<NameableObject> programIndicators )
+    {
+        ListMap<String, NameableObject> map = new ListMap<>();
+        
+        for ( NameableObject programIndicator : programIndicators )
+        {
+            ProgramIndicator indicator = (ProgramIndicator) programIndicator;
+            
+            String filter = indicator.getFilter();
+            
+            map.putValue( filter, indicator );
+        }
+        
+        return map;
+    }
+    
+    /**
      * Creates a mapping between data type and data element for the given data elements.
      */
-    private ListMap<DataType, NameableObject> getDataTypeDataElementMap( Collection<NameableObject> dataElements )
+    private ListMap<DataType, NameableObject> getDataTypeDataElementMap( List<NameableObject> dataElements )
     {
         ListMap<DataType, NameableObject> map = new ListMap<>();
         
@@ -757,7 +809,7 @@ public class DefaultQueryPlanner
      * Creates a mapping between the aggregation type and data element for the
      * given data elements and period type.
      */
-    private ListMap<AggregationType, NameableObject> getAggregationTypeDataElementMap( Collection<NameableObject> dataElements, PeriodType aggregationPeriodType )
+    private ListMap<AggregationType, NameableObject> getAggregationTypeDataElementMap( List<NameableObject> dataElements, PeriodType aggregationPeriodType )
     {
         ListMap<AggregationType, NameableObject> map = new ListMap<>();
         
@@ -777,7 +829,7 @@ public class DefaultQueryPlanner
      * Creates a mapping between the number of days in the period interval and period
      * for the given periods.
      */
-    private ListMap<Integer, NameableObject> getDaysPeriodMap( Collection<NameableObject> periods )
+    private ListMap<Integer, NameableObject> getDaysPeriodMap( List<NameableObject> periods )
     {
         ListMap<Integer, NameableObject> map = new ListMap<>();
         
