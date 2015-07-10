@@ -47,6 +47,7 @@ import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.i18n.I18nService;
+import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.MathUtils;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
@@ -129,6 +130,13 @@ public class DefaultProgramIndicatorService
     public void setI18nService( I18nService service )
     {
         i18nService = service;
+    }
+    
+    private StatementBuilder statementBuilder;
+
+    public void setStatementBuilder( StatementBuilder statementBuilder )
+    {
+        this.statementBuilder = statementBuilder;
     }
 
     // -------------------------------------------------------------------------
@@ -276,7 +284,7 @@ public class DefaultProgramIndicatorService
 
         return result;
     }
-
+    
     @Override
     public String getExpressionDescription( String expression )
     {
@@ -358,6 +366,40 @@ public class DefaultProgramIndicatorService
         return description.toString();
     }
 
+    @Override
+    public String getAnalyticsSQl( String expression )
+    {
+        if ( expression == null )
+        {
+            return null;
+        }
+        
+        StringBuffer buffer = new StringBuffer();
+
+        Matcher matcher = ProgramIndicator.EXPRESSION_PATTERN.matcher( expression );
+        
+        while ( matcher.find() )
+        {
+            String key = matcher.group( 1 );
+            String col = statementBuilder.columnQuote( matcher.group( 2 ) );
+            
+            if ( ProgramIndicator.KEY_DATAELEMENT.equals( key ) )
+            {
+                String deCol = statementBuilder.columnQuote( matcher.group( 3 ) );
+                
+                matcher.appendReplacement( buffer, deCol );
+            }
+            else
+            {
+                matcher.appendReplacement( buffer, col );
+            }
+        }
+        
+        matcher.appendTail( buffer );
+
+        return buffer.toString();
+    }
+    
     @Override
     public String expressionIsValid( String expression )
     {

@@ -1084,6 +1084,7 @@
     <property name="attributeService" ref="org.hisp.dhis.trackedentity.TrackedEntityAttributeService" />
     <property name="constantService" ref="org.hisp.dhis.constant.ConstantService" />
     <property name="attributeValueService" ref="org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueService" />
+    <property name="statementBuilder" ref="statementBuilder" />
   </bean>
 
   <bean id="org.hisp.dhis.relationship.RelationshipService" class="org.hisp.dhis.relationship.DefaultRelationshipService">

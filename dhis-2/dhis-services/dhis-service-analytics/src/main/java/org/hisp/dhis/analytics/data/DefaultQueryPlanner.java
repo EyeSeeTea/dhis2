@@ -73,6 +73,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.program.ProgramIndicator;
+import org.hisp.dhis.program.ProgramIndicatorService;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.filter.AggregatableDataElementFilter;
 import org.hisp.dhis.system.util.MathUtils;
@@ -98,6 +99,9 @@ public class DefaultQueryPlanner
     
     @Autowired
     private SystemSettingManager systemSettingManager;
+    
+    @Autowired
+    private ProgramIndicatorService programIndicatorService;
     
     // -------------------------------------------------------------------------
     // DefaultQueryPlanner implementation
@@ -544,7 +548,7 @@ public class DefaultQueryPlanner
             {
                 DataQueryParams query = params.instance();
                 query.setProgramIndicators( filterProgramIndicatorMap.get( filter ) );
-                query.setFilterExpression( filter );
+                query.setFilterExpression( programIndicatorService.getAnalyticsSQl( filter ) );
                 queries.add( query );
             }
         }
@@ -888,8 +892,7 @@ public class DefaultQueryPlanner
     /**
      * Indicates whether disaggregation is allowed for the given input.
      */
-    private boolean isDisaggregation( String aggregationOperator, 
-        PeriodType aggregationPeriodType, PeriodType dataPeriodType )
+    private boolean isDisaggregation( String aggregationOperator, PeriodType aggregationPeriodType, PeriodType dataPeriodType )
     {
         return dataPeriodType != null && aggregationPeriodType != null && aggregationPeriodType.getFrequencyOrder() < dataPeriodType.getFrequencyOrder();
     }
