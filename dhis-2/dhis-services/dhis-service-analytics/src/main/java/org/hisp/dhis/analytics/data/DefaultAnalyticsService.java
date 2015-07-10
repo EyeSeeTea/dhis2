@@ -634,6 +634,7 @@ public class DefaultAnalyticsService
                 getUids( params.getDimensionOrFilter( PERIOD_DIM_ID ) ) :
                     getLocalPeriodIdentifiers( params.getDimensionOrFilter( PERIOD_DIM_ID ), calendar );
 
+            metaData.put( DATA_X_DIM_ID, getUids( params.getDimensionOrFilter( DATA_X_DIM_ID ) ) );
             metaData.put( PERIOD_DIM_ID, periodUids );
             metaData.put( ORGUNIT_DIM_ID, getUids( params.getDimensionOrFilter( ORGUNIT_DIM_ID ) ) );
             metaData.put( CATEGORYOPTIONCOMBO_DIM_ID, cocNameMap.keySet() );
