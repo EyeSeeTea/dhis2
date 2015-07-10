@@ -114,6 +114,7 @@ public class EventQueryParams
 
         params.partitions = new Partitions( this.partitions );
         params.periodType = this.periodType;
+        params.filterExpression = this.filterExpression;
         
         params.program = this.program;
         params.programStage = this.programStage;
