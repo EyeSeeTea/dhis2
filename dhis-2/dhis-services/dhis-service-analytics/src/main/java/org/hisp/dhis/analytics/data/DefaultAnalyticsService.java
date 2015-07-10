@@ -656,10 +656,7 @@ public class DefaultAnalyticsService
 
             for ( DimensionalObject dim : params.getDimensionsAndFilters() )
             {
-                if ( dim.isAllItems() )
-                {
-                    metaData.put( dim.getDimension(), getUids( dim.getItems() ) );
-                }
+                metaData.put( dim.getDimension(), getUids( dim.getItems() ) );
             }
             
             grid.setMetaData( metaData );
