@@ -73,7 +73,7 @@ public class ValidationUtils
     private static int LAT_MAX = 90;
     private static int LAT_MIN = -90;
 
-    private static final Set<Character> SQL_VALID_CHARS = Sets.newHashSet( '&', '|', '=', '!', '<', '>', '/', '%' );
+    private static final Set<Character> SQL_VALID_CHARS = Sets.newHashSet( '&', '|', '=', '!', '<', '>', '/', '%', '"', '\'' );
 
     /**
      * Validates whether a filter expression contains malicious code such as SQL 
@@ -82,33 +82,26 @@ public class ValidationUtils
      * @param filter the filter string.
      * @return true if the filter string is valid, false otherwise.
      */
-    public static boolean filterExpressionIsValid( String filter )
+    public static boolean expressionIsValidSQl( String filter )
     {
         if ( filter == null )
         {
             return true;
         }
 
-        if ( filter.matches( SqlView.getIllegalKeywordsRegex() ) )
+        if ( filter.matches( SqlView.getIllegalKeywordsRegex() ) || filter.contains( "select" ) )
         {
             return false;
         }
-
-        check: for ( int i = 0; i < filter.length(); i++ ) 
+        
+        for ( int i = 0; i < filter.length(); i++ ) 
         {
             char ch = filter.charAt( i );
             
-            if ( Character.isWhitespace( ch ) || Character.isLetterOrDigit( ch ) )
+            if ( !( Character.isWhitespace( ch ) || Character.isLetterOrDigit( ch ) || SQL_VALID_CHARS.contains( ch ) ) )
             {
-                continue check;
+                return false;
             }
-            
-            if ( SQL_VALID_CHARS.contains( ch ) )
-            {
-                continue check;
-            }
-            
-            return false;
         }
         
         return true;

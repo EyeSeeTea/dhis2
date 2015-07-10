@@ -185,4 +185,14 @@ public class ValidationUtilsTest
         assertTrue( isValidHexColor( "#4a6" ) );
         assertTrue( isValidHexColor( "abc" ) );
     }
+    
+    @Test
+    public void testExpressionIsValidSQl()
+    {
+        assertFalse( expressionIsValidSQl( "10 == 10; delete from table" ) );
+        assertFalse( expressionIsValidSQl( "select from table" ) );
+        
+        assertTrue( expressionIsValidSQl( "\"abcdef12345\" < 30" ) );
+        assertTrue( expressionIsValidSQl( "\"abcdef12345\" >= \"bcdefg23456\"" ) );
+    }
 }

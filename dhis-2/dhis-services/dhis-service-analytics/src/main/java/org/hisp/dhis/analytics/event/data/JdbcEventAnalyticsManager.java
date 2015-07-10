@@ -514,9 +514,9 @@ public class JdbcEventAnalyticsManager
         // Filter expression
         // ---------------------------------------------------------------------
 
-        if ( params.hasFilterExpression() && ValidationUtils.filterExpressionIsValid( params.getFilterExpression() ) )
+        if ( params.hasFilterExpression() && ValidationUtils.expressionIsValidSQl( params.getFilterExpression() ) )
         {
-            sql += "and " + ExpressionUtils.asSql( params.getFilterExpression() );
+            sql += "and " + ExpressionUtils.asSql( params.getFilterExpression() ) + " ";
         }
         
         // ---------------------------------------------------------------------
