@@ -28,9 +28,9 @@ package org.hisp.dhis.system.util;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -89,7 +89,6 @@ public class ExpressionUtilsTest
         assertFalse( ExpressionUtils.isTrue( "\"a\" == \"b\"", null ) );
         assertFalse( ExpressionUtils.isTrue( "'b' == 'c'", null ) );
         assertFalse( ExpressionUtils.isTrue( "'goat' == 'cow'", null ) );
-        assertFalse( ExpressionUtils.isTrue( "'goat' == goat", null ) );
     }
     
     @Test
@@ -115,7 +114,6 @@ public class ExpressionUtilsTest
         assertFalse( ExpressionUtils.isTrue( "v3 == 'cow'", vars ) );
         assertFalse( ExpressionUtils.isTrue( "v4 == 'goat'", vars ) );
         assertFalse( ExpressionUtils.isTrue( "v4 == \"goat\"", vars ) );
-        assertFalse( ExpressionUtils.isTrue( "v4 == horse", vars ) );
     }
     
     @Test
@@ -149,5 +147,23 @@ public class ExpressionUtilsTest
         assertEquals( "2 < 3", ExpressionUtils.asSql( "2 lt 3" ) );
         assertEquals( "10 / 2", ExpressionUtils.asSql( "10 div 2" ) );
         assertEquals( "10 % 2", ExpressionUtils.asSql( "10 mod 2" ) );
+    }
+        
+    @Test
+    public void testIsValid()
+    {
+        Map<String, Object> vars = new HashMap<String, Object>();
+        
+        vars.put( "v1", "12" );
+        
+        assertTrue( ExpressionUtils.isValid( "2 + 8", null ) );
+        assertTrue( ExpressionUtils.isValid( "3 - v1", vars ) );
+        assertTrue( ExpressionUtils.isValid( "d2:zing(1)", null ) );
+        assertTrue( ExpressionUtils.isValid( "(d2:zing(1)+d2:zing(1))*50/1", null ) );
+        
+        assertFalse( ExpressionUtils.isValid( "2 a 3", null ) );
+        assertFalse( ExpressionUtils.isValid( "v2 + 3", vars ) );
+        assertFalse( ExpressionUtils.isValid( "4 + abc", vars ) );
+        assertFalse( ExpressionUtils.isValid( "'goat' == goat", null ) );
     }
 }
