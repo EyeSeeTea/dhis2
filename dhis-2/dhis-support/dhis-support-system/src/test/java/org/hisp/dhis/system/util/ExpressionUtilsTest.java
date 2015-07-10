@@ -43,6 +43,37 @@ import org.junit.Test;
  */
 public class ExpressionUtilsTest
 {
+    private static final double DELTA = 0.01;
+    
+    @Test
+    public void testEvaluateToDouble()
+    {
+        assertEquals( 3d, ExpressionUtils.evaluateToDouble( "3", null ), DELTA );
+        assertEquals( 3.45, ExpressionUtils.evaluateToDouble( "3.45", null ), DELTA );
+        assertEquals( 5d, ExpressionUtils.evaluateToDouble( "2 + 3", null ), DELTA );
+        assertEquals( 15.6, ExpressionUtils.evaluateToDouble( "12.4 + 3.2", null ), DELTA );        
+        assertEquals( 3d, ExpressionUtils.evaluateToDouble( "d2:zing(3)", null ), DELTA );        
+        assertEquals( 2d, ExpressionUtils.evaluateToDouble( "d2:zing(-3) + 2.0", null ), DELTA );
+        assertEquals( 4d, ExpressionUtils.evaluateToDouble( "d2:zing(-1) + 4 + d2:zing(-2)", null ), DELTA );
+        assertEquals( 0d, ExpressionUtils.evaluateToDouble( "d2:oizp(-4)", null ), DELTA );
+        assertEquals( 1d, ExpressionUtils.evaluateToDouble( "d2:oizp(0)", null ), DELTA );
+        assertEquals( 2d, ExpressionUtils.evaluateToDouble( "d2:oizp(-4) + d2:oizp(0) + d2:oizp(3.0)", null ), DELTA );
+    }
+
+    @Test
+    public void testEvaluateToDoubleWithVars()
+    {
+        Map<String, Object> vars = new HashMap<String, Object>();
+        
+        vars.put( "v1", 4d );
+        vars.put( "v2", -5d );
+        
+        assertEquals( 7d, ExpressionUtils.evaluateToDouble( "v1 + 3", vars ), DELTA );
+        assertEquals( 4d, ExpressionUtils.evaluateToDouble( "d2:zing(v1)", vars ), DELTA );
+        assertEquals( 0d, ExpressionUtils.evaluateToDouble( "d2:zing(v2)", vars ), DELTA );
+        assertEquals( 4d, ExpressionUtils.evaluateToDouble( "d2:zing(v1) + d2:zing(v2)", vars ), DELTA );
+    }
+    
     @Test
     public void testIsTrue()
     {
