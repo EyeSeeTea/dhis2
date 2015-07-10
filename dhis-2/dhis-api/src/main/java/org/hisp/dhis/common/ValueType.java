@@ -30,7 +30,6 @@ package org.hisp.dhis.common;
 
 import java.util.Date;
 
-import org.hisp.dhis.calendar.DateTimeUnit;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.joda.time.DateTime;
