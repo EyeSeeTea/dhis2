@@ -32,6 +32,7 @@ import static org.hisp.dhis.dataelement.DataElement.AGGREGATION_OPERATOR_AVERAGE
 import static org.hisp.dhis.dataelement.DataElement.AGGREGATION_OPERATOR_AVERAGE_SUM;
 import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_BOOL;
 import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_DATE;
+import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_DATETIME;
 import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_INT;
 import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_NEGATIVE_INT;
 import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_NUMBER;
