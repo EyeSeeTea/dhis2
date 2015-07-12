@@ -266,31 +266,6 @@ public class TextUtils
     }
 
     /**
-     * Transforms a collection of Integers into a comma delimited String. If the
-     * given collection of elements are null or is empty, an empty String is
-     * returned.
-     * 
-     * @param elements the collection of Integers
-     * @return a comma delimited String.
-     */
-    public static String getCommaDelimitedString( Collection<?> elements )
-    {
-        final StringBuilder builder = new StringBuilder();
-        
-        if ( elements != null && !elements.isEmpty() )
-        {
-            for ( Object element : elements )
-            {
-                builder.append( element.toString() ).append( DELIMITER );
-            }
-            
-            return builder.substring( 0, builder.length() - DELIMITER.length() );
-        }
-        
-        return builder.toString();
-    }
-
-    /**
      * Joins the elements of the provided array into a single String containing 
      * the provided list of elements.
      * 
@@ -314,6 +289,31 @@ public class TextUtils
         }
         
         return StringUtils.join( objects, separator );
+    }
+    
+    /**
+     * Transforms a collection of Integers into a comma delimited String. If the
+     * given collection of elements are null or is empty, an empty String is
+     * returned.
+     * 
+     * @param elements the collection of Integers
+     * @return a comma delimited String.
+     */
+    public static String getCommaDelimitedString( Collection<?> elements )
+    {
+        final StringBuilder builder = new StringBuilder();
+        
+        if ( elements != null && !elements.isEmpty() )
+        {
+            for ( Object element : elements )
+            {
+                builder.append( element.toString() ).append( DELIMITER );
+            }
+            
+            return builder.substring( 0, builder.length() - DELIMITER.length() );
+        }
+        
+        return builder.toString();
     }
     
     /**
@@ -495,5 +495,31 @@ public class TextUtils
         }
         
         return null;
+    }
+    
+    /**
+     * Indicates whether the given string contains any of the given search
+     * strings. The operation ignores case and leading and trailing blanks.
+     * 
+     * @param string the string to check, can be null.
+     * @param searchStrings the strings to check against.
+     * @return true or false.
+     */
+    public static boolean containsAnyIgnoreCase( String string, Collection<String> searchStrings )
+    {
+        if ( string == null || searchStrings == null )
+        {
+            return false;
+        }
+        
+        for ( String searchString : searchStrings )
+        {
+            if ( string.trim().toLowerCase().contains( searchString.trim().toLowerCase() ) )
+            {
+                return true;
+            }
+        }
+        
+        return false;
     }
 }

@@ -51,9 +51,9 @@ import java.util.regex.Pattern;
 import org.apache.commons.validator.routines.DateValidator;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.commons.validator.routines.UrlValidator;
+import org.hisp.dhis.commons.util.TextUtils;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.datavalue.DataValue;
-import org.hisp.dhis.sqlview.SqlView;
 
 import com.google.common.collect.Sets;
 
@@ -75,6 +75,10 @@ public class ValidationUtils
 
     private static final Set<Character> SQL_VALID_CHARS = Sets.newHashSet( '&', '|', '=', '!', '<', '>', '/', '%', '"', '\'' );
 
+    public static final Set<String> ILLEGAL_SQL_KEYWORDS = Sets.newHashSet( "alter", "before", "case", 
+        "commit", "copy", "create", "createdb", "createrole", "createuser", "close", "delete", "destroy", "drop", 
+        "escape", "insert", "select", "rename", "replace", "restore", "return", "update", "when", "write" );
+    
     /**
      * Validates whether a filter expression contains malicious code such as SQL 
      * injection attempts.
@@ -89,7 +93,7 @@ public class ValidationUtils
             return true;
         }
 
-        if ( filter.matches( SqlView.getIllegalKeywordsRegex() ) || filter.contains( "select" ) )
+        if ( TextUtils.containsAnyIgnoreCase( filter, ILLEGAL_SQL_KEYWORDS ) )
         {
             return false;
         }

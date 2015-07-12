@@ -381,17 +381,26 @@ public class DefaultProgramIndicatorService
         while ( matcher.find() )
         {
             String key = matcher.group( 1 );
-            String col = statementBuilder.columnQuote( matcher.group( 2 ) );
+            String uid = statementBuilder.columnQuote( matcher.group( 2 ) );
             
             if ( ProgramIndicator.KEY_DATAELEMENT.equals( key ) )
             {
-                String deCol = statementBuilder.columnQuote( matcher.group( 3 ) );
+                String de = statementBuilder.columnQuote( matcher.group( 3 ) );
                 
-                matcher.appendReplacement( buffer, deCol );
+                matcher.appendReplacement( buffer, de );
             }
-            else
+            else if ( ProgramIndicator.KEY_ATTRIBUTE.equals( key ) )
             {
-                matcher.appendReplacement( buffer, col );
+                matcher.appendReplacement( buffer, uid );
+            }
+            else if ( ProgramIndicator.KEY_CONSTANT.equals( key ) )
+            {
+                Constant constant = constantService.getConstant( uid );
+                
+                if ( constant != null )
+                {
+                    matcher.appendReplacement( buffer, String.valueOf( constant.getValue() ) );
+                }
             }
         }
         
