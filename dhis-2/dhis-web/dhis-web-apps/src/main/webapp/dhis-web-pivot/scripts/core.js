@@ -588,6 +588,11 @@ Ext.onReady( function() {
                         layout.userOrganisationUnit = config.userOrganisationUnit;
                     }
 
+                    // TODO program
+                    if (Ext.isString(config.program)) {
+                        layout.program = config.program;
+                    }
+
                     // validate
 					if (!validateSpecialCases()) {
 						return;
@@ -2086,6 +2091,8 @@ Ext.onReady( function() {
 			web.analytics = {};
 
 			web.analytics.getParamString = function(xLayout, isSorted) {
+                isSorted = false;
+                
 				var axisDimensionNames = isSorted ? xLayout.sortedAxisDimensionNames : xLayout.axisDimensionNames,
 					filterDimensions = isSorted ? xLayout.sortedFilterDimensions : xLayout.filterDimensions,
 					dimensionNameIdsMap = isSorted ? xLayout.dimensionNameSortedIdsMap : xLayout.dimensionNameIdsMap,
@@ -2159,6 +2166,11 @@ Ext.onReady( function() {
 				if (Ext.isObject(xLayout.dataApprovalLevel) && Ext.isString(xLayout.dataApprovalLevel.id) && xLayout.dataApprovalLevel.id !== 'DEFAULT') {
 					paramString += '&approvalLevel=' + xLayout.dataApprovalLevel.id;
 				}
+
+                // TODO program
+                if (xLayout.program) {
+                    paramString += '&program=' + xLayout.program;
+                }
 
 				return paramString;
 			};

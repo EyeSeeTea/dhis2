@@ -2499,6 +2499,11 @@ Ext.onReady( function() {
 						else if (dimName === dx && nameDimArrayMap.hasOwnProperty(dimName) && nameDimArrayMap[dimName]) {
 							for (var k = 0; k < nameDimArrayMap[dx].length; k++) {
 								axes[i].push(Ext.clone(nameDimArrayMap[dx][k]));
+
+                                // TODO program
+                                if (nameDimArrayMap[dx][k].program) {
+                                    config.program = nameDimArrayMap[dx][k].program;
+                                }
 							}
 						}
 						else if (nameDimArrayMap.hasOwnProperty(dimName) && nameDimArrayMap[dimName]) {
@@ -2506,6 +2511,8 @@ Ext.onReady( function() {
 								axes[i].push(Ext.clone(nameDimArrayMap[dimName][k]));
 							}
 						}
+
+                        
 					}
 				}
 
@@ -4737,6 +4744,11 @@ Ext.onReady( function() {
 						name: r.data.name
 					});
 				});
+
+                // TODO program
+                if (eventDataItemSelectedStore.getRange().length || programIndicatorSelectedStore.getRange().length) {
+                    config.program = eventDataItemProgram.getValue() || programIndicatorProgram.getValue();
+                }
 
 				return config.items.length ? config : null;
 			},
