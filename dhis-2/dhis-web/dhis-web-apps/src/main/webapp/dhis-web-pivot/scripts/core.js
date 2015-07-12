@@ -589,7 +589,7 @@ Ext.onReady( function() {
                     }
 
                     // TODO program
-                    if (Ext.isString(config.program)) {
+                    if (Ext.isObject(config.program)) {
                         layout.program = config.program;
                     }
 
@@ -2170,8 +2170,8 @@ Ext.onReady( function() {
 				}
 
                 // TODO program
-                if (xLayout.program) {
-                    paramString += '&program=' + xLayout.program;
+                if (xLayout.program && xLayout.program.id) {
+                    paramString += '&program=' + xLayout.program.id;
                 }
 
 				return paramString;

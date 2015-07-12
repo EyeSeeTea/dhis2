@@ -4762,7 +4762,7 @@ Ext.onReady( function() {
 
                 // TODO program
                 if (eventDataItemSelectedStore.getRange().length || programIndicatorSelectedStore.getRange().length) {
-                    config.program = eventDataItemProgram.getValue() || programIndicatorProgram.getValue();
+                    config.program = {id: eventDataItemProgram.getValue() || programIndicatorProgram.getValue()};
                 }
 
 				return config.items.length ? config : null;
