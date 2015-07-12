@@ -2476,12 +2476,12 @@ Ext.onReady( function() {
 					}
 				}
 
-				nameDimArrayMap[dx] = Ext.Array.clean([].concat(
-					nameDimArrayMap[dimConf.indicator.objectName] || [],
-					nameDimArrayMap[dimConf.dataElement.objectName] || [],
-					nameDimArrayMap[dimConf.operand.objectName] || [],
-					nameDimArrayMap[dimConf.dataSet.objectName] || []
-				));
+				//nameDimArrayMap[dx] = Ext.Array.clean([].concat(
+					//nameDimArrayMap[dimConf.indicator.objectName] || [],
+					//nameDimArrayMap[dimConf.dataElement.objectName] || [],
+					//nameDimArrayMap[dimConf.operand.objectName] || [],
+					//nameDimArrayMap[dimConf.dataSet.objectName] || []
+				//));
 
 				// columns, rows, filters
 				for (var i = 0, nameArrays = [columnDimNames, rowDimNames, filterDimNames], axes = [config.columns, config.rows, config.filters], dimNames; i < nameArrays.length; i++) {
@@ -2705,6 +2705,9 @@ Ext.onReady( function() {
 			legendSetStore,
 
             isScrolled,
+            onDataTypeSelect,
+            dataType,
+            
             indicatorLabel,
             indicatorSearch,
             indicatorFilter,
@@ -2726,6 +2729,8 @@ Ext.onReady( function() {
             dataSetAvailable,
             dataSetSelected,
             dataSet,
+            data,
+            
 			rewind,
             relativePeriodDefaults,
             relativePeriod,
@@ -3192,6 +3197,52 @@ Ext.onReady( function() {
 		});
 		ns.app.stores.dataSetSelected = dataSetSelectedStore;
 
+        eventDataItemAvailableStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			data: [],
+			sortStore: function() {
+				this.sort('name', 'ASC');
+			}
+		});
+		ns.app.stores.eventDataItemAvailable = eventDataItemAvailableStore;
+        
+        eventDataItemSelectedStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			data: []
+		});
+		ns.app.stores.eventDataItemSelected = eventDataItemSelectedStore;
+        
+        programIndicatorAvailableStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			data: [],
+			sortStore: function() {
+				this.sort('name', 'ASC');
+			}
+		});
+		ns.app.stores.programIndicatorAvailable = programIndicatorAvailableStore;
+        
+        programIndicatorSelectedStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			data: []
+		});
+		ns.app.stores.programIndicatorSelected = programIndicatorSelectedStore;
+        
+		programStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			proxy: {
+				type: 'ajax',
+				url: ns.core.init.contextPath + '/api/programs.json?fields=id,name&paging=false',
+				reader: {
+					type: 'json',
+					root: 'programs'
+				},
+				pageParam: false,
+				startParam: false,
+				limitParam: false
+			}
+		});
+		ns.app.stores.program = programStore;
+
 		periodTypeStore = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name'],
 			data: ns.core.conf.period.periodTypes
@@ -3307,6 +3358,88 @@ Ext.onReady( function() {
 
 			return scrollBottom / el.scrollHeight > 0.9;
 		};
+
+        onDataTypeSelect = function(type) {
+            type = type || 'in';
+            
+            if (type === 'in') {
+                indicator.show();
+                dataElement.hide();
+                dataSet.hide();
+                eventDataItem.hide();
+                programIndicator.hide();
+            }
+            else if (type === 'de') {
+                indicator.hide();
+                dataElement.show();
+                dataSet.hide();
+                eventDataItem.hide();
+                programIndicator.hide();
+            }
+            else if (type === 'ds') {
+                indicator.hide();
+                dataElement.hide();
+                dataSet.show();
+                eventDataItem.hide();
+                programIndicator.hide();
+
+				if (!dataSetAvailableStore.isLoaded) {
+                    dataSetAvailableStore.isLoaded = true;
+					dataSetAvailableStore.loadPage(null, false);
+                }
+            }
+            else if (type === 'di') {
+                indicator.hide();
+                dataElement.hide();
+                dataSet.hide();
+                eventDataItem.show();
+                programIndicator.hide();
+
+                if (!programStore.isLoaded) {
+                    programStore.isLoaded = true;
+                    programStore.load();
+                }
+            }
+            else if (type === 'pi') {
+                indicator.hide();
+                dataElement.hide();
+                dataSet.hide();
+                eventDataItem.hide();
+                programIndicator.show();
+
+                if (!programStore.isLoaded) {
+                    programStore.isLoaded = true;
+                    programStore.load();
+                }
+            }
+        };
+
+        dataType = Ext.create('Ext.form.field.ComboBox', {
+            cls: 'ns-combo',
+            style: 'margin-bottom:1px',
+            width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding,
+            valueField: 'id',
+            displayField: 'name',
+            //emptyText: NS.i18n.data_type,
+            editable: false,
+            queryMode: 'local',
+            value: 'in',
+            store: {
+                fields: ['id', 'name'],
+                data: [
+                     {id: 'in', name: NS.i18n.indicators},
+                     {id: 'de', name: NS.i18n.data_elements},
+                     {id: 'ds', name: NS.i18n.data_sets},
+                     {id: 'di', name: NS.i18n.event_data_items},
+                     {id: 'pi', name: NS.i18n.program_indicators}
+                ]
+            },
+            listeners: {
+                select: function(cb) {
+                    onDataTypeSelect(cb.getValue());
+                }
+            }
+        });
 
         indicatorLabel = Ext.create('Ext.form.Label', {
             text: NS.i18n.available,
@@ -3495,11 +3628,13 @@ Ext.onReady( function() {
 			}
 		});
 
-		indicator = {
+		indicator = Ext.create('Ext.panel.Panel', {
 			xtype: 'panel',
-			title: '<div class="ns-panel-title-data">' + NS.i18n.indicators + '</div>',
+			//title: '<div class="ns-panel-title-data">' + NS.i18n.indicators + '</div>',
+            preventHeader: true,
 			hideCollapseTool: true,
             dimension: dimConf.indicator.objectName,
+            bodyStyle: 'border:0 none',
 			getDimension: function() {
 				var config = {
 					dimension: dimConf.indicator.objectName,
@@ -3539,13 +3674,13 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				added: function() {
-					accordionPanels.push(this);
+					//accordionPanels.push(this);
 				},
 				expand: function(p) {
-					p.onExpand();
+					//p.onExpand();
 				}
 			}
-		};
+		});
 
         dataElementLabel = Ext.create('Ext.form.Label', {
             text: NS.i18n.available,
@@ -3761,10 +3896,13 @@ Ext.onReady( function() {
 			}
 		});
 
-		dataElement = {
+		dataElement = Ext.create('Ext.panel.Panel', {
 			xtype: 'panel',
-			title: '<div class="ns-panel-title-data">' + NS.i18n.data_elements + '</div>',
+			//title: '<div class="ns-panel-title-data">' + NS.i18n.data_elements + '</div>',
+            preventHeader: true,
+            hidden: true,
 			hideCollapseTool: true,
+            bodyStyle: 'border:0 none',
             dimension: dimConf.dataElement.objectName,
 			getDimension: function() {
 				var config = {
@@ -3812,13 +3950,13 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				added: function() {
-					accordionPanels.push(this);
+					//accordionPanels.push(this);
 				},
 				expand: function(p) {
-					p.onExpand();
+					//p.onExpand();
 				}
 			}
-		};
+		});
 
         dataSetLabel = Ext.create('Ext.form.Label', {
             text: NS.i18n.available,
@@ -3972,10 +4110,13 @@ Ext.onReady( function() {
 			}
 		});
 
-		dataSet = {
+		dataSet = Ext.create('Ext.panel.Panel', {
 			xtype: 'panel',
-			title: '<div class="ns-panel-title-data">' + NS.i18n.reporting_rates + '</div>',
+			//title: '<div class="ns-panel-title-data">' + NS.i18n.reporting_rates + '</div>',
+            preventHeader: true,
+            hidden: true,
 			hideCollapseTool: true,
+            bodyStyle: 'border:0 none',
             dimension: dimConf.dataSet.objectName,
 			getDimension: function() {
 				var config = {
@@ -4001,11 +4142,6 @@ Ext.onReady( function() {
 					this,
 					ns.core.conf.layout.west_fill_accordion_dataset
 				);
-
-				if (!dataSetAvailableStore.isLoaded) {
-                    dataSetAvailableStore.isLoaded = true;
-					dataSetAvailableStore.loadPage(null, false);
-                }
 			},
 			items: [
 				{
@@ -4017,6 +4153,612 @@ Ext.onReady( function() {
 						dataSetSelected
 					]
 				}
+			],
+			listeners: {
+				added: function() {
+					//accordionPanels.push(this);
+				},
+				expand: function(p) {
+					//p.onExpand();
+				}
+			}
+		});
+
+        onEventDataItemProgramSelect = function(programId) {
+            Ext.Ajax.request({
+                url: ns.core.init.contextPath + '/api/programs.json?paging=false&fields=programTrackedEntityAttributes[trackedEntityAttribute[id,name]],programStages[programStageDataElements[dataElement[id,name]]]&filter=id:eq:' + programId,
+                success: function(r) {
+                    r = Ext.decode(r.responseText);
+                    
+                    var isA = Ext.isArray,
+                        isO = Ext.isObject,
+                        program = isA(r.programs) && r.programs.length ? r.programs[0] : null,
+                        stages = isO(program) && isA(program.programStages) && program.programStages.length ? program.programStages : [],
+                        attributes = isO(program) && isA(program.programTrackedEntityAttributes) ? Ext.Array.pluck(program.programTrackedEntityAttributes, 'trackedEntityAttribute') : [],
+                        dataElements = [],
+                        data;
+
+                    // data elements
+                    for (var i = 0, stage; i < stages.length; i++) {
+                        stage = stages[i];
+
+                        if (isA(stage.programStageDataElements) && stage.programStageDataElements.length) {
+                            dataElements = dataElements.concat(Ext.Array.pluck(stage.programStageDataElements, 'dataElement') || []);
+                        }
+                    }
+
+                    data = ns.core.support.prototype.array.sort(Ext.Array.clean([].concat(dataElements, attributes))) || [];
+
+                    eventDataItemAvailableStore.loadData(data);
+
+                    console.log(dataElements);
+                    console.log(attributes);
+                }
+            });
+
+        };
+
+		eventDataItemProgram = Ext.create('Ext.form.field.ComboBox', {
+			cls: 'ns-combo',
+			style: 'margin:0 1px 1px 0',
+			width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding,
+			valueField: 'id',
+			displayField: 'name',
+			emptyText: NS.i18n.select_program,
+			editable: false,
+			store: programStore,
+			listeners: {
+				select: function(cb) {
+                    onEventDataItemProgramSelect(cb.getValue());
+				}
+			}
+		});
+
+        eventDataItemLabel = Ext.create('Ext.form.Label', {
+            text: NS.i18n.available,
+            cls: 'ns-toolbar-multiselect-left-label',
+            style: 'margin-right:5px'
+        });
+
+        eventDataItemSearch = Ext.create('Ext.button.Button', {
+            width: 22,
+            height: 22,
+            cls: 'ns-button-icon',
+            //disabled: true,
+            style: 'background: url(images/search_14.png) 3px 3px no-repeat',
+            showFilter: function() {
+                eventDataItemLabel.hide();
+                this.hide();
+                eventDataItemFilter.show();
+                eventDataItemFilter.reset();
+            },
+            hideFilter: function() {
+                eventDataItemLabel.show();
+                this.show();
+                eventDataItemFilter.hide();
+                eventDataItemFilter.reset();
+            },
+            handler: function() {
+                this.showFilter();
+            }
+        });
+
+        eventDataItemFilter = Ext.create('Ext.form.field.Trigger', {
+            cls: 'ns-trigger-filter',
+            emptyText: 'Filter available..',
+            height: 22,
+            hidden: true,
+            enableKeyEvents: true,
+            fieldStyle: 'height:22px; border-right:0 none',
+            style: 'height:22px',
+            onTriggerClick: function() {
+				if (this.getValue()) {
+					this.reset();
+					this.onKeyUpHandler();
+
+                    eventDataItemAvailableStore.clearFilter();
+				}
+            },
+            onKeyUpHandler: function() {
+                var value = this.getValue() || '',
+                    store = eventDataItemAvailableStore,
+                    str;
+
+                //if (Ext.isString(value) || Ext.isNumber(value)) {
+                    //store.loadPage(null, this.getValue(), false);
+                //}
+
+                store.filterBy(function(record) {
+                    str = record.data.name || '';
+
+                    return str.toLowerCase().indexOf(value.toLowerCase()) !== -1;
+                });                
+            },
+            listeners: {
+                keyup: {
+                    fn: function(cmp) {
+                        cmp.onKeyUpHandler();
+                    },
+                    buffer: 100
+                },
+                show: function(cmp) {
+                    cmp.focus(false, 50);
+                },
+                focus: function(cmp) {
+                    cmp.addCls('ns-trigger-filter-focused');
+                },
+                blur: function(cmp) {
+                    cmp.removeCls('ns-trigger-filter-focused');
+                }
+            }
+        });
+
+		eventDataItemAvailable = Ext.create('Ext.ux.form.MultiSelect', {
+			cls: 'ns-toolbar-multiselect-left',
+			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
+			valueField: 'id',
+			displayField: 'name',
+			store: eventDataItemAvailableStore,
+			tbar: [
+				eventDataItemLabel,
+                eventDataItemSearch,
+                eventDataItemFilter,
+				'->',
+				{
+					xtype: 'button',
+					icon: 'images/arrowright.png',
+					width: 22,
+					handler: function() {
+						ns.core.web.multiSelect.select(eventDataItemAvailable, eventDataItemSelected);
+					}
+				},
+				{
+					xtype: 'button',
+					icon: 'images/arrowrightdouble.png',
+					width: 22,
+					handler: function() {
+						//eventDataItemAvailableStore.loadPage(null, null, null, true, function() {
+							ns.core.web.multiSelect.selectAll(eventDataItemAvailable, eventDataItemSelected);
+						//});
+					}
+				}
+			],
+			listeners: {
+				render: function(ms) {
+                    var el = Ext.get(ms.boundList.getEl().id + '-listEl').dom;
+
+                    //el.addEventListener('scroll', function(e) {
+                        //if (isScrolled(e) && !eventDataItemAvailableStore.isPending) {
+                            //eventDataItemAvailableStore.loadPage(null, null, true);
+                        //}
+                    //});
+
+					ms.boundList.on('itemdblclick', function() {
+						ns.core.web.multiSelect.select(ms, eventDataItemSelected);
+					}, ms);
+				}
+			}
+		});
+
+		eventDataItemSelected = Ext.create('Ext.ux.form.MultiSelect', {
+			cls: 'ns-toolbar-multiselect-right',
+			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
+			valueField: 'id',
+			displayField: 'name',
+			ddReorder: true,
+			store: eventDataItemSelectedStore,
+			tbar: [
+				{
+					xtype: 'button',
+					icon: 'images/arrowleftdouble.png',
+					width: 22,
+					handler: function() {
+						ns.core.web.multiSelect.unselectAll(eventDataItemAvailable, eventDataItemSelected);
+					}
+				},
+				{
+					xtype: 'button',
+					icon: 'images/arrowleft.png',
+					width: 22,
+					handler: function() {
+						ns.core.web.multiSelect.unselect(eventDataItemAvailable, eventDataItemSelected);
+					}
+				},
+				'->',
+				{
+					xtype: 'label',
+					text: NS.i18n.selected,
+					cls: 'ns-toolbar-multiselect-right-label'
+				}
+			],
+			listeners: {
+				afterrender: function() {
+					this.boundList.on('itemdblclick', function() {
+						ns.core.web.multiSelect.unselect(eventDataItemAvailable, this);
+					}, this);
+				}
+			}
+		});
+
+		eventDataItem = Ext.create('Ext.panel.Panel', {
+			xtype: 'panel',
+			//title: '<div class="ns-panel-title-data">' + NS.i18n.eventDataItems + '</div>',
+            preventHeader: true,
+            hidden: true,
+			hideCollapseTool: true,
+            dimension: dimConf.eventDataItem.objectName,
+            bodyStyle: 'border:0 none',
+			getDimension: function() {
+				var config = {
+					dimension: dimConf.eventDataItem.objectName,
+					items: []
+				};
+
+				eventDataItemSelectedStore.each( function(r) {
+					config.items.push({
+						id: r.data.id,
+						name: r.data.name
+					});
+				});
+
+				return config.items.length ? config : null;
+			},
+			onExpand: function() {
+				var h = westRegion.hasScrollbar ?
+					ns.core.conf.layout.west_scrollbarheight_accordion_indicator : ns.core.conf.layout.west_maxheight_accordion_indicator;
+				accordion.setThisHeight(h);
+				ns.core.web.multiSelect.setHeight(
+					[eventDataItemAvailable, eventDataItemSelected],
+					this,
+					ns.core.conf.layout.west_fill_accordion_eventdataitem
+				);
+			},
+			items: [
+				eventDataItemProgram,
+				{
+					xtype: 'panel',
+					layout: 'column',
+					bodyStyle: 'border-style:none',
+					items: [
+                        eventDataItemAvailable,
+						eventDataItemSelected
+					]
+				}
+			],
+			listeners: {
+				added: function() {
+					//accordionPanels.push(this);
+				},
+				expand: function(p) {
+					//p.onExpand();
+				}
+			}
+		});
+
+        onProgramIndicatorProgramSelect = function(programId) {
+            Ext.Ajax.request({
+                url: ns.core.init.contextPath + '/api/programs.json?paging=false&fields=programIndicators[id,name]&filter=id:eq:' + programId,
+                success: function(r) {
+                    r = Ext.decode(r.responseText);
+                    
+                    var isA = Ext.isArray,
+                        isO = Ext.isObject,
+                        program = isA(r.programs) && r.programs.length ? r.programs[0] : null,
+                        programIndicators = isO(program) && isA(program.programIndicators) && program.programIndicators.length ? program.programIndicators : [],
+                        data = ns.core.support.prototype.array.sort(Ext.Array.clean(programIndicators)) || [];
+
+                    programIndicatorAvailableStore.loadData(data);
+
+                    console.log(data);
+                }
+            });
+
+        };
+
+		programIndicatorProgram = Ext.create('Ext.form.field.ComboBox', {
+			cls: 'ns-combo',
+			style: 'margin:0 1px 1px 0',
+			width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding,
+			valueField: 'id',
+			displayField: 'name',
+			emptyText: NS.i18n.select_program,
+			editable: false,
+			store: programStore,
+			listeners: {
+				select: function(cb) {
+                    onProgramIndicatorProgramSelect(cb.getValue());
+				}
+			}
+		});
+
+        programIndicatorLabel = Ext.create('Ext.form.Label', {
+            text: NS.i18n.available,
+            cls: 'ns-toolbar-multiselect-left-label',
+            style: 'margin-right:5px'
+        });
+
+        programIndicatorSearch = Ext.create('Ext.button.Button', {
+            width: 22,
+            height: 22,
+            cls: 'ns-button-icon',
+            //disabled: true,
+            style: 'background: url(images/search_14.png) 3px 3px no-repeat',
+            showFilter: function() {
+                programIndicatorLabel.hide();
+                this.hide();
+                programIndicatorFilter.show();
+                programIndicatorFilter.reset();
+            },
+            hideFilter: function() {
+                programIndicatorLabel.show();
+                this.show();
+                programIndicatorFilter.hide();
+                programIndicatorFilter.reset();
+            },
+            handler: function() {
+                this.showFilter();
+            }
+        });
+
+        programIndicatorFilter = Ext.create('Ext.form.field.Trigger', {
+            cls: 'ns-trigger-filter',
+            emptyText: 'Filter available..',
+            height: 22,
+            hidden: true,
+            enableKeyEvents: true,
+            fieldStyle: 'height:22px; border-right:0 none',
+            style: 'height:22px',
+            onTriggerClick: function() {
+				if (this.getValue()) {
+					this.reset();
+					this.onKeyUpHandler();
+
+                    programIndicatorAvailableStore.clearFilter();
+				}
+            },
+            onKeyUpHandler: function() {
+                var value = this.getValue() || '',
+                    store = programIndicatorAvailableStore,
+                    str;
+
+                //if (Ext.isString(value) || Ext.isNumber(value)) {
+                    //store.loadPage(null, this.getValue(), false);
+                //}
+
+                store.filterBy(function(record) {
+                    str = record.data.name || '';
+
+                    return str.toLowerCase().indexOf(value.toLowerCase()) !== -1;
+                });                
+            },
+            listeners: {
+                keyup: {
+                    fn: function(cmp) {
+                        cmp.onKeyUpHandler();
+                    },
+                    buffer: 100
+                },
+                show: function(cmp) {
+                    cmp.focus(false, 50);
+                },
+                focus: function(cmp) {
+                    cmp.addCls('ns-trigger-filter-focused');
+                },
+                blur: function(cmp) {
+                    cmp.removeCls('ns-trigger-filter-focused');
+                }
+            }
+        });
+
+		programIndicatorAvailable = Ext.create('Ext.ux.form.MultiSelect', {
+			cls: 'ns-toolbar-multiselect-left',
+			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
+			valueField: 'id',
+			displayField: 'name',
+			store: programIndicatorAvailableStore,
+			tbar: [
+				programIndicatorLabel,
+                programIndicatorSearch,
+                programIndicatorFilter,
+				'->',
+				{
+					xtype: 'button',
+					icon: 'images/arrowright.png',
+					width: 22,
+					handler: function() {
+						ns.core.web.multiSelect.select(programIndicatorAvailable, programIndicatorSelected);
+					}
+				},
+				{
+					xtype: 'button',
+					icon: 'images/arrowrightdouble.png',
+					width: 22,
+					handler: function() {
+						//programIndicatorAvailableStore.loadPage(null, null, null, true, function() {
+							ns.core.web.multiSelect.selectAll(programIndicatorAvailable, programIndicatorSelected);
+						//});
+					}
+				}
+			],
+			listeners: {
+				render: function(ms) {
+                    var el = Ext.get(ms.boundList.getEl().id + '-listEl').dom;
+
+                    //el.addEventListener('scroll', function(e) {
+                        //if (isScrolled(e) && !programIndicatorAvailableStore.isPending) {
+                            //programIndicatorAvailableStore.loadPage(null, null, true);
+                        //}
+                    //});
+
+					ms.boundList.on('itemdblclick', function() {
+						ns.core.web.multiSelect.select(ms, programIndicatorSelected);
+					}, ms);
+				}
+			}
+		});
+
+		programIndicatorSelected = Ext.create('Ext.ux.form.MultiSelect', {
+			cls: 'ns-toolbar-multiselect-right',
+			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
+			valueField: 'id',
+			displayField: 'name',
+			ddReorder: true,
+			store: programIndicatorSelectedStore,
+			tbar: [
+				{
+					xtype: 'button',
+					icon: 'images/arrowleftdouble.png',
+					width: 22,
+					handler: function() {
+						ns.core.web.multiSelect.unselectAll(programIndicatorAvailable, programIndicatorSelected);
+					}
+				},
+				{
+					xtype: 'button',
+					icon: 'images/arrowleft.png',
+					width: 22,
+					handler: function() {
+						ns.core.web.multiSelect.unselect(programIndicatorAvailable, programIndicatorSelected);
+					}
+				},
+				'->',
+				{
+					xtype: 'label',
+					text: NS.i18n.selected,
+					cls: 'ns-toolbar-multiselect-right-label'
+				}
+			],
+			listeners: {
+				afterrender: function() {
+					this.boundList.on('itemdblclick', function() {
+						ns.core.web.multiSelect.unselect(programIndicatorAvailable, this);
+					}, this);
+				}
+			}
+		});
+
+		programIndicator = Ext.create('Ext.panel.Panel', {
+			xtype: 'panel',
+			//title: '<div class="ns-panel-title-data">' + NS.i18n.programIndicators + '</div>',
+            preventHeader: true,
+            hidden: true,
+			hideCollapseTool: true,
+            dimension: dimConf.programIndicator.objectName,
+            bodyStyle: 'border:0 none',
+			getDimension: function() {
+				var config = {
+					dimension: dimConf.programIndicator.objectName,
+					items: []
+				};
+
+				programIndicatorSelectedStore.each( function(r) {
+					config.items.push({
+						id: r.data.id,
+						name: r.data.name
+					});
+				});
+
+				return config.items.length ? config : null;
+			},
+			onExpand: function() {
+				var h = westRegion.hasScrollbar ?
+					ns.core.conf.layout.west_scrollbarheight_accordion_indicator : ns.core.conf.layout.west_maxheight_accordion_indicator;
+				accordion.setThisHeight(h);
+				ns.core.web.multiSelect.setHeight(
+					[programIndicatorAvailable, programIndicatorSelected],
+					this,
+					ns.core.conf.layout.west_fill_accordion_programindicator
+				);
+			},
+			items: [
+				programIndicatorProgram,
+				{
+					xtype: 'panel',
+					layout: 'column',
+					bodyStyle: 'border-style:none',
+					items: [
+                        programIndicatorAvailable,
+						programIndicatorSelected
+					]
+				}
+			],
+			listeners: {
+				added: function() {
+					//accordionPanels.push(this);
+				},
+				expand: function(p) {
+					//p.onExpand();
+				}
+			}
+		});
+
+        data = {
+			xtype: 'panel',
+			title: '<div class="ns-panel-title-data">' + NS.i18n.data + '</div>',
+			hideCollapseTool: true,
+            dimension: dimConf.data.objectName,
+			getDimension: function() {
+				var config = {
+					dimension: dimConf.data.objectName,
+					items: []
+				};
+
+				indicatorSelectedStore.each( function(r) {
+					config.items.push({
+						id: r.data.id,
+						name: r.data.name
+					});
+				});
+
+				dataElementSelectedStore.each( function(r) {
+					config.items.push({
+						id: r.data.id,
+						name: r.data.name
+					});
+				});
+
+				dataSetSelectedStore.each( function(r) {
+					config.items.push({
+						id: r.data.id,
+						name: r.data.name
+					});
+				});
+                
+				eventDataItemSelectedStore.each( function(r) {
+					config.items.push({
+						id: r.data.id,
+						name: r.data.name
+					});
+				});
+                
+				programIndicatorSelectedStore.each( function(r) {
+					config.items.push({
+						id: r.data.id,
+						name: r.data.name
+					});
+				});
+
+				return config.items.length ? config : null;
+			},
+			onExpand: function() {
+                var conf = ns.core.conf.layout,
+                    h = westRegion.hasScrollbar ? conf.west_scrollbarheight_accordion_indicator : conf.west_maxheight_accordion_indicator;
+                    
+				accordion.setThisHeight(h);
+                
+				ns.core.web.multiSelect.setHeight([indicatorAvailable, indicatorSelected], this, conf.west_fill_accordion_indicator);
+                ns.core.web.multiSelect.setHeight([dataElementAvailable, dataElementSelected], this, conf.west_fill_accordion_dataelement);
+                ns.core.web.multiSelect.setHeight([dataSetAvailable, dataSetSelected], this, conf.west_fill_accordion_dataset);
+                ns.core.web.multiSelect.setHeight([eventDataItemAvailable, eventDataItemSelected], this, conf.west_fill_accordion_eventdataitem);
+                ns.core.web.multiSelect.setHeight([programIndicatorAvailable, programIndicatorSelected], this, conf.west_fill_accordion_programindicator);
+			},
+			items: [
+                dataType,
+                indicator,
+                dataElement,
+                dataSet,
+                eventDataItem,
+                programIndicator
 			],
 			listeners: {
 				added: function() {
@@ -5456,9 +6198,10 @@ Ext.onReady( function() {
 			height: 700,
 			items: function() {
 				var panels = [
-					indicator,
-					dataElement,
-					dataSet,
+					//indicator,
+					//dataElement,
+					//dataSet,
+                    data,
 					period,
 					organisationUnit
 				],
@@ -6727,7 +7470,7 @@ Ext.onReady( function() {
 
 					// left gui
 					var viewportHeight = westRegion.getHeight(),
-						numberOfTabs = ns.core.init.dimensions.length + 5,
+						numberOfTabs = ns.core.init.dimensions.length + 3,
 						tabHeight = 28,
 						minPeriodHeight = 380;
 

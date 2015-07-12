@@ -104,6 +104,18 @@ Ext.onReady( function() {
 						dimensionName: 'dx',
 						objectName: 'ds'
 					},
+					eventDataItem: {
+						value: 'eventDataItem',
+						name: NS.i18n.event_data_items || 'Event data items',
+						dimensionName: 'dx',
+						objectName: 'di'
+					},
+					programIndicator: {
+						value: 'programIndicator',
+						name: NS.i18n.program_indicators || 'Program indicators',
+						dimensionName: 'dx',
+						objectName: 'pi'
+					},
 					period: {
 						value: 'period',
 						name: NS.i18n.periods || 'Periods',
@@ -174,9 +186,14 @@ Ext.onReady( function() {
 				west_fieldset_width: 418,
 				west_width_padding: 2,
 				west_fill: 2,
-				west_fill_accordion_indicator: 56,
-				west_fill_accordion_dataelement: 59,
-				west_fill_accordion_dataset: 31,
+				//west_fill_accordion_indicator: 56,
+				west_fill_accordion_indicator: 81,
+				//west_fill_accordion_dataelement: 59,
+				west_fill_accordion_dataelement: 81,
+				//west_fill_accordion_dataset: 31,
+				west_fill_accordion_dataset: 56,
+                west_fill_accordion_eventdataitem: 81,
+                west_fill_accordion_programindicator: 81,
 				west_fill_accordion_period: 303,
 				west_fill_accordion_organisationunit: 58,
 				west_maxheight_accordion_indicator: 400,
