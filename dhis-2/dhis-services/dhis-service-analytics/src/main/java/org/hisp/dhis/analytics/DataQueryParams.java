@@ -1589,6 +1589,23 @@ public class DataQueryParams
         return this;
     }
     
+    public DataQueryParams retainDataDimensions( DataDimensionItemType... itemTypes )
+    {
+        DimensionalObject dimension = getDimension( DATA_X_DIM_ID );
+        
+        List<NameableObject> items = new ArrayList<>();
+        
+        for ( DataDimensionItemType itemType : itemTypes )
+        {
+            items.addAll( DimensionalObjectUtils.getByDataDimensionType( itemType, dimension.getItems() ) );
+        }
+
+        dimension.getItems().clear();
+        dimension.getItems().addAll( items );
+        
+        return this;
+    }
+    
     // -------------------------------------------------------------------------
     // Get and set helpers for dimensions
     // -------------------------------------------------------------------------

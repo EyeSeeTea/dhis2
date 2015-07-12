@@ -567,7 +567,7 @@ public class DefaultAnalyticsService
         if ( !params.getProgramDataElements().isEmpty() || !params.getProgramAttributes().isEmpty() )
         {
             DataQueryParams dataSourceParams = params.instance();
-            dataSourceParams.retainDataDimension( DataDimensionItemType.PROGRAM_DATA_ELEMENT );
+            dataSourceParams.retainDataDimensions( DataDimensionItemType.PROGRAM_DATA_ELEMENT, DataDimensionItemType.PROGRAM_ATTRIBUTE );
             
             EventQueryParams eventQueryParams = EventQueryParams.fromDataQueryParams( dataSourceParams );
             
