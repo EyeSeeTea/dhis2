@@ -4173,7 +4173,7 @@ Ext.onReady( function() {
 
         onEventDataItemProgramSelect = function(programId) {
             Ext.Ajax.request({
-                url: ns.core.init.contextPath + '/api/programs.json?paging=false&fields=programTrackedEntityAttributes[trackedEntityAttribute[id,name]],programStages[programStageDataElements[dataElement[id,name]]]&filter=id:eq:' + programId,
+                url: ns.core.init.contextPath + '/api/programs.json?paging=false&fields=programTrackedEntityAttributes[trackedEntityAttribute[id,name]],programStages[programStageDataElements[dataElement[id,name,type]]]&filter=id:eq:' + programId,
                 success: function(r) {
                     r = Ext.decode(r.responseText);
                     
@@ -4186,11 +4186,17 @@ Ext.onReady( function() {
                         data;
 
                     // data elements
-                    for (var i = 0, stage; i < stages.length; i++) {
+                    for (var i = 0, stage, elements; i < stages.length; i++) {
                         stage = stages[i];
 
                         if (isA(stage.programStageDataElements) && stage.programStageDataElements.length) {
-                            dataElements = dataElements.concat(Ext.Array.pluck(stage.programStageDataElements, 'dataElement') || []);
+                            elements = Ext.Array.pluck(stage.programStageDataElements, 'dataElement') || [];
+
+                            for (var j = 0; j < elements.length; j++) {
+                                if (Ext.Array.contains(['int', 'string', 'bool', 'trueonly'], (elements[j].type || '').toLowerCase())) {
+                                    dataElements.push(elements[j]);
+                                }
+                            }
                         }
                     }
 
