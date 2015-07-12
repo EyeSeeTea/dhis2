@@ -73,7 +73,8 @@ public class ValidationUtils
     private static int LAT_MAX = 90;
     private static int LAT_MIN = -90;
 
-    private static final Set<Character> SQL_VALID_CHARS = Sets.newHashSet( '&', '|', '=', '!', '<', '>', '/', '%', '"', '\'' );
+    private static final Set<Character> SQL_VALID_CHARS = Sets.newHashSet( 
+        '&', '|', '=', '!', '<', '>', '/', '%', '"', '\'', '*', '+', '-', '^', ',', '.' );
 
     public static final Set<String> ILLEGAL_SQL_KEYWORDS = Sets.newHashSet( "alter", "before", "case", 
         "commit", "copy", "create", "createdb", "createrole", "createuser", "close", "delete", "destroy", "drop", 

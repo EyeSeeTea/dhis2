@@ -194,5 +194,6 @@ public class ValidationUtilsTest
         
         assertTrue( expressionIsValidSQl( "\"abcdef12345\" < 30" ) );
         assertTrue( expressionIsValidSQl( "\"abcdef12345\" >= \"bcdefg23456\"" ) );
+        assertTrue( expressionIsValidSQl( "\"DO0v7fkhUNd\" > -30000 and \"DO0v7fkhUNd\" < 30000" ) );
     }
 }
