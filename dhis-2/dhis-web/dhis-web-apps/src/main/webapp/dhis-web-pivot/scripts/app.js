@@ -4193,7 +4193,7 @@ Ext.onReady( function() {
                             elements = Ext.Array.pluck(stage.programStageDataElements, 'dataElement') || [];
 
                             for (var j = 0; j < elements.length; j++) {
-                                if (Ext.Array.contains(['int', 'string', 'bool', 'trueonly'], (elements[j].type || '').toLowerCase())) {
+                                if (Ext.Array.contains(['int', 'number', 'string', 'bool', 'trueonly'], (elements[j].type || '').toLowerCase())) {
                                     dataElements.push(elements[j]);
                                 }
                             }
