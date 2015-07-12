@@ -4181,8 +4181,10 @@ Ext.onReady( function() {
                         isO = Ext.isObject,
                         program = isA(r.programs) && r.programs.length ? r.programs[0] : null,
                         stages = isO(program) && isA(program.programStages) && program.programStages.length ? program.programStages : [],
-                        attributes = isO(program) && isA(program.programTrackedEntityAttributes) ? Ext.Array.pluck(program.programTrackedEntityAttributes, 'trackedEntityAttribute') : [],
+                        teas = isO(program) && isA(program.programTrackedEntityAttributes) ? Ext.Array.pluck(program.programTrackedEntityAttributes, 'trackedEntityAttribute') : [],
                         dataElements = [],
+                        attributes = [],
+                        types = ['int', 'number', 'string', 'bool', 'trueonly'],
                         data;
 
                     // data elements
@@ -4193,10 +4195,17 @@ Ext.onReady( function() {
                             elements = Ext.Array.pluck(stage.programStageDataElements, 'dataElement') || [];
 
                             for (var j = 0; j < elements.length; j++) {
-                                if (Ext.Array.contains(['int', 'number', 'string', 'bool', 'trueonly'], (elements[j].type || '').toLowerCase())) {
+                                if (Ext.Array.contains(types, (elements[j].type || '').toLowerCase())) {
                                     dataElements.push(elements[j]);
                                 }
                             }
+                        }
+                    }
+
+                    // attributes
+                    for (i = 0; i < teas.length; i++) {
+                        if (Ext.Array.contains(types, (teas[i].type || '').toLowerCase())) {
+                            attributes.push(teas[i]);
                         }
                     }
 
