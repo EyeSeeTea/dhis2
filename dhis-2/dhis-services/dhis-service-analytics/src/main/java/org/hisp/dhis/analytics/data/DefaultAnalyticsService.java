@@ -508,47 +508,56 @@ public class DefaultAnalyticsService
     {
         if ( !params.getProgramIndicators().isEmpty() )
         {
-            DataQueryParams dataSourceParams = params.instance();
-            dataSourceParams.retainDataDimension( DataDimensionItemType.PROGRAM_INDICATOR );
-            
-            List<ProgramIndicator> indicators = asTypedList( dataSourceParams.getProgramIndicators() );
-            
-            //TODO constants
-
             // -----------------------------------------------------------------
-            // Get indicator values
+            // Run queries with different filter expression separately
             // -----------------------------------------------------------------
 
-            List<List<DimensionItem>> dimensionItemPermutations = dataSourceParams.getDimensionItemPermutations();
+            List<DataQueryParams> queries = queryPlanner.groupByFilterExpression( params );
             
-            Map<String, Map<String, Double>> permutationOperandValueMap = getProgramPermutationOperandValueMap( dataSourceParams );
-
-            for ( ProgramIndicator indicator : indicators )
+            for ( DataQueryParams query : queries )
             {
-                for ( List<DimensionItem> dimensionItems : dimensionItemPermutations )
+                DataQueryParams dataSourceParams = query.instance();
+                dataSourceParams.retainDataDimension( DataDimensionItemType.PROGRAM_INDICATOR );
+                
+                List<ProgramIndicator> indicators = asTypedList( dataSourceParams.getProgramIndicators() );
+                
+                //TODO constants
+    
+                // -----------------------------------------------------------------
+                // Get indicator values
+                // -----------------------------------------------------------------
+    
+                List<List<DimensionItem>> dimensionItemPermutations = dataSourceParams.getDimensionItemPermutations();
+                
+                Map<String, Map<String, Double>> permutationOperandValueMap = getProgramPermutationOperandValueMap( dataSourceParams );
+    
+                for ( ProgramIndicator indicator : indicators )
                 {
-                    String permKey = DimensionItem.asItemKey( dimensionItems );
-                    
-                    Map<String, Double> valueMap = permutationOperandValueMap.get( permKey );
-
-                    if ( valueMap == null )
+                    for ( List<DimensionItem> dimensionItems : dimensionItemPermutations )
                     {
-                        continue;
-                    }
-
-                    Double value = programIndicatorService.getProgramIndicatorValue( indicator, valueMap );
-                    
-                    if ( value != null )
-                    {
-                        List<DimensionItem> row = new ArrayList<>( dimensionItems );
-
-                        row.add( DX_INDEX, new DimensionItem( DATA_X_DIM_ID, indicator ) );
+                        String permKey = DimensionItem.asItemKey( dimensionItems );
                         
-                        Double roundedValue = MathUtils.getRounded( value );
+                        Map<String, Double> valueMap = permutationOperandValueMap.get( permKey );
+    
+                        if ( valueMap == null )
+                        {
+                            continue;
+                        }
+    
+                        Double value = programIndicatorService.getProgramIndicatorValue( indicator, valueMap );
                         
-                        grid.addRow();
-                        grid.addValues( DimensionItem.getItemIdentifiers( row ) );
-                        grid.addValue( dataSourceParams.isSkipRounding() ? value : roundedValue );
+                        if ( value != null )
+                        {
+                            List<DimensionItem> row = new ArrayList<>( dimensionItems );
+    
+                            row.add( DX_INDEX, new DimensionItem( DATA_X_DIM_ID, indicator ) );
+                            
+                            Double roundedValue = MathUtils.getRounded( value );
+                            
+                            grid.addRow();
+                            grid.addValues( DimensionItem.getItemIdentifiers( row ) );
+                            grid.addValue( dataSourceParams.isSkipRounding() ? value : roundedValue );
+                        }
                     }
                 }
             }
@@ -1311,33 +1320,28 @@ public class DefaultAnalyticsService
      * @param params the data query parameters.
      */
     private Map<String, Map<String, Double>> getProgramPermutationOperandValueMap( DataQueryParams params )
-    {
-        List<DataQueryParams> queries = queryPlanner.groupByFilterExpression( params );
-        
+    {        
         Map<String, Map<String, Double>> permutationMap = new HashMap<>();
+             
+        List<ProgramIndicator> programIndicators = asTypedList( params.getProgramIndicators() );
+        List<NameableObject> dataElements = asList( programIndicatorService.getDataElementsInIndicators( programIndicators ) );
+        List<NameableObject> attributes = asList( programIndicatorService.getAttributesInIndicators( programIndicators ) );
+        List<NameableObject> dataItems = ListUtils.union( dataElements, attributes );
         
-        for ( DataQueryParams query : queries )
-        {            
-            List<ProgramIndicator> programIndicators = asTypedList( query.getProgramIndicators() );
-            List<NameableObject> dataElements = asList( programIndicatorService.getDataElementsInIndicators( programIndicators ) );
-            List<NameableObject> attributes = asList( programIndicatorService.getAttributesInIndicators( programIndicators ) );
-            List<NameableObject> dataItems = ListUtils.union( dataElements, attributes );
+        if ( !dataElements.isEmpty() || !attributes.isEmpty() )
+        {
+            DataQueryParams dataSourceParams = params.instance().removeDimension( DATA_X_DIM_ID );
             
-            if ( !dataElements.isEmpty() || !attributes.isEmpty() )
-            {
-                DataQueryParams dataSourceParams = query.instance().removeDimension( DATA_X_DIM_ID );
-                
-                dataSourceParams.getDimensions().add( DX_INDEX, new BaseDimensionalObject( 
-                    DATA_X_DIM_ID, DimensionType.DATA_X, dataItems ) );
-                
-                EventQueryParams eventQueryParams = EventQueryParams.fromDataQueryParams( dataSourceParams );
-                
-                Grid grid = eventAnalyticsService.getAggregatedEventData( eventQueryParams );
-                
-                Map<String, Double> valueMap = grid.getAsMap( grid.getWidth() - 1, DIMENSION_SEP );
-                
-                permutationMap.putAll( DataQueryParams.getPermutationProgramValueMap( valueMap ) );
-            }
+            dataSourceParams.getDimensions().add( DX_INDEX, new BaseDimensionalObject( 
+                DATA_X_DIM_ID, DimensionType.DATA_X, dataItems ) );
+            
+            EventQueryParams eventQueryParams = EventQueryParams.fromDataQueryParams( dataSourceParams );
+            
+            Grid grid = eventAnalyticsService.getAggregatedEventData( eventQueryParams );
+            
+            Map<String, Double> valueMap = grid.getAsMap( grid.getWidth() - 1, DIMENSION_SEP );
+            
+            permutationMap.putAll( DataQueryParams.getPermutationProgramValueMap( valueMap ) );
         }
         
         return permutationMap;
