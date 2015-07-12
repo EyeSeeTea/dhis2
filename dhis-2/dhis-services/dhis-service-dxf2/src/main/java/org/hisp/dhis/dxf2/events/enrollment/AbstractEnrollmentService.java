@@ -30,13 +30,12 @@ package org.hisp.dhis.dxf2.events.enrollment;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.IdentifiableObjectManager;
-import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.common.QueryOperator;
+import org.hisp.dhis.commons.collection.CachingMap;
 import org.hisp.dhis.dbms.DbmsManager;
 import org.hisp.dhis.dxf2.events.event.Note;
 import org.hisp.dhis.dxf2.events.trackedentity.Attribute;
@@ -50,10 +49,11 @@ import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
+import org.hisp.dhis.program.ProgramInstanceQueryParams;
 import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.program.ProgramStatus;
 import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
-import org.hisp.dhis.program.ProgramType;
 import org.hisp.dhis.system.callable.IdentifiableObjectSearchCallable;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.MathUtils;
@@ -65,13 +65,10 @@ import org.hisp.dhis.trackedentitycomment.TrackedEntityComment;
 import org.hisp.dhis.trackedentitycomment.TrackedEntityCommentService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.UserService;
-import org.hisp.dhis.commons.collection.CachingMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -128,164 +125,15 @@ public abstract class AbstractEnrollmentService
     // -------------------------------------------------------------------------
 
     @Override
-    public Enrollments getEnrollments()
+    public List<Enrollment> getEnrollments( Iterable<ProgramInstance> programInstances )
     {
-        List<Program> programs = getProgramsWithRegistration();
-
-        List<ProgramInstance> programInstances = new ArrayList<>(
-            programInstanceService.getProgramInstances( programs ) );
-
-        return getEnrollments( programInstances );
-    }
-
-    @Override
-    public Enrollments getEnrollments( EnrollmentStatus status )
-    {
-        List<Program> programs = getProgramsWithRegistration();
-
-        List<ProgramInstance> programInstances = new ArrayList<>(
-            programInstanceService.getProgramInstances( programs, status.getValue() ) );
-
-        return getEnrollments( programInstances );
-    }
-
-    @Override
-    public Enrollments getEnrollments( TrackedEntityInstance trackedEntityInstance )
-    {
-        org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance = getTrackedEntityInstance( trackedEntityInstance
-            .getTrackedEntityInstance() );
-
-        return getEnrollments( entityInstance );
-    }
-
-    @Override
-    public Enrollments getEnrollments( TrackedEntityInstance trackedEntityInstance, EnrollmentStatus status )
-    {
-        org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance = getTrackedEntityInstance( trackedEntityInstance
-            .getTrackedEntityInstance() );
-        return getEnrollments( entityInstance, status );
-    }
-
-    @Override
-    public Enrollments getEnrollments( org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance )
-    {
-        List<ProgramInstance> programInstances = new ArrayList<>( entityInstance.getProgramInstances() );
-
-        return getEnrollments( programInstances );
-    }
-
-    @Override
-    public Enrollments getEnrollments( org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance,
-        EnrollmentStatus status )
-    {
-        List<ProgramInstance> programInstances = new ArrayList<>(
-            programInstanceService.getProgramInstances( entityInstance, status.getValue() ) );
-
-        return getEnrollments( programInstances );
-    }
-
-    @Override
-    public Enrollments getEnrollments( Program program )
-    {
-        List<ProgramInstance> programInstances = new ArrayList<>(
-            programInstanceService.getProgramInstances( program ) );
-        return getEnrollments( programInstances );
-    }
-
-    @Override
-    public Enrollments getEnrollments( Program program, EnrollmentStatus status )
-    {
-        List<ProgramInstance> programInstances = new ArrayList<>(
-            programInstanceService.getProgramInstances( program, status.getValue() ) );
-
-        return getEnrollments( programInstances );
-    }
-
-    @Override
-    public Enrollments getEnrollments( Program program, EnrollmentStatus status, OrganisationUnit organisationUnit, Date startDate, Date endDate )
-    {
-        List<ProgramInstance> programInstances = new ArrayList<>(
-            programInstanceService.getProgramInstancesByStatus( status.getValue(), program, Arrays.asList( organisationUnit.getId() ), startDate, endDate ) );
-
-        return getEnrollments( programInstances );
-    }
-
-    @Override
-    public Enrollments getEnrollments( Program program, EnrollmentStatus status, List<OrganisationUnit> organisationUnits, Date startDate, Date endDate )
-    {
-        List<ProgramInstance> programInstances = new ArrayList<>(
-            programInstanceService.getProgramInstancesByStatus( status.getValue(), program, IdentifiableObjectUtils.getIdentifiers( organisationUnits ), startDate, endDate ) );
-
-        return getEnrollments( programInstances );
-    }
-
-    @Override
-    public Enrollments getEnrollments( OrganisationUnit organisationUnit )
-    {
-        List<Program> programs = getProgramsWithRegistration();
-        List<ProgramInstance> programInstances = new ArrayList<>(
-            programInstanceService.getProgramInstances( programs, organisationUnit ) );
-
-        return getEnrollments( programInstances );
-    }
-
-    @Override
-    public Enrollments getEnrollments( OrganisationUnit organisationUnit, EnrollmentStatus status )
-    {
-        List<Program> programs = getProgramsWithRegistration();
-        List<ProgramInstance> programInstances = new ArrayList<>(
-            programInstanceService.getProgramInstances( programs, organisationUnit, status.getValue() ) );
-
-        return getEnrollments( programInstances );
-    }
-
-    @Override
-    public Enrollments getEnrollments( Program program, OrganisationUnit organisationUnit )
-    {
-        return getEnrollments( programInstanceService.getProgramInstances( program, organisationUnit, 0, null ) );
-    }
-
-    @Override
-    public Enrollments getEnrollments( Program program, OrganisationUnit organisationUnit, Date startDate, Date endDate )
-    {
-        return getEnrollments(
-            programInstanceService.getProgramInstances( program, Arrays.asList( organisationUnit.getId() ), startDate, endDate, 0, Integer.MAX_VALUE ) );
-    }
-
-    @Override
-    public Enrollments getEnrollments( Program program, List<OrganisationUnit> organisationUnits, Date startDate, Date endDate )
-    {
-        return getEnrollments(
-            programInstanceService.getProgramInstances( program, IdentifiableObjectUtils.getIdentifiers( organisationUnits ), startDate, endDate, 0, Integer.MAX_VALUE ) );
-    }
-
-    @Override
-    public Enrollments getEnrollments( Program program, TrackedEntityInstance trackedEntityInstance )
-    {
-        org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance = getTrackedEntityInstance( trackedEntityInstance
-            .getTrackedEntityInstance() );
-        return getEnrollments( programInstanceService.getProgramInstances( entityInstance, program ) );
-    }
-
-    @Override
-    public Enrollments getEnrollments( Program program, TrackedEntityInstance trackedEntityInstance,
-        EnrollmentStatus status )
-    {
-        org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance = getTrackedEntityInstance( trackedEntityInstance
-            .getTrackedEntityInstance() );
-        return getEnrollments( programInstanceService.getProgramInstances( entityInstance, program, status.getValue() ) );
-    }
-
-    @Override
-    public Enrollments getEnrollments( Collection<ProgramInstance> programInstances )
-    {
-        Enrollments enrollments = new Enrollments();
+        List<Enrollment> enrollments = new ArrayList<>();
 
         for ( ProgramInstance programInstance : programInstances )
         {
             if ( programInstance != null && programInstance.getEntityInstance() != null )
             {
-                enrollments.getEnrollments().add( getEnrollment( programInstance ) );
+                enrollments.add( getEnrollment( programInstance ) );
             }
         }
 
@@ -309,6 +157,7 @@ public abstract class AbstractEnrollmentService
 
         if ( programInstance.getEntityInstance() != null )
         {
+            enrollment.setTrackedEntity( programInstance.getEntityInstance().getTrackedEntity().getUid() );
             enrollment.setTrackedEntityInstance( programInstance.getEntityInstance().getUid() );
         }
 
@@ -317,6 +166,8 @@ public abstract class AbstractEnrollmentService
             enrollment.setOrgUnit( programInstance.getOrganisationUnit().getUid() );
         }
 
+        enrollment.setCreated( programInstance.getCreated() );
+        enrollment.setLastUpdated( programInstance.getLastUpdated() );
         enrollment.setProgram( programInstance.getProgram().getUid() );
         enrollment.setStatus( EnrollmentStatus.fromInt( programInstance.getStatus() ) );
         enrollment.setDateOfEnrollment( programInstance.getEnrollmentDate() );
@@ -378,9 +229,16 @@ public abstract class AbstractEnrollmentService
 
         Program program = getProgram( enrollment.getProgram() );
 
-        Enrollments enrollments = getEnrollments( program, trackedEntityInstance, EnrollmentStatus.ACTIVE );
+        ProgramInstanceQueryParams params = new ProgramInstanceQueryParams();
+        params.setOrganisationUnitMode( OrganisationUnitSelectionMode.ALL );
+        params.setSkipPaging( true );
+        params.setProgram( program );
+        params.setTrackedEntityInstance( entityInstance );
+        params.setProgramStatus( ProgramStatus.ACTIVE );
 
-        if ( !enrollments.getEnrollments().isEmpty() )
+        List<Enrollment> enrollments = getEnrollments( programInstanceService.getProgramInstances( params ) );
+
+        if ( !enrollments.isEmpty() )
         {
             importSummary.setStatus( ImportStatus.ERROR );
             importSummary.setDescription( "TrackedEntityInstance " + trackedEntityInstance.getTrackedEntityInstance()
@@ -392,9 +250,11 @@ public abstract class AbstractEnrollmentService
 
         if ( program.getOnlyEnrollOnce() )
         {
-            enrollments = getEnrollments( program, trackedEntityInstance, EnrollmentStatus.COMPLETED );
+            params.setProgramStatus( ProgramStatus.COMPLETED );
 
-            if ( !enrollments.getEnrollments().isEmpty() )
+            enrollments = getEnrollments( programInstanceService.getProgramInstances( params ) );
+
+            if ( !enrollments.isEmpty() )
             {
                 importSummary.setStatus( ImportStatus.ERROR );
                 importSummary.setDescription( "TrackedEntityInstance " + trackedEntityInstance.getTrackedEntityInstance()
@@ -595,8 +455,7 @@ public abstract class AbstractEnrollmentService
 
         for ( ProgramTrackedEntityAttribute programTrackedEntityAttribute : program.getProgramAttributes() )
         {
-            mandatoryMap
-                .put( programTrackedEntityAttribute.getAttribute(), programTrackedEntityAttribute.isMandatory() );
+            mandatoryMap.put( programTrackedEntityAttribute.getAttribute(), programTrackedEntityAttribute.isMandatory() );
         }
 
         for ( TrackedEntityAttributeValue value : trackedEntityInstance.getAttributeValues() )
@@ -677,7 +536,7 @@ public abstract class AbstractEnrollmentService
             params.setOrganisationUnitMode( OrganisationUnitSelectionMode.ALL );
         }
 
-        Grid instances = teiService.getTrackedEntityInstances( params );
+        Grid instances = teiService.getTrackedEntityInstancesGrid( params );
 
         if ( instances.getHeight() == 0
             || (instances.getHeight() == 1 && instances.getRow( 0 ).contains( tei.getUid() )) )
@@ -729,13 +588,6 @@ public abstract class AbstractEnrollmentService
                 trackedEntityInstance.addAttributeValue( value );
             }
         }
-    }
-
-    private List<Program> getProgramsWithRegistration()
-    {
-        List<Program> programs = programService.getPrograms( ProgramType.WITH_REGISTRATION );
-
-        return programs;
     }
 
     private org.hisp.dhis.trackedentity.TrackedEntityInstance getTrackedEntityInstance( String trackedEntityInstance )

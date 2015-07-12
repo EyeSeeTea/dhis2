@@ -47,6 +47,6 @@ public class OneIfZeroOrPositiveFunction
     @Override
     public Double eval( double arg )
     {
-        return ( arg >= 0 ) ? 1d : 0d;
+        return ( arg >= 0d ) ? 1d : 0d;
     }
 }

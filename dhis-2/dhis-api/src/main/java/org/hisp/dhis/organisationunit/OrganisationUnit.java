@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.google.common.base.Joiner;
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.common.BaseIdentifiableObject;
@@ -81,6 +82,8 @@ public class OrganisationUnit
 {
     private static final long serialVersionUID = 1228298379303894619L;
 
+    private static final Joiner PATH_JOINER = Joiner.on( "/" );
+
     public static final String FEATURETYPE_NONE = "None";
     public static final String FEATURETYPE_MULTIPOLYGON = "MultiPolygon";
     public static final String FEATURETYPE_POLYGON = "Polygon";
@@ -106,6 +109,8 @@ public class OrganisationUnit
     private String uuid;
 
     private OrganisationUnit parent;
+
+    private String path;
 
     private Date openingDate;
 
@@ -821,6 +826,42 @@ public class OrganisationUnit
     public void setParent( OrganisationUnit parent )
     {
         this.parent = parent;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getPath()
+    {
+        List<String> pathList = new ArrayList<>();
+        OrganisationUnit currentParent = parent;
+
+        pathList.add( uid );
+
+        while ( currentParent != null )
+        {
+            if ( !pathList.contains( currentParent.getUid() ) )
+            {
+                pathList.add( currentParent.getUid() );
+                currentParent = currentParent.getParent();
+            }
+            else
+            {
+                // we have tests in the system which needs cyclic OU graphs, so we need to short-circuit here if we encounter that
+                currentParent = null;
+            }
+        }
+
+        Collections.reverse( pathList );
+
+        path = "/" + PATH_JOINER.join( pathList );
+
+        return path;
+    }
+
+    public void setPath( String path )
+    {
+        this.path = path;
     }
 
     @JsonProperty

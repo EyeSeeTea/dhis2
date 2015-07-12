@@ -28,6 +28,10 @@ package org.hisp.dhis.webapi.utils;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.dxf2.importsummary.ImportStatus;
+import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
+import org.hisp.dhis.dxf2.importsummary.ImportSummary;
+import org.hisp.dhis.dxf2.metadata.ImportTypeSummary;
 import org.hisp.dhis.dxf2.webmessage.WebMessage;
 import org.hisp.dhis.dxf2.webmessage.WebMessageResponse;
 import org.hisp.dhis.dxf2.webmessage.WebMessageStatus;
@@ -139,7 +143,115 @@ public final class WebMessageUtils
 
     public static WebMessage forbidden( String message, String devMessage )
     {
-        return createWebMessage( message, WebMessageStatus.ERROR, HttpServletResponse.SC_FORBIDDEN );
+        return createWebMessage( message, devMessage, WebMessageStatus.ERROR, HttpServletResponse.SC_FORBIDDEN );
+    }
+
+    public static WebMessage serviceUnavailable( String message )
+    {
+        return createWebMessage( message, WebMessageStatus.ERROR, HttpServletResponse.SC_SERVICE_UNAVAILABLE );
+    }
+
+    public static WebMessage serviceUnavailable( String message, String devMessage )
+    {
+        return createWebMessage( message, devMessage, WebMessageStatus.ERROR, HttpServletResponse.SC_SERVICE_UNAVAILABLE );
+    }
+
+    public static WebMessage unprocessableEntity( String message )
+    {
+        return createWebMessage( message, WebMessageStatus.ERROR, 422 );
+    }
+
+    public static WebMessage unprocessableEntity( String message, String devMessage )
+    {
+        return createWebMessage( message, devMessage, WebMessageStatus.ERROR, 422 );
+    }
+
+    public static WebMessage unathorized( String message )
+    {
+        return createWebMessage( message, WebMessageStatus.ERROR, HttpServletResponse.SC_UNAUTHORIZED );
+    }
+
+    public static WebMessage unathorized( String message, String devMessage )
+    {
+        return createWebMessage( message, devMessage, WebMessageStatus.ERROR, HttpServletResponse.SC_UNAUTHORIZED );
+    }
+
+    public static WebMessage importTypeSummary( ImportTypeSummary importTypeSummary )
+    {
+        WebMessage webMessage = new WebMessage();
+
+        if ( importTypeSummary.isStatus( ImportStatus.ERROR ) )
+        {
+            webMessage.setMessage( "An error occurred, please check import summary." );
+            webMessage.setStatus( WebMessageStatus.ERROR );
+            webMessage.setHttpStatusCode( HttpServletResponse.SC_CONFLICT );
+        }
+        else if ( !importTypeSummary.getConflicts().isEmpty() )
+        {
+            webMessage.setMessage( "One more conflicts encountered, please check import summary." );
+            webMessage.setStatus( WebMessageStatus.WARNING );
+            webMessage.setHttpStatusCode( HttpServletResponse.SC_CONFLICT );
+        }
+        else
+        {
+            webMessage.setMessage( "Import was successful." );
+            webMessage.setStatus( WebMessageStatus.OK );
+            webMessage.setHttpStatusCode( HttpServletResponse.SC_OK );
+        }
+
+        webMessage.setResponse( importTypeSummary );
+
+        return webMessage;
+    }
+
+    public static WebMessage importSummary( ImportSummary importSummary )
+    {
+        WebMessage webMessage = new WebMessage();
+
+        if ( importSummary.isStatus( ImportStatus.ERROR ) )
+        {
+            webMessage.setMessage( "An error occurred, please check import summary." );
+            webMessage.setStatus( WebMessageStatus.ERROR );
+            webMessage.setHttpStatusCode( HttpServletResponse.SC_CONFLICT );
+        }
+        else if ( !importSummary.getConflicts().isEmpty() )
+        {
+            webMessage.setMessage( "One more conflicts encountered, please check import summary." );
+            webMessage.setStatus( WebMessageStatus.WARNING );
+            webMessage.setHttpStatusCode( HttpServletResponse.SC_CONFLICT );
+        }
+        else
+        {
+            webMessage.setMessage( "Import was successful." );
+            webMessage.setStatus( WebMessageStatus.OK );
+            webMessage.setHttpStatusCode( HttpServletResponse.SC_OK );
+        }
+
+        webMessage.setResponse( importSummary );
+
+        return webMessage;
+    }
+
+    public static WebMessage importSummaries( ImportSummaries importSummaries )
+    {
+        WebMessage webMessage = new WebMessage();
+
+        if ( importSummaries.getIgnored() > 0 )
+        {
+            webMessage.setMessage( "One more conflicts encountered, please check import summary." );
+            webMessage.setStatus( WebMessageStatus.WARNING );
+            webMessage.setHttpStatusCode( HttpServletResponse.SC_CONFLICT );
+        }
+        else
+        {
+            webMessage.setMessage( "Import was successful." );
+            webMessage.setStatus( WebMessageStatus.OK );
+            webMessage.setHttpStatusCode( HttpServletResponse.SC_OK );
+        }
+
+        webMessage.setResponse( importSummaries );
+
+        return webMessage;
     }
 
     private WebMessageUtils()

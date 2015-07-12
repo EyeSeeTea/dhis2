@@ -34,6 +34,7 @@ import org.hisp.dhis.chart.ChartService;
 import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.dxf2.webmessage.WebMessageException;
 import org.hisp.dhis.interpretation.Interpretation;
 import org.hisp.dhis.interpretation.InterpretationComment;
 import org.hisp.dhis.interpretation.InterpretationService;
@@ -49,7 +50,7 @@ import org.hisp.dhis.reporttable.ReportTableService;
 import org.hisp.dhis.schema.descriptors.InterpretationSchemaDescriptor;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
-import org.hisp.dhis.webapi.utils.ContextUtils;
+import org.hisp.dhis.webapi.utils.WebMessageUtils;
 import org.hisp.dhis.webapi.webdomain.WebMetaData;
 import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -125,14 +126,13 @@ public class InterpretationController
     @RequestMapping( value = "/chart/{uid}", method = RequestMethod.POST, consumes = { "text/html", "text/plain" } )
     public void shareChartInterpretation(
         @PathVariable( "uid" ) String chartUid,
-        @RequestBody String text, HttpServletResponse response )
+        @RequestBody String text, HttpServletResponse response, HttpServletRequest request ) throws WebMessageException
     {
         Chart chart = chartService.getChart( chartUid );
 
         if ( chart == null )
         {
-            ContextUtils.conflictResponse( response, "Chart identifier not valid: " + chartUid );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Chart identifier not valid: " + chartUid ) );
         }
 
         User user = currentUserService.getCurrentUser();
@@ -148,27 +148,28 @@ public class InterpretationController
 
         interpretationService.saveInterpretation( interpretation );
 
-        ContextUtils.createdResponse( response, "Interpretation created", InterpretationSchemaDescriptor.API_ENDPOINT + "/" + interpretation.getUid() );
+        response.addHeader( "Location", InterpretationSchemaDescriptor.API_ENDPOINT + "/" + interpretation.getUid() );
+        webMessageService.send( WebMessageUtils.created( "Interpretation created" ), response, request );
     }
 
     @RequestMapping( value = "/map/{uid}", method = RequestMethod.POST, consumes = { "text/html", "text/plain" } )
     public void shareMapInterpretation(
         @PathVariable( "uid" ) String mapUid,
-        @RequestBody String text, HttpServletResponse response )
+        @RequestBody String text, HttpServletResponse response, HttpServletRequest request ) throws WebMessageException
     {
         Map map = mappingService.getMap( mapUid );
 
         if ( map == null )
         {
-            ContextUtils.conflictResponse( response, "Map identifier not valid: " + mapUid );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Map identifier not valid: " + mapUid ) );
         }
 
         Interpretation interpretation = new Interpretation( map, text );
 
         interpretationService.saveInterpretation( interpretation );
 
-        ContextUtils.createdResponse( response, "Interpretation created", InterpretationSchemaDescriptor.API_ENDPOINT + "/" + interpretation.getUid() );
+        response.addHeader( "Location", InterpretationSchemaDescriptor.API_ENDPOINT + "/" + interpretation.getUid() );
+        webMessageService.send( WebMessageUtils.created( "Interpretation created" ), response, request );
     }
 
     @RequestMapping( value = "/reportTable/{uid}", method = RequestMethod.POST, consumes = { "text/html", "text/plain" } )
@@ -176,14 +177,13 @@ public class InterpretationController
         @PathVariable( "uid" ) String reportTableUid,
         @RequestParam( value = "pe", required = false ) String isoPeriod,
         @RequestParam( value = "ou", required = false ) String orgUnitUid,
-        @RequestBody String text, HttpServletResponse response )
+        @RequestBody String text, HttpServletResponse response, HttpServletRequest request ) throws WebMessageException
     {
         ReportTable reportTable = reportTableService.getReportTable( reportTableUid );
 
         if ( reportTable == null )
         {
-            ContextUtils.conflictResponse( response, "Report table identifier not valid: " + reportTableUid );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Report table identifier not valid: " + reportTableUid ) );
         }
 
         Period period = PeriodType.getPeriodFromIsoString( isoPeriod );
@@ -196,8 +196,7 @@ public class InterpretationController
 
             if ( orgUnit == null )
             {
-                ContextUtils.conflictResponse( response, "Organisation unit identifier not valid: " + orgUnitUid );
-                return;
+                throw new WebMessageException( WebMessageUtils.conflict( "Organisation unit identifier not valid: " + orgUnitUid ) );
             }
         }
 
@@ -205,7 +204,8 @@ public class InterpretationController
 
         interpretationService.saveInterpretation( interpretation );
 
-        ContextUtils.createdResponse( response, "Interpretation created", InterpretationSchemaDescriptor.API_ENDPOINT + "/" + interpretation.getUid() );
+        response.addHeader( "Location", InterpretationSchemaDescriptor.API_ENDPOINT + "/" + interpretation.getUid() );
+        webMessageService.send( WebMessageUtils.created( "Interpretation created" ), response, request );
     }
 
     @RequestMapping( value = "/dataSetReport/{uid}", method = RequestMethod.POST, consumes = { "text/html", "text/plain" } )
@@ -213,37 +213,35 @@ public class InterpretationController
         @PathVariable( "uid" ) String dataSetUid,
         @RequestParam( "pe" ) String isoPeriod,
         @RequestParam( "ou" ) String orgUnitUid,
-        @RequestBody String text, HttpServletResponse response )
+        @RequestBody String text, HttpServletResponse response, HttpServletRequest request ) throws WebMessageException
     {
         DataSet dataSet = dataSetService.getDataSet( dataSetUid );
 
         if ( dataSet == null )
         {
-            ContextUtils.conflictResponse( response, "Data set identifier not valid: " + dataSetUid );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Data set identifier not valid: " + dataSetUid ) );
         }
 
         Period period = PeriodType.getPeriodFromIsoString( isoPeriod );
 
         if ( period == null )
         {
-            ContextUtils.conflictResponse( response, "Period identifier not valid: " + isoPeriod );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Period identifier not valid: " + isoPeriod ) );
         }
 
         OrganisationUnit orgUnit = organisationUnitService.getOrganisationUnit( orgUnitUid );
 
         if ( orgUnit == null )
         {
-            ContextUtils.conflictResponse( response, "Organisation unit identifier not valid: " + orgUnitUid );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Organisation unit identifier not valid: " + orgUnitUid ) );
         }
 
         Interpretation interpretation = new Interpretation( dataSet, period, orgUnit, text );
 
         interpretationService.saveInterpretation( interpretation );
 
-        ContextUtils.createdResponse( response, "Interpretation created", InterpretationSchemaDescriptor.API_ENDPOINT + "/" + interpretation.getUid() );
+        response.addHeader( "Location", InterpretationSchemaDescriptor.API_ENDPOINT + "/" + interpretation.getUid() );
+        webMessageService.send( WebMessageUtils.created( "Interpretation created" ), response, request );
     }
 
     @Override
@@ -253,8 +251,7 @@ public class InterpretationController
 
         if ( interpretation == null )
         {
-            ContextUtils.conflictResponse( response, "Interpretation does not exist: " + uid );
-            return;
+            throw new WebMessageException( WebMessageUtils.notFound( "Interpretation does not exist: " + uid ) );
         }
 
         if ( !currentUserService.getCurrentUser().equals( interpretation.getUser() ) &&
@@ -267,14 +264,14 @@ public class InterpretationController
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT )
-    public void updateInterpretation( @PathVariable( "uid" ) String uid, HttpServletResponse response, @RequestBody String content )
+    public void updateInterpretation( @PathVariable( "uid" ) String uid, HttpServletResponse response,
+        @RequestBody String content ) throws WebMessageException
     {
         Interpretation interpretation = interpretationService.getInterpretation( uid );
 
         if ( interpretation == null )
         {
-            ContextUtils.conflictResponse( response, "Interpretation does not exist: " + uid );
-            return;
+            throw new WebMessageException( WebMessageUtils.notFound( "Interpretation does not exist: " + uid ) );
         }
 
         if ( !currentUserService.getCurrentUser().equals( interpretation.getUser() ) &&
@@ -289,14 +286,13 @@ public class InterpretationController
     }
 
     @RequestMapping( value = "/{uid}/comments/{cuid}", method = RequestMethod.DELETE )
-    public void deleteComment( @PathVariable( "uid" ) String uid, @PathVariable( "cuid" ) String cuid, HttpServletResponse response )
+    public void deleteComment( @PathVariable( "uid" ) String uid, @PathVariable( "cuid" ) String cuid, HttpServletResponse response ) throws WebMessageException
     {
         Interpretation interpretation = interpretationService.getInterpretation( uid );
 
         if ( interpretation == null )
         {
-            ContextUtils.conflictResponse( response, "Interpretation does not exist: " + uid );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Interpretation does not exist: " + uid ) );
         }
 
         Iterator<InterpretationComment> iterator = interpretation.getComments().iterator();
@@ -322,14 +318,13 @@ public class InterpretationController
 
     @RequestMapping( value = "/{uid}/comments/{cuid}", method = RequestMethod.PUT )
     public void updateComment( @PathVariable( "uid" ) String uid, @PathVariable( "cuid" ) String cuid, HttpServletResponse response,
-        @RequestBody String content )
+        @RequestBody String content ) throws WebMessageException
     {
         Interpretation interpretation = interpretationService.getInterpretation( uid );
 
         if ( interpretation == null )
         {
-            ContextUtils.conflictResponse( response, "Interpretation does not exist: " + uid );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Interpretation does not exist: " + uid ) );
         }
 
         for ( InterpretationComment comment : interpretation.getComments() )
@@ -352,14 +347,13 @@ public class InterpretationController
     @RequestMapping( value = { "/{uid}/comment", "/{uid}/comments" }, method = RequestMethod.POST, consumes = { "text/html", "text/plain" } )
     public void postComment(
         @PathVariable( "uid" ) String uid,
-        @RequestBody String text, HttpServletResponse response )
+        @RequestBody String text, HttpServletResponse response, HttpServletRequest request ) throws WebMessageException
     {
         Interpretation interpretation = interpretationService.getInterpretation( uid );
 
         if ( interpretation == null )
         {
-            ContextUtils.conflictResponse( response, "Interpretation does not exist: " + uid );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Interpretation does not exist: " + uid ) );
         }
 
         InterpretationComment comment = interpretationService.addInterpretationComment( uid, text );
@@ -368,6 +362,7 @@ public class InterpretationController
         builder.append( InterpretationSchemaDescriptor.API_ENDPOINT ).append( "/" ).append( uid );
         builder.append( "/comments/" ).append( comment.getUid() );
 
-        ContextUtils.createdResponse( response, "Commented created", builder.toString() );
+        response.addHeader( "Location", builder.toString() );
+        webMessageService.send( WebMessageUtils.created( "Commented created" ), response, request );
     }
 }

@@ -42,7 +42,6 @@ import org.hisp.dhis.analytics.event.EventAnalyticsService;
 import org.hisp.dhis.analytics.event.EventQueryParams;
 import org.hisp.dhis.common.DisplayProperty;
 import org.hisp.dhis.common.Grid;
-import org.hisp.dhis.common.IllegalQueryException;
 import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.system.grid.GridUtils;
 import org.hisp.dhis.webapi.utils.ContextUtils;
@@ -50,7 +49,6 @@ import org.hisp.dhis.webapi.utils.ContextUtils.CacheStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -101,7 +99,7 @@ public class EventAnalyticsController
         HttpServletResponse response ) throws Exception
     {
         EventQueryParams params = analyticsService.getFromUrl( program, stage, startDate, endDate, dimension, filter,
-            value, aggregationType, skipMeta, skipRounding, hierarchyMeta, showHierarchy, sortOrder, limit, outputType, 
+            value, aggregationType, skipMeta, skipRounding, hierarchyMeta, showHierarchy, sortOrder, limit, outputType,
             collapseDataDimensions, aggregateData, displayProperty, i18nManager.getI18nFormat() );
 
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_JSON, CacheStrategy.RESPECT_SYSTEM_SETTING );
@@ -135,7 +133,7 @@ public class EventAnalyticsController
         HttpServletResponse response ) throws Exception
     {
         EventQueryParams params = analyticsService.getFromUrl( program, stage, startDate, endDate, dimension, filter,
-            value, aggregationType, skipMeta, skipRounding, hierarchyMeta, showHierarchy, sortOrder, limit, outputType, 
+            value, aggregationType, skipMeta, skipRounding, hierarchyMeta, showHierarchy, sortOrder, limit, outputType,
             collapseDataDimensions, aggregateData, displayProperty, i18nManager.getI18nFormat() );
 
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_XML, CacheStrategy.RESPECT_SYSTEM_SETTING, "events.xml", false );
@@ -167,7 +165,7 @@ public class EventAnalyticsController
         HttpServletResponse response ) throws Exception
     {
         EventQueryParams params = analyticsService.getFromUrl( program, stage, startDate, endDate, dimension, filter,
-            value, aggregationType, skipMeta, skipRounding, hierarchyMeta, showHierarchy, sortOrder, limit, outputType, 
+            value, aggregationType, skipMeta, skipRounding, hierarchyMeta, showHierarchy, sortOrder, limit, outputType,
             collapseDataDimensions, aggregateData, displayProperty, i18nManager.getI18nFormat() );
 
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_EXCEL, CacheStrategy.RESPECT_SYSTEM_SETTING, "events.xls", true );
@@ -199,12 +197,12 @@ public class EventAnalyticsController
         HttpServletResponse response ) throws Exception
     {
         EventQueryParams params = analyticsService.getFromUrl( program, stage, startDate, endDate, dimension, filter,
-            value, aggregationType, skipMeta, skipRounding, hierarchyMeta, showHierarchy, sortOrder, limit, outputType, 
+            value, aggregationType, skipMeta, skipRounding, hierarchyMeta, showHierarchy, sortOrder, limit, outputType,
             collapseDataDimensions, aggregateData, displayProperty, i18nManager.getI18nFormat() );
 
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_CSV, CacheStrategy.RESPECT_SYSTEM_SETTING, "events.csv", true );
         Grid grid = analyticsService.getAggregatedEventData( params );
-        GridUtils.toCsv( substituteMetaData( grid ), response.getOutputStream() );
+        GridUtils.toCsv( substituteMetaData( grid ), response.getWriter() );
     }
 
     @RequestMapping( value = RESOURCE_PATH + "/aggregate/{program}.html", method = RequestMethod.GET )
@@ -231,7 +229,7 @@ public class EventAnalyticsController
         HttpServletResponse response ) throws Exception
     {
         EventQueryParams params = analyticsService.getFromUrl( program, stage, startDate, endDate, dimension, filter,
-            value, aggregationType, skipMeta, skipRounding, hierarchyMeta, showHierarchy, sortOrder, limit, outputType, 
+            value, aggregationType, skipMeta, skipRounding, hierarchyMeta, showHierarchy, sortOrder, limit, outputType,
             collapseDataDimensions, aggregateData, displayProperty, i18nManager.getI18nFormat() );
 
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_HTML, CacheStrategy.RESPECT_SYSTEM_SETTING, "events.html", false );
@@ -354,7 +352,7 @@ public class EventAnalyticsController
 
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_CSV, CacheStrategy.RESPECT_SYSTEM_SETTING, "events.csv", true );
         Grid grid = analyticsService.getEvents( params );
-        GridUtils.toCsv( substituteMetaData( grid ), response.getOutputStream() );
+        GridUtils.toCsv( substituteMetaData( grid ), response.getWriter() );
     }
 
     @RequestMapping( value = RESOURCE_PATH + "/query/{program}.html", method = RequestMethod.GET )
@@ -398,15 +396,5 @@ public class EventAnalyticsController
         }
 
         return grid;
-    }
-
-    // -------------------------------------------------------------------------
-    // Exception handlers
-    // -------------------------------------------------------------------------
-
-    @ExceptionHandler( IllegalQueryException.class )
-    public void illegalQueryExceptionHandler( IllegalQueryException ex, HttpServletResponse response )
-    {
-        ContextUtils.conflictResponse( response, ex.getMessage() );
     }
 }

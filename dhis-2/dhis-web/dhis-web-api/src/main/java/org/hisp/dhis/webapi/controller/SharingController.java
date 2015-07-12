@@ -28,14 +28,6 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.acl.AccessStringHelper;
@@ -44,12 +36,14 @@ import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.dxf2.common.JacksonUtils;
+import org.hisp.dhis.dxf2.webmessage.WebMessageException;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupAccess;
 import org.hisp.dhis.user.UserGroupAccessService;
 import org.hisp.dhis.user.UserGroupService;
-import org.hisp.dhis.webapi.utils.ContextUtils;
+import org.hisp.dhis.webapi.service.WebMessageService;
+import org.hisp.dhis.webapi.utils.WebMessageUtils;
 import org.hisp.dhis.webapi.webdomain.sharing.Sharing;
 import org.hisp.dhis.webapi.webdomain.sharing.SharingUserGroupAccess;
 import org.hisp.dhis.webapi.webdomain.sharing.SharingUserGroups;
@@ -60,6 +54,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -87,13 +88,15 @@ public class SharingController
     @Autowired
     private AclService aclService;
 
+    @Autowired
+    private WebMessageService webMessageService;
+
     @RequestMapping( method = RequestMethod.GET, produces = { "application/json" } )
-    public void getSharing( @RequestParam String type, @RequestParam String id, HttpServletResponse response ) throws IOException
+    public void getSharing( @RequestParam String type, @RequestParam String id, HttpServletResponse response ) throws IOException, WebMessageException
     {
         if ( !aclService.isShareable( type ) )
         {
-            ContextUtils.notFoundResponse( response, "Type " + type + " is not supported." );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Type " + type + " is not supported." ) );
         }
 
         Class<? extends IdentifiableObject> klass = aclService.classForType( type );
@@ -101,8 +104,7 @@ public class SharingController
 
         if ( object == null )
         {
-            ContextUtils.notFoundResponse( response, "Object of type " + type + " with ID " + id + " was not found." );
-            return;
+            throw new WebMessageException( WebMessageUtils.notFound( "Object of type " + type + " with ID " + id + " was not found." ) );
         }
 
         if ( !aclService.canManage( currentUserService.getCurrentUser(), object ) )
@@ -156,27 +158,25 @@ public class SharingController
         }
 
         Collections.sort( sharing.getObject().getUserGroupAccesses(), SharingUserGroupAccessNameComparator.INSTANCE );
-        
+
         JacksonUtils.toJson( response.getOutputStream(), sharing );
     }
 
     @RequestMapping( method = { RequestMethod.POST, RequestMethod.PUT }, consumes = "application/json" )
-    public void setSharing( @RequestParam String type, @RequestParam String id, HttpServletResponse response, HttpServletRequest request ) throws IOException
+    public void setSharing( @RequestParam String type, @RequestParam String id, HttpServletResponse response, HttpServletRequest request ) throws IOException, WebMessageException
     {
         Class<? extends IdentifiableObject> sharingClass = aclService.classForType( type );
 
         if ( sharingClass == null || !aclService.isShareable( sharingClass ) )
         {
-            ContextUtils.notFoundResponse( response, "Type " + type + " is not supported." );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Type " + type + " is not supported." ) );
         }
 
         BaseIdentifiableObject object = (BaseIdentifiableObject) manager.get( sharingClass, id );
 
         if ( object == null )
         {
-            ContextUtils.notFoundResponse( response, "Object of type " + type + " with ID " + id + " was not found." );
-            return;
+            throw new WebMessageException( WebMessageUtils.notFound( "Object of type " + type + " with ID " + id + " was not found." ) );
         }
 
         if ( !aclService.canManage( currentUserService.getCurrentUser(), object ) )
@@ -254,24 +254,24 @@ public class SharingController
 
         log.info( builder );
 
-        ContextUtils.okResponse( response, "Access control set" );
+        webMessageService.send( WebMessageUtils.ok( "Access control set" ), response, request );
     }
 
     @RequestMapping( value = "/search", method = RequestMethod.GET, produces = { "application/json" } )
-    public void searchUserGroups( @RequestParam String key, @RequestParam( required = false ) Integer pageSize, HttpServletResponse response ) throws IOException
+    public void searchUserGroups( @RequestParam String key, @RequestParam( required = false ) Integer pageSize,
+        HttpServletResponse response ) throws IOException, WebMessageException
     {
         if ( key == null )
         {
-            ContextUtils.conflictResponse( response, "Search key not specified" );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Search key not specified" ) );
         }
-        
+
         int max = pageSize != null ? pageSize : Integer.MAX_VALUE;
-        
+
         SharingUserGroups sharingUserGroups = new SharingUserGroups();
 
         List<UserGroup> userGroups = userGroupService.getUserGroupsBetweenByName( key, 0, max );
-        
+
         for ( UserGroup userGroup : userGroups )
         {
             SharingUserGroupAccess sharingUserGroupAccess = new SharingUserGroupAccess();

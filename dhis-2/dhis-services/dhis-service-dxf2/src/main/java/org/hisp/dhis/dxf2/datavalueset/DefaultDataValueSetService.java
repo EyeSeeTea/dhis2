@@ -56,6 +56,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.IdentifiableProperty;
+import org.hisp.dhis.common.IllegalQueryException;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
@@ -181,10 +182,11 @@ public class DefaultDataValueSetService
         if ( organisationUnits != null )
         {
             params.getOrganisationUnits().addAll( identifiableObjectManager.getByUid( OrganisationUnit.class, organisationUnits ) );
+            params.setRequestOrganisationUnits();
             
             if ( includeChildren )
             {
-                params.setOrganisationUnits( new HashSet<OrganisationUnit>( 
+                params.getOrganisationUnits().addAll( new HashSet<OrganisationUnit>( 
                     organisationUnitService.getOrganisationUnitsWithChildren( getUids( params.getOrganisationUnits() ) ) ) );
             }
         }
@@ -222,19 +224,11 @@ public class DefaultDataValueSetService
             violation = "Start date must be before end date";
         }
         
-        if ( params.getOrganisationUnits().isEmpty() )
+        if ( params.getRequestOrganisationUnits().isEmpty() )
         {
             violation = "At least one valid organisation unit must be specified";
         }
         
-        for ( OrganisationUnit unit : params.getOrganisationUnits() )
-        {
-            if ( !organisationUnitService.isInUserHierarchy( unit ) )
-            {
-                violation = "Organisation unit is not inside hierarchy of current user: " + unit.getUid();
-            }
-        }
-
         if ( params.hasLimit() && params.getLimit() < 0 )
         {
             violation = "Limit cannot be less than zero: " + params.getLimit();
@@ -247,6 +241,18 @@ public class DefaultDataValueSetService
             throw new IllegalArgumentException( violation );
         }
     }
+
+    @Override
+    public void decideAccess( DataExportParams params )
+    {
+        for ( OrganisationUnit unit : params.getRequestOrganisationUnits() )
+        {
+            if ( !organisationUnitService.isInUserHierarchy( unit ) )
+            {
+                throw new IllegalQueryException( "User is not allowed to view org unit: " + unit.getUid() );
+            }
+        }
+    }
     
     //--------------------------------------------------------------------------
     // Write
@@ -255,6 +261,7 @@ public class DefaultDataValueSetService
     @Override
     public void writeDataValueSetXml( DataExportParams params, OutputStream out )
     {
+        decideAccess( params );
         validate( params );
 
         dataValueSetStore.writeDataValueSetXml( params, getCompleteDate( params ), out );
@@ -263,6 +270,7 @@ public class DefaultDataValueSetService
     @Override
     public void writeDataValueSetJson( DataExportParams params, OutputStream out )
     {
+        decideAccess( params );
         validate( params );
 
         dataValueSetStore.writeDataValueSetJson( params, getCompleteDate( params ), out );
@@ -277,6 +285,7 @@ public class DefaultDataValueSetService
     @Override
     public void writeDataValueSetCsv( DataExportParams params, Writer writer )
     {
+        decideAccess( params );
         validate( params );
         
         dataValueSetStore.writeDataValueSetCsv( params, getCompleteDate( params ), writer );

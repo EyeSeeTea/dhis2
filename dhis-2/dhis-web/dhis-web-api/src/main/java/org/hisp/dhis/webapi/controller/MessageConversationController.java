@@ -28,18 +28,12 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.google.common.collect.Lists;
 import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.dxf2.common.ImportOptions;
 import org.hisp.dhis.dxf2.common.JacksonUtils;
 import org.hisp.dhis.dxf2.common.TranslateOptions;
+import org.hisp.dhis.dxf2.webmessage.WebMessageException;
 import org.hisp.dhis.hibernate.exception.DeleteAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.UpdateAccessDeniedException;
 import org.hisp.dhis.message.MessageService;
@@ -56,6 +50,7 @@ import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupService;
 import org.hisp.dhis.user.UserService;
 import org.hisp.dhis.webapi.utils.ContextUtils;
+import org.hisp.dhis.webapi.utils.WebMessageUtils;
 import org.hisp.dhis.webapi.webdomain.MessageConversation;
 import org.hisp.dhis.webapi.webdomain.WebMetaData;
 import org.hisp.dhis.webapi.webdomain.WebOptions;
@@ -71,7 +66,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.google.common.collect.Lists;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -174,7 +174,7 @@ public class MessageConversationController
         postObject( response, request, messageConversation );
     }
 
-    public void postObject( HttpServletResponse response, HttpServletRequest request, MessageConversation messageConversation )
+    public void postObject( HttpServletResponse response, HttpServletRequest request, MessageConversation messageConversation ) throws WebMessageException
     {
         List<User> users = new ArrayList<>( messageConversation.getUsers() );
         messageConversation.getUsers().clear();
@@ -185,8 +185,7 @@ public class MessageConversationController
 
             if ( organisationUnit == null )
             {
-                ContextUtils.conflictResponse( response, "Organisation Unit does not exist: " + ou.getUid() );
-                return;
+                throw new WebMessageException( WebMessageUtils.conflict( "Organisation Unit does not exist: " + ou.getUid() ) );
             }
 
             messageConversation.getUsers().addAll( organisationUnit.getUsers() );
@@ -198,8 +197,7 @@ public class MessageConversationController
 
             if ( user == null )
             {
-                ContextUtils.conflictResponse( response, "User does not exist: " + u.getUid() );
-                return;
+                throw new WebMessageException( WebMessageUtils.conflict( "User does not exist: " + u.getUid() ) );
             }
 
             messageConversation.getUsers().add( user );
@@ -211,8 +209,7 @@ public class MessageConversationController
 
             if ( userGroup == null )
             {
-                ContextUtils.conflictResponse( response, "User Group does not exist: " + ug.getUid() );
-                return;
+                throw new WebMessageException( WebMessageUtils.notFound( "User Group does not exist: " + ug.getUid() ) );
             }
 
             messageConversation.getUsers().addAll( userGroup.getMembers() );
@@ -220,8 +217,7 @@ public class MessageConversationController
 
         if ( messageConversation.getUsers().isEmpty() )
         {
-            ContextUtils.conflictResponse( response, "No recipients selected." );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "No recipients selected." ) );
         }
 
         String metaData = MessageService.META_USER_AGENT + request.getHeader( ContextUtils.HEADER_USER_AGENT );
@@ -230,7 +226,8 @@ public class MessageConversationController
 
         org.hisp.dhis.message.MessageConversation conversation = messageService.getMessageConversation( id );
 
-        ContextUtils.createdResponse( response, "Message conversation created", MessageConversationSchemaDescriptor.API_ENDPOINT + "/" + conversation.getUid() );
+        response.addHeader( "Location", MessageConversationSchemaDescriptor.API_ENDPOINT + "/" + conversation.getUid() );
+        webMessageService.send( WebMessageUtils.created( "Message conversation created" ), response, request );
     }
 
     //--------------------------------------------------------------------------
@@ -247,13 +244,13 @@ public class MessageConversationController
 
         if ( conversation == null )
         {
-            ContextUtils.conflictResponse( response, "Message conversation does not exist: " + uid );
-            return;
+            throw new WebMessageException( WebMessageUtils.notFound( "Message conversation does not exist: " + uid ) );
         }
 
         messageService.sendReply( conversation, body, metaData );
 
-        ContextUtils.createdResponse( response, "Message conversation created", MessageConversationSchemaDescriptor.API_ENDPOINT + "/" + conversation.getUid() );
+        response.addHeader( "Location", MessageConversationSchemaDescriptor.API_ENDPOINT + "/" + conversation.getUid() );
+        webMessageService.send( WebMessageUtils.created( "Message conversation created" ), response, request );
     }
 
     //--------------------------------------------------------------------------
@@ -268,7 +265,7 @@ public class MessageConversationController
 
         messageService.sendFeedback( subject, body, metaData );
 
-        ContextUtils.createdResponse( response, "Feedback created", null );
+        webMessageService.send( WebMessageUtils.created( "Feedback created" ), response, request );
     }
 
     //--------------------------------------------------------------------------
@@ -277,7 +274,7 @@ public class MessageConversationController
 
     @RequestMapping( value = "/{uid}/read", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE } )
     public @ResponseBody RootNode markMessageConversationRead(
-         @PathVariable String uid, @RequestParam ( required = false ) String userUid, HttpServletResponse response )
+        @PathVariable String uid, @RequestParam( required = false ) String userUid, HttpServletResponse response )
     {
         return modifyMessageConversationRead( userUid, new String[]{ uid }, response, true );
     }
@@ -295,7 +292,7 @@ public class MessageConversationController
 
     @RequestMapping( value = "/{uid}/unread", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE } )
     public @ResponseBody RootNode markMessageConversationUnread(
-        @PathVariable String uid, @RequestParam ( required = false ) String userUid, HttpServletResponse response )
+        @PathVariable String uid, @RequestParam( required = false ) String userUid, HttpServletResponse response )
     {
         return modifyMessageConversationRead( userUid, new String[]{ uid }, response, false );
     }
@@ -566,6 +563,7 @@ public class MessageConversationController
 
     /**
      * Internal handler for setting the read property of MessageConversation.
+     *
      * @param readValue true when setting as read, false when setting unread.
      */
     private RootNode modifyMessageConversationRead( String userUid, String[] uids, HttpServletResponse response, boolean readValue )
@@ -603,7 +601,7 @@ public class MessageConversationController
         for ( org.hisp.dhis.message.MessageConversation conversation : messageConversations )
         {
 
-            boolean success = ( readValue ? conversation.markRead( user ) : conversation.markUnread( user ) );
+            boolean success = (readValue ? conversation.markRead( user ) : conversation.markUnread( user ));
             if ( success )
             {
                 messageService.updateMessageConversation( conversation );

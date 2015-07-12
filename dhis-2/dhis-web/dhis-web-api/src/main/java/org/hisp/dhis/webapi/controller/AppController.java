@@ -28,20 +28,26 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
+import java.io.File;
+import java.io.IOException;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.appmanager.App;
 import org.hisp.dhis.appmanager.AppManager;
 import org.hisp.dhis.dxf2.render.DefaultRenderService;
 import org.hisp.dhis.dxf2.render.RenderService;
+import org.hisp.dhis.dxf2.webmessage.WebMessageException;
 import org.hisp.dhis.external.location.LocationManager;
 import org.hisp.dhis.hibernate.exception.ReadAccessDeniedException;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.webapi.utils.ContextUtils;
+import org.hisp.dhis.webapi.utils.WebMessageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
@@ -58,13 +64,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 
 /**
  * @author Lars Helge Overland
@@ -73,8 +75,6 @@ import java.util.Map;
 @RequestMapping( AppController.RESOURCE_PATH )
 public class AppController
 {
-    private static final Log log = LogFactory.getLog( AppController.class );
-
     public static final String RESOURCE_PATH = "/apps";
 
     @Autowired
@@ -100,7 +100,7 @@ public class AppController
     @RequestMapping( method = RequestMethod.POST )
     @ResponseStatus( HttpStatus.NO_CONTENT )
     @PreAuthorize( "hasRole('ALL') or hasRole('M_dhis-web-maintenance-appmanager')" )
-    public void installApp( @RequestParam( "file" ) MultipartFile file, HttpServletRequest request, HttpServletResponse response ) throws IOException
+    public void installApp( @RequestParam( "file" ) MultipartFile file, HttpServletRequest request, HttpServletResponse response ) throws IOException, WebMessageException
     {
         File tempFile = File.createTempFile( "IMPORT_", "_ZIP" );
         file.transferTo( tempFile );
@@ -113,13 +113,11 @@ public class AppController
         }
         catch ( JsonParseException ex )
         {
-            ContextUtils.conflictResponse( response, "Invalid JSON in app manifest file" );
-            log.error( ex );
+            throw new WebMessageException( WebMessageUtils.conflict( "Invalid JSON in app manifest file." ) );
         }
         catch ( IOException ex )
         {
-            ContextUtils.conflictResponse( response, "App could not not be installed on file system, check permissions" );
-            log.error( ex );
+            throw new WebMessageException( WebMessageUtils.conflict( "App could not not be installed on file system, check permissions" ) );
         }
     }
 
@@ -198,30 +196,29 @@ public class AppController
 
     @RequestMapping( value = "/{app}", method = RequestMethod.DELETE )
     @PreAuthorize( "hasRole('ALL') or hasRole('M_dhis-web-maintenance-appmanager')" )
-    public void deleteApp( @PathVariable( "app" ) String app, HttpServletRequest request, HttpServletResponse response )
+    public void deleteApp( @PathVariable( "app" ) String app, HttpServletRequest request, HttpServletResponse response ) throws WebMessageException
     {
         if ( !appManager.exists( app ) )
         {
-            ContextUtils.notFoundResponse( response, "App does not exist: " + app );
+            throw new WebMessageException( WebMessageUtils.notFound( "App does not exist: " + app ) );
         }
 
         if ( !appManager.deleteApp( app ) )
         {
-            ContextUtils.conflictResponse( response, "There was an error deleting app: " + app );
+            throw new WebMessageException( WebMessageUtils.conflict( "There was an error deleting app: " + app ) );
         }
     }
 
     @SuppressWarnings( "unchecked" )
     @RequestMapping( value = "/config", method = RequestMethod.POST, consumes = ContextUtils.CONTENT_TYPE_JSON )
     @PreAuthorize( "hasRole('ALL') or hasRole('M_dhis-web-maintenance-appmanager')" )
-    public void setConfig( HttpServletRequest request, HttpServletResponse response ) throws IOException
+    public void setConfig( HttpServletRequest request, HttpServletResponse response ) throws IOException, WebMessageException
     {
         Map<String, String> config = renderService.fromJson( request.getInputStream(), Map.class );
 
         if ( config == null )
         {
-            ContextUtils.conflictResponse( response, "No config specified" );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "No config specified" ) );
         }
 
         String appBaseUrl = StringUtils.trimToNull( config.get( AppManager.KEY_APP_BASE_URL ) );

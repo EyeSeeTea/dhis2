@@ -32,8 +32,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.hisp.dhis.common.Pager;
-import org.hisp.dhis.common.PagerUtils;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementGroup;
@@ -95,13 +93,6 @@ public class DataElementOperandController extends AbstractCrudController<DataEle
                 List<DataElement> dataElements = new ArrayList<>( manager.getAllSorted( DataElement.class ) );
                 dataElementOperands = new ArrayList<>( dataElementCategoryService.getFullOperands( dataElements ) );
             }
-        }
-
-        if ( options.hasPaging() )
-        {
-            Pager pager = new Pager( options.getPage(), dataElementOperands.size(), options.getPageSize() );
-            metaData.setPager( pager );
-            dataElementOperands = PagerUtils.pageCollection( dataElementOperands, pager );
         }
 
         return dataElementOperands;

@@ -45,12 +45,10 @@ import org.hisp.dhis.dxf2.common.JacksonUtils;
 import org.hisp.dhis.dxf2.datavalueset.DataExportParams;
 import org.hisp.dhis.dxf2.datavalueset.DataValueSetService;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
-import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -85,9 +83,9 @@ public class DataValueSetController
     {
         response.setContentType( CONTENT_TYPE_XML );
 
-        DataExportParams params = dataValueSetService.getFromUrl( dataSet, period, 
+        DataExportParams params = dataValueSetService.getFromUrl( dataSet, period,
             startDate, endDate, orgUnit, children, lastUpdated, limit, idSchemes );
-        
+
         dataValueSetService.writeDataValueSetXml( params, response.getOutputStream() );
     }
 
@@ -105,9 +103,9 @@ public class DataValueSetController
     {
         response.setContentType( CONTENT_TYPE_JSON );
 
-        DataExportParams params = dataValueSetService.getFromUrl( dataSet, period, 
+        DataExportParams params = dataValueSetService.getFromUrl( dataSet, period,
             startDate, endDate, orgUnit, children, lastUpdated, limit, idSchemes );
-        
+
         dataValueSetService.writeDataValueSetJson( params, response.getOutputStream() );
     }
 
@@ -126,9 +124,9 @@ public class DataValueSetController
     {
         response.setContentType( CONTENT_TYPE_CSV );
 
-        DataExportParams params = dataValueSetService.getFromUrl( dataSet, period, 
+        DataExportParams params = dataValueSetService.getFromUrl( dataSet, period,
             startDate, endDate, orgUnit, children, lastUpdated, limit, idSchemes );
-        
+
         dataValueSetService.writeDataValueSetCsv( params, response.getWriter() );
     }
 
@@ -167,15 +165,5 @@ public class DataValueSetController
 
         response.setContentType( CONTENT_TYPE_XML );
         JacksonUtils.toXml( response.getOutputStream(), summary );
-    }
-
-    // -------------------------------------------------------------------------
-    // Supportive
-    // -------------------------------------------------------------------------
-
-    @ExceptionHandler( IllegalArgumentException.class )
-    public void handleError( IllegalArgumentException ex, HttpServletResponse response )
-    {
-        ContextUtils.conflictResponse( response, ex.getMessage() );
     }
 }
