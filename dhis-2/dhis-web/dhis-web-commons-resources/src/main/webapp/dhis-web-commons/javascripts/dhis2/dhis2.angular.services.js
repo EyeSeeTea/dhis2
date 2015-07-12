@@ -999,9 +999,9 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         //Called from "runExpression". Only proceed with this logic in case there seems to be dhis function calls: "dhis." is present.
         if(angular.isDefined(expression) && expression.indexOf("dhis.") !== -1){   
             var dhisFunctions = [{name:"dhis.daysbetween",parameters:2},
+                                {name:"dhis.yearsbetween",parameters:2},
                                 {name:"dhis.floor",parameters:1},
                                 {name:"dhis.modulus",parameters:2},
-                                {name:"dhis.hasValue",parameters:1},
                                 {name:"dhis.concatenate"}];
 
             angular.forEach(dhisFunctions, function(dhisFunction){
@@ -1041,6 +1041,15 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                         //Replace the end evaluation of the dhis function:
                         expression = expression.replace(callToThisFunction, seconddate.diff(firstdate,'days'));
                     }
+                    else if(dhisFunction.name === "dhis.yearsbetween")
+                    {
+                        var firstdate = $filter('trimquotes')(parameters[0]);
+                        var seconddate = $filter('trimquotes')(parameters[1]);
+                        firstdate = moment(firstdate);
+                        seconddate = moment(seconddate);
+                        //Replace the end evaluation of the dhis function:
+                        expression = expression.replace(callToThisFunction, seconddate.diff(firstdate,'years'));
+                    }
                     else if(dhisFunction.name === "dhis.floor")
                     {
                         var floored = Math.floor(parameters[0]);
@@ -1054,15 +1063,6 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                         var rest = dividend % divisor;
                         //Replace the end evaluation of the dhis function:
                         expression = expression.replace(callToThisFunction, rest);
-                    }
-                    else if(dhisFunction.name === "dhis.hasValue")
-                    {
-                        //"evaluate" hasvalue to true or false:
-                        if(variablesHash[parameters[0]].hasValue){
-                            expression = expression.replace(callToThisFunction, 'true');
-                        } else {
-                            expression = expression.replace(callToThisFunction, 'false');
-                        }
                     }
                     else if(dhisFunction.name === "dhis.concatenate")
                     {
