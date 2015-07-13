@@ -851,7 +851,6 @@ public abstract class BaseAnalyticalObject
         categoryOptionGroups.clear();
         attributeDimensions.clear();
         dataElementDimensions.clear();
-        program = null;
         userOrganisationUnit = false;
         userOrganisationUnitChildren = false;
         userOrganisationUnitGrandChildren = false;

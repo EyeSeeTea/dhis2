@@ -87,6 +87,7 @@ import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.period.RelativePeriodEnum;
 import org.hisp.dhis.period.RelativePeriods;
+import org.hisp.dhis.program.Program;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeDimension;
 import org.hisp.dhis.trackedentity.TrackedEntityDataElementDimension;
@@ -346,6 +347,11 @@ public class DefaultDimensionService
             else
             {
                 object.setUser( currentUserService.getCurrentUser() );
+            }
+            
+            if ( object.getProgram() != null )
+            {
+                object.setProgram( identifiableObjectManager.get( Program.class, object.getProgram().getUid() ) );
             }
 
             mergeDimensionalObjects( object, object.getColumns() );

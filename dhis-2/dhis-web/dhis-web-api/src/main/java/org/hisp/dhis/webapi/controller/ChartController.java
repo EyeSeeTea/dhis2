@@ -120,6 +120,7 @@ public class ChartController
         chartService.addChart( chart );
 
         response.addHeader( "Location", ChartSchemaDescriptor.API_ENDPOINT + "/" + chart.getUid() );
+        
         webMessageService.send( WebMessageUtils.created( "Chart created" ), response, request );
     }
 
