@@ -178,6 +178,7 @@ public class EventQueryParams
         }
 
         params.setAggregateData( true );
+        params.setSkipRounding( true );
         params.removeDimension( DATA_X_DIM_ID );
         
         return params;

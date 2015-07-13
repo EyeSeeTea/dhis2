@@ -552,7 +552,7 @@ public class DefaultAnalyticsService
     
                             row.add( DX_INDEX, new DimensionItem( DATA_X_DIM_ID, indicator ) );
                             
-                            Double roundedValue = MathUtils.getRounded( value );
+                            Double roundedValue = indicator.hasDecimals() ? MathUtils.getRounded( value, indicator.getDecimals() ) : MathUtils.getRounded( value );
                             
                             grid.addRow();
                             grid.addValues( DimensionItem.getItemIdentifiers( row ) );
