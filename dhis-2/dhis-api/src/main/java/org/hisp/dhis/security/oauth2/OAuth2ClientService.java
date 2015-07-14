@@ -1,4 +1,4 @@
-package org.hisp.dhis.schema.descriptors;
+package org.hisp.dhis.security.oauth2;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,37 +28,24 @@ package org.hisp.dhis.schema.descriptors;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.commons.filter.MetaDataFilter;
-import org.hisp.dhis.security.Authority;
-import org.hisp.dhis.security.AuthorityType;
-import org.hisp.dhis.schema.Schema;
-import org.hisp.dhis.schema.SchemaDescriptor;
-import org.springframework.stereotype.Component;
-
-import com.google.common.collect.Lists;
+import java.util.Collection;
 
 /**
- * @author Lars Helge Overland
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@Component
-public class MetaDataFilterSchemaDescriptor implements SchemaDescriptor
+public interface OAuth2ClientService
 {
-    public static final String SINGULAR = "metaDataFilter";
+    void saveOAuth2Client( OAuth2Client oAuth2Client );
 
-    public static final String PLURAL = "metaDataFilters";
+    void updateOAuth2Client( OAuth2Client oAuth2Client );
 
-    public static final String API_ENDPOINT = "/" + PLURAL;
+    void deleteOAuth2Client( OAuth2Client oAuth2Client );
 
-    @Override
-    public Schema getSchema()
-    {
-        Schema schema = new Schema( MetaDataFilter.class, SINGULAR, PLURAL );
-        schema.setRelativeApiEndpoint( API_ENDPOINT );
-        schema.setOrder( 1430 );
+    OAuth2Client getOAuth2Client( int id );
 
-        schema.getAuthorities().add( new Authority( AuthorityType.CREATE_PUBLIC, Lists.newArrayList( "F_METADATA_EXPORT" ) ) );
-        schema.getAuthorities().add( new Authority( AuthorityType.EXTERNALIZE, Lists.newArrayList( "F_METADATA_EXPORT" ) ) );
+    OAuth2Client getOAuth2Client( String uid );
 
-        return schema;
-    }
+    OAuth2Client getOAuth2ClientByClientId( String cid );
+
+    Collection<OAuth2Client> getOAuth2Clients();
 }

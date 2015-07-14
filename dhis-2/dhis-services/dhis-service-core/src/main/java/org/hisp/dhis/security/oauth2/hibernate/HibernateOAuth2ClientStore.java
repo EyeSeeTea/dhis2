@@ -1,4 +1,4 @@
-package org.hisp.dhis.oauth2;
+package org.hisp.dhis.security.oauth2.hibernate;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,16 +28,21 @@ package org.hisp.dhis.oauth2;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.system.deletion.DeletionHandler;
+import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.hisp.dhis.security.oauth2.OAuth2Client;
+import org.hisp.dhis.security.oauth2.OAuth2ClientStore;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class OAuth2ClientDeletionHandler extends DeletionHandler
+public class HibernateOAuth2ClientStore
+    extends HibernateIdentifiableObjectStore<OAuth2Client>
+    implements OAuth2ClientStore
 {
     @Override
-    protected String getClassName()
+    public OAuth2Client getByClientId( String cid )
     {
-        return OAuth2Client.class.getName();
+        return (OAuth2Client) getCriteria().add( Restrictions.eq( "cid", cid ) ).uniqueResult();
     }
 }
