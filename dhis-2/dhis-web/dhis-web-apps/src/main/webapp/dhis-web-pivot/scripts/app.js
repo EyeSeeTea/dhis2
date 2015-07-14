@@ -7260,37 +7260,49 @@ Ext.onReady( function() {
 			}                
 
 			// Indicators
-			indicatorSelectedStore.removeAll();
-			objectName = dimConf.indicator.objectName;
-			if (dimMap[objectName]) {
-				indicatorSelectedStore.add(Ext.clone(recMap[objectName]));
-				ns.core.web.multiSelect.filterAvailable({store: indicatorAvailableStore}, {store: indicatorSelectedStore});
-			}
+			indicatorAvailableStore.removeAll();
+            indicatorSelectedStore.removeAll();
+			//objectName = dimConf.indicator.objectName;
+			//if (dimMap[objectName]) {
+				//indicatorSelectedStore.add(Ext.clone(recMap[objectName]));
+				//ns.core.web.multiSelect.filterAvailable({store: indicatorAvailableStore}, {store: indicatorSelectedStore});
+			//}
 
 			// Data elements
+			dataElementAvailableStore.removeAll();
 			dataElementSelectedStore.removeAll();
-			objectName = dimConf.dataElement.objectName;
-			if (dimMap[objectName]) {
-				dataElementSelectedStore.add(Ext.clone(recMap[objectName]));
-				ns.core.web.multiSelect.filterAvailable({store: dataElementAvailableStore}, {store: dataElementSelectedStore});
-				dataElementDetailLevel.setValue(objectName);
-			}
+			//objectName = dimConf.dataElement.objectName;
+			//if (dimMap[objectName]) {
+				//dataElementSelectedStore.add(Ext.clone(recMap[objectName]));
+				//ns.core.web.multiSelect.filterAvailable({store: dataElementAvailableStore}, {store: dataElementSelectedStore});
+				//dataElementDetailLevel.setValue(objectName);
+			//}
 
 			// Operands
-			objectName = dimConf.operand.objectName;
-			if (dimMap[objectName]) {
-				dataElementSelectedStore.add(Ext.clone(recMap[objectName]));
-				ns.core.web.multiSelect.filterAvailable({store: dataElementAvailableStore}, {store: dataElementSelectedStore});
-				dataElementDetailLevel.setValue(objectName);
-			}
+			//objectName = dimConf.operand.objectName;
+			//if (dimMap[objectName]) {
+				//dataElementSelectedStore.add(Ext.clone(recMap[objectName]));
+				//ns.core.web.multiSelect.filterAvailable({store: dataElementAvailableStore}, {store: dataElementSelectedStore});
+				//dataElementDetailLevel.setValue(objectName);
+			//}
 
 			// Data sets
+			dataSetAvailableStore.removeAll();
 			dataSetSelectedStore.removeAll();
-			objectName = dimConf.dataSet.objectName;
-			if (dimMap[objectName]) {
-				dataSetSelectedStore.add(Ext.clone(recMap[objectName]));
-				ns.core.web.multiSelect.filterAvailable({store: dataSetAvailableStore}, {store: dataSetSelectedStore});
-			}
+			//objectName = dimConf.dataSet.objectName;
+			//if (dimMap[objectName]) {
+				//dataSetSelectedStore.add(Ext.clone(recMap[objectName]));
+				//ns.core.web.multiSelect.filterAvailable({store: dataSetAvailableStore}, {store: dataSetSelectedStore});
+			//}
+
+            // event data items
+			eventDataItemAvailableStore.removeAll();
+			eventDataItemSelectedStore.removeAll();
+
+            // program indicators
+			programIndicatorAvailableStore.removeAll();
+			programIndicatorSelectedStore.removeAll();
+            
 
 			// Periods
 			fixedPeriodSelectedStore.removeAll();
