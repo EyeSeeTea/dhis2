@@ -1,4 +1,4 @@
-package org.hisp.dhis.oauth2;
+package org.hisp.dhis.security.oauth2.hibernate;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,67 +28,21 @@ package org.hisp.dhis.oauth2;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.DhisSpringTest;
-import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.Collection;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.hisp.dhis.security.oauth2.OAuth2Client;
+import org.hisp.dhis.security.oauth2.OAuth2ClientStore;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class OAuth2ClientStoreTest
-    extends DhisSpringTest
+public class HibernateOAuth2ClientStore
+    extends HibernateIdentifiableObjectStore<OAuth2Client>
+    implements OAuth2ClientStore
 {
-    @Autowired
-    private OAuth2ClientStore oAuth2ClientStore;
-
-    private OAuth2Client clientA;
-
-    private OAuth2Client clientB;
-
-    private OAuth2Client clientC;
-
     @Override
-    public void setUpTest()
+    public OAuth2Client getByClientId( String cid )
     {
-        clientA = new OAuth2Client();
-        clientA.setName( "clientA" );
-        clientA.setCid( "clientA" );
-
-        clientB = new OAuth2Client();
-        clientB.setName( "clientB" );
-        clientB.setCid( "clientB" );
-
-        clientC = new OAuth2Client();
-        clientC.setName( "clientC" );
-        clientC.setCid( "clientC" );
-    }
-
-    @Test
-    public void testGetAll()
-    {
-        oAuth2ClientStore.save( clientA );
-        oAuth2ClientStore.save( clientB );
-        oAuth2ClientStore.save( clientC );
-
-        Collection<OAuth2Client> all = oAuth2ClientStore.getAll();
-
-        assertEquals( 3, all.size() );
-    }
-
-    @Test
-    public void testGetByClientID()
-    {
-        oAuth2ClientStore.save( clientA );
-        oAuth2ClientStore.save( clientB );
-        oAuth2ClientStore.save( clientC );
-
-        assertNotNull( oAuth2ClientStore.getByClientId( "clientA" ) );
-        assertNotNull( oAuth2ClientStore.getByClientId( "clientB" ) );
-        assertNotNull( oAuth2ClientStore.getByClientId( "clientC" ) );
+        return (OAuth2Client) getCriteria().add( Restrictions.eq( "cid", cid ) ).uniqueResult();
     }
 }

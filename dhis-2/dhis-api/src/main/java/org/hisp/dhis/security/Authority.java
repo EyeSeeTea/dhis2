@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.common;
+package org.hisp.dhis.security;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,45 +28,66 @@ package org.hisp.dhis.dxf2.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.springframework.util.StringUtils;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.hisp.dhis.common.DxfNamespaces;
 
-import java.util.Locale;
+import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class TranslateOptions
+@JacksonXmlRootElement( localName = "authority", namespace = DxfNamespaces.DXF_2_0 )
+public class Authority
 {
-    private boolean translate;
+    private AuthorityType type;
 
-    private String locale;
+    private List<String> authorities;
 
-    public TranslateOptions()
+    public Authority( AuthorityType type )
     {
+        this.type = type;
     }
 
-    public boolean isTranslate()
+    public Authority( AuthorityType type, List<String> authorities )
     {
-        return translate || !StringUtils.isEmpty( locale );
+        this( type );
+        this.authorities = authorities;
     }
 
-    public void setTranslate( boolean translate )
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public AuthorityType getType()
     {
-        this.translate = translate;
+        return type;
     }
 
-    public Locale getLocale()
+    public void setType( AuthorityType type )
     {
-        return Locale.forLanguageTag( locale );
+        this.type = type;
     }
 
-    public void setLocale( String locale )
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "authorities", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "authority", namespace = DxfNamespaces.DXF_2_0 )
+    public List<String> getAuthorities()
     {
-        this.locale = locale;
+        return authorities;
     }
 
-    public boolean defaultLocale()
+    public void setAuthorities( List<String> authorities )
     {
-        return StringUtils.isEmpty( locale );
+        this.authorities = authorities;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "Authority{" +
+            "type=" + type +
+            ", authorities=" + authorities +
+            '}';
     }
 }

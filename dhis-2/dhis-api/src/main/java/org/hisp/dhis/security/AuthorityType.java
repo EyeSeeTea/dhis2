@@ -1,4 +1,4 @@
-package org.hisp.dhis.oauth2;
+package org.hisp.dhis.security;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,24 +28,16 @@ package org.hisp.dhis.oauth2;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface OAuth2ClientService
+public enum AuthorityType
 {
-    void saveOAuth2Client( OAuth2Client oAuth2Client );
-
-    void updateOAuth2Client( OAuth2Client oAuth2Client );
-
-    void deleteOAuth2Client( OAuth2Client oAuth2Client );
-
-    OAuth2Client getOAuth2Client( int id );
-
-    OAuth2Client getOAuth2Client( String uid );
-
-    OAuth2Client getOAuth2ClientByClientId( String cid );
-
-    Collection<OAuth2Client> getOAuth2Clients();
+    CREATE,
+    CREATE_PUBLIC,
+    CREATE_PRIVATE,
+    EXTERNALIZE,
+    READ,
+    UPDATE,
+    DELETE
 }

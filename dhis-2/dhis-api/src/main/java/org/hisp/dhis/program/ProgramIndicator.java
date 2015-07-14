@@ -101,7 +101,7 @@ public class ProgramIndicator
 
     public ProgramIndicator()
     {
-        setAutoFields();
+
     }
 
     // -------------------------------------------------------------------------

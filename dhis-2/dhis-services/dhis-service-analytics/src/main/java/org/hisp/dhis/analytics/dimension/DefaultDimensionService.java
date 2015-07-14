@@ -51,7 +51,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.hisp.dhis.acl.AclService;
+import org.hisp.dhis.security.acl.AclService;
 import org.hisp.dhis.common.BaseAnalyticalObject;
 import org.hisp.dhis.common.BaseDimensionalObject;
 import org.hisp.dhis.common.DataDimensionItem;

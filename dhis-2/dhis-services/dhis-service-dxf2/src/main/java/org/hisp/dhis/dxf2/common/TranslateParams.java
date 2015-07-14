@@ -1,4 +1,4 @@
-package org.hisp.dhis.schema;
+package org.hisp.dhis.dxf2.common;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,16 +28,45 @@ package org.hisp.dhis.schema;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.springframework.util.StringUtils;
+
+import java.util.Locale;
+
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public enum AuthorityType
+public class TranslateParams
 {
-    CREATE,
-    CREATE_PUBLIC,
-    CREATE_PRIVATE,
-    EXTERNALIZE,
-    READ,
-    UPDATE,
-    DELETE
+    private boolean translate;
+
+    private String locale;
+
+    public TranslateParams()
+    {
+    }
+
+    public boolean isTranslate()
+    {
+        return translate || !StringUtils.isEmpty( locale );
+    }
+
+    public void setTranslate( boolean translate )
+    {
+        this.translate = translate;
+    }
+
+    public Locale getLocale()
+    {
+        return Locale.forLanguageTag( locale );
+    }
+
+    public void setLocale( String locale )
+    {
+        this.locale = locale;
+    }
+
+    public boolean defaultLocale()
+    {
+        return StringUtils.isEmpty( locale );
+    }
 }

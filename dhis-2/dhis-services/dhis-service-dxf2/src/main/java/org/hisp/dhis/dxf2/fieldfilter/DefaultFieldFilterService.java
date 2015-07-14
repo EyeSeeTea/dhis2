@@ -61,6 +61,8 @@ import java.util.regex.Pattern;
  */
 public class DefaultFieldFilterService implements FieldFilterService
 {
+    private final Pattern MUTATOR_PATTERN = Pattern.compile( "(\\w+)(?:::(\\w+))?(?:\\|rename\\((\\w+)\\))?" );
+
     @Autowired
     private ParserService parserService;
 
@@ -322,8 +324,6 @@ public class DefaultFieldFilterService implements FieldFilterService
         Schema schema = schemaService.getDynamicSchema( klass );
         List<String> cleanupFields = Lists.newArrayList();
 
-        Pattern pattern = Pattern.compile( "(\\w+)(?:::(\\w+))?(?:\\|rename\\((\\w+)\\))?" );
-
         for ( String fieldKey : Sets.newHashSet( fieldMap.keySet() ) )
         {
             if ( "*".equals( fieldKey ) )
@@ -393,7 +393,7 @@ public class DefaultFieldFilterService implements FieldFilterService
             }
             else if ( fieldKey.contains( "::" ) || fieldKey.contains( "|rename(" ) )
             {
-                Matcher matcher = pattern.matcher( fieldKey );
+                Matcher matcher = MUTATOR_PATTERN.matcher( fieldKey );
 
                 if ( !matcher.find() )
                 {

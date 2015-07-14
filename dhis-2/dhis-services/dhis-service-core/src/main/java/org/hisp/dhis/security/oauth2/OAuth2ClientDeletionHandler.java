@@ -1,4 +1,4 @@
-package org.hisp.dhis.webapi.webdomain;
+package org.hisp.dhis.security.oauth2;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,34 +28,16 @@ package org.hisp.dhis.webapi.webdomain;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.common.DxfNamespaces;
-import org.hisp.dhis.dxf2.datavalueset.DataValueSet;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.hisp.dhis.system.deletion.DeletionHandler;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JacksonXmlRootElement( localName = "dataValueSets", namespace = DxfNamespaces.DXF_2_0 )
-public class DataValueSets
+public class OAuth2ClientDeletionHandler extends DeletionHandler
 {
-    private List<DataValueSet> dataValueSets = new ArrayList<>();
-
-    @JsonProperty
-    @JacksonXmlElementWrapper( localName = "dataValueSets", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "dataValueSet", namespace = DxfNamespaces.DXF_2_0 )
-    public List<DataValueSet> getDataValueSets()
+    @Override
+    protected String getClassName()
     {
-        return dataValueSets;
-    }
-
-    public void setDataValueSets( List<DataValueSet> dataValueSets )
-    {
-        this.dataValueSets = dataValueSets;
+        return OAuth2Client.class.getName();
     }
 }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.oauth2;
+package org.hisp.dhis.security.oauth2;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,67 +28,67 @@ package org.hisp.dhis.oauth2;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.DhisSpringTest;
+import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@Transactional
-public class DefaultOAuth2ClientService implements OAuth2ClientService
+public class OAuth2ClientStoreTest
+    extends DhisSpringTest
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
     @Autowired
     private OAuth2ClientStore oAuth2ClientStore;
 
-    // -------------------------------------------------------------------------
-    // OAuth2ClientService
-    // -------------------------------------------------------------------------
+    private OAuth2Client clientA;
+
+    private OAuth2Client clientB;
+
+    private OAuth2Client clientC;
 
     @Override
-    public void saveOAuth2Client( OAuth2Client oAuth2Client )
+    public void setUpTest()
     {
-        oAuth2ClientStore.save( oAuth2Client );
+        clientA = new OAuth2Client();
+        clientA.setName( "clientA" );
+        clientA.setCid( "clientA" );
+
+        clientB = new OAuth2Client();
+        clientB.setName( "clientB" );
+        clientB.setCid( "clientB" );
+
+        clientC = new OAuth2Client();
+        clientC.setName( "clientC" );
+        clientC.setCid( "clientC" );
     }
 
-    @Override
-    public void updateOAuth2Client( OAuth2Client oAuth2Client )
+    @Test
+    public void testGetAll()
     {
-        oAuth2ClientStore.update( oAuth2Client );
+        oAuth2ClientStore.save( clientA );
+        oAuth2ClientStore.save( clientB );
+        oAuth2ClientStore.save( clientC );
+
+        Collection<OAuth2Client> all = oAuth2ClientStore.getAll();
+
+        assertEquals( 3, all.size() );
     }
 
-    @Override
-    public void deleteOAuth2Client( OAuth2Client oAuth2Client )
+    @Test
+    public void testGetByClientID()
     {
-        oAuth2ClientStore.delete( oAuth2Client );
-    }
+        oAuth2ClientStore.save( clientA );
+        oAuth2ClientStore.save( clientB );
+        oAuth2ClientStore.save( clientC );
 
-    @Override
-    public OAuth2Client getOAuth2Client( int id )
-    {
-        return oAuth2ClientStore.get( id );
-    }
-
-    @Override
-    public OAuth2Client getOAuth2Client( String uid )
-    {
-        return oAuth2ClientStore.getByUid( uid );
-    }
-
-    @Override
-    public OAuth2Client getOAuth2ClientByClientId( String cid )
-    {
-        return oAuth2ClientStore.getByClientId( cid );
-    }
-
-    @Override
-    public Collection<OAuth2Client> getOAuth2Clients()
-    {
-        return oAuth2ClientStore.getAll();
+        assertNotNull( oAuth2ClientStore.getByClientId( "clientA" ) );
+        assertNotNull( oAuth2ClientStore.getByClientId( "clientB" ) );
+        assertNotNull( oAuth2ClientStore.getByClientId( "clientC" ) );
     }
 }
