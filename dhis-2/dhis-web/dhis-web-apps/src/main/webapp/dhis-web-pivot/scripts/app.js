@@ -2805,6 +2805,10 @@ Ext.onReady( function() {
                 this.isPending = false;
                 indicatorSearch.hideFilter();
             },
+            loadDataAndUpdate: function(data, append) {
+                this.loadData(data, append);
+                this.updateFilter();
+            },
             getRecordsByIds: function(ids) {
                 var records = [];
 
@@ -2887,7 +2891,7 @@ Ext.onReady( function() {
             loadStore: function(data, pager, append, fn) {
 				pager = pager || {};
 
-                this.loadData(data, append);
+                this.loadDataAndUpdate(data, append);
                 this.sortStore();
 
                 this.lastPage = this.nextPage;
@@ -2964,6 +2968,10 @@ Ext.onReady( function() {
                 this.nextPage = 1;
                 this.isPending = false;
                 dataElementSearch.hideFilter();
+            },
+            loadDataAndUpdate: function(data, append) {
+                this.loadData(data, append);
+                this.updateFilter();
             },
             getRecordsByIds: function(ids) {
                 var records = [];
@@ -3106,7 +3114,7 @@ Ext.onReady( function() {
             loadStore: function(data, pager, append, fn) {
 				pager = pager || {};
 
-                this.loadData(data, append);
+                this.loadDataAndUpdate(data, append);
                 this.sortStore();
 
                 this.lastPage = this.nextPage;
@@ -3176,6 +3184,10 @@ Ext.onReady( function() {
                 this.nextPage = 1;
                 this.isPending = false;
                 dataSetSearch.hideFilter();
+            },
+            loadDataAndUpdate: function(data, append) {
+                this.loadData(data, append);
+                this.updateFilter();
             },
             getRecordsByIds: function(ids) {
                 var records = [];
@@ -3249,7 +3261,7 @@ Ext.onReady( function() {
             loadStore: function(data, pager, append, fn) {
 				pager = pager || {};
 
-                this.loadData(data, append);
+                this.loadDataAndUpdate(data, append);
                 this.sortStore();
 
                 this.lastPage = this.nextPage;
@@ -7560,9 +7572,16 @@ Ext.onReady( function() {
 
             // Data
             dataSelectedStore.removeAll();
+
 			indicatorAvailableStore.removeAll();
+            indicatorGroup.clearValue();
+
 			dataElementAvailableStore.removeAll();
+            dataElementGroup.clearValue();
+            dataElementDetailLevel.reset();
+
 			dataSetAvailableStore.removeAll();
+
 			eventDataItemAvailableStore.removeAll();
 			programIndicatorAvailableStore.removeAll();
 
