@@ -648,6 +648,18 @@ public class DefaultAnalyticsService
             metaData.put( PERIOD_DIM_ID, periodUids );
             metaData.put( CATEGORYOPTIONCOMBO_DIM_ID, cocNameMap.keySet() );
 
+            for ( DimensionalObject dim : params.getDimensionsAndFilters() )
+            {
+                if ( !metaData.keySet().contains( dim.getDimension() ) )
+                {
+                    metaData.put( dim.getDimension(), getUids( dim.getItems() ) );
+                }
+            }
+
+            // -----------------------------------------------------------------
+            // Organisation unit hierarchy
+            // -----------------------------------------------------------------
+
             User user = currentUserService.getCurrentUser();
             
             List<OrganisationUnit> organisationUnits = asTypedList( params.getDimensionOrFilter( ORGUNIT_DIM_ID ), OrganisationUnit.class );
@@ -661,14 +673,6 @@ public class DefaultAnalyticsService
             if ( params.isShowHierarchy() )
             {
                 metaData.put( OU_NAME_HIERARCHY_KEY, getParentNameGraphMap( organisationUnits, roots, true, params.getDisplayProperty() ) );
-            }
-            
-            for ( DimensionalObject dim : params.getDimensionsAndFilters() )
-            {
-                if ( !metaData.keySet().contains( dim.getDimension() ) )
-                {
-                    metaData.put( dim.getDimension(), getUids( dim.getItems() ) );
-                }
             }
             
             grid.setMetaData( metaData );
