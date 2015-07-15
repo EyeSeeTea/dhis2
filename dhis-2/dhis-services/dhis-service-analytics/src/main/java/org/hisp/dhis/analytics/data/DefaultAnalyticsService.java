@@ -33,8 +33,8 @@ import static org.hisp.dhis.analytics.AnalyticsTableManager.COMPLETENESS_TABLE_N
 import static org.hisp.dhis.analytics.AnalyticsTableManager.COMPLETENESS_TARGET_TABLE_NAME;
 import static org.hisp.dhis.analytics.AnalyticsTableManager.ORGUNIT_TARGET_TABLE_NAME;
 import static org.hisp.dhis.analytics.DataQueryParams.COMPLETENESS_DIMENSION_TYPES;
-import static org.hisp.dhis.analytics.DataQueryParams.DISPLAY_NAME_CATEGORYOPTIONCOMBO;
 import static org.hisp.dhis.analytics.DataQueryParams.DISPLAY_NAME_ATTRIBUTEOPTIONCOMBO;
+import static org.hisp.dhis.analytics.DataQueryParams.DISPLAY_NAME_CATEGORYOPTIONCOMBO;
 import static org.hisp.dhis.analytics.DataQueryParams.DISPLAY_NAME_DATA_X;
 import static org.hisp.dhis.analytics.DataQueryParams.DISPLAY_NAME_LATITUDE;
 import static org.hisp.dhis.analytics.DataQueryParams.DISPLAY_NAME_LONGITUDE;
@@ -42,9 +42,8 @@ import static org.hisp.dhis.analytics.DataQueryParams.DISPLAY_NAME_ORGUNIT;
 import static org.hisp.dhis.analytics.DataQueryParams.DISPLAY_NAME_PERIOD;
 import static org.hisp.dhis.analytics.DataQueryParams.DX_INDEX;
 import static org.hisp.dhis.analytics.DataQueryParams.KEY_DE_GROUP;
-import static org.hisp.dhis.common.DimensionalObject.CATEGORYOPTIONCOMBO_DIM_ID;
-
 import static org.hisp.dhis.common.DimensionalObject.ATTRIBUTEOPTIONCOMBO_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.CATEGORYOPTIONCOMBO_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.DATA_X_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.DIMENSION_SEP;
 import static org.hisp.dhis.common.DimensionalObject.LATITUDE_DIM_ID;
@@ -646,9 +645,7 @@ public class DefaultAnalyticsService
                 getUids( params.getDimensionOrFilter( PERIOD_DIM_ID ) ) :
                     getLocalPeriodIdentifiers( params.getDimensionOrFilter( PERIOD_DIM_ID ), calendar );
 
-            metaData.put( DATA_X_DIM_ID, getUids( params.getDimensionOrFilter( DATA_X_DIM_ID ) ) );
             metaData.put( PERIOD_DIM_ID, periodUids );
-            metaData.put( ORGUNIT_DIM_ID, getUids( params.getDimensionOrFilter( ORGUNIT_DIM_ID ) ) );
             metaData.put( CATEGORYOPTIONCOMBO_DIM_ID, cocNameMap.keySet() );
 
             User user = currentUserService.getCurrentUser();
@@ -665,10 +662,13 @@ public class DefaultAnalyticsService
             {
                 metaData.put( OU_NAME_HIERARCHY_KEY, getParentNameGraphMap( organisationUnits, roots, true, params.getDisplayProperty() ) );
             }
-
+            
             for ( DimensionalObject dim : params.getDimensionsAndFilters() )
             {
-                metaData.put( dim.getDimension(), getUids( dim.getItems() ) );
+                if ( !metaData.keySet().contains( dim.getDimension() ) )
+                {
+                    metaData.put( dim.getDimension(), getUids( dim.getItems() ) );
+                }
             }
             
             grid.setMetaData( metaData );
