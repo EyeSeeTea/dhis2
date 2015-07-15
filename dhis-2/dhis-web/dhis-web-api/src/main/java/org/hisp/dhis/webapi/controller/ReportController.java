@@ -204,7 +204,7 @@ public class ReportController
 
         if ( report.isTypeHtml() )
         {
-            contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_HTML, CacheStrategy.RESPECT_SYSTEM_SETTING );
+            contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_HTML, report.getCacheStrategy() );
 
             reportService.renderHtmlReport( response.getWriter(), uid, date, organisationUnitUid, format );
         }
@@ -216,7 +216,7 @@ public class ReportController
 
             String filename = CodecUtils.filenameEncode( report.getName() ) + "." + type;
 
-            contextUtils.configureResponse( response, contentType, CacheStrategy.RESPECT_SYSTEM_SETTING, filename, attachment );
+            contextUtils.configureResponse( response, contentType, report.getCacheStrategy(), filename, attachment );
 
             JasperPrint print = reportService.renderReport( response.getOutputStream(), uid, period, organisationUnitUid, type, format );
 
