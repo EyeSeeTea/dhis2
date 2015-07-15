@@ -61,19 +61,12 @@ Ext.onReady( function() {
 		// conf
 		(function() {
 			conf.finals = {
-				url: {
-					path_module: '/dhis-web-pivot/',
-					organisationunitchildren_get: 'getOrganisationUnitChildren.action'
-				},
 				dimension: {
 					data: {
 						value: 'data',
 						name: NS.i18n.data || 'Data',
 						dimensionName: 'dx',
-						objectName: 'dx',
-						warning: {
-							filter: '...'//NS.i18n.wm_multiple_filter_ind_de
-						}
+						objectName: 'dx'
 					},
 					category: {
 						name: NS.i18n.assigned_categories || 'Assigned categories',
@@ -186,16 +179,14 @@ Ext.onReady( function() {
 				west_fieldset_width: 418,
 				west_width_padding: 2,
 				west_fill: 2,
-				//west_fill_accordion_indicator: 56,
 				west_fill_accordion_indicator: 81,
-				//west_fill_accordion_dataelement: 59,
 				west_fill_accordion_dataelement: 81,
-				//west_fill_accordion_dataset: 31,
 				west_fill_accordion_dataset: 56,
                 west_fill_accordion_eventdataitem: 81,
                 west_fill_accordion_programindicator: 81,
 				west_fill_accordion_period: 303,
 				west_fill_accordion_organisationunit: 58,
+                west_fill_accordion_group: 31,
 				west_maxheight_accordion_indicator: 400,
 				west_maxheight_accordion_dataelement: 400,
 				west_maxheight_accordion_dataset: 400,

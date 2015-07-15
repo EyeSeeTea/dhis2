@@ -2474,13 +2474,6 @@ Ext.onReady( function() {
 					}
 				}
 
-				//nameDimArrayMap[dx] = Ext.Array.clean([].concat(
-					//nameDimArrayMap[dimConf.indicator.objectName] || [],
-					//nameDimArrayMap[dimConf.dataElement.objectName] || [],
-					//nameDimArrayMap[dimConf.operand.objectName] || [],
-					//nameDimArrayMap[dimConf.dataSet.objectName] || []
-				//));
-
 				// columns, rows, filters
 				for (var i = 0, nameArrays = [columnDimNames, rowDimNames, filterDimNames], axes = [config.columns, config.rows, config.filters], dimNames; i < nameArrays.length; i++) {
 					dimNames = nameArrays[i];
@@ -2509,8 +2502,6 @@ Ext.onReady( function() {
 								axes[i].push(Ext.clone(nameDimArrayMap[dimName][k]));
 							}
 						}
-
-
 					}
 				}
 
@@ -2739,6 +2730,22 @@ Ext.onReady( function() {
             dataSetAvailable,
             dataSetSelected,
             dataSet,
+            onEventDataItemProgramSelect,
+            eventDataItemProgram,
+            eventDataItemLabel,
+            eventDataItemSearch,
+            eventDataItemFilter,
+            eventDataItemAvailable,
+            eventDataItemSelected,
+            eventDataItem,
+            onProgramIndicatorProgramSelect,
+            programIndicatorProgram,
+            programIndicatorLabel,
+            programIndicatorSearch,
+            programIndicatorFilter,
+            programIndicatorAvailable,
+            programIndicatorSelected,
+            programIndicator,
             data,
 
 			rewind,
@@ -3263,7 +3270,7 @@ Ext.onReady( function() {
 
                 this.isPending = false;
 
-				ns.core.web.multiSelect.filterAvailable({store: dataSetAvailableStore}, {store: dataSetSelectedStore});
+				//ns.core.web.multiSelect.filterAvailable({store: dataSetAvailableStore}, {store: dataSetSelectedStore});
 
                 if (fn) {
 					fn();
@@ -6143,7 +6150,7 @@ Ext.onReady( function() {
 
 					this.isPending = false;
 
-					ns.core.web.multiSelect.filterAvailable({store: availableStore}, {store: selectedStore});
+					//ns.core.web.multiSelect.filterAvailable({store: availableStore}, {store: selectedStore});
 
 					if (fn) {
 						fn();
@@ -6402,7 +6409,7 @@ Ext.onReady( function() {
 					ns.core.web.multiSelect.setHeight(
 						[available, selected],
 						this,
-						ns.core.conf.layout.west_fill_accordion_dataset
+						ns.core.conf.layout.west_fill_accordion_group
 					);
 				},
 				items: [
@@ -6460,9 +6467,6 @@ Ext.onReady( function() {
 			height: 700,
 			items: function() {
 				var panels = [
-					//indicator,
-					//dataElement,
-					//dataSet,
                     data,
 					period,
 					organisationUnit
