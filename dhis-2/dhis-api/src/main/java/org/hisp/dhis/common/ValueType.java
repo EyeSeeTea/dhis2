@@ -47,7 +47,7 @@ public enum ValueType
     BOOLEAN( Boolean.class ),
     TRUE_ONLY( Boolean.class ),
     DATE( Date.class ),
-    DATETIME(DateTime.class),
+    DATETIME( DateTime.class ),
     NUMBER( Double.class ),
     UNIT_INTERVAL( Double.class ),
     PERCENTAGE( Double.class ),
@@ -59,12 +59,12 @@ public enum ValueType
     
     private final Class<?> javaClass;
     
-    private ValueType()
+    ValueType()
     {
         this.javaClass = null;
     }
     
-    private ValueType( Class<?> javaClass )
+    ValueType( Class<?> javaClass )
     {
         this.javaClass = javaClass;
     }
