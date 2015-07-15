@@ -1374,6 +1374,7 @@ public class DefaultAnalyticsService
                 DATA_X_DIM_ID, DimensionType.DATA_X, dataItems ) );
             
             EventQueryParams eventQueryParams = EventQueryParams.fromDataQueryParams( dataSourceParams );
+            eventQueryParams.setSkipRounding( true );
             
             Grid grid = eventAnalyticsService.getAggregatedEventData( eventQueryParams );
             
