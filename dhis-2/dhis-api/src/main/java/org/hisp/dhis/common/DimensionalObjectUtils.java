@@ -30,8 +30,6 @@ package org.hisp.dhis.common;
 
 import static org.hisp.dhis.common.DataDimensionItem.DATA_DIMENSION_TYPE_CLASS_MAP;
 import static org.hisp.dhis.common.DataDimensionItem.DATA_DIMENSION_TYPE_DOMAIN_MAP;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,7 +47,6 @@ import org.hisp.dhis.common.DataDimensionItem.DataDimensionItemType;
 import org.hisp.dhis.common.comparator.ObjectStringValueComparator;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementOperand;
-import org.junit.Test;
 
 import com.google.common.collect.Sets;
 
@@ -442,15 +439,5 @@ public class DimensionalObjectUtils
         }
         
         return set;
-    }
-    
-    @Test
-    public void testValidFullOperand()
-    {
-        assertTrue( DimensionalObjectUtils.isValidDimensionalOperand( "d4HjsAHkj42-G142kJ2k3Gj" ) );
-        
-        assertFalse( DimensionalObjectUtils.isValidDimensionalOperand( "d4HjsAHkj42" ) );
-        assertFalse( DimensionalObjectUtils.isValidDimensionalOperand( "14HjsAHkj42-G142kJ2k3Gj" ) );
-        assertFalse( DimensionalObjectUtils.isValidDimensionalOperand( "d4HjsAHkj42.G142kJ2k3Gj" ) );
     }
 }
