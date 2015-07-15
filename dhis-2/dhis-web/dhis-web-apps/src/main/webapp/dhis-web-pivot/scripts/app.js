@@ -6150,7 +6150,7 @@ Ext.onReady( function() {
 
 					this.isPending = false;
 
-					//ns.core.web.multiSelect.filterAvailable({store: availableStore}, {store: selectedStore});
+					ns.core.web.multiSelect.filterAvailable({store: availableStore}, {store: selectedStore});
 
 					if (fn) {
 						fn();
