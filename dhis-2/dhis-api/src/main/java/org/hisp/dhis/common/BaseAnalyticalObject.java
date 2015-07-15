@@ -905,8 +905,8 @@ public abstract class BaseAnalyticalObject
 
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlElementWrapper( localName = "dataDimensions", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "dataDimension", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlElementWrapper( localName = "dataDimensionItems", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "dataDimensionItem", namespace = DxfNamespaces.DXF_2_0 )
     public List<DataDimensionItem> getDataDimensionItems()
     {
         return dataDimensionItems;
