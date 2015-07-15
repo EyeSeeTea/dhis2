@@ -43,7 +43,7 @@ import org.hisp.dhis.report.Report;
 import org.hisp.dhis.report.ReportService;
 import org.hisp.dhis.schema.descriptors.ReportSchemaDescriptor;
 import org.hisp.dhis.webapi.utils.ContextUtils;
-import org.hisp.dhis.common.caching.CacheStrategy;
+import org.hisp.dhis.common.cache.CacheStrategy;
 import org.hisp.dhis.webapi.utils.WebMessageUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;

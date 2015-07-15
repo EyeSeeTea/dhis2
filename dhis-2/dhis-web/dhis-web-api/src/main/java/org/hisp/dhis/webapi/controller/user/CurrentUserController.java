@@ -65,7 +65,7 @@ import org.hisp.dhis.webapi.controller.exception.FilterTooShortException;
 import org.hisp.dhis.webapi.controller.exception.NotAuthenticatedException;
 import org.hisp.dhis.webapi.service.ContextService;
 import org.hisp.dhis.webapi.utils.ContextUtils;
-import org.hisp.dhis.common.caching.CacheStrategy;
+import org.hisp.dhis.common.cache.CacheStrategy;
 import org.hisp.dhis.webapi.utils.FormUtils;
 import org.hisp.dhis.webapi.webdomain.FormDataSet;
 import org.hisp.dhis.webapi.webdomain.FormOrganisationUnit;

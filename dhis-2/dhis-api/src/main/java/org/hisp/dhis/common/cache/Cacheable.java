@@ -1,4 +1,4 @@
-package org.hisp.dhis.common.caching;
+package org.hisp.dhis.common.cache;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -31,11 +31,7 @@ package org.hisp.dhis.common.caching;
 /**
  * @author Halvdan Hoem Grelland
  */
-public enum CacheStrategy
+public interface Cacheable
 {
-    NO_CACHE,
-    CACHE_1_HOUR,
-    CACHE_6AM_TOMORROW,
-    CACHE_TWO_WEEKS,
-    RESPECT_SYSTEM_SETTING
+    CacheStrategy getCacheStrategy();
 }

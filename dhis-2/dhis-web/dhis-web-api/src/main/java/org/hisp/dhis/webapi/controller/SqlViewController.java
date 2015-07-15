@@ -36,7 +36,7 @@ import org.hisp.dhis.sqlview.SqlView;
 import org.hisp.dhis.sqlview.SqlViewService;
 import org.hisp.dhis.system.grid.GridUtils;
 import org.hisp.dhis.webapi.utils.ContextUtils;
-import org.hisp.dhis.common.caching.CacheStrategy;
+import org.hisp.dhis.common.cache.CacheStrategy;
 import org.hisp.dhis.webapi.utils.WebMessageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
