@@ -827,9 +827,6 @@ public class TableAlteror
         executeSql( "alter table version alter column versionkey set not null" );
         executeSql( "alter table version add constraint version_versionkey_key unique(versionkey)" );
 
-        updateAddCacheStrategy( "report" );
-        updateAddCacheStrategy( "sqlview" );
-
         oauth2();
 
         upgradeDataValuesWithAttributeOptionCombo();
@@ -1109,19 +1106,6 @@ public class TableAlteror
         {
             batchHandler.flush();
         }
-    }
-
-    private void updateAddCacheStrategy( String tableName )
-    {
-        if ( tableName == null )
-        {
-            return;
-        }
-
-        executeSql( "alter table " + tableName + " add column cachestrategy character varying(255)" );
-        executeSql( "update " + tableName + " set cachestrategy = '" + CacheStrategy.RESPECT_SYSTEM_SETTING.toString().toUpperCase() +
-            "' where cachestrategy is null" );
-        executeSql( "update " + tableName + " alter column cachestrategy set not null" );
     }
 
     private void upgradeReportTables()

@@ -1,4 +1,4 @@
-package org.hisp.dhis.common;
+package org.hisp.dhis.hibernate;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,23 +28,47 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.cache.CacheStrategy;
-import org.hisp.dhis.hibernate.NotNullEnumUserType;
+import org.hibernate.engine.spi.SessionImplementor;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
+ * Enum UserType which never provides a null value to Hibernate.
+ * On null values present in the database, the default value is substituted.
+ *
+ * Useful for extending existing schemas with enums and still being
+ * able to require non-null values (works like default).
+ *
  * @author Halvdan Hoem Grelland
  */
-public class CacheStrategyUserType
-    extends NotNullEnumUserType<CacheStrategy>
+public abstract class NotNullEnumUserType<E extends Enum<E>>
+    extends EnumUserType<E>
 {
-    public CacheStrategyUserType()
+    private Class<E> clazz = null;
+
+    protected NotNullEnumUserType( Class<E> clazz )
     {
-        super( CacheStrategy.class );
+        super( clazz );
+        this.clazz = clazz;
     }
 
     @Override
-    protected CacheStrategy getDefaultValue()
+    public Object nullSafeGet( ResultSet resultSet, String[] names, SessionImplementor implementor, Object owner )
     {
-        return CacheStrategy.RESPECT_SYSTEM_SETTING;
+        Object value;
+
+        try
+        {
+            value = super.nullSafeGet( resultSet, names, implementor, owner );
+        }
+        catch ( SQLException e )
+        {
+            value = Enum.valueOf( clazz, getDefaultValue().name() );
+        }
+
+        return value;
     }
+
+    protected abstract E getDefaultValue();
 }
