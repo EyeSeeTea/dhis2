@@ -3299,8 +3299,8 @@ Ext.onReady( function() {
 			sortStore: function() {
 				this.sort('name', 'ASC');
 			},
-            loadDataAndUpdate: function(data) {
-                this.loadData(data);
+            loadDataAndUpdate: function(data, append) {
+                this.loadData(data, append);
                 this.updateFilter();
             },
             getRecordsByIds: function(ids) {
@@ -3342,8 +3342,8 @@ Ext.onReady( function() {
 			sortStore: function() {
 				this.sort('name', 'ASC');
 			},
-            loadDataAndUpdate: function(data) {
-                this.loadData(data);
+            loadDataAndUpdate: function(data, append) {
+                this.loadData(data, append);
                 this.updateFilter();
             },
             getRecordsByIds: function(ids) {
@@ -4797,7 +4797,7 @@ Ext.onReady( function() {
                         programIndicators = isO(program) && isA(program.programIndicators) && program.programIndicators.length ? program.programIndicators : [],
                         data = ns.core.support.prototype.array.sort(Ext.Array.clean(programIndicators)) || [];
 
-                    eventDataItemAvailableStore.loadDataAndUpdate(data);
+                    programIndicatorAvailableStore.loadDataAndUpdate(data);
                 }
             });
 
