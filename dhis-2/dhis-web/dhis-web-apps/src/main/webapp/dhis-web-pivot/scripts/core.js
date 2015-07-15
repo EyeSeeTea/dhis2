@@ -2112,7 +2112,7 @@ Ext.onReady( function() {
 
                 // TODO
                 isSorted = false;
-                
+
 				var axisDimensionNames = isSorted ? xLayout.sortedAxisDimensionNames : xLayout.axisDimensionNames,
 					filterDimensions = isSorted ? xLayout.sortedFilterDimensions : xLayout.filterDimensions,
 					dimensionNameIdsMap = isSorted ? xLayout.dimensionNameSortedIdsMap : xLayout.dimensionNameIdsMap,
@@ -2138,6 +2138,7 @@ Ext.onReady( function() {
 							if (index > 0) {
 								addCategoryDimension = true;
 								items[j] = items[j].substr(0, index);
+                                //items[j] = items[j].replace('#', '-');
 							}
 						}
 

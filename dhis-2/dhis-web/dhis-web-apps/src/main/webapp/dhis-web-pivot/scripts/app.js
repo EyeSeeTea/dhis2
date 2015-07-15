@@ -1961,7 +1961,7 @@ Ext.onReady( function() {
 			listeners: {
 				show: function(w) {
 					Ext.Ajax.request({
-						url: ns.core.init.contextPath + '/api/system/infso.json',
+						url: ns.core.init.contextPath + '/api/system/info.json',
 						success: function(r) {
 							var info = Ext.decode(r.responseText),
 								divStyle = 'padding:3px',
@@ -2697,16 +2697,14 @@ Ext.onReady( function() {
 	// viewport
 	createViewport = function() {
         var indicatorAvailableStore,
-			indicatorSelectedStore,
             indicatorGroupStore,
 			dataElementAvailableStore,
-			dataElementSelectedStore,
 			dataElementGroupStore,
 			dataSetAvailableStore,
-			dataSetSelectedStore,
-            dataSelectedStore,
             eventDataItemAvailableStore,
             programIndicatorAvailableStore,
+            programStore,
+            dataSelectedStore,
 			periodTypeStore,
 			fixedPeriodAvailableStore,
 			fixedPeriodSelectedStore,
@@ -2806,6 +2804,7 @@ Ext.onReady( function() {
                 indicatorSearch.hideFilter();
             },
             loadDataAndUpdate: function(data, append) {
+                this.clearFilter(); // work around
                 this.loadData(data, append);
                 this.updateFilter();
             },
@@ -2902,7 +2901,7 @@ Ext.onReady( function() {
 
                 this.isPending = false;
 
-                ns.core.web.multiSelect.filterAvailable({store: indicatorAvailableStore}, {store: indicatorSelectedStore});
+                //ns.core.web.multiSelect.filterAvailable({store: indicatorAvailableStore}, {store: indicatorSelectedStore});
 
                 if (fn) {
 					fn();
@@ -2915,12 +2914,6 @@ Ext.onReady( function() {
 			}
 		});
 		ns.app.stores.indicatorAvailable = indicatorAvailableStore;
-
-		indicatorSelectedStore = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
-			data: []
-		});
-		ns.app.stores.indicatorSelected = indicatorSelectedStore;
 
 		indicatorGroupStore = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name', 'index'],
@@ -2970,6 +2963,7 @@ Ext.onReady( function() {
                 dataElementSearch.hideFilter();
             },
             loadDataAndUpdate: function(data, append) {
+                this.clearFilter(); // work around
                 this.loadData(data, append);
                 this.updateFilter();
             },
@@ -2993,9 +2987,11 @@ Ext.onReady( function() {
 
                 this.clearFilter();
 
-                this.filterBy(function(record) {
-                    return !Ext.Array.contains(selectedStoreIds, record.data.id);
-                });
+                if (selectedStoreIds.length) {
+                    this.filterBy(function(record) {
+                        return !Ext.Array.contains(selectedStoreIds, record.data.id);
+                    });
+                }
             },
             loadPage: function(uid, filter, append, noPaging, fn) {
                 uid = (Ext.isString(uid) || Ext.isNumber(uid)) ? uid : dataElementGroup.getValue();
@@ -3125,7 +3121,7 @@ Ext.onReady( function() {
 
                 this.isPending = false;
 
-				ns.core.web.multiSelect.filterAvailable({store: dataElementAvailableStore}, {store: dataElementSelectedStore});
+				//ns.core.web.multiSelect.filterAvailable({store: dataElementAvailableStore}, {store: dataElementSelectedStore});
 
                 if (fn) {
 					fn();
@@ -3136,12 +3132,6 @@ Ext.onReady( function() {
 			}
 		});
 		ns.app.stores.dataElementAvailable = dataElementAvailableStore;
-
-		dataElementSelectedStore = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
-			data: []
-		});
-		ns.app.stores.dataElementSelected = dataElementSelectedStore;
 
 		dataElementGroupStore = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name', 'index'],
@@ -3186,6 +3176,7 @@ Ext.onReady( function() {
                 dataSetSearch.hideFilter();
             },
             loadDataAndUpdate: function(data, append) {
+                this.clearFilter(); // work around
                 this.loadData(data, append);
                 this.updateFilter();
             },
@@ -3287,12 +3278,6 @@ Ext.onReady( function() {
 		});
 		ns.app.stores.dataSetAvailable = dataSetAvailableStore;
 
-		dataSetSelectedStore = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
-			data: []
-		});
-		ns.app.stores.dataSetSelected = dataSetSelectedStore;
-
         eventDataItemAvailableStore = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name'],
 			data: [],
@@ -3300,6 +3285,7 @@ Ext.onReady( function() {
 				this.sort('name', 'ASC');
 			},
             loadDataAndUpdate: function(data, append) {
+                this.clearFilter(); // work around
                 this.loadData(data, append);
                 this.updateFilter();
             },
@@ -3330,12 +3316,6 @@ Ext.onReady( function() {
 		});
 		ns.app.stores.eventDataItemAvailable = eventDataItemAvailableStore;
 
-        eventDataItemSelectedStore = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
-			data: []
-		});
-		ns.app.stores.eventDataItemSelected = eventDataItemSelectedStore;
-
         programIndicatorAvailableStore = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name'],
 			data: [],
@@ -3343,6 +3323,7 @@ Ext.onReady( function() {
 				this.sort('name', 'ASC');
 			},
             loadDataAndUpdate: function(data, append) {
+                this.clearFilter(); // work around
                 this.loadData(data, append);
                 this.updateFilter();
             },
@@ -3372,12 +3353,6 @@ Ext.onReady( function() {
             }
 		});
 		ns.app.stores.programIndicatorAvailable = programIndicatorAvailableStore;
-
-        programIndicatorSelectedStore = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
-			data: []
-		});
-		ns.app.stores.programIndicatorSelected = programIndicatorSelectedStore;
 
 		programStore = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name'],
@@ -3934,31 +3909,6 @@ Ext.onReady( function() {
 			hideCollapseTool: true,
             dimension: dimConf.indicator.objectName,
             bodyStyle: 'border:0 none',
-			getDimension: function() {
-				var config = {
-					dimension: dimConf.indicator.objectName,
-					items: []
-				};
-
-				indicatorSelectedStore.each( function(r) {
-					config.items.push({
-						id: r.data.id,
-						name: r.data.name
-					});
-				});
-
-				return config.items.length ? config : null;
-			},
-			onExpand: function() {
-				//var h = westRegion.hasScrollbar ?
-					//ns.core.conf.layout.west_scrollbarheight_accordion_indicator : ns.core.conf.layout.west_maxheight_accordion_indicator;
-				//accordion.setThisHeight(h);
-				//ns.core.web.multiSelect.setHeight(
-					//[indicatorAvailable, indicatorSelected],
-					//this,
-					//ns.core.conf.layout.west_fill_accordion_indicator
-				//);
-			},
 			items: [
 				indicatorGroup,
 				{
@@ -4198,9 +4148,7 @@ Ext.onReady( function() {
 			listeners: {
 				select: function(cb) {
 					dataElementGroup.loadAvailable(true);
-					//dataElementSelectedStore.removeAll();
                     dataSelectedStore.removeByProperty('objectName', 'de');
-                    // TODO
 				}
 			}
 		});
@@ -4213,31 +4161,6 @@ Ext.onReady( function() {
 			hideCollapseTool: true,
             bodyStyle: 'border:0 none',
             dimension: dimConf.dataElement.objectName,
-			getDimension: function() {
-				var config = {
-					dimension: dataElementDetailLevel.getValue(),
-					items: []
-				};
-
-				dataElementSelectedStore.each( function(r) {
-					config.items.push({
-						id: r.data.id,
-						name: r.data.name
-					});
-				});
-
-				return config.items.length ? config : null;
-			},
-			onExpand: function() {
-				//var h = ns.app.westRegion.hasScrollbar ?
-					//ns.core.conf.layout.west_scrollbarheight_accordion_dataelement : ns.core.conf.layout.west_maxheight_accordion_dataelement;
-				//accordion.setThisHeight(h);
-				//ns.core.web.multiSelect.setHeight(
-					//[dataElementAvailable, dataElementSelected],
-					//this,
-					//ns.core.conf.layout.west_fill_accordion_indicator
-				//);
-			},
 			items: [
 				{
 					xtype: 'container',
@@ -7561,16 +7484,16 @@ Ext.onReady( function() {
 				groups = [],
 				orgunits = [];
 
-			// State
+			// state
 			downloadButton.enable();
             shareButton.enable();
 
-			// Set gui
+			// set gui
 			if (!updateGui) {
 				return;
 			}
 
-            // Data
+            // dx
             dataSelectedStore.removeAll();
 
 			indicatorAvailableStore.removeAll();
@@ -7594,52 +7517,7 @@ Ext.onReady( function() {
                 dataSelectedStore.addRecords(recMap['dx']);
             }
 
-			// Indicators
-			//indicatorAvailableStore.removeAll();
-            //indicatorSelectedStore.removeAll();
-			//objectName = dimConf.indicator.objectName;
-			//if (dimMap[objectName]) {
-				//indicatorSelectedStore.add(Ext.clone(recMap[objectName]));
-				//ns.core.web.multiSelect.filterAvailable({store: indicatorAvailableStore}, {store: indicatorSelectedStore});
-			//}
-
-			// Data elements
-			//dataElementAvailableStore.removeAll();
-			//dataElementSelectedStore.removeAll();
-			//objectName = dimConf.dataElement.objectName;
-			//if (dimMap[objectName]) {
-				//dataElementSelectedStore.add(Ext.clone(recMap[objectName]));
-				//ns.core.web.multiSelect.filterAvailable({store: dataElementAvailableStore}, {store: dataElementSelectedStore});
-				//dataElementDetailLevel.setValue(objectName);
-			//}
-
-			// Operands
-			//objectName = dimConf.operand.objectName;
-			//if (dimMap[objectName]) {
-				//dataElementSelectedStore.add(Ext.clone(recMap[objectName]));
-				//ns.core.web.multiSelect.filterAvailable({store: dataElementAvailableStore}, {store: dataElementSelectedStore});
-				//dataElementDetailLevel.setValue(objectName);
-			//}
-
-			// Data sets
-			//dataSetAvailableStore.removeAll();
-			//dataSetSelectedStore.removeAll();
-			//objectName = dimConf.dataSet.objectName;
-			//if (dimMap[objectName]) {
-				//dataSetSelectedStore.add(Ext.clone(recMap[objectName]));
-				//ns.core.web.multiSelect.filterAvailable({store: dataSetAvailableStore}, {store: dataSetSelectedStore});
-			//}
-
-            // event data items
-			//eventDataItemAvailableStore.removeAll();
-			//eventDataItemSelectedStore.removeAll();
-
-            // program indicators
-			//programIndicatorAvailableStore.removeAll();
-			//programIndicatorSelectedStore.removeAll();
-
-
-			// Periods
+			// periods
 			fixedPeriodSelectedStore.removeAll();
 			period.resetRelativePeriods();
 			periodRecords = recMap[dimConf.period.objectName] || [];
@@ -7656,7 +7534,7 @@ Ext.onReady( function() {
 			fixedPeriodSelectedStore.add(fixedPeriodRecords);
 			ns.core.web.multiSelect.filterAvailable({store: fixedPeriodAvailableStore}, {store: fixedPeriodSelectedStore});
 
-			// Group sets
+			// group sets
 			for (var key in dimensionPanelMap) {
 				if (dimensionPanelMap.hasOwnProperty(key)) {
 					var panel = dimensionPanelMap[key],
@@ -7681,7 +7559,7 @@ Ext.onReady( function() {
 				}
 			}
 
-			// Layout
+			// layout
 			ns.app.stores.dimension.removeAll();
 			ns.app.stores.col.removeAll();
 			ns.app.stores.row.removeAll();
@@ -7759,12 +7637,12 @@ Ext.onReady( function() {
                 ns.app.stores.dimension.add({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
             }
 
-			// Options
+			// options
 			if (ns.app.optionsWindow) {
 				ns.app.optionsWindow.setOptions(layout);
 			}
 
-			// Organisation units
+			// organisation units
 			if (recMap[dimConf.organisationUnit.objectName]) {
 				for (var i = 0, ouRecords = recMap[dimConf.organisationUnit.objectName]; i < ouRecords.length; i++) {
 					if (ouRecords[i].id === 'USER_ORGUNIT') {
