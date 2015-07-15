@@ -3358,7 +3358,7 @@ Ext.onReady( function() {
 
                 this.isPending = false;
 
-				ns.core.web.multiSelect.filterAvailable({store: dataSetAvailableStore}, {store: dataSetSelectedStore});
+				//ns.core.web.multiSelect.filterAvailable({store: dataSetAvailableStore}, {store: dataSetSelectedStore});
 
                 if (fn) {
 					fn();
@@ -4439,31 +4439,6 @@ Ext.onReady( function() {
 			hideCollapseTool: true,
             bodyStyle: 'border:0 none',
             dimension: dimConf.dataSet.objectName,
-			getDimension: function() {
-				var config = {
-					dimension: dimConf.dataSet.objectName,
-					items: []
-				};
-
-				dataSetSelectedStore.each( function(r) {
-					config.items.push({
-						id: r.data.id,
-						name: r.data.name
-					});
-				});
-
-				return config.items.length ? config : null;
-			},
-			onExpand: function() {
-				//var h = ns.app.westRegion.hasScrollbar ?
-					//ns.core.conf.layout.west_scrollbarheight_accordion_dataset : ns.core.conf.layout.west_maxheight_accordion_dataset;
-				//accordion.setThisHeight(h);
-				//ns.core.web.multiSelect.setHeight(
-					//[dataSetAvailable, dataSetSelected],
-					//this,
-					//ns.core.conf.layout.west_fill_accordion_dataset
-				//);
-			},
 			items: [
 				{
 					xtype: 'panel',
@@ -4735,31 +4710,6 @@ Ext.onReady( function() {
 			hideCollapseTool: true,
             dimension: dimConf.eventDataItem.objectName,
             bodyStyle: 'border:0 none',
-			getDimension: function() {
-				var config = {
-					dimension: dimConf.eventDataItem.objectName,
-					items: []
-				};
-
-				eventDataItemSelectedStore.each( function(r) {
-					config.items.push({
-						id: r.data.id,
-						name: r.data.name
-					});
-				});
-
-				return config.items.length ? config : null;
-			},
-			onExpand: function() {
-				//var h = westRegion.hasScrollbar ?
-					//ns.core.conf.layout.west_scrollbarheight_accordion_indicator : ns.core.conf.layout.west_maxheight_accordion_indicator;
-				//accordion.setThisHeight(h);
-				//ns.core.web.multiSelect.setHeight(
-					//[eventDataItemAvailable, eventDataItemSelected],
-					//this,
-					//ns.core.conf.layout.west_fill_accordion_eventdataitem
-				//);
-			},
 			items: [
 				eventDataItemProgram,
 				{
@@ -5004,31 +4954,6 @@ Ext.onReady( function() {
 			hideCollapseTool: true,
             dimension: dimConf.programIndicator.objectName,
             bodyStyle: 'border:0 none',
-			getDimension: function() {
-				var config = {
-					dimension: dimConf.programIndicator.objectName,
-					items: []
-				};
-
-				programIndicatorSelectedStore.each( function(r) {
-					config.items.push({
-						id: r.data.id,
-						name: r.data.name
-					});
-				});
-
-				return config.items.length ? config : null;
-			},
-			onExpand: function() {
-				//var h = westRegion.hasScrollbar ?
-					//ns.core.conf.layout.west_scrollbarheight_accordion_indicator : ns.core.conf.layout.west_maxheight_accordion_indicator;
-				//accordion.setThisHeight(h);
-				//ns.core.web.multiSelect.setHeight(
-					//[programIndicatorAvailable, programIndicatorSelected],
-					//this,
-					//ns.core.conf.layout.west_fill_accordion_programindicator
-				//);
-			},
 			items: [
 				programIndicatorProgram,
 				{
