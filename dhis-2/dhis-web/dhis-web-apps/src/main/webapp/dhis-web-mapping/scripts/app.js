@@ -8503,13 +8503,13 @@ Ext.onReady( function() {
 				valueType.setValue(dxDim.objectName);
 				valueTypeToggler(dxDim.objectName);
 
-            if (dataDim === dimConf.dataElement.objectName) {
+            if (dxDim.objectName === dimConf.dataElement.objectName) {
                 dataElementDetailLevel.setValue(dxDim.dimension);
             }
 
 				// Data
-				objectNameCmpMap[dataDim].store.add(dxDim.items[0]);
-				objectNameCmpMap[dataDim].setValue(dxDim.items[0].id);
+				objectNameCmpMap[dxDim.objectName].store.add(dxDim.items[0]);
+				objectNameCmpMap[dxDim.objectName].setValue(dxDim.items[0].id);
 
 				// Period
 				period.store.add(gis.conf.period.relativePeriodRecordsMap[peDim.items[0].id] ? gis.conf.period.relativePeriodRecordsMap[peDim.items[0].id] : peDim.items[0]);
