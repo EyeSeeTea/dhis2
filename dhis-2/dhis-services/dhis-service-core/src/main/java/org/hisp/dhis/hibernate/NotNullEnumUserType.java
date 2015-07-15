@@ -70,5 +70,9 @@ public abstract class NotNullEnumUserType<E extends Enum<E>>
         return value;
     }
 
+    /**
+     * The default value. Substituted for null values present in the DB.
+     * @return the default enum value.
+     */
     protected abstract E getDefaultValue();
 }
