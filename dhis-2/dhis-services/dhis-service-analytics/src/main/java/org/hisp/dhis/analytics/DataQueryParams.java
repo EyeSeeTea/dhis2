@@ -1130,7 +1130,7 @@ public class DataQueryParams
     {
         if ( DATA_X_DIM_ID.equals( dimension.getDimension() ) )
         {
-            dimensions.add( 0, dimension );
+            dimensions.add( DX_INDEX, dimension );
         }
         else
         {

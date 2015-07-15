@@ -408,9 +408,9 @@ public class DefaultAnalyticsService
                 // -------------------------------------------------------------
                 // Merge data element and option combo into operand column
                 // -------------------------------------------------------------
-
+                
                 List<String> values = Lists.newArrayList( entry.getKey().split( DIMENSION_SEP ) );
-                String operand = values.get( 0 ) + DIMENSION_SEP + values.get( 1 );
+                String operand = values.get( 0 ) + DataElementOperand.SEPARATOR + values.get( 1 );
                 values.remove( 0 );
                 values.set( 0, operand );                
                 
@@ -1092,7 +1092,8 @@ public class DefaultAnalyticsService
                 }
                 else if ( DimensionalObjectUtils.isValidDimensionalOperand( uid ) )
                 {
-                    DataElementOperand operand = operandService.getDataElementOperand( splitSafe( uid, DIMENSION_SEP, 0 ), splitSafe( uid, DIMENSION_SEP, 1 ) );
+                    DataElementOperand operand = operandService.getDataElementOperand( 
+                        splitSafe( uid, DataElementOperand.ESCAPED_SEPARATOR, 0 ), splitSafe( uid, DataElementOperand.ESCAPED_SEPARATOR, 1 ) );
                     
                     if ( operand != null )
                     {

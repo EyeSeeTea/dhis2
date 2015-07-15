@@ -60,7 +60,7 @@ public class DimensionalObjectUtils
     public static final String ITEM_SEP = "-";
     
     private static final Pattern INT_PATTERN = Pattern.compile( "^(0|-?[1-9]\\d*)$" );
-    private static final Pattern DIMENSIONAL_OPERAND_PATTERN = Pattern.compile( "([a-zA-Z]\\w{10})-([a-zA-Z]\\w{10})" );
+    private static final Pattern DIMENSIONAL_OPERAND_PATTERN = Pattern.compile( "([a-zA-Z]\\w{10})\\.([a-zA-Z]\\w{10})" );
     
     public static final String TITLE_ITEM_SEP = ", ";
         
