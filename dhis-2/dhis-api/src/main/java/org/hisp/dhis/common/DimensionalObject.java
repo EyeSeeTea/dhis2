@@ -55,6 +55,7 @@ public interface DimensionalObject
     final String DATA_X_DIM_ID = "dx"; // in, de, ds, do
     final String DATA_COLLAPSED_DIM_ID = "dy"; // Collapsed event data dimensions
     final String CATEGORYOPTIONCOMBO_DIM_ID = "co";
+    final String ATTRIBUTEOPTIONCOMBO_DIM_ID = "ao";
     final String PERIOD_DIM_ID = "pe";
     final String ORGUNIT_DIM_ID = "ou";
     final String ORGUNIT_GROUP_DIM_ID = "oug"; // Used for org unit target

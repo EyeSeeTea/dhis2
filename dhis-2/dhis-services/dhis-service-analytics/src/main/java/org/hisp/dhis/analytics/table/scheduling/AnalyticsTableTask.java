@@ -31,11 +31,9 @@ package org.hisp.dhis.analytics.table.scheduling;
 import static org.hisp.dhis.setting.SystemSettingManager.KEY_LAST_SUCCESSFUL_ANALYTICS_TABLES_UPDATE;
 import static org.hisp.dhis.system.notification.NotificationLevel.ERROR;
 import static org.hisp.dhis.system.notification.NotificationLevel.INFO;
-
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_APPLICATION_TITLE;
 import java.util.Date;
-
 import javax.annotation.Resource;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.analytics.AnalyticsTableService;
@@ -45,6 +43,7 @@ import org.hisp.dhis.message.MessageService;
 import org.hisp.dhis.scheduling.TaskId;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.notification.Notifier;
+import org.hisp.dhis.commons.util.TextUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -161,11 +160,14 @@ public class AnalyticsTableTask
         }
         catch ( RuntimeException ex )
         {
+            String appTitle = (String) systemSettingManager.getSystemSetting( KEY_APPLICATION_TITLE, TextUtils.EMPTY );
+            
             notifier.notify( taskId, ERROR, "Process failed: " + ex.getMessage(), true );
             
             messageService.sendSystemNotification( 
                 "Analytics table process failed",
                 "Analytics table process failed, please check the logs. Time: " + new DateTime().toString() + ". " +
+                "Application title: " + appTitle + " " +
                 "Message: " + ex.getMessage() + " " +
                 "Cause: " + DebugUtils.getStackTrace( ex.getCause() ) );
             
