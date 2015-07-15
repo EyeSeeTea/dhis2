@@ -2132,15 +2132,15 @@ Ext.onReady( function() {
 					items = Ext.clone(dimensionNameIdsMap[dimName]);
 
 					if (dimName === dx) {
-						for (var j = 0, index; j < items.length; j++) {
-							index = items[j].indexOf('#');
+						//for (var j = 0, index; j < items.length; j++) {
+							//index = items[j].indexOf('#');
 
-							if (index > 0) {
-								addCategoryDimension = true;
-								items[j] = items[j].substr(0, index);
-                                //items[j] = items[j].replace('#', '-');
-							}
-						}
+							//if (index > 0) {
+								//addCategoryDimension = true;
+								//items[j] = items[j].substr(0, index);
+                                //items[j] = items[j].replace('#', '.');
+							//}
+						//}
 
 						items = Ext.Array.unique(items);
 					}
@@ -2193,7 +2193,7 @@ Ext.onReady( function() {
                     paramString += '&program=' + xLayout.program.id;
                 }
 
-				return paramString;
+				return paramString.replace(/#/g, '.');
 			};
 
 			web.analytics.validateUrl = function(url) {
