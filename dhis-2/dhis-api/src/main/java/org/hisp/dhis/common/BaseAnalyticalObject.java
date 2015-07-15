@@ -136,9 +136,6 @@ public abstract class BaseAnalyticalObject
     protected List<Integer> organisationUnitLevels = new ArrayList<>();
     
     @Scanned
-    protected List<DataElementCategoryOptionCombo> categoryOptionCombos = new ArrayList<>();
-
-    @Scanned
     protected List<DataElementCategoryDimension> categoryDimensions = new ArrayList<>();
 
     @Scanned
@@ -1006,20 +1003,6 @@ public abstract class BaseAnalyticalObject
         this.organisationUnitLevels = organisationUnitLevels;
     }
 
-    @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlElementWrapper( localName = "categoryOptionCombos", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "categoryOptionCombo", namespace = DxfNamespaces.DXF_2_0 )
-    public List<DataElementCategoryOptionCombo> getCategoryOptionCombos()
-    {
-        return categoryOptionCombos;
-    }
-
-    public void setCategoryOptionCombos( List<DataElementCategoryOptionCombo> categoryOptionCombos )
-    {
-        this.categoryOptionCombos = categoryOptionCombos;
-    }
-    
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlElementWrapper( localName = "categoryDimensions", namespace = DxfNamespaces.DXF_2_0 )
