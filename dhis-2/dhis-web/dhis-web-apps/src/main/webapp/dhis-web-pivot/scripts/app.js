@@ -3287,6 +3287,10 @@ Ext.onReady( function() {
 			sortStore: function() {
 				this.sort('name', 'ASC');
 			},
+            loadDataAndUpdate: function(data) {
+                this.loadData(data);
+                this.updateFilter();
+            },
             getRecordsByIds: function(ids) {
                 var records = [];
 
@@ -3310,7 +3314,7 @@ Ext.onReady( function() {
                 this.filterBy(function(record) {
                     return !Ext.Array.contains(selectedStoreIds, record.data.id);
                 });
-            },
+            }
 		});
 		ns.app.stores.eventDataItemAvailable = eventDataItemAvailableStore;
 
@@ -3326,6 +3330,10 @@ Ext.onReady( function() {
 			sortStore: function() {
 				this.sort('name', 'ASC');
 			},
+            loadDataAndUpdate: function(data) {
+                this.loadData(data);
+                this.updateFilter();
+            },
             getRecordsByIds: function(ids) {
                 var records = [];
 
@@ -3349,7 +3357,7 @@ Ext.onReady( function() {
                 this.filterBy(function(record) {
                     return !Ext.Array.contains(selectedStoreIds, record.data.id);
                 });
-            },
+            }
 		});
 		ns.app.stores.programIndicatorAvailable = programIndicatorAvailableStore;
 
@@ -3358,6 +3366,22 @@ Ext.onReady( function() {
 			data: []
 		});
 		ns.app.stores.programIndicatorSelected = programIndicatorSelectedStore;
+
+		programStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			proxy: {
+				type: 'ajax',
+				url: ns.core.init.contextPath + '/api/programs.json?fields=id,name&paging=false',
+				reader: {
+					type: 'json',
+					root: 'programs'
+				},
+				pageParam: false,
+				startParam: false,
+				limitParam: false
+			}
+		});
+		ns.app.stores.program = programStore;
 
         dataSelectedStore = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name'],
@@ -3373,16 +3397,39 @@ Ext.onReady( function() {
                 return ids;
             },
             addRecords: function(records, objectName) {
+                var prop = 'objectName',
+                    recordsToAdd = [],
+                    objectsToAdd = [];
+
                 records = Ext.Array.from(records);
 
                 if (records.length) {
-                    if (objectName) {
-                        for (var i = 0; i < records.length; i++) {
-                            records[i].set('objectName', objectName);
+                    for (var i = 0, record; i < records.length; i++) {
+                        record = records[i];
+
+                        // record
+                        if (record.data) {
+                            if (objectName) {
+                                record.set(prop, objectName);
+                            }
+                            recordsToAdd.push(record);
+                        }
+                        // object
+                        else {
+                            if (objectName) {
+                                record[prop] = objectName;
+                            }
+                            objectsToAdd.push(record);
                         }
                     }
 
-                    this.add(records);
+                    if (recordsToAdd.length) {
+                        this.add(recordsToAdd);
+                    }
+
+                    if (objectsToAdd.length) {
+                        this.loadData(objectsToAdd, true);
+                    }
                 }
             },
             removeByIds: function(ids) {
@@ -3426,22 +3473,6 @@ Ext.onReady( function() {
             }
 		});
 		ns.app.stores.dataSelected = dataSelectedStore;
-
-		programStore = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
-			proxy: {
-				type: 'ajax',
-				url: ns.core.init.contextPath + '/api/programs.json?fields=id,name&paging=false',
-				reader: {
-					type: 'json',
-					root: 'programs'
-				},
-				pageParam: false,
-				startParam: false,
-				limitParam: false
-			}
-		});
-		ns.app.stores.program = programStore;
 
 		periodTypeStore = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name'],
@@ -4485,10 +4516,7 @@ Ext.onReady( function() {
 
                     data = ns.core.support.prototype.array.sort(Ext.Array.clean([].concat(dataElements, attributes))) || [];
 
-                    eventDataItemAvailableStore.loadData(data);
-
-                    console.log(dataElements);
-                    console.log(attributes);
+                    eventDataItemAvailableStore.loadDataAndUpdate(data);
                 }
             });
 
@@ -4757,9 +4785,7 @@ Ext.onReady( function() {
                         programIndicators = isO(program) && isA(program.programIndicators) && program.programIndicators.length ? program.programIndicators : [],
                         data = ns.core.support.prototype.array.sort(Ext.Array.clean(programIndicators)) || [];
 
-                    programIndicatorAvailableStore.loadData(data);
-
-                    console.log(data);
+                    eventDataItemAvailableStore.loadDataAndUpdate(data);
                 }
             });
 
@@ -7532,9 +7558,26 @@ Ext.onReady( function() {
 				return;
 			}
 
-			// Indicators
+            // Data
+            dataSelectedStore.removeAll();
 			indicatorAvailableStore.removeAll();
-            indicatorSelectedStore.removeAll();
+			dataElementAvailableStore.removeAll();
+			dataSetAvailableStore.removeAll();
+			eventDataItemAvailableStore.removeAll();
+			programIndicatorAvailableStore.removeAll();
+
+            if (Ext.isObject(xLayout.program) && Ext.isString(xLayout.program.id)) {
+                eventDataItemProgram.setValue(xLayout.program.id);
+                onEventDataItemProgramSelect(xLayout.program.id)
+            }
+
+            if (dimMap['dx']) {
+                dataSelectedStore.addRecords(recMap['dx']);
+            }
+
+			// Indicators
+			//indicatorAvailableStore.removeAll();
+            //indicatorSelectedStore.removeAll();
 			//objectName = dimConf.indicator.objectName;
 			//if (dimMap[objectName]) {
 				//indicatorSelectedStore.add(Ext.clone(recMap[objectName]));
@@ -7542,8 +7585,8 @@ Ext.onReady( function() {
 			//}
 
 			// Data elements
-			dataElementAvailableStore.removeAll();
-			dataElementSelectedStore.removeAll();
+			//dataElementAvailableStore.removeAll();
+			//dataElementSelectedStore.removeAll();
 			//objectName = dimConf.dataElement.objectName;
 			//if (dimMap[objectName]) {
 				//dataElementSelectedStore.add(Ext.clone(recMap[objectName]));
@@ -7560,8 +7603,8 @@ Ext.onReady( function() {
 			//}
 
 			// Data sets
-			dataSetAvailableStore.removeAll();
-			dataSetSelectedStore.removeAll();
+			//dataSetAvailableStore.removeAll();
+			//dataSetSelectedStore.removeAll();
 			//objectName = dimConf.dataSet.objectName;
 			//if (dimMap[objectName]) {
 				//dataSetSelectedStore.add(Ext.clone(recMap[objectName]));
@@ -7569,12 +7612,12 @@ Ext.onReady( function() {
 			//}
 
             // event data items
-			eventDataItemAvailableStore.removeAll();
-			eventDataItemSelectedStore.removeAll();
+			//eventDataItemAvailableStore.removeAll();
+			//eventDataItemSelectedStore.removeAll();
 
             // program indicators
-			programIndicatorAvailableStore.removeAll();
-			programIndicatorSelectedStore.removeAll();
+			//programIndicatorAvailableStore.removeAll();
+			//programIndicatorSelectedStore.removeAll();
 
 
 			// Periods
