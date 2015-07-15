@@ -2510,7 +2510,7 @@ Ext.onReady( function() {
 							}
 						}
 
-                        
+
 					}
 				}
 
@@ -2578,7 +2578,7 @@ Ext.onReady( function() {
 						'Accepts': 'application/json'
 					},
 					disableCaching: false,
-					failure: function(r) {    
+					failure: function(r) {
                         onFailure();
 
                         r = Ext.decode(r.responseText);
@@ -2704,6 +2704,9 @@ Ext.onReady( function() {
 			dataElementGroupStore,
 			dataSetAvailableStore,
 			dataSetSelectedStore,
+            dataSelectedStore,
+            eventDataItemAvailableStore,
+            programIndicatorAvailableStore,
 			periodTypeStore,
 			fixedPeriodAvailableStore,
 			fixedPeriodSelectedStore,
@@ -2715,7 +2718,8 @@ Ext.onReady( function() {
             isScrolled,
             onDataTypeSelect,
             dataType,
-            
+            dataSelected,
+
             indicatorLabel,
             indicatorSearch,
             indicatorFilter,
@@ -2738,7 +2742,7 @@ Ext.onReady( function() {
             dataSetSelected,
             dataSet,
             data,
-            
+
 			rewind,
             relativePeriodDefaults,
             relativePeriod,
@@ -2800,6 +2804,30 @@ Ext.onReady( function() {
                 this.nextPage = 1;
                 this.isPending = false;
                 indicatorSearch.hideFilter();
+            },
+            getRecordsByIds: function(ids) {
+                var records = [];
+
+                ids = Ext.Array.from(ids);
+
+                for (var i = 0, index; i < ids.length; i++) {
+                    index = this.findExact('id', ids[i]);
+
+                    if (index !== -1) {
+                        records.push(this.getAt(index));
+                    }
+                }
+
+                return records;
+            },
+            updateFilter: function() {
+                var selectedStoreIds = dataSelectedStore.getIds();
+
+                this.clearFilter();
+
+                this.filterBy(function(record) {
+                    return !Ext.Array.contains(selectedStoreIds, record.data.id);
+                });
             },
             loadPage: function(uid, filter, append, noPaging, fn) {
                 var store = this,
@@ -2936,6 +2964,30 @@ Ext.onReady( function() {
                 this.nextPage = 1;
                 this.isPending = false;
                 dataElementSearch.hideFilter();
+            },
+            getRecordsByIds: function(ids) {
+                var records = [];
+
+                ids = Ext.Array.from(ids);
+
+                for (var i = 0, index; i < ids.length; i++) {
+                    index = this.findExact('id', ids[i]);
+
+                    if (index !== -1) {
+                        records.push(this.getAt(index));
+                    }
+                }
+
+                return records;
+            },
+            updateFilter: function() {
+                var selectedStoreIds = dataSelectedStore.getIds();
+
+                this.clearFilter();
+
+                this.filterBy(function(record) {
+                    return !Ext.Array.contains(selectedStoreIds, record.data.id);
+                });
             },
             loadPage: function(uid, filter, append, noPaging, fn) {
                 uid = (Ext.isString(uid) || Ext.isNumber(uid)) ? uid : dataElementGroup.getValue();
@@ -3125,6 +3177,30 @@ Ext.onReady( function() {
                 this.isPending = false;
                 dataSetSearch.hideFilter();
             },
+            getRecordsByIds: function(ids) {
+                var records = [];
+
+                ids = Ext.Array.from(ids);
+
+                for (var i = 0, index; i < ids.length; i++) {
+                    index = this.findExact('id', ids[i]);
+
+                    if (index !== -1) {
+                        records.push(this.getAt(index));
+                    }
+                }
+
+                return records;
+            },
+            updateFilter: function() {
+                var selectedStoreIds = dataSelectedStore.getIds();
+
+                this.clearFilter();
+
+                this.filterBy(function(record) {
+                    return !Ext.Array.contains(selectedStoreIds, record.data.id);
+                });
+            },
             loadPage: function(filter, append, noPaging, fn) {
                 var store = this,
 					params = {},
@@ -3210,31 +3286,147 @@ Ext.onReady( function() {
 			data: [],
 			sortStore: function() {
 				this.sort('name', 'ASC');
-			}
+			},
+            getRecordsByIds: function(ids) {
+                var records = [];
+
+                ids = Ext.Array.from(ids);
+
+                for (var i = 0, index; i < ids.length; i++) {
+                    index = this.findExact('id', ids[i]);
+
+                    if (index !== -1) {
+                        records.push(this.getAt(index));
+                    }
+                }
+
+                return records;
+            },
+            updateFilter: function() {
+                var selectedStoreIds = dataSelectedStore.getIds();
+
+                this.clearFilter();
+
+                this.filterBy(function(record) {
+                    return !Ext.Array.contains(selectedStoreIds, record.data.id);
+                });
+            },
 		});
 		ns.app.stores.eventDataItemAvailable = eventDataItemAvailableStore;
-        
+
         eventDataItemSelectedStore = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name'],
 			data: []
 		});
 		ns.app.stores.eventDataItemSelected = eventDataItemSelectedStore;
-        
+
         programIndicatorAvailableStore = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name'],
 			data: [],
 			sortStore: function() {
 				this.sort('name', 'ASC');
-			}
+			},
+            getRecordsByIds: function(ids) {
+                var records = [];
+
+                ids = Ext.Array.from(ids);
+
+                for (var i = 0, index; i < ids.length; i++) {
+                    index = this.findExact('id', ids[i]);
+
+                    if (index !== -1) {
+                        records.push(this.getAt(index));
+                    }
+                }
+
+                return records;
+            },
+            updateFilter: function() {
+                var selectedStoreIds = dataSelectedStore.getIds();
+
+                this.clearFilter();
+
+                this.filterBy(function(record) {
+                    return !Ext.Array.contains(selectedStoreIds, record.data.id);
+                });
+            },
 		});
 		ns.app.stores.programIndicatorAvailable = programIndicatorAvailableStore;
-        
+
         programIndicatorSelectedStore = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name'],
 			data: []
 		});
 		ns.app.stores.programIndicatorSelected = programIndicatorSelectedStore;
-        
+
+        dataSelectedStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			data: [],
+            getIds: function() {
+                var records = this.getRange(),
+                    ids = [];
+
+                for (var i = 0; i < records.length; i++) {
+                    ids.push(records[i].data.id);
+                }
+
+                return ids;
+            },
+            addRecords: function(records, objectName) {
+                records = Ext.Array.from(records);
+
+                if (records.length) {
+                    if (objectName) {
+                        for (var i = 0; i < records.length; i++) {
+                            records[i].set('objectName', objectName);
+                        }
+                    }
+
+                    this.add(records);
+                }
+            },
+            removeByIds: function(ids) {
+                ids = Ext.Array.from(ids);
+
+                for (var i = 0, index; i < ids.length; i++) {
+                    index = this.findExact('id', ids[i]);
+
+                    if (index !== -1) {
+                        this.removeAt(index);
+                    }
+                }
+            },
+            removeByProperty: function(property, values) {
+                if (!(property && values)) {
+                    return;
+                }
+
+                var recordsToRemove = [];
+
+                values = Ext.Array.from(values);
+
+                this.each(function(record) {
+                    if (Ext.Array.contains(values, record.data[property])) {
+                        recordsToRemove.push(record);
+                    }
+                });
+
+                this.remove(recordsToRemove);
+            },
+            listeners: {
+                add: function() {
+                    data.updateStoreFilters();
+                },
+                remove: function() {
+                    data.updateStoreFilters();
+                },
+                clear: function() {
+                    data.updateStoreFilters();
+                }
+            }
+		});
+		ns.app.stores.dataSelected = dataSelectedStore;
+
 		programStore = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name'],
 			proxy: {
@@ -3369,13 +3561,15 @@ Ext.onReady( function() {
 
         onDataTypeSelect = function(type) {
             type = type || 'in';
-            
+
             if (type === 'in') {
                 indicator.show();
                 dataElement.hide();
                 dataSet.hide();
                 eventDataItem.hide();
                 programIndicator.hide();
+
+                //dataSelected.show();
             }
             else if (type === 'de') {
                 indicator.hide();
@@ -3449,6 +3643,53 @@ Ext.onReady( function() {
             }
         });
 
+        dataSelected = Ext.create('Ext.ux.form.MultiSelect', {
+			cls: 'ns-toolbar-multiselect-right',
+			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
+			valueField: 'id',
+			displayField: 'name',
+			ddReorder: true,
+			store: dataSelectedStore,
+			tbar: [
+				{
+					xtype: 'button',
+					icon: 'images/arrowleftdouble.png',
+					width: 22,
+					handler: function() {
+						//ns.core.web.multiSelect.unselectAll(programIndicatorAvailable, programIndicatorSelected);
+                        dataSelectedStore.removeAll();
+                        data.updateStoreFilters();
+					}
+				},
+				{
+					xtype: 'button',
+					icon: 'images/arrowleft.png',
+					width: 22,
+					handler: function() {
+						//ns.core.web.multiSelect.unselect(programIndicatorAvailable, programIndicatorSelected);
+                        dataSelectedStore.removeByIds(dataSelected.getValue());
+                        data.updateStoreFilters();
+					}
+				},
+				'->',
+				{
+					xtype: 'label',
+					text: NS.i18n.selected,
+					cls: 'ns-toolbar-multiselect-right-label'
+				}
+			],
+			listeners: {
+				afterrender: function() {
+					this.boundList.on('itemdblclick', function() {
+						//ns.core.web.multiSelect.unselect(programIndicatorAvailable, this);
+                        dataSelectedStore.removeByIds(dataSelected.getValue());
+                        data.updateStoreFilters();
+					}, this);
+				}
+			}
+		});
+
+        // indicator
         indicatorLabel = Ext.create('Ext.form.Label', {
             text: NS.i18n.available,
             cls: 'ns-toolbar-multiselect-left-label',
@@ -3565,7 +3806,10 @@ Ext.onReady( function() {
 					icon: 'images/arrowright.png',
 					width: 22,
 					handler: function() {
-						ns.core.web.multiSelect.select(indicatorAvailable, indicatorSelected);
+                        if (indicatorAvailable.getValue().length) {
+                            var records = indicatorAvailableStore.getRecordsByIds(indicatorAvailable.getValue());
+                            dataSelectedStore.addRecords(records, 'in');
+                        }
 					}
 				},
 				{
@@ -3574,7 +3818,7 @@ Ext.onReady( function() {
 					width: 22,
 					handler: function() {
 						indicatorAvailableStore.loadPage(null, null, null, true, function() {
-							ns.core.web.multiSelect.selectAll(indicatorAvailable, indicatorSelected);
+                            dataSelectedStore.addRecords(indicatorAvailableStore.getRange(), 'in');
 						});
 					}
 				}
@@ -3589,8 +3833,8 @@ Ext.onReady( function() {
                         }
                     });
 
-					ms.boundList.on('itemdblclick', function() {
-						ns.core.web.multiSelect.select(ms, indicatorSelected);
+					ms.boundList.on('itemdblclick', function(bl, record) {
+                        dataSelectedStore.addRecords(record, 'in');
 					}, ms);
 				}
 			}
@@ -3602,14 +3846,16 @@ Ext.onReady( function() {
 			valueField: 'id',
 			displayField: 'name',
 			ddReorder: true,
-			store: indicatorSelectedStore,
+			store: dataSelectedStore,
 			tbar: [
 				{
 					xtype: 'button',
 					icon: 'images/arrowleftdouble.png',
 					width: 22,
 					handler: function() {
-						ns.core.web.multiSelect.unselectAll(indicatorAvailable, indicatorSelected);
+                        if (dataSelectedStore.getRange().length) {
+                            dataSelectedStore.removeAll();
+                        }
 					}
 				},
 				{
@@ -3617,7 +3863,9 @@ Ext.onReady( function() {
 					icon: 'images/arrowleft.png',
 					width: 22,
 					handler: function() {
-						ns.core.web.multiSelect.unselect(indicatorAvailable, indicatorSelected);
+                        if (indicatorSelected.getValue().length) {
+                            dataSelectedStore.removeByIds(indicatorSelected.getValue());
+                        }
 					}
 				},
 				'->',
@@ -3629,8 +3877,8 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				afterrender: function() {
-					this.boundList.on('itemdblclick', function() {
-						ns.core.web.multiSelect.unselect(indicatorAvailable, this);
+					this.boundList.on('itemdblclick', function(bl, record) {
+                        dataSelectedStore.removeByIds(record.data.id);
 					}, this);
 				}
 			}
@@ -3659,14 +3907,14 @@ Ext.onReady( function() {
 				return config.items.length ? config : null;
 			},
 			onExpand: function() {
-				var h = westRegion.hasScrollbar ?
-					ns.core.conf.layout.west_scrollbarheight_accordion_indicator : ns.core.conf.layout.west_maxheight_accordion_indicator;
-				accordion.setThisHeight(h);
-				ns.core.web.multiSelect.setHeight(
-					[indicatorAvailable, indicatorSelected],
-					this,
-					ns.core.conf.layout.west_fill_accordion_indicator
-				);
+				//var h = westRegion.hasScrollbar ?
+					//ns.core.conf.layout.west_scrollbarheight_accordion_indicator : ns.core.conf.layout.west_maxheight_accordion_indicator;
+				//accordion.setThisHeight(h);
+				//ns.core.web.multiSelect.setHeight(
+					//[indicatorAvailable, indicatorSelected],
+					//this,
+					//ns.core.conf.layout.west_fill_accordion_indicator
+				//);
 			},
 			items: [
 				indicatorGroup,
@@ -3690,6 +3938,7 @@ Ext.onReady( function() {
 			}
 		});
 
+        // data element
         dataElementLabel = Ext.create('Ext.form.Label', {
             text: NS.i18n.available,
             cls: 'ns-toolbar-multiselect-left-label',
@@ -3778,7 +4027,10 @@ Ext.onReady( function() {
 					icon: 'images/arrowright.png',
 					width: 22,
 					handler: function() {
-						ns.core.web.multiSelect.select(dataElementAvailable, dataElementSelected);
+                        if (dataElementAvailable.getValue().length) {
+                            var records = dataElementAvailableStore.getRecordsByIds(dataElementAvailable.getValue());
+                            dataSelectedStore.addRecords(records, 'de');
+                        }
 					}
 				},
 				{
@@ -3787,7 +4039,7 @@ Ext.onReady( function() {
 					width: 22,
 					handler: function() {
 						dataElementAvailableStore.loadPage(null, null, null, true, function() {
-							ns.core.web.multiSelect.selectAll(dataElementAvailable, dataElementSelected);
+                            dataSelectedStore.addRecords(dataElementAvailableStore.getRange(), 'de');
 						});
 					}
 				}
@@ -3802,8 +4054,8 @@ Ext.onReady( function() {
                         }
                     });
 
-					ms.boundList.on('itemdblclick', function() {
-						ns.core.web.multiSelect.select(ms, dataElementSelected);
+					ms.boundList.on('itemdblclick', function(bl, record) {
+                        dataSelectedStore.addRecords(record, 'de');
 					}, ms);
 				}
 			}
@@ -3815,14 +4067,16 @@ Ext.onReady( function() {
 			valueField: 'id',
 			displayField: 'name',
 			ddReorder: true,
-			store: dataElementSelectedStore,
+			store: dataSelectedStore,
 			tbar: [
 				{
 					xtype: 'button',
 					icon: 'images/arrowleftdouble.png',
 					width: 22,
 					handler: function() {
-						ns.core.web.multiSelect.unselectAll(dataElementAvailable, dataElementSelected);
+                        if (dataSelectedStore.getRange().length) {
+                            dataSelectedStore.removeAll();
+                        }
 					}
 				},
 				{
@@ -3830,7 +4084,9 @@ Ext.onReady( function() {
 					icon: 'images/arrowleft.png',
 					width: 22,
 					handler: function() {
-						ns.core.web.multiSelect.unselect(dataElementAvailable, dataElementSelected);
+                        if (dataElementSelected.getValue().length) {
+                            dataSelectedStore.removeByIds(dataElementSelected.getValue());
+                        }
 					}
 				},
 				'->',
@@ -3842,8 +4098,8 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				afterrender: function() {
-					this.boundList.on('itemdblclick', function() {
-						ns.core.web.multiSelect.unselect(dataElementAvailable, this);
+					this.boundList.on('itemdblclick', function(bl, record) {
+                        dataSelectedStore.removeByIds(record.data.id);
 					}, this);
 				}
 			}
@@ -3899,7 +4155,9 @@ Ext.onReady( function() {
 			listeners: {
 				select: function(cb) {
 					dataElementGroup.loadAvailable(true);
-					dataElementSelectedStore.removeAll();
+					//dataElementSelectedStore.removeAll();
+                    dataSelectedStore.removeByProperty('objectName', 'de');
+                    // TODO
 				}
 			}
 		});
@@ -3928,14 +4186,14 @@ Ext.onReady( function() {
 				return config.items.length ? config : null;
 			},
 			onExpand: function() {
-				var h = ns.app.westRegion.hasScrollbar ?
-					ns.core.conf.layout.west_scrollbarheight_accordion_dataelement : ns.core.conf.layout.west_maxheight_accordion_dataelement;
-				accordion.setThisHeight(h);
-				ns.core.web.multiSelect.setHeight(
-					[dataElementAvailable, dataElementSelected],
-					this,
-					ns.core.conf.layout.west_fill_accordion_indicator
-				);
+				//var h = ns.app.westRegion.hasScrollbar ?
+					//ns.core.conf.layout.west_scrollbarheight_accordion_dataelement : ns.core.conf.layout.west_maxheight_accordion_dataelement;
+				//accordion.setThisHeight(h);
+				//ns.core.web.multiSelect.setHeight(
+					//[dataElementAvailable, dataElementSelected],
+					//this,
+					//ns.core.conf.layout.west_fill_accordion_indicator
+				//);
 			},
 			items: [
 				{
@@ -3966,6 +4224,7 @@ Ext.onReady( function() {
 			}
 		});
 
+        // data set
         dataSetLabel = Ext.create('Ext.form.Label', {
             text: NS.i18n.available,
             cls: 'ns-toolbar-multiselect-left-label',
@@ -4047,7 +4306,10 @@ Ext.onReady( function() {
 					icon: 'images/arrowright.png',
 					width: 22,
 					handler: function() {
-						ns.core.web.multiSelect.select(dataSetAvailable, dataSetSelected);
+                        if (dataSetAvailable.getValue().length) {
+                            var records = dataSetAvailableStore.getRecordsByIds(dataSetAvailable.getValue());
+                            dataSelectedStore.addRecords(records, 'ds');
+                        }
 					}
 				},
 				{
@@ -4056,7 +4318,7 @@ Ext.onReady( function() {
 					width: 22,
 					handler: function() {
 						dataSetAvailableStore.loadPage(null, null, true, function() {
-							ns.core.web.multiSelect.selectAll(dataSetAvailable, dataSetSelected);
+                            dataSelectedStore.addRecords(dataSetAvailableStore.getRange(), 'ds');
 						});
 					}
 				}
@@ -4071,9 +4333,9 @@ Ext.onReady( function() {
                         }
                     });
 
-					this.boundList.on('itemdblclick', function() {
-						ns.core.web.multiSelect.select(this, dataSetSelected);
-					}, this);
+					ms.boundList.on('itemdblclick', function(bl, record) {
+                        dataSelectedStore.addRecords(record, 'ds');
+					}, ms);
 				}
 			}
 		});
@@ -4084,14 +4346,16 @@ Ext.onReady( function() {
 			valueField: 'id',
 			displayField: 'name',
 			ddReorder: true,
-			store: dataSetSelectedStore,
+			store: dataSelectedStore,
 			tbar: [
 				{
 					xtype: 'button',
 					icon: 'images/arrowleftdouble.png',
 					width: 22,
 					handler: function() {
-						ns.core.web.multiSelect.unselectAll(dataSetAvailable, dataSetSelected);
+                        if (dataSelectedStore.getRange().length) {
+                            dataSelectedStore.removeAll();
+                        }
 					}
 				},
 				{
@@ -4099,7 +4363,9 @@ Ext.onReady( function() {
 					icon: 'images/arrowleft.png',
 					width: 22,
 					handler: function() {
-						ns.core.web.multiSelect.unselect(dataSetAvailable, dataSetSelected);
+                        if (dataSetSelected.getValue().length) {
+                            dataSelectedStore.removeByIds(dataSetSelected.getValue());
+                        }
 					}
 				},
 				'->',
@@ -4111,8 +4377,8 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				afterrender: function() {
-					this.boundList.on('itemdblclick', function() {
-						ns.core.web.multiSelect.unselect(dataSetAvailable, this);
+					this.boundList.on('itemdblclick', function(bl, record) {
+                        dataSelectedStore.removeByIds(record.data.id);
 					}, this);
 				}
 			}
@@ -4142,14 +4408,14 @@ Ext.onReady( function() {
 				return config.items.length ? config : null;
 			},
 			onExpand: function() {
-				var h = ns.app.westRegion.hasScrollbar ?
-					ns.core.conf.layout.west_scrollbarheight_accordion_dataset : ns.core.conf.layout.west_maxheight_accordion_dataset;
-				accordion.setThisHeight(h);
-				ns.core.web.multiSelect.setHeight(
-					[dataSetAvailable, dataSetSelected],
-					this,
-					ns.core.conf.layout.west_fill_accordion_dataset
-				);
+				//var h = ns.app.westRegion.hasScrollbar ?
+					//ns.core.conf.layout.west_scrollbarheight_accordion_dataset : ns.core.conf.layout.west_maxheight_accordion_dataset;
+				//accordion.setThisHeight(h);
+				//ns.core.web.multiSelect.setHeight(
+					//[dataSetAvailable, dataSetSelected],
+					//this,
+					//ns.core.conf.layout.west_fill_accordion_dataset
+				//);
 			},
 			items: [
 				{
@@ -4172,12 +4438,19 @@ Ext.onReady( function() {
 			}
 		});
 
-        onEventDataItemProgramSelect = function(programId) {
+        // event data item
+        onEventDataItemProgramSelect = function(programId, skipSync) {
+            if (!skipSync) {
+                dataSelectedStore.removeByProperty('objectName', ['di','pi']);
+                programIndicatorProgram.setValue(programId);
+                onProgramIndicatorProgramSelect(programId, true);
+            }
+
             Ext.Ajax.request({
                 url: ns.core.init.contextPath + '/api/programs.json?paging=false&fields=programTrackedEntityAttributes[trackedEntityAttribute[id,name]],programStages[programStageDataElements[dataElement[id,name,type]]]&filter=id:eq:' + programId,
                 success: function(r) {
                     r = Ext.decode(r.responseText);
-                    
+
                     var isA = Ext.isArray,
                         isO = Ext.isObject,
                         program = isA(r.programs) && r.programs.length ? r.programs[0] : null,
@@ -4295,7 +4568,7 @@ Ext.onReady( function() {
                     str = record.data.name || '';
 
                     return str.toLowerCase().indexOf(value.toLowerCase()) !== -1;
-                });                
+                });
             },
             listeners: {
                 keyup: {
@@ -4332,7 +4605,10 @@ Ext.onReady( function() {
 					icon: 'images/arrowright.png',
 					width: 22,
 					handler: function() {
-						ns.core.web.multiSelect.select(eventDataItemAvailable, eventDataItemSelected);
+                        if (eventDataItemAvailable.getValue().length) {
+                            var records = eventDataItemAvailableStore.getRecordsByIds(eventDataItemAvailable.getValue());
+                            dataSelectedStore.addRecords(records, 'di');
+                        }
 					}
 				},
 				{
@@ -4341,7 +4617,7 @@ Ext.onReady( function() {
 					width: 22,
 					handler: function() {
 						//eventDataItemAvailableStore.loadPage(null, null, null, true, function() {
-							ns.core.web.multiSelect.selectAll(eventDataItemAvailable, eventDataItemSelected);
+                            dataSelectedStore.addRecords(eventDataItemAvailableStore.getRange(), 'di');
 						//});
 					}
 				}
@@ -4356,8 +4632,8 @@ Ext.onReady( function() {
                         //}
                     //});
 
-					ms.boundList.on('itemdblclick', function() {
-						ns.core.web.multiSelect.select(ms, eventDataItemSelected);
+					ms.boundList.on('itemdblclick', function(bl, record) {
+                        dataSelectedStore.addRecords(record, 'di');
 					}, ms);
 				}
 			}
@@ -4369,14 +4645,16 @@ Ext.onReady( function() {
 			valueField: 'id',
 			displayField: 'name',
 			ddReorder: true,
-			store: eventDataItemSelectedStore,
+			store: dataSelectedStore,
 			tbar: [
 				{
 					xtype: 'button',
 					icon: 'images/arrowleftdouble.png',
 					width: 22,
 					handler: function() {
-						ns.core.web.multiSelect.unselectAll(eventDataItemAvailable, eventDataItemSelected);
+                        if (dataSelectedStore.getRange().length) {
+                            dataSelectedStore.removeAll();
+                        }
 					}
 				},
 				{
@@ -4384,7 +4662,9 @@ Ext.onReady( function() {
 					icon: 'images/arrowleft.png',
 					width: 22,
 					handler: function() {
-						ns.core.web.multiSelect.unselect(eventDataItemAvailable, eventDataItemSelected);
+                        if (eventDataItemSelected.getValue().length) {
+                            dataSelectedStore.removeByIds(eventDataItemSelected.getValue());
+                        }
 					}
 				},
 				'->',
@@ -4396,8 +4676,8 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				afterrender: function() {
-					this.boundList.on('itemdblclick', function() {
-						ns.core.web.multiSelect.unselect(eventDataItemAvailable, this);
+					this.boundList.on('itemdblclick', function(bl, record) {
+                        dataSelectedStore.removeByIds(record.data.id);
 					}, this);
 				}
 			}
@@ -4427,14 +4707,14 @@ Ext.onReady( function() {
 				return config.items.length ? config : null;
 			},
 			onExpand: function() {
-				var h = westRegion.hasScrollbar ?
-					ns.core.conf.layout.west_scrollbarheight_accordion_indicator : ns.core.conf.layout.west_maxheight_accordion_indicator;
-				accordion.setThisHeight(h);
-				ns.core.web.multiSelect.setHeight(
-					[eventDataItemAvailable, eventDataItemSelected],
-					this,
-					ns.core.conf.layout.west_fill_accordion_eventdataitem
-				);
+				//var h = westRegion.hasScrollbar ?
+					//ns.core.conf.layout.west_scrollbarheight_accordion_indicator : ns.core.conf.layout.west_maxheight_accordion_indicator;
+				//accordion.setThisHeight(h);
+				//ns.core.web.multiSelect.setHeight(
+					//[eventDataItemAvailable, eventDataItemSelected],
+					//this,
+					//ns.core.conf.layout.west_fill_accordion_eventdataitem
+				//);
 			},
 			items: [
 				eventDataItemProgram,
@@ -4458,12 +4738,19 @@ Ext.onReady( function() {
 			}
 		});
 
-        onProgramIndicatorProgramSelect = function(programId) {
+        // program indicator
+        onProgramIndicatorProgramSelect = function(programId, skipSync) {
+            if (!skipSync) {
+                dataSelectedStore.removeByProperty('objectName', ['di','pi']);
+                eventDataItemProgram.setValue(programId);
+                onEventDataItemProgramSelect(programId, true);
+            }
+
             Ext.Ajax.request({
                 url: ns.core.init.contextPath + '/api/programs.json?paging=false&fields=programIndicators[id,name]&filter=id:eq:' + programId,
                 success: function(r) {
                     r = Ext.decode(r.responseText);
-                    
+
                     var isA = Ext.isArray,
                         isO = Ext.isObject,
                         program = isA(r.programs) && r.programs.length ? r.programs[0] : null,
@@ -4552,7 +4839,7 @@ Ext.onReady( function() {
                     str = record.data.name || '';
 
                     return str.toLowerCase().indexOf(value.toLowerCase()) !== -1;
-                });                
+                });
             },
             listeners: {
                 keyup: {
@@ -4589,7 +4876,10 @@ Ext.onReady( function() {
 					icon: 'images/arrowright.png',
 					width: 22,
 					handler: function() {
-						ns.core.web.multiSelect.select(programIndicatorAvailable, programIndicatorSelected);
+                        if (programIndicatorAvailable.getValue().length) {
+                            var records = programIndicatorAvailableStore.getRecordsByIds(programIndicatorAvailable.getValue());
+                            dataSelectedStore.addRecords(records, 'pi');
+                        }
 					}
 				},
 				{
@@ -4598,7 +4888,7 @@ Ext.onReady( function() {
 					width: 22,
 					handler: function() {
 						//programIndicatorAvailableStore.loadPage(null, null, null, true, function() {
-							ns.core.web.multiSelect.selectAll(programIndicatorAvailable, programIndicatorSelected);
+                            dataSelectedStore.addRecords(programIndicatorAvailableStore.getRange(), 'pi');
 						//});
 					}
 				}
@@ -4613,8 +4903,8 @@ Ext.onReady( function() {
                         //}
                     //});
 
-					ms.boundList.on('itemdblclick', function() {
-						ns.core.web.multiSelect.select(ms, programIndicatorSelected);
+					ms.boundList.on('itemdblclick', function(bl, record) {
+                        dataSelectedStore.addRecords(record, 'pi');
 					}, ms);
 				}
 			}
@@ -4626,14 +4916,16 @@ Ext.onReady( function() {
 			valueField: 'id',
 			displayField: 'name',
 			ddReorder: true,
-			store: programIndicatorSelectedStore,
+			store: dataSelectedStore,
 			tbar: [
 				{
 					xtype: 'button',
 					icon: 'images/arrowleftdouble.png',
 					width: 22,
 					handler: function() {
-						ns.core.web.multiSelect.unselectAll(programIndicatorAvailable, programIndicatorSelected);
+                        if (dataSelectedStore.getRange().length) {
+                            dataSelectedStore.removeAll();
+                        }
 					}
 				},
 				{
@@ -4641,7 +4933,9 @@ Ext.onReady( function() {
 					icon: 'images/arrowleft.png',
 					width: 22,
 					handler: function() {
-						ns.core.web.multiSelect.unselect(programIndicatorAvailable, programIndicatorSelected);
+                        if (programIndicatorSelected.getValue().length) {
+                            dataSelectedStore.removeByIds(programIndicatorSelected.getValue());
+                        }
 					}
 				},
 				'->',
@@ -4653,8 +4947,8 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				afterrender: function() {
-					this.boundList.on('itemdblclick', function() {
-						ns.core.web.multiSelect.unselect(programIndicatorAvailable, this);
+					this.boundList.on('itemdblclick', function(bl, record) {
+                        dataSelectedStore.removeByIds(record.data.id);
 					}, this);
 				}
 			}
@@ -4684,14 +4978,14 @@ Ext.onReady( function() {
 				return config.items.length ? config : null;
 			},
 			onExpand: function() {
-				var h = westRegion.hasScrollbar ?
-					ns.core.conf.layout.west_scrollbarheight_accordion_indicator : ns.core.conf.layout.west_maxheight_accordion_indicator;
-				accordion.setThisHeight(h);
-				ns.core.web.multiSelect.setHeight(
-					[programIndicatorAvailable, programIndicatorSelected],
-					this,
-					ns.core.conf.layout.west_fill_accordion_programindicator
-				);
+				//var h = westRegion.hasScrollbar ?
+					//ns.core.conf.layout.west_scrollbarheight_accordion_indicator : ns.core.conf.layout.west_maxheight_accordion_indicator;
+				//accordion.setThisHeight(h);
+				//ns.core.web.multiSelect.setHeight(
+					//[programIndicatorAvailable, programIndicatorSelected],
+					//this,
+					//ns.core.conf.layout.west_fill_accordion_programindicator
+				//);
 			},
 			items: [
 				programIndicatorProgram,
@@ -4720,41 +5014,20 @@ Ext.onReady( function() {
 			title: '<div class="ns-panel-title-data">' + NS.i18n.data + '</div>',
 			hideCollapseTool: true,
             dimension: dimConf.data.objectName,
+            updateStoreFilters: function() {
+                indicatorAvailableStore.updateFilter();
+                dataElementAvailableStore.updateFilter();
+                dataSetAvailableStore.updateFilter();
+                eventDataItemAvailableStore.updateFilter();
+                programIndicatorAvailableStore.updateFilter();
+            },
 			getDimension: function() {
 				var config = {
 					dimension: dimConf.data.objectName,
 					items: []
 				};
 
-				indicatorSelectedStore.each( function(r) {
-					config.items.push({
-						id: r.data.id,
-						name: r.data.name
-					});
-				});
-
-				dataElementSelectedStore.each( function(r) {
-					config.items.push({
-						id: r.data.id,
-						name: r.data.name
-					});
-				});
-
-				dataSetSelectedStore.each( function(r) {
-					config.items.push({
-						id: r.data.id,
-						name: r.data.name
-					});
-				});
-                
-				eventDataItemSelectedStore.each( function(r) {
-					config.items.push({
-						id: r.data.id,
-						name: r.data.name
-					});
-				});
-                
-				programIndicatorSelectedStore.each( function(r) {
+				dataSelectedStore.each( function(r) {
 					config.items.push({
 						id: r.data.id,
 						name: r.data.name
@@ -4762,7 +5035,7 @@ Ext.onReady( function() {
 				});
 
                 // TODO program
-                if (eventDataItemSelectedStore.getRange().length || programIndicatorSelectedStore.getRange().length) {
+                if (eventDataItemProgram.getValue() || programIndicatorProgram.getValue()) {
                     config.program = {id: eventDataItemProgram.getValue() || programIndicatorProgram.getValue()};
                 }
 
@@ -4771,9 +5044,9 @@ Ext.onReady( function() {
 			onExpand: function() {
                 var conf = ns.core.conf.layout,
                     h = westRegion.hasScrollbar ? conf.west_scrollbarheight_accordion_indicator : conf.west_maxheight_accordion_indicator;
-                    
+
 				accordion.setThisHeight(h);
-                
+
 				ns.core.web.multiSelect.setHeight([indicatorAvailable, indicatorSelected], this, conf.west_fill_accordion_indicator);
                 ns.core.web.multiSelect.setHeight([dataElementAvailable, dataElementSelected], this, conf.west_fill_accordion_dataelement);
                 ns.core.web.multiSelect.setHeight([dataSetAvailable, dataSetSelected], this, conf.west_fill_accordion_dataset);
@@ -5121,7 +5394,7 @@ Ext.onReady( function() {
 			height: 180,
 			valueField: 'id',
 			displayField: 'name',
-			ddReorder: false,
+			ddReorder: true,
 			store: fixedPeriodSelectedStore,
 			tbar: [
 				' ',
@@ -6140,7 +6413,7 @@ Ext.onReady( function() {
 
                     if (selectedStore.getRange().length) {
                         config.items = [];
-                    
+
                         selectedStore.each( function(r) {
                             config.items.push({id: r.data.id});
                         });
@@ -6239,7 +6512,7 @@ Ext.onReady( function() {
                 // idPanelMap
                 for (var i = 0, dimPanel; i < dimPanels.length; i++) {
                     dimPanel = dimPanels[i];
-                    
+
                     dimensionPanelMap[dimPanel.dimension] = dimPanel;
                 }
 
@@ -7257,7 +7530,7 @@ Ext.onReady( function() {
 			// Set gui
 			if (!updateGui) {
 				return;
-			}                
+			}
 
 			// Indicators
 			indicatorAvailableStore.removeAll();
@@ -7302,7 +7575,7 @@ Ext.onReady( function() {
             // program indicators
 			programIndicatorAvailableStore.removeAll();
 			programIndicatorSelectedStore.removeAll();
-            
+
 
 			// Periods
 			fixedPeriodSelectedStore.removeAll();
