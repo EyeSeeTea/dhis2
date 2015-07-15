@@ -8515,10 +8515,10 @@ Ext.onReady( function() {
 				reset(true);
 
 				// Value type
-				valueType.setValue(vType);
-				valueTypeToggler(vType);
+				valueType.setValue(dataDim);
+				valueTypeToggler(dataDim);
 
-				if (vType === dimConf.dataElement.objectName) {
+				if (dataDim === dimConf.dataElement.objectName) {
 					dataElementDetailLevel.setValue(dxDim.dimension);
 				}
 

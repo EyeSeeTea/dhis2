@@ -3514,6 +3514,9 @@ Ext.onReady( function() {
 
 					layout.organisationUnitGroupSet = config.organisationUnitGroupSet;
 
+                    // TODO, TMP
+                    layout.dataDimensionItems = config.dataDimensionItems;
+
 					return layout;
 				}();
 			};
