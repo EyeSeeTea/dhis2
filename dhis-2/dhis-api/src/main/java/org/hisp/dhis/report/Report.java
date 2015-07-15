@@ -71,7 +71,7 @@ public class Report
 
     private ReportParams reportParams;
 
-    private CacheStrategy cacheStrategy;
+    private CacheStrategy cacheStrategy = CacheStrategy.RESPECT_SYSTEM_SETTING;
 
     // -------------------------------------------------------------------------
     // Constructors

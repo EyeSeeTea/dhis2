@@ -79,7 +79,7 @@ public class SqlView
 
     private SqlViewType type;
 
-    private CacheStrategy cacheStrategy;
+    private CacheStrategy cacheStrategy = CacheStrategy.RESPECT_SYSTEM_SETTING;
     
     // -------------------------------------------------------------------------
     // Constructors
@@ -268,7 +268,7 @@ public class SqlView
     @Override
     public CacheStrategy getCacheStrategy()
     {
-        return cacheStrategy != null ? cacheStrategy : CacheStrategy.RESPECT_SYSTEM_SETTING;
+        return cacheStrategy;
     }
 
     public void setCacheStrategy( CacheStrategy cacheStrategy )

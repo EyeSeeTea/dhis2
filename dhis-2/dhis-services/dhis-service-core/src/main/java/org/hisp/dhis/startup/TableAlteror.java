@@ -34,6 +34,7 @@ import org.amplecode.quick.StatementHolder;
 import org.amplecode.quick.StatementManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.common.cache.CacheStrategy;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.jdbc.batchhandler.RelativePeriodsBatchHandler;
@@ -826,6 +827,9 @@ public class TableAlteror
         executeSql( "alter table version alter column versionkey set not null" );
         executeSql( "alter table version add constraint version_versionkey_key unique(versionkey)" );
 
+        updateAddCacheStrategy( "report" );
+        updateAddCacheStrategy( "sqlview" );
+
         oauth2();
 
         upgradeDataValuesWithAttributeOptionCombo();
@@ -1105,6 +1109,19 @@ public class TableAlteror
         {
             batchHandler.flush();
         }
+    }
+
+    private void updateAddCacheStrategy( String tableName )
+    {
+        if ( tableName == null )
+        {
+            return;
+        }
+
+        executeSql( "alter table " + tableName + " add column cachestrategy character varying(255)" );
+        executeSql( "update " + tableName + " set cachestrategy = '" + CacheStrategy.RESPECT_SYSTEM_SETTING.toString().toUpperCase() +
+            "' where cachestrategy is null" );
+        executeSql( "update " + tableName + " alter column cachestrategy set not null" );
     }
 
     private void upgradeReportTables()

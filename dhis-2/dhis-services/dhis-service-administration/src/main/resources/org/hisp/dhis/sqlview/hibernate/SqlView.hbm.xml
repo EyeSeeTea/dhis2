@@ -26,7 +26,7 @@
       </type>
     </property>
 
-    <property name="cacheStrategy" column="cachestrategy" type="org.hisp.dhis.common.CacheStrategyUserType" not-null="true" />
+    <property name="cacheStrategy" type="org.hisp.dhis.common.CacheStrategyUserType" column="cachestrategy" not-null="true" />
 
     <!-- Access properties -->
     <property name="externalAccess" />
