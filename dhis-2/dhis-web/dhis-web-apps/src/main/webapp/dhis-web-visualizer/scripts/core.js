@@ -2345,6 +2345,10 @@ Ext.onReady( function() {
 			web.analytics = {};
 
 			web.analytics.getParamString = function(xLayout, isSorted) {
+
+                // TODO
+                isSorted = false;
+
                 var axisDimensionNames = isSorted ? xLayout.sortedAxisDimensionNames : xLayout.axisDimensionNames,
                     filterDimensions = isSorted ? xLayout.sortedFilterDimensions : xLayout.filterDimensions,
                     dimensionNameIdsMap = isSorted ? xLayout.dimensionNameSortedIdsMap : xLayout.dimensionNameIdsMap,
