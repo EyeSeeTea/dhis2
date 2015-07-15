@@ -680,6 +680,7 @@ Ext.onReady( function() {
                 west_fill_accordion_programindicator: 81,
                 west_fill_accordion_period: 303,
                 west_fill_accordion_organisationunit: 58,
+                west_fill_accordion_group: 31,
                 west_maxheight_accordion_indicator: 350,
                 west_maxheight_accordion_dataelement: 350,
                 west_maxheight_accordion_dataset: 350,

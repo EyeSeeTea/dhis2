@@ -6481,7 +6481,7 @@ Ext.onReady( function() {
 					ns.core.web.multiSelect.setHeight(
 						[available, selected],
 						this,
-						ns.core.conf.layout.west_fill_accordion_dataset
+						ns.core.conf.layout.west_fill_accordion_group
 					);
 				},
 				items: [
@@ -7581,20 +7581,27 @@ Ext.onReady( function() {
 			ns.core.web.multiSelect.filterAvailable({store: fixedPeriodAvailableStore}, {store: fixedPeriodSelectedStore});
 
 			// group sets
-			for (var key in dimensionIdSelectedStoreMap) {
-				if (dimensionIdSelectedStoreMap.hasOwnProperty(key)) {
-					var a = dimensionIdAvailableStoreMap[key],
-						s = dimensionIdSelectedStoreMap[key];
+			for (var key in dimensionPanelMap) {
+				if (dimensionPanelMap.hasOwnProperty(key)) {
+					var panel = dimensionPanelMap[key],
+                        a = panel.availableStore,
+						s = panel.selectedStore;
 
-					if (s.getCount() > 0) {
-						a.reset();
-						s.removeAll();
-					}
+                    // reset
+                    a.reset();
+                    s.removeAll();
+                    panel.selectedAll.setValue(false);
 
-					if (recMap[key]) {
-						s.add(recMap[key]);
-						ns.core.web.multiSelect.filterAvailable({store: a}, {store: s});
-					}
+                    // add
+                    if (Ext.Array.contains(xLayout.objectNames, key)) {
+                        if (recMap[key]) {
+                            s.add(recMap[key]);
+                            ns.core.web.multiSelect.filterAvailable({store: a}, {store: s});
+                        }
+                        else {
+                            panel.selectedAll.setValue(true);
+                        }
+                    }
 				}
 			}
 
@@ -7678,12 +7685,12 @@ Ext.onReady( function() {
                 ns.app.stores.dimension.add({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
             }
 
-			// Options
+			// options
 			if (ns.app.optionsWindow) {
 				ns.app.optionsWindow.setOptions(layout);
 			}
 
-			// Organisation units
+			// organisation units
 			if (recMap[dimConf.organisationUnit.objectName]) {
 				for (var i = 0, ouRecords = recMap[dimConf.organisationUnit.objectName]; i < ouRecords.length; i++) {
 					if (ouRecords[i].id === 'USER_ORGUNIT') {
