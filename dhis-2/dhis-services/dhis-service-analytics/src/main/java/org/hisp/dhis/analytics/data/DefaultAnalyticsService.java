@@ -41,6 +41,7 @@ import static org.hisp.dhis.analytics.DataQueryParams.DISPLAY_NAME_LONGITUDE;
 import static org.hisp.dhis.analytics.DataQueryParams.DISPLAY_NAME_ORGUNIT;
 import static org.hisp.dhis.analytics.DataQueryParams.DISPLAY_NAME_PERIOD;
 import static org.hisp.dhis.analytics.DataQueryParams.DX_INDEX;
+import static org.hisp.dhis.analytics.DataQueryParams.CO_INDEX;
 import static org.hisp.dhis.analytics.DataQueryParams.KEY_DE_GROUP;
 import static org.hisp.dhis.common.DimensionalObject.ATTRIBUTEOPTIONCOMBO_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.CATEGORYOPTIONCOMBO_DIM_ID;
@@ -388,18 +389,21 @@ public class DefaultAnalyticsService
         if ( !params.getDataElementOperands().isEmpty() )
         {
             DataQueryParams dataSourceParams = params.instance();
+            dataSourceParams.retainDataDimension( DataDimensionItemType.DATA_ELEMENT_OPERAND );
             
             // -----------------------------------------------------------------
             // Replace operands with data element and option combo dimensions
             // -----------------------------------------------------------------
             
-            List<DataElementOperand> operands = asTypedList( params.getDataElementOperands() );
+            List<DataElementOperand> operands = asTypedList( dataSourceParams.getDataElementOperands() );
             List<NameableObject> dataElements = Lists.newArrayList( DimensionalObjectUtils.getDataElements( operands ) );
             List<NameableObject> categoryOptionCombos = Lists.newArrayList( DimensionalObjectUtils.getCategoryOptionCombos( operands ) );
 
             //TODO check if data was dim or filter
-            dataSourceParams.setDimensionOptions( DATA_X_DIM_ID, DimensionType.DATA_X, null, dataElements );
-            dataSourceParams.setCategoryOptionCombos( categoryOptionCombos );
+            
+            dataSourceParams.removeDimension( DATA_X_DIM_ID );
+            dataSourceParams.addDimension( new BaseDimensionalObject( DATA_X_DIM_ID, DimensionType.DATA_X, dataElements ) );
+            dataSourceParams.addDimension( new BaseDimensionalObject( CATEGORYOPTIONCOMBO_DIM_ID, DimensionType.CATEGORY_OPTION_COMBO, categoryOptionCombos ) );
 
             Map<String, Object> aggregatedDataMap = getAggregatedDataValueMapObjectTyped( dataSourceParams );
 
@@ -408,15 +412,15 @@ public class DefaultAnalyticsService
                 // -------------------------------------------------------------
                 // Merge data element and option combo into operand column
                 // -------------------------------------------------------------
-                
+                                
                 List<String> values = Lists.newArrayList( entry.getKey().split( DIMENSION_SEP ) );
-                String operand = values.get( 0 ) + DataElementOperand.SEPARATOR + values.get( 1 );
-                values.remove( 0 );
-                values.set( 0, operand );                
+                String operand = values.get( DX_INDEX ) + DataElementOperand.SEPARATOR + values.get( CO_INDEX );
+                values.remove( CO_INDEX );
+                values.set( DX_INDEX, operand );
                 
                 grid.addRow();
                 grid.addValues( values.toArray() );
-                grid.addValue( params.isSkipRounding() ? entry.getValue() : getRounded( entry.getValue() ) );
+                grid.addValue( dataSourceParams.isSkipRounding() ? entry.getValue() : getRounded( entry.getValue() ) );
             }
         }
     }
@@ -1431,7 +1435,7 @@ public class DefaultAnalyticsService
             
             dataSourceParams.getDimensions().add( DataQueryParams.DX_INDEX, new BaseDimensionalObject( 
                 DATA_X_DIM_ID, DimensionType.DATA_X, dataElements ) );
-            dataSourceParams.getDimensions().add( DataQueryParams.CO_IN_INDEX, new BaseDimensionalObject( 
+            dataSourceParams.getDimensions().add( DataQueryParams.CO_INDEX, new BaseDimensionalObject( 
                 CATEGORYOPTIONCOMBO_DIM_ID, DimensionType.CATEGORY_OPTION_COMBO, new ArrayList<NameableObject>() ) );
     
             return getAggregatedDataValueMap( dataSourceParams );

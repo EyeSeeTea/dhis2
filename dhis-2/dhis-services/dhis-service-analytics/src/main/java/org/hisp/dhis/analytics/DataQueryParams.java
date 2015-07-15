@@ -105,7 +105,7 @@ public class DataQueryParams
     public static final String DISPLAY_NAME_LATITUDE = "Latitude";
 
     public static final int DX_INDEX = 0;
-    public static final int CO_IN_INDEX = 1;
+    public static final int CO_INDEX = 1;
 
     public static final Set<Class<? extends IdentifiableObject>> DYNAMIC_DIM_CLASSES = ImmutableSet.<Class<? extends IdentifiableObject>>builder().
         add( OrganisationUnitGroupSet.class ).add( DataElementGroupSet.class ).add( CategoryOptionGroupSet.class ).add( DataElementCategory.class ).build();
@@ -1008,11 +1008,11 @@ public class DataQueryParams
             List<String> keys = Lists.newArrayList( key.split( DIMENSION_SEP ) );
             
             String de = keys.get( DX_INDEX );
-            String coc = cocEnabled ? keys.get( CO_IN_INDEX ) : null;
+            String coc = cocEnabled ? keys.get( CO_INDEX ) : null;
 
             DataElementOperand operand = new DataElementOperand( de, coc );
             
-            ListUtils.removeAll( keys, DX_INDEX, ( cocEnabled ? CO_IN_INDEX : -1 ) );
+            ListUtils.removeAll( keys, DX_INDEX, ( cocEnabled ? CO_INDEX : -1 ) );
             
             String permKey = StringUtils.join( keys, DIMENSION_SEP );
             
@@ -1131,6 +1131,10 @@ public class DataQueryParams
         if ( DATA_X_DIM_ID.equals( dimension.getDimension() ) )
         {
             dimensions.add( DX_INDEX, dimension );
+        }
+        else if ( CATEGORYOPTIONCOMBO_DIM_ID.equals( dimension.getDimension() ) )
+        {
+            dimensions.add( CO_INDEX, dimension );
         }
         else
         {
