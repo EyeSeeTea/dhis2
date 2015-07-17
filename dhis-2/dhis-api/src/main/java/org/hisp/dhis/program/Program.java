@@ -134,12 +134,11 @@ public class Program
 
     public Program()
     {
-        setAutoFields();
+
     }
 
     public Program( String name, String description )
     {
-        setAutoFields();
         this.name = name;
         this.description = description;
     }
@@ -251,6 +250,7 @@ public class Program
         return null;
     }
 
+    @Override
     public int increaseVersion()
     {
         return ++version;
@@ -274,6 +274,7 @@ public class Program
         this.description = description;
     }
 
+    @Override
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
@@ -282,6 +283,7 @@ public class Program
         return version;
     }
 
+    @Override
     public void setVersion( int version )
     {
         this.version = version;
@@ -345,6 +347,7 @@ public class Program
         this.dateOfIncidentDescription = dateOfIncidentDescription;
     }
 
+    //TODO remove
     @JsonProperty
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getKind()

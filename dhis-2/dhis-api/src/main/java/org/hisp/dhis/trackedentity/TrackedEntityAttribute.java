@@ -111,7 +111,7 @@ public class TrackedEntityAttribute
 
     public TrackedEntityAttribute()
     {
-        setAutoFields();
+
     }
 
     public TrackedEntityAttribute( String name, String description, String valueType, Boolean inherit,
@@ -122,8 +122,6 @@ public class TrackedEntityAttribute
         this.valueType = valueType;
         this.inherit = inherit;
         this.displayOnVisitSchedule = displayOnVisitSchedule;
-
-        setAutoFields();
     }
 
     // -------------------------------------------------------------------------
@@ -146,6 +144,7 @@ public class TrackedEntityAttribute
         return optionSet != null;
     }
 
+    @Override
     public boolean hasLegendSet()
     {
         return legendSet != null;

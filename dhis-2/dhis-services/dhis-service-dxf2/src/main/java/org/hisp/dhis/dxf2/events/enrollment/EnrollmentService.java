@@ -28,18 +28,13 @@ package org.hisp.dhis.dxf2.events.enrollment;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
 import org.hisp.dhis.importexport.ImportStrategy;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -53,45 +48,11 @@ public interface EnrollmentService
     // READ
     // -------------------------------------------------------------------------
 
-    Enrollments getEnrollments();
-
-    Enrollments getEnrollments( EnrollmentStatus status );
-
-    Enrollments getEnrollments( TrackedEntityInstance trackedEntityInstance );
-
-    Enrollments getEnrollments( TrackedEntityInstance trackedEntityInstance, EnrollmentStatus status );
-
-    Enrollments getEnrollments( org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance );
-
-    Enrollments getEnrollments( org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance, EnrollmentStatus status );
-
-    Enrollments getEnrollments( Program program );
-
-    Enrollments getEnrollments( Program program, EnrollmentStatus status );
-
-    Enrollments getEnrollments( Program program, EnrollmentStatus status, OrganisationUnit organisationUnit, Date startDate, Date endDate );
-
-    Enrollments getEnrollments( Program program, EnrollmentStatus status, List<OrganisationUnit> organisationUnits, Date startDate, Date endDate );
-
-    Enrollments getEnrollments( Program program, TrackedEntityInstance trackedEntityInstance );
-
-    Enrollments getEnrollments( Program program, TrackedEntityInstance trackedEntityInstance, EnrollmentStatus status );
-
-    Enrollments getEnrollments( OrganisationUnit organisationUnit );
-
-    Enrollments getEnrollments( OrganisationUnit organisationUnit, EnrollmentStatus status );
-
-    Enrollments getEnrollments( Program program, OrganisationUnit organisationUnit );
-
-    Enrollments getEnrollments( Program program, OrganisationUnit organisationUnit, Date startDate, Date endDate );
-
-    Enrollments getEnrollments( Program program, List<OrganisationUnit> organisationUnits, Date startDate, Date endDate );
-
-    Enrollments getEnrollments( Collection<ProgramInstance> programInstances );
-
     Enrollment getEnrollment( String id );
 
     Enrollment getEnrollment( ProgramInstance programInstance );
+
+    List<Enrollment> getEnrollments( Iterable<ProgramInstance> programInstances );
 
     // -------------------------------------------------------------------------
     // CREATE

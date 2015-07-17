@@ -28,15 +28,26 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.common.DimensionalObjectUtils.getUniqueDimensions;
+
+import java.io.IOException;
+import java.util.Date;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.chart.ChartService;
 import org.hisp.dhis.common.DimensionService;
+import org.hisp.dhis.commons.util.CodecUtils;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dxf2.common.ImportOptions;
 import org.hisp.dhis.dxf2.common.JacksonUtils;
+import org.hisp.dhis.dxf2.webmessage.WebMessageException;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.indicator.Indicator;
@@ -46,10 +57,10 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.schema.descriptors.ChartSchemaDescriptor;
-import org.hisp.dhis.commons.util.CodecUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.hisp.dhis.webapi.utils.ContextUtils.CacheStrategy;
+import org.hisp.dhis.webapi.utils.WebMessageUtils;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,15 +69,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Date;
-import java.util.Set;
-
-import static org.hisp.dhis.common.DimensionalObjectUtils.getUniqueDimensions;
-import static org.hisp.dhis.common.DimensionalObjectUtils.toDimension;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -93,7 +95,7 @@ public class ChartController
 
     @Autowired
     private DimensionService dimensionService;
-    
+
     @Autowired
     private CurrentUserService currentUserService;
 
@@ -117,7 +119,9 @@ public class ChartController
 
         chartService.addChart( chart );
 
-        ContextUtils.createdResponse( response, "Chart created", ChartSchemaDescriptor.API_ENDPOINT + "/" + chart.getUid() );
+        response.addHeader( "Location", ChartSchemaDescriptor.API_ENDPOINT + "/" + chart.getUid() );
+        
+        webMessageService.send( WebMessageUtils.created( "Chart created" ), response, request );
     }
 
     @Override
@@ -128,8 +132,7 @@ public class ChartController
 
         if ( chart == null )
         {
-            ContextUtils.notFoundResponse( response, "Chart does not exist: " + uid );
-            return;
+            throw new WebMessageException( WebMessageUtils.notFound( "Chart does not exist: " + uid ) );
         }
 
         Chart newChart = JacksonUtils.fromJson( request.getInputStream(), Chart.class );
@@ -149,8 +152,7 @@ public class ChartController
 
         if ( chart == null )
         {
-            ContextUtils.notFoundResponse( response, "Chart does not exist: " + uid );
-            return;
+            throw new WebMessageException( WebMessageUtils.notFound( "Chart does not exist: " + uid ) );
         }
 
         chartService.deleteChart( chart );
@@ -168,14 +170,13 @@ public class ChartController
         @RequestParam( value = "width", defaultValue = "800", required = false ) int width,
         @RequestParam( value = "height", defaultValue = "500", required = false ) int height,
         @RequestParam( value = "attachment", required = false ) boolean attachment,
-        HttpServletResponse response ) throws IOException
+        HttpServletResponse response ) throws IOException, WebMessageException
     {
         Chart chart = chartService.getChartNoAcl( uid );
 
         if ( chart == null )
         {
-            ContextUtils.notFoundResponse( response, "Chart does not exist: " + uid );
-            return;
+            throw new WebMessageException( WebMessageUtils.notFound( "Chart does not exist: " + uid ) );
         }
 
         OrganisationUnit unit = ou != null ? organisationUnitService.getOrganisationUnit( ou ) : null;
@@ -227,38 +228,34 @@ public class ChartController
         @RequestParam String ou,
         @RequestParam( defaultValue = "525", required = false ) int width,
         @RequestParam( defaultValue = "300", required = false ) int height,
-        HttpServletResponse response ) throws IOException
+        HttpServletResponse response ) throws IOException, WebMessageException
     {
         DataElement dataElement = dataElementService.getDataElement( de );
 
         if ( dataElement == null )
         {
-            ContextUtils.conflictResponse( response, "Data element does not exist: " + de );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Data element does not exist: " + de ) );
         }
 
         DataElementCategoryOptionCombo categoryOptionCombo = categoryService.getDataElementCategoryOptionCombo( co );
 
         if ( categoryOptionCombo == null )
         {
-            ContextUtils.conflictResponse( response, "Category option combo does not exist: " + co );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Category option combo does not exist: " + co ) );
         }
 
         Period period = PeriodType.getPeriodFromIsoString( pe );
 
         if ( period == null )
         {
-            ContextUtils.conflictResponse( response, "Period does not exist: " + pe );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Period does not exist: " + pe ) );
         }
 
         OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( ou );
 
         if ( organisationUnit == null )
         {
-            ContextUtils.conflictResponse( response, "Organisation unit does not exist: " + ou );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Organisation unit does not exist: " + ou ) );
         }
 
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_PNG, CacheStrategy.RESPECT_SYSTEM_SETTING, "chart.png", false );
@@ -278,7 +275,7 @@ public class ChartController
         chart.populateAnalyticalProperties();
 
         Set<OrganisationUnit> roots = currentUserService.getCurrentUser().getDataViewOrganisationUnitsWithFallback();
-        
+
         for ( OrganisationUnit organisationUnit : chart.getOrganisationUnits() )
         {
             chart.getParentGraphMap().put( organisationUnit.getUid(), organisationUnit.getParentGraph( roots ) );
@@ -307,12 +304,12 @@ public class ChartController
 
         if ( chart.getColumns() != null )
         {
-            chart.setSeries( toDimension( chart.getColumns().get( 0 ).getDimension() ) );
+            chart.setSeries( chart.getColumns().get( 0 ).getDimension() );
         }
 
         if ( chart.getRows() != null )
         {
-            chart.setCategory( toDimension( chart.getRows().get( 0 ).getDimension() ) );
+            chart.setCategory( chart.getRows().get( 0 ).getDimension() );
         }
 
         chart.getFilterDimensions().addAll( getUniqueDimensions( chart.getFilters() ) );

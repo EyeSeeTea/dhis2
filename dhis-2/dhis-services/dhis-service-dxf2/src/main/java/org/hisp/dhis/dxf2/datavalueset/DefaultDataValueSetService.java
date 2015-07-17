@@ -56,6 +56,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.IdentifiableProperty;
+import org.hisp.dhis.common.IllegalQueryException;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
@@ -93,6 +94,7 @@ import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.ValidationUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.commons.collection.CachingMap;
+import org.hisp.dhis.commons.util.Clock;
 import org.hisp.dhis.commons.util.DebugUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -181,10 +183,11 @@ public class DefaultDataValueSetService
         if ( organisationUnits != null )
         {
             params.getOrganisationUnits().addAll( identifiableObjectManager.getByUid( OrganisationUnit.class, organisationUnits ) );
+            params.setRequestOrganisationUnits();
             
             if ( includeChildren )
             {
-                params.setOrganisationUnits( new HashSet<OrganisationUnit>( 
+                params.getOrganisationUnits().addAll( new HashSet<OrganisationUnit>( 
                     organisationUnitService.getOrganisationUnitsWithChildren( getUids( params.getOrganisationUnits() ) ) ) );
             }
         }
@@ -222,19 +225,11 @@ public class DefaultDataValueSetService
             violation = "Start date must be before end date";
         }
         
-        if ( params.getOrganisationUnits().isEmpty() )
+        if ( params.getRequestOrganisationUnits().isEmpty() )
         {
             violation = "At least one valid organisation unit must be specified";
         }
         
-        for ( OrganisationUnit unit : params.getOrganisationUnits() )
-        {
-            if ( !organisationUnitService.isInUserHierarchy( unit ) )
-            {
-                violation = "Organisation unit is not inside hierarchy of current user: " + unit.getUid();
-            }
-        }
-
         if ( params.hasLimit() && params.getLimit() < 0 )
         {
             violation = "Limit cannot be less than zero: " + params.getLimit();
@@ -247,6 +242,18 @@ public class DefaultDataValueSetService
             throw new IllegalArgumentException( violation );
         }
     }
+
+    @Override
+    public void decideAccess( DataExportParams params )
+    {
+        for ( OrganisationUnit unit : params.getRequestOrganisationUnits() )
+        {
+            if ( !organisationUnitService.isInUserHierarchy( unit ) )
+            {
+                throw new IllegalQueryException( "User is not allowed to view org unit: " + unit.getUid() );
+            }
+        }
+    }
     
     //--------------------------------------------------------------------------
     // Write
@@ -255,6 +262,7 @@ public class DefaultDataValueSetService
     @Override
     public void writeDataValueSetXml( DataExportParams params, OutputStream out )
     {
+        decideAccess( params );
         validate( params );
 
         dataValueSetStore.writeDataValueSetXml( params, getCompleteDate( params ), out );
@@ -263,6 +271,7 @@ public class DefaultDataValueSetService
     @Override
     public void writeDataValueSetJson( DataExportParams params, OutputStream out )
     {
+        decideAccess( params );
         validate( params );
 
         dataValueSetStore.writeDataValueSetJson( params, getCompleteDate( params ), out );
@@ -277,6 +286,7 @@ public class DefaultDataValueSetService
     @Override
     public void writeDataValueSetCsv( DataExportParams params, Writer writer )
     {
+        decideAccess( params );
         validate( params );
         
         dataValueSetStore.writeDataValueSetCsv( params, getCompleteDate( params ), writer );
@@ -527,9 +537,9 @@ public class DefaultDataValueSetService
      */
     private ImportSummary saveDataValueSet( ImportOptions importOptions, TaskId id, DataValueSet dataValueSet )
     {
-        log.debug( "Import options: " + importOptions );
-        notifier.clear( id ).notify( id, "Process started" );
-
+        Clock clock = new Clock( log ).startClock().logTime( "Starting data value import, options: " + importOptions );
+        notifier.clear( id ).notify( id, "Process started" );        
+        
         ImportSummary summary = new ImportSummary();
 
         I18n i18n = i18nManager.getI18n();
@@ -579,7 +589,8 @@ public class DefaultDataValueSetService
         {
             notifier.notify( id, "Loading data elements and organisation units" );
             dataElementMap.putAll( identifiableObjectManager.getIdMap( DataElement.class, dataElementIdScheme ) );
-            orgUnitMap.putAll( getOrgUnitMap( orgUnitIdScheme ) );
+            orgUnitMap.putAll( getOrgUnitMap( orgUnitIdScheme ) );            
+            clock.logTime( "Preheated data element and organisation unit caches" );
         }
         
         IdentifiableObjectCallable<DataElement> dataElementCallable = new IdentifiableObjectCallable<>( 
@@ -663,8 +674,8 @@ public class DefaultDataValueSetService
 
         Date now = new Date();
 
+        clock.logTime( "Validated outer meta-data" );
         notifier.notify( id, "Importing data values" );
-        log.info( "Importing data values" );
 
         while ( dataValueSet.hasNextDataValue() )
         {
@@ -730,6 +741,7 @@ public class DefaultDataValueSetService
             
             boolean inUserHierarchy = orgUnitInHierarchyMap.get( orgUnit.getUid(), new Callable<Boolean>()
             {
+                @Override
                 public Boolean call() throws Exception
                 {
                     return organisationUnitService.isInUserHierarchy( orgUnit.getUid(), currentOrgUnits );
@@ -846,7 +858,7 @@ public class DefaultDataValueSetService
         summary.setDescription( "Import process completed successfully" );
 
         notifier.notify( id, INFO, "Import done", true ).addTaskSummary( id, summary );
-        log.info( "Data value import done, total: " + totalCount + ", import: " + importCount + ", update: " + updateCount );
+        clock.logTime( "Data value import done, total: " + totalCount + ", import: " + importCount + ", update: " + updateCount );
 
         dataValueSet.close();
 

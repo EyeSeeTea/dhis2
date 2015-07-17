@@ -34,9 +34,11 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.hisp.dhis.common.BaseDimensionalObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.DimensionType;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeStrategy;
@@ -66,12 +68,11 @@ public class CategoryOptionGroupSet
 
     public CategoryOptionGroupSet()
     {
-        setAutoFields();
+
     }
 
     public CategoryOptionGroupSet( String name )
     {
-        this();
         this.name = name;
     }
 
@@ -110,6 +111,12 @@ public class CategoryOptionGroupSet
     public List<NameableObject> getItems()
     {
         return new ArrayList<NameableObject>( members );
+    }
+
+    @Override
+    public DimensionType getDimensionType()
+    {
+        return DimensionType.CATEGORYOPTION_GROUPSET;
     }
 
     // -------------------------------------------------------------------------

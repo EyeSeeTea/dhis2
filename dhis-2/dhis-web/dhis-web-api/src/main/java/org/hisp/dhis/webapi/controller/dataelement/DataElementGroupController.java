@@ -35,10 +35,11 @@ import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementOperand;
-import org.hisp.dhis.dxf2.common.TranslateOptions;
+import org.hisp.dhis.dxf2.common.TranslateParams;
+import org.hisp.dhis.dxf2.webmessage.WebMessageException;
 import org.hisp.dhis.schema.descriptors.DataElementGroupSchemaDescriptor;
 import org.hisp.dhis.webapi.controller.AbstractCrudController;
-import org.hisp.dhis.webapi.utils.ContextUtils;
+import org.hisp.dhis.webapi.utils.WebMessageUtils;
 import org.hisp.dhis.webapi.webdomain.WebMetaData;
 import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,17 +71,16 @@ public class DataElementGroupController
     @RequestMapping( value = "/{uid}/operands", method = RequestMethod.GET )
     public String getOperands( @PathVariable( "uid" ) String uid,
         @RequestParam Map<String, String> parameters,
-        TranslateOptions translateOptions,
+        TranslateParams translateParams,
         Model model, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
         WebOptions options = new WebOptions( parameters );
         List<DataElementGroup> dataElementGroups = getEntity( uid );
-        translate( dataElementGroups, translateOptions );
+        translate( dataElementGroups, translateParams );
 
         if ( dataElementGroups.isEmpty() )
         {
-            ContextUtils.notFoundResponse( response, "DataElementGroup not found for uid: " + uid );
-            return null;
+            throw new WebMessageException( WebMessageUtils.notFound( "DataElementGroup not found for uid: " + uid ) );
         }
 
         WebMetaData metaData = new WebMetaData();
@@ -116,18 +116,17 @@ public class DataElementGroupController
     public String getOperandsByQuery( @PathVariable( "uid" ) String uid,
         @PathVariable( "q" ) String q,
         @RequestParam Map<String, String> parameters,
-        TranslateOptions translateOptions,
+        TranslateParams translateParams,
         Model model, HttpServletRequest request,
         HttpServletResponse response ) throws Exception
     {
         WebOptions options = new WebOptions( parameters );
         List<DataElementGroup> dataElementGroups = getEntity( uid );
-        translate( dataElementGroups, translateOptions );
+        translate( dataElementGroups, translateParams );
 
         if ( dataElementGroups.isEmpty() )
         {
-            ContextUtils.notFoundResponse( response, "DataElementGroup not found for uid: " + uid );
-            return null;
+            throw new WebMessageException( WebMessageUtils.notFound( "DataElementGroup not found for uid: " + uid ) );
         }
 
         WebMetaData metaData = new WebMetaData();

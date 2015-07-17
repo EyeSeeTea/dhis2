@@ -46,6 +46,7 @@ import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.dxf2.common.JacksonUtils;
+import org.hisp.dhis.dxf2.webmessage.WebMessageException;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
@@ -55,7 +56,7 @@ import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
 import org.hisp.dhis.webapi.utils.ContextUtils;
-import org.hisp.dhis.webapi.utils.InputUtils;
+import org.hisp.dhis.webapi.utils.WebMessageUtils;
 import org.hisp.dhis.webapi.webdomain.approval.Approval;
 import org.hisp.dhis.webapi.webdomain.approval.Approvals;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -124,9 +125,6 @@ public class DataApprovalController
     @Autowired
     private DataElementCategoryService categoryService;
 
-    @Autowired
-    private InputUtils inputUtils;
-
     // -------------------------------------------------------------------------
     // Get
     // -------------------------------------------------------------------------
@@ -136,7 +134,7 @@ public class DataApprovalController
         @RequestParam String ds,
         @RequestParam String pe,
         @RequestParam String ou, HttpServletResponse response )
-        throws IOException
+        throws IOException, WebMessageException
     {
         log.info( "GET " + APPROVALS_PATH + "?ds=" + ds + "&pe=" + pe + "&ou=" + ou );
 
@@ -144,24 +142,21 @@ public class DataApprovalController
 
         if ( dataSet == null )
         {
-            ContextUtils.conflictResponse( response, "Illegal data set identifier: " + ds );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Illegal data set identifier: " + ds ) );
         }
 
         Period period = PeriodType.getPeriodFromIsoString( pe );
 
         if ( period == null )
         {
-            ContextUtils.conflictResponse( response, "Illegal period identifier: " + pe );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Illegal period identifier: " + pe ) );
         }
 
         OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( ou );
 
         if ( organisationUnit == null )
         {
-            ContextUtils.conflictResponse( response, "Illegal organisation unit identifier: " + ou );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Illegal organisation unit identifier: " + ou ) );
         }
 
         DataElementCategoryOptionCombo combo = categoryService.getDefaultDataElementCategoryOptionCombo();
@@ -254,7 +249,7 @@ public class DataApprovalController
         @RequestParam Set<String> ds,
         @RequestParam String pe,
         @RequestParam( required = false ) String ou,
-        HttpServletResponse response ) throws IOException
+        HttpServletResponse response ) throws IOException, WebMessageException
     {
         Set<DataSet> dataSets = new HashSet<>( objectManager.getByUid( DataSet.class, ds ) );
 
@@ -262,8 +257,7 @@ public class DataApprovalController
 
         if ( period == null )
         {
-            ContextUtils.conflictResponse( response, "Illegal period identifier: " + pe );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Illegal period identifier: " + pe ) );
         }
 
         OrganisationUnit orgUnit = organisationUnitService.getOrganisationUnit( ou );
@@ -274,7 +268,7 @@ public class DataApprovalController
 
         for ( DataApprovalStatus status : statusList )
         {
-            Map<String, Object> item = new HashMap<String, Object>();
+            Map<String, Object> item = new HashMap<>();
 
             DataApproval approval = status.getDataApproval();
 
@@ -310,7 +304,7 @@ public class DataApprovalController
     public void saveApproval(
         @RequestParam String ds,
         @RequestParam String pe,
-        @RequestParam String ou, HttpServletResponse response )
+        @RequestParam String ou, HttpServletResponse response ) throws WebMessageException
     {
         log.info( "POST " + APPROVALS_PATH + "?ds=" + ds + "&pe=" + pe + "&ou=" + ou );
 
@@ -318,32 +312,28 @@ public class DataApprovalController
 
         if ( dataSet == null )
         {
-            ContextUtils.conflictResponse( response, "Illegal data set identifier: " + ds );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Illegal data set identifier: " + ds ) );
         }
 
         Period period = PeriodType.getPeriodFromIsoString( pe );
 
         if ( period == null )
         {
-            ContextUtils.conflictResponse( response, "Illegal period identifier: " + pe );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Illegal period identifier: " + pe ) );
         }
 
         OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( ou );
 
         if ( organisationUnit == null )
         {
-            ContextUtils.conflictResponse( response, "Illegal organisation unit identifier: " + ou );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Illegal organisation unit identifier: " + ou ) );
         }
 
         DataApprovalLevel dataApprovalLevel = dataApprovalLevelService.getHighestDataApprovalLevel( organisationUnit );
 
         if ( dataApprovalLevel == null )
         {
-            ContextUtils.conflictResponse( response, "Approval level not found." );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Approval level not found." ) );
         }
 
         User user = currentUserService.getCurrentUser();
@@ -356,11 +346,11 @@ public class DataApprovalController
 
     @RequestMapping( value = APPROVALS_PATH + "/approvals", method = RequestMethod.POST )
     public void saveApprovalBatch( @RequestBody Approvals approvals,
-        HttpServletRequest request, HttpServletResponse response )
+        HttpServletRequest request, HttpServletResponse response ) throws WebMessageException
     {
         if ( approvals.getDs() == null || approvals.getDs().isEmpty() || approvals.getPe() == null || approvals.getPe().isEmpty() )
         {
-            ContextUtils.conflictResponse( response, "Approval must have data sets and periods" );
+            throw new WebMessageException( WebMessageUtils.conflict( "Approval must have data sets and periods" ) );
         }
 
         dataApprovalService.approveData( getDataApprovalList( approvals ) );
@@ -368,11 +358,11 @@ public class DataApprovalController
 
     @RequestMapping( value = APPROVALS_PATH + "/unapprovals", method = RequestMethod.POST )
     public void removeApprovalBatch( @RequestBody Approvals approvals,
-        HttpServletRequest request, HttpServletResponse response )
+        HttpServletRequest request, HttpServletResponse response ) throws WebMessageException
     {
         if ( approvals.getDs() == null || approvals.getDs().isEmpty() || approvals.getPe() == null || approvals.getPe().isEmpty() )
         {
-            ContextUtils.conflictResponse( response, "Approval must have data sets and periods" );
+            throw new WebMessageException( WebMessageUtils.conflict( "Approval must have data sets and periods" ) );
         }
 
         dataApprovalService.unapproveData( getDataApprovalList( approvals ) );
@@ -381,7 +371,7 @@ public class DataApprovalController
     @PreAuthorize( "hasRole('ALL') or hasRole('F_APPROVE_DATA') or hasRole('F_APPROVE_DATA_LOWER_LEVELS')" )
     @RequestMapping( value = MULTIPLE_SAVE_RESOURCE_PATH, method = RequestMethod.POST )
     public void saveApprovalMultiple( @RequestBody DataApprovalStateRequests dataApprovalStateRequests,
-        HttpServletResponse response )
+        HttpServletResponse response ) throws WebMessageException
     {
         List<DataApproval> dataApprovalList = new ArrayList<>();
 
@@ -391,16 +381,14 @@ public class DataApprovalController
 
             if ( dataSet == null )
             {
-                ContextUtils.conflictResponse( response, "Illegal data set identifier: " + dataApprovalStateRequest.getDs() );
-                return;
+                throw new WebMessageException( WebMessageUtils.conflict( "Illegal data set identifier: " + dataApprovalStateRequest.getDs() ) );
             }
 
             Period period = PeriodType.getPeriodFromIsoString( dataApprovalStateRequest.getPe() );
 
             if ( period == null )
             {
-                ContextUtils.conflictResponse( response, "Illegal period identifier: " + dataApprovalStateRequest.getPe() );
-                return;
+                throw new WebMessageException( WebMessageUtils.conflict( "Illegal period identifier: " + dataApprovalStateRequest.getPe() ) );
             }
 
             OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit(
@@ -408,16 +396,14 @@ public class DataApprovalController
 
             if ( organisationUnit == null )
             {
-                ContextUtils.conflictResponse( response, "Illegal organisation unit identifier: " + dataApprovalStateRequest.getOu() );
-                return;
+                throw new WebMessageException( WebMessageUtils.conflict( "Illegal organisation unit identifier: " + dataApprovalStateRequest.getOu() ) );
             }
 
             DataApprovalLevel dataApprovalLevel = dataApprovalLevelService.getHighestDataApprovalLevel( organisationUnit );
 
             if ( dataApprovalLevel == null )
             {
-                ContextUtils.conflictResponse( response, "Approval level not found." );
-                return;
+                throw new WebMessageException( WebMessageUtils.conflict( "Approval level not found." ) );
             }
 
             User user = dataApprovalStateRequest.getAb() == null ?
@@ -442,7 +428,7 @@ public class DataApprovalController
     public void acceptApproval(
         @RequestParam String ds,
         @RequestParam String pe,
-        @RequestParam String ou, HttpServletResponse response )
+        @RequestParam String ou, HttpServletResponse response ) throws WebMessageException
     {
         log.info( "POST " + APPROVALS_PATH + ACCEPTANCES_PATH + "?ds=" + ds + "&pe=" + pe + "&ou=" + ou );
 
@@ -450,32 +436,28 @@ public class DataApprovalController
 
         if ( dataSet == null )
         {
-            ContextUtils.conflictResponse( response, "Illegal data set identifier: " + ds );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Illegal data set identifier: " + ds ) );
         }
 
         Period period = PeriodType.getPeriodFromIsoString( pe );
 
         if ( period == null )
         {
-            ContextUtils.conflictResponse( response, "Illegal period identifier: " + pe );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Illegal period identifier: " + pe ) );
         }
 
         OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( ou );
 
         if ( organisationUnit == null )
         {
-            ContextUtils.conflictResponse( response, "Illegal organisation unit identifier: " + ou );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Illegal organisation unit identifier: " + ou ) );
         }
 
         DataApprovalLevel dataApprovalLevel = dataApprovalLevelService.getHighestDataApprovalLevel( organisationUnit );
 
         if ( dataApprovalLevel == null )
         {
-            ContextUtils.conflictResponse( response, "Approval level not found." );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Approval level not found." ) );
         }
 
         User user = currentUserService.getCurrentUser();
@@ -488,11 +470,11 @@ public class DataApprovalController
 
     @RequestMapping( value = ACCEPTANCES_PATH + "/acceptances", method = RequestMethod.POST )
     public void saveAcceptanceBatch( @RequestBody Approvals approvals,
-        HttpServletRequest request, HttpServletResponse response )
+        HttpServletRequest request, HttpServletResponse response ) throws WebMessageException
     {
         if ( approvals.getDs() == null || approvals.getDs().isEmpty() || approvals.getPe() == null || approvals.getPe().isEmpty() )
         {
-            ContextUtils.conflictResponse( response, "Approval must have data sets and periods" );
+            throw new WebMessageException( WebMessageUtils.conflict( "Approval must have data sets and periods" ) );
         }
 
         dataApprovalService.acceptData( getDataApprovalList( approvals ) );
@@ -500,11 +482,11 @@ public class DataApprovalController
 
     @RequestMapping( value = ACCEPTANCES_PATH + "/unacceptances", method = RequestMethod.POST )
     public void removeAcceptancesBatch( @RequestBody Approvals approvals,
-        HttpServletRequest request, HttpServletResponse response )
+        HttpServletRequest request, HttpServletResponse response ) throws WebMessageException
     {
         if ( approvals.getDs() == null || approvals.getDs().isEmpty() || approvals.getPe() == null || approvals.getPe().isEmpty() )
         {
-            ContextUtils.conflictResponse( response, "Approval must have data sets and periods" );
+            throw new WebMessageException( WebMessageUtils.conflict( "Approval must have data sets and periods" ) );
         }
 
         dataApprovalService.unacceptData( getDataApprovalList( approvals ) );
@@ -513,7 +495,7 @@ public class DataApprovalController
     @PreAuthorize( "hasRole('ALL') or hasRole('F_ACCEPT_DATA_LOWER_LEVELS')" )
     @RequestMapping( value = MULTIPLE_ACCEPTANCES_RESOURCE_PATH, method = RequestMethod.POST )
     public void acceptApprovalMultiple( @RequestBody DataApprovalStateRequests dataApprovalStateRequests,
-        HttpServletResponse response )
+        HttpServletResponse response ) throws WebMessageException
     {
         List<DataApproval> dataApprovalList = new ArrayList<>();
 
@@ -523,16 +505,14 @@ public class DataApprovalController
 
             if ( dataSet == null )
             {
-                ContextUtils.conflictResponse( response, "Illegal data set identifier: " + dataApprovalStateRequest.getDs() );
-                return;
+                throw new WebMessageException( WebMessageUtils.conflict( "Illegal data set identifier: " + dataApprovalStateRequest.getDs() ) );
             }
 
             Period period = PeriodType.getPeriodFromIsoString( dataApprovalStateRequest.getPe() );
 
             if ( period == null )
             {
-                ContextUtils.conflictResponse( response, "Illegal period identifier: " + dataApprovalStateRequest.getPe() );
-                return;
+                throw new WebMessageException( WebMessageUtils.conflict( "Illegal period identifier: " + dataApprovalStateRequest.getPe() ) );
             }
 
             OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit(
@@ -540,16 +520,14 @@ public class DataApprovalController
 
             if ( organisationUnit == null )
             {
-                ContextUtils.conflictResponse( response, "Illegal organisation unit identifier: " + dataApprovalStateRequest.getOu() );
-                return;
+                throw new WebMessageException( WebMessageUtils.conflict( "Illegal organisation unit identifier: " + dataApprovalStateRequest.getOu() ) );
             }
 
             DataApprovalLevel dataApprovalLevel = dataApprovalLevelService.getHighestDataApprovalLevel( organisationUnit );
 
             if ( dataApprovalLevel == null )
             {
-                ContextUtils.conflictResponse( response, "Approval level not found." );
-                return;
+                throw new WebMessageException( WebMessageUtils.conflict( "Approval level not found." ) );
             }
 
             User user = dataApprovalStateRequest.getAb() == null ?
@@ -573,7 +551,7 @@ public class DataApprovalController
     public void removeApproval(
         @RequestParam Set<String> ds,
         @RequestParam String pe,
-        @RequestParam String ou, HttpServletResponse response )
+        @RequestParam String ou, HttpServletResponse response ) throws WebMessageException
     {
         log.info( "DELETE " + APPROVALS_PATH + "?ds=" + ds + "&pe=" + pe + "&ou=" + ou );
 
@@ -581,32 +559,28 @@ public class DataApprovalController
 
         if ( dataSets.size() != ds.size() )
         {
-            ContextUtils.conflictResponse( response, "Illegal data set identifier in this list: " + ds );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Illegal data set identifier in this list: " + ds ) );
         }
 
         Period period = PeriodType.getPeriodFromIsoString( pe );
 
         if ( period == null )
         {
-            ContextUtils.conflictResponse( response, "Illegal period identifier: " + pe );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Illegal period identifier: " + pe ) );
         }
 
         OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( ou );
 
         if ( organisationUnit == null )
         {
-            ContextUtils.conflictResponse( response, "Illegal organisation unit identifier: " + ou );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Illegal organisation unit identifier: " + ou ) );
         }
 
         DataApprovalLevel dataApprovalLevel = dataApprovalLevelService.getHighestDataApprovalLevel( organisationUnit );
 
         if ( dataApprovalLevel == null )
         {
-            ContextUtils.conflictResponse( response, "Approval level not found." );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Approval level not found." ) );
         }
 
         User user = currentUserService.getCurrentUser();
@@ -627,7 +601,7 @@ public class DataApprovalController
     public void unacceptApproval(
         @RequestParam String ds,
         @RequestParam String pe,
-        @RequestParam String ou, HttpServletResponse response )
+        @RequestParam String ou, HttpServletResponse response ) throws WebMessageException
     {
         log.info( "DELETE " + APPROVALS_PATH + ACCEPTANCES_PATH + "?ds=" + ds + "&pe=" + pe + "&ou=" + ou );
 
@@ -635,32 +609,28 @@ public class DataApprovalController
 
         if ( dataSet == null )
         {
-            ContextUtils.conflictResponse( response, "Illegal data set identifier: " + ds );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Illegal data set identifier: " + ds ) );
         }
 
         Period period = PeriodType.getPeriodFromIsoString( pe );
 
         if ( period == null )
         {
-            ContextUtils.conflictResponse( response, "Illegal period identifier: " + pe );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Illegal period identifier: " + pe ) );
         }
 
         OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( ou );
 
         if ( organisationUnit == null )
         {
-            ContextUtils.conflictResponse( response, "Illegal organisation unit identifier: " + ou );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Illegal organisation unit identifier: " + ou ) );
         }
 
         DataApprovalLevel dataApprovalLevel = dataApprovalLevelService.getHighestDataApprovalLevel( organisationUnit );
 
         if ( dataApprovalLevel == null )
         {
-            ContextUtils.conflictResponse( response, "Approval level not found." );
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Approval level not found." ) );
         }
 
         User user = currentUserService.getCurrentUser();

@@ -28,27 +28,18 @@ package org.hisp.dhis.organisationunit.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
+import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.common.AuditLogUtil;
 import org.hisp.dhis.common.SetMap;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.hisp.dhis.dbms.DbmsManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitHierarchy;
@@ -59,6 +50,17 @@ import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.security.access.AccessDeniedException;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Kristian Nordal
@@ -71,6 +73,9 @@ public class HibernateOrganisationUnitStore
 
     @Autowired
     private CurrentUserService currentUserService;
+
+    @Autowired
+    private DbmsManager dbmsManager;
 
     // -------------------------------------------------------------------------
     // OrganisationUnit
@@ -121,7 +126,7 @@ public class HibernateOrganisationUnitStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<OrganisationUnit> getAllOrganisationUnitsByStatus( boolean active )
     {
         Query query = getQuery( "from OrganisationUnit o where o.active is :active" );
@@ -137,7 +142,7 @@ public class HibernateOrganisationUnitStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<OrganisationUnit> getAllOrganisationUnitsByStatusLastUpdated( boolean active, Date lastUpdated )
     {
         return getCriteria().add( Restrictions.ge( "lastUpdated", lastUpdated ) ).add( Restrictions.eq( "active", active ) ).list();
@@ -150,21 +155,21 @@ public class HibernateOrganisationUnitStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<OrganisationUnit> getRootOrganisationUnits()
     {
         return getQuery( "from OrganisationUnit o where o.parent is null" ).list();
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<OrganisationUnit> getOrganisationUnitsWithoutGroups()
     {
         return getQuery( "from OrganisationUnit o where o.groups.size = 0" ).list();
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<OrganisationUnit> getOrganisationUnitsByNameAndGroups( String query,
         Collection<OrganisationUnitGroup> groups, boolean limit )
     {
@@ -227,7 +232,7 @@ public class HibernateOrganisationUnitStore
             "left join organisationunit ou on ou.organisationunitid=d.sourceid " +
             "left join dataset ds on ds.datasetid=d.datasetid";
 
-        final SetMap<String, String> map = new SetMap<>();        
+        final SetMap<String, String> map = new SetMap<>();
 
         jdbcTemplate.query( sql, new RowCallbackHandler()
         {
@@ -264,7 +269,7 @@ public class HibernateOrganisationUnitStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<OrganisationUnit> getBetweenByStatus( boolean status, int first, int max )
     {
         Criteria criteria = getCriteria().add( Restrictions.eq( "active", status ) );
@@ -275,7 +280,7 @@ public class HibernateOrganisationUnitStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<OrganisationUnit> getBetweenByLastUpdated( Date lastUpdated, int first, int max )
     {
         Criteria criteria = getCriteria().add( Restrictions.ge( "lastUpdated", lastUpdated ) );
@@ -286,7 +291,7 @@ public class HibernateOrganisationUnitStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<OrganisationUnit> getBetweenByStatusLastUpdated( boolean status, Date lastUpdated, int first, int max )
     {
         Criteria criteria = getCriteria().add( Restrictions.ge( "lastUpdated", lastUpdated ) ).add( Restrictions.eq( "active", status ) );
@@ -297,16 +302,16 @@ public class HibernateOrganisationUnitStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<OrganisationUnit> getWithinCoordinateArea( double[] box )
     {
         return getQuery( "from OrganisationUnit o"
-            + " where o.featureType='Point'"
-            + " and o.coordinates is not null"
-            + " and CAST( SUBSTRING(o.coordinates, 2, LOCATE(',', o.coordinates) - 2) AS big_decimal ) >= " + box[3]
-            + " and CAST( SUBSTRING(o.coordinates, 2, LOCATE(',', o.coordinates) - 2) AS big_decimal ) <= " + box[1]
-            + " and CAST( SUBSTRING(coordinates, LOCATE(',', o.coordinates) + 1, LOCATE(']', o.coordinates) - LOCATE(',', o.coordinates) - 1 ) AS big_decimal ) >= " + box[2]
-            + " and CAST( SUBSTRING(coordinates, LOCATE(',', o.coordinates) + 1, LOCATE(']', o.coordinates) - LOCATE(',', o.coordinates) - 1 ) AS big_decimal ) <= " + box[0]
+                + " where o.featureType='Point'"
+                + " and o.coordinates is not null"
+                + " and CAST( SUBSTRING(o.coordinates, 2, LOCATE(',', o.coordinates) - 2) AS big_decimal ) >= " + box[3]
+                + " and CAST( SUBSTRING(o.coordinates, 2, LOCATE(',', o.coordinates) - 2) AS big_decimal ) <= " + box[1]
+                + " and CAST( SUBSTRING(coordinates, LOCATE(',', o.coordinates) + 1, LOCATE(']', o.coordinates) - LOCATE(',', o.coordinates) - 1 ) AS big_decimal ) >= " + box[2]
+                + " and CAST( SUBSTRING(coordinates, LOCATE(',', o.coordinates) + 1, LOCATE(']', o.coordinates) - LOCATE(',', o.coordinates) - 1 ) AS big_decimal ) <= " + box[0]
         ).list();
     }
 
@@ -331,5 +336,49 @@ public class HibernateOrganisationUnitStore
             + now + "' " + "where organisationunitid=" + organisationUnitId;
 
         jdbcTemplate.execute( sql );
+    }
+
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public void updatePaths()
+    {
+        List<OrganisationUnit> organisationUnits = new ArrayList<>( getQuery( "from OrganisationUnit ou where ou.path IS NULL" ).list() );
+        Session session = sessionFactory.getCurrentSession();
+        int counter = 0;
+
+        // use SF directly since we don't need to check for access etc here, just a simple update with no changes (so that path gets re-generated)
+        for ( OrganisationUnit organisationUnit : organisationUnits )
+        {
+            session.update( organisationUnit );
+
+            if ( (counter % 400) == 0 )
+            {
+                dbmsManager.clearSession();
+            }
+
+            counter++;
+        }
+    }
+
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public void forceUpdatePaths()
+    {
+        List<OrganisationUnit> organisationUnits = new ArrayList<>( getQuery( "from OrganisationUnit" ).list() );
+        Session session = sessionFactory.getCurrentSession();
+        int counter = 0;
+
+        // use SF directly since we don't need to check for access etc here, just a simple update with no changes (so that path gets re-generated)
+        for ( OrganisationUnit organisationUnit : organisationUnits )
+        {
+            session.update( organisationUnit );
+
+            if ( (counter % 400) == 0 )
+            {
+                dbmsManager.clearSession();
+            }
+
+            counter++;
+        }
     }
 }

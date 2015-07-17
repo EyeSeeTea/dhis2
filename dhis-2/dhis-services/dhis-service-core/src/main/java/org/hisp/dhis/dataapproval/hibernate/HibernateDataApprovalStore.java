@@ -36,7 +36,7 @@ import static org.hisp.dhis.dataapproval.DataApprovalState.UNAPPROVED_ABOVE;
 import static org.hisp.dhis.dataapproval.DataApprovalState.UNAPPROVED_READY;
 import static org.hisp.dhis.dataapproval.DataApprovalState.UNAPPROVED_WAITING;
 import static org.hisp.dhis.setting.SystemSettingManager.KEY_ACCEPTANCE_REQUIRED_FOR_APPROVAL;
-import static org.hisp.dhis.commons.util.ConversionUtils.getIdentifiers;
+import static org.hisp.dhis.common.IdentifiableObjectUtils.getIdentifiers;
 import static org.hisp.dhis.commons.util.TextUtils.getCommaDelimitedString;
 
 import java.util.ArrayList;
@@ -96,6 +96,7 @@ public class HibernateDataApprovalStore
 
     private JdbcTemplate jdbcTemplate;
 
+    @Override
     public void setJdbcTemplate( JdbcTemplate jdbcTemplate )
     {
         this.jdbcTemplate = jdbcTemplate;
@@ -110,6 +111,7 @@ public class HibernateDataApprovalStore
 
     private CurrentUserService currentUserService;
 
+    @Override
     public void setCurrentUserService( CurrentUserService currentUserService )
     {
         this.currentUserService = currentUserService;
@@ -244,7 +246,7 @@ public class HibernateDataApprovalStore
 
         DataElementCategoryCombo defaultCategoryCombo = categoryService.getDefaultDataElementCategoryCombo();
 
-        final String dataSetIds = getCommaDelimitedString( getIdentifiers( DataSet.class, validDataSets ) );
+        final String dataSetIds = getCommaDelimitedString( getIdentifiers( validDataSets ) );
 
         boolean isDefaultCombo = categoryService.getDefaultDataElementCategoryOptionCombo().equals( attributeOptionCombo );
 
@@ -453,6 +455,7 @@ public class HibernateDataApprovalStore
 
             DataElementCategoryOptionCombo optionCombo = ( aoc == null || aoc == 0 ? null : optionComboCache.get( aoc, new Callable<DataElementCategoryOptionCombo>()
             {
+                @Override
                 public DataElementCategoryOptionCombo call() throws ExecutionException
                 {
                     return categoryService.getDataElementCategoryOptionCombo( aoc );
@@ -461,6 +464,7 @@ public class HibernateDataApprovalStore
 
             OrganisationUnit ou = ( orgUnit != null ? orgUnit : orgUnitCache.get( ouId, new Callable<OrganisationUnit>()
             {
+                @Override
                 public OrganisationUnit call() throws ExecutionException
                 {
                     return organisationUnitService.getOrganisationUnit( ouId );

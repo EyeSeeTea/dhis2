@@ -36,8 +36,8 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.apache.commons.lang3.Validate;
-import org.hisp.dhis.acl.Access;
-import org.hisp.dhis.acl.AccessStringHelper;
+import org.hisp.dhis.security.acl.Access;
+import org.hisp.dhis.security.acl.AccessStringHelper;
 import org.hisp.dhis.common.annotation.Description;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.DimensionalView;
@@ -378,8 +378,8 @@ public class BaseIdentifiableObject
     public int hashCode()
     {
         int result = getUid() != null ? getUid().hashCode() : 0;
-        result = 31 * result + ( getCode() != null ? getCode().hashCode() : 0 );
-        result = 31 * result + ( getName() != null ? getName().hashCode() : 0 );
+        result = 31 * result + (getCode() != null ? getCode().hashCode() : 0);
+        result = 31 * result + (getName() != null ? getName().hashCode() : 0);
 
         return result;
     }
@@ -463,7 +463,7 @@ public class BaseIdentifiableObject
 
         publicAccess = AccessStringHelper.DEFAULT;
         externalAccess = false;
-        
+
         if ( userGroupAccesses != null )
         {
             userGroupAccesses.clear();
@@ -500,7 +500,7 @@ public class BaseIdentifiableObject
     public static Map<String, Integer> getCodeMap( Collection<? extends BaseIdentifiableObject> objects )
     {
         Map<String, Integer> map = new HashMap<>();
-        
+
         for ( BaseIdentifiableObject object : objects )
         {
             String code = object.getCode();
@@ -508,7 +508,7 @@ public class BaseIdentifiableObject
 
             map.put( code, internalId );
         }
-        
+
         return map;
     }
 
@@ -521,7 +521,7 @@ public class BaseIdentifiableObject
     public static Map<String, Integer> getNameMap( Collection<? extends BaseIdentifiableObject> objects )
     {
         Map<String, Integer> map = new HashMap<>();
-        
+
         for ( BaseIdentifiableObject object : objects )
         {
             String name = object.getName();
@@ -529,7 +529,7 @@ public class BaseIdentifiableObject
 
             map.put( name, internalId );
         }
-        
+
         return map;
     }
 

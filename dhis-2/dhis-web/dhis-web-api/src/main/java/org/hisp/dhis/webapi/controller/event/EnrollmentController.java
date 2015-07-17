@@ -28,24 +28,27 @@ package org.hisp.dhis.webapi.controller.event;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.IdentifiableObjectManager;
+import com.google.common.collect.Lists;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.dxf2.common.JacksonUtils;
 import org.hisp.dhis.dxf2.events.enrollment.Enrollment;
 import org.hisp.dhis.dxf2.events.enrollment.EnrollmentService;
 import org.hisp.dhis.dxf2.events.enrollment.EnrollmentStatus;
-import org.hisp.dhis.dxf2.events.enrollment.Enrollments;
-import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
-import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstanceService;
+import org.hisp.dhis.dxf2.fieldfilter.FieldFilterService;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
 import org.hisp.dhis.importexport.ImportStrategy;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.program.Program;
+import org.hisp.dhis.node.NodeUtils;
+import org.hisp.dhis.node.types.RootNode;
+import org.hisp.dhis.program.ProgramInstanceQueryParams;
+import org.hisp.dhis.program.ProgramInstanceService;
+import org.hisp.dhis.program.ProgramStatus;
 import org.hisp.dhis.webapi.controller.exception.NotFoundException;
+import org.hisp.dhis.webapi.service.ContextService;
+import org.hisp.dhis.webapi.service.WebMessageService;
 import org.hisp.dhis.webapi.utils.ContextUtils;
+import org.hisp.dhis.webapi.utils.WebMessageUtils;
 import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -57,6 +60,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.http.HttpServletRequest;
@@ -66,6 +70,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -80,83 +85,56 @@ public class EnrollmentController
     private EnrollmentService enrollmentService;
 
     @Autowired
-    private TrackedEntityInstanceService trackedEntityInstanceService;
+    private ProgramInstanceService programInstanceService;
 
     @Autowired
-    private IdentifiableObjectManager manager;
+    protected FieldFilterService fieldFilterService;
 
     @Autowired
-    private OrganisationUnitService organisationUnitService;
+    protected ContextService contextService;
+
+    @Autowired
+    private WebMessageService webMessageService;
 
     // -------------------------------------------------------------------------
     // READ
     // -------------------------------------------------------------------------
 
     @RequestMapping( value = "", method = RequestMethod.GET )
-    public String getEnrollments(
-        @RequestParam( value = "orgUnit", required = false ) String orgUnitUid,
-        @RequestParam( value = "program", required = false ) String programUid,
-        @RequestParam( value = "trackedEntityInstance", required = false ) String trackedEntityInstanceUid,
-        @RequestParam( required = false ) Date startDate,
-        @RequestParam( required = false ) Date endDate,
+    public @ResponseBody RootNode getEnrollments(
+        @RequestParam( required = false ) String ou,
         @RequestParam( required = false ) OrganisationUnitSelectionMode ouMode,
-        @RequestParam( value = "status", required = false ) EnrollmentStatus status,
-        @RequestParam Map<String, String> parameters, Model model ) throws NotFoundException
+        @RequestParam( required = false ) String program,
+        @RequestParam( required = false ) ProgramStatus programStatus,
+        @RequestParam( required = false ) Boolean followUp,
+        @RequestParam( required = false ) Date lastUpdated,
+        @RequestParam( required = false ) Date programStartDate,
+        @RequestParam( required = false ) Date programEndDate,
+        @RequestParam( required = false ) String trackedEntity,
+        @RequestParam( required = false ) String trackedEntityInstance,
+        @RequestParam( required = false ) Integer page,
+        @RequestParam( required = false ) Integer pageSize,
+        @RequestParam( required = false ) boolean totalPages,
+        @RequestParam( required = false ) boolean skipPaging )
     {
-        WebOptions options = new WebOptions( parameters );
-        Enrollments enrollments;
+        List<String> fields = Lists.newArrayList( contextService.getParameterValues( "fields" ) );
 
-        if ( startDate != null && endDate != null && programUid != null && orgUnitUid != null && ouMode != null )
+        if ( fields.isEmpty() )
         {
-            OrganisationUnit organisationUnit = getOrganisationUnit( orgUnitUid );
-            List<OrganisationUnit> organisationUnits = getOrganisationUnits( organisationUnit, ouMode );
-
-            Program program = getProgram( programUid );
-
-            enrollments = status != null ?
-                enrollmentService.getEnrollments( program, status, organisationUnits, startDate, endDate ) :
-                enrollmentService.getEnrollments( program, organisationUnits, startDate, endDate );
-        }
-        else if ( orgUnitUid == null && programUid == null && trackedEntityInstanceUid == null )
-        {
-            enrollments = status != null ? enrollmentService.getEnrollments( status ) : enrollmentService.getEnrollments();
-        }
-        else if ( orgUnitUid != null && programUid != null )
-        {
-            OrganisationUnit organisationUnit = getOrganisationUnit( orgUnitUid );
-            Program program = getProgram( programUid );
-
-            enrollments = enrollmentService.getEnrollments( program, organisationUnit );
-        }
-        else if ( programUid != null && trackedEntityInstanceUid != null )
-        {
-            Program program = getProgram( programUid );
-            TrackedEntityInstance trackedEntityInstance = getTrackedEntityInstance( trackedEntityInstanceUid );
-
-            enrollments = status != null ? enrollmentService.getEnrollments( program, trackedEntityInstance, status )
-                : enrollmentService.getEnrollments( program, trackedEntityInstance );
-        }
-        else if ( orgUnitUid != null )
-        {
-            OrganisationUnit organisationUnit = getOrganisationUnit( orgUnitUid );
-            enrollments = status != null ? enrollmentService.getEnrollments( organisationUnit, status )
-                : enrollmentService.getEnrollments( organisationUnit );
-        }
-        else if ( programUid != null )
-        {
-            Program program = getProgram( programUid );
-            enrollments = status != null ? enrollmentService.getEnrollments( program, status ) : enrollmentService.getEnrollments( program );
-        }
-        else
-        {
-            TrackedEntityInstance trackedEntityInstance = getTrackedEntityInstance( trackedEntityInstanceUid );
-            enrollments = status != null ? enrollmentService.getEnrollments( trackedEntityInstance, status ) : enrollmentService.getEnrollments( trackedEntityInstance );
+            fields.add( "enrollment,created,lastUpdated,trackedEntity,trackedEntityInstance,program,status,orgUnit,dateOfEnrollment,dateOfIncident,followup" );
         }
 
-        model.addAttribute( "model", enrollments );
-        model.addAttribute( "viewClass", options.getViewClass( "basic" ) );
+        Set<String> orgUnits = ContextUtils.getQueryParamValues( ou );
+        ProgramInstanceQueryParams params = programInstanceService.getFromUrl( orgUnits, ouMode, lastUpdated, program, programStatus, programStartDate,
+            programEndDate, trackedEntity, trackedEntityInstance, followUp, page, pageSize, totalPages, skipPaging );
 
-        return "enrollments";
+        List<Enrollment> enrollments = new ArrayList<>( enrollmentService.getEnrollments(
+            programInstanceService.getProgramInstances( params ) ) );
+
+        RootNode rootNode = NodeUtils.createMetadata();
+        rootNode.addChild( fieldFilterService.filter( Enrollment.class, enrollments, fields ) );
+
+        return rootNode;
     }
 
     @RequestMapping( value = "/{id}", method = RequestMethod.GET )
@@ -197,7 +175,7 @@ public class EnrollmentController
                 response.setHeader( "Location", getResourcePath( request, importSummary ) );
             }
 
-            JacksonUtils.toXml( response.getOutputStream(), importSummary );
+            webMessageService.send( WebMessageUtils.importSummaries( importSummaries ), response, request );
         }
     }
 
@@ -223,7 +201,7 @@ public class EnrollmentController
                 response.setHeader( "Location", getResourcePath( request, importSummary ) );
             }
 
-            JacksonUtils.toJson( response.getOutputStream(), importSummary );
+            webMessageService.send( WebMessageUtils.importSummaries( importSummaries ), response, request );
         }
     }
 
@@ -236,9 +214,7 @@ public class EnrollmentController
     public void updateEnrollmentXml( @PathVariable String id, HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
         ImportSummary importSummary = enrollmentService.updateEnrollmentXml( id, request.getInputStream() );
-        response.setContentType( MediaType.APPLICATION_XML_VALUE );
-
-        JacksonUtils.toXml( response.getOutputStream(), importSummary );
+        webMessageService.send( WebMessageUtils.importSummary( importSummary ), response, request );
     }
 
     @RequestMapping( value = "/{id}", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
@@ -246,9 +222,7 @@ public class EnrollmentController
     public void updateEnrollmentJson( @PathVariable String id, HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
         ImportSummary importSummary = enrollmentService.updateEnrollmentJson( id, request.getInputStream() );
-        response.setContentType( MediaType.APPLICATION_JSON_VALUE );
-
-        JacksonUtils.toJson( response.getOutputStream(), importSummary );
+        webMessageService.send( WebMessageUtils.importSummary( importSummary ), response, request );
     }
 
     @RequestMapping( value = "/{id}/cancelled", method = RequestMethod.PUT )
@@ -300,63 +274,6 @@ public class EnrollmentController
         }
 
         return enrollment;
-    }
-
-    private TrackedEntityInstance getTrackedEntityInstance( String id ) throws NotFoundException
-    {
-        TrackedEntityInstance trackedEntityInstance = trackedEntityInstanceService.getTrackedEntityInstance( id );
-
-        if ( trackedEntityInstance == null )
-        {
-            throw new NotFoundException( "TrackedEntityInstance", id );
-        }
-
-        return trackedEntityInstance;
-    }
-
-    private OrganisationUnit getOrganisationUnit( String id ) throws NotFoundException
-    {
-        OrganisationUnit organisationUnit = manager.get( OrganisationUnit.class, id );
-
-        if ( organisationUnit == null )
-        {
-            throw new NotFoundException( "OrganisationUnit", id );
-        }
-
-        return organisationUnit;
-    }
-
-    private List<OrganisationUnit> getOrganisationUnits( OrganisationUnit rootOrganisationUnit, OrganisationUnitSelectionMode ouMode )
-    {
-        List<OrganisationUnit> organisationUnits = new ArrayList<>();
-
-        if ( OrganisationUnitSelectionMode.DESCENDANTS.equals( ouMode ) )
-        {
-            organisationUnits.addAll( organisationUnitService.getOrganisationUnitWithChildren( rootOrganisationUnit.getUid() ) );
-        }
-        else if ( OrganisationUnitSelectionMode.CHILDREN.equals( ouMode ) )
-        {
-            organisationUnits.add( rootOrganisationUnit );
-            organisationUnits.addAll( rootOrganisationUnit.getChildren() );
-        }
-        else // SELECTED
-        {
-            organisationUnits.add( rootOrganisationUnit );
-        }
-
-        return organisationUnits;
-    }
-
-    private Program getProgram( String id ) throws NotFoundException
-    {
-        Program program = manager.get( Program.class, id );
-
-        if ( program == null )
-        {
-            throw new NotFoundException( "Program", id );
-        }
-
-        return program;
     }
 
     private String getResourcePath( HttpServletRequest request, ImportSummary importSummary )

@@ -32,6 +32,7 @@ import java.util.Date;
 
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
+import org.joda.time.DateTime;
 
 /**
  * @author Lars Helge Overland
@@ -46,6 +47,7 @@ public enum ValueType
     BOOLEAN( Boolean.class ),
     TRUE_ONLY( Boolean.class ),
     DATE( Date.class ),
+    DATETIME( DateTime.class ),
     NUMBER( Double.class ),
     UNIT_INTERVAL( Double.class ),
     PERCENTAGE( Double.class ),
@@ -57,12 +59,12 @@ public enum ValueType
     
     private final Class<?> javaClass;
     
-    private ValueType()
+    ValueType()
     {
         this.javaClass = null;
     }
     
-    private ValueType( Class<?> javaClass )
+    ValueType( Class<?> javaClass )
     {
         this.javaClass = javaClass;
     }
@@ -132,6 +134,10 @@ public enum ValueType
         {
             return ValueType.DATE;
         }
+        else if ( DataElement.VALUE_TYPE_DATETIME.equals( dataElement.getType() ) )
+        {
+            return ValueType.DATETIME;
+        }
 
         return ValueType.TEXT; // Fall back
     }
@@ -142,7 +148,7 @@ public enum ValueType
      */
     public static ValueType getFromAttribute( TrackedEntityAttribute attribute )
     {
-        if ( TrackedEntityAttribute.TYPE_NUMBER.equals( attribute.getValueType() ) )
+        if ( TrackedEntityAttribute.TYPE_NUMBER.equals( attribute.getValueType() ) || DataElement.VALUE_TYPE_INT.equals( attribute.getValueType() ) )
         {
             return ValueType.NUMBER;
         }

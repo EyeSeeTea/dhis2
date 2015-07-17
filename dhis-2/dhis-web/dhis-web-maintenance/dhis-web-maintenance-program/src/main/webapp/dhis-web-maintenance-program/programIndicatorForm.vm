@@ -13,7 +13,7 @@
 		<div id="expression-tabs" style="width:670px">
 			<ul>
 				<li><a href="#expression-tab1">$i18n.getString("data_elements")</a></li>
-				#if($program.proprgramType=='with_registration')
+				#if($program.programType=='WITH_REGISTRATION')
 					<li><a href="#expression-tab2">$i18n.getString("attributes")</a></li>
 					<li><a href="#expression-tab3">$i18n.getString("variables")</a></li>
 				#end
@@ -43,7 +43,7 @@
 		      </table>
 			</div>
 			
-		#if($program.proprgramType=='with_registration')
+		#if($program.programType=='WITH_REGISTRATION')
 		
 			<div id="expression-tab2">
 				<table style="width:100%">
@@ -149,7 +149,7 @@
 	</tr>
 	<tr>
 		<td><div class="message message-info" style="margin-top:10px">The filter is applied to events and filters the data source used for the calculation of the indicator.
-			The filter must evaluate to either true or false.</div></td> 
+			The filter must evaluate to either true or false. Use single quotes for text values.</div></td> 
 	</tr>	
 	<tr>
 		<td>
