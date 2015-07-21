@@ -41,7 +41,7 @@ import org.springframework.http.HttpStatus;
  */
 @JacksonXmlRootElement( localName = "webMessage", namespace = DxfNamespaces.DXF_2_0 )
 @JsonPropertyOrder( {
-    "status", "code", "httpStatus", "httpStatusCode", "message", "devMessage", "response"
+    "httpStatus", "httpStatusCode", "status", "code", "message", "devMessage", "response"
 } )
 public class WebMessage
 {
@@ -109,17 +109,17 @@ public class WebMessage
 
     public boolean isOk()
     {
-        return WebMessageStatus.OK.equals( status );
+        return WebMessageStatus.OK == status;
     }
 
     public boolean isWarning()
     {
-        return WebMessageStatus.WARNING.equals( status );
+        return WebMessageStatus.WARNING == status;
     }
 
     public boolean isError()
     {
-        return WebMessageStatus.ERROR.equals( status );
+        return WebMessageStatus.ERROR == status;
     }
 
     // -------------------------------------------------------------------------

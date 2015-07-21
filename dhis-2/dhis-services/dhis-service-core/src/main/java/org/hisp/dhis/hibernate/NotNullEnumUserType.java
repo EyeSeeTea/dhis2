@@ -34,7 +34,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Enum UserType which never provides a null value to Hibernate.
+ * EnumUserType which never provides a null value to Hibernate.
  * On null values present in the database, the default value is substituted.
  *
  * Useful for extending existing schemas with enums and still being

@@ -37,6 +37,7 @@ import org.hisp.dhis.dxf2.common.ImportOptions;
 import org.hisp.dhis.dxf2.common.JacksonUtils;
 import org.hisp.dhis.dxf2.webmessage.WebMessageException;
 import org.hisp.dhis.hibernate.exception.DeleteAccessDeniedException;
+import org.hisp.dhis.hibernate.exception.UpdateAccessDeniedException;
 import org.hisp.dhis.schema.descriptors.DashboardItemSchemaDescriptor;
 import org.hisp.dhis.schema.descriptors.DashboardSchemaDescriptor;
 import org.hisp.dhis.webapi.utils.WebMessageUtils;
@@ -68,6 +69,10 @@ public class DashboardController
 {
     @Autowired
     private DashboardService dashboardService;
+
+    // -------------------------------------------------------------------------
+    // Dashboard
+    // -------------------------------------------------------------------------
 
     @RequestMapping( value = "/q/{query}", method = RequestMethod.GET )
     public String search( @PathVariable String query, @RequestParam( required = false ) Set<String> max,
@@ -103,6 +108,11 @@ public class DashboardController
             throw new WebMessageException( WebMessageUtils.notFound( "Dashboard does not exist: " + uid ) );
         }
 
+        if ( !aclService.canUpdate( currentUserService.getCurrentUser(), dashboard ) )
+        {
+            throw new UpdateAccessDeniedException( "You don't have the proper permissions to update this dashboard." );
+        }
+
         Dashboard newDashboard = JacksonUtils.fromJson( request.getInputStream(), Dashboard.class );
 
         dashboard.setName( newDashboard.getName() ); // TODO Name only for now
@@ -130,6 +140,10 @@ public class DashboardController
         dashboardService.deleteDashboard( objects.get( 0 ) );
     }
 
+    // -------------------------------------------------------------------------
+    // Dashboard items
+    // -------------------------------------------------------------------------
+
     @RequestMapping( value = "/{uid}/items", method = RequestMethod.POST, consumes = "application/json" )
     public void postJsonItem( @PathVariable String uid, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
@@ -138,6 +152,11 @@ public class DashboardController
         if ( dashboard == null )
         {
             throw new WebMessageException( WebMessageUtils.notFound( "Dashboard does not exist: " + uid ) );
+        }
+
+        if ( !aclService.canUpdate( currentUserService.getCurrentUser(), dashboard ) )
+        {
+            throw new UpdateAccessDeniedException( "You don't have the proper permissions to update this dashboard." );
         }
 
         DashboardItem item = JacksonUtils.fromJson( request.getInputStream(), DashboardItem.class );
@@ -156,6 +175,18 @@ public class DashboardController
     public void postJsonItemContent( HttpServletResponse response, HttpServletRequest request,
         @PathVariable String dashboardUid, @RequestParam String type, @RequestParam( "id" ) String contentUid ) throws Exception
     {
+        Dashboard dashboard = dashboardService.getDashboard( dashboardUid );
+
+        if ( dashboard == null )
+        {
+            throw new WebMessageException( WebMessageUtils.notFound( "Dashboard does not exist: " + dashboardUid) );
+        }
+
+        if ( !aclService.canUpdate( currentUserService.getCurrentUser(), dashboard ) )
+        {
+            throw new UpdateAccessDeniedException( "You don't have the proper permissions to update this dashboard." );
+        }
+
         DashboardItem item = dashboardService.addItemContent( dashboardUid, type, contentUid );
 
         if ( item == null )
@@ -180,6 +211,11 @@ public class DashboardController
             throw new WebMessageException( WebMessageUtils.notFound( "Dashboard does not exist: " + dashboardUid ) );
         }
 
+        if ( !aclService.canUpdate( currentUserService.getCurrentUser(), dashboard ) )
+        {
+            throw new UpdateAccessDeniedException( "You don't have the proper permissions to update this dashboard." );
+        }
+
         if ( dashboard.moveItem( itemUid, position ) )
         {
             dashboardService.updateDashboard( dashboard );
@@ -197,6 +233,11 @@ public class DashboardController
         if ( dashboard == null )
         {
             throw new WebMessageException( WebMessageUtils.notFound( "Dashboard does not exist: " + dashboardUid ) );
+        }
+
+        if ( !aclService.canUpdate( currentUserService.getCurrentUser(), dashboard ) )
+        {
+            throw new UpdateAccessDeniedException( "You don't have the proper permissions to update this dashboard." );
         }
 
         DashboardItem item = dashboardService.getDashboardItem( itemUid );
@@ -224,6 +265,11 @@ public class DashboardController
         if ( dashboard == null )
         {
             throw new WebMessageException( WebMessageUtils.notFound( "Dashboard does not exist: " + dashboardUid ) );
+        }
+
+        if ( !aclService.canUpdate( currentUserService.getCurrentUser(), dashboard ) )
+        {
+            throw new UpdateAccessDeniedException( "You don't have the proper permissions to update this dashboard." );
         }
 
         DashboardItem item = dashboard.getItemByUid( itemUid );

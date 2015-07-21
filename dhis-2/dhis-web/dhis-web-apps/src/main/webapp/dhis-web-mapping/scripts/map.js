@@ -2497,13 +2497,29 @@ Ext.onReady(function() {
 
                 // operand
                 if (Ext.isArray(response.mapViews)) {
-                    for (var i = 0, view; i < response.mapViews.length; i++) {
+                    for (var i = 0, view, objectName; i < response.mapViews.length; i++) {
                         view = response.mapViews[i];
+
+                        // TODO, TMP
+                        if (Ext.isArray(view.dataDimensionItems) && view.dataDimensionItems.length && Ext.isObject(view.dataDimensionItems[0])) {
+                            var item = view.dataDimensionItems[0];
+
+                            if (item.hasOwnProperty('dataElement')) {
+                                objectName = 'de';
+                            }
+                            else if (item.hasOwnProperty('dataSet')) {
+                                objectName = 'ds';
+                            }
+                            else {
+                                objectName = 'in';
+                            }
+                        }
 
                         if (view) {
                             if (Ext.isArray(view.columns) && view.columns.length) {
                                 for (var j = 0, dim; j < view.columns.length; j++) {
                                     dim = view.columns[j];
+                                    dim.objectName = objectName;
 
                                     if (Ext.isArray(dim.items) && dim.items.length) {
                                         for (var k = 0, item; k < dim.items.length; k++) {
@@ -3865,7 +3881,8 @@ Ext.onReady(function() {
 
             if (!view.legendSet) {
                 fn();
-            } else {
+            }
+            else {
                 var bounds = [],
                     colors = [],
                     names = [],
@@ -4775,6 +4792,10 @@ Ext.onReady(function() {
                     dimension.dimension = config.dimension;
                     dimension.items = config.items;
 
+                    if (config.objectName) {
+                        dimension.objectName = config.objectName;
+                    }
+
                     return Ext.clone(dimension);
                 }();
             };
@@ -4843,14 +4864,13 @@ Ext.onReady(function() {
                     for (var i = 0, dim; i < dimensions.length; i++) {
                         dim = dimensions[i];
 
-                        if (dim.dimension === dimConf.indicator.objectName ||
-                            dim.dimension === dimConf.dataElement.objectName ||
-                            dim.dimension === dimConf.operand.objectName ||
-                            dim.dimension === dimConf.dataSet.objectName) {
+                        if (dim.dimension === dimConf.data.objectName) {
                             dxDim = dim;
-                        } else if (dim.dimension === dimConf.period.objectName) {
+                        }
+                        else if (dim.dimension === dimConf.period.objectName) {
                             peDim = dim;
-                        } else if (dim.dimension === dimConf.organisationUnit.objectName) {
+                        }
+                        else if (dim.dimension === dimConf.organisationUnit.objectName) {
                             ouDim = dim;
                         }
                     }

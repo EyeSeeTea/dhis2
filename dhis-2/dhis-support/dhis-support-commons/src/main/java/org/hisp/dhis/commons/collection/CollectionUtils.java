@@ -43,6 +43,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * Utility methods for operations on various collections.
+ * 
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public class CollectionUtils
@@ -105,18 +107,6 @@ public class CollectionUtils
         Set<T> set1 = new HashSet<>( c1 );
         set1.retainAll( new HashSet<>( c2 ) );
         return set1;
-    }
-
-    /**
-     * Returns the Collection if it is not null or a new, empty Collection otherwise.
-     *
-     * @param collection the Collection.
-     * @param <T> the type.
-     * @return the given Collection or a new, empty Collection.
-     */
-    public static <T> Collection<T> emptyIfNull( Collection<T> collection )
-    {
-        return collection != null ? collection : new HashSet<T>();
     }
 
     /**

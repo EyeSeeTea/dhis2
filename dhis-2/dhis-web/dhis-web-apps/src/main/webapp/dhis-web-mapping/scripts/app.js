@@ -3025,7 +3025,7 @@ Ext.onReady( function() {
 										method: 'GET',
 										failure: function(r) {
                                             gis.olmap.mask.hide();
-                                            alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+                                            gis.alert(r);
 										},
 										success: function(r) {
 											var sharing = Ext.decode(r.responseText),
@@ -4271,9 +4271,7 @@ Ext.onReady( function() {
 							w.update(html);
 						},
 						failure: function(r) {
-							html += r.status + '\n' + r.statusText + '\n' + r.responseText;
-
-							w.update(html);
+							w.update(r.status + '\n' + r.statusText + '\n' + r.responseText);
 						},
                         callback: function() {
                             document.body.oncontextmenu = true;
@@ -7519,14 +7517,14 @@ Ext.onReady( function() {
 			listeners: {
 				select: function() {
 					var id = this.getValue(),
-						index = id.indexOf('#');
+						index = id.indexOf('.');
 
 					if (index !== -1) {
 						id = id.substr(0, index);
 					}
 
 					Ext.Ajax.request({
-						url: gis.init.contextPath + '/api/dataElements.json?fields=legendSet[id]&paging=false&filter=id:eq:' + this.getValue(),
+						url: gis.init.contextPath + '/api/dataElements.json?fields=legendSet[id]&paging=false&filter=id:eq:' + id,
 						success: function(r) {
 							var set = Ext.decode(r.responseText).dataElements[0].legendSet;
 
@@ -7555,12 +7553,12 @@ Ext.onReady( function() {
 
 		dataElementDetailLevel = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'gis-combo',
-			style: 'margin-left:2px',
+			style: 'margin-left:1px',
 			queryMode: 'local',
 			editable: false,
 			valueField: 'id',
 			displayField: 'text',
-			width: 65 - 2,
+			width: 65 - 1,
 			value: dimConf.dataElement.objectName,
 			onSelect: function() {
 				dataElementGroup.loadAvailable();
@@ -8481,7 +8479,8 @@ Ext.onReady( function() {
 				levels = [],
 				groups = [],
 				setLayerGui,
-				setWidgetGui;
+				setWidgetGui,
+                dataDim;
 
 			objectNameCmpMap[dimConf.indicator.objectName] = indicator;
 			objectNameCmpMap[dimConf.dataElement.objectName] = dataElement;
@@ -8499,16 +8498,16 @@ Ext.onReady( function() {
 				reset(true);
 
 				// Value type
-				valueType.setValue(vType);
-				valueTypeToggler(vType);
+				valueType.setValue(dxDim.objectName);
+				valueTypeToggler(dxDim.objectName);
 
-				if (vType === dimConf.dataElement.objectName) {
-					dataElementDetailLevel.setValue(dxDim.dimension);
-				}
+            if (dxDim.objectName === dimConf.dataElement.objectName) {
+                dataElementDetailLevel.setValue(dxDim.dimension);
+            }
 
 				// Data
-				objectNameCmpMap[dxDim.dimension].store.add(dxDim.items[0]);
-				objectNameCmpMap[dxDim.dimension].setValue(dxDim.items[0].id);
+				objectNameCmpMap[dxDim.objectName].store.add(dxDim.items[0]);
+				objectNameCmpMap[dxDim.objectName].setValue(dxDim.items[0].id);
 
 				// Period
 				period.store.add(gis.conf.period.relativePeriodRecordsMap[peDim.items[0].id] ? gis.conf.period.relativePeriodRecordsMap[peDim.items[0].id] : peDim.items[0]);
@@ -8602,7 +8601,8 @@ Ext.onReady( function() {
 
             if (objectNameCmpMap[vType].getValue()) {
                 view.columns = [{
-                    dimension: vType,
+                    dimension: 'dx',
+                    objectName: vType,
                     items: [{
                         id: objectNameCmpMap[vType].getValue()
                     }]
@@ -8638,7 +8638,9 @@ Ext.onReady( function() {
 				};
 			}
 
-			return gis.api.layout.Layout(view);
+            var v = gis.api.layout.Layout(view);
+
+			return v;
 		};
 
         accordionBody = Ext.create('Ext.panel.Panel', {

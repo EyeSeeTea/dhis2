@@ -137,6 +137,15 @@ public class ExpressionUtilsTest
     }
     
     @Test
+    public void testAsSql()
+    {
+        assertEquals( "2 > 1 and 3 < 4", ExpressionUtils.asSql( "2 > 1 && 3 < 4" ) );
+        assertEquals( "2 > 1 or 3 < 4", ExpressionUtils.asSql( "2 > 1 || 3 < 4" ) );
+        assertEquals( "'a' = 1", ExpressionUtils.asSql( "'a' == 1" ) );
+        assertEquals( "\"oZg33kd9taw\" = 'Female'", ExpressionUtils.asSql( "\"oZg33kd9taw\" == 'Female'" ) );
+    }
+        
+    @Test
     public void testIsValid()
     {
         Map<String, Object> vars = new HashMap<String, Object>();
@@ -147,9 +156,11 @@ public class ExpressionUtilsTest
         assertTrue( ExpressionUtils.isValid( "3 - v1", vars ) );
         assertTrue( ExpressionUtils.isValid( "d2:zing(1)", null ) );
         assertTrue( ExpressionUtils.isValid( "(d2:zing(1)+d2:zing(1))*50/1", null ) );
+        assertTrue( ExpressionUtils.isValid( "1/(1/100)", null ) );
         
         assertFalse( ExpressionUtils.isValid( "2 a 3", null ) );
         assertFalse( ExpressionUtils.isValid( "v2 + 3", vars ) );
         assertFalse( ExpressionUtils.isValid( "4 + abc", vars ) );
+        assertFalse( ExpressionUtils.isValid( "'goat' == goat", null ) );
     }
 }

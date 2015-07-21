@@ -1069,13 +1069,29 @@ Ext.onReady( function() {
 
                 // operand
                 if (Ext.isArray(r.mapViews)) {
-                    for (var i = 0, view; i < r.mapViews.length; i++) {
+                    for (var i = 0, view, objectName; i < r.mapViews.length; i++) {
                         view = r.mapViews[i];
+
+                        // TODO, TMP
+                        if (Ext.isArray(view.dataDimensionItems) && view.dataDimensionItems.length && Ext.isObject(view.dataDimensionItems[0])) {
+                            var item = view.dataDimensionItems[0];
+
+                            if (item.hasOwnProperty('dataElement')) {
+                                objectName = 'de';
+                            }
+                            else if (item.hasOwnProperty('dataSet')) {
+                                objectName = 'ds';
+                            }
+                            else {
+                                objectName = 'in';
+                            }
+                        }
 
                         if (view) {
                             if (Ext.isArray(view.columns) && view.columns.length) {
                                 for (var j = 0, dim; j < view.columns.length; j++) {
                                     dim = view.columns[j];
+                                    dim.objectName = objectName;
 
                                     if (Ext.isArray(dim.items) && dim.items.length) {
                                         for (var k = 0, item; k < dim.items.length; k++) {
@@ -1097,12 +1113,13 @@ Ext.onReady( function() {
             failure = function(r) {
                 gis.olmap.mask.hide();
 
-                if (Ext.Array.contains([403], r.status)) {
-                    alert(GIS.i18n.you_do_not_have_access_to_all_items_in_this_favorite);
+                r = Ext.decode(r.responseText);
+
+                if (Ext.Array.contains([403], parseInt(r.httpStatusCode))) {
+                    r.message = GIS.i18n.you_do_not_have_access_to_all_items_in_this_favorite || r.message;
                 }
-                else {
-                    alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
-                }
+
+                gis.alert(r);
             };
 
             if (isPlugin) {
@@ -1118,6 +1135,9 @@ Ext.onReady( function() {
                     url: url,
                     success: function(r) {
                         success(Ext.decode(r.responseText));
+                    },
+                    failure: function(r) {
+                        failure(r);
                     }
                 });
             }
@@ -1392,7 +1412,7 @@ Ext.onReady( function() {
 					url: gis.init.contextPath + '/api/analytics/events/query/' + view.program.id + '.json' + paramString,
 					disableCaching: false,
 					failure: function(r) {
-                        alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+                        gis.alert(r);
 					},
 					success: function(r) {
 						success(Ext.decode(r.responseText));
@@ -1718,7 +1738,10 @@ Ext.onReady( function() {
 
 			// Legend
 			gis.viewport.eastRegion.doLayout();
-			layer.legendPanel.expand();
+
+            if (layer.legendPanel) {
+                layer.legendPanel.expand();
+            }
 
 			// Layer
 			if (layer.item) {
@@ -2370,7 +2393,7 @@ Ext.onReady( function() {
 					url: gis.init.contextPath + '/api/analytics.json' + paramString,
 					disableCaching: false,
 					failure: function(r) {
-                        alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+                        gis.alert(r);
 					},
 					success: function(r) {
 						success(Ext.decode(r.responseText));
@@ -2448,7 +2471,7 @@ Ext.onReady( function() {
                     minSize: view.radiusLow,
                     maxSize: view.radiusHigh
                 };
-
+                
                 layer.core.view = view;
                 layer.core.colorInterpolation = colors;
                 layer.core.applyClassification(options);
@@ -2501,7 +2524,7 @@ Ext.onReady( function() {
                         'de': 'dataElements',
                         'ds': 'dataSets'
                     },
-                    elementUrl = elementMap[view.columns[0].dimension],
+                    elementUrl = elementMap[view.columns[0].objectName],
                     id = view.columns[0].items[0].id;
 
                 Ext.Ajax.request({
@@ -2528,7 +2551,10 @@ Ext.onReady( function() {
 
 			// Legend
 			gis.viewport.eastRegion.doLayout();
-			layer.legendPanel.expand();
+
+            if (layer.legendPanel) {
+                layer.legendPanel.expand();
+            }
 
 			// Layer
 			layer.setLayerOpacity(view.opacity);
@@ -2647,6 +2673,9 @@ Ext.onReady( function() {
 			store = {},
 			layers = [],
 			gis = {};
+
+        // tmp
+        gis.alert = function() {};
 
 		// conf
 		(function() {
@@ -3229,6 +3258,64 @@ Ext.onReady( function() {
                 return dataDimensions;
             };
 
+            util.message = {};
+
+            util.message.alert = function(obj) {
+                var config = {},
+                    type,
+                    window;
+
+                if (!obj || (Ext.isObject(obj) && !obj.message && !obj.responseText)) {
+                    return;
+                }
+
+                // if response object
+                if (Ext.isObject(obj) && obj.responseText && !obj.message) {
+                    obj = Ext.decode(obj.responseText);
+                }
+
+                // if string
+                if (Ext.isString(obj)) {
+                    obj = {
+                        status: 'ERROR',
+                        message: obj
+                    };
+                }
+
+                // web message
+                type = (obj.status || 'INFO').toLowerCase();
+
+				config.title = obj.status;
+				config.iconCls = 'gis-window-title-messagebox ' + type;
+
+                // html
+                config.html = '';
+                config.html += obj.httpStatusCode ? 'Code: ' + obj.httpStatusCode + '<br>' : '';
+                config.html += obj.httpStatus ? 'Status: ' + obj.httpStatus + '<br><br>' : '';
+                config.html += obj.message + (obj.message.substr(obj.message.length - 1) === '.' ? '' : '.');
+
+                // bodyStyle
+                config.bodyStyle = 'padding: 12px; background: #fff; max-width: 600px; max-height: ' + gis.viewport.centerRegion.getHeight() / 2 + 'px';
+
+                // destroy handler
+                config.modal = true;
+                config.destroyOnBlur = true;
+
+                // listeners
+                config.listeners = {
+                    show: function(w) {
+                        w.setPosition(w.getPosition()[0], w.getPosition()[1] / 2);
+
+						if (!w.hasDestroyOnBlurHandler) {
+							gis.util.gui.window.addDestroyOnBlurHandler(w);
+						}
+                    }
+                };
+
+                window = Ext.create('Ext.window.Window', config);
+
+                window.show();
+            };
 		}());
 
 		gis.init = init;
@@ -3313,6 +3400,10 @@ Ext.onReady( function() {
 					dimension.dimension = config.dimension;
 					dimension.items = config.items;
 
+                    if (config.objectName) {
+                        dimension.objectName = config.objectName;
+                    }
+
 					return Ext.clone(dimension);
 				}();
 			};
@@ -3381,10 +3472,7 @@ Ext.onReady( function() {
 					for (var i = 0, dim; i < dimensions.length; i++) {
 						dim = dimensions[i];
 
-						if (dim.dimension === dimConf.indicator.objectName ||
-							dim.dimension === dimConf.dataElement.objectName ||
-							dim.dimension === dimConf.operand.objectName ||
-							dim.dimension === dimConf.dataSet.objectName) {
+						if (dim.dimension === dimConf.data.objectName) {
 							dxDim = dim;
 						}
 						else if (dim.dimension === dimConf.period.objectName) {
@@ -3604,6 +3692,8 @@ Ext.onReady( function() {
 				}();
 			};
 		}());
+
+        gis.alert = util.message.alert;
 
 		gis.api = api;
 		gis.store = store;

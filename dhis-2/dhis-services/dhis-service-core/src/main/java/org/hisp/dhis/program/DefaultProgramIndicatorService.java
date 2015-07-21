@@ -47,6 +47,7 @@ import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.i18n.I18nService;
+import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.MathUtils;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
@@ -129,6 +130,13 @@ public class DefaultProgramIndicatorService
     public void setI18nService( I18nService service )
     {
         i18nService = service;
+    }
+    
+    private StatementBuilder statementBuilder;
+
+    public void setStatementBuilder( StatementBuilder statementBuilder )
+    {
+        this.statementBuilder = statementBuilder;
     }
 
     // -------------------------------------------------------------------------
@@ -276,7 +284,7 @@ public class DefaultProgramIndicatorService
 
         return result;
     }
-
+    
     @Override
     public String getExpressionDescription( String expression )
     {
@@ -359,6 +367,49 @@ public class DefaultProgramIndicatorService
     }
 
     @Override
+    public String getAnalyticsSQl( String expression )
+    {
+        if ( expression == null )
+        {
+            return null;
+        }
+        
+        StringBuffer buffer = new StringBuffer();
+
+        Matcher matcher = ProgramIndicator.EXPRESSION_PATTERN.matcher( expression );
+        
+        while ( matcher.find() )
+        {
+            String key = matcher.group( 1 );
+            String uid = statementBuilder.columnQuote( matcher.group( 2 ) );
+            
+            if ( ProgramIndicator.KEY_DATAELEMENT.equals( key ) )
+            {
+                String de = statementBuilder.columnQuote( matcher.group( 3 ) );
+                
+                matcher.appendReplacement( buffer, de );
+            }
+            else if ( ProgramIndicator.KEY_ATTRIBUTE.equals( key ) )
+            {
+                matcher.appendReplacement( buffer, uid );
+            }
+            else if ( ProgramIndicator.KEY_CONSTANT.equals( key ) )
+            {
+                Constant constant = constantService.getConstant( uid );
+                
+                if ( constant != null )
+                {
+                    matcher.appendReplacement( buffer, String.valueOf( constant.getValue() ) );
+                }
+            }
+        }
+        
+        matcher.appendTail( buffer );
+
+        return buffer.toString();
+    }
+    
+    @Override
     public String expressionIsValid( String expression )
     {
         String expr = getSubstitutedExpression( expression );
@@ -386,7 +437,12 @@ public class DefaultProgramIndicatorService
             return expr;
         }
         
-        return ExpressionUtils.isBoolean( expr, null ) ? ProgramIndicator.VALID : ProgramIndicator.FILTER_NOT_EVALUATING_TO_TRUE_OR_FALSE;
+        if ( !ExpressionUtils.isBoolean( expr, null ) )
+        {
+            return ProgramIndicator.FILTER_NOT_EVALUATING_TO_TRUE_OR_FALSE;
+        }
+        
+        return ProgramIndicator.VALID;
     }    
     
     /**
@@ -415,7 +471,9 @@ public class DefaultProgramIndicatorService
 
                 if ( programStage != null && dataElement != null )
                 {
-                    matcher.appendReplacement( expr, String.valueOf( 1 ) );
+                    String sample = dataElement.isNumericType() ? String.valueOf( 1 ) : "'A'";
+                    
+                    matcher.appendReplacement( expr, sample );
                 }
                 else
                 {
@@ -428,7 +486,9 @@ public class DefaultProgramIndicatorService
                 
                 if ( attribute != null )
                 {
-                    matcher.appendReplacement( expr, String.valueOf( 1 ) );
+                    String sample = attribute.isNumericType() ? String.valueOf( 1 ) : "'A'";
+                    
+                    matcher.appendReplacement( expr, sample );
                 }
                 else
                 {

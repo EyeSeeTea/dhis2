@@ -39,11 +39,15 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
+ * Utility class for expression language based on JEXL.
+ * 
  * @author Lars Helge Overland
  */
 public class ExpressionUtils
 {
     private static final JexlEngine JEXL = new JexlEngine();
+    
+    private static final Map<String, String> EL_SQL_MAP = new HashMap<>();
 
     private static final Pattern NUMERIC_PATTERN = Pattern.compile( "^(-?0|-?[1-9]\\d*)(\\.\\d+)?(E(-)?\\d+)?$" );
     
@@ -56,6 +60,12 @@ public class ExpressionUtils
         JEXL.setCache( 512 );
         JEXL.setSilent( false );
         JEXL.setStrict( true );
+        
+        EL_SQL_MAP.put( "&&", "and" );
+        EL_SQL_MAP.put( "\\|\\|", "or" );
+        EL_SQL_MAP.put( "==", "=" );
+        
+        //TODO Add support for textual operators like eq, ne and lt
     }
     
     /**
@@ -71,7 +81,7 @@ public class ExpressionUtils
         Expression exp = JEXL.createExpression( expression );
         
         JexlContext context = vars != null ? new MapContext( vars ) : new MapContext();
-                
+        
         return exp.evaluate( context );
     }
 
@@ -133,7 +143,7 @@ public class ExpressionUtils
             return false;
         }
     }
-    
+
     /**
      * Indicates whether the given expression is valid, i.e. can be successfully
      * evaluated.
@@ -152,6 +162,11 @@ public class ExpressionUtils
         }
         catch ( JexlException ex )
         {
+            if ( ex.getMessage().contains( "divide error" ) )
+            {
+                return true; //TODO Masking bug in Jexl, fix
+            }
+            
             return false;
         }
     }
@@ -165,5 +180,26 @@ public class ExpressionUtils
     public static boolean isNumeric( String value )
     {
         return NUMERIC_PATTERN.matcher( value ).matches();
+    }
+    
+    /**
+     * Converts the given expression into a valid SQL clause.
+     * 
+     * @param expression the expression.
+     * @return an SQL clause.
+     */
+    public static String asSql( String expression )
+    {
+        if ( expression == null )
+        {
+            return null;
+        }
+        
+        for ( String key : EL_SQL_MAP.keySet() )
+        {
+            expression = expression.replaceAll( key, EL_SQL_MAP.get( key ) );
+        }
+        
+        return expression;
     }
 }
