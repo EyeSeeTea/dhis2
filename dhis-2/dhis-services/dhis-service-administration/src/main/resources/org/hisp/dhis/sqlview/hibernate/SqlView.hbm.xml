@@ -26,7 +26,12 @@
       </type>
     </property>
 
-    <property name="cacheStrategy" type="org.hisp.dhis.common.CacheStrategyUserType" column="cachestrategy" not-null="true" />
+    <property name="cacheStrategy" length="40">
+      <type name="org.hibernate.type.EnumType">
+        <param name="enumClass">org.hisp.dhis.common.cache.CacheStrategy</param>
+        <param name="type">12</param>
+      </type>
+    </property>
 
     <!-- Access properties -->
     <property name="externalAccess" />

@@ -29,6 +29,7 @@ package org.hisp.dhis.dataadmin.action.sqlview;
  */
 
 import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.common.cache.CacheStrategy;
 import org.hisp.dhis.sqlview.SqlView;
 import org.hisp.dhis.sqlview.SqlViewService;
 
@@ -76,6 +77,13 @@ public class UpdateSqlViewAction
         this.sqlquery = sqlquery;
     }
 
+    private String cacheStrategy;
+
+    public void setCacheStrategy( String cacheStrategy )
+    {
+        this.cacheStrategy = cacheStrategy;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -87,6 +95,7 @@ public class UpdateSqlViewAction
 
         sqlView.setDescription( description.replaceAll( "\\s+", " " ).trim() );
         sqlView.setSqlQuery( sqlquery );
+        sqlView.setCacheStrategy( Enum.valueOf( CacheStrategy.class, cacheStrategy ) );
 
         sqlViewService.updateSqlView( sqlView.cleanSqlQuery() );
 

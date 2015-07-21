@@ -237,7 +237,7 @@ public class Report
     @Override
     public CacheStrategy getCacheStrategy()
     {
-        return cacheStrategy;
+        return cacheStrategy != null ? cacheStrategy : CacheStrategy.RESPECT_SYSTEM_SETTING;
     }
 
     public void setCacheStrategy( CacheStrategy cacheStrategy )

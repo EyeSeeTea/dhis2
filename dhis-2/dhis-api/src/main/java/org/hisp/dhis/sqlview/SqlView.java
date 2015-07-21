@@ -242,6 +242,17 @@ public class SqlView
     }
 
     @Override
+    public CacheStrategy getCacheStrategy()
+    {
+        return cacheStrategy != null ? cacheStrategy : CacheStrategy.RESPECT_SYSTEM_SETTING;
+    }
+
+    public void setCacheStrategy( CacheStrategy cacheStrategy )
+    {
+        this.cacheStrategy = cacheStrategy;
+    }
+
+    @Override
     public void mergeWith( IdentifiableObject other, MergeStrategy strategy )
     {
         super.mergeWith( other, strategy );
@@ -255,24 +266,15 @@ public class SqlView
                 description = sqlView.getDescription();
                 sqlQuery = sqlView.getSqlQuery();
                 type = sqlView.getType();
+                cacheStrategy = sqlView.getCacheStrategy();
             }
             else if ( strategy.isMerge() )
             {
                 description = sqlView.getDescription() == null ? description : sqlView.getDescription();
                 sqlQuery = sqlView.getSqlQuery() == null ? sqlQuery : sqlView.getSqlQuery();
                 type = sqlView.getType() == null ? type : sqlView.getType();
+                cacheStrategy = sqlView.getCacheStrategy() == null ? cacheStrategy : sqlView.getCacheStrategy(); // TODO never null?
             }
         }
-    }
-
-    @Override
-    public CacheStrategy getCacheStrategy()
-    {
-        return cacheStrategy;
-    }
-
-    public void setCacheStrategy( CacheStrategy cacheStrategy )
-    {
-        this.cacheStrategy = cacheStrategy;
     }
 }
