@@ -225,11 +225,13 @@ public class Report
             {
                 designContent = report.getDesignContent();
                 reportTable = report.getReportTable();
+                cacheStrategy = report.getCacheStrategy();
             }
             else if ( strategy.isMerge() )
             {
                 designContent = report.getDesignContent() == null ? designContent : report.getDesignContent();
                 reportTable = report.getReportTable() == null ? reportTable : report.getReportTable();
+                cacheStrategy = report.getCacheStrategy() == null ? cacheStrategy : report.getCacheStrategy(); // TODO never null?
             }
         }
     }

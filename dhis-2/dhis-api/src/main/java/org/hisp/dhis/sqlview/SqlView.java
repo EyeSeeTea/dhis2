@@ -62,9 +62,11 @@ public class SqlView
 
     public static final Set<String> PROTECTED_TABLES = Sets.newHashSet( "users", "userinfo", 
         "trackedentityattribute", "trackedentityattributevalue" );
-    
+
     public static final Set<String> ILLEGAL_KEYWORDS = Sets.newHashSet( "delete", "alter", "update", 
         "create", "drop", "commit", "createdb", "createuser", "insert", "rename", "replace", "restore", "write" );
+
+    public static final CacheStrategy DEFAULT_CACHE_STRATEGY = CacheStrategy.RESPECT_SYSTEM_SETTING;
 
     private static final String CRITERIA_SEP = ":";
     private static final String REGEX_SEP = "|";

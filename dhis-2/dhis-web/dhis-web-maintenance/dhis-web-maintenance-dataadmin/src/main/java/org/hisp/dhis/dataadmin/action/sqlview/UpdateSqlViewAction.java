@@ -29,6 +29,7 @@ package org.hisp.dhis.dataadmin.action.sqlview;
  */
 
 import com.opensymphony.xwork2.Action;
+import org.apache.commons.lang3.EnumUtils;
 import org.hisp.dhis.common.cache.CacheStrategy;
 import org.hisp.dhis.sqlview.SqlView;
 import org.hisp.dhis.sqlview.SqlViewService;
@@ -95,7 +96,12 @@ public class UpdateSqlViewAction
 
         sqlView.setDescription( description.replaceAll( "\\s+", " " ).trim() );
         sqlView.setSqlQuery( sqlquery );
-        sqlView.setCacheStrategy( Enum.valueOf( CacheStrategy.class, cacheStrategy ) );
+
+        if ( cacheStrategy != null )
+        {
+            CacheStrategy strategy = EnumUtils.getEnum( CacheStrategy.class, cacheStrategy );
+            sqlView.setCacheStrategy( strategy != null ? strategy : CacheStrategy.RESPECT_SYSTEM_SETTING );
+        }
 
         sqlViewService.updateSqlView( sqlView.cleanSqlQuery() );
 

@@ -101,6 +101,24 @@
 			<input type="button" value="$i18n.getString( 'cancel' )" style="width:10em" onclick="window.location.href='displayViewReportForm.action'" />
 		</td>
 	</tr>
+
+	<tr>
+		<th colspan="2">$i18n.getString( "settings" )</th>
+	</tr>
+	<tr>
+		<td>
+			<label for="cacheStrategy">$i18n.getString( "cache_strategy" )</label>
+		</td>
+		<td>
+			<select id="cacheStrategy" name="cacheStrategy">
+				<option value="RESPECT_SYSTEM_SETTING" #if( $!report.cacheStrategy.name() == "RESPECT_SYSTEM_SETTING" ) selected="selected" #end>$i18n.getString( "respect_system_setting" )</option>
+				<option value="NO_CACHE" #if( $!report.cacheStrategy.name() == "NO_CACHE" ) selected="selected" #end>$i18n.getString( "no_cache" )</option>
+                <option value="CACHE_1_HOUR" #if( $!report.cacheStrategy.name() == "CACHE_1_HOUR" ) selected="selected" #end>$i18n.getString( "cache_for_1_hour" )</option>
+				<option value="CACHE_6AM_TOMORROW" #if( $!report.cacheStrategy.name() == "CACHE_6AM_TOMORROW" ) selected="selected" #end>$i18n.getString( "cache_until_6am_tomorrow" )</option>
+				<option value="CACHE_TWO_WEEKS" #if( $!report.cacheStrategy.name() == "CACHE_TWO_WEEKS" ) selected="selected" #end>$i18n.getString( "cache_for_two_weeks" )</option>
+			</select>
+		</td>
+	</tr>
 </table>
 	
 </form>
