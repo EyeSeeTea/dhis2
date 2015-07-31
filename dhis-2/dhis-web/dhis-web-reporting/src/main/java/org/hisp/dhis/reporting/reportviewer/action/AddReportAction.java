@@ -156,7 +156,7 @@ public class AddReportAction
 
     private String cacheStrategy;
 
-    private void setCacheStrategy( String cacheStrategy )
+    public void setCacheStrategy( String cacheStrategy )
     {
         this.cacheStrategy = cacheStrategy;
     }
@@ -181,7 +181,7 @@ public class AddReportAction
         throws Exception
     {
         // ---------------------------------------------------------------------
-        // New report or update existing one?
+        // New report or update existing object?
         // ---------------------------------------------------------------------
 
         boolean isNewReport = id == null;
