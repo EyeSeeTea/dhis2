@@ -29,11 +29,21 @@ package org.hisp.dhis.common.cache;
  */
 
 /**
+ * Inheritors of this interface gain the cacheStrategy property which allows
+ * specifically setting and persisting the CacheStrategy for that particular object.
+ * The chosen CacheStrategy should be honored on a per-object-basis for any Cacheable
+ * and will ultimately decide the cache parameters of any web request returning the object.
+ *
  * @author Halvdan Hoem Grelland
  */
 public interface Cacheable
 {
     CacheStrategy DEFAULT_CACHE_STRATEGY = CacheStrategy.RESPECT_SYSTEM_SETTING;
 
+    /**
+     * Returns the CacheStrategy for this Cacheable. Should never return null.
+     *
+     * @return the CacheStrategy of this object.
+     */
     CacheStrategy getCacheStrategy();
 }
