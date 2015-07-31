@@ -37,8 +37,7 @@ import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeStrategy;
-import org.hisp.dhis.common.cache.CacheStrategy;
-import org.hisp.dhis.common.cache.Cacheable;
+import org.hisp.dhis.common.cache.CacheableBaseIdentifiableObject;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.period.RelativePeriods;
@@ -50,8 +49,7 @@ import org.hisp.dhis.reporttable.ReportTable;
  */
 @JacksonXmlRootElement( localName = "report", namespace = DxfNamespaces.DXF_2_0 )
 public class Report
-    extends BaseIdentifiableObject
-    implements Cacheable
+    extends CacheableBaseIdentifiableObject
 {
     private static final long serialVersionUID = 7880117720157807526L;
 
@@ -70,8 +68,6 @@ public class Report
     private RelativePeriods relatives;
 
     private ReportParams reportParams;
-
-    private CacheStrategy cacheStrategy = DEFAULT_CACHE_STRATEGY;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -212,20 +208,6 @@ public class Report
         this.reportParams = reportParams;
     }
 
-    @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    @Override
-    public CacheStrategy getCacheStrategy()
-    {
-        return cacheStrategy;
-    }
-
-    public void setCacheStrategy( CacheStrategy cacheStrategy )
-    {
-        this.cacheStrategy = cacheStrategy;
-    }
-
     @Override
     public void mergeWith( IdentifiableObject other, MergeStrategy strategy )
     {
@@ -239,13 +221,12 @@ public class Report
             {
                 designContent = report.getDesignContent();
                 reportTable = report.getReportTable();
-                cacheStrategy = report.getCacheStrategy();
             }
             else if ( strategy.isMerge() )
             {
                 designContent = report.getDesignContent() == null ? designContent : report.getDesignContent();
                 reportTable = report.getReportTable() == null ? reportTable : report.getReportTable();
-                cacheStrategy = report.getCacheStrategy() == null ? cacheStrategy : report.getCacheStrategy();
+
             }
         }
     }
