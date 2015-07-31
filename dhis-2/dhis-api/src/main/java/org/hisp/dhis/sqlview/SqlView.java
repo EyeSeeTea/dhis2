@@ -66,8 +66,6 @@ public class SqlView
     public static final Set<String> ILLEGAL_KEYWORDS = Sets.newHashSet( "delete", "alter", "update", 
         "create", "drop", "commit", "createdb", "createuser", "insert", "rename", "replace", "restore", "write" );
 
-    public static final CacheStrategy DEFAULT_CACHE_STRATEGY = CacheStrategy.RESPECT_SYSTEM_SETTING;
-
     private static final String CRITERIA_SEP = ":";
     private static final String REGEX_SEP = "|";
     
@@ -81,7 +79,7 @@ public class SqlView
 
     private SqlViewType type;
 
-    private CacheStrategy cacheStrategy = CacheStrategy.RESPECT_SYSTEM_SETTING;
+    private CacheStrategy cacheStrategy = DEFAULT_CACHE_STRATEGY;
     
     // -------------------------------------------------------------------------
     // Constructors
@@ -243,10 +241,13 @@ public class SqlView
         this.type = type;
     }
 
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     @Override
     public CacheStrategy getCacheStrategy()
     {
-        return cacheStrategy != null ? cacheStrategy : CacheStrategy.RESPECT_SYSTEM_SETTING;
+        return cacheStrategy;
     }
 
     public void setCacheStrategy( CacheStrategy cacheStrategy )
@@ -275,7 +276,7 @@ public class SqlView
                 description = sqlView.getDescription() == null ? description : sqlView.getDescription();
                 sqlQuery = sqlView.getSqlQuery() == null ? sqlQuery : sqlView.getSqlQuery();
                 type = sqlView.getType() == null ? type : sqlView.getType();
-                cacheStrategy = sqlView.getCacheStrategy() == null ? cacheStrategy : sqlView.getCacheStrategy(); // TODO never null?
+                cacheStrategy = sqlView.getCacheStrategy() == null ? cacheStrategy : sqlView.getCacheStrategy();
             }
         }
     }

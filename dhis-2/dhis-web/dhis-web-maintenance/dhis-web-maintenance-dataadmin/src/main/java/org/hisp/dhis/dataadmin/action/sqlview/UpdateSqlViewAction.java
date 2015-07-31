@@ -100,7 +100,7 @@ public class UpdateSqlViewAction
         if ( cacheStrategy != null )
         {
             CacheStrategy strategy = EnumUtils.getEnum( CacheStrategy.class, cacheStrategy );
-            sqlView.setCacheStrategy( strategy != null ? strategy : CacheStrategy.RESPECT_SYSTEM_SETTING );
+            sqlView.setCacheStrategy( strategy != null ? strategy : SqlView.DEFAULT_CACHE_STRATEGY );
         }
 
         sqlViewService.updateSqlView( sqlView.cleanSqlQuery() );

@@ -238,7 +238,7 @@ public class AddReportAction
         if ( cacheStrategy != null )
         {
             CacheStrategy strategy = EnumUtils.getEnum( CacheStrategy.class, cacheStrategy );
-            report.setCacheStrategy( strategy != null ? strategy : CacheStrategy.RESPECT_SYSTEM_SETTING );
+            report.setCacheStrategy( strategy != null ? strategy : Report.DEFAULT_CACHE_STRATEGY );
         }
         else if ( isNewReport )
         {

@@ -46,7 +46,7 @@
 				<textarea type="text" id="sqlquery" name="sqlquery" style="width:80em;height:20em">$!encoder.htmlEncode( $!sqlViewObject.sqlQuery )</textarea>
 			</td>
 		</tr>
-        <tr>
+		<tr>
 			<td><label>$encoder.htmlEncode( $i18n.getString( "cache_strategy" ) )</label></td>
 			<td>
 			<select id="cacheStrategy" name="cacheStrategy">
@@ -66,6 +66,4 @@
 			</td>
 		</tr>
 	</table>
-
 </form>
-

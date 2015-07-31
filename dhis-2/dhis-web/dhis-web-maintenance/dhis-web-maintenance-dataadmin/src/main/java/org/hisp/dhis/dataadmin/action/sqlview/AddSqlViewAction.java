@@ -28,6 +28,7 @@ package org.hisp.dhis.dataadmin.action.sqlview;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.apache.commons.lang3.EnumUtils;
 import org.hisp.dhis.common.cache.CacheStrategy;
 import org.hisp.dhis.sqlview.SqlView;
 import org.hisp.dhis.sqlview.SqlViewService;
@@ -105,9 +106,10 @@ public class AddSqlViewAction
         sqlView.setSqlQuery( sqlquery );
         sqlView.setType( SqlViewType.valueOf( type ) );
 
-        if ( cacheStrategy!= null )
+        if ( cacheStrategy != null )
         {
-            sqlView.setCacheStrategy( Enum.valueOf( CacheStrategy.class, cacheStrategy ) );
+            CacheStrategy strategy = EnumUtils.getEnum( CacheStrategy.class, cacheStrategy );
+            sqlView.setCacheStrategy( strategy != null ? strategy : SqlView.DEFAULT_CACHE_STRATEGY );
         }
         else
         {

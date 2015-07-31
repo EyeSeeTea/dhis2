@@ -71,7 +71,7 @@ public class Report
 
     private ReportParams reportParams;
 
-    private CacheStrategy cacheStrategy = CacheStrategy.RESPECT_SYSTEM_SETTING;
+    private CacheStrategy cacheStrategy = DEFAULT_CACHE_STRATEGY;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -212,6 +212,20 @@ public class Report
         this.reportParams = reportParams;
     }
 
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @Override
+    public CacheStrategy getCacheStrategy()
+    {
+        return cacheStrategy;
+    }
+
+    public void setCacheStrategy( CacheStrategy cacheStrategy )
+    {
+        this.cacheStrategy = cacheStrategy;
+    }
+
     @Override
     public void mergeWith( IdentifiableObject other, MergeStrategy strategy )
     {
@@ -231,19 +245,8 @@ public class Report
             {
                 designContent = report.getDesignContent() == null ? designContent : report.getDesignContent();
                 reportTable = report.getReportTable() == null ? reportTable : report.getReportTable();
-                cacheStrategy = report.getCacheStrategy() == null ? cacheStrategy : report.getCacheStrategy(); // TODO never null?
+                cacheStrategy = report.getCacheStrategy() == null ? cacheStrategy : report.getCacheStrategy();
             }
         }
-    }
-
-    @Override
-    public CacheStrategy getCacheStrategy()
-    {
-        return cacheStrategy != null ? cacheStrategy : CacheStrategy.RESPECT_SYSTEM_SETTING;
-    }
-
-    public void setCacheStrategy( CacheStrategy cacheStrategy )
-    {
-        this.cacheStrategy = cacheStrategy;
     }
 }

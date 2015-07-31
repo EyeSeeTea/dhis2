@@ -33,5 +33,7 @@ package org.hisp.dhis.common.cache;
  */
 public interface Cacheable
 {
+    CacheStrategy DEFAULT_CACHE_STRATEGY = CacheStrategy.RESPECT_SYSTEM_SETTING;
+
     CacheStrategy getCacheStrategy();
 }
