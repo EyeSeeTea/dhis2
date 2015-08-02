@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.legend.LegendSet;
 import org.hisp.dhis.option.OptionSet;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
@@ -53,6 +54,8 @@ public class QueryItem
     
     private String valueType;
     
+    private AggregationType aggregationType;
+    
     private OptionSet optionSet;
 
     // -------------------------------------------------------------------------
@@ -64,18 +67,20 @@ public class QueryItem
         this.item = item;
     }
 
-    public QueryItem( NameableObject item, LegendSet legendSet, String valueType, OptionSet optionSet )
+    public QueryItem( NameableObject item, LegendSet legendSet, String valueType, AggregationType aggregationType, OptionSet optionSet )
     {
         this.item = item;
         this.legendSet = legendSet;
         this.valueType = valueType;
+        this.aggregationType = aggregationType;
         this.optionSet = optionSet;
     }
     
-    public QueryItem( NameableObject item, QueryOperator operator, String filter, String valueType, OptionSet optionSet )
+    public QueryItem( NameableObject item, QueryOperator operator, String filter, String valueType, AggregationType aggregationType, OptionSet optionSet )
     {
         this.item = item;
         this.valueType = valueType;
+        this.aggregationType = aggregationType;
         this.optionSet = optionSet;
         
         if ( operator != null && filter != null )
@@ -146,7 +151,7 @@ public class QueryItem
         
         for ( TrackedEntityAttribute attribute : attributes )
         {
-            queryItems.add( new QueryItem( attribute, attribute.getLegendSet(), attribute.getValueType(), attribute.hasOptionSet() ? attribute.getOptionSet() : null ) );
+            queryItems.add( new QueryItem( attribute, attribute.getLegendSet(), attribute.getValueType(), attribute.getAggregationType(), attribute.hasOptionSet() ? attribute.getOptionSet() : null ) );
         }
         
         return queryItems;
@@ -233,6 +238,16 @@ public class QueryItem
     public void setValueType( String valueType )
     {
         this.valueType = valueType;
+    }
+
+    public AggregationType getAggregationType()
+    {
+        return aggregationType;
+    }
+
+    public void setAggregationType( AggregationType aggregationType )
+    {
+        this.aggregationType = aggregationType;
     }
 
     public OptionSet getOptionSet()

@@ -152,28 +152,28 @@ public class EventQueryParams
         for ( NameableObject object : dataQueryParams.getProgramDataElements() )
         {
             DataElement element = (DataElement) object;            
-            QueryItem item = new QueryItem( element, element.getLegendSet(), element.getType(), element.getOptionSet() );
+            QueryItem item = new QueryItem( element, element.getLegendSet(), element.getType(), element.getAggregationType(), element.getOptionSet() );
             params.getItems().add( item );
         }
 
         for ( NameableObject object : dataQueryParams.getProgramAttributes() )
         {
             TrackedEntityAttribute element = (TrackedEntityAttribute) object;            
-            QueryItem item = new QueryItem( element, element.getLegendSet(), element.getValueType(), element.getOptionSet() );
+            QueryItem item = new QueryItem( element, element.getLegendSet(), element.getValueType(), element.getAggregationType(), element.getOptionSet() );
             params.getItems().add( item );
         }
 
         for ( NameableObject object : dataQueryParams.getFilterProgramDataElements() )
         {
             DataElement element = (DataElement) object;            
-            QueryItem item = new QueryItem( element, element.getLegendSet(), element.getType(), element.getOptionSet() );            
+            QueryItem item = new QueryItem( element, element.getLegendSet(), element.getType(), element.getAggregationType(), element.getOptionSet() );            
             params.getItemFilters().add( item );
         }
 
         for ( NameableObject object : dataQueryParams.getFilterProgramAttributes() )
         {
             TrackedEntityAttribute element = (TrackedEntityAttribute) object;            
-            QueryItem item = new QueryItem( element, element.getLegendSet(), element.getValueType(), element.getOptionSet() );            
+            QueryItem item = new QueryItem( element, element.getLegendSet(), element.getValueType(), element.getAggregationType(), element.getOptionSet() );            
             params.getItemFilters().add( item );
         }
 
@@ -286,11 +286,14 @@ public class EventQueryParams
         return optionSets;
     }
     
+    /**
+     * Indicates whether this query is of the given organisation unit mode.
+     */
     public boolean isOrganisationUnitMode( String mode )
     {
         return organisationUnitMode != null && organisationUnitMode.equalsIgnoreCase( mode );
     }
-    
+
     /**
      * Indicates whether any items or item filters are present.
      */
