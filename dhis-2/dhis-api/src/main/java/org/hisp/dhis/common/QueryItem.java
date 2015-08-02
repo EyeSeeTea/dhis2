@@ -46,7 +46,7 @@ import org.hisp.dhis.util.ObjectUtils;
  */
 public class QueryItem
 {
-    private NameableObject item;
+    private DimensionalObject item;
     
     private LegendSet legendSet;
 
@@ -62,12 +62,12 @@ public class QueryItem
     // Constructors
     // -------------------------------------------------------------------------
 
-    public QueryItem( NameableObject item )
+    public QueryItem( DimensionalObject item )
     {
         this.item = item;
     }
 
-    public QueryItem( NameableObject item, LegendSet legendSet, String valueType, AggregationType aggregationType, OptionSet optionSet )
+    public QueryItem( DimensionalObject item, LegendSet legendSet, String valueType, AggregationType aggregationType, OptionSet optionSet )
     {
         this.item = item;
         this.legendSet = legendSet;
@@ -76,7 +76,7 @@ public class QueryItem
         this.optionSet = optionSet;
     }
     
-    public QueryItem( NameableObject item, QueryOperator operator, String filter, String valueType, AggregationType aggregationType, OptionSet optionSet )
+    public QueryItem( DimensionalObject item, QueryOperator operator, String filter, String valueType, AggregationType aggregationType, OptionSet optionSet )
     {
         this.item = item;
         this.valueType = valueType;
@@ -200,12 +200,12 @@ public class QueryItem
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    public NameableObject getItem()
+    public DimensionalObject getItem()
     {
         return item;
     }
 
-    public void setItem( NameableObject item )
+    public void setItem( DimensionalObject item )
     {
         this.item = item;
     }

@@ -518,6 +518,7 @@ public class DataElement
         return legendSet != null;
     }
 
+    @Override
     public AggregationType getAggregationType()
     {
         return aggregationOperator != null ? AggregationType.fromValue( aggregationOperator ) : null;

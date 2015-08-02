@@ -697,7 +697,7 @@ public class DefaultEventAnalyticsService
         throw new IllegalQueryException( "Item identifier does not reference any data element or attribute part of the program: " + item );
     }
     
-    private NameableObject getValueDimension( String value )
+    private DimensionalObject getValueDimension( String value )
     {
         if ( value == null )
         {

@@ -37,6 +37,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.analytics.EventOutputType;
 import org.hisp.dhis.analytics.Partitions;
@@ -69,7 +70,7 @@ public class EventQueryParams
     
     private String filter;
     
-    private NameableObject value;
+    private DimensionalObject value;
     
     private List<String> asc = new ArrayList<>();
     
@@ -285,6 +286,36 @@ public class EventQueryParams
         
         return optionSets;
     }
+
+    /**
+     * Returns the aggregation type for this query, first by looking at the
+     * aggregation type of the query, second by looking at the aggregation type
+     * of the value dimension.
+     */
+    public AggregationType getAggregationTypeFallback()
+    {
+        if ( hasAggregationType() )
+        {
+            return aggregationType;
+        }
+        else if ( hasValueDimension() )
+        {
+            return value.getAggregationType();
+        }
+        
+        return null;
+    }
+
+    /**
+     * Indicates whether this object is of the given aggregation type. Based on
+     * {@link getAggregationTypeFallback}.
+     */
+    @Override
+    public boolean isAggregationType( AggregationType aggregationType )
+    {
+        AggregationType type = getAggregationTypeFallback();
+        return type != null && type.equals( aggregationType );
+    }    
     
     /**
      * Indicates whether this query is of the given organisation unit mode.
@@ -302,6 +333,9 @@ public class EventQueryParams
         return !items.isEmpty() || !itemFilters.isEmpty();
     }
 
+    /**
+     * Indicates whether this query has a start and end date.
+     */
     public boolean hasStartEndDate()
     {
         return startDate != null && endDate != null;
@@ -448,12 +482,12 @@ public class EventQueryParams
         this.filter = filter;
     }
 
-    public NameableObject getValue()
+    public DimensionalObject getValue()
     {
         return value;
     }
 
-    public void setValue( NameableObject value )
+    public void setValue( DimensionalObject value )
     {
         this.value = value;
     }
