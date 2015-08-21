@@ -271,11 +271,10 @@ public class DefaultEventQueryPlanner
                 queries.add( query );
             }
             
-            for ( NameableObject programIndicator : params.getProgramIndicators() )
+            for ( ProgramIndicator programIndicator : params.getItemProgramIndicators() )
             {
                 EventQueryParams query = params.instance();
-                query.removeDimension( DimensionalObject.DATA_X_DIM_ID );
-                query.setProgramIndicator( (ProgramIndicator) programIndicator );
+                query.setProgramIndicator( programIndicator );
                 queries.add( query );
             }
         }

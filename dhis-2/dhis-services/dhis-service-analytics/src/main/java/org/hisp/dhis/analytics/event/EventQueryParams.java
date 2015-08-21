@@ -67,10 +67,10 @@ public class EventQueryParams
     private List<QueryItem> items = new ArrayList<>();
     
     private List<QueryItem> itemFilters = new ArrayList<>();
-    
+        
     private DimensionalObject value;
-    
-    private List<ProgramIndicator> programIndicators = new ArrayList<>();
+        
+    private List<ProgramIndicator> itemProgramIndicators = new ArrayList<>();
 
     private ProgramIndicator programIndicator;
     
@@ -125,7 +125,7 @@ public class EventQueryParams
         params.items = new ArrayList<>( this.items );
         params.itemFilters = new ArrayList<>( this.itemFilters );
         params.value = this.value;
-        params.programIndicators = new ArrayList<>( this.programIndicators );
+        params.itemProgramIndicators = new ArrayList<>( this.itemProgramIndicators );
         params.programIndicator = this.programIndicator;
         params.asc = new ArrayList<>( this.asc );
         params.desc = new ArrayList<>( this.desc );
@@ -180,9 +180,13 @@ public class EventQueryParams
             params.getItemFilters().add( item );
         }
 
-        params.setAggregateData( true );
+        for ( NameableObject object : dataQueryParams.getProgramIndicators() )
+        {
+            ProgramIndicator programIndicator = (ProgramIndicator) object;
+            params.getItemProgramIndicators().add( programIndicator );
+        }
         
-        //TODO
+        params.setAggregateData( true );
         params.removeDimension( DimensionalObject.DATA_X_DIM_ID );
         
         return params;
@@ -432,7 +436,7 @@ public class EventQueryParams
             "Items: " + items + ", " +
             "Item filters: " + itemFilters + ", " +
             "Value: " + value + ", " +
-            "Program indicators: " + programIndicators + ", " +
+            "Item program indicators: " + itemProgramIndicators + ", " +
             "Program indicator: " + programIndicator + ", " +
             "Aggregation type: " + aggregationType + ", " +
             "Dimensions: " + dimensions + ", " +
@@ -491,6 +495,16 @@ public class EventQueryParams
     public void setValue( DimensionalObject value )
     {
         this.value = value;
+    }
+
+    public List<ProgramIndicator> getItemProgramIndicators()
+    {
+        return itemProgramIndicators;
+    }
+
+    public void setItemProgramIndicators( List<ProgramIndicator> itemProgramIndicators )
+    {
+        this.itemProgramIndicators = itemProgramIndicators;
     }
 
     public ProgramIndicator getProgramIndicator()
