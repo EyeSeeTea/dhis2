@@ -51,6 +51,7 @@ import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
+import org.hisp.dhis.program.ProgramIndicator;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -267,6 +268,14 @@ public class DefaultEventQueryPlanner
                 EventQueryParams query = params.instance();
                 query.getItems().clear();
                 query.setValue( item.getItem() );
+                queries.add( query );
+            }
+            
+            for ( NameableObject programIndicator : params.getProgramIndicators() )
+            {
+                EventQueryParams query = params.instance();
+                query.removeDimension( DimensionalObject.DATA_X_DIM_ID );
+                query.setProgramIndicator( (ProgramIndicator) programIndicator );
                 queries.add( query );
             }
         }
