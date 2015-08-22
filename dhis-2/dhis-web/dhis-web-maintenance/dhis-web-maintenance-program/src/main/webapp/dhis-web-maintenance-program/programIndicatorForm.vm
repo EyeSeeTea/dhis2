@@ -5,7 +5,7 @@
 		<th>$i18n.getString( "expression" )</th>
 	</tr>
 	<tr>
-		<td><div class="message message-info" style="margin-top:10px">The expression defines how the indicator is calculated</div></td> 
+		<td><div class="message message-info" style="margin-top:10px">The expression defines how the indicator is calculated.</div></td> 
 	</tr>
 	<tr>
 		<td>
