@@ -95,6 +95,22 @@ public class DefaultAppManager
     }
 
     @Override
+    public App getApp( String key )
+    {
+        List<App> apps = getApps();
+        
+        for ( App app : apps )
+        {
+            if ( key.equals( app.getKey() ) )
+            {
+                return app;
+            }
+        }
+        
+        return null;
+    }
+
+    @Override
     public List<App> getAccessibleApps()
     {
         List<App> applications = new ArrayList<>( getApps() );

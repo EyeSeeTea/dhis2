@@ -30,10 +30,10 @@ dhis2.util.namespace("dhis2.coc");
 
 dhis2.coc = {
     clearAndSetAjaxSelect: function( type, clearSelected ) {
-        var source = "../api/categories.json";
+        var source = '../api/categories.json';
 
         if( type !== undefined ) {
-            source += "?filter=dataDimensionType:eq:" + type;
+            source += '?filter=dataDimensionType:eq:' + type;
         }
 
         if( clearSelected ) {
@@ -48,6 +48,6 @@ dhis2.coc = {
         });
     },
     getType: function () {
-        return $('#dimensionType').val().toLowerCase();
+        return $('#dataDimensionType').val().toUpperCase();
     }
 };

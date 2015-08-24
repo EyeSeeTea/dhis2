@@ -28,6 +28,11 @@ package org.hisp.dhis.dd.action.categoryoptiongroup;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hisp.dhis.attribute.Attribute;
+import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +41,6 @@ import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
- * 
  * @version $ GetCategoryOptionGroupAction.java Feb 12, 2014 11:27:01 PM $
  */
 public class GetCategoryOptionGroupAction
@@ -48,6 +52,9 @@ public class GetCategoryOptionGroupAction
 
     @Autowired
     private DataElementCategoryService dataElementCategoryService;
+
+    @Autowired
+    private AttributeService attributeService;
 
     // -------------------------------------------------------------------------
     // Input
@@ -67,6 +74,13 @@ public class GetCategoryOptionGroupAction
         return categoryOptionGroup;
     }
 
+    private List<Attribute> attributes;
+
+    public List<Attribute> getAttributes()
+    {
+        return attributes;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -77,7 +91,8 @@ public class GetCategoryOptionGroupAction
     {
         categoryOptionGroup = dataElementCategoryService.getCategoryOptionGroup( id );
 
+        attributes = new ArrayList<>( attributeService.getDataElementAttributes() );
+
         return SUCCESS;
     }
-
 }

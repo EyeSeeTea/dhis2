@@ -293,8 +293,8 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                     var optionSetId = prStDe.dataElement.optionSet.id;                 
                                     newInputField = '<ui-select theme="select2" ' + commonInputFieldProperty + ' on-select="saveDatavalue(prStDes.' + fieldId + ', outerForm.' + fieldId + ')" >' +
                                             '<ui-select-match allow-clear="true" style="width:100%;" placeholder="' + $translate.instant('select_or_search') + '">{{$select.selected.name || $select.selected}}</ui-select-match>' +
-                                            '<ui-select-choices  infinite-scroll="addMoreOptions()" infinite-scroll-distance="2"' +
-                                            ' repeat="option.name as option in optionSets.' + optionSetId + '.options | filter: $select.search | limitTo:infiniteScroll.currentOptions">' +
+                                            '<ui-select-choices ' +
+                                            ' repeat="option.name as option in optionSets.' + optionSetId + '.options | filter: $select.search | limitTo:30">' +
                                             '<span ng-bind-html="option.name | highlight: $select.search"></span>' +
                                             '</ui-select-choices>' +
                                             '</ui-select>';
@@ -401,13 +401,11 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 
                             //check if attribute has optionset
                             if (att.optionSetValue) {
-                                var optionSetId = att.optionSet.id;
-                                newInputField = '<ui-select theme="select2" ' + commonInputFieldProperty + ' >' +
+                                var optionSetId = att.optionSet.id;                                
+                                newInputField = '<ui-select theme="select2" ' + commonInputFieldProperty + '  on-select="validationAndSkipLogic(selectedTei,\'' + attId + '\')" >' +
                                         '<ui-select-match style="width:100%;" allow-clear="true" placeholder="' + $translate.instant('select_or_search') + '">{{$select.selected.name || $select.selected}}</ui-select-match>' +
                                         '<ui-select-choices ' +
-                                        'infinite-scroll="addMoreOptions()" ' +
-                                        'infinite-scroll-distance="2" ' +
-                                        'repeat="option.name as option in optionSets.' + optionSetId + '.options | filter: $select.search | limitTo:infiniteScroll.currentOptions">' +
+                                        'repeat="option.name as option in optionSets.' + optionSetId + '.options | filter: $select.search | limitTo:30">' +
                                         '<span ng-bind-html="option.name | highlight: $select.search"></span>' +
                                         '</ui-select-choices>' +
                                         '</ui-select>';
@@ -415,7 +413,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                             else {
                                 //check attribute type and generate corresponding angular input field
                                 if (att.valueType === "number") {
-                                    newInputField = '<input type="text" ' +
+                                    newInputField = '<input type="number" ' +
                                             ' d2-number-validator ' +
                                             ' ng-blur="validationAndSkipLogic(selectedTei,\'' + attId + '\')" ' +
                                             commonInputFieldProperty + ' >';

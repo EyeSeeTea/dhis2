@@ -31,11 +31,15 @@ package org.hisp.dhis.dd.action.categoryoptiongroup;
 import com.opensymphony.xwork2.Action;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hisp.dhis.attribute.AttributeService;
+import org.hisp.dhis.common.DataDimensionType;
 import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.system.util.AttributeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -50,6 +54,9 @@ public class AddCategoryOptionGroupAction
 
     @Autowired
     private DataElementCategoryService dataElementCategoryService;
+
+    @Autowired
+    private AttributeService attributeService;
 
     // -------------------------------------------------------------------------
     // Input
@@ -76,11 +83,25 @@ public class AddCategoryOptionGroupAction
         this.code = code;
     }
 
+    private String dataDimensionType;
+
+    public void setDataDimensionType( String dataDimensionType )
+    {
+        this.dataDimensionType = dataDimensionType;
+    }
+
     private Set<String> coSelected = new HashSet<>();
 
     public void setCoSelected( Set<String> coSelected )
     {
         this.coSelected = coSelected;
+    }
+
+    private List<String> jsonAttributeValues;
+
+    public void setJsonAttributeValues( List<String> jsonAttributeValues )
+    {
+        this.jsonAttributeValues = jsonAttributeValues;
     }
 
     // -------------------------------------------------------------------------
@@ -94,10 +115,17 @@ public class AddCategoryOptionGroupAction
         CategoryOptionGroup categoryOptionGroup = new CategoryOptionGroup( StringUtils.trimToNull( name ) );
         categoryOptionGroup.setShortName( StringUtils.trimToNull( shortName ) );
         categoryOptionGroup.setCode( StringUtils.trimToNull( code ) );
+        categoryOptionGroup.setDataDimensionType( DataDimensionType.valueOf( dataDimensionType ) );
 
         for ( String id : coSelected )
         {
             categoryOptionGroup.addCategoryOption( dataElementCategoryService.getDataElementCategoryOption( id ) );
+        }
+
+        if ( jsonAttributeValues != null )
+        {
+            AttributeUtils.updateAttributeValuesFromJson( categoryOptionGroup.getAttributeValues(), jsonAttributeValues,
+                attributeService );
         }
 
         dataElementCategoryService.saveCategoryOptionGroup( categoryOptionGroup );

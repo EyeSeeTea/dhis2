@@ -30,6 +30,7 @@ package org.hisp.dhis.webapi.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -89,11 +90,28 @@ public class AppController
     private ResourceLoader resourceLoader = new DefaultResourceLoader();
 
     @RequestMapping( method = RequestMethod.GET, produces = ContextUtils.CONTENT_TYPE_JSON )
-    public void getApps( HttpServletResponse response )
+    public void getApps( @RequestParam(required=false) String key, HttpServletResponse response )
         throws IOException
     {
-        List<App> apps = appManager.getApps();
-
+        List<App> apps = new ArrayList<App>();
+        
+        if ( key != null )
+        {
+            App app = appManager.getApp( key );
+            
+            if ( app == null )
+            {
+                response.sendError( HttpServletResponse.SC_NOT_FOUND );
+                return;
+            }
+            
+            apps.add( app );
+        }
+        else
+        {
+            apps = appManager.getApps();
+        }
+        
         renderService.toJson( response.getOutputStream(), apps );
     }
 

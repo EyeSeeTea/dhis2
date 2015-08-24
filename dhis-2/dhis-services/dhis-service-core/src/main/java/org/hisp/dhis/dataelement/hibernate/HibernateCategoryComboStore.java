@@ -31,6 +31,7 @@ package org.hisp.dhis.dataelement.hibernate;
 import java.util.List;
 
 import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.common.DataDimensionType;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.dataelement.CategoryComboStore;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
@@ -44,8 +45,8 @@ public class HibernateCategoryComboStore
 {
     @Override
     @SuppressWarnings("unchecked")
-    public List<DataElementCategoryCombo> getCategoryCombosByDimensionType( String dimensionType )
+    public List<DataElementCategoryCombo> getCategoryCombosByDimensionType( DataDimensionType dataDimensionType )
     {
-        return getSharingCriteria( Restrictions.or( Restrictions.eq( "dimensionType", dimensionType ), Restrictions.eq( "name", "default" ) ) ).list();
+        return getSharingCriteria( Restrictions.or( Restrictions.eq( "dataDimensionType", dataDimensionType ), Restrictions.eq( "name", "default" ) ) ).list();
     }
 }
