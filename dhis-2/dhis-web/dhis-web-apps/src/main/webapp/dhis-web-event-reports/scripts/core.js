@@ -165,7 +165,7 @@ Ext.onReady( function() {
                 west_fill_accordion_indicator: 56,
                 west_fill_accordion_dataelement: 59,
                 west_fill_accordion_dataset: 31,
-                west_fill_accordion_period: 330,
+                west_fill_accordion_period: 335,
                 west_fill_accordion_organisationunit: 58,
                 west_maxheight_accordion_indicator: 450,
                 west_maxheight_accordion_dataset: 350,
@@ -1911,8 +1911,8 @@ Ext.onReady( function() {
                     names,
 					headers,
                     booleanNameMap = {
-                        'true': ER.i18n.yes || 'Yes',
-                        'false': ER.i18n.no || 'No'
+                        '1': ER.i18n.yes || 'Yes',
+                        '0': ER.i18n.no || 'No'
                     };
 
 				response = Ext.clone(response);
@@ -3405,8 +3405,8 @@ Ext.onReady( function() {
                     names = xResponse.metaData.names,
                     optionNames = xResponse.metaData.optionNames,
                     booleanNames = {
-                        'true': NS.i18n.yes,
-                        'false': NS.i18n.no
+                        '1': NS.i18n.yes,
+                        '0': NS.i18n.no
                     },
                     pager = xResponse.metaData.pager,
                     count = pager.page * pager.pageSize - pager.pageSize
@@ -3445,7 +3445,6 @@ Ext.onReady( function() {
 					for (var j = 0, str, header, name; j < dimensionHeaders.length; j++) {
 						header = dimensionHeaders[j];
 						str = row[header.index];
-
                         str = optionNames[header.name + str] || optionNames[str] || booleanNames[str] || names[str] || str;
 						name = web.report.query.format(str);
 

@@ -337,9 +337,10 @@ function addProgramRule()
 			,contentType: "application/json"
 			,data: JSON.stringify(json_Data)
 			,success: function(data){
-				var programRuleId = data.lastImported;
-				saveProgramRuleVariable();
-				saveAction( programRuleId );
+				if( data.response && data.response.lastImported ){
+					saveProgramRuleVariable();
+					saveAction( data.response.lastImported );	
+				}				
 			}
 			,error:  function(){}
 		});

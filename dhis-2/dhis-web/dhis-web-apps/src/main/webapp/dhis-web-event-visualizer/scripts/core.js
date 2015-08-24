@@ -689,7 +689,7 @@ Ext.onReady( function() {
                 west_fill_accordion_indicator: 56,
                 west_fill_accordion_dataelement: 59,
                 west_fill_accordion_dataset: 31,
-                west_fill_accordion_period: 330,
+                west_fill_accordion_period: 335,
                 west_fill_accordion_organisationunit: 58,
                 west_maxheight_accordion_indicator: 450,
                 west_maxheight_accordion_dataset: 350,
@@ -2554,8 +2554,8 @@ Ext.onReady( function() {
                     names,
 					headers,
                     booleanNameMap = {
-                        'true': EV.i18n.yes || 'Yes',
-                        'false': EV.i18n.no || 'No'
+                        '1': EV.i18n.yes || 'Yes',
+                        '0': EV.i18n.no || 'No'
                     };
 
 				response = Ext.clone(response);

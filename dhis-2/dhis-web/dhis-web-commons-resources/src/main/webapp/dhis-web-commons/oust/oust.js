@@ -134,13 +134,15 @@ function SelectionTreeSelection()
 
 function SelectionTree()
 {
-    this.clearSelectedOrganisationUnits = function()
+    this.clearSelectedOrganisationUnitsAndBuildTree = function()
     {
-    	$.ajax({ 
+    	$.ajax( { 
     		url: selectionTreePath + 'clearSelectedOrganisationUnits.action',
-			async: false
-    	});
-    };
+			success: function() {
+				selectionTree.buildSelectionTree();
+			}
+    	} );
+    }
 
     this.toggle = function( unitId )
     {

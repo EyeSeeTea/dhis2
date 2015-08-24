@@ -63,7 +63,7 @@ trackerCapture.controller('RegistrationController',
     }
     
     $scope.selectedOrgUnit = SessionStorageService.get('SELECTED_OU');
-    $scope.selectedEnrollment = {dateOfEnrollment: $scope.today, dateOfIncident: $scope.today};   
+    $scope.selectedEnrollment = {dateOfEnrollment: $scope.today, dateOfIncident: $scope.today, orgUnitName: $scope.selectedOrgUnit.name};   
             
     $scope.trackedEntities = {available: []};
     TEService.getAll().then(function(entities){
@@ -143,7 +143,7 @@ trackerCapture.controller('RegistrationController',
         }
         
         RegistrationService.registerOrUpdate($scope.tei, $scope.optionSets, $scope.attributesById).then(function(registrationResponse){
-            var reg = registrationResponse.response && registrationResponse.response.importSummaries && registrationResponse.response.importSummaries[0] ? registrationResponse.response.importSummaries[0] : {};
+            var reg = registrationResponse.response ? registrationResponse.response : {};            
             if(reg.reference && reg.status === 'SUCCESS'){                
                 $scope.tei.trackedEntityInstance = reg.reference;
                 

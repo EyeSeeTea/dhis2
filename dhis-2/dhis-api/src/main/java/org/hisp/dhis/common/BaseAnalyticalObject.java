@@ -158,8 +158,6 @@ public abstract class BaseAnalyticalObject
     @Scanned
     protected List<OrganisationUnitGroup> itemOrganisationUnitGroups = new ArrayList<>();
 
-    protected boolean rewindRelativePeriods;
-
     protected String digitGroupSeparator;
 
     protected int sortOrder;
@@ -211,7 +209,7 @@ public abstract class BaseAnalyticalObject
     {
         return relatives != null && !relatives.isEmpty();
     }
-
+    
     public boolean hasOrganisationUnitLevels()
     {
         return organisationUnitLevels != null && !organisationUnitLevels.isEmpty();
@@ -221,7 +219,7 @@ public abstract class BaseAnalyticalObject
     {
         return itemOrganisationUnitGroups != null && !itemOrganisationUnitGroups.isEmpty();
     }
-
+    
     public boolean hasSortOrder()
     {
         return sortOrder != 0;
@@ -361,14 +359,7 @@ public abstract class BaseAnalyticalObject
 
             if ( hasRelativePeriods() )
             {
-                if ( rewindRelativePeriods )
-                {
-                    items.addAll( relatives.getRewindedRelativePeriods( 1, date, format, dynamicNames ) );
-                }
-                else
-                {
-                    items.addAll( relatives.getRelativePeriods( date, format, dynamicNames ) );
-                }
+                items.addAll( relatives.getRelativePeriods( date, format, dynamicNames ) );
             }
 
             type = DimensionType.PERIOD;
@@ -534,17 +525,15 @@ public abstract class BaseAnalyticalObject
      * @param dimension the dimension identifier.
      * @return a list of DimensionalObjects.
      */
-    protected List<DimensionalObject> getDimensionalObjectList( String dimension )
+    protected DimensionalObject getDimensionalObject( String dimension )
     {
-        List<DimensionalObject> objects = new ArrayList<>();
-
         List<String> categoryDims = getCategoryDims();
 
         if ( DATA_X_DIM_ID.equals( dimension ) )
         {
-            objects.add( new BaseDimensionalObject( dimension, DimensionType.DATA_X, getDataDimensionNameableObjects() ) );
+            return new BaseDimensionalObject( dimension, DimensionType.DATA_X, getDataDimensionNameableObjects() );
         }
-        else if ( PERIOD_DIM_ID.equals( dimension ) && (!periods.isEmpty() || hasRelativePeriods()) )
+        else if ( PERIOD_DIM_ID.equals( dimension ) )
         {
             List<Period> periodList = new ArrayList<>( periods );
 
@@ -560,9 +549,9 @@ public abstract class BaseAnalyticalObject
 
             Collections.sort( periodList, new AscendingPeriodComparator() );
 
-            objects.add( new BaseDimensionalObject( dimension, DimensionType.PERIOD, periodList ) );
+            return new BaseDimensionalObject( dimension, DimensionType.PERIOD, periodList );
         }
-        else if ( ORGUNIT_DIM_ID.equals( dimension ) && (!organisationUnits.isEmpty() || !transientOrganisationUnits.isEmpty() || hasUserOrgUnit()) )
+        else if ( ORGUNIT_DIM_ID.equals( dimension ) )
         {
             List<NameableObject> ouList = new ArrayList<>();
             ouList.addAll( organisationUnits );
@@ -603,25 +592,25 @@ public abstract class BaseAnalyticalObject
                 }
             }
 
-            objects.add( new BaseDimensionalObject( dimension, DimensionType.ORGANISATIONUNIT, ouList ) );
+            return new BaseDimensionalObject( dimension, DimensionType.ORGANISATIONUNIT, ouList );
         }
         else if ( CATEGORYOPTIONCOMBO_DIM_ID.equals( dimension ) )
         {
-            objects.add( new BaseDimensionalObject( dimension, DimensionType.CATEGORY_OPTION_COMBO, new ArrayList<BaseNameableObject>() ) );
+            return new BaseDimensionalObject( dimension, DimensionType.CATEGORY_OPTION_COMBO, new ArrayList<BaseNameableObject>() ) ;
         }
         else if ( categoryDims.contains( dimension ) )
         {
             DataElementCategoryDimension categoryDimension = categoryDimensions.get( categoryDims.indexOf( dimension ) );
 
-            objects.add( new BaseDimensionalObject( dimension, DimensionType.CATEGORY, categoryDimension.getItems() ) );
+            return new BaseDimensionalObject( dimension, DimensionType.CATEGORY, categoryDimension.getItems() );
         }
         else if ( DATA_COLLAPSED_DIM_ID.contains( dimension ) )
         {
-            objects.add( new BaseDimensionalObject( dimension, DimensionType.DATA_COLLAPSED, new ArrayList<NameableObject>() ) );
+            return new BaseDimensionalObject( dimension, DimensionType.DATA_COLLAPSED, new ArrayList<NameableObject>() );
         }
         else if ( STATIC_DIMS.contains( dimension ) )
         {
-            objects.add( new BaseDimensionalObject( dimension, DimensionType.STATIC, new ArrayList<NameableObject>() ) );
+            return new BaseDimensionalObject( dimension, DimensionType.STATIC, new ArrayList<NameableObject>() );
         }
         else
         {
@@ -639,7 +628,7 @@ public abstract class BaseAnalyticalObject
 
             if ( deGroupMap.containsKey( dimension ) )
             {
-                objects.add( new BaseDimensionalObject( dimension, DimensionType.DATAELEMENT_GROUPSET, deGroupMap.get( dimension ) ) );
+                return new BaseDimensionalObject( dimension, DimensionType.DATAELEMENT_GROUPSET, deGroupMap.get( dimension ) );
             }
 
             // Organisation unit group set
@@ -656,7 +645,7 @@ public abstract class BaseAnalyticalObject
 
             if ( ouGroupMap.containsKey( dimension ) )
             {
-                objects.add( new BaseDimensionalObject( dimension, DimensionType.ORGANISATIONUNIT_GROUPSET, ouGroupMap.get( dimension ) ) );
+                return new BaseDimensionalObject( dimension, DimensionType.ORGANISATIONUNIT_GROUPSET, ouGroupMap.get( dimension ) );
             }
 
             // Category option group set
@@ -673,7 +662,7 @@ public abstract class BaseAnalyticalObject
 
             if ( coGroupMap.containsKey( dimension ) )
             {
-                objects.add( new BaseDimensionalObject( dimension, DimensionType.CATEGORYOPTION_GROUPSET, coGroupMap.get( dimension ) ) );
+                return new BaseDimensionalObject( dimension, DimensionType.CATEGORYOPTION_GROUPSET, coGroupMap.get( dimension ) );
             }
 
             // Tracked entity attribute
@@ -689,7 +678,7 @@ public abstract class BaseAnalyticalObject
             {
                 TrackedEntityAttributeDimension tead = attributes.get( dimension );
 
-                objects.add( new BaseDimensionalObject( dimension, DimensionType.PROGRAM_ATTRIBUTE, null, tead.getDisplayName(), tead.getLegendSet(), tead.getFilter() ) );
+                return new BaseDimensionalObject( dimension, DimensionType.PROGRAM_ATTRIBUTE, null, tead.getDisplayName(), tead.getLegendSet(), tead.getFilter() );
             }
 
             // Tracked entity data element
@@ -705,11 +694,11 @@ public abstract class BaseAnalyticalObject
             {
                 TrackedEntityDataElementDimension tedd = dataElements.get( dimension );
 
-                objects.add( new BaseDimensionalObject( dimension, DimensionType.PROGRAM_DATAELEMENT, null, tedd.getDisplayName(), tedd.getLegendSet(), tedd.getFilter() ) );
+                return new BaseDimensionalObject( dimension, DimensionType.PROGRAM_DATAELEMENT, null, tedd.getDisplayName(), tedd.getLegendSet(), tedd.getFilter() );
             }
         }
 
-        return objects;
+        throw new IllegalArgumentException( "Not a valid dimension: " + dimension );
     }
 
     private List<String> getCategoryDims()
@@ -891,7 +880,6 @@ public abstract class BaseAnalyticalObject
             userOrganisationUnitChildren = object.isUserOrganisationUnitChildren();
             userOrganisationUnitGrandChildren = object.isUserOrganisationUnitGrandChildren();
             itemOrganisationUnitGroups = object.getItemOrganisationUnitGroups();
-            rewindRelativePeriods = object.isRewindRelativePeriods();
             digitGroupSeparator = object.getDigitGroupSeparator();
             userOrganisationUnit = object.isUserOrganisationUnit();
             sortOrder = object.getSortOrder();
@@ -1124,19 +1112,6 @@ public abstract class BaseAnalyticalObject
     public void setItemOrganisationUnitGroups( List<OrganisationUnitGroup> itemOrganisationUnitGroups )
     {
         this.itemOrganisationUnitGroups = itemOrganisationUnitGroups;
-    }
-
-    @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public boolean isRewindRelativePeriods()
-    {
-        return rewindRelativePeriods;
-    }
-
-    public void setRewindRelativePeriods( boolean rewindRelativePeriods )
-    {
-        this.rewindRelativePeriods = rewindRelativePeriods;
     }
 
     @JsonProperty

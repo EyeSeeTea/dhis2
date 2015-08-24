@@ -25,6 +25,7 @@ dhis2.db.currentItemPos;
 dhis2.db.currentShareType;
 dhis2.db.currentShareId;
 dhis2.db.currentMaxType = [];
+dhis2.db.currentUserOrgUnit = [];
 dhis2.db.contextPath;
 dhis2.db.maxItems = 40;
 dhis2.db.shapeNormal = "normal";
@@ -59,6 +60,9 @@ $( document ).ready( function()
 
 	$( "#searchField" ).focus();
 	$( "#searchField" ).keyup( dhis2.db.search );
+	
+	selectionTreeSelection.setMultipleSelectionAllowed( true );
+	selectionTree.clearSelectedOrganisationUnitsAndBuildTree();
 
 	$.getJSON( "../api/me/user-account.json?" + dhis2.util.cacheBust(), function( json ) {
 		dhis2.db.currentKey = "dhis2.dashboard.current." + json.username;
@@ -585,6 +589,7 @@ dhis2.db.renderItems = function( $d, dashboardItem, width, prepend )
 
 	var graphStyle = "width:" + width + "px; overflow:hidden;";
 	var tableStyle = "width:" + width + "px;";
+	var userOrgUnit = dhis2.db.currentUserOrgUnit || [];
 
 	if ( "chart" == dashboardItem.type )
 	{
@@ -602,6 +607,7 @@ dhis2.db.renderItems = function( $d, dashboardItem, width, prepend )
             dashboard: true,
             crossDomain: false,
             skipMask: true,
+            userOrgUnit: userOrgUnit,
             domainAxisStyle: {
                 labelRotation: 45,
                 labelFont: '10px sans-serif',
@@ -639,6 +645,7 @@ dhis2.db.renderItems = function( $d, dashboardItem, width, prepend )
             dashboard: true,
             crossDomain: false,
             skipMask: true,
+            userOrgUnit: userOrgUnit,
             domainAxisStyle: {
                 labelRotation: 45,
                 labelFont: '10px sans-serif',
@@ -674,7 +681,10 @@ dhis2.db.renderItems = function( $d, dashboardItem, width, prepend )
             hideLegend: true,
             dashboard: true,
             crossDomain: false,
-            skipMask: true
+            skipMask: true,
+            mapViews: [{
+                userOrgUnit: userOrgUnit
+            }]
 	    });
 	}
 	else if ( "reportTable" == dashboardItem.type )
@@ -691,7 +701,8 @@ dhis2.db.renderItems = function( $d, dashboardItem, width, prepend )
             crossDomain: false,
             skipMask: true,
             displayDensity: 'compact',
-            fontSize: 'small'
+            fontSize: 'small',
+            userOrgUnit: userOrgUnit
 	    });
 	}
 	else if ( "eventReport" == dashboardItem.type )
@@ -708,7 +719,8 @@ dhis2.db.renderItems = function( $d, dashboardItem, width, prepend )
             crossDomain: false,
             skipMask: true,
             displayDensity: 'compact',
-            fontSize: 'small'
+            fontSize: 'small',
+            userOrgUnit: userOrgUnit
 	    });
 	}
 	else if ( "users" == dashboardItem.type )
@@ -1213,4 +1225,35 @@ dhis2.db.downloadImage = function()
 		url = url + "&attachment=true";
 		window.location.href = url;
 	}
+}
+
+//------------------------------------------------------------------------------
+// Org unit selector
+//------------------------------------------------------------------------------
+
+dhis2.db.viewOrgUnitSelector = function()
+{
+	$( "#orgUnitSelectorForm" ).dialog( {
+		autoOpen: true,
+		modal: true,
+		width: 370,
+		height: 500,
+		resizable: false,
+		title: i18n_user_org_unit_filter
+	} );
+}
+
+dhis2.db.updateSelectedOrgUnits = function()
+{
+	var ous = selectionTreeSelection.getSelectedUid();
+	dhis2.db.currentUserOrgUnit = ous;	
+	dhis2.db.renderDashboard( dhis2.db.current() );
+	$( "#orgUnitSelectorForm" ).dialog( "destroy" );
+}
+
+dhis2.db.clearSelectedOrgUnits = function()
+{
+	dhis2.db.currentUserOrgUnit = [];
+	selectionTree.clearSelectedOrganisationUnitsAndBuildTree();
+	dhis2.db.updateSelectedOrgUnits();
 }

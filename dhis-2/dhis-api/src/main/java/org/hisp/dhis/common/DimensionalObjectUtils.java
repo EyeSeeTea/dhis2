@@ -28,9 +28,6 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.common.DataDimensionItem.DATA_DIMENSION_TYPE_CLASS_MAP;
-import static org.hisp.dhis.common.DataDimensionItem.DATA_DIMENSION_TYPE_DOMAIN_MAP;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -43,9 +40,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hisp.dhis.common.DataDimensionItem.DataDimensionItemType;
 import org.hisp.dhis.common.comparator.ObjectStringValueComparator;
-import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementOperand;
 
 import com.google.common.collect.Sets;
@@ -63,33 +58,6 @@ public class DimensionalObjectUtils
     private static final Pattern DIMENSIONAL_OPERAND_PATTERN = Pattern.compile( "([a-zA-Z]\\w{10})\\.([a-zA-Z]\\w{10})" );
     
     public static final String TITLE_ITEM_SEP = ", ";
-        
-    /**
-     * Creates a unique list of dimension identifiers based on the given list
-     * of DimensionalObjects.
-     * 
-     * @param dimensions the list of DimensionalObjects.
-     * @return list of dimension identifiers.
-     */
-    public static List<String> getUniqueDimensions( List<DimensionalObject> dimensions )
-    {
-        List<String> dims = new ArrayList<>();
-        
-        if ( dimensions != null )
-        {
-            for ( DimensionalObject dimension : dimensions )
-            {
-                String dim = dimension.getDimension();
-                
-                if ( dim != null && !dims.contains( dim ) )
-                {
-                    dims.add( dim );
-                }
-            }
-        }
-        
-        return dims;
-    }
 
     public static List<DimensionalObject> getCopies( List<DimensionalObject> dimensions )
     {
@@ -102,36 +70,6 @@ public class DimensionalObjectUtils
                 DimensionalObject object = ((BaseDimensionalObject) dimension).instance();
                 list.add( object );
             }
-        }
-        
-        return list;
-    }
-    
-    /**
-     * Returns a list of data dimension options which match the given data 
-     * dimension item type.
-     * 
-     * @param itemType the data dimension item type.
-     * @param dataDimensionOptions the data dimension options.
-     * @return list of nameable objects.
-     */
-    public static List<NameableObject> getByDataDimensionType( DataDimensionItemType itemType, List<NameableObject> dataDimensionOptions )
-    {
-        List<NameableObject> list = new ArrayList<>();
-        
-        for ( NameableObject object : dataDimensionOptions )
-        {
-            if ( !object.getClass().equals( DATA_DIMENSION_TYPE_CLASS_MAP.get( itemType ) ) )
-            {
-                continue;
-            }
-            
-            if ( object.getClass().equals( DataElement.class ) && !( ((DataElement) object).getDomainType().equals( DATA_DIMENSION_TYPE_DOMAIN_MAP.get( itemType ) ) ) )
-            {
-                continue;
-            }
-            
-            list.add( object );
         }
         
         return list;
@@ -243,7 +181,7 @@ public class DimensionalObjectUtils
      * Splits the given string on the ; character and returns the items in a 
      * list. Returns null if the given string is null.
      */
-    public static List<String> getDimensionsFromParam( String param )
+    public static List<String> getItemsFromParam( String param )
     {
         if ( param == null )
         {

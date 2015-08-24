@@ -159,6 +159,7 @@ public class DefaultEventAnalyticsService
     // EventAnalyticsService implementation
     // -------------------------------------------------------------------------
 
+    // TODO use ValueType for type in grid headers
     // TODO order event analytics tables on execution date to avoid default
     // TODO sorting in queries
 
@@ -174,66 +175,71 @@ public class DefaultEventAnalyticsService
         int maxLimit = queryPlanner.getMaxLimit();
         
         // ---------------------------------------------------------------------
-        // Headers
+        // Headers and data
         // ---------------------------------------------------------------------
 
-        if ( params.isCollapseDataDimensions() || params.isAggregateData() )
+        if ( !params.isSkipData() )
         {
-            grid.addHeader( new GridHeader( DimensionalObject.DATA_COLLAPSED_DIM_ID, DataQueryParams.DISPLAY_NAME_DATA_X, String.class.getName(), false, true ) );
-        }
-        else
-        {
-            for ( QueryItem item : params.getItems() )
+            // -----------------------------------------------------------------
+            // Headers
+            // -----------------------------------------------------------------
+
+            if ( params.isCollapseDataDimensions() || params.isAggregateData() )
             {
-                //TODO use ValueType for type
-
-                String legendSet = item.hasLegendSet() ? item.getLegendSet().getUid() : null;
-
-                grid.addHeader( new GridHeader( item.getItem().getUid(), item.getItem().getName(), item.getTypeAsString(), false, true, item.getOptionSetUid(), legendSet ) );
+                grid.addHeader( new GridHeader( DimensionalObject.DATA_COLLAPSED_DIM_ID, DataQueryParams.DISPLAY_NAME_DATA_X, String.class.getName(), false, true ) );
             }
-        }
+            else
+            {
+                for ( QueryItem item : params.getItems() )
+                {
+                    String legendSet = item.hasLegendSet() ? item.getLegendSet().getUid() : null;
+    
+                    grid.addHeader( new GridHeader( item.getItem().getUid(), item.getItem().getName(), item.getTypeAsString(), false, true, item.getOptionSetUid(), legendSet ) );
+                }
+            }
+    
+            for ( DimensionalObject dimension : params.getDimensions() )
+            {
+                grid.addHeader( new GridHeader( dimension.getDimension(), dimension.getDisplayName(), String.class.getName(), false, true ) );
+            }
+    
+            grid.addHeader( new GridHeader( "value", "Value", Double.class.getName(), false, false ) );
 
-        for ( DimensionalObject dimension : params.getDimensions() )
-        {
-            grid.addHeader( new GridHeader( dimension.getDimension(), dimension.getDisplayName(), String.class.getName(), false, true ) );
-        }
+            // -----------------------------------------------------------------
+            // Data
+            // -----------------------------------------------------------------
 
-        grid.addHeader( new GridHeader( "value", "Value", Double.class.getName(), false, false ) );
+            Timer t = new Timer().start().disablePrint();
+    
+            List<EventQueryParams> queries = queryPlanner.planAggregateQuery( params );
+    
+            t.getSplitTime( "Planned event query, got partitions: " + params.getPartitions() );
+    
+            for ( EventQueryParams query : queries )
+            {
+                analyticsManager.getAggregatedEventData( query, grid, maxLimit );
+            }
+            
+            t.getTime( "Got aggregated events" );
+            
+            if ( maxLimit > 0 && grid.getHeight() > maxLimit )
+            {
+                throw new IllegalQueryException( "Number of rows produced by query is larger than the max limit: " + maxLimit );
+            }
 
-        // ---------------------------------------------------------------------
-        // Data
-        // ---------------------------------------------------------------------
+            // -----------------------------------------------------------------
+            // Limit and sort, done again due to potential multiple partitions
+            // -----------------------------------------------------------------
 
-        Timer t = new Timer().start().disablePrint();
-
-        List<EventQueryParams> queries = queryPlanner.planAggregateQuery( params );
-
-        t.getSplitTime( "Planned event query, got partitions: " + params.getPartitions() );
-
-        for ( EventQueryParams query : queries )
-        {
-            analyticsManager.getAggregatedEventData( query, grid, maxLimit );
-        }
-        
-        t.getTime( "Got aggregated events" );
-        
-        if ( maxLimit > 0 && grid.getHeight() > maxLimit )
-        {
-            throw new IllegalQueryException( "Number of rows produced by query is larger than the max limit: " + maxLimit );
-        }
-
-        // ---------------------------------------------------------------------
-        // Limit and sort - done again due to potential multiple partitions
-        // ---------------------------------------------------------------------
-
-        if ( params.hasSortOrder() )
-        {            
-            grid.sortGrid( 1, params.getSortOrderAsInt() );
-        }
-        
-        if ( params.hasLimit() && grid.getHeight() > params.getLimit() )
-        {
-            grid.limitGrid( params.getLimit() );
+            if ( params.hasSortOrder() )
+            {            
+                grid.sortGrid( 1, params.getSortOrderAsInt() );
+            }
+            
+            if ( params.hasLimit() && grid.getHeight() > params.getLimit() )
+            {
+                grid.limitGrid( params.getLimit() );
+            }
         }
         
         // ---------------------------------------------------------------------
@@ -247,12 +253,12 @@ public class DefaultEventAnalyticsService
             Map<String, String> uidNameMap = getUidNameMap( params );
     
             metaData.put( NAMES_META_KEY, uidNameMap );
-            metaData.put( PERIOD_DIM_ID, getUids( params.getDimensionOrFilter( PERIOD_DIM_ID ) ) );
-            metaData.put( ORGUNIT_DIM_ID, getUids( params.getDimensionOrFilter( ORGUNIT_DIM_ID ) ) );
+            metaData.put( PERIOD_DIM_ID, getUids( params.getDimensionOrFilterItems( PERIOD_DIM_ID ) ) );
+            metaData.put( ORGUNIT_DIM_ID, getUids( params.getDimensionOrFilterItems( ORGUNIT_DIM_ID ) ) );
 
             User user = currentUserService.getCurrentUser();
 
-            List<OrganisationUnit> organisationUnits = asTypedList( params.getDimensionOrFilter( ORGUNIT_DIM_ID ), OrganisationUnit.class );
+            List<OrganisationUnit> organisationUnits = asTypedList( params.getDimensionOrFilterItems( ORGUNIT_DIM_ID ), OrganisationUnit.class );
             Collection<OrganisationUnit> roots = user != null ? user.getOrganisationUnits() : null;
             
             if ( params.isHierarchyMeta() )
@@ -353,7 +359,7 @@ public class DefaultEventAnalyticsService
         if ( params.isHierarchyMeta() )
         {
             metaData.put( OU_HIERARCHY_KEY, getParentGraphMap( asTypedList( 
-                params.getDimensionOrFilter( ORGUNIT_DIM_ID ), OrganisationUnit.class ), roots ) );
+                params.getDimensionOrFilterItems( ORGUNIT_DIM_ID ), OrganisationUnit.class ), roots ) );
         }
 
         if ( params.isPaging() )
@@ -369,12 +375,12 @@ public class DefaultEventAnalyticsService
 
     @Override
     public EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate,
-        Set<String> dimension, Set<String> filter, String value, AggregationType aggregationType, boolean skipMeta, boolean skipRounding, boolean hierarchyMeta, 
-        boolean showHierarchy, SortOrder sortOrder, Integer limit, EventOutputType outputType, boolean collapseDataDimensions, 
+        Set<String> dimension, Set<String> filter, String value, AggregationType aggregationType, boolean skipMeta, boolean skipData, boolean skipRounding, 
+        boolean hierarchyMeta, boolean showHierarchy, SortOrder sortOrder, Integer limit, EventOutputType outputType, boolean collapseDataDimensions, 
         boolean aggregateData, DisplayProperty displayProperty, I18nFormat format )
     {
         EventQueryParams params = getFromUrl( program, stage, startDate, endDate, dimension, filter, null, null, null,
-            skipMeta, hierarchyMeta, false, displayProperty, null, null, format );
+            skipMeta, skipData, hierarchyMeta, false, displayProperty, null, null, format );
                 
         params.setValue( getValueDimension( value ) );
         params.setAggregationType( aggregationType );
@@ -392,7 +398,7 @@ public class DefaultEventAnalyticsService
     @Override
     public EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate,
         Set<String> dimension, Set<String> filter, String ouMode, Set<String> asc, Set<String> desc,
-        boolean skipMeta, boolean hierarchyMeta, boolean coordinatesOnly, DisplayProperty displayProperty, Integer page, Integer pageSize, I18nFormat format )
+        boolean skipMeta, boolean skipData, boolean hierarchyMeta, boolean coordinatesOnly, DisplayProperty displayProperty, Integer page, Integer pageSize, I18nFormat format )
     {
         EventQueryParams params = new EventQueryParams();
 
@@ -432,7 +438,7 @@ public class DefaultEventAnalyticsService
             {
                 String dimensionId = getDimensionFromParam( dim );
                 List<String> items = getDimensionItemsFromParam( dim );                
-                DimensionalObject dimObj = analyticsService.getDimension( dimensionId, items, null, format, true );
+                DimensionalObject dimObj = analyticsService.getDimension( dimensionId, items, null, null, format, true );
                 
                 if ( dimObj != null )
                 {
@@ -451,7 +457,7 @@ public class DefaultEventAnalyticsService
             {
                 String dimensionId = getDimensionFromParam( dim );
                 List<String> items = getDimensionItemsFromParam( dim );                
-                DimensionalObject dimObj = analyticsService.getDimension( dimensionId, items, null, format, true );
+                DimensionalObject dimObj = analyticsService.getDimension( dimensionId, items, null, null, format, true );
                 
                 if ( dimObj != null )
                 {
@@ -486,6 +492,7 @@ public class DefaultEventAnalyticsService
         params.setEndDate( end );
         params.setOrganisationUnitMode( ouMode );
         params.setSkipMeta( skipMeta );
+        params.setSkipData( skipData );
         params.setHierarchyMeta( hierarchyMeta );
         params.setCoordinatesOnly( coordinatesOnly );
         params.setDisplayProperty( displayProperty );
@@ -509,7 +516,7 @@ public class DefaultEventAnalyticsService
             for ( DimensionalObject dimension : ListUtils.union( object.getColumns(), object.getRows() ) )
             {
                 DimensionalObject dimObj = analyticsService.
-                    getDimension( dimension.getDimension(), getUids( dimension.getItems() ), date, format, true );
+                    getDimension( dimension.getDimension(), getUids( dimension.getItems() ), date, null, format, true );
                 
                 if ( dimObj != null )
                 {
@@ -524,7 +531,7 @@ public class DefaultEventAnalyticsService
             for ( DimensionalObject filter : object.getFilters() )
             {
                 DimensionalObject dimObj = analyticsService.
-                    getDimension( filter.getDimension(), getUids( filter.getItems() ), date, format, true );
+                    getDimension( filter.getDimension(), getUids( filter.getItems() ), date, null, format, true );
                 
                 if ( dimObj != null )
                 {
@@ -684,20 +691,20 @@ public class DefaultEventAnalyticsService
 
         if ( de != null ) //TODO check if part of program
         {
-            return new QueryItem( de, legendSet, de.getType(), de.getOptionSet() );
+            return new QueryItem( de, legendSet, de.getType(), de.getAggregationType(), de.getOptionSet() );
         }
 
         TrackedEntityAttribute at = attributeService.getTrackedEntityAttribute( item );
 
         if ( at != null )
         {
-            return new QueryItem( at, legendSet, at.getValueType(), at.getOptionSet() );
+            return new QueryItem( at, legendSet, at.getValueType(), at.getAggregationType(), at.getOptionSet() );
         }
 
         throw new IllegalQueryException( "Item identifier does not reference any data element or attribute part of the program: " + item );
     }
     
-    private NameableObject getValueDimension( String value )
+    private DimensionalObject getValueDimension( String value )
     {
         if ( value == null )
         {

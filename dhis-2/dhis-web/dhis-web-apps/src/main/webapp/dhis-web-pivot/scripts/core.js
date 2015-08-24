@@ -184,7 +184,7 @@ Ext.onReady( function() {
 				west_fill_accordion_dataset: 56,
                 west_fill_accordion_eventdataitem: 81,
                 west_fill_accordion_programindicator: 81,
-				west_fill_accordion_period: 303,
+				west_fill_accordion_period: 310,
 				west_fill_accordion_organisationunit: 58,
                 west_fill_accordion_group: 31,
 				west_maxheight_accordion_indicator: 400,
@@ -346,7 +346,9 @@ Ext.onReady( function() {
 				}();
 			};
 
-			api.layout.Layout = function(config, applyConfig) {
+			api.layout.Layout = function(config, applyConfig, forceApplyConfig) {
+                config = Ext.apply(config, applyConfig);
+
 				var layout = {},
 					getValidatedDimensionArray,
 					validateSpecialCases;
@@ -403,7 +405,7 @@ Ext.onReady( function() {
 
                 // displayProperty: string ('name') // 'name', 'shortname', null
 
-                // userOrganisationUnit: string
+                // userOrgUnit: string
 
 				getValidatedDimensionArray = function(dimensionArray) {
 					var dimensionArray = Ext.clone(dimensionArray);
@@ -575,8 +577,8 @@ Ext.onReady( function() {
                         layout.displayProperty = config.displayProperty;
                     }
 
-                    if (Ext.isString(config.userOrganisationUnit)) {
-                        layout.userOrganisationUnit = config.userOrganisationUnit;
+                    if (Ext.Array.from(config.userOrgUnit).length) {
+                        layout.userOrgUnit = Ext.Array.from(config.userOrgUnit);
                     }
 
                     // TODO program
@@ -589,7 +591,7 @@ Ext.onReady( function() {
 						return;
 					}
 
-                    return Ext.apply(layout, applyConfig);
+                    return Ext.apply(layout, forceApplyConfig);
 				}();
 			};
 
@@ -1245,98 +1247,27 @@ Ext.onReady( function() {
 					}
 				};
 
-                // Set items from init/metaData/xLayout
+                // set items from init/metaData/xLayout
                 for (var i = 0, dim, metaDataDim, items; i < dimensions.length; i++) {
                     dim = dimensions[i];
                     dim.items = [];
                     metaDataDim = response.metaData[dim.objectName];
 
-                    // If ou and children
-                    if (dim.dimensionName === ou) {
-                        if (isUserOrgunit || isUserOrgunitChildren || isUserOrgunitGrandChildren) {
-                            var userOu,
-                                userOuc,
-                                userOugc;
-
-                            if (init.user && isUserOrgunit) {
-                                userOu = [];
-
-                                for (var j = 0; j < init.user.ou.length; j++) {
-                                    userOu.push({
-                                        id: init.user.ou[j],
-                                        name: service.layout.getItemName(xLayout, response, init.user.ou[j], false)
-                                    });
-                                }
-                            }
-                            if (init.user && init.user.ouc && isUserOrgunitChildren) {
-                                userOuc = [];
-
-                                for (var j = 0; j < init.user.ouc.length; j++) {
-                                    userOuc.push({
-                                        id: init.user.ouc[j],
-                                        name: service.layout.getItemName(xLayout, response, init.user.ouc[j], false)
-                                    });
-                                }
-
-                                support.prototype.array.sort(userOuc);
-                            }
-                            if (init.user && init.user.ouc && isUserOrgunitGrandChildren) {
-                                var userOuOuc = [].concat(init.user.ou, init.user.ouc),
-                                    responseOu = response.metaData[ou];
-
-                                userOugc = [];
-
-                                for (var j = 0, id; j < responseOu.length; j++) {
-                                    id = responseOu[j];
-
-                                    if (!Ext.Array.contains(userOuOuc, id)) {
-                                        userOugc.push({
-                                            id: id,
-                                            name: service.layout.getItemName(xLayout, response, id, false)
-                                        });
-                                    }
-                                }
-
-                                support.prototype.array.sort(userOugc);
-                            }
-
-                            dim.items = [].concat(userOu || [], userOuc || [], userOugc || []);
-                        }
-                        else if (isLevel || isGroup) {
-                            for (var j = 0, responseOu = response.metaData[ou], id; j < responseOu.length; j++) {
-                                id = responseOu[j];
-
-                                dim.items.push({
-                                    id: id,
-                                    name: service.layout.getItemName(xLayout, response, id, false)
-                                });
-                            }
-
-                            support.prototype.array.sort(dim.items);
-                        }
-                        else {
-                            dim.items = Ext.clone(xLayout.dimensionNameItemsMap[dim.dimensionName]);
+                    if (Ext.isArray(metaDataDim) && metaDataDim.length) {
+                        var ids = Ext.clone(response.metaData[dim.dimensionName]);
+                        for (var j = 0; j < ids.length; j++) {
+                            dim.items.push({
+                                id: ids[j],
+                                name: response.metaData.names[ids[j]]
+                            });
                         }
                     }
                     else {
-                        // Items: get ids from metadata -> items
-                        if (Ext.isArray(metaDataDim) && metaDataDim.length) {
-                            var ids = Ext.clone(response.metaData[dim.dimensionName]);
-                            for (var j = 0; j < ids.length; j++) {
-                                dim.items.push({
-                                    id: ids[j],
-                                    name: response.metaData.names[ids[j]]
-                                });
-                            }
-                        }
-                        // Items: get items from xLayout
-                        else {
-                            dim.items = Ext.clone(xLayout.objectNameItemsMap[dim.objectName]);
-                        }
+                        dim.items = Ext.clone(xLayout.objectNameItemsMap[dim.objectName]);
                     }
                 }
 
-                // Add missing names
+                // add missing names
                 dimensions = Ext.Array.clean([].concat(xLayout.columns || [], xLayout.rows || [], xLayout.filters || []));
 
                 for (var i = 0, idNameMap = response.metaData.names, dimItems; i < dimensions.length; i++) {
@@ -1353,7 +1284,7 @@ Ext.onReady( function() {
                     }
                 }
 
-                // Remove dimensions from layout that do not exist in response
+                // remove dimensions from layout that do not exist in response
                 for (var i = 0, dimensionName; i < xLayout.axisDimensionNames.length; i++) {
                     dimensionName = xLayout.axisDimensionNames[i];
                     if (!Ext.Array.contains(headerNames, dimensionName)) {
@@ -2100,10 +2031,6 @@ Ext.onReady( function() {
 			web.analytics = {};
 
 			web.analytics.getParamString = function(xLayout, isSorted) {
-
-                // TODO
-                isSorted = false;
-
 				var axisDimensionNames = isSorted ? xLayout.sortedAxisDimensionNames : xLayout.axisDimensionNames,
 					filterDimensions = isSorted ? xLayout.sortedFilterDimensions : xLayout.filterDimensions,
 					dimensionNameIdsMap = isSorted ? xLayout.dimensionNameSortedIdsMap : xLayout.dimensionNameIdsMap,
@@ -2169,9 +2096,13 @@ Ext.onReady( function() {
                 // display property
                 paramString += '&displayProperty=' + displayProperty.toUpperCase();
 
-                // user organisation unit
-                if (Ext.isString(xLayout.userOrganisationUnit)) {
-					paramString += '&userOrganisationUnit=' + xLayout.userOrganisationUnit;
+                // user org unit
+                if (Ext.isArray(xLayout.userOrgUnit) && xLayout.userOrgUnit.length) {
+                    paramString += '&userOrgUnit=';
+
+                    for (var i = 0; i < xLayout.userOrgUnit.length; i++) {
+                        paramString += xLayout.userOrgUnit[i] + (i < xLayout.userOrgUnit.length - 1 ? ';' : '');
+                    }
 				}
 
 				// data approval level

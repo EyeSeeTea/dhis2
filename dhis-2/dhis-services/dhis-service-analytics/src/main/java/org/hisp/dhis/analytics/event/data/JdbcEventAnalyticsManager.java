@@ -156,7 +156,7 @@ public class JdbcEventAnalyticsManager
     {
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet( sql );
 
-        log.info( "Analytics event aggregate SQL: " + sql );
+        log.debug( "Analytics event aggregate SQL: " + sql );
         
         while ( rowSet.next() )
         {            
@@ -436,7 +436,7 @@ public class JdbcEventAnalyticsManager
         }
         else // Periods
         {
-            sql += "where " + params.getPeriodType() + " in (" + getQuotedCommaDelimitedString( getUids( params.getDimensionOrFilter( PERIOD_DIM_ID ) ) ) + ") ";
+            sql += "where " + params.getPeriodType() + " in (" + getQuotedCommaDelimitedString( getUids( params.getDimensionOrFilterItems( PERIOD_DIM_ID ) ) ) + ") ";
         }
 
         // ---------------------------------------------------------------------
@@ -445,7 +445,7 @@ public class JdbcEventAnalyticsManager
 
         if ( params.isOrganisationUnitMode( DimensionalObject.OU_MODE_SELECTED ) )
         {
-            sql += "and ou in (" + getQuotedCommaDelimitedString( getUids( params.getDimensionOrFilter( ORGUNIT_DIM_ID ) ) ) + ") ";
+            sql += "and ou in (" + getQuotedCommaDelimitedString( getUids( params.getDimensionOrFilterItems( ORGUNIT_DIM_ID ) ) ) + ") ";
         }
         else if ( params.isOrganisationUnitMode( DimensionalObject.OU_MODE_CHILDREN ) )
         {
@@ -455,7 +455,7 @@ public class JdbcEventAnalyticsManager
         {
             sql += "and (";
             
-            for ( NameableObject object : params.getDimensionOrFilter( ORGUNIT_DIM_ID ) )
+            for ( NameableObject object : params.getDimensionOrFilterItems( ORGUNIT_DIM_ID ) )
             {
                 OrganisationUnit unit = (OrganisationUnit) object;
                 sql += "uidlevel" + unit.getLevel() + " = '" + unit.getUid() + "' or ";
@@ -516,7 +516,9 @@ public class JdbcEventAnalyticsManager
 
         if ( params.hasFilterExpression() && ValidationUtils.expressionIsValidSQl( params.getFilterExpression() ) )
         {
-            sql += "and (" + ExpressionUtils.asSql( params.getFilterExpression() ) + ") ";
+            String sqlFilter = ExpressionUtils.asSql( params.getFilterExpression() );
+            
+            sql += "and (" + sqlFilter + ") ";
         }
         
         // ---------------------------------------------------------------------

@@ -901,7 +901,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 })
 
 /* service for executing tracker rules and broadcasting results */
-.service('TrackerRulesExecutionService', function(VariableService, $rootScope, $log, $filter, orderByFilter){
+.service('TrackerRulesExecutionService', function(VariableService,DateUtils,CalendarService, $rootScope, $log, $filter, orderByFilter){
     
     var replaceVariables = function(expression, variablesHash){
         //replaces the variables in an expression with actual variable values.                
@@ -1004,7 +1004,8 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                 {name:"dhis.yearsbetween",parameters:2},
                                 {name:"dhis.floor",parameters:1},
                                 {name:"dhis.modulus",parameters:2},
-                                {name:"dhis.concatenate"}];
+                                {name:"dhis.concatenate"},
+                                {name:"dhis.adddays",parameters:2}];
 
             angular.forEach(dhisFunctions, function(dhisFunction){
                 //Replace each * with a regex that matches each parameter, allowing commas only inside single quotation marks.
@@ -1075,6 +1076,15 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                         returnString += "'";
                         expression = expression.replace(callToThisFunction, returnString);
                     }
+                    else if(dhisFunction.name === "dhis.adddays")
+                    {
+                        var date = $filter('trimquotes')(parameters[0]);
+                        var daystoadd = $filter('trimquotes')(parameters[1]);
+                        var newdate = DateUtils.format( moment(date, CalendarService.getSetting().momentFormat).add(daystoadd, 'days') );
+                        var newdatestring = "'" + newdate + "'";
+                        //Replace the end evaluation of the dhis function:
+                        expression = expression.replace(callToThisFunction, newdatestring);
+                    }
                 });
             });
         }
@@ -1108,7 +1118,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             answer = eval(dhisfunctionsevaluated);
         }
         if(dhis2.validation.isNumber(answer)){
-            answer = Number(answer).toFixed(2);
+        	answer = Math.round(answer*100)/100;
         }
         return answer;
     }; 

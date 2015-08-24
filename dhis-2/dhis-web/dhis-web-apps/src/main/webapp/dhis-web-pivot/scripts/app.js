@@ -2541,19 +2541,32 @@ Ext.onReady( function() {
 			web.pivot.getData = function(layout, isUpdateGui) {
 				var xLayout,
 					paramString,
+                    sortedParamString,
                     onFailure;
 
 				if (!layout) {
 					return;
 				}
 
-                onFailure = function() {
+                onFailure = function(r) {
                     ns.app.viewport.setGui(layout, xLayout, isUpdateGui);
                     web.mask.hide(ns.app.centerRegion);
+
+                    if (r) {
+                        r = Ext.decode(r.responseText);
+
+                        if (Ext.Array.contains([413, 414], parseInt(r.httpStatusCode))) {
+                            web.analytics.validateUrl(init.contextPath + '/api/analytics.json' + paramString);
+                        }
+                        else {
+                            ns.alert(r);
+                        }
+                    }
                 };
 
 				xLayout = service.layout.getExtendedLayout(layout);
-				paramString = web.analytics.getParamString(xLayout, true);
+				paramString = web.analytics.getParamString(xLayout) + '&skipData=true';
+				sortedParamString = web.analytics.getParamString(xLayout, true) + '&skipMeta=true';
 
 				// show mask
 				web.mask.show(ns.app.centerRegion);
@@ -2561,7 +2574,7 @@ Ext.onReady( function() {
                 // timing
                 ns.app.dateData = new Date();
 
-				Ext.Ajax.request({
+                Ext.Ajax.request({
 					url: init.contextPath + '/api/analytics.json' + paramString,
 					timeout: 60000,
 					headers: {
@@ -2570,32 +2583,41 @@ Ext.onReady( function() {
 					},
 					disableCaching: false,
 					failure: function(r) {
-                        onFailure();
-
-                        r = Ext.decode(r.responseText);
-
-						if (Ext.Array.contains([413, 414], parseInt(r.httpStatusCode))) {
-							web.analytics.validateUrl(init.contextPath + '/api/analytics.json' + paramString);
-						}
-						else {
-                            ns.alert(r);
-						}
+                        onFailure(r);
 					},
 					success: function(r) {
-                        ns.app.dateCreate = new Date();
+                        var metaData = Ext.decode(r.responseText).metaData;
 
-						var response = api.response.Response(Ext.decode(r.responseText));
+                        Ext.Ajax.request({
+                            url: init.contextPath + '/api/analytics.json' + sortedParamString,
+                            timeout: 60000,
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accepts': 'application/json'
+                            },
+                            disableCaching: false,
+                            failure: function(r) {
+                                onFailure(r);
+                            },
+                            success: function(r) {
+                                ns.app.dateCreate = new Date();
 
-						if (!response) {
-                            onFailure();
-							return;
-						}
+                                var response = api.response.Response(Ext.decode(r.responseText));
 
-						ns.app.paramString = paramString;
+                                if (!response) {
+                                    onFailure();
+                                    return;
+                                }
 
-						web.pivot.createTable(layout, response, null, isUpdateGui);
-					}
-				});
+                                response.metaData = metaData;
+
+                                ns.app.paramString = sortedParamString;
+
+                                web.pivot.createTable(layout, response, null, isUpdateGui);
+                            }
+                        });
+                    }
+                });
 			};
 
 			web.pivot.createTable = function(layout, response, xResponse, isUpdateGui) {
@@ -4395,7 +4417,7 @@ Ext.onReady( function() {
             }
 
             Ext.Ajax.request({
-                url: ns.core.init.contextPath + '/api/programs.json?paging=false&fields=programTrackedEntityAttributes[trackedEntityAttribute[id,name]],programStages[programStageDataElements[dataElement[id,name,type]]]&filter=id:eq:' + programId,
+                url: ns.core.init.contextPath + '/api/programs.json?paging=false&fields=programTrackedEntityAttributes[trackedEntityAttribute[id,name,valueType]],programStages[programStageDataElements[dataElement[id,name,type]]]&filter=id:eq:' + programId,
                 success: function(r) {
                     r = Ext.decode(r.responseText);
 
@@ -4406,7 +4428,7 @@ Ext.onReady( function() {
                         teas = isO(program) && isA(program.programTrackedEntityAttributes) ? Ext.Array.pluck(program.programTrackedEntityAttributes, 'trackedEntityAttribute') : [],
                         dataElements = [],
                         attributes = [],
-                        types = ['int', 'number', 'string', 'bool', 'trueonly'],
+                        types = ['int', 'string', 'bool', 'trueonly', 'number', 'optionSet'],
                         data;
 
                     // data elements
@@ -4426,7 +4448,7 @@ Ext.onReady( function() {
 
                     // attributes
                     for (i = 0; i < teas.length; i++) {
-                        if (Ext.Array.contains(types, (teas[i].type || '').toLowerCase())) {
+                        if (Ext.Array.contains(types, (teas[i].valueType || '').toLowerCase())) {
                             attributes.push(teas[i]);
                         }
                     }

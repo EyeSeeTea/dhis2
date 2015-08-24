@@ -288,6 +288,7 @@ public class TableAlteror
         executeSql( "UPDATE dataelement SET numbertype='number' where numbertype is null and valuetype='int'" );
         executeSql( "UPDATE dataelement SET valuetype='posInt' where valuetype='positiveNumber'" );
         executeSql( "UPDATE dataelement SET valuetype='negInt' where valuetype='negativeNumber'" );
+        executeSql( "UPDATE dataelement SET aggregationtype='avg_sum_org_unit' where aggregationtype='average'" );
 
         // revert prepare aggregate*Value tables for offline diffs
 
@@ -314,7 +315,6 @@ public class TableAlteror
         executeSql( "UPDATE chart SET type='line' where type='line3d'" );
         executeSql( "UPDATE chart SET type='pie' where type='pie'" );
         executeSql( "UPDATE chart SET type='pie' where type='pie3d'" );
-        executeSql( "UPDATE chart SET rewindRelativePeriods = false WHERE rewindRelativePeriods is null" );
 
         executeSql( "UPDATE chart SET type=lower(type), series=lower(series), category=lower(category), filter=lower(filter)" );
 
@@ -333,6 +333,7 @@ public class TableAlteror
         executeSql( "ALTER TABLE chart DROP CONSTRAINT chart_name_key" );
 
         executeSql( "ALTER TABLE chart DROP COLUMN domainaxixlabel" );
+        executeSql( "ALTER TABLE chart DROP COLUMN rewindrelativeperiods" );
 
         executeSql( "ALTER TABLE chart ALTER hideLegend DROP NOT NULL" );
         executeSql( "ALTER TABLE chart ALTER regression DROP NOT NULL" );
@@ -825,6 +826,10 @@ public class TableAlteror
 
         executeSql( "alter table version alter column versionkey set not null" );
         executeSql( "alter table version add constraint version_versionkey_key unique(versionkey)" );
+
+        // Cacheable
+        executeSql( "UPDATE report set cachestrategy='RESPECT_SYSTEM_SETTING' where cachestrategy is null" );
+        executeSql( "UPDATE sqlview set cachestrategy='RESPECT_SYSTEM_SETTING' where cachestrategy is null" );
 
         oauth2();
 

@@ -266,10 +266,10 @@ public class TableAlteror
             + "ON pa.trackedentityattributeid=trackedentityattribute.trackedentityattributeid  "
             + "where trackedentityattribute.mandatory is not null" );
         executeSql( "ALTER TABLE trackedentityattribute DROP COLUMN mandatory" );
-
         executeSql( "ALTER TABLE trackedentityattribute DROP COLUMN groupBy" );
 
         executeSql( "update trackedentityattribute set valuetype='string' where valuetype='combo' and optionsetid is null" );
+        executeSql( "update trackedentityattribute set aggregationype='AVERAGE' where aggregationtype is null" );
 
         executeSql( "UPDATE trackedentityattribute SET valuetype='string' WHERE valuetype='localId';" );
         executeSql( "UPDATE trackedentityattribute SET valuetype='number' WHERE valuetype='age'" );
@@ -307,6 +307,8 @@ public class TableAlteror
         executeSql( "ALTER TABLE programindicator ALTER description TYPE text" );
         executeSql( "ALTER TABLE programindicator ALTER expression TYPE text" );
         executeSql( "ALTER TABLE programstage ALTER description TYPE text" );
+        
+        executeSql( "update programindicator set displayinform = false where displayinform is null" );
         
         executeSql( "drop index index_patientdatavalue" );
         

@@ -45,7 +45,7 @@ import org.hisp.dhis.reporttable.ReportTableService;
 import org.hisp.dhis.schema.descriptors.ReportTableSchemaDescriptor;
 import org.hisp.dhis.system.grid.GridUtils;
 import org.hisp.dhis.webapi.utils.ContextUtils;
-import org.hisp.dhis.webapi.utils.ContextUtils.CacheStrategy;
+import org.hisp.dhis.common.cache.CacheStrategy;
 import org.hisp.dhis.webapi.utils.WebMessageUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +61,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 import java.util.Set;
 
-import static org.hisp.dhis.common.DimensionalObjectUtils.getUniqueDimensions;
+import static org.hisp.dhis.common.DimensionalObjectUtils.getDimensions;
 import static org.hisp.dhis.commons.util.CodecUtils.filenameEncode;
 
 /**
@@ -298,9 +298,9 @@ public class ReportTableController
         reportTable.getRowDimensions().clear();
         reportTable.getFilterDimensions().clear();
 
-        reportTable.getColumnDimensions().addAll( getUniqueDimensions( reportTable.getColumns() ) );
-        reportTable.getRowDimensions().addAll( getUniqueDimensions( reportTable.getRows() ) );
-        reportTable.getFilterDimensions().addAll( getUniqueDimensions( reportTable.getFilters() ) );
+        reportTable.getColumnDimensions().addAll( getDimensions( reportTable.getColumns() ) );
+        reportTable.getRowDimensions().addAll( getDimensions( reportTable.getRows() ) );
+        reportTable.getFilterDimensions().addAll( getDimensions( reportTable.getFilters() ) );
 
         if ( reportTable.getLegendSet() != null )
         {
