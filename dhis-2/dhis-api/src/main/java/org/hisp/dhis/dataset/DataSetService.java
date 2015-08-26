@@ -162,12 +162,6 @@ public interface DataSetService
     List<DataSet> getDataSetsBySources( Collection<OrganisationUnit> sources );
 
     /**
-     * Returns the number of Sources among the specified Sources associated with
-     * the specified DataSet.
-     */
-    int getSourcesAssociatedWithDataSet( DataSet dataSet, Collection<OrganisationUnit> sources );
-
-    /**
      * Get all DataSets.
      *
      * @return A list containing all DataSets.

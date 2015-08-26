@@ -226,22 +226,6 @@ public class DefaultDataSetService
     }
 
     @Override
-    public int getSourcesAssociatedWithDataSet( DataSet dataSet, Collection<OrganisationUnit> sources )
-    {
-        int count = 0;
-
-        for ( OrganisationUnit source : sources )
-        {
-            if ( dataSet.getSources().contains( source ) )
-            {
-                count++;
-            }
-        }
-
-        return count;
-    }
-
-    @Override
     public List<DataSet> getAllDataSets()
     {
         return i18n( i18nService, dataSetStore.getAll() );
