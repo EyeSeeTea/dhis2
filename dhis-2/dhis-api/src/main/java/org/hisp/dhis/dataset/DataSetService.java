@@ -185,29 +185,6 @@ public interface DataSetService
     List<DataSet> getDataSets( Collection<Integer> identifiers );
 
     /**
-     * Searches through the data sets with the corresponding given identifiers.
-     * If the given data element is a member of one of the data sets, that data
-     * sets period type is returned. This implies that if the data element is a
-     * member of more than one data set, which period type being returned is
-     * undefined. If null is passed as the second argument, all data sets will
-     * be searched.
-     *
-     * @param dataElement        the data element to find the period type for.
-     * @param dataSetIdentifiers the data set identifiers to search through.
-     * @return the period type of the given data element.
-     */
-    PeriodType getPeriodType( DataElement dataElement, Collection<Integer> dataSetIdentifiers );
-
-    /**
-     * Returns a distinct collection of data elements associated with the data
-     * sets with the given corresponding data set identifiers.
-     *
-     * @param dataSetIdentifiers the data set identifiers.
-     * @return a distinct list of data elements.
-     */
-    Set<DataElement> getDistinctDataElements( Collection<Integer> dataSetIdentifiers );
-
-    /**
      * Returns a list of data sets with the given uids.
      *
      * @param uids the collection of uids.

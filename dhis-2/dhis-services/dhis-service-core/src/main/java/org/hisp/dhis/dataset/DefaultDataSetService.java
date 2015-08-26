@@ -37,7 +37,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -249,37 +248,6 @@ public class DefaultDataSetService
                 return identifiers.contains( object.getId() );
             }
         } );
-    }
-
-    @Override
-    public PeriodType getPeriodType( DataElement dataElement, Collection<Integer> dataSetIdentifiers )
-    {
-        List<DataSet> dataSets = getDataSets( dataSetIdentifiers );
-
-        for ( DataSet dataSet : dataSets )
-        {
-            if ( dataSet.getDataElements().contains( dataElement ) )
-            {
-                return dataSet.getPeriodType();
-            }
-        }
-
-        return null;
-    }
-
-    @Override
-    public Set<DataElement> getDistinctDataElements( Collection<Integer> dataSetIdentifiers )
-    {
-        List<DataSet> dataSets = getDataSets( dataSetIdentifiers );
-
-        Set<DataElement> dataElements = new HashSet<>();
-
-        for ( DataSet dataSet : dataSets )
-        {
-            dataElements.addAll( dataSet.getDataElements() );
-        }
-
-        return dataElements;
     }
 
     @Override
