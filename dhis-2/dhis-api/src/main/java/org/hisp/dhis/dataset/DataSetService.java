@@ -185,21 +185,6 @@ public interface DataSetService
     List<DataSet> getDataSets( Collection<Integer> identifiers );
 
     /**
-     * Get list of available ie. unassigned datasets.
-     *
-     * @return A List containing all avialable DataSets.
-     */
-    List<DataSet> getAvailableDataSets();
-
-    /**
-     * Get list of assigned (ie. which had corresponding dataentryform)
-     * datasets.
-     *
-     * @return A List containing assigned DataSets.
-     */
-    List<DataSet> getAssignedDataSets();
-
-    /**
      * Get list of assigned (ie. which had corresponding dataentryform) datasets
      * for specific period type.
      *

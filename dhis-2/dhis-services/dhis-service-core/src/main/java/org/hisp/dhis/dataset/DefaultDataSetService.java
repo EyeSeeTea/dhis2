@@ -41,18 +41,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.hisp.dhis.commons.filter.Filter;
+import org.hisp.dhis.commons.filter.FilterUtils;
 import org.hisp.dhis.dataapproval.DataApprovalService;
 import org.hisp.dhis.dataapproval.DataApprovalStatus;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.dataentryform.DataEntryForm;
 import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.commons.filter.Filter;
-import org.hisp.dhis.commons.filter.FilterUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.joda.time.DateTime;
 import org.springframework.transaction.annotation.Transactional;
@@ -250,44 +249,6 @@ public class DefaultDataSetService
                 return identifiers.contains( object.getId() );
             }
         } );
-    }
-
-    @Override
-    public List<DataSet> getAvailableDataSets()
-    {
-        List<DataSet> availableDataSetList = new ArrayList<>();
-        List<DataSet> dataSetList = new ArrayList<>( getAllDataSets() );
-
-        for ( DataSet dataSet : dataSetList )
-        {
-            DataEntryForm dataEntryForm = dataSet.getDataEntryForm();
-
-            if ( dataEntryForm == null )
-            {
-                availableDataSetList.add( dataSet );
-            }
-        }
-
-        return availableDataSetList;
-    }
-
-    @Override
-    public List<DataSet> getAssignedDataSets()
-    {
-        List<DataSet> assignedDataSetList = new ArrayList<>();
-        List<DataSet> dataSetList = new ArrayList<>( getAllDataSets() );
-
-        for ( DataSet dataSet : dataSetList )
-        {
-            DataEntryForm dataEntryForm = dataSet.getDataEntryForm();
-
-            if ( dataEntryForm != null )
-            {
-                assignedDataSetList.add( dataSet );
-            }
-        }
-
-        return assignedDataSetList;
     }
 
     @Override
