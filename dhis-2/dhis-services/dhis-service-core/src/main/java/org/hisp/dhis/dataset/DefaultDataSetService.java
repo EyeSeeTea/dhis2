@@ -268,24 +268,6 @@ public class DefaultDataSetService
     }
 
     @Override
-    public List<DataSet> getAssignedDataSetsByPeriodType( PeriodType periodType )
-    {
-        List<DataSet> dataSetListByPeriodType = new ArrayList<>( getDataSetsByPeriodType( periodType ) );
-
-        Iterator<DataSet> dataSetIterator = dataSetListByPeriodType.iterator();
-        while ( dataSetIterator.hasNext() )
-        {
-            DataSet dataSet = dataSetIterator.next();
-            if ( dataSet.getSources() == null || dataSet.getSources().size() == 0 )
-            {
-                dataSetIterator.remove();
-            }
-        }
-
-        return dataSetListByPeriodType;
-    }
-
-    @Override
     public Set<DataElement> getDistinctDataElements( Collection<Integer> dataSetIdentifiers )
     {
         List<DataSet> dataSets = getDataSets( dataSetIdentifiers );
