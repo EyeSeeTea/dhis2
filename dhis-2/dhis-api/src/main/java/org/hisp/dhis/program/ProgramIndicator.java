@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.hisp.dhis.analytics.AggregationType;
+import org.hisp.dhis.analytics.EventOutputType;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.DxfNamespaces;
@@ -74,7 +75,7 @@ public class ProgramIndicator
     
     private static final String EXPRESSION_REGEXP = "(" + KEY_DATAELEMENT + "|" + KEY_ATTRIBUTE + "|" + KEY_PROGRAM_VARIABLE + "|" + KEY_CONSTANT + ")\\{(\\w+|" + 
         VAR_INCIDENT_DATE + "|" + VAR_ENROLLMENT_DATE + "|" + VAR_CURRENT_DATE + ")" + SEPARATOR_ID + "?(\\w*)\\}";
-    private static final String SQL_FUNC_REGEXP = "d2:(.+?)\\((.+?)\\)";
+    private static final String SQL_FUNC_REGEXP = "d2:(.+?)\\(([^,]+)\\,?([^,]*)\\,?([^,]*)\\)";
 
     public static final Pattern EXPRESSION_PATTERN = Pattern.compile( EXPRESSION_REGEXP );
     public static final Pattern SQL_FUNC_PATTERN = Pattern.compile( SQL_FUNC_REGEXP );
@@ -97,6 +98,8 @@ public class ProgramIndicator
     
     private AggregationType aggregationType;
 
+    private EventOutputType eventOutputType;
+        
     /**
      * Number of decimals to use for indicator value, null implies default.
      */
@@ -218,6 +221,19 @@ public class ProgramIndicator
     public void setAggregationType( AggregationType aggregationType )
     {
         this.aggregationType = aggregationType;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public EventOutputType getEventOutputType()
+    {
+        return eventOutputType;
+    }
+
+    public void setEventOutputType( EventOutputType eventOutputType )
+    {
+        this.eventOutputType = eventOutputType;
     }
 
     @JsonProperty
