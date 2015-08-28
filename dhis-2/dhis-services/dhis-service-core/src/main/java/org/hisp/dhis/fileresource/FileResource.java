@@ -28,8 +28,14 @@ package org.hisp.dhis.fileresource;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.google.common.hash.Hashing;
 import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
 
 /**
  * @author Halvdan Hoem Grelland
@@ -38,29 +44,35 @@ public class FileResource
     extends BaseIdentifiableObject
 {
     private String filename;            // Name of the file including extension
+
     private String contentType;         // MIME type
+
     private String contentMD5;          // MD5 digest of the content
+
     private String storageKey;          // Key to fetch content from external storage
-    private boolean assigned;           // Is this resource assigned (e.g. to a datavalue)?
+
+    private boolean assigned = false;   // Is this resource assigned (e.g. to a datavalue)?
+
     private FileResourceDomain domain;  // What is the domain of this fileResource? Might affect backend storage location or provider
 
     public FileResource()
     {
         this.name = autoGenerateName();
-        this.assigned = false;
     }
 
-    public FileResource( String filename, String contentType, String storageKey, boolean assigned, FileResourceDomain domain )
+    public FileResource( String filename, String contentType, String storageKey, FileResourceDomain domain )
     {
         this();
 
         this.filename = filename;
         this.contentType = contentType;
         this.storageKey = storageKey;
-        this.assigned = assigned;
         this.domain = domain;
     }
 
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getFilename()
     {
         return filename;
@@ -71,6 +83,9 @@ public class FileResource
         this.filename = filename;
     }
 
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getContentType()
     {
         return contentType;
@@ -81,6 +96,9 @@ public class FileResource
         this.contentType = contentType;
     }
 
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getContentMD5()
     {
         return contentMD5;

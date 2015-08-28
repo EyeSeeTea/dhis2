@@ -15,11 +15,11 @@
     </id>
     &identifiableProperties;
 
-    <property name="filename" column="filename" not-null="true" unique="false" length="255" />
-
     <property name="name" column="name" not-null="true" unique="true" length="230" />
 
-    <property name="contentType" />
+    <property name="filename" column="filename" not-null="true" unique="false" length="255" />
+
+    <property name="contentType" column="contenttype" not-null="true" unique="false" length="255" />
 
     <property name="contentMD5" column="contentmd5" not-null="true" length="32" />
 
