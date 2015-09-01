@@ -53,7 +53,7 @@ public class FileResource
 
     private boolean assigned = false;   // Is this resource assigned (e.g. to a datavalue)?
 
-    private FileResourceDomain domain;  // What is the domain of this fileResource? Might affect backend storage location or provider
+    'private FileResourceDomain domain;  // What is the domain of this fileResource? Might affect backend storage location or provider
 
     public FileResource()
     {
