@@ -495,7 +495,6 @@ public abstract class DhisConvenienceTest
         for ( DataElementCategoryOption categoryOption : categoryOptions )
         {
             categoryOptionCombo.getCategoryOptions().add( categoryOption );
-
             categoryOption.getCategoryOptionCombos().add( categoryOptionCombo );
         }
 

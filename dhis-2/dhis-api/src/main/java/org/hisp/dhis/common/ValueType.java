@@ -28,10 +28,11 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Date;
-
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
+import org.hisp.dhis.trackedentity.TrackedEntityInstance;
+
+import java.util.Date;
 
 /**
  * @author Lars Helge Overland
@@ -41,7 +42,7 @@ public enum ValueType
     TEXT( String.class ),
     LONG_TEXT( String.class ),
     LETTER( String.class ),
-    TYPE_PHONE_NUMBER( String.class ),
+    PHONE_NUMBER( String.class ),
     EMAIL( String.class ),
     BOOLEAN( Boolean.class ),
     TRUE_ONLY( Boolean.class ),
@@ -54,23 +55,40 @@ public enum ValueType
     INTEGER_POSITIVE( Integer.class ),
     INTEGER_NEGATIVE( Integer.class ),
     INTEGER_ZERO_OR_POSITIVE( Integer.class ),
-    NEGATIVE_INTEGER( Integer.class );
-    
+    TRACKER_ASSOCIATE( TrackedEntityInstance.class ),
+    OPTION_SET( String.class ),
+    USERNAME( String.class );
+
     private final Class<?> javaClass;
-    
+
     ValueType()
     {
         this.javaClass = null;
     }
-    
+
     ValueType( Class<?> javaClass )
     {
         this.javaClass = javaClass;
     }
-    
+
     public Class<?> getJavaClass()
     {
         return javaClass;
+    }
+
+    public boolean isInteger()
+    {
+        return this == INTEGER || this == INTEGER_POSITIVE || this == INTEGER_NEGATIVE || this == INTEGER_ZERO_OR_POSITIVE;
+    }
+
+    public boolean isNumeric()
+    {
+        return this.isInteger() || this == NUMBER;
+    }
+
+    public boolean isText()
+    {
+        return this == TEXT || this == LONG_TEXT;
     }
 
     /**
@@ -78,7 +96,7 @@ public enum ValueType
      * this method.
      */
     public static ValueType getFromDataElement( DataElement dataElement )
-    {        
+    {
         if ( DataElement.VALUE_TYPE_STRING.equals( dataElement.getType() ) )
         {
             if ( DataElement.VALUE_TYPE_LONG_TEXT.equals( dataElement.getTextType() ) )
@@ -137,6 +155,10 @@ public enum ValueType
         {
             return ValueType.DATETIME;
         }
+        else if ( DataElement.VALUE_TYPE_USER_NAME.equals( dataElement.getType() ) )
+        {
+            return ValueType.USERNAME;
+        }
 
         return ValueType.TEXT; // Fall back
     }
@@ -159,7 +181,15 @@ public enum ValueType
         {
             return ValueType.DATE;
         }
-        
+        else if ( TrackedEntityAttribute.TYPE_TRACKER_ASSOCIATE.equals( attribute.getValueType() ) )
+        {
+            return ValueType.TRACKER_ASSOCIATE;
+        }
+        else if ( TrackedEntityAttribute.TYPE_USERS.equals( attribute.getValueType() ) )
+        {
+            return ValueType.USERNAME;
+        }
+
         return ValueType.TEXT; // Fall back
-    }    
+    }
 }
