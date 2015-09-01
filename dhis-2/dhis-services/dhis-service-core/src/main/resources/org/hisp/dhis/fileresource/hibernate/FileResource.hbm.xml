@@ -15,9 +15,8 @@
     </id>
     &identifiableProperties;
 
-    <property name="name" column="name" not-null="true" unique="true" length="230" />
-
-    <property name="filename" column="filename" not-null="true" unique="false" length="255" />
+    <!-- TODO name == filename. Can this be non-unique? -->
+    <property name="name" column="name" not-null="true" unique="false" length="230" />
 
     <property name="contentType" column="contenttype" not-null="true" unique="false" length="255" />
 

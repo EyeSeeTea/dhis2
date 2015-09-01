@@ -43,8 +43,6 @@ import org.hisp.dhis.common.view.ExportView;
 public class FileResource
     extends BaseIdentifiableObject
 {
-    private String filename;            // Name of the file including extension
-
     private String contentType;         // MIME type
 
     private String contentMD5;          // MD5 digest of the content
@@ -57,14 +55,11 @@ public class FileResource
 
     public FileResource()
     {
-        this.name = autoGenerateName();
     }
 
-    public FileResource( String filename, String contentType, String storageKey, FileResourceDomain domain )
+    public FileResource( String name, String contentType, String storageKey, FileResourceDomain domain )
     {
-        this();
-
-        this.filename = filename;
+        this.name = name;
         this.contentType = contentType;
         this.storageKey = storageKey;
         this.domain = domain;
@@ -73,14 +68,14 @@ public class FileResource
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String getFilename()
+    public String getName()
     {
-        return filename;
+        return name;
     }
 
-    public void setFilename( String filename )
+    public void setName( String name )
     {
-        this.filename = filename;
+        this.name = name;
     }
 
     @JsonProperty
