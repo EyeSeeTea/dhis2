@@ -67,18 +67,43 @@ public class DefaultFileResourceService
     @Override
     public String saveFileResource( FileResource fileResource, ByteSource content )
     {
-        return null;
+        String name = fileResourceContentStore.saveFileResourceContent( fileResource.getStorageKey(), content );
+
+        if ( name == null )
+        {
+            return null;
+        }
+
+        int id = fileResourceStore.save( fileResource );
+
+        if ( id <= 0 )
+        {
+            fileResourceContentStore.deleteFileResourceContent( fileResource.getStorageKey() );
+            return null;
+        }
+
+        return fileResource.getUid();
     }
 
     @Override
     public void deleteFileResource( String uid )
     {
+        FileResource fileResource = fileResourceStore.getByUid( uid );
 
+        if ( fileResource == null )
+        {
+            return; // Doesn't exist
+        }
+
+        String storageKey = fileResource.getStorageKey();
+
+        fileResourceContentStore.deleteFileResourceContent( storageKey );
+        fileResourceStore.delete( fileResource );
     }
 
     @Override
     public ByteSource getFileResourceContent( FileResource fileResource )
     {
-        return null;
+        return fileResourceContentStore.getFileResourceContent( fileResource.getStorageKey() );
     }
 }
