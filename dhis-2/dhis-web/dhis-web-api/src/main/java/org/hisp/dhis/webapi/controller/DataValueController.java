@@ -508,7 +508,7 @@ public class DataValueController
 
         if ( attributeOptionCombo == null )
         {
-            return;
+            throw new WebMessageException( WebMessageUtils.badRequest( "Invalid attribute option combo" ) );
         }
 
         Period period = PeriodType.getPeriodFromIsoString( pe );
@@ -579,6 +579,7 @@ public class DataValueController
         FileResource fileResource = new FileResource( filename, contentType, contentMD5, storageKey, FileResourceDomain.DATAVALUE );
         fileResource.setAssigned( false );
         fileResource.setCreated( new Date() );
+        fileResource.setUser( currentUserService.getCurrentUser() );
 
         // ---------------------------------------------------------------------
         // Save file resource
@@ -586,12 +587,9 @@ public class DataValueController
 
         String uid = fileResourceService.saveFileResource( fileResource, content );
 
-        DataValue dataValue = dataValueService.getDataValue( dataElement, period, organisationUnit, categoryOptionCombo, attributeOptionCombo );
-
-        if ( dataValue != null )
+        if ( uid == null )
         {
-            // DataValue referenced exists already
-            // TODO How to handle?
+            throw new WebMessageException( WebMessageUtils.error( "Saving the file resource failed" ) );
         }
 
         WebMessage webMessage = new WebMessage( WebMessageStatus.OK, HttpStatus.CREATED );
