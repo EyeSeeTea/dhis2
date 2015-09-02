@@ -59,7 +59,8 @@ public enum ValueType
     INTEGER_ZERO_OR_POSITIVE( Integer.class ),
     TRACKER_ASSOCIATE( TrackedEntityInstance.class ),
     OPTION_SET( String.class ),
-    USERNAME( String.class );
+    USERNAME( String.class ),
+    FILE_RESOURCE( String.class );
 
     public static List<String> INTEGER_TYPE_STRINGS = Lists.newArrayList(
         INTEGER.toString(), INTEGER_POSITIVE.toString(), INTEGER_NEGATIVE.toString(), INTEGER_ZERO_OR_POSITIVE.toString()
@@ -104,6 +105,11 @@ public enum ValueType
     public boolean isText()
     {
         return this == TEXT || this == LONG_TEXT;
+    }
+
+    public boolean isFile()
+    {
+        return this == FILE_RESOURCE;
     }
 
     /**
@@ -173,6 +179,10 @@ public enum ValueType
         else if ( DataElement.VALUE_TYPE_USER_NAME.equals( dataElement.getType() ) )
         {
             return ValueType.USERNAME;
+        }
+        else if ( DataElement.VALUE_TYPE_FILE_RESOURCE.equals( dataElement.getType() ) )
+        {
+            return ValueType.FILE_RESOURCE;
         }
 
         return ValueType.TEXT; // Fall back

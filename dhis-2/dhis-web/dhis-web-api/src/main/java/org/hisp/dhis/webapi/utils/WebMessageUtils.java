@@ -242,6 +242,8 @@ public final class WebMessageUtils
         return webMessage;
     }
 
+    public static WebMessage fileResourceUpload
+
     private WebMessageUtils()
     {
     }

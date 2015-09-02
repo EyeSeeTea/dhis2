@@ -28,18 +28,21 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.google.common.io.ByteSource;
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
+import org.hisp.dhis.dxf2.webmessage.WebMessage;
 import org.hisp.dhis.dxf2.webmessage.WebMessageException;
+import org.hisp.dhis.dxf2.webmessage.WebMessageStatus;
+import org.hisp.dhis.dxf2.webmessage.responses.FileResourceWebMessageResponse;
 import org.hisp.dhis.fileresource.FileResource;
 import org.hisp.dhis.fileresource.FileResourceDomain;
 import org.hisp.dhis.fileresource.FileResourceService;
@@ -52,6 +55,7 @@ import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.webapi.utils.InputUtils;
 import org.hisp.dhis.webapi.utils.WebMessageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -59,6 +63,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -453,8 +458,8 @@ public class DataValueController
     }
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_DATAVALUE_ADD')" )
-    @RequestMapping( value = "/files", method = RequestMethod.POST, produces = "text/plain" )
-    public void saveDataValueFileResource(
+    @RequestMapping( value = "/files", method = RequestMethod.POST )
+    public @ResponseBody WebMessage saveDataValueFileResource(
         @RequestParam String de,
         @RequestParam( required = false ) String co,
         @RequestParam( required = false ) String cc,
@@ -473,6 +478,14 @@ public class DataValueController
         if ( dataElement == null )
         {
             throw new WebMessageException( WebMessageUtils.conflict( "Illegal data element identifier: " + de ) );
+        }
+
+        boolean isFileResourceDataElement = dataElement.isFileType();
+
+        if ( !isFileResourceDataElement )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "Data element must be of type file resource",
+                "This endpoint only accepts requests for data elements which correspond to a file type." ) );
         }
 
         DataElementCategoryOptionCombo categoryOptionCombo;
@@ -519,9 +532,7 @@ public class DataValueController
             throw new WebMessageException( WebMessageUtils.conflict( "Organisation unit is not in the hierarchy of the current user: " + ou ) );
         }
 
-        boolean valid = multipartFile != null && !multipartFile.isEmpty();
-
-        if ( !valid )
+        if ( multipartFile == null || multipartFile.isEmpty() )
         {
             throw new WebMessageException( WebMessageUtils.conflict( "File is missing", "The multipart request didn't contain a file or the file was empty." ) );
         }
@@ -566,56 +577,26 @@ public class DataValueController
         String storageKey = "dataValue/" + filename + "-" + contentMD5;
 
         FileResource fileResource = new FileResource( filename, contentType, contentMD5, storageKey, FileResourceDomain.DATAVALUE );
+        fileResource.setAssigned( false );
+        fileResource.setCreated( new Date() );
 
         // ---------------------------------------------------------------------
         // Save file resource
         // ---------------------------------------------------------------------
 
-        Date now = new Date();
+        String uid = fileResourceService.saveFileResource( fileResource, content );
 
         DataValue dataValue = dataValueService.getDataValue( dataElement, period, organisationUnit, categoryOptionCombo, attributeOptionCombo );
 
-        if ( dataValue == null )
+        if ( dataValue != null )
         {
-            dataValue = new DataValue( dataElement, period, organisationUnit, categoryOptionCombo, attributeOptionCombo,
-                StringUtils.trimToNull( value ), storedBy, now, StringUtils.trimToNull( comment ) );
-
-            dataValueService.addDataValue( dataValue );
+            // DataValue referenced exists already
+            // TODO How to handle?
         }
-        else
-        {
-            if ( value == null && DataElement.VALUE_TYPE_TRUE_ONLY.equals( dataElement.getType() ) )
-            {
-                if ( comment == null )
-                {
-                    dataValueService.deleteDataValue( dataValue );
-                    return;
-                }
-                else
-                {
-                    value = "false";
-                }
-            }
 
-            if ( value != null )
-            {
-                dataValue.setValue( StringUtils.trimToNull( value ) );
-            }
+        WebMessage webMessage = new WebMessage( WebMessageStatus.OK, HttpStatus.CREATED );
+        webMessage.setResponse( new FileResourceWebMessageResponse( fileResource ) );
 
-            if ( comment != null )
-            {
-                dataValue.setComment( StringUtils.trimToNull( comment ) );
-            }
-
-            if ( followUp )
-            {
-                dataValue.toggleFollowUp();
-            }
-
-            dataValue.setLastUpdated( now );
-            dataValue.setStoredBy( storedBy );
-
-            dataValueService.updateDataValue( dataValue );
-        }
+        return webMessage;
     }
 }

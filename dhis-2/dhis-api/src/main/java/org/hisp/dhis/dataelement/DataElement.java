@@ -108,6 +108,7 @@ public class DataElement
     public static final String VALUE_TYPE_ZERO_OR_POSITIVE_INT = "zeroPositiveInt";
     public static final String VALUE_TYPE_TEXT = "text";
     public static final String VALUE_TYPE_LONG_TEXT = "longText";
+    public static final String VALUE_TYPE_FILE_RESOURCE = "fileResource";
 
     public static final String AGGREGATION_OPERATOR_SUM = "sum";
     public static final String AGGREGATION_OPERATOR_AVERAGE_SUM = "avg_sum_org_unit"; // Sum in organisation unit
@@ -279,6 +280,14 @@ public class DataElement
     {
         // TODO optimize when using persisted valueType
         return ValueType.DATE == getValueType() || ValueType.DATETIME == getValueType();
+    }
+
+    /**
+     * Indicates whether the value type of this data element is a file (externally stored resource)
+     */
+    public boolean isFileType()
+    {
+        return getValueType().isFile();
     }
 
     /**
