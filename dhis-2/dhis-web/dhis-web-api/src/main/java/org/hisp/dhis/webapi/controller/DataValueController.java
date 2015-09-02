@@ -28,6 +28,9 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.hash.HashCode;
+import com.google.common.hash.Hashing;
+import com.google.common.io.ByteSource;
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.dataelement.DataElement;
@@ -37,6 +40,9 @@ import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.dxf2.webmessage.WebMessageException;
+import org.hisp.dhis.fileresource.FileResource;
+import org.hisp.dhis.fileresource.FileResourceDomain;
+import org.hisp.dhis.fileresource.FileResourceService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
@@ -49,11 +55,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -91,6 +101,9 @@ public class DataValueController
 
     @Autowired
     private InputUtils inputUtils;
+
+    @Autowired
+    private FileResourceService fileResourceService;
 
     // ---------------------------------------------------------------------
     // POST
@@ -437,5 +450,172 @@ public class DataValueController
         model.addAttribute( "model", value );
 
         return "value";
+    }
+
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_DATAVALUE_ADD')" )
+    @RequestMapping( value = "/files", method = RequestMethod.POST, produces = "text/plain" )
+    public void saveDataValueFileResource(
+        @RequestParam String de,
+        @RequestParam( required = false ) String co,
+        @RequestParam( required = false ) String cc,
+        @RequestParam( required = false ) String cp,
+        @RequestParam String pe,
+        @RequestParam String ou,
+        @RequestBody( required = true ) MultipartFile multipartFile )
+        throws WebMessageException, IOException
+    {
+        // ---------------------------------------------------------------------
+        // Input validation
+        // ---------------------------------------------------------------------
+
+        DataElement dataElement = idObjectManager.get( DataElement.class, de );
+
+        if ( dataElement == null )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "Illegal data element identifier: " + de ) );
+        }
+
+        DataElementCategoryOptionCombo categoryOptionCombo;
+
+        if ( co != null )
+        {
+            categoryOptionCombo = categoryService.getDataElementCategoryOptionCombo( co );
+        }
+        else
+        {
+            categoryOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
+        }
+
+        if ( categoryOptionCombo == null )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "Illegal category option combo identifier: " + co ) );
+        }
+
+        DataElementCategoryOptionCombo attributeOptionCombo = inputUtils.getAttributeOptionCombo( cc, cp );
+
+        if ( attributeOptionCombo == null )
+        {
+            return;
+        }
+
+        Period period = PeriodType.getPeriodFromIsoString( pe );
+
+        if ( period == null )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "Illegal period identifier: " + pe ) );
+        }
+
+        OrganisationUnit organisationUnit = idObjectManager.get( OrganisationUnit.class, ou );
+
+        if ( organisationUnit == null )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "Illegal organisation unit identifier: " + ou ) );
+        }
+
+        boolean isInHierarchy = organisationUnitService.isInUserHierarchy( organisationUnit );
+
+        if ( !isInHierarchy )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "Organisation unit is not in the hierarchy of the current user: " + ou ) );
+        }
+
+        boolean valid = multipartFile != null && !multipartFile.isEmpty();
+
+        if ( !valid )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "File is missing", "The multipart request didn't contain a file or the file was empty." ) );
+        }
+
+        // ---------------------------------------------------------------------
+        // Future period constraint check //TODO better check
+        // ---------------------------------------------------------------------
+
+        if ( period.isFuture() && dataElement.getOpenFuturePeriods() <= 0 )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "One or more data sets for data element does not allow future periods: " + de ) );
+        }
+
+        // ---------------------------------------------------------------------
+        // Locking validation
+        // ---------------------------------------------------------------------
+
+        if ( dataSetService.isLocked( dataElement, period, organisationUnit, null ) )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "Data set is locked" ) );
+        }
+
+        // ---------------------------------------------------------------------
+        // Assemble fileResource
+        // ---------------------------------------------------------------------
+
+//        String storedBy = currentUserService.getCurrentUsername();
+
+        String filename = multipartFile.getOriginalFilename(); // TODO Might be null
+        String contentType = multipartFile.getContentType();
+
+        ByteSource content = new ByteSource()
+        {
+            @Override
+            public InputStream openStream() throws IOException
+            {
+                return multipartFile.getInputStream();
+            }
+        };
+
+        String contentMD5 = content.hash( Hashing.md5() ).toString();
+        String storageKey = "dataValue/" + filename + "-" + contentMD5;
+
+        FileResource fileResource = new FileResource( filename, contentType, contentMD5, storageKey, FileResourceDomain.DATAVALUE );
+
+        // ---------------------------------------------------------------------
+        // Save file resource
+        // ---------------------------------------------------------------------
+
+        Date now = new Date();
+
+        DataValue dataValue = dataValueService.getDataValue( dataElement, period, organisationUnit, categoryOptionCombo, attributeOptionCombo );
+
+        if ( dataValue == null )
+        {
+            dataValue = new DataValue( dataElement, period, organisationUnit, categoryOptionCombo, attributeOptionCombo,
+                StringUtils.trimToNull( value ), storedBy, now, StringUtils.trimToNull( comment ) );
+
+            dataValueService.addDataValue( dataValue );
+        }
+        else
+        {
+            if ( value == null && DataElement.VALUE_TYPE_TRUE_ONLY.equals( dataElement.getType() ) )
+            {
+                if ( comment == null )
+                {
+                    dataValueService.deleteDataValue( dataValue );
+                    return;
+                }
+                else
+                {
+                    value = "false";
+                }
+            }
+
+            if ( value != null )
+            {
+                dataValue.setValue( StringUtils.trimToNull( value ) );
+            }
+
+            if ( comment != null )
+            {
+                dataValue.setComment( StringUtils.trimToNull( comment ) );
+            }
+
+            if ( followUp )
+            {
+                dataValue.toggleFollowUp();
+            }
+
+            dataValue.setLastUpdated( now );
+            dataValue.setStoredBy( storedBy );
+
+            dataValueService.updateDataValue( dataValue );
+        }
     }
 }

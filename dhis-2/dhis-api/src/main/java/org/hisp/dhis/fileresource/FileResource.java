@@ -57,10 +57,11 @@ public class FileResource
     {
     }
 
-    public FileResource( String name, String contentType, String storageKey, FileResourceDomain domain )
+    public FileResource( String name, String contentType, String contentMD5, String storageKey, FileResourceDomain domain )
     {
         this.name = name;
         this.contentType = contentType;
+        this.contentMD5 = contentMD5;
         this.storageKey = storageKey;
         this.domain = domain;
     }
