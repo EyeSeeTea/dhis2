@@ -38,6 +38,7 @@ import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
 
 /**
+ * TODO Implement haveUniqueNames == false
  * @author Halvdan Hoem Grelland
  */
 public class FileResource

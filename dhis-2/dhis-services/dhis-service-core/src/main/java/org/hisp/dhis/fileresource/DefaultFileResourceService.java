@@ -29,6 +29,7 @@ package org.hisp.dhis.fileresource;
  */
 
 import com.google.common.io.ByteSource;
+import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 
 /**
  * @author Halvdan Hoem Grelland
@@ -40,9 +41,9 @@ public class DefaultFileResourceService
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private FileResourceStore fileResourceStore;
+    private GenericIdentifiableObjectStore<FileResource> fileResourceStore;
 
-    public void setFileResourceStore( FileResourceStore fileResourceStore )
+    public void setFileResourceStore( GenericIdentifiableObjectStore<FileResource> fileResourceStore )
     {
         this.fileResourceStore = fileResourceStore;
     }
@@ -67,7 +68,9 @@ public class DefaultFileResourceService
     @Override
     public String saveFileResource( FileResource fileResource, ByteSource content )
     {
-        String name = fileResourceContentStore.saveFileResourceContent( fileResource.getStorageKey(), content );
+        String storageKey = fileResource.getStorageKey();
+
+        String name = fileResourceContentStore.saveFileResourceContent( storageKey, content );
 
         if ( name == null )
         {
@@ -78,7 +81,7 @@ public class DefaultFileResourceService
 
         if ( id <= 0 )
         {
-            fileResourceContentStore.deleteFileResourceContent( fileResource.getStorageKey() );
+            fileResourceContentStore.deleteFileResourceContent( storageKey );
             return null;
         }
 
