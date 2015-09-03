@@ -466,7 +466,7 @@ public class DataValueController
         @RequestParam( required = false ) String cp,
         @RequestParam String pe,
         @RequestParam String ou,
-        @RequestBody( required = true ) MultipartFile multipartFile )
+        @RequestParam( value = "file", required = true ) MultipartFile multipartFile )
         throws WebMessageException, IOException
     {
         // ---------------------------------------------------------------------
