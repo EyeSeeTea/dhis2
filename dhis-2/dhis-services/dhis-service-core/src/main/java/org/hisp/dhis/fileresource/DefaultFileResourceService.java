@@ -29,8 +29,11 @@ package org.hisp.dhis.fileresource;
  */
 
 import com.google.common.io.ByteSource;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.hisp.dhis.user.CurrentUserService;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Halvdan Hoem Grelland
@@ -38,6 +41,9 @@ import org.hisp.dhis.user.CurrentUserService;
 public class DefaultFileResourceService
     implements FileResourceService
 {
+
+    private static final Log log = LogFactory.getLog( DefaultFileResourceService.class );
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -56,13 +62,6 @@ public class DefaultFileResourceService
         this.fileResourceContentStore = fileResourceContentStore;
     }
 
-    private CurrentUserService currentUserService;
-
-    public void setCurrentUserService( CurrentUserService currentUserService )
-    {
-        this.currentUserService = currentUserService;
-    }
-
     // -------------------------------------------------------------------------
     // FileResourceService implementation
     // -------------------------------------------------------------------------
@@ -73,32 +72,32 @@ public class DefaultFileResourceService
         return fileResourceStore.getByUid( uid );
     }
 
+    @Transactional
     @Override
     public String saveFileResource( FileResource fileResource, ByteSource content )
     {
-//        String storageKey = fileResource.getStorageKey();
-//
-//        String name = fileResourceContentStore.saveFileResourceContent( storageKey, content );
-//
-//        if ( name == null )
-//        {
-//            return null;
-//        }
-        FileResource fileResourceA = new FileResource( "filenavn.txt", "text/plain", "trololo", "storageKeyHere", FileResourceDomain.DATAVALUE );
-        fileResourceA.setAssigned( false );
-        fileResourceA.setUser( currentUserService.getCurrentUser() );
-//        int id = fileResourceStore.save( fileResource );
-        fileResourceStore.save( fileResourceA );
-//
-//        if ( id <= 0 )
-//        {
-//            fileResourceContentStore.deleteFileResourceContent( storageKey );
-//            return null;
-//        }
+        String storageKey = fileResource.getStorageKey();
+
+        String name = fileResourceContentStore.saveFileResourceContent( storageKey, content );
+
+        if ( name == null )
+        {
+            log.debug( "Failed saving content for FileResource" );
+            return null;
+        }
+
+        int id = fileResourceStore.save( fileResource );
+
+        if ( id <= 0 )
+        {
+            log.debug( "Failed to persist the FileResource: " + fileResource.getName() );
+            return null;
+        }
 
         return fileResource.getUid();
     }
 
+    @Transactional
     @Override
     public void deleteFileResource( String uid )
     {
