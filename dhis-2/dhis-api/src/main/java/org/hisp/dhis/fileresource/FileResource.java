@@ -135,9 +135,4 @@ public class FileResource
     {
         this.domain = domain;
     }
-
-    private String autoGenerateName()
-    {
-        return Hashing.md5().newHasher().hash().toString();
-    }
 }
