@@ -33,9 +33,6 @@ import static org.hisp.dhis.setting.SystemSettingManager.KEY_DATA_IMPORT_STRICT_
 import static org.hisp.dhis.setting.SystemSettingManager.KEY_DATA_IMPORT_STRICT_ORGANISATION_UNITS;
 import static org.hisp.dhis.setting.SystemSettingManager.KEY_DATA_IMPORT_STRICT_PERIODS;
 
-import com.google.common.hash.Hashing;
-import com.google.common.io.ByteSource;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -44,6 +41,8 @@ import java.io.InputStream;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.common.hash.Hashing;
+import com.google.common.io.ByteSource;
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.ValueType;
