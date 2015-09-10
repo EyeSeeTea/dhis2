@@ -1061,7 +1061,7 @@ Ext.onReady( function() {
 
 		getMap = function() {
             var isPlugin = GIS.plugin && !GIS.app,
-                type = isPlugin ? 'jsonp' : 'json',
+                type = 'json',
                 url = gis.init.contextPath + '/api/maps/' + gis.map.id + '.' + type + '?fields=' + gis.conf.url.mapFields.join(','),
                 success,
                 failure;
@@ -1105,7 +1105,7 @@ Ext.onReady( function() {
 
                 gis.alert(r);
             };
-
+console.log(gis.util.connection);
             if (isPlugin) {
                 Ext.data.JsonP.request({
                     url: url,
@@ -2351,6 +2351,11 @@ Ext.onReady( function() {
                     paramString += view.userOrgUnit[i] + (i < view.userOrgUnit.length - 1 ? ';' : '');
                 }
             }
+            
+            // relative period date
+            if (view.relativePeriodDate) {
+                paramString += '&relativePeriodDate=' + view.relativePeriodDate;
+            }
 
 			success = function(json) {
 				var response = gis.api.response.Response(json),
@@ -3289,6 +3294,25 @@ Ext.onReady( function() {
                 return dataDimensions;
             };
 
+            util.date = {};
+
+            util.date.getYYYYMMDD = function(param) {
+                if (!Ext.isString(param)) {
+                    if (!(Object.prototype.toString.call(param) === '[object Date]' && param.toString() !== 'Invalid date')) {
+                        return null;
+                    }
+                }
+
+                var date = new Date(param),
+                    month = '' + (1 + date.getMonth()),
+                    day = '' + date.getDate();
+
+                month = month.length === 1 ? '0' + month : month;
+                day = day.length === 1 ? '0' + day : day;
+
+                return date.getFullYear() + '-' + month + '-' + day;
+            };
+
             util.message = {};
 
             util.message.alert = function(obj) {
@@ -3347,7 +3371,18 @@ Ext.onReady( function() {
 
                 window.show();
             };
-		}());
+
+            util.connection = {};
+
+            util.connection.ajax = function(requestConfig, authConfig) {
+                if (authConfig.crossDomain && Ext.isString(authConfig.username) && Ext.isString(authConfig.password)) {
+                    requestConfig.headers = Ext.isObject(authConfig.headers) ? authConfig.headers : {};
+                    requestConfig.headers['Authorization'] = 'Basic ' + btoa(authConfig.username + ':' + authConfig.password);
+                }
+
+                Ext.Ajax.request(requestConfig);
+            };
+        }());
 
 		gis.init = init;
 		gis.conf = conf;
@@ -3640,6 +3675,11 @@ Ext.onReady( function() {
 
                     if (Ext.Array.from(config.userOrgUnit).length) {
                         layout.userOrgUnit = Ext.Array.from(config.userOrgUnit);
+                    }
+                    
+                    // relative period date
+                    if (util.date.getYYYYMMDD(config.relativePeriodDate)) {
+                        layout.relativePeriodDate = support.prototype.date.getYYYYMMDD(config.relativePeriodDate);
                     }
 
                     return Ext.apply(layout, forceApplyConfig);

@@ -263,7 +263,7 @@ public class JdbcEventAnalyticsTableManager
         {
             ValueType valueType = dataElement.getValueType();
             String dataType = getColumnType( valueType );
-            String dataClause = dataElement.isNumericType() ? numericClause : dataElement.isDateType() ? dateClause : "";
+            String dataClause = dataElement.isNumericType() ? numericClause : dataElement.getValueType().isDate() ? dateClause : "";
             String select = getSelectClause( valueType );
 
             String sql = "(select " + select + " from trackedentitydatavalue where programstageinstanceid=psi.programstageinstanceid " + 
@@ -289,10 +289,9 @@ public class JdbcEventAnalyticsTableManager
 
         for ( TrackedEntityAttribute attribute : table.getProgram().getTrackedEntityAttributes() )
         {
-            ValueType valueType = ValueType.getFromAttribute( attribute );
-            String dataType = getColumnType( valueType );
+            String dataType = getColumnType( attribute.getValueType() );
             String dataClause = attribute.isNumericType() ? numericClause : attribute.isDateType() ? dateClause : "";
-            String select = getSelectClause( valueType );
+            String select = getSelectClause( attribute.getValueType() );
 
             String sql = "(select " + select + " from trackedentityattributevalue where trackedentityinstanceid=pi.trackedentityinstanceid " + 
                 "and trackedentityattributeid=" + attribute.getId() + dataClause + ") as " + quote( attribute.getUid() );
@@ -304,7 +303,7 @@ public class JdbcEventAnalyticsTableManager
         for ( TrackedEntityAttribute attribute : table.getProgram().getTrackedEntityAttributesWithLegendSet() )
         {
             String column = quote( attribute.getUid() + PartitionUtils.SEP + attribute.getLegendSet().getUid() );
-            String select = getSelectClause( ValueType.getFromAttribute( attribute ) );
+            String select = getSelectClause( attribute.getValueType() );
             
             String sql = "(select l.uid from maplegend l inner join maplegendsetmaplegend lsl on l.maplegendid=lsl.maplegendid " +
                 "inner join trackedentityattributevalue av on l.startvalue <= " + select + " and l.endvalue > " + select + " " +
@@ -320,13 +319,15 @@ public class JdbcEventAnalyticsTableManager
         String[] ps = { quote( "ps" ), "character(11) not null", "ps.uid" };
         String[] erd = { quote( "enrollmentdate" ), "timestamp", "pi.enrollmentdate" };
         String[] ed = { quote( "executiondate" ), "timestamp", "psi.executiondate" };
+        String[] dd = { quote( "duedate" ), "timestamp", "psi.duedate" };
+        String[] cd = { quote( "completeddate" ), "timestamp", "psi.completeddate" };
         String[] longitude = { quote( "longitude" ), dbl, "psi.longitude" };
         String[] latitude = { quote( "latitude" ), dbl, "psi.latitude" };
         String[] ou = { quote( "ou" ), "character(11) not null", "ou.uid" };
         String[] oun = { quote( "ouname" ), "character varying(230) not null", "ou.name" };
         String[] ouc = { quote( "oucode" ), "character varying(50)", "ou.code" };
 
-        columns.addAll( Lists.newArrayList( psi, pi, ps, erd, ed, longitude, latitude, ou, oun, ouc ) );
+        columns.addAll( Lists.newArrayList( psi, pi, ps, erd, ed, dd, cd, longitude, latitude, ou, oun, ouc ) );
 
         if ( table.hasProgram() && table.getProgram().isRegistration() )
         {

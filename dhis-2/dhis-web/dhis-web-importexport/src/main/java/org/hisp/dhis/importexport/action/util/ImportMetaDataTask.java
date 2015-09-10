@@ -30,12 +30,13 @@ package org.hisp.dhis.importexport.action.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.security.SecurityContextRunnable;
+import org.hisp.dhis.commons.util.DebugUtils;
 import org.hisp.dhis.dxf2.common.ImportOptions;
+import org.hisp.dhis.dxf2.common.JacksonUtils;
 import org.hisp.dhis.dxf2.metadata.ImportService;
 import org.hisp.dhis.dxf2.metadata.MetaData;
-import org.hisp.dhis.dxf2.common.JacksonUtils;
 import org.hisp.dhis.scheduling.TaskId;
-import org.hisp.dhis.commons.util.DebugUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,7 +45,7 @@ import java.io.InputStream;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public class ImportMetaDataTask
-    implements Runnable
+    extends SecurityContextRunnable
 {
     private static final Log log = LogFactory.getLog( ImportMetaDataTask.class );
 
@@ -60,9 +61,10 @@ public class ImportMetaDataTask
 
     private String format;
 
-    public ImportMetaDataTask( String userUid, ImportService importService, ImportOptions importOptions, 
+    public ImportMetaDataTask( String userUid, ImportService importService, ImportOptions importOptions,
         InputStream inputStream, TaskId taskId, String format )
     {
+        super();
         this.userUid = userUid;
         this.importService = importService;
         this.importOptions = importOptions;
@@ -72,9 +74,9 @@ public class ImportMetaDataTask
     }
 
     @Override
-    public void run()
+    public void call()
     {
-        MetaData metaData = null;
+        MetaData metaData;
 
         try
         {
@@ -90,7 +92,7 @@ public class ImportMetaDataTask
         catch ( IOException ex )
         {
             log.error( DebugUtils.getStackTrace( ex ) );
-            
+
             throw new RuntimeException( "Failed to parse meta data input stream", ex );
         }
 

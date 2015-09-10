@@ -39,6 +39,7 @@ import org.hibernate.SessionFactory;
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
+import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dxf2.events.enrollment.Enrollment;
 import org.hisp.dhis.dxf2.events.enrollment.EnrollmentService;
@@ -149,8 +150,8 @@ public class RegistrationMultiEventsServiceTest
 
         dataElementA = createDataElement( 'A' );
         dataElementB = createDataElement( 'B' );
-        dataElementA.setType( DataElement.VALUE_TYPE_INT );
-        dataElementB.setType( DataElement.VALUE_TYPE_INT );
+        dataElementA.setValueType( ValueType.INTEGER );
+        dataElementB.setValueType( ValueType.INTEGER );
 
         identifiableObjectManager.save( dataElementA );
         identifiableObjectManager.save( dataElementB );
@@ -162,7 +163,7 @@ public class RegistrationMultiEventsServiceTest
         identifiableObjectManager.save( programStageA );
         identifiableObjectManager.save( programStageB );
 
-        programA = createProgram( 'A', new HashSet<ProgramStage>(), organisationUnitA );
+        programA = createProgram( 'A', new HashSet<>(), organisationUnitA );
         programA.setProgramType( ProgramType.WITH_REGISTRATION );
         identifiableObjectManager.save( programA );
 

@@ -28,19 +28,17 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import org.hisp.dhis.DhisSpringTest;
+import org.hisp.dhis.common.ValueType;
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.hisp.dhis.DhisSpringTest;
-import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import static org.junit.Assert.*;
 
 /**
  * @author Kristian Nordal
@@ -100,13 +98,13 @@ public class DataElementServiceTest
         assertNotNull( dataElementA.getLastUpdated() );
 
         dataElementA = dataElementService.getDataElement( idA );
-        assertEquals( DataElement.VALUE_TYPE_INT, dataElementA.getType() );
+        assertEquals( ValueType.INTEGER, dataElementA.getValueType() );
 
-        dataElementA.setType( DataElement.VALUE_TYPE_BOOL );
+        dataElementA.setValueType( ValueType.BOOLEAN );
         dataElementService.updateDataElement( dataElementA );
         dataElementA = dataElementService.getDataElement( idA );
-        assertNotNull( dataElementA.getType() );
-        assertEquals( DataElement.VALUE_TYPE_BOOL, dataElementA.getType() );
+        assertNotNull( dataElementA.getValueType() );
+        assertEquals( ValueType.BOOLEAN, dataElementA.getValueType() );
     }
 
     @Test
@@ -156,9 +154,9 @@ public class DataElementServiceTest
         DataElement dataElementB = createDataElement( 'B' );
         DataElement dataElementC = createDataElement( 'C' );
 
-        dataElementA.setCode( "codeA");
-        dataElementB.setCode( "codeB");
-        dataElementC.setCode( "codeC");
+        dataElementA.setCode( "codeA" );
+        dataElementB.setCode( "codeB" );
+        dataElementC.setCode( "codeC" );
 
         int idA = dataElementService.addDataElement( dataElementA );
         int idB = dataElementService.addDataElement( dataElementB );
@@ -259,10 +257,10 @@ public class DataElementServiceTest
         DataElement dataElementC = createDataElement( 'C' );
         DataElement dataElementD = createDataElement( 'D' );
 
-        dataElementA.setType( DataElement.VALUE_TYPE_INT );
-        dataElementB.setType( DataElement.VALUE_TYPE_BOOL );
-        dataElementC.setType( DataElement.VALUE_TYPE_STRING );
-        dataElementD.setType( DataElement.VALUE_TYPE_INT );
+        dataElementA.setValueType( ValueType.INTEGER );
+        dataElementB.setValueType( ValueType.BOOLEAN );
+        dataElementC.setValueType( ValueType.TEXT );
+        dataElementD.setValueType( ValueType.INTEGER );
 
         dataElementService.addDataElement( dataElementA );
         dataElementService.addDataElement( dataElementB );
@@ -283,10 +281,8 @@ public class DataElementServiceTest
     @Test
     public void testGetDataElementsByAggregationOperator()
     {
-        assertEquals( 0, dataElementService.getDataElementsByAggregationOperator(
-            DataElement.AGGREGATION_OPERATOR_AVERAGE_SUM ).size() );
-        assertEquals( 0, dataElementService.getDataElementsByAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM )
-            .size() );
+        assertEquals( 0, dataElementService.getDataElementsByAggregationOperator( DataElement.AGGREGATION_OPERATOR_AVERAGE_SUM ).size() );
+        assertEquals( 0, dataElementService.getDataElementsByAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM ).size() );
 
         DataElement dataElementA = createDataElement( 'A' );
         dataElementA.setAggregationOperator( DataElement.AGGREGATION_OPERATOR_AVERAGE_SUM );
@@ -302,58 +298,52 @@ public class DataElementServiceTest
         dataElementService.addDataElement( dataElementC );
         dataElementService.addDataElement( dataElementD );
 
-        assertEquals( 1, dataElementService.getDataElementsByAggregationOperator(
-            DataElement.AGGREGATION_OPERATOR_AVERAGE_SUM ).size() );
-        assertEquals( 3, dataElementService.getDataElementsByAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM )
-            .size() );
+        assertEquals( 1, dataElementService.getDataElementsByAggregationOperator( DataElement.AGGREGATION_OPERATOR_AVERAGE_SUM ).size() );
+        assertEquals( 3, dataElementService.getDataElementsByAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM ).size() );
     }
 
     @Test
-    public void testGetDataElementsByDomainType()
+    public void testGetDataElementsByValueType()
     {
-        assertEquals( 0, dataElementService.getDataElementsByType( DataElement.VALUE_TYPE_INT ).size() );
-        assertEquals( 0, dataElementService.getDataElementsByType( DataElement.VALUE_TYPE_BOOL ).size() );
-
-        DataElement dataElementA = createDataElement( 'A' );
-        dataElementA.setType( DataElement.VALUE_TYPE_INT );
-        DataElement dataElementB = createDataElement( 'B' );
-        dataElementB.setType( DataElement.VALUE_TYPE_BOOL );
-        DataElement dataElementC = createDataElement( 'C' );
-        dataElementC.setType( DataElement.VALUE_TYPE_BOOL );
-        DataElement dataElementD = createDataElement( 'D' );
-        dataElementD.setType( DataElement.VALUE_TYPE_BOOL );
+        DataElement dataElementA = createDataElement( 'A', ValueType.NUMBER );
+        DataElement dataElementB = createDataElement( 'B', ValueType.NUMBER );
+        DataElement dataElementC = createDataElement( 'C', ValueType.BOOLEAN );
+        DataElement dataElementD = createDataElement( 'D', ValueType.TEXT );
 
         dataElementService.addDataElement( dataElementA );
         dataElementService.addDataElement( dataElementB );
         dataElementService.addDataElement( dataElementC );
         dataElementService.addDataElement( dataElementD );
 
-        assertEquals( 1, dataElementService.getDataElementsByType( DataElement.VALUE_TYPE_INT ).size() );
-        assertEquals( 3, dataElementService.getDataElementsByType( DataElement.VALUE_TYPE_BOOL ).size() );
+        assertEquals( 2, dataElementService.getDataElementsByValueType( ValueType.NUMBER ).size() );
+        assertEquals( 1, dataElementService.getDataElementsByValueType( ValueType.BOOLEAN ).size() );
+        assertEquals( 1, dataElementService.getDataElementsByValueType( ValueType.TEXT ).size() );
+        assertEquals( 0, dataElementService.getDataElementsByValueType( ValueType.LONG_TEXT ).size() );
+        assertEquals( 0, dataElementService.getDataElementsByValueType( ValueType.INTEGER ).size() );
+        assertEquals( 0, dataElementService.getDataElementsByValueType( ValueType.INTEGER_POSITIVE ).size() );
+        assertEquals( 0, dataElementService.getDataElementsByValueType( ValueType.INTEGER_NEGATIVE ).size() );
     }
 
     @Test
-    public void testGetDataElementsByType()
+    public void testGetDataElementsByValueTypes()
     {
-        assertEquals( 0, dataElementService.getDataElementsByType( DataElement.VALUE_TYPE_INT ).size() );
-        assertEquals( 0, dataElementService.getDataElementsByType( DataElement.VALUE_TYPE_BOOL ).size() );
-
-        DataElement dataElementA = createDataElement( 'A' );
-        dataElementA.setType( DataElement.VALUE_TYPE_INT );
-        DataElement dataElementB = createDataElement( 'B' );
-        dataElementB.setType( DataElement.VALUE_TYPE_BOOL );
-        DataElement dataElementC = createDataElement( 'C' );
-        dataElementC.setType( DataElement.VALUE_TYPE_BOOL );
-        DataElement dataElementD = createDataElement( 'D' );
-        dataElementD.setType( DataElement.VALUE_TYPE_BOOL );
+        DataElement dataElementA = createDataElement( 'A', ValueType.INTEGER );
+        DataElement dataElementB = createDataElement( 'B', ValueType.INTEGER_POSITIVE );
+        DataElement dataElementC = createDataElement( 'C', ValueType.INTEGER_ZERO_OR_POSITIVE );
+        DataElement dataElementD = createDataElement( 'D', ValueType.NUMBER );
+        DataElement dataElementE = createDataElement( 'E', ValueType.TEXT );
+        DataElement dataElementF = createDataElement( 'F', ValueType.LONG_TEXT );
 
         dataElementService.addDataElement( dataElementA );
         dataElementService.addDataElement( dataElementB );
         dataElementService.addDataElement( dataElementC );
         dataElementService.addDataElement( dataElementD );
+        dataElementService.addDataElement( dataElementE );
+        dataElementService.addDataElement( dataElementF );
 
-        assertEquals( 1, dataElementService.getDataElementsByType( DataElement.VALUE_TYPE_INT ).size() );
-        assertEquals( 3, dataElementService.getDataElementsByType( DataElement.VALUE_TYPE_BOOL ).size() );
+        assertEquals( 3, dataElementService.getDataElementsByValueTypes( ValueType.INTEGER_TYPES ).size() );
+        assertEquals( 4, dataElementService.getDataElementsByValueTypes( ValueType.NUMERIC_TYPES ).size() );
+        assertEquals( 2, dataElementService.getDataElementsByValueTypes( ValueType.TEXT_TYPES ).size() );
     }
 
     // -------------------------------------------------------------------------

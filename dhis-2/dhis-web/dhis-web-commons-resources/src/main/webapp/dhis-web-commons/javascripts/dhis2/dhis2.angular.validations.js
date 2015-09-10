@@ -6,31 +6,31 @@ d2Directives.directive('d2NumberValidator', function() {
         link: function (scope, element, attrs, ngModel) {
             
             function setValidity(numberType, isRequired){
-                if(numberType === 'number'){
+                if(numberType === 'NUMBER'){
                     ngModel.$validators.number = function(value) {
                     	value = value === 0 ? value.toString(): value; 
                         return value === 'null' || !value ? !isRequired : dhis2.validation.isNumber(value);
                     };
                 }
-                else if(numberType === 'posInt'){
+                else if(numberType === 'INTEGER_POSITIVE'){
                     ngModel.$validators.posInt = function(value) {
                     	value = value === 0 ? value.toString(): value; 
                         return value === 'null' || !value ? !isRequired : dhis2.validation.isPositiveInt(value);
                     };
                 }
-                else if(numberType === 'negInt'){
+                else if(numberType === 'INTEGER_NEGATIVE'){
                     ngModel.$validators.negInt = function(value) {
                     	value = value === 0 ? value.toString(): value;
                         return value === 'null' || !value ? !isRequired : dhis2.validation.isNegativeInt(value);
                     };
                 }
-                else if(numberType === 'zeroPositiveInt'){
+                else if(numberType === 'INTEGER_ZERO_OR_POSITIVE'){
                     ngModel.$validators.zeroPositiveInt = function(value) {
                     	value = value === 0 ? value.toString(): value; 
                         return value === 'null' || !value ? !isRequired : dhis2.validation.isZeroOrPositiveInt(value);
                     };
                 }
-                else if(numberType === 'int'){
+                else if(numberType === 'INTEGER'){
                     ngModel.$validators.int = function(value) {
                     	value = value === 0 ? value.toString(): value;
                         return value === 'null' || !value ? !isRequired : dhis2.validation.isInt(value);
@@ -68,10 +68,9 @@ d2Directives.directive('d2NumberValidator', function() {
                 }
                 var maxDate = $parse(attrs.maxDate)(scope);
                 var convertedDate = DateUtils.format(angular.copy(value));
-                var isValid = value === convertedDate;
-                var calendarSetting = CalendarService.getSetting();
+                var isValid = value === convertedDate;                
                 if(isValid){
-                    isValid = maxDate === 0 ? !moment(convertedDate, calendarSetting.momentFormat).isAfter(DateUtils.getToday()) : isValid;
+                    isValid = maxDate === 0 ? !moment(convertedDate).isAfter(DateUtils.getToday()) : isValid;
                 }
                 return isValid;
             };

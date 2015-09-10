@@ -3795,7 +3795,7 @@ Ext.onReady( function() {
                 var layoutWindow = ns.app.aggregateLayoutWindow;
 
                 this.each( function(record) {
-                    if (Ext.Array.contains(['int', 'number'], (record.data.valueType || record.data.type))) {
+                    if (Ext.Array.contains(ns.core.conf.valueType.numericTypes, record.data.valueType)) {
                         layoutWindow.valueStore.add(record.data);
                     }
                 });
@@ -4140,7 +4140,7 @@ Ext.onReady( function() {
             }
             else {
                 Ext.Ajax.request({
-                    url: ns.core.init.contextPath + '/api/programStages.json?filter=id:eq:' + stageId + '&fields=programStageDataElements[dataElement[id,' + ns.core.init.namePropertyUrl + ',type,optionSet[id,name]]]',
+                    url: ns.core.init.contextPath + '/api/programStages.json?filter=id:eq:' + stageId + '&fields=programStageDataElements[dataElement[id,' + ns.core.init.namePropertyUrl + ',valueType,optionSet[id,name]]]',
                     success: function(r) {
                         var objects = Ext.decode(r.responseText).programStages,
                             dataElements;
@@ -4356,7 +4356,6 @@ Ext.onReady( function() {
 			var getUxType,
 				ux;
 
-            element.type = element.type || element.valueType;
 			index = index || dataElementSelected.items.items.length;
 
 			getUxType = function(element) {
@@ -4365,19 +4364,19 @@ Ext.onReady( function() {
 					return 'Ext.ux.panel.OrganisationUnitGroupSetContainer';
 				}
 
-				if (element.type === 'int' || element.type === 'number') {
+				if (Ext.Array.contains(ns.core.conf.valueType.numericTypes, element.valueType)) {
 					return 'Ext.ux.panel.DataElementIntegerContainer';
 				}
 
-				if (element.type === 'string') {
+				if (Ext.Array.contains(ns.core.conf.valueType.textTypes, element.valueType)) {
 					return 'Ext.ux.panel.DataElementStringContainer';
 				}
 
-				if (element.type === 'date') {
+				if (Ext.Array.contains(ns.core.conf.valueType.dateTypes, element.valueType)) {
 					return 'Ext.ux.panel.DataElementDateContainer';
 				}
 
-				if (element.type === 'bool' || element.type === 'trueOnly') {
+				if (Ext.Array.contains(ns.core.conf.valueType.booleanTypes, element.valueType)) {
 					return 'Ext.ux.panel.DataElementBooleanContainer';
 				}
 
@@ -4418,7 +4417,7 @@ Ext.onReady( function() {
 				allElements = [],
                 aggWindow = ns.app.aggregateLayoutWindow,
                 //queryWindow = ns.app.queryLayoutWindow,
-                includeKeys = ['int', 'number', 'bool', 'boolean', 'trueOnly'],
+                includeKeys = ns.core.conf.valueType.aggregateTypes,
                 ignoreKeys = ['pe', 'ou'],
                 recordMap = {
 					'pe': {id: 'pe', name: 'Periods'},
@@ -4456,7 +4455,7 @@ Ext.onReady( function() {
 				element = dataElements[i];
 				allElements.push(element);
 
-				if (element.type === 'int' && element.filter) {
+				if (Ext.Array.contains(ns.core.conf.valueType.numericTypes, element.valueType) && element.filter) {
 					a = element.filter.split(':');
 					numberOfElements = a.length / 2;
 
@@ -4478,7 +4477,6 @@ Ext.onReady( function() {
 			// panel, store
             for (var i = 0, element, ux, store; i < allElements.length; i++) {
 				element = allElements[i];
-                element.type = element.type || element.valueType;
                 element.name = element.name || element.displayName;
                 recordMap[element.id] = element;
 
@@ -4491,7 +4489,7 @@ Ext.onReady( function() {
                     }
                 }
 
-                store = Ext.Array.contains(includeKeys, element.type) || element.optionSet ? aggWindow.colStore : aggWindow.fixedFilterStore;
+                store = Ext.Array.contains(includeKeys, element.valueType) || element.optionSet ? aggWindow.colStore : aggWindow.fixedFilterStore;
 
                 aggWindow.addDimension(element, store, valueStore);
                 //queryWindow.colStore.add(element);
@@ -4534,7 +4532,7 @@ Ext.onReady( function() {
 					for (var i = 0, store, record, dim; i < layout.filters.length; i++) {
                         dim = layout.filters[i];
 						record = recordMap[dim.dimension];
-						store = Ext.Array.contains(includeKeys, element.type) || element.optionSet ? aggWindow.filterStore : aggWindow.fixedFilterStore;
+						store = Ext.Array.contains(includeKeys, element.valueType) || element.optionSet ? aggWindow.filterStore : aggWindow.fixedFilterStore;
 
                         //aggWindow.addDimension(record || extendDim(Ext.clone(dim)), store, null, true);
                         store.add(record || extendDim(Ext.clone(dim)));
@@ -7440,7 +7438,7 @@ Ext.onReady( function() {
 						iconCls: 'ns-menu-item-datasource',
 						handler: function() {
 							if (ns.core.init.contextPath && ns.app.paramString) {
-								window.open(ns.core.init.contextPath + ns.core.web.analytics.getParamString(ns.app.layout, 'html'), '_blank');
+								window.open(ns.core.init.contextPath + ns.core.web.analytics.getParamString(ns.app.layout, 'html+css'), '_blank');
 							}
 						}
 					},

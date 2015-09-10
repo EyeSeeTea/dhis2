@@ -28,18 +28,17 @@ package org.hisp.dhis.dxf2.metadata.tasks;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.security.SecurityContextRunnable;
 import org.hisp.dhis.dxf2.common.ImportOptions;
 import org.hisp.dhis.dxf2.metadata.ImportService;
 import org.hisp.dhis.dxf2.metadata.MetaData;
 import org.hisp.dhis.scheduling.TaskId;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public class ImportMetaDataTask
-    implements Runnable
+    extends SecurityContextRunnable
 {
     private String userUid;
 
@@ -51,22 +50,19 @@ public class ImportMetaDataTask
 
     private final MetaData metaData;
 
-    private final Authentication authentication;
-
     public ImportMetaDataTask( String userUid, ImportService importService, ImportOptions importOptions, TaskId taskId, MetaData metaData )
     {
+        super();
         this.userUid = userUid;
         this.importService = importService;
         this.importOptions = importOptions;
         this.taskId = taskId;
         this.metaData = metaData;
-        this.authentication = SecurityContextHolder.getContext().getAuthentication();
     }
 
     @Override
-    public void run()
+    public void call()
     {
-        SecurityContextHolder.getContext().setAuthentication( authentication );
         importService.importMetaData( userUid, metaData, importOptions, taskId );
     }
 }

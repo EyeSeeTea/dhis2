@@ -896,7 +896,8 @@ public class HibernateCaseAggregationConditionStore
             if ( isExist )
             {
                 TrackedEntityAttribute attribute = attributeService.getTrackedEntityAttribute( Integer.parseInt( attributeId ) );
-                if ( attribute.getValueType().equals( TrackedEntityAttribute.TYPE_NUMBER ) )
+
+                if ( ValueType.NUMBER == attribute.getValueType() )
                 {
                     sql += " AND cast( _pav.value as " + statementBuilder.getDoubleColumnType() + " )  ";
                 }
@@ -1328,7 +1329,7 @@ public class HibernateCaseAggregationConditionStore
         Date endDate = calEndDate.getTime();
 
         CalendarPeriodType periodType = (CalendarPeriodType) PeriodType.getPeriodTypeByName( periodTypeName );
-        List<Period> periods = new ArrayList<Period>( periodType.generatePeriods( startDate, endDate ) );
+        List<Period> periods = new ArrayList<>( periodType.generatePeriods( startDate, endDate ) );
         periods = periodService.reloadPeriods( periods );
 
         return periods;

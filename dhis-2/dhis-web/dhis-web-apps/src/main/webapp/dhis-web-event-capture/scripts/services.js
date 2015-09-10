@@ -10,7 +10,7 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
     var store = new dhis2.storage.Store({
         name: 'dhis2ec',
         adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
-        objectStores: ['programs', 'programStages', 'geoJsons', 'optionSets', 'events', 'programValidations', 'programRules', 'programRuleVariables', 'programIndicators', 'ouLevels', 'constants']
+        objectStores: ['programs', 'programStages', 'categories', 'geoJsons', 'optionSets', 'events', 'programValidations', 'programRules', 'programRuleVariables', 'programIndicators', 'ouLevels', 'constants']
     });
     return{
         currentStore: store
@@ -200,9 +200,27 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
             var objs = [];
             
             ECStorageService.currentStore.open().done(function(){
-                ECStorageService.currentStore.getAll(store, program).done(function(data){   
+                ECStorageService.currentStore.getAll(store).done(function(data){   
                     angular.forEach(data, function(o){
                         if(o.program.id === program){                            
+                            objs.push(o);                               
+                        }                        
+                    });
+                    $rootScope.$apply(function(){
+                        def.resolve(objs);
+                    });
+                });                
+            });            
+            return def.promise;
+        },
+        getByIds: function(store, ids){
+            var def = $q.defer();
+            var objs = [];
+            
+            ECStorageService.currentStore.open().done(function(){
+                ECStorageService.currentStore.getAll(store).done(function(data){   
+                    angular.forEach(data, function(o){
+                        if(ids.indexOf(o.id) !== -1){                            
                             objs.push(o);                               
                         }                        
                     });
@@ -288,7 +306,7 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
                 dhis2Event.id = dhis2.util.uid();  
                 dhis2Event.event = dhis2Event.id;
                 dhis2.ec.store.set( 'events', dhis2Event );                
-                return {importSummaries: [{status: 'SUCCESS', reference: dhis2Event.id}]};
+                return {response: {importSummaries: [{status: 'SUCCESS', reference: dhis2Event.id}]}};
             });
             return promise;            
         },        
@@ -432,7 +450,7 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
                     var programRuleVariablesArray = [];
                     //Loop through and add the variables belonging to this program
                     angular.forEach(variables, function(variable){
-                       if(variable.program.id == programUid) {
+                       if(variable.program.id === programUid) {
                             programRuleVariablesArray.push(variable);
                        }
                     });

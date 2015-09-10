@@ -76,6 +76,7 @@ import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.common.QueryFilter;
 import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.common.QueryOperator;
+import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.commons.collection.ListUtils;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
@@ -85,6 +86,8 @@ import org.hisp.dhis.legend.LegendSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramIndicator;
+import org.hisp.dhis.program.ProgramIndicatorService;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageService;
@@ -132,6 +135,9 @@ public class DefaultEventAnalyticsService
     private TrackedEntityAttributeService attributeService;
     
     @Autowired
+    ProgramIndicatorService programIndicatorService;
+    
+    @Autowired
     private OrganisationUnitService organisationUnitService;
 
     @Autowired
@@ -169,6 +175,8 @@ public class DefaultEventAnalyticsService
         securityManager.decideAccess( params );
         
         queryPlanner.validate( params );
+        
+        params.removeProgramIndicatorItems(); // Not supported as items for aggregate
         
         Grid grid = new ListGrid();
 
@@ -376,11 +384,11 @@ public class DefaultEventAnalyticsService
     @Override
     public EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate,
         Set<String> dimension, Set<String> filter, String value, AggregationType aggregationType, boolean skipMeta, boolean skipData, boolean skipRounding, 
-        boolean hierarchyMeta, boolean showHierarchy, SortOrder sortOrder, Integer limit, EventOutputType outputType, boolean collapseDataDimensions, 
+        boolean completedOnly, boolean hierarchyMeta, boolean showHierarchy, SortOrder sortOrder, Integer limit, EventOutputType outputType, boolean collapseDataDimensions, 
         boolean aggregateData, DisplayProperty displayProperty, I18nFormat format )
     {
         EventQueryParams params = getFromUrl( program, stage, startDate, endDate, dimension, filter, null, null, null,
-            skipMeta, skipData, hierarchyMeta, false, displayProperty, null, null, format );
+            skipMeta, skipData, completedOnly, hierarchyMeta, false, displayProperty, null, null, format );
                 
         params.setValue( getValueDimension( value ) );
         params.setAggregationType( aggregationType );
@@ -398,7 +406,8 @@ public class DefaultEventAnalyticsService
     @Override
     public EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate,
         Set<String> dimension, Set<String> filter, String ouMode, Set<String> asc, Set<String> desc,
-        boolean skipMeta, boolean skipData, boolean hierarchyMeta, boolean coordinatesOnly, DisplayProperty displayProperty, Integer page, Integer pageSize, I18nFormat format )
+        boolean skipMeta, boolean skipData, boolean completedOnly, boolean hierarchyMeta, boolean coordinatesOnly, 
+        DisplayProperty displayProperty, Integer page, Integer pageSize, I18nFormat format )
     {
         EventQueryParams params = new EventQueryParams();
 
@@ -493,6 +502,7 @@ public class DefaultEventAnalyticsService
         params.setOrganisationUnitMode( ouMode );
         params.setSkipMeta( skipMeta );
         params.setSkipData( skipData );
+        params.setCompletedOnly( completedOnly );
         params.setHierarchyMeta( hierarchyMeta );
         params.setCoordinatesOnly( coordinatesOnly );
         params.setDisplayProperty( displayProperty );
@@ -691,7 +701,7 @@ public class DefaultEventAnalyticsService
 
         if ( de != null ) //TODO check if part of program
         {
-            return new QueryItem( de, legendSet, de.getType(), de.getAggregationType(), de.getOptionSet() );
+            return new QueryItem( de, legendSet, de.getValueType(), de.getAggregationType(), de.getOptionSet() );
         }
 
         TrackedEntityAttribute at = attributeService.getTrackedEntityAttribute( item );
@@ -699,6 +709,13 @@ public class DefaultEventAnalyticsService
         if ( at != null )
         {
             return new QueryItem( at, legendSet, at.getValueType(), at.getAggregationType(), at.getOptionSet() );
+        }
+        
+        ProgramIndicator pi = programIndicatorService.getProgramIndicatorByUid( item );
+        
+        if ( pi != null )
+        {
+            return new QueryItem( pi, legendSet, ValueType.NUMBER, pi.getAggregationType(), null );
         }
 
         throw new IllegalQueryException( "Item identifier does not reference any data element or attribute part of the program: " + item );

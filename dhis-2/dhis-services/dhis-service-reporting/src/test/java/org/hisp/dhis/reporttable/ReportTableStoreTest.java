@@ -189,13 +189,13 @@ public class ReportTableStoreTest
     public void testSaveGetReportTable()
     {
         ReportTable reportTableA = new ReportTable( "Immunization",
-            new ArrayList<DataElement>(), indicators, new ArrayList<DataSet>(), periods, units, 
+            new ArrayList<>(), indicators, new ArrayList<>(), periods, units,
             true, true, false, relativesA, null, "january_2000" );        
         ReportTable reportTableB = new ReportTable( "Prescriptions",
-            dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, units, 
+            dataElements, new ArrayList<>(), new ArrayList<>(), periods, units,
             false, false, true, relativesB, null, "january_2000" );
         ReportTable reportTableC = new ReportTable( "Assualt",
-            new ArrayList<DataElement>(), new ArrayList<Indicator>(), dataSets, periods, units, 
+            new ArrayList<>(), new ArrayList<>(), dataSets, periods, units,
             false, false, true, relativesC, null, "january_2000" );
         
         int idA = reportTableStore.save( reportTableA );
@@ -210,26 +210,17 @@ public class ReportTableStoreTest
         assertEquals( indicators, reportTableA.getIndicators() );
         assertEquals( periods, reportTableA.getPeriods() );
         assertEquals( units, reportTableA.getOrganisationUnits() );
-        assertEquals( true, reportTableA.isDoIndicators() );
-        assertEquals( true, reportTableA.isDoPeriods() );
-        assertEquals( false, reportTableA.isDoUnits() );
         assertEquals( relativesA, reportTableA.getRelatives() );
         
         assertEquals( "Prescriptions", reportTableB.getName() );
         assertEquals( dataElements, reportTableB.getDataElements() );
         assertEquals( periods, reportTableB.getPeriods() );
         assertEquals( units, reportTableB.getOrganisationUnits() );
-        assertEquals( false, reportTableB.isDoIndicators() );
-        assertEquals( false, reportTableB.isDoPeriods() );
-        assertEquals( true, reportTableB.isDoUnits() );
         assertEquals( relativesB, reportTableB.getRelatives() );
 
         assertEquals( "Assualt", reportTableC.getName() );
         assertEquals( periods, reportTableC.getPeriods() );
         assertEquals( units, reportTableC.getOrganisationUnits() );
-        assertEquals( false, reportTableC.isDoIndicators() );
-        assertEquals( false, reportTableC.isDoPeriods() );
-        assertEquals( true, reportTableC.isDoUnits() );
         assertEquals( relativesC, reportTableC.getRelatives() );
     }
 
@@ -237,10 +228,10 @@ public class ReportTableStoreTest
     public void testDeleteReportTable()
     {
         ReportTable reportTableA = new ReportTable( "Immunization",
-            new ArrayList<DataElement>(), indicators, new ArrayList<DataSet>(), periods, units, 
+            new ArrayList<>(), indicators, new ArrayList<>(), periods, units,
             true, true, false, relativesA, null, "january_2000" );        
         ReportTable reportTableB = new ReportTable( "Prescriptions",
-            dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, units, 
+            dataElements, new ArrayList<>(), new ArrayList<>(), periods, units,
             false, false, true, relativesB, null, "january_2000" );
         
         int idA = reportTableStore.save( reportTableA );
@@ -264,10 +255,10 @@ public class ReportTableStoreTest
     public void testGetAllReportTables()
     {
         ReportTable reportTableA = new ReportTable( "Immunization",
-            new ArrayList<DataElement>(), indicators, new ArrayList<DataSet>(), periods, units, 
+            new ArrayList<>(), indicators, new ArrayList<>(), periods, units,
             true, true, false, relativesA, null, "january_2000" );        
         ReportTable reportTableB = new ReportTable( "Prescriptions",
-            dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, units, 
+            dataElements, new ArrayList<>(), new ArrayList<>(), periods, units,
             false, false, true, relativesB, null, "january_2000" );
         
         reportTableStore.save( reportTableA );
@@ -283,10 +274,10 @@ public class ReportTableStoreTest
     public void testGetReportTableByName()
     {
         ReportTable reportTableA = new ReportTable( "Immunization",
-            new ArrayList<DataElement>(), indicators, new ArrayList<DataSet>(), periods, units, 
+            new ArrayList<>(), indicators, new ArrayList<>(), periods, units,
             true, true, false, relativesA, null, "january_2000" );        
         ReportTable reportTableB = new ReportTable( "Prescriptions",
-            dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, units, 
+            dataElements, new ArrayList<>(), new ArrayList<>(), periods, units,
             false, false, true, relativesB, null, "january_2000" );
         
         reportTableStore.save( reportTableA );

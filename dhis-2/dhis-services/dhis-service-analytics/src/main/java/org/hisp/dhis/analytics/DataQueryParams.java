@@ -51,6 +51,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.common.BaseDimensionalObject;
@@ -154,6 +155,11 @@ public class DataQueryParams
      * Indicates that full precision should be provided for values.
      */
     protected boolean skipRounding;
+
+    /**
+     * Indicates whether to include completed events only.
+     */
+    protected boolean completedOnly;
     
     /**
      * Indicates i) if the names of all ancestors of the organisation units part
@@ -266,6 +272,7 @@ public class DataQueryParams
         params.skipMeta = this.skipMeta;
         params.skipData = this.skipData;
         params.skipRounding = this.skipRounding;
+        params.completedOnly = this.completedOnly;
         params.hierarchyMeta = this.hierarchyMeta;
         params.ignoreLimit = this.ignoreLimit;
         params.hideEmptyRows = this.hideEmptyRows;
@@ -1289,6 +1296,16 @@ public class DataQueryParams
         this.skipRounding = skipRounding;
     }
 
+    public boolean isCompletedOnly()
+    {
+        return completedOnly;
+    }
+
+    public void setCompletedOnly( boolean completedOnly )
+    {
+        this.completedOnly = completedOnly;
+    }
+    
     public boolean isHierarchyMeta()
     {
         return hierarchyMeta;
@@ -1463,7 +1480,7 @@ public class DataQueryParams
      * dimension is specified, all category option combos for the first data 
      * element is returned. Returns an empty array if the dimension is not present.
      */
-    public NameableObject[] getDimensionArrayCollapseDxExplodeCoc( String dimension )
+    public NameableObject[] getDimensionArrayExplodeCoc( String dimension )
     {
         List<NameableObject> items = new ArrayList<>();
         
@@ -1473,12 +1490,7 @@ public class DataQueryParams
             
             if ( !des.isEmpty() )
             {
-                Set<DataElementCategoryCombo> categoryCombos = new HashSet<>();
-                
-                for ( NameableObject de : des )
-                {
-                    categoryCombos.add( ((DataElement) de).getCategoryCombo() );
-                }
+                Set<DataElementCategoryCombo> categoryCombos = des.stream().map( d -> ((DataElement) d).getCategoryCombo() ).collect( Collectors.toSet() );
                 
                 for ( DataElementCategoryCombo cc : categoryCombos )
                 {
@@ -1707,25 +1719,8 @@ public class DataQueryParams
 
     public List<DimensionalObject> getDataElementGroupSets()
     {
-        List<DimensionalObject> list = new ArrayList<>();
-        
-        for ( DimensionalObject dimension : dimensions )
-        {
-            if ( DimensionType.DATAELEMENT_GROUPSET.equals( dimension.getDimensionType() ) )
-            {
-                list.add( dimension );
-            }
-        }
-        
-        for ( DimensionalObject filter : filters )
-        {
-            if ( DimensionType.DATAELEMENT_GROUPSET.equals( filter.getDimensionType() ) )
-            {
-                list.add( filter );
-            }
-        }
-        
-        return list;
+        return ListUtils.union( dimensions, filters ).stream().
+            filter( d -> DimensionType.DATAELEMENT_GROUPSET.equals( d.getDimensionType() ) ).collect( Collectors.toList() );
     }
     
     public void setDataElementGroupSet( DataElementGroupSet groupSet )

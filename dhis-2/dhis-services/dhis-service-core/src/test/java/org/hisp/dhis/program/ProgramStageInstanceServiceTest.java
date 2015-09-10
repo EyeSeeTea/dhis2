@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.hisp.dhis.DhisSpringTest;
+import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.event.EventStatus;
@@ -167,7 +168,7 @@ public class ProgramStageInstanceServiceTest
         entityInstanceService.addTrackedEntityInstance( entityInstanceB );
 
         TrackedEntityAttribute attribute = createTrackedEntityAttribute( 'A' );
-        attribute.setValueType( TrackedEntityAttribute.TYPE_PHONE_NUMBER );
+        attribute.setValueType( ValueType.PHONE_NUMBER );
         attributeService.addTrackedEntityAttribute( attribute );
 
         TrackedEntityAttributeValue attributeValue = createTrackedEntityAttributeValue( 'A', entityInstanceA, attribute );
@@ -180,7 +181,7 @@ public class ProgramStageInstanceServiceTest
         /**
          * Program A
          */
-        programA = createProgram( 'A', new HashSet<ProgramStage>(), organisationUnitA );
+        programA = createProgram( 'A', new HashSet<>(), organisationUnitA );
         programService.addProgram( programA );
 
         stageA = new ProgramStage( "A", programA );
@@ -240,7 +241,7 @@ public class ProgramStageInstanceServiceTest
          * Program B
          */
 
-        Program programB = createProgram( 'B', new HashSet<ProgramStage>(), organisationUnitB );
+        Program programB = createProgram( 'B', new HashSet<>(), organisationUnitB );
         programService.addProgram( programB );
 
         stageC = new ProgramStage( "C", programB );
@@ -443,18 +444,6 @@ public class ProgramStageInstanceServiceTest
         programStageInstanceService.completeProgramStageInstance( programStageInstanceA, mockFormat );
         
         assertEquals( true, programStageInstanceService.getProgramStageInstance( idA ).isCompleted() );
-    }
-
-    @Test
-    public void testSetExecutionDate()
-    {
-        int idA = programStageInstanceService.addProgramStageInstance( programStageInstanceA );
-
-        programStageInstanceService.setExecutionDate( programStageInstanceA, enrollmentDate, organisationUnitA );
-
-        ProgramStageInstance programStageInstance = programStageInstanceService.getProgramStageInstance( idA );
-        assertEquals( enrollmentDate, programStageInstance.getExecutionDate() );
-        assertEquals( organisationUnitA, programStageInstance.getOrganisationUnit() );
     }
 
     @Test

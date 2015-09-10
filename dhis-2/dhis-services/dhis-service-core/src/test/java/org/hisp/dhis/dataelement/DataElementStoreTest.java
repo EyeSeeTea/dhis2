@@ -28,21 +28,19 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.hisp.dhis.DhisSpringTest;
+import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.period.MonthlyPeriodType;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Torgeir Lorange Ostby
@@ -53,10 +51,10 @@ public class DataElementStoreTest
 {
     @Autowired
     private DataElementStore dataElementStore;
-    
+
     @Autowired
     private DataSetService dataSetService;
-        
+
     // -------------------------------------------------------------------------
     // Tests
     // -------------------------------------------------------------------------
@@ -94,13 +92,13 @@ public class DataElementStoreTest
         DataElement dataElementA = createDataElement( 'A' );
         int idA = dataElementStore.save( dataElementA );
         dataElementA = dataElementStore.get( idA );
-        assertEquals( DataElement.VALUE_TYPE_INT, dataElementA.getType() );
+        assertEquals( ValueType.INTEGER, dataElementA.getValueType() );
 
-        dataElementA.setType( DataElement.VALUE_TYPE_BOOL );
+        dataElementA.setValueType( ValueType.BOOLEAN );
         dataElementStore.update( dataElementA );
         dataElementA = dataElementStore.get( idA );
-        assertNotNull( dataElementA.getType() );
-        assertEquals( DataElement.VALUE_TYPE_BOOL, dataElementA.getType() );
+        assertNotNull( dataElementA.getValueType() );
+        assertEquals( ValueType.BOOLEAN, dataElementA.getValueType() );
     }
 
     @Test
@@ -195,7 +193,7 @@ public class DataElementStoreTest
         DataElement dataElementC = dataElementStore.getByShortName( "DataElementShortC" );
         assertNull( dataElementC );
     }
-    
+
     @Test
     public void testGetAllDataElements()
     {
@@ -232,11 +230,11 @@ public class DataElementStoreTest
         DataElement dataElementB = createDataElement( 'B' );
         DataElement dataElementC = createDataElement( 'C' );
         DataElement dataElementD = createDataElement( 'D' );
-        
-        dataElementA.setType( DataElement.VALUE_TYPE_INT );
-        dataElementB.setType( DataElement.VALUE_TYPE_BOOL );
-        dataElementC.setType( DataElement.VALUE_TYPE_STRING );
-        dataElementD.setType( DataElement.VALUE_TYPE_INT );
+
+        dataElementA.setValueType( ValueType.INTEGER );
+        dataElementB.setValueType( ValueType.BOOLEAN );
+        dataElementC.setValueType( ValueType.TEXT );
+        dataElementD.setValueType( ValueType.INTEGER );
 
         dataElementStore.save( dataElementA );
         dataElementStore.save( dataElementB );
@@ -257,10 +255,8 @@ public class DataElementStoreTest
     @Test
     public void testGetDataElementsByAggregationOperator()
     {
-        assertEquals( 0, dataElementStore.getDataElementsByAggregationOperator(
-            DataElement.AGGREGATION_OPERATOR_AVERAGE_SUM ).size() );
-        assertEquals( 0, dataElementStore.getDataElementsByAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM )
-            .size() );
+        assertEquals( 0, dataElementStore.getDataElementsByAggregationOperator( DataElement.AGGREGATION_OPERATOR_AVERAGE_SUM ).size() );
+        assertEquals( 0, dataElementStore.getDataElementsByAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM ).size() );
 
         DataElement dataElementA = createDataElement( 'A' );
         dataElementA.setAggregationOperator( DataElement.AGGREGATION_OPERATOR_AVERAGE_SUM );
@@ -276,12 +272,10 @@ public class DataElementStoreTest
         dataElementStore.save( dataElementC );
         dataElementStore.save( dataElementD );
 
-        assertEquals( 1, dataElementStore.getDataElementsByAggregationOperator(
-            DataElement.AGGREGATION_OPERATOR_AVERAGE_SUM ).size() );
-        assertEquals( 3, dataElementStore.getDataElementsByAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM )
-            .size() );
+        assertEquals( 1, dataElementStore.getDataElementsByAggregationOperator( DataElement.AGGREGATION_OPERATOR_AVERAGE_SUM ).size() );
+        assertEquals( 3, dataElementStore.getDataElementsByAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM ).size() );
     }
-    
+
     @Test
     public void testGetDataElementsByDomainType()
     {
@@ -289,7 +283,7 @@ public class DataElementStoreTest
         assertEquals( 0, dataElementStore.getDataElementsByDomainType( DataElementDomain.TRACKER ).size() );
 
         DataElement dataElementA = createDataElement( 'A' );
-        dataElementA.setDomainType( DataElementDomain.AGGREGATE);
+        dataElementA.setDomainType( DataElementDomain.AGGREGATE );
         DataElement dataElementB = createDataElement( 'B' );
         dataElementB.setDomainType( DataElementDomain.TRACKER );
         DataElement dataElementC = createDataElement( 'C' );
@@ -307,77 +301,53 @@ public class DataElementStoreTest
     }
 
     @Test
-    public void testGetDataElementsByType()
-    {
-        assertEquals( 0, dataElementStore.getDataElementsByType( DataElement.VALUE_TYPE_INT ).size() );
-        assertEquals( 0, dataElementStore.getDataElementsByType( DataElement.VALUE_TYPE_BOOL ).size() );
-
-        DataElement dataElementA = createDataElement( 'A' );
-        dataElementA.setType( DataElement.VALUE_TYPE_INT );
-        DataElement dataElementB = createDataElement( 'B' );
-        dataElementB.setType( DataElement.VALUE_TYPE_BOOL );
-        DataElement dataElementC = createDataElement( 'C' );
-        dataElementC.setType( DataElement.VALUE_TYPE_BOOL );
-        DataElement dataElementD = createDataElement( 'D' );
-        dataElementD.setType( DataElement.VALUE_TYPE_BOOL );
-
-        dataElementStore.save( dataElementA );
-        dataElementStore.save( dataElementB );
-        dataElementStore.save( dataElementC );
-        dataElementStore.save( dataElementD );
-
-        assertEquals( 1, dataElementStore.getDataElementsByType( DataElement.VALUE_TYPE_INT ).size() );
-        assertEquals( 3, dataElementStore.getDataElementsByType( DataElement.VALUE_TYPE_BOOL ).size() );
-    }
-
-    @Test
     public void testGetDataElementAggregationLevels()
     {
         List<Integer> aggregationLevels = Arrays.asList( 3, 5 );
-        
+
         DataElement dataElementA = createDataElement( 'A' );
         dataElementA.setAggregationLevels( aggregationLevels );
-        
+
         int idA = dataElementStore.save( dataElementA );
-        
+
         assertNotNull( dataElementStore.get( idA ).getAggregationLevels() );
         assertEquals( 2, dataElementStore.get( idA ).getAggregationLevels().size() );
         assertEquals( aggregationLevels, dataElementStore.get( idA ).getAggregationLevels() );
     }
-        
+
     @Test
     public void testGetDataElementsByAggregationLevel()
     {
         DataElement dataElementA = createDataElement( 'A' );
         DataElement dataElementB = createDataElement( 'B' );
         DataElement dataElementC = createDataElement( 'C' );
-        
+
         dataElementA.getAggregationLevels().addAll( Arrays.asList( 3, 5 ) );
         dataElementB.getAggregationLevels().addAll( Arrays.asList( 4, 5 ) );
 
         dataElementStore.save( dataElementA );
         dataElementStore.save( dataElementB );
         dataElementStore.save( dataElementC );
-        
+
         List<DataElement> dataElements = dataElementStore.getDataElementsByAggregationLevel( 2 );
-        
+
         assertEquals( 0, dataElements.size() );
-        
+
         dataElements = dataElementStore.getDataElementsByAggregationLevel( 3 );
-        
+
         assertEquals( 1, dataElements.size() );
 
         dataElements = dataElementStore.getDataElementsByAggregationLevel( 4 );
-        
+
         assertEquals( 1, dataElements.size() );
-        
+
         dataElements = dataElementStore.getDataElementsByAggregationLevel( 5 );
-        
+
         assertEquals( 2, dataElements.size() );
         assertTrue( dataElements.contains( dataElementA ) );
         assertTrue( dataElements.contains( dataElementB ) );
     }
-    
+
     @Test
     public void testGetDataElementsZeroIsSignificant()
     {
@@ -388,17 +358,17 @@ public class DataElementStoreTest
 
         dataElementA.setZeroIsSignificant( true );
         dataElementB.setZeroIsSignificant( true );
-        
+
         dataElementStore.save( dataElementA );
         dataElementStore.save( dataElementB );
         dataElementStore.save( dataElementC );
         dataElementStore.save( dataElementD );
-        
+
         List<DataElement> dataElements = dataElementStore.getDataElementsByZeroIsSignificant( true );
-        
+
         assertTrue( equals( dataElements, dataElementA, dataElementB ) );
     }
-    
+
     @Test
     public void testGetDataElements()
     {
@@ -408,32 +378,32 @@ public class DataElementStoreTest
         DataElement dataElementD = createDataElement( 'D' );
         DataElement dataElementE = createDataElement( 'E' );
         DataElement dataElementF = createDataElement( 'F' );
-        
+
         dataElementStore.save( dataElementA );
         dataElementStore.save( dataElementB );
         dataElementStore.save( dataElementC );
         dataElementStore.save( dataElementD );
         dataElementStore.save( dataElementE );
         dataElementStore.save( dataElementF );
-        
+
         DataSet dataSetA = createDataSet( 'A', new MonthlyPeriodType() );
         DataSet dataSetB = createDataSet( 'B', new MonthlyPeriodType() );
-        
+
         dataSetA.getDataElements().add( dataElementA );
         dataSetA.getDataElements().add( dataElementC );
         dataSetA.getDataElements().add( dataElementF );
         dataSetB.getDataElements().add( dataElementD );
         dataSetB.getDataElements().add( dataElementF );
-        
+
         dataSetService.addDataSet( dataSetA );
         dataSetService.addDataSet( dataSetB );
-        
+
         List<DataSet> dataSets = new ArrayList<>();
         dataSets.add( dataSetA );
         dataSets.add( dataSetB );
-        
+
         List<DataElement> dataElements = dataElementStore.getDataElementsByDataSets( dataSets );
-        
+
         assertNotNull( dataElements );
         assertEquals( 4, dataElements.size() );
         assertTrue( dataElements.contains( dataElementA ) );

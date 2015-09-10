@@ -28,8 +28,22 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_DATA_IMPORT_REQUIRE_CATEGORY_OPTION_COMBO;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_DATA_IMPORT_STRICT_CATEGORY_OPTION_COMBOS;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_DATA_IMPORT_STRICT_ORGANISATION_UNITS;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_DATA_IMPORT_STRICT_PERIODS;
+
 import com.google.common.hash.Hashing;
 import com.google.common.io.ByteSource;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.io.IOException;
+import java.io.InputStream;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.ValueType;
@@ -50,6 +64,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.util.ValidationUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.webapi.utils.InputUtils;
@@ -59,19 +74,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 /**
  * @author Lars Helge Overland
@@ -103,6 +110,9 @@ public class DataValueController
 
     @Autowired
     private IdentifiableObjectManager idObjectManager;
+    
+    @Autowired
+    private SystemSettingManager systemSettingManager;
 
     @Autowired
     private InputUtils inputUtils;
@@ -127,6 +137,11 @@ public class DataValueController
         @RequestParam( required = false ) String comment,
         @RequestParam( required = false ) boolean followUp, HttpServletResponse response ) throws WebMessageException
     {
+        boolean strictPeriods = (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_STRICT_PERIODS, false );
+        boolean strictCategoryOptionCombos = (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_STRICT_CATEGORY_OPTION_COMBOS, false );
+        boolean strictOrgUnits = (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_STRICT_ORGANISATION_UNITS, false );
+        boolean requireCategoryOptionCombo = (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_REQUIRE_CATEGORY_OPTION_COMBO, false );
+        
         // ---------------------------------------------------------------------
         // Input validation
         // ---------------------------------------------------------------------
@@ -138,27 +153,29 @@ public class DataValueController
             throw new WebMessageException( WebMessageUtils.conflict( "Illegal data element identifier: " + de ) );
         }
 
-        DataElementCategoryOptionCombo categoryOptionCombo;
-
-        if ( co != null )
-        {
-            categoryOptionCombo = categoryService.getDataElementCategoryOptionCombo( co );
-        }
-        else
-        {
-            categoryOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
-        }
+        DataElementCategoryOptionCombo categoryOptionCombo = categoryService.getDataElementCategoryOptionCombo( co );
 
         if ( categoryOptionCombo == null )
         {
-            throw new WebMessageException( WebMessageUtils.conflict( "Illegal category option combo identifier: " + co ) );
+            if ( requireCategoryOptionCombo )
+            {
+                throw new WebMessageException( WebMessageUtils.conflict( "Category option combo is required but is not specified" ) );
+            }
+            else if ( co != null )
+            {
+                throw new WebMessageException( WebMessageUtils.conflict( "Illegal category option combo identifier: " + co ) );
+            }
+            else
+            {
+                categoryOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
+            }
         }
 
         DataElementCategoryOptionCombo attributeOptionCombo = inputUtils.getAttributeOptionCombo( cc, cp );
 
         if ( attributeOptionCombo == null )
         {
-            return;
+            throw new WebMessageException( WebMessageUtils.conflict( "Illegal attribute option combo identifier: " + cc + " " + cp ) );
         }
 
         Period period = PeriodType.getPeriodFromIsoString( pe );
@@ -175,36 +192,56 @@ public class DataValueController
             throw new WebMessageException( WebMessageUtils.conflict( "Illegal organisation unit identifier: " + ou ) );
         }
 
-        boolean isInHierarchy = organisationUnitService.isInUserHierarchy( organisationUnit );
+        boolean inUserHierarchy = organisationUnitService.isInUserHierarchy( organisationUnit );
 
-        if ( !isInHierarchy )
+        if ( !inUserHierarchy )
         {
             throw new WebMessageException( WebMessageUtils.conflict( "Organisation unit is not in the hierarchy of the current user: " + ou ) );
         }
-
-        String valid = ValidationUtils.dataValueIsValid( value, dataElement );
-
-        if ( valid != null )
+        
+        boolean invalidFuturePeriod = period.isFuture() && dataElement.getOpenFuturePeriods() <= 0;
+        
+        if ( invalidFuturePeriod )
         {
-            throw new WebMessageException( WebMessageUtils.conflict( "Invalid value: " + value + ", must match data element type: " + dataElement.getDetailedType() ) );
+            throw new WebMessageException( WebMessageUtils.conflict( "One or more data sets for data element does not allow future periods: " + de ) );
         }
 
-        valid = ValidationUtils.commentIsValid( comment );
+        String valueValid = ValidationUtils.dataValueIsValid( value, dataElement );
 
-        if ( valid != null )
+        if ( valueValid != null )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "Invalid value: " + value + ", must match data element type: " + dataElement.getValueType() ) );
+        }
+
+        String commentValid = ValidationUtils.commentIsValid( comment );
+
+        if ( commentValid != null )
         {
             throw new WebMessageException( WebMessageUtils.conflict( "Invalid comment: " + comment ) );
         }
 
         // ---------------------------------------------------------------------
-        // Future period constraint check //TODO better check
+        // Optional constraints
         // ---------------------------------------------------------------------
 
-        if ( period.isFuture() && dataElement.getOpenFuturePeriods() <= 0 )
+        if ( strictPeriods && !dataElement.getPeriodTypes().contains( period.getPeriodType() ) )
         {
-            throw new WebMessageException( WebMessageUtils.conflict( "One or more data sets for data element does not allow future periods: " + de ) );
+            throw new WebMessageException( WebMessageUtils.conflict( 
+                "Period type of period: " + period.getIsoDate() + " not valid for data element: " + dataElement.getUid() ) );
         }
-
+        
+        if ( strictCategoryOptionCombos && !dataElement.getCategoryCombo().getOptionCombos().contains( categoryOptionCombo ) )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( 
+                "Category option combo: " + categoryOptionCombo.getUid() + " must be part of category combo of data element: " + dataElement.getUid() ) );
+        }
+        
+        if ( strictOrgUnits && !dataElement.hasDataSetOrganisationUnit( organisationUnit ) )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( 
+                "Data element: " + dataElement.getUid() + " must be assigned through data sets to organisation unit: " + organisationUnit.getUid() ) );
+        }
+        
         // ---------------------------------------------------------------------
         // Locking validation
         // ---------------------------------------------------------------------
@@ -233,7 +270,7 @@ public class DataValueController
         }
         else
         {
-            if ( value == null && DataElement.VALUE_TYPE_TRUE_ONLY.equals( dataElement.getType() ) )
+            if ( value == null && ValueType.TRUE_ONLY.equals( dataElement.getValueType() ) )
             {
                 if ( comment == null )
                 {
@@ -469,6 +506,11 @@ public class DataValueController
         @RequestParam( value = "file", required = true ) MultipartFile multipartFile )
         throws WebMessageException, IOException
     {
+        boolean strictPeriods = (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_STRICT_PERIODS, false );
+        boolean strictCategoryOptionCombos = (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_STRICT_CATEGORY_OPTION_COMBOS, false );
+        boolean strictOrgUnits = (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_STRICT_ORGANISATION_UNITS, false );
+        boolean requireCategoryOptionCombo = (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_REQUIRE_CATEGORY_OPTION_COMBO, false );
+
         // ---------------------------------------------------------------------
         // Input validation
         // ---------------------------------------------------------------------
@@ -480,35 +522,35 @@ public class DataValueController
             throw new WebMessageException( WebMessageUtils.conflict( "Illegal data element identifier: " + de ) );
         }
 
-        boolean isFileResourceDataElement = dataElement.isFileType();
-
-        if ( !isFileResourceDataElement )
+        if ( !dataElement.isFileType() )
         {
             throw new WebMessageException( WebMessageUtils.conflict( "Data element must be of type file resource",
                 "This endpoint only accepts requests for data elements which correspond to a file type." ) );
         }
 
-        DataElementCategoryOptionCombo categoryOptionCombo;
-
-        if ( co != null )
-        {
-            categoryOptionCombo = categoryService.getDataElementCategoryOptionCombo( co );
-        }
-        else
-        {
-            categoryOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
-        }
+        DataElementCategoryOptionCombo categoryOptionCombo = categoryService.getDataElementCategoryOptionCombo( co );
 
         if ( categoryOptionCombo == null )
         {
-            throw new WebMessageException( WebMessageUtils.conflict( "Illegal category option combo identifier: " + co ) );
+            if ( requireCategoryOptionCombo )
+            {
+                throw new WebMessageException( WebMessageUtils.conflict( "Category option combo is required but is not specified" ) );
+            }
+            else if ( co != null )
+            {
+                throw new WebMessageException( WebMessageUtils.conflict( "Illegal category option combo identifier: " + co ) );
+            }
+            else
+            {
+                categoryOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
+            }
         }
 
         DataElementCategoryOptionCombo attributeOptionCombo = inputUtils.getAttributeOptionCombo( cc, cp );
 
         if ( attributeOptionCombo == null )
         {
-            throw new WebMessageException( WebMessageUtils.badRequest( "Invalid attribute option combo" ) );
+            throw new WebMessageException( WebMessageUtils.conflict( "Illegal attribute option combo identifier: " + cc + " " + cp ) );
         }
 
         Period period = PeriodType.getPeriodFromIsoString( pe );
@@ -525,11 +567,18 @@ public class DataValueController
             throw new WebMessageException( WebMessageUtils.conflict( "Illegal organisation unit identifier: " + ou ) );
         }
 
-        boolean isInHierarchy = organisationUnitService.isInUserHierarchy( organisationUnit );
+        boolean inUserHierarchy = organisationUnitService.isInUserHierarchy( organisationUnit );
 
-        if ( !isInHierarchy )
+        if ( !inUserHierarchy )
         {
             throw new WebMessageException( WebMessageUtils.conflict( "Organisation unit is not in the hierarchy of the current user: " + ou ) );
+        }
+
+        boolean invalidFuturePeriod = period.isFuture() && dataElement.getOpenFuturePeriods() <= 0;
+
+        if ( invalidFuturePeriod )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "One or more data sets for data element does not allow future periods: " + de ) );
         }
 
         if ( multipartFile == null || multipartFile.isEmpty() )
@@ -538,12 +587,25 @@ public class DataValueController
         }
 
         // ---------------------------------------------------------------------
-        // Future period constraint check //TODO better check
+        // Optional constraints
         // ---------------------------------------------------------------------
 
-        if ( period.isFuture() && dataElement.getOpenFuturePeriods() <= 0 )
+        if ( strictPeriods && !dataElement.getPeriodTypes().contains( period.getPeriodType() ) )
         {
-            throw new WebMessageException( WebMessageUtils.conflict( "One or more data sets for data element does not allow future periods: " + de ) );
+            throw new WebMessageException( WebMessageUtils.conflict(
+                "Period type of period: " + period.getIsoDate() + " not valid for data element: " + dataElement.getUid() ) );
+        }
+
+        if ( strictCategoryOptionCombos && !dataElement.getCategoryCombo().getOptionCombos().contains( categoryOptionCombo ) )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict(
+                "Category option combo: " + categoryOptionCombo.getUid() + " must be part of category combo of data element: " + dataElement.getUid() ) );
+        }
+
+        if ( strictOrgUnits && !dataElement.hasDataSetOrganisationUnit( organisationUnit ) )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict(
+                "Data element: " + dataElement.getUid() + " must be assigned through data sets to organisation unit: " + organisationUnit.getUid() ) );
         }
 
         // ---------------------------------------------------------------------

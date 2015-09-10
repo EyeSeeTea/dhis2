@@ -32,7 +32,7 @@ if( dhis2.ec.memoryOnly ) {
 dhis2.ec.store = new dhis2.storage.Store({
     name: 'dhis2ec',
     adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
-    objectStores: ['programs', 'programStages', 'geoJsons', 'optionSets', 'events', 'programValidations', 'programRules', 'programRuleVariables', 'programIndicators', 'ouLevels', 'constants']
+    objectStores: ['programs', 'programStages', 'categories', 'geoJsons', 'optionSets', 'events', 'programValidations', 'programRules', 'programRuleVariables', 'programIndicators', 'ouLevels', 'constants']
 });
 
 (function($) {
@@ -151,6 +151,7 @@ function downloadMetaData(){
     promise = promise.then( getMetaPrograms );     
     promise = promise.then( getPrograms );     
     promise = promise.then( getProgramStages );
+    promise = promise.then( getCategories );
     promise = promise.then( getMetaProgramValidations );
     promise = promise.then( getProgramValidations );
     promise = promise.then( getMetaProgramIndicators );
@@ -197,10 +198,7 @@ function getUserRoles()
 }
 
 function getCalendarSetting()
-{
-    if(localStorage['CALENDAR_SETTING']){
-       return; 
-    }    
+{       
     var def = $.Deferred();
 
     $.ajax({
@@ -243,7 +241,7 @@ function getMetaPrograms()
     $.ajax({
         url: '../api/programs.json',
         type: 'GET',
-        data:'filter=programType:eq:WITHOUT_REGISTRATION&paging=false&fields=id,name,version,programStages[id,version,programStageSections[id],programStageDataElements[dataElement[id,optionSet[id,version]]]]'
+        data:'filter=programType:eq:WITHOUT_REGISTRATION&paging=false&fields=id,name,version,categoryCombo[id,isDefault,categories[id,categoryOptions[id]]],programStages[id,version,programStageSections[id],programStageDataElements[dataElement[id,optionSet[id,version]]]]'
     }).done( function(response) {        
         def.resolve( response.programs ? response.programs: [] );
     }).fail(function(){
@@ -308,7 +306,7 @@ function getProgram( id )
         return $.ajax( {
             url: '../api/programs/' + id + '.json',
             type: 'GET',
-            data: 'fields=id,name,programType,version,dataEntryMethod,dateOfEnrollmentDescription,dateOfIncidentDescription,displayIncidentDate,ignoreOverdueEvents,organisationUnits[id,name],programStages[id,name,version],userRoles[id,name]'
+            data: 'fields=id,name,programType,version,dataEntryMethod,dateOfEnrollmentDescription,dateOfIncidentDescription,displayIncidentDate,ignoreOverdueEvents,categoryCombo[id,isDefault,categories[id]],organisationUnits[id,name],programStages[id,name,version],userRoles[id,name]'
         }).done( function( program ){            
             var ou = {};
             _.each(_.values( program.organisationUnits), function(o){
@@ -350,7 +348,7 @@ function getProgramStages( programs )
                 var p = d.promise();
                 dhis2.ec.store.get('programStages', program.programStages[0].id).done(function(obj) {
                     if(!obj || obj.version !== program.programStages[0].version) {
-                        promise = promise.then( getD2Object( program.programStages[0].id, 'programStages', '../api/programStages', 'fields=id,name,version,description,reportDateDescription,captureCoordinates,dataEntryForm,minDaysFromStart,repeatable,preGenerateUID,programStageSections[id,name,programStageDataElements[dataElement[id]]],programStageDataElements[displayInReports,sortOrder,allowProvidedElsewhere,allowFutureDate,compulsory,dataElement[id,name,type,optionSetValue,numberType,textType,formName,optionSet[id]]]', 'idb' ) );
+                        promise = promise.then( getD2Object( program.programStages[0].id, 'programStages', '../api/programStages', 'fields=id,name,version,description,reportDateDescription,captureCoordinates,dataEntryForm,minDaysFromStart,repeatable,preGenerateUID,programStageSections[id,name,programStageDataElements[dataElement[id]]],programStageDataElements[displayInReports,sortOrder,allowProvidedElsewhere,allowFutureDate,compulsory,dataElement[id,name,valueType,optionSetValue,formName,optionSet[id]]]', 'idb' ) );
                     }
 
                     d.resolve();
@@ -374,6 +372,26 @@ function getProgramStages( programs )
     builder.resolve();
 
     return mainPromise;    
+}
+
+function getCategories( programs )
+{
+    if(!programs){
+        return;
+    }
+    
+    var catigories = [];
+    _.each( _.values( programs ), function ( program ) {
+        if( program && program.categoryCombo && !program.categoryCombo.isDefault && program.categoryCombo.categories ) {
+            _.each(_.values(program.categoryCombo.categories), function(cat){
+                catigories.push( cat );
+            });            
+        }
+    });
+    
+    if(catigories.length > 0 ){
+        return checkAndGetD2Objects( {programs: programs, self: catigories}, 'categories', '../api/categories', 'fields=id,name,categoryOptions[id,name]');
+    }
 }
 
 function getOptionSets( programs )

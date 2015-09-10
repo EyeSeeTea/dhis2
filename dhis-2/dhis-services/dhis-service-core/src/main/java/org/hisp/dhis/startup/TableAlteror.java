@@ -34,7 +34,6 @@ import org.amplecode.quick.StatementHolder;
 import org.amplecode.quick.StatementManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.jdbc.batchhandler.RelativePeriodsBatchHandler;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
@@ -159,6 +158,7 @@ public class TableAlteror
         executeSql( "ALTER TABLE indicator DROP COLUMN numeratoraggregationtype" );
         executeSql( "ALTER TABLE indicator DROP COLUMN denominatoraggregationtype" );
         executeSql( "ALTER TABLE dataset DROP COLUMN locked" );
+        executeSql( "ALTER TABLE dataset DROP COLUMN skipaggregation" );
         executeSql( "ALTER TABLE configuration DROP COLUMN completenessrecipientsid" );
         executeSql( "ALTER TABLE dataelement DROP COLUMN alternativename" );
         executeSql( "ALTER TABLE indicator DROP COLUMN alternativename" );
@@ -213,7 +213,7 @@ public class TableAlteror
 
         executeSql( "ALTER TABLE organisationunit DROP COLUMN hasPatients" );
 
-        executeSql( "update dataelement set texttype='text' where valuetype='string' and texttype is null" );
+        // executeSql( "update dataelement set texttype='text' where valuetype='string' and texttype is null" );
 
         // categories_categoryoptions
         // set to 0 temporarily
@@ -285,9 +285,9 @@ public class TableAlteror
 
         executeSql( "ALTER TABLE section DROP CONSTRAINT section_name_key" );
         executeSql( "UPDATE patientattribute set inheritable=false where inheritable is null" );
-        executeSql( "UPDATE dataelement SET numbertype='number' where numbertype is null and valuetype='int'" );
-        executeSql( "UPDATE dataelement SET valuetype='posInt' where valuetype='positiveNumber'" );
-        executeSql( "UPDATE dataelement SET valuetype='negInt' where valuetype='negativeNumber'" );
+        // executeSql( "UPDATE dataelement SET numbertype='number' where numbertype is null and valuetype='int'" );
+        // executeSql( "UPDATE dataelement SET valuetype='posInt' where valuetype='positiveNumber'" );
+        // executeSql( "UPDATE dataelement SET valuetype='negInt' where valuetype='negativeNumber'" );
         executeSql( "UPDATE dataelement SET aggregationtype='avg_sum_org_unit' where aggregationtype='average'" );
 
         // revert prepare aggregate*Value tables for offline diffs
@@ -727,6 +727,8 @@ public class TableAlteror
         executeSql( "UPDATE dataset SET version=0 WHERE version IS NULL" );
         executeSql( "UPDATE program SET version=0 WHERE version IS NULL" );
         executeSql( "update program set categorycomboid = " + defaultCategoryComboId + " where categorycomboid is null" );
+        executeSql( "update programstageinstance set attributeoptioncomboid = " + defaultOptionComboId + " where attributeoptioncomboid is null" );
+
 
         executeSql( "ALTER TABLE datavalue ALTER COLUMN lastupdated TYPE timestamp" );
         executeSql( "ALTER TABLE completedatasetregistration ALTER COLUMN date TYPE timestamp" );
@@ -841,6 +843,20 @@ public class TableAlteror
         executeSql( "update categoryoptiongroupset set datadimensiontype = 'DISAGGREGATION' where datadimensiontype is null" );
         executeSql( "update categoryoptiongroup set datadimensiontype = 'DISAGGREGATION' where datadimensiontype is null" );
 
+        // Remove data mart
+        executeSql( "drop table aggregateddatasetcompleteness" );
+        executeSql( "drop table aggregateddatasetcompleteness_temp" );
+        executeSql( "drop table aggregateddatavalue" );
+        executeSql( "drop table aggregateddatavalue_temp" );
+        executeSql( "drop table aggregatedindicatorvalue" );
+        executeSql( "drop table aggregatedindicatorvalue_temp" );
+        executeSql( "drop table aggregatedorgunitdatasetcompleteness" );
+        executeSql( "drop table aggregatedorgunitdatasetcompleteness_temp" );
+        executeSql( "drop table aggregatedorgunitdatavalue" );
+        executeSql( "drop table aggregatedorgunitdatavalue_temp" );
+        executeSql( "drop table aggregatedorgunitindicatorvalue" );
+        executeSql( "drop table aggregatedorgunitindicatorvalue_temp" );
+
         oauth2();
 
         upgradeDataValuesWithAttributeOptionCombo();
@@ -854,30 +870,9 @@ public class TableAlteror
         upgradeAggregationType( "chart" );
 
         updateRelativePeriods();
-        updateValueTypes();
         organisationUnitService.updatePaths();
 
         log.info( "Tables updated" );
-    }
-
-    private void updateValueTypes()
-    {
-        executeSql( "update dataelement set vtype='NUMBER' where valuetype='int' and numbertype='number' and vtype is null" );
-        executeSql( "update dataelement set vtype='INTEGER' where valuetype='int' and numbertype='int' and vtype is null" );
-        executeSql( "update dataelement set vtype='INTEGER_POSITIVE' where valuetype='int' and numbertype='posInt' and vtype is null" );
-        executeSql( "update dataelement set vtype='INTEGER_NEGATIVE' where valuetype='int' and numbertype='negInt' and vtype is null" );
-        executeSql( "update dataelement set vtype='INTEGER_ZERO_OR_POSITIVE' where valuetype='int' and numbertype='zeroPositiveInt' and vtype is null" );
-        executeSql( "update dataelement set vtype='PERCENTAGE' where valuetype='int' and numbertype='percentage' and vtype is null" );
-        executeSql( "update dataelement set vtype='UNIT_INTERVAL' where valuetype='int' and numbertype='unitInterval' and vtype is null" );
-
-        executeSql( "update dataelement set vtype='TEXT' where valuetype='string' and texttype='text' and vtype is null" );
-        executeSql( "update dataelement set vtype='LONG_TEXT' where valuetype='string' and texttype='longText' and vtype is null" );
-
-        executeSql( "update dataelement set vtype='DATE' where valuetype='date' and vtype is null" );
-        executeSql( "update dataelement set vtype='DATETIME' where valuetype='datetime' and vtype is null" );
-        executeSql( "update dataelement set vtype='BOOLEAN' where valuetype='bool' and vtype is null" );
-        executeSql( "update dataelement set vtype='TRUE_ONLY' where valuetype='trueOnly' and vtype is null" );
-        executeSql( "update dataelement set vtype='USERNAME' where valuetype='username' and vtype is null" );
     }
 
     public void oauth2()

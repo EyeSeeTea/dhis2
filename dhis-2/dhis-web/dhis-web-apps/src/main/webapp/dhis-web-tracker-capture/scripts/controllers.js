@@ -15,8 +15,8 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
                 $timeout,
                 Paginator,
                 SessionStorageService,
+                MetaDataFactory,
                 DateUtils,
-                OptionSetService,
                 OrgUnitFactory,
                 OperatorFactory,
                 ProgramFactory,
@@ -69,13 +69,12 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
             
             if(!$scope.optionSets){
                 $scope.optionSets = [];
-                OptionSetService.getAll().then(function(optionSets){
-                    angular.forEach(optionSets, function(optionSet){                        
+                MetaDataFactory.getAll('optionSets').then(function(optionSets){
+                    angular.forEach(optionSets, function(optionSet){  
                         $scope.optionSets[optionSet.id] = optionSet;
                     });
-                    
                     CurrentSelection.setOptionSets($scope.optionSets);
-                });
+                });                
             }
             $scope.loadPrograms($scope.selectedOrgUnit);
         }

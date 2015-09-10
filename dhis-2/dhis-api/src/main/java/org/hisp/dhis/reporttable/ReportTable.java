@@ -91,10 +91,6 @@ public class ReportTable
     public static final String TOTAL_COLUMN_NAME = "total";
     public static final String TOTAL_COLUMN_PRETTY_NAME = "Total";
 
-    public static final String AGGREGATION_TYPE_DEFAULT = "default";
-    public static final String AGGREGATION_TYPE_COUNT = "count";
-    public static final String AGGREGATION_TYPE_SUM = "sum";
-
     public static final String DISPLAY_DENSITY_COMFORTABLE = "comfortable";
     public static final String DISPLAY_DENSITY_NORMAL = "normal";
     public static final String DISPLAY_DENSITY_COMPACT = "compact";
@@ -503,51 +499,6 @@ public class ReportTable
     public String getParentOrganisationUnitName()
     {
         return relativeOrganisationUnit != null ? relativeOrganisationUnit.getName() : EMPTY;
-    }
-
-    public boolean isDoIndicators()
-    {
-        return columnDimensions.contains( DATA_X_DIM_ID );
-    }
-
-    public void setDoIndicators( boolean doIndicators )
-    {
-        this.columnDimensions.remove( DATA_X_DIM_ID );
-
-        if ( doIndicators )
-        {
-            this.columnDimensions.add( DATA_X_DIM_ID );
-        }
-    }
-
-    public boolean isDoPeriods()
-    {
-        return columnDimensions.contains( PERIOD_DIM_ID );
-    }
-
-    public void setDoPeriods( boolean doPeriods )
-    {
-        this.columnDimensions.remove( PERIOD_DIM_ID );
-
-        if ( doPeriods )
-        {
-            this.columnDimensions.add( PERIOD_DIM_ID );
-        }
-    }
-
-    public boolean isDoUnits()
-    {
-        return columnDimensions.contains( ORGUNIT_DIM_ID );
-    }
-
-    public void setDoUnits( boolean doUnits )
-    {
-        this.columnDimensions.remove( ORGUNIT_DIM_ID );
-
-        if ( doUnits )
-        {
-            this.columnDimensions.add( ORGUNIT_DIM_ID );
-        }
     }
 
     /**

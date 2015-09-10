@@ -2116,12 +2116,12 @@ Ext.onReady( function() {
 
 	// core
     extendCore = function(core) {
-        var conf = core.conf,
+        var init = core.init,
+            conf = core.conf,
 			api = core.api,
 			support = core.support,
 			service = core.service,
-			web = core.web,
-			init = core.init;
+			web = core.web;
 
         // init
         (function() {
@@ -4476,7 +4476,7 @@ Ext.onReady( function() {
             }
 
             Ext.Ajax.request({
-                url: ns.core.init.contextPath + '/api/programs.json?paging=false&fields=programTrackedEntityAttributes[trackedEntityAttribute[id,name]],programStages[programStageDataElements[dataElement[id,name,type]]]&filter=id:eq:' + programId,
+                url: ns.core.init.contextPath + '/api/programs.json?paging=false&fields=programTrackedEntityAttributes[trackedEntityAttribute[id,name,valueType]],programStages[programStageDataElements[dataElement[id,name,valueType]]]&filter=id:eq:' + programId,
                 success: function(r) {
                     r = Ext.decode(r.responseText);
 
@@ -4487,7 +4487,7 @@ Ext.onReady( function() {
                         teas = isO(program) && isA(program.programTrackedEntityAttributes) ? Ext.Array.pluck(program.programTrackedEntityAttributes, 'trackedEntityAttribute') : [],
                         dataElements = [],
                         attributes = [],
-                        types = ['int', 'number', 'string', 'bool', 'trueonly'],
+                        types = ns.core.conf.valueType.aggregateTypes,
                         data;
 
                     // data elements
@@ -4498,7 +4498,7 @@ Ext.onReady( function() {
                             elements = Ext.Array.pluck(stage.programStageDataElements, 'dataElement') || [];
 
                             for (var j = 0; j < elements.length; j++) {
-                                if (Ext.Array.contains(types, (elements[j].type || '').toLowerCase())) {
+                                if (Ext.Array.contains(types, elements[j].valueType)) {
                                     dataElements.push(elements[j]);
                                 }
                             }
@@ -4507,7 +4507,7 @@ Ext.onReady( function() {
 
                     // attributes
                     for (i = 0; i < teas.length; i++) {
-                        if (Ext.Array.contains(types, (teas[i].type || '').toLowerCase())) {
+                        if (Ext.Array.contains(types, teas[i].valueType)) {
                             attributes.push(teas[i]);
                         }
                     }
@@ -7677,6 +7677,8 @@ Ext.onReady( function() {
 			period: period,
 			treePanel: treePanel,
 			setGui: setGui,
+            westRegion: westRegion,
+            centerRegion: centerRegion,
             update: update,
 			items: [
 				westRegion,
@@ -7780,19 +7782,25 @@ Ext.onReady( function() {
 		var requests = [],
 			callbacks = 0,
 			init = {},
+            appConfig,
 			fn;
 
 		fn = function() {
 			if (++callbacks === requests.length) {
 
-				NS.instances.push(ns);
-
-                ns.init = init;
-				ns.core = NS.getCore(ns);
+				ns.core = NS.getCore(init);
+                ns.alert = ns.core.webAlert;
 				extendCore(ns.core);
 
 				dimConf = ns.core.conf.finals.dimension;
 				ns.app.viewport = createViewport();
+
+                ns.core.app.getViewportWidth = function() { return ns.app.viewport.getWidth(); };
+                ns.core.app.getViewportHeight = function() { return ns.app.viewport.getHeight(); };
+                ns.core.app.getCenterRegionWidth = function() { return ns.app.viewport.centerRegion.getWidth(); };
+                ns.core.app.getCenterRegionHeight = function() { return ns.app.viewport.centerRegion.getHeight(); };
+
+                NS.instances.push(ns);
 			}
 		};
 

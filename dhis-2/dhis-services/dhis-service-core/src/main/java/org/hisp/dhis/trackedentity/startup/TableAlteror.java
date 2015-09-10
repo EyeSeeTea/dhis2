@@ -304,8 +304,12 @@ public class TableAlteror
         executeSql( "update eventreport set collapsedatadimensions = false where collapsedatadimensions is null" );
         executeSql( "update eventchart set collapsedatadimensions = false where collapsedatadimensions is null" );
 
+        executeSql( "update programindicator set aggregationtype='AVERAGE' where aggregationtype is null" );
         executeSql( "ALTER TABLE programindicator ALTER description TYPE text" );
         executeSql( "ALTER TABLE programindicator ALTER expression TYPE text" );
+        executeSql( "alter table programindicator drop column valuetype" );
+        executeSql( "alter table programindicator drop column rootdate" );
+        
         executeSql( "ALTER TABLE programstage ALTER description TYPE text" );
         
         executeSql( "update programindicator set displayinform = false where displayinform is null" );

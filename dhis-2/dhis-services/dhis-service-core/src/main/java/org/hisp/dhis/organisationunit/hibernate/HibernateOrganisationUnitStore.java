@@ -28,8 +28,16 @@ package org.hisp.dhis.organisationunit.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
@@ -39,28 +47,19 @@ import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.common.AuditLogUtil;
 import org.hisp.dhis.common.SetMap;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.hisp.dhis.commons.util.SqlHelper;
+import org.hisp.dhis.commons.util.TextUtils;
 import org.hisp.dhis.dbms.DbmsManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitHierarchy;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.organisationunit.OrganisationUnitQueryParams;
 import org.hisp.dhis.organisationunit.OrganisationUnitStore;
 import org.hisp.dhis.system.objectmapper.OrganisationUnitRelationshipRowMapper;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.security.access.AccessDeniedException;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Kristian Nordal
@@ -126,26 +125,9 @@ public class HibernateOrganisationUnitStore
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
-    public List<OrganisationUnit> getAllOrganisationUnitsByStatus( boolean active )
-    {
-        Query query = getQuery( "from OrganisationUnit o where o.active is :active" );
-        query.setParameter( "active", active );
-
-        return query.list();
-    }
-
-    @Override
     public List<OrganisationUnit> getAllOrganisationUnitsByLastUpdated( Date lastUpdated )
     {
         return getAllGeLastUpdated( lastUpdated );
-    }
-
-    @Override
-    @SuppressWarnings( "unchecked" )
-    public List<OrganisationUnit> getAllOrganisationUnitsByStatusLastUpdated( boolean active, Date lastUpdated )
-    {
-        return getCriteria().add( Restrictions.ge( "lastUpdated", lastUpdated ) ).add( Restrictions.eq( "active", active ) ).list();
     }
 
     @Override
@@ -170,59 +152,74 @@ public class HibernateOrganisationUnitStore
 
     @Override
     @SuppressWarnings( "unchecked" )
-    public List<OrganisationUnit> getOrganisationUnitsByNameAndGroups( String query,
-        Collection<OrganisationUnitGroup> groups, boolean limit )
+    public List<OrganisationUnit> getOrganisationUnits( OrganisationUnitQueryParams params )
     {
-        boolean first = true;
-
-        query = StringUtils.trimToNull( query );
-        groups = CollectionUtils.isEmpty( groups ) ? null : groups;
-
-        StringBuilder hql = new StringBuilder( "from OrganisationUnit o" );
-
-        if ( query != null )
+        SqlHelper hlp = new SqlHelper();
+        
+        String hql = "select o from OrganisationUnit o ";
+        
+        if ( params.getQuery() != null )
         {
-            hql.append( " where ( lower(o.name) like :expression or o.code = :query or o.uid = :query )" );
-
-            first = false;
+            hql += hlp.whereAnd() + " (lower(o.name) like :queryLower or o.code = :query or o.uid = :query) " ;
         }
 
-        if ( groups != null )
+        if ( params.hasGroups() )
         {
-            for ( int i = 0; i < groups.size(); i++ )
+            for ( OrganisationUnitGroup group : params.getGroups() )
             {
-                String clause = first ? " where" : " and";
-
-                hql.append( clause ).append( " :g" ).append( i ).append( " in elements( o.groups )" );
-
-                first = false;
+                hql += hlp.whereAnd() + " :" + group.getUid() + " in elements(o.groups) ";
+            }
+        }
+        
+        if ( params.hasParents() )
+        {
+            hql += hlp.whereAnd() + " (";
+            
+            for ( OrganisationUnit parent : params.getParents() )
+            {
+                hql += "o.path like :" + parent.getUid() + " or ";
+            }
+            
+            hql = TextUtils.removeLastOr( hql ) + ") ";
+        }
+        
+        hql += "order by o.name";
+        
+        Query query = getQuery( hql );
+        
+        if ( params.getQuery() != null )
+        {
+            query.setString( "queryLower", "%" + params.getQuery().toLowerCase() + "%" );
+            query.setString( "query", params.getQuery() );
+        }
+        
+        if ( params.hasGroups() )
+        {
+            for ( OrganisationUnitGroup group : params.getGroups() )
+            {
+                query.setEntity( group.getUid(), group );
+            }
+        }
+        
+        if ( params.hasParents() )
+        {
+            for ( OrganisationUnit parent : params.getParents() )
+            {
+                query.setString( parent.getUid(), "%" + parent.getUid() + "%" );
             }
         }
 
-        Query q = sessionFactory.getCurrentSession().createQuery( hql.toString() );
-
-        if ( query != null )
+        if ( params.getFirst() != null )
         {
-            q.setString( "expression", "%" + query.toLowerCase() + "%" );
-            q.setString( "query", query );
+            query.setFirstResult( params.getFirst() );
         }
-
-        if ( groups != null )
+        
+        if ( params.getMax() != null )
         {
-            int i = 0;
-
-            for ( OrganisationUnitGroup group : groups )
-            {
-                q.setEntity( "g" + i++, group );
-            }
+            query.setMaxResults( params.getMax() ).list();
         }
-
-        if ( limit )
-        {
-            q.setMaxResults( OrganisationUnitService.MAX_LIMIT );
-        }
-
-        return q.list();
+        
+        return query.list();
     }
 
     @Override
@@ -249,37 +246,6 @@ public class HibernateOrganisationUnitStore
     }
 
     @Override
-    public Set<Integer> getOrganisationUnitIdsWithoutData()
-    {
-        final String sql = "select organisationunitid from organisationunit ou where not exists (" +
-            "select sourceid from datavalue where sourceid=ou.organisationunitid)";
-
-        final Set<Integer> units = new HashSet<>();
-
-        jdbcTemplate.query( sql, new RowCallbackHandler()
-        {
-            @Override
-            public void processRow( ResultSet rs ) throws SQLException
-            {
-                units.add( rs.getInt( 1 ) );
-            }
-        } );
-
-        return units;
-    }
-
-    @Override
-    @SuppressWarnings( "unchecked" )
-    public List<OrganisationUnit> getBetweenByStatus( boolean status, int first, int max )
-    {
-        Criteria criteria = getCriteria().add( Restrictions.eq( "active", status ) );
-        criteria.setFirstResult( first );
-        criteria.setMaxResults( max );
-
-        return criteria.list();
-    }
-
-    @Override
     @SuppressWarnings( "unchecked" )
     public List<OrganisationUnit> getBetweenByLastUpdated( Date lastUpdated, int first, int max )
     {
@@ -292,26 +258,15 @@ public class HibernateOrganisationUnitStore
 
     @Override
     @SuppressWarnings( "unchecked" )
-    public List<OrganisationUnit> getBetweenByStatusLastUpdated( boolean status, Date lastUpdated, int first, int max )
-    {
-        Criteria criteria = getCriteria().add( Restrictions.ge( "lastUpdated", lastUpdated ) ).add( Restrictions.eq( "active", status ) );
-        criteria.setFirstResult( first );
-        criteria.setMaxResults( max );
-
-        return criteria.list();
-    }
-
-    @Override
-    @SuppressWarnings( "unchecked" )
     public List<OrganisationUnit> getWithinCoordinateArea( double[] box )
     {
-        return getQuery( "from OrganisationUnit o"
-                + " where o.featureType='Point'"
-                + " and o.coordinates is not null"
-                + " and CAST( SUBSTRING(o.coordinates, 2, LOCATE(',', o.coordinates) - 2) AS big_decimal ) >= " + box[3]
-                + " and CAST( SUBSTRING(o.coordinates, 2, LOCATE(',', o.coordinates) - 2) AS big_decimal ) <= " + box[1]
-                + " and CAST( SUBSTRING(coordinates, LOCATE(',', o.coordinates) + 1, LOCATE(']', o.coordinates) - LOCATE(',', o.coordinates) - 1 ) AS big_decimal ) >= " + box[2]
-                + " and CAST( SUBSTRING(coordinates, LOCATE(',', o.coordinates) + 1, LOCATE(']', o.coordinates) - LOCATE(',', o.coordinates) - 1 ) AS big_decimal ) <= " + box[0]
+        return getQuery( "from OrganisationUnit o " +
+            "where o.featureType='Point' " +
+            "and o.coordinates is not null " +
+            "and cast( substring(o.coordinates, 2, locate(',', o.coordinates) - 2) AS big_decimal ) >= " + box[3] + " " +
+            "and cast( substring(o.coordinates, 2, locate(',', o.coordinates) - 2) AS big_decimal ) <= " + box[1] + " " +
+            "and cast( substring(coordinates, locate(',', o.coordinates) + 1, locate(']', o.coordinates) - locate(',', o.coordinates) - 1 ) AS big_decimal ) >= " + box[2] + " " +
+            "and cast( substring(coordinates, locate(',', o.coordinates) + 1, locate(']', o.coordinates) - locate(',', o.coordinates) - 1 ) AS big_decimal ) <= " + box[0]
         ).list();
     }
 
@@ -346,7 +301,8 @@ public class HibernateOrganisationUnitStore
         Session session = sessionFactory.getCurrentSession();
         int counter = 0;
 
-        // use SF directly since we don't need to check for access etc here, just a simple update with no changes (so that path gets re-generated)
+        // Use session directly since we don't need to check for access
+        
         for ( OrganisationUnit organisationUnit : organisationUnits )
         {
             session.update( organisationUnit );
@@ -368,7 +324,8 @@ public class HibernateOrganisationUnitStore
         Session session = sessionFactory.getCurrentSession();
         int counter = 0;
 
-        // use SF directly since we don't need to check for access etc here, just a simple update with no changes (so that path gets re-generated)
+        // Use session directly since we don't need to check for access
+        
         for ( OrganisationUnit organisationUnit : organisationUnits )
         {
             session.update( organisationUnit );

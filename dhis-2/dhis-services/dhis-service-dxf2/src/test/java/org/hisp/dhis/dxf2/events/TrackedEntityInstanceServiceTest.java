@@ -44,7 +44,6 @@ import org.hisp.dhis.dxf2.importsummary.ImportSummary;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstanceService;
-import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.trackedentity.TrackedEntity;
 import org.hisp.dhis.trackedentity.TrackedEntityService;
 import org.junit.Ignore;
@@ -100,7 +99,7 @@ public class TrackedEntityInstanceServiceTest
         femaleA.setTrackedEntity( trackedEntity );
         femaleB.setTrackedEntity( trackedEntity );
 
-        programA = createProgram( 'A', new HashSet<ProgramStage>(), organisationUnitA );
+        programA = createProgram( 'A', new HashSet<>(), organisationUnitA );
         manager.save( organisationUnitA );
         manager.save( organisationUnitB );
         manager.save( maleA );

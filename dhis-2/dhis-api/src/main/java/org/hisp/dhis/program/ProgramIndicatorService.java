@@ -30,10 +30,6 @@ package org.hisp.dhis.program;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
-import org.hisp.dhis.constant.Constant;
-import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 
 /**
  * @author Chau Thu Tran
@@ -111,7 +107,7 @@ public interface ProgramIndicatorService
      * @param programInstance  ProgramInstance
      * @return Indicator value
      */
-    String getProgramIndicatorValue( ProgramIndicator programIndicator, ProgramInstance programInstance );
+    Double getProgramIndicatorValue( ProgramIndicator programIndicator, ProgramInstance programInstance );
 
     /**
      * Get indicator values of all program indicators defined for a TrackedEntityInstance
@@ -119,7 +115,7 @@ public interface ProgramIndicatorService
      * @param programInstance ProgramInstance
      * @return a mapping of indicator display name and indicator value.
      */
-    Map<String, String> getProgramIndicatorValues( ProgramInstance programInstance );
+    Map<String, Double> getProgramIndicatorValues( ProgramInstance programInstance );
 
     /**
      * Get description of an indicator expression.
@@ -128,14 +124,33 @@ public interface ProgramIndicatorService
      * @return The description
      */
     String getExpressionDescription( String expression );
-    
+
     /**
-     * Get the expression as an analytics SQL clause.
+     * Get the expression as an analytics SQL clause. Ignores missing numeric
+     * values for data elements and attributes.
      * 
      * @param expression the expression.
      * @return the SQL string.
      */
     String getAnalyticsSQl( String expression );
+    
+    /**
+     * Get the expression as an analytics SQL clause.
+     * 
+     * @param expression the expression.
+     * @param whether to ignore missing values for data elements and attributes.
+     * @return the SQL string.
+     */
+    String getAnalyticsSQl( String expression, boolean ignoreMissingValues );
+    
+    /**
+     * Returns a SQL clause which matches any value for the data elements and
+     * attributes in the given expression.
+     * 
+     * @param expression the expression.
+     * @return the SQL string.
+     */
+    String getAnyValueExistsClauseAnalyticsSql( String expression );
 
     /**
      * Indicates whether the given program indicator expression is valid.
@@ -156,28 +171,4 @@ public interface ProgramIndicatorService
      *         {@link ProgramIndicator.INVALID_VARIABLES_IN_EXPRESSION}.
      */
     String filterIsValid( String filter );
-    
-    /**
-     * Get all {@link ProgramStageDataElement} part of the expression.
-     * 
-     * @param expression the expression.
-     * @return a set of ProgramStageDataElements.
-     */
-    Set<ProgramStageDataElement> getProgramStageDataElementsInExpression( String expression );
-
-    /**
-     * Get all {@link TrackedEntityAttribute} part of the expression.
-     * 
-     * @param expression the expression.
-     * @return a set of TrackedEntityAttributes.
-     */
-    Set<TrackedEntityAttribute> getAttributesInExpression( String expression );
-    
-    /**
-     * Get all {@link Constant} part of the expression of the expression.
-     * 
-     * @param expression the expression.
-     * @return a set of Constants.
-     */
-    Set<Constant> getConstantsInExpression( String expression );
 }

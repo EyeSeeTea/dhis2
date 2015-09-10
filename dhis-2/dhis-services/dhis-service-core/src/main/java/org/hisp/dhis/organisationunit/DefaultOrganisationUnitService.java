@@ -28,8 +28,21 @@ package org.hisp.dhis.organisationunit;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
+import static org.hisp.dhis.i18n.I18nUtils.i18n;
+
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.commons.filter.Filter;
@@ -46,20 +59,7 @@ import org.hisp.dhis.user.User;
 import org.hisp.dhis.version.VersionService;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.awt.geom.Point2D;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
-import static org.hisp.dhis.i18n.I18nUtils.i18n;
+import com.google.common.collect.Maps;
 
 /**
  * @author Torgeir Lorange Ostby
@@ -189,21 +189,9 @@ public class DefaultOrganisationUnitService
     }
 
     @Override
-    public List<OrganisationUnit> getAllOrganisationUnitsByStatus( boolean status )
-    {
-        return i18n( i18nService, organisationUnitStore.getAllOrganisationUnitsByStatus( status ) );
-    }
-
-    @Override
     public List<OrganisationUnit> getAllOrganisationUnitsByLastUpdated( Date lastUpdated )
     {
         return i18n( i18nService, organisationUnitStore.getAllOrganisationUnitsByLastUpdated( lastUpdated ) );
-    }
-
-    @Override
-    public List<OrganisationUnit> getAllOrganisationUnitsByStatusLastUpdated( boolean status, Date lastUpdated )
-    {
-        return i18n( i18nService, organisationUnitStore.getAllOrganisationUnitsByStatusLastUpdated( status, lastUpdated ) );
     }
 
     @Override
@@ -225,6 +213,12 @@ public class DefaultOrganisationUnitService
     public List<OrganisationUnit> getOrganisationUnitsByUid( Collection<String> uids )
     {
         return i18n( i18nService, organisationUnitStore.getByUid( uids ) );
+    }
+
+    @Override
+    public List<OrganisationUnit> getOrganisationUnitsByQuery( OrganisationUnitQueryParams params )
+    {
+        return organisationUnitStore.getOrganisationUnits( params );
     }
 
     @Override
@@ -616,38 +610,6 @@ public class DefaultOrganisationUnitService
     }
 
     @Override
-    public List<OrganisationUnit> getOrganisationUnitsByNameAndGroups( String query,
-        Collection<OrganisationUnitGroup> groups, boolean limit )
-    {
-        return i18n( i18nService, organisationUnitStore.getOrganisationUnitsByNameAndGroups( query, groups, limit ) );
-    }
-
-    @Override
-    public List<OrganisationUnit> getOrganisationUnitsByNameAndGroups( String name,
-        Collection<OrganisationUnitGroup> groups, OrganisationUnit parent, boolean limit )
-    {
-        // Can only limit in query if parent is not set and we get all units
-
-        boolean _limit = limit && parent == null;
-
-        final Set<OrganisationUnit> result = new HashSet<>( organisationUnitStore.getOrganisationUnitsByNameAndGroups( name,
-            groups, _limit ) );
-
-        if ( parent == null )
-        {
-            return new ArrayList<OrganisationUnit>( result );
-        }
-
-        final Set<OrganisationUnit> subTree = new HashSet<>( getOrganisationUnitWithChildren( parent.getId() ) );
-
-        List<OrganisationUnit> intersection = new ArrayList<OrganisationUnit>( Sets.intersection( subTree,
-            result ) );
-
-        return limit && intersection.size() > MAX_LIMIT ? intersection.subList( 0, MAX_LIMIT )
-            : intersection;
-    }
-
-    @Override
     public OrganisationUnitDataSetAssociationSet getOrganisationUnitDataSetAssociationSet( Integer maxLevels )
     {
         Map<String, Set<String>> associationSet = Maps.newHashMap( organisationUnitStore.getOrganisationUnitDataSetAssocationMap() );
@@ -718,21 +680,6 @@ public class DefaultOrganisationUnitService
     }
 
     @Override
-    public void filterOrganisationUnitsWithoutData( Collection<OrganisationUnit> organisationUnits )
-    {
-        final Set<Integer> unitsWithoutData = organisationUnitStore.getOrganisationUnitIdsWithoutData();
-
-        FilterUtils.filter( organisationUnits, new Filter<OrganisationUnit>()
-        {
-            @Override
-            public boolean retain( OrganisationUnit unit )
-            {
-                return unit != null && (!unitsWithoutData.contains( unit.getId() ) || unit.hasChild());
-            }
-        } );
-    }
-
-    @Override
     public List<OrganisationUnit> getOrganisationUnitsBetween( int first, int max )
     {
         return i18n( i18nService, organisationUnitStore.getAllOrderedName( first, max ) );
@@ -745,22 +692,9 @@ public class DefaultOrganisationUnitService
     }
 
     @Override
-    public List<OrganisationUnit> getOrganisationUnitsBetweenByStatus( boolean status, int first, int max )
-    {
-        return i18n( i18nService, organisationUnitStore.getBetweenByStatus( status, first, max ) );
-    }
-
-    @Override
     public List<OrganisationUnit> getOrganisationUnitsBetweenByLastUpdated( Date lastUpdated, int first, int max )
     {
         return i18n( i18nService, organisationUnitStore.getBetweenByLastUpdated( lastUpdated, first, max ) );
-    }
-
-    @Override
-    public List<OrganisationUnit> getOrganisationUnitsBetweenByStatusLastUpdated( boolean status,
-        Date lastUpdated, int first, int max )
-    {
-        return i18n( i18nService, organisationUnitStore.getBetweenByStatusLastUpdated( status, lastUpdated, first, max ) );
     }
 
     @Override

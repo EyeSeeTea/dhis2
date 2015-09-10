@@ -132,15 +132,6 @@ public interface OrganisationUnitService
     List<OrganisationUnit> getAllOrganisationUnits();
 
     /**
-     * Returns all OrganisationUnits by status.
-     *
-     * @param active Get active or inactive
-     * @return a list of all OrganisationUnits, or an empty list if
-     * there are no OrganisationUnits.
-     */
-    List<OrganisationUnit> getAllOrganisationUnitsByStatus( boolean status );
-
-    /**
      * Returns all OrganisationUnits by lastUpdated.
      *
      * @param lastUpdated OrganisationUnits from this date
@@ -148,16 +139,6 @@ public interface OrganisationUnitService
      * there are no OrganisationUnits.
      */
     List<OrganisationUnit> getAllOrganisationUnitsByLastUpdated( Date lastUpdated );
-
-    /**
-     * Returns all OrganisationUnits by status and lastUpdated.
-     *
-     * @param active      Get active or inactive
-     * @param lastUpdated OrganisationUnits from this date
-     * @return a list of all OrganisationUnits, or an empty list if
-     * there are no OrganisationUnits.
-     */
-    List<OrganisationUnit> getAllOrganisationUnitsByStatusLastUpdated( boolean status, Date lastUpdated );
 
     /**
      * Returns all OrganisationUnits with corresponding identifiers.
@@ -171,9 +152,17 @@ public interface OrganisationUnitService
      * Returns all OrganisationUnits with corresponding identifiers.
      *
      * @param uids the collection of uids.
-     * @return a collection of OrganisationUnits.
+     * @return a list of OrganisationUnits.
      */
     List<OrganisationUnit> getOrganisationUnitsByUid( Collection<String> uids );
+    
+    /**
+     * Returns a list of OrganisationUnits based on the given params.
+     * 
+     * @param params the params.
+     * @return a list of OrganisationUnits.
+     */
+    List<OrganisationUnit> getOrganisationUnitsByQuery( OrganisationUnitQueryParams params );
 
     /**
      * Returns an OrganisationUnit with a given name.
@@ -393,41 +382,13 @@ public interface OrganisationUnitService
      */
     List<OrganisationUnit> getOrganisationUnitsWithoutGroups();
 
-    /**
-     * Returns all OrganisationUnit which names are like the given name, or which
-     * code or uid are equal the given name, and are within the given groups.
-     *
-     * @param query  the query to match on name, code or uid.
-     * @param groups the organisation unit groups.
-     * @param limit  the limit of returned objects.
-     * @return a list of OrganisationUnits.
-     */
-    List<OrganisationUnit> getOrganisationUnitsByNameAndGroups( String name, Collection<OrganisationUnitGroup> groups, boolean limit );
-
-    /**
-     * Returns all OrganisationUnit which names are like the given name, or which
-     * code or uid are equal the given name, and are within the given groups.
-     *
-     * @param query  the query to match on name, code or uid.
-     * @param groups the organisation unit groups.
-     * @param limit  the limit of returned objects.
-     * @return a list of OrganisationUnits.
-     */
-    List<OrganisationUnit> getOrganisationUnitsByNameAndGroups( String name, Collection<OrganisationUnitGroup> groups, OrganisationUnit parent, boolean limit );
-
     OrganisationUnitDataSetAssociationSet getOrganisationUnitDataSetAssociationSet( Integer maxlevels );
-
-    void filterOrganisationUnitsWithoutData( Collection<OrganisationUnit> organisationUnits );
 
     List<OrganisationUnit> getOrganisationUnitsBetween( int first, int max );
 
     List<OrganisationUnit> getOrganisationUnitsBetweenByName( String name, int first, int max );
 
-    List<OrganisationUnit> getOrganisationUnitsBetweenByStatus( boolean status, int first, int max );
-
     List<OrganisationUnit> getOrganisationUnitsBetweenByLastUpdated( Date lastUpdated, int first, int max );
-
-    List<OrganisationUnit> getOrganisationUnitsBetweenByStatusLastUpdated( boolean status, Date lastUpdated, int first, int max );
 
     Map<String, OrganisationUnit> getUuidOrganisationUnitMap();
 

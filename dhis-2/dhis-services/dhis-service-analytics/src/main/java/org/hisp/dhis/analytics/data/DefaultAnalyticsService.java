@@ -667,7 +667,7 @@ public class DefaultAnalyticsService
             {
                 reportTable.getColumnDimensions().add( dimension );
 
-                tableColumns.add( params.getDimensionArrayCollapseDxExplodeCoc( dimension ) );
+                tableColumns.add( params.getDimensionArrayExplodeCoc( dimension ) );
             }
         }
 
@@ -677,7 +677,7 @@ public class DefaultAnalyticsService
             {
                 reportTable.getRowDimensions().add( dimension );
 
-                tableRows.add( params.getDimensionArrayCollapseDxExplodeCoc( dimension ) );
+                tableRows.add( params.getDimensionArrayExplodeCoc( dimension ) );
             }
         }
 
@@ -908,7 +908,7 @@ public class DefaultAnalyticsService
 
     @Override
     public DataQueryParams getFromUrl( Set<String> dimensionParams, Set<String> filterParams, AggregationType aggregationType,
-        String measureCriteria, boolean skipMeta, boolean skipData, boolean skipRounding, boolean hierarchyMeta, boolean ignoreLimit,
+        String measureCriteria, boolean skipMeta, boolean skipData, boolean skipRounding, boolean completedOnly, boolean hierarchyMeta, boolean ignoreLimit,
         boolean hideEmptyRows, boolean showHierarchy, DisplayProperty displayProperty, IdentifiableProperty outputIdScheme, 
         String approvalLevel, Date relativePeriodDate, String userOrgUnit, String program, String stage, I18nFormat format )
     {
@@ -935,6 +935,7 @@ public class DefaultAnalyticsService
         params.setSkipMeta( skipMeta );
         params.setSkipData( skipData );
         params.setSkipRounding( skipRounding );
+        params.setCompletedOnly( completedOnly );
         params.setHierarchyMeta( hierarchyMeta );
         params.setHideEmptyRows( hideEmptyRows );
         params.setShowHierarchy( showHierarchy );
@@ -1140,7 +1141,9 @@ public class DefaultAnalyticsService
 
             for ( Period period : periods )
             {
-                period.setName( format != null ? format.formatPeriod( period ) : null );
+                String name = format != null ? format.formatPeriod( period ) : null;
+                period.setName( name );
+                period.setShortName( name );
 
                 if ( !calendar.isIso8601() )
                 {
@@ -1270,7 +1273,7 @@ public class DefaultAnalyticsService
             
             List<NameableObject> dimItems = !allItems ? asList( idObjectManager.getByUidOrdered( itemClass, items ) ) : dimObject.getItems();
                         
-            DimensionalObject object = new BaseDimensionalObject( dimension, dimObject.getDimensionType(), null, null, dimItems, allItems );
+            DimensionalObject object = new BaseDimensionalObject( dimension, dimObject.getDimensionType(), null, dimObject.getName(), dimItems, allItems );
             
             return object;
         }

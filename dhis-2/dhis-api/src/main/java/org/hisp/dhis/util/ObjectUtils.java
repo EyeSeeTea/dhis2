@@ -1,5 +1,9 @@
 package org.hisp.dhis.util;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 /*
  * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
@@ -28,31 +32,9 @@ package org.hisp.dhis.util;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
-import org.joda.time.DateTime;
 
 public class ObjectUtils
 {
-    public static final Map<String, Class<?>> VALUE_TYPE_JAVA_CLASS_MAP = new HashMap<String, Class<?>>() { {
-        put( DataElement.VALUE_TYPE_INT, Double.class );
-        put( DataElement.VALUE_TYPE_STRING, String.class );
-        put( DataElement.VALUE_TYPE_BOOL, Boolean.class );
-        put( DataElement.VALUE_TYPE_TRUE_ONLY, Boolean.class );
-        put( DataElement.VALUE_TYPE_DATE, Date.class );
-        put( DataElement.VALUE_TYPE_DATETIME, DateTime.class );
-        put( DataElement.VALUE_TYPE_UNIT_INTERVAL, Double.class );
-        put( DataElement.VALUE_TYPE_PERCENTAGE, Double.class );
-        put( TrackedEntityAttribute.TYPE_NUMBER, Double.class );
-        put( TrackedEntityAttribute.TYPE_LETTER, String.class );
-        put( TrackedEntityAttribute.TYPE_OPTION_SET, String.class );
-        put( TrackedEntityAttribute.TYPE_EMAIL, String.class );
-    } };
-    
     /**
      * Returns the first non-null argument. Returns null if all arguments are null.
      * 
@@ -74,5 +56,24 @@ public class ObjectUtils
         }
         
         return null;
+    }
+    
+    /**
+     * Returns a list of strings, where the strings are the result of calling
+     * String.valueOf( Object ) of each object in the given collection.
+     * 
+     * @param objects the collection of objects.
+     * @return a list of strings.
+     */
+    public static List<String> asStringList( Collection<? extends Object> objects )
+    {
+        List<String> list = new ArrayList<>();
+        
+        for ( Object object : objects )
+        {
+            list.add( String.valueOf( object ) );
+        }
+        
+        return list;
     }
 }

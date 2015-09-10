@@ -28,11 +28,10 @@ package org.hisp.dhis.dataadmin.action.option;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.opensymphony.xwork2.Action;
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.option.OptionService;
 import org.hisp.dhis.option.OptionSet;
-
-import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran

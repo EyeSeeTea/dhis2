@@ -677,6 +677,14 @@ Ext.onReady( function() {
                 idNameMap: {}
             };
 
+            conf.valueType = {
+            	numericTypes: ['NUMBER','UNIT_INTERVAL','PERCENTAGE','INTEGER','INTEGER_POSITIVE','INTEGER_NEGATIVE','INTEGER_ZERO_OR_POSITIVE'],
+            	textTypes: ['TEXT','LONG_TEXT','LETTER','PHONE_NUMBER','EMAIL'],
+            	booleanTypes: ['BOOLEAN','TRUE_ONLY'],
+            	dateTypes: ['DATE','DATETIME'],
+            	aggregateTypes: ['NUMBER','UNIT_INTERVAL','PERCENTAGE','INTEGER','INTEGER_POSITIVE','INTEGER_NEGATIVE','INTEGER_ZERO_OR_POSITIVE','BOOLEAN','TRUE_ONLY']
+            }
+
             for (var i = 0, obj; i < conf.aggregationType.data.length; i++) {
                 obj = conf.aggregationType.data[i];
                 conf.aggregationType.idNameMap[obj.id] = obj.text;
@@ -1135,6 +1143,11 @@ Ext.onReady( function() {
 					//layout.sortOrder = Ext.isNumber(config.sortOrder) ? config.sortOrder : 0;
 					//layout.topLimit = Ext.isNumber(config.topLimit) ? config.topLimit : 0;
 
+                    // relative period date
+                    if (support.prototype.date.getYYYYMMDD(config.relativePeriodDate)) {
+                        layout.relativePeriodDate = support.prototype.date.getYYYYMMDD(config.relativePeriodDate);
+                    }
+                    
                     // style
                     if (Ext.isObject(config.domainAxisStyle)) {
                         layout.domainAxisStyle = config.domainAxisStyle;
@@ -1570,6 +1583,26 @@ Ext.onReady( function() {
 
 				return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, conf.report.digitGroupSeparator[separator]);
 			};
+
+                // date
+            support.prototype.date = {};
+
+            support.prototype.date.getYYYYMMDD = function(param) {
+                if (!Ext.isString(param)) {
+                    if (!(Object.prototype.toString.call(param) === '[object Date]' && param.toString() !== 'Invalid date')) {
+                        return null;
+                    }
+                }
+
+                var date = new Date(param),
+                    month = '' + (1 + date.getMonth()),
+                    day = '' + date.getDate();
+
+                month = month.length === 1 ? '0' + month : month;
+                day = day.length === 1 ? '0' + day : day;
+
+                return date.getFullYear() + '-' + month + '-' + day;
+            };
 
 			// color
 			support.color = {};
@@ -3029,6 +3062,11 @@ Ext.onReady( function() {
                 // collapse data items
                 if (layout.collapseDataDimensions) {
                     paramString += '&collapseDataDimensions=true';
+                }
+
+                // relative period date
+                if (layout.relativePeriodDate) {
+                    paramString += '&relativePeriodDate=' + layout.relativePeriodDate;
                 }
 
                 return paramString;
