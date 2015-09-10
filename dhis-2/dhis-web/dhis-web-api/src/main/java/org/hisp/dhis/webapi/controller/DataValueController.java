@@ -38,6 +38,7 @@ import java.util.Date;
 import java.util.List;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -134,7 +135,8 @@ public class DataValueController
         @RequestParam String ou,
         @RequestParam( required = false ) String value,
         @RequestParam( required = false ) String comment,
-        @RequestParam( required = false ) boolean followUp, HttpServletResponse response ) throws WebMessageException
+        @RequestParam( required = false ) boolean followUp )
+        throws WebMessageException
     {
         boolean strictPeriods = (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_STRICT_PERIODS, false );
         boolean strictCategoryOptionCombos = (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_STRICT_CATEGORY_OPTION_COMBOS, false );
@@ -636,9 +638,9 @@ public class DataValueController
         };
 
         String contentMD5 = content.hash( Hashing.md5() ).toString();
-        String storageKey = "dataValue/" + filename + "-" + contentMD5;
+        String storageKey = "dataValue/" + UUID.randomUUID();
 
-        FileResource fileResource = new FileResource( filename, contentType, contentMD5, storageKey, FileResourceDomain.DATAVALUE );
+        FileResource fileResource = new FileResource( filename, contentType, contentMD5, storageKey, FileResourceDomain.DATA_VALUE );
         fileResource.setAssigned( false );
         fileResource.setCreated( new Date() );
         fileResource.setUser( currentUserService.getCurrentUser() );
