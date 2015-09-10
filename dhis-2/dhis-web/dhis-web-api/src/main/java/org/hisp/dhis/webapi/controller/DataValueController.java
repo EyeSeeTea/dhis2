@@ -252,6 +252,30 @@ public class DataValueController
             throw new WebMessageException( WebMessageUtils.conflict( "Data set is locked" ) );
         }
 
+
+        // ---------------------------------------------------------------------
+        // Deal with file resource
+        // ---------------------------------------------------------------------
+
+        FileResource fileResource = null;
+
+        if ( dataElement.getValueType() == ValueType.FILE_RESOURCE )
+        {
+            fileResource = fileResourceService.getFileResource( value );
+
+            if ( fileResource == null || fileResource.getDomain() != FileResourceDomain.DATA_VALUE )
+            {
+                throw new WebMessageException( WebMessageUtils.notFound( FileResource.class, value ) );
+            }
+
+            if ( fileResource.isAssigned() )
+            {
+                throw new WebMessageException( WebMessageUtils.conflict( "File resource is already assigned or is linked to another data value" ) );
+            }
+
+            fileResource.setAssigned( true );
+        }
+
         // ---------------------------------------------------------------------
         // Assemble and save data value
         // ---------------------------------------------------------------------
@@ -286,6 +310,11 @@ public class DataValueController
 
             if ( value != null )
             {
+                if ( dataElement.isFileType() )
+                {
+                    fileResourceService.deleteFileResource( dataValue.getValue() );
+                }
+
                 dataValue.setValue( StringUtils.trimToNull( value ) );
             }
 
@@ -303,6 +332,11 @@ public class DataValueController
             dataValue.setStoredBy( storedBy );
 
             dataValueService.updateDataValue( dataValue );
+        }
+
+        if ( fileResource != null )
+        {
+            fileResourceService.updateFileResource( fileResource );
         }
     }
 

@@ -39,4 +39,6 @@ public interface FileResourceService
     String saveFileResource( FileResource fileResource, ByteSource content );
     void deleteFileResource( String uid );
     ByteSource getFileResourceContent( FileResource fileResource );
+    boolean fileResourceExists( String uid );
+    void updateFileResource( FileResource fileResource );
 }

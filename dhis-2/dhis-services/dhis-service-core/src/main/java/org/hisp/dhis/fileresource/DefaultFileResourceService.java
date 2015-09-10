@@ -119,4 +119,16 @@ public class DefaultFileResourceService
     {
         return fileResourceContentStore.getFileResourceContent( fileResource.getStorageKey() );
     }
+
+    @Override
+    public boolean fileResourceExists( String uid )
+    {
+        return fileResourceStore.getByUid( uid ) != null;
+    }
+
+    @Override
+    public void updateFileResource( FileResource fileResource )
+    {
+        fileResourceStore.update( fileResource );
+    }
 }
