@@ -29,10 +29,10 @@ package org.hisp.dhis.fileresource;
  */
 
 import com.google.common.io.ByteSource;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
-import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -76,7 +76,7 @@ public class DefaultFileResourceService
     @Override
     public String saveFileResource( FileResource fileResource, ByteSource content )
     {
-        String storageKey = fileResource.getStorageKey();
+        String storageKey = StringUtils.prependIfMissing( fileResource.getStorageKey(), fileResource.getDomain().getContainerName() );
 
         String name = fileResourceContentStore.saveFileResourceContent( storageKey, content );
 

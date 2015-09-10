@@ -33,5 +33,17 @@ package org.hisp.dhis.fileresource;
  */
 public enum FileResourceDomain
 {
-    DATAVALUE, FILESTORE
+    DATAVALUE("dataValue"), FILESTORE("filestore");
+
+    private String containerName;
+
+    FileResourceDomain( String containerName )
+    {
+        this.containerName = containerName;
+    }
+
+    public String getContainerName()
+    {
+        return containerName;
+    }
 }

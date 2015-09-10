@@ -559,9 +559,10 @@ public class DataValueController
         // Assemble fileResource
         // ---------------------------------------------------------------------
 
-//        String storedBy = currentUserService.getCurrentUsername();
-
-        String filename = multipartFile.getOriginalFilename(); // TODO Might be null
+        // TODO Validate multipart params: filename etc. Don't save nulls
+        // TODO Validate filename. Disallow file system chars such as '/'
+        // TODO Validate contentType or 'sniff' if not specified
+        String filename = multipartFile.getOriginalFilename();
         String contentType = multipartFile.getContentType();
 
         ByteSource content = new ByteSource()
