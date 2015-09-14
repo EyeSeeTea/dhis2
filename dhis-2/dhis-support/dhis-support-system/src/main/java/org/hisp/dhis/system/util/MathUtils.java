@@ -434,9 +434,11 @@ public class MathUtils
      */
     public static boolean isCoordinate( String value )
     {
-    	System.out.println("Testing coordinate " + value);
-    	System.out.println(COORDINATE_PATTERN.matcher( value ).matches());
-        return value != null && COORDINATE_PATTERN.matcher( value ).matches();
+    	if (value == null) {
+    		return false;
+    	}
+    	value = value.trim();
+        return COORDINATE_PATTERN.matcher( value ).matches();
     }
 
     /**

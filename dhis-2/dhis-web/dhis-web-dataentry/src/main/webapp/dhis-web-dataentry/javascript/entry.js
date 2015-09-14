@@ -176,7 +176,7 @@ function saveVal( dataElementId, optionComboId, fieldId, feedbackId )
     if ( value )
     {
         if ( type == 'TEXT' || type == 'NUMBER' || type == 'INTEGER' || type == 'INTEGER_POSITIVE' || type == 'INTEGER_NEGATIVE'
-          || type == 'INTEGER_ZERO_OR_POSITIVE' || type == 'UNIT_INTERVAL' || type == 'PERCENTAGE' )
+          || type == 'INTEGER_ZERO_OR_POSITIVE' || type == 'UNIT_INTERVAL' || type == 'PERCENTAGE' || type == 'COORDINATE')
         {
             if ( value.length > dhis2.de.cst.valueMaxLength )
             {
