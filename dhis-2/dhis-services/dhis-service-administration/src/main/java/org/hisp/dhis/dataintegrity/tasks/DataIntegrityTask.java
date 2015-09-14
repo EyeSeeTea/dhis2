@@ -68,7 +68,7 @@ public class DataIntegrityTask
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
-
+    
     public DataIntegrityTask( TaskId taskId, DataIntegrityService dataIntegrityService, Notifier notifier )
     {
         this.taskId = taskId;

@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.objectfilter.ops;
+package org.hisp.dhis.objectfilter.ops;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -29,24 +29,26 @@ package org.hisp.dhis.dxf2.objectfilter.ops;
  */
 
 /**
-* @author Morten Olav Hansen <mortenoh@gmail.com>
-*/
-public class NullOp extends Op
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
+ */
+public class EndsWithOp extends Op
 {
-    @Override
-    public boolean wantValue()
-    {
-        return false;
-    }
-
     @Override
     public OpStatus evaluate( Object object )
     {
-        if ( object == null )
+        if ( getValue() == null || object == null )
         {
-            return OpStatus.INCLUDE;
+            return OpStatus.IGNORE;
         }
 
-        return OpStatus.EXCLUDE;
+        if ( String.class.isInstance( object ) )
+        {
+            String s1 = getValue( String.class );
+            String s2 = (String) object;
+
+            return (s1 != null && s2.toLowerCase().endsWith( s1.toLowerCase() )) ? OpStatus.INCLUDE : OpStatus.EXCLUDE;
+        }
+
+        return OpStatus.IGNORE;
     }
 }

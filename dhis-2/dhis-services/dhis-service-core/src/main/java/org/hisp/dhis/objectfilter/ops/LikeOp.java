@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.objectfilter.ops;
+package org.hisp.dhis.objectfilter.ops;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,39 +28,27 @@ package org.hisp.dhis.dxf2.objectfilter.ops;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.query.QueryUtils;
-
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public abstract class Op
+public class LikeOp extends Op
 {
-    private String value;
-
-    public boolean wantValue()
+    @Override
+    public OpStatus evaluate( Object object )
     {
-        return true;
-    }
+        if ( getValue() == null || object == null )
+        {
+            return OpStatus.EXCLUDE;
+        }
 
-    public void setValue( String value )
-    {
-        this.value = value;
-    }
+        if ( String.class.isInstance( object ) )
+        {
+            String s1 = getValue( String.class );
+            String s2 = (String) object;
 
-    public String getValue()
-    {
-        return value;
-    }
+            return (s1 != null && s2.toLowerCase().contains( s1.toLowerCase() )) ? OpStatus.INCLUDE : OpStatus.EXCLUDE;
+        }
 
-    public <T> T getValue( Class<T> klass )
-    {
-        return QueryUtils.getValue( klass, value );
+        return OpStatus.EXCLUDE;
     }
-
-    public <T> T getValue( Class<T> klass, Object value )
-    {
-        return QueryUtils.getValue( klass, value );
-    }
-
-    public abstract OpStatus evaluate( Object object );
 }

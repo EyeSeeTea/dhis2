@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.fieldfilter;
+package org.hisp.dhis.fieldfilter;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo

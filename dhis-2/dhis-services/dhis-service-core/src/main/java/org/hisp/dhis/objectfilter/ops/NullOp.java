@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.objectfilter.ops;
+package org.hisp.dhis.objectfilter.ops;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -31,7 +31,22 @@ package org.hisp.dhis.dxf2.objectfilter.ops;
 /**
 * @author Morten Olav Hansen <mortenoh@gmail.com>
 */
-public enum OpStatus
+public class NullOp extends Op
 {
-    INCLUDE, EXCLUDE, IGNORE
+    @Override
+    public boolean wantValue()
+    {
+        return false;
+    }
+
+    @Override
+    public OpStatus evaluate( Object object )
+    {
+        if ( object == null )
+        {
+            return OpStatus.INCLUDE;
+        }
+
+        return OpStatus.EXCLUDE;
+    }
 }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.objectfilter.ops;
+package org.hisp.dhis.objectfilter.ops;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,12 +28,10 @@ package org.hisp.dhis.dxf2.objectfilter.ops;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
- */
-public class EmptyCollectionOp extends Op
+* @author Morten Olav Hansen <mortenoh@gmail.com>
+*/
+public class NnullOp extends Op
 {
     @Override
     public boolean wantValue()
@@ -44,26 +42,11 @@ public class EmptyCollectionOp extends Op
     @Override
     public OpStatus evaluate( Object object )
     {
-        if ( object == null )
+        if ( object != null )
         {
-            // TODO: ignore or include here?
-            return OpStatus.IGNORE;
+            return OpStatus.INCLUDE;
         }
 
-        if ( Collection.class.isInstance( object ) )
-        {
-            Collection<?> c = (Collection<?>) object;
-
-            if ( c.isEmpty() )
-            {
-                return OpStatus.INCLUDE;
-            }
-            else
-            {
-                return OpStatus.EXCLUDE;
-            }
-        }
-
-        return OpStatus.IGNORE;
+        return OpStatus.EXCLUDE;
     }
 }

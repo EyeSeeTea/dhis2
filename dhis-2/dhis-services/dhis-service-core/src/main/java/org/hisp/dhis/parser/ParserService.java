@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.objectfilter.ops;
+package org.hisp.dhis.parser;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,58 +28,30 @@ package org.hisp.dhis.dxf2.objectfilter.ops;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-import java.util.Date;
+import org.hisp.dhis.fieldfilter.FieldMap;
+import org.hisp.dhis.objectfilter.Filters;
+
+import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class LtOp extends Op
+public interface ParserService
 {
-    @Override
-    public OpStatus evaluate( Object object )
-    {
-        if ( getValue() == null || object == null )
-        {
-            return OpStatus.EXCLUDE;
-        }
+    /**
+     * Parses and generates Ops based on filter string, used for object filtering.
+     *
+     * @param filters One or more filter strings to parse
+     * @return Filters object
+     */
+    Filters parseObjectFilter( List<String> filters );
 
-        if ( Integer.class.isInstance( object ) )
-        {
-            Integer s1 = getValue( Integer.class );
-            Integer s2 = (Integer) object;
-
-            return (s1 != null && s2 < s1) ? OpStatus.INCLUDE : OpStatus.EXCLUDE;
-        }
-        else if ( Float.class.isInstance( object ) )
-        {
-            Float s1 = getValue( Float.class );
-            Float s2 = (Float) object;
-
-            return (s1 != null && s2 < s1) ? OpStatus.INCLUDE : OpStatus.EXCLUDE;
-        }
-        else if ( Collection.class.isInstance( object ) )
-        {
-            Collection<?> collection = (Collection<?>) object;
-            Integer size = getValue( Integer.class );
-
-            if ( size != null && collection.size() < size )
-            {
-                return OpStatus.INCLUDE;
-            }
-            else
-            {
-                return OpStatus.EXCLUDE;
-            }
-        }
-        else if ( Date.class.isInstance( object ) )
-        {
-            Date s1 = getValue( Date.class );
-            Date s2 = (Date) object;
-
-            return (s1 != null && (s2.before( s1 ))) ? OpStatus.INCLUDE : OpStatus.EXCLUDE;
-        }
-
-        return OpStatus.EXCLUDE;
-    }
+    /**
+     * Parses and writes out fieldMap with included/excluded properties.
+     *
+     * @param filter String to parse, can be used for both inclusion/exclusion
+     * @return FieldMap with property name as key, and another FieldMap as value (recursive)
+     * @see org.hisp.dhis.fieldfilter.FieldMap
+     */
+    FieldMap parseFieldFilter( String filter );
 }
