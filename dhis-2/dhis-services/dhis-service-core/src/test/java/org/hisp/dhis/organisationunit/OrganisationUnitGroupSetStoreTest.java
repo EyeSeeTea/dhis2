@@ -41,10 +41,10 @@ public class OrganisationUnitGroupSetStoreTest
         createOrganisationUnitGroupSet( 'A' ),
         createOrganisationUnitGroupSet( 'B' ),
         createOrganisationUnitGroupSet( 'C' ) };
-
+    
     @Override
     protected OrganisationUnitGroupSet[] getObjects()
-    {
+    {   
         return objects;
     }    
 

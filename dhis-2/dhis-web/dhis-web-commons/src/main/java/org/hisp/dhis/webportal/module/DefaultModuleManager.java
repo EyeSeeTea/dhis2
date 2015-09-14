@@ -48,6 +48,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author Torgeir Lorange Ostby
@@ -74,9 +75,6 @@ public class DefaultModuleManager
 
     @Autowired
     private AppManager appManager;
-
-    @Autowired
-    private CurrentUserService currentUserService;
 
     private ActionAccessResolver actionAccessResolver;
 
@@ -154,10 +152,7 @@ public class DefaultModuleManager
         List<Module> modules = getAccessibleMenuModules();
         List<App> apps = appManager.getAccessibleApps();
 
-        for ( App app : apps )
-        {
-            modules.add( Module.getModule( app ) );
-        }
+        modules.addAll( apps.stream().map( Module::getModule ).collect( Collectors.toList() ) );
 
         return modules;
     }
@@ -267,15 +262,9 @@ public class DefaultModuleManager
 
     private List<Module> getAccessibleModules( List<Module> modules )
     {
-        List<Module> allowed = new ArrayList<>();
-
-        for ( Module module : modules )
-        {
-            if ( module != null && actionAccessResolver.hasAccess( module.getName(), defaultActionName ) )
-            {
-                allowed.add( module );
-            }
-        }
+        List<Module> allowed = modules.stream()
+            .filter( module -> module != null && actionAccessResolver.hasAccess( module.getName(), defaultActionName ) )
+            .collect( Collectors.toList() );
 
         if ( modules.size() > allowed.size() )
         {
