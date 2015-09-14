@@ -66,6 +66,7 @@ public class MathUtils
     private static final Pattern POSITIVE_OR_ZERO_INT_PATTERN = Pattern.compile( "(^0$)|(^[1-9]\\d*$)" );
     private static final Pattern NEGATIVE_INT_PATTERN = Pattern.compile( "^-[1-9]\\d*$" );
     private static final Pattern ZERO_PATTERN = Pattern.compile( "^0(\\.0*)?$" );
+    private static final Pattern COORDINATE_PATTERN = Pattern.compile( "^([+-]?\\d+\\.?\\d+)\\s*,\\s*([+-]?\\d+\\.?\\d+)$" );
 
     /**
      * Evaluates whether an expression is true or false.
@@ -423,6 +424,19 @@ public class MathUtils
     public static boolean isZeroOrPositiveInteger( String value )
     {
         return value != null && INT_VALIDATOR.isValid( value ) && POSITIVE_OR_ZERO_INT_PATTERN.matcher( value ).matches();
+    }
+
+    /**
+     * Returns true if the provided string argument is to be considered a coordinate.
+     * 
+     * @param value the value.
+     * @return true if the provided string argument is to be considered a coordinate.
+     */
+    public static boolean isCoordinate( String value )
+    {
+    	System.out.println("Testing coordinate " + value);
+    	System.out.println(COORDINATE_PATTERN.matcher( value ).matches());
+        return value != null && COORDINATE_PATTERN.matcher( value ).matches();
     }
 
     /**

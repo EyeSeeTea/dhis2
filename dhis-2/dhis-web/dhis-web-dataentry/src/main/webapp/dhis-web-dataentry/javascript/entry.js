@@ -202,6 +202,10 @@ function saveVal( dataElementId, optionComboId, fieldId, feedbackId )
             {
                 return dhis2.de.alertField( fieldId, i18n_value_must_zero_or_positive_integer + '\n\n' + dataElementName );
             }
+            if ( type == 'COORDINATE' && !dhis2.validation.isCoordinate( value ) )
+            {
+                return dhis2.de.alertField( fieldId, i18n_value_must_coordinate + '\n\n' + dataElementName );
+            }
             if ( type == 'UNIT_INTERVAL' && !dhis2.validation.isUnitInterval( value ) )
             {
             	return dhis2.de.alertField( fieldId, i18n_value_must_unit_interval + '\n\n' + dataElementName );

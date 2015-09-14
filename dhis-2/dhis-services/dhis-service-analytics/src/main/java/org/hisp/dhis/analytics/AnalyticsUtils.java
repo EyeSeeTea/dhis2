@@ -29,6 +29,7 @@ package org.hisp.dhis.analytics;
  */
 
 import static org.hisp.dhis.common.DataDimensionItem.DATA_DIMENSION_TYPE_CLASS_MAP;
+
 import static org.hisp.dhis.common.DataDimensionItem.DATA_DIMENSION_TYPE_DOMAIN_MAP;
 import static org.hisp.dhis.system.util.DateUtils.getMediumDateString;
 

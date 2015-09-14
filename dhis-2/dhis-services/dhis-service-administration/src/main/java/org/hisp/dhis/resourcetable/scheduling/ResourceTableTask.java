@@ -29,6 +29,7 @@ package org.hisp.dhis.resourcetable.scheduling;
  */
 
 import static org.hisp.dhis.setting.SystemSettingManager.KEY_APPLICATION_TITLE;
+
 import static org.hisp.dhis.setting.SystemSettingManager.KEY_LAST_SUCCESSFUL_RESOURCE_TABLES_UPDATE;
 
 import java.util.Date;

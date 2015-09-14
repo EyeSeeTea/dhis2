@@ -69,6 +69,13 @@ dhis2.validation.isZeroOrPositiveInt = function(value) {
 };
 
 /**
+ * Allow coordinate.
+ */
+dhis2.validation.isCoordinate = function(value) {
+	return true;
+};
+
+/**
  * Allow only negative integers, not zero and no thousands separators.
  */
 dhis2.validation.isNegativeInt = function(value) {
@@ -127,6 +134,7 @@ dhis2.validation.isUnitInterval = function(value) {
  * i18n_value_must_number
  * i18n_value_must_positive_integer
  * i18n_value_must_zero_or_positive_integer
+ * i18n_value_must_coordinate
  * i18n_value_must_negative_integer
  * i18n_value_must_unit_interval
  * i18n_value_must_percentage
@@ -172,6 +180,14 @@ dhis2.validation.isValidValueType = function(value, valueType) {
     {
       if( !dhis2.validation.isZeroOrPositiveInt(value) ) {
         setHeaderDelayMessage(i18n_value_must_zero_or_positive_integer);
+        return false;
+      }
+      break;
+    }
+    case 'COORDINATE':
+    {
+      if( !dhis2.validation.isCoordinate(value) ) {
+        setHeaderDelayMessage(i18n_value_must_coordinate);
         return false;
       }
       break;
