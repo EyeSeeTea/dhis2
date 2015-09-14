@@ -687,7 +687,7 @@ public class DataValueController
 
         if ( uid == null )
         {
-            throw new WebMessageException( WebMessageUtils.error( "Saving the file resource failed" ) );
+            throw new WebMessageException( WebMessageUtils.error( "Saving the file failed" ) );
         }
 
         WebMessage webMessage = new WebMessage( WebMessageStatus.OK, HttpStatus.CREATED );
