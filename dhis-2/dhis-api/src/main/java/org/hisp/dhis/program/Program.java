@@ -60,6 +60,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.google.common.collect.Sets;
 
 /**
  * @author Abyot Asalefew
@@ -75,9 +76,9 @@ public class Program
 
     private int version;
 
-    private String dateOfEnrollmentDescription; //TODO rename to enrollmentDateDescription
+    private String enrollmentDateLabel;
 
-    private String dateOfIncidentDescription; //TODO rename to incidentDateDescription
+    private String incidentDateLabel;
 
     @Scanned
     private Set<OrganisationUnit> organisationUnits = new HashSet<>();
@@ -153,6 +154,30 @@ public class Program
     // Logic methods
     // -------------------------------------------------------------------------
 
+    public void addOrganisationUnit( OrganisationUnit organisationUnit )
+    {
+        organisationUnits.add( organisationUnit );
+        organisationUnit.getPrograms().add( this );
+    }
+    
+    public void removeOrganisationUnit( OrganisationUnit organisationUnit )
+    {
+        organisationUnits.remove( organisationUnit );
+        organisationUnit.getPrograms().remove( this );
+    }
+    
+    public void updateOrganisationUnits( Set<OrganisationUnit> updates )
+    {
+        Set<OrganisationUnit> toRemove = Sets.difference( organisationUnits, updates );
+        Set<OrganisationUnit> toAdd = Sets.difference( updates, organisationUnits );
+        
+        toRemove.parallelStream().forEach( u -> u.getPrograms().remove( this ) );
+        toAdd.parallelStream().forEach( u -> u.getPrograms().add( this ) );
+        
+        organisationUnits.clear();
+        organisationUnits.addAll( updates );
+    }
+    
     /**
      * Returns the ProgramTrackedEntityAttribute of this Program which contains
      * the given TrackedEntityAttribute.
@@ -334,28 +359,28 @@ public class Program
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     @PropertyRange( min = 2 )
-    public String getDateOfEnrollmentDescription()
+    public String getEnrollmentDateLabel()
     {
-        return dateOfEnrollmentDescription;
+        return enrollmentDateLabel;
     }
 
-    public void setDateOfEnrollmentDescription( String dateOfEnrollmentDescription )
+    public void setEnrollmentDateLabel( String enrollmentDateLabel )
     {
-        this.dateOfEnrollmentDescription = dateOfEnrollmentDescription;
+        this.enrollmentDateLabel = enrollmentDateLabel;
     }
 
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     @PropertyRange( min = 2 )
-    public String getDateOfIncidentDescription()
+    public String getIncidentDateLabel()
     {
-        return dateOfIncidentDescription;
+        return incidentDateLabel;
     }
 
-    public void setDateOfIncidentDescription( String dateOfIncidentDescription )
+    public void setIncidentDateLabel( String incidentDateLabel )
     {
-        this.dateOfIncidentDescription = dateOfIncidentDescription;
+        this.incidentDateLabel = incidentDateLabel;
     }
 
     //TODO remove
@@ -677,8 +702,8 @@ public class Program
             if ( strategy.isReplace() )
             {
                 description = program.getDescription();
-                dateOfEnrollmentDescription = program.getDateOfEnrollmentDescription();
-                dateOfIncidentDescription = program.getDateOfIncidentDescription();
+                enrollmentDateLabel = program.getEnrollmentDateLabel();
+                incidentDateLabel = program.getIncidentDateLabel();
                 programType = program.getProgramType();
                 displayIncidentDate = program.getDisplayIncidentDate();
                 ignoreOverdueEvents = program.getIgnoreOverdueEvents();
@@ -695,8 +720,8 @@ public class Program
             else if ( strategy.isMerge() )
             {
                 description = program.getDescription() == null ? description : program.getDescription();
-                dateOfEnrollmentDescription = program.getDateOfEnrollmentDescription() == null ? dateOfEnrollmentDescription : program.getDateOfEnrollmentDescription();
-                dateOfIncidentDescription = program.getDateOfIncidentDescription() == null ? dateOfIncidentDescription : program.getDateOfIncidentDescription();
+                enrollmentDateLabel = program.getEnrollmentDateLabel() == null ? enrollmentDateLabel : program.getEnrollmentDateLabel();
+                incidentDateLabel = program.getIncidentDateLabel() == null ? incidentDateLabel : program.getIncidentDateLabel();
                 programType = program.getProgramType() == null ? programType : program.getProgramType();
                 displayIncidentDate = program.getDisplayIncidentDate() == null ? displayIncidentDate : program.getDisplayIncidentDate();
                 ignoreOverdueEvents = program.getIgnoreOverdueEvents() == null ? ignoreOverdueEvents : program.getIgnoreOverdueEvents();

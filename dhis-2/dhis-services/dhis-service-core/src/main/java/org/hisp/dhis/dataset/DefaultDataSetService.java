@@ -36,7 +36,6 @@ import static org.hisp.dhis.i18n.I18nUtils.i18n;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -48,12 +47,15 @@ import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitQueryParams;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.user.CurrentUserService;
 import org.joda.time.DateTime;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.collect.Sets;
 
 /**
  * @author Lars Helge Overland
@@ -369,7 +371,7 @@ public class DefaultDataSetService
 
         boolean expired = dataSet.getExpiryDays() != DataSet.NO_EXPIRY && new DateTime( period.getEndDate() ).plusDays( dataSet.getExpiryDays() ).isBefore( new DateTime( now ) );
 
-        boolean exception = lockExceptionStore.getCount( dataSet, period, organisationUnit ) > 0l;
+        boolean exception = lockExceptionStore.getCount( dataSet, period, organisationUnit ) > 0L;
         
         if ( expired && !exception )
         {
@@ -415,25 +417,23 @@ public class DefaultDataSetService
 
         boolean expired = expiryDays != DataSet.NO_EXPIRY && new DateTime( period.getEndDate() ).plusDays( expiryDays ).isBefore( new DateTime( now ) );
 
-        return expired && lockExceptionStore.getCount( dataElement, period, organisationUnit ) == 0l;
+        return expired && lockExceptionStore.getCount( dataElement, period, organisationUnit ) == 0L;
     }
 
     @Override
     public void mergeWithCurrentUserOrganisationUnits( DataSet dataSet, Collection<OrganisationUnit> mergeOrganisationUnits )
     {
-        Set<OrganisationUnit> organisationUnits = new HashSet<>( dataSet.getSources() );
+        Set<OrganisationUnit> selectedOrgUnits = Sets.newHashSet( dataSet.getSources() );
+        
+        OrganisationUnitQueryParams params = new OrganisationUnitQueryParams();
+        params.setParents( currentUserService.getCurrentUser().getOrganisationUnits() );
 
-        Set<OrganisationUnit> userOrganisationUnits = new HashSet<>();
+        Set<OrganisationUnit> userOrganisationUnits = Sets.newHashSet( organisationUnitService.getOrganisationUnitsByQuery( params ) );
 
-        for ( OrganisationUnit organisationUnit : currentUserService.getCurrentUser().getOrganisationUnits() )
-        {
-            userOrganisationUnits.addAll( organisationUnitService.getOrganisationUnitWithChildren( organisationUnit.getUid() ) );
-        }
+        selectedOrgUnits.removeAll( userOrganisationUnits );
+        selectedOrgUnits.addAll( mergeOrganisationUnits );
 
-        organisationUnits.removeAll( userOrganisationUnits );
-        organisationUnits.addAll( mergeOrganisationUnits );
-
-        dataSet.updateOrganisationUnits( organisationUnits );
+        dataSet.updateOrganisationUnits( selectedOrgUnits );
 
         updateDataSet( dataSet );
     }

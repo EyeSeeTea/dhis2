@@ -2393,6 +2393,7 @@ Ext.onReady( function() {
 			showDimensionLabels,
 			hideEmptyRows,
             hideNaData,
+            completedOnly,
             limit,
             outputType,
             aggregationType,
@@ -2451,6 +2452,11 @@ Ext.onReady( function() {
 
 		hideNaData = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: NS.i18n.hide_na_data,
+			style: 'margin-bottom:' + checkboxBottomMargin + 'px',
+		});
+
+		completedOnly = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: NS.i18n.include_only_completed_events_only,
 			style: 'margin-bottom:' + checkboxBottomMargin + 'px',
 		});
 
@@ -2563,6 +2569,7 @@ Ext.onReady( function() {
                 showDimensionLabels,
 				hideEmptyRows,
                 hideNaData,
+                completedOnly,
                 limit,
                 outputType
                 //aggregationType
@@ -2605,9 +2612,10 @@ Ext.onReady( function() {
                     showDimensionLabels: showDimensionLabels.getValue(),
 					hideEmptyRows: hideEmptyRows.getValue(),
                     hideNaData: hideNaData.getValue(),
+					completedOnly: completedOnly.getValue(),
+					outputType: outputType.getValue(),
                     sortOrder: limit.getSortOrder(),
                     topLimit: limit.getTopLimit(),
-					outputType: outputType.getValue(),
 					showHierarchy: showHierarchy.getValue(),
                     showDimensionLabels: showDimensionLabels.getValue(),
 					displayDensity: displayDensity.getValue(),
@@ -2624,8 +2632,9 @@ Ext.onReady( function() {
 				showDimensionLabels.setValue(Ext.isBoolean(layout.showDimensionLabels) ? layout.showDimensionLabels : true);
 				hideEmptyRows.setValue(Ext.isBoolean(layout.hideEmptyRows) ? layout.hideEmptyRows : false);
 				hideNaData.setValue(Ext.isBoolean(layout.hideNaData) ? layout.hideNaData : false);
-				limit.setValues(layout.sortOrder, layout.topLimit);
+                completedOnly.setValue(Ext.isBoolean(layout.completedOnly) ? layout.completedOnly : false);
 				outputType.setValue(Ext.isString(layout.outputType) ? layout.outputType : 'EVENT');
+				limit.setValues(layout.sortOrder, layout.topLimit);
                 //aggregationType.setValue(Ext.isString(layout.aggregationType) ? layout.aggregationType : 'default');
 				showHierarchy.setValue(Ext.isBoolean(layout.showHierarchy) ? layout.showHierarchy : false);
 				displayDensity.setValue(Ext.isString(layout.displayDensity) ? layout.displayDensity : 'normal');
@@ -2712,6 +2721,7 @@ Ext.onReady( function() {
                     w.showDimensionLabels = showDimensionLabels;
 					w.hideEmptyRows = hideEmptyRows;
                     w.hideNaData = hideNaData;
+                    w.completedOnly = completedOnly;
                     w.limit = limit;
 					w.outputType = outputType;
 					w.showHierarchy = showHierarchy;
@@ -2726,13 +2736,10 @@ Ext.onReady( function() {
 	};
 
     QueryOptionsWindow = function() {
-		var showHierarchy,
+		var completedOnly,
 			digitGroupSeparator,
 			displayDensity,
 			fontSize,
-			reportingPeriod,
-			organisationUnit,
-			parentOrganisationUnit,
 
 			data,
 			style,
@@ -2743,10 +2750,10 @@ Ext.onReady( function() {
             checkboxBottomMargin = 2,
 			window;
 
-		//showHierarchy = Ext.create('Ext.form.field.Checkbox', {
-			//boxLabel: NS.i18n.show_hierarchy,
-			//style: 'margin-bottom:4px'
-		//});
+		completedOnly = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: NS.i18n.include_only_completed_events_only,
+			style: 'margin-bottom:' + checkboxBottomMargin + 'px',
+		});
 
 		displayDensity = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'ns-combo',
@@ -2811,26 +2818,13 @@ Ext.onReady( function() {
 			})
 		});
 
-		//legendSet = Ext.create('Ext.form.field.ComboBox', {
-			//cls: 'ns-combo',
-			//style: 'margin-bottom:3px',
-			//width: comboboxWidth,
-			//labelWidth: 130,
-			//fieldLabel: NS.i18n.legend_set,
-			//valueField: 'id',
-			//displayField: 'name',
-			//editable: false,
-			//value: 0,
-			//store: ns.app.stores.legendSet
-		//});
-
-		//organisationUnits = {
-			//bodyStyle: 'border:0 none',
-			//style: 'margin-left:14px',
-			//items: [
-				//showHierarchy
-			//]
-		//};
+		data = {
+			bodyStyle: 'border:0 none',
+			style: 'margin-left:14px',
+			items: [
+                completedOnly
+			]
+		};
 
 		style = {
 			bodyStyle: 'border:0 none',
@@ -2839,7 +2833,6 @@ Ext.onReady( function() {
 				displayDensity,
 				fontSize,
 				digitGroupSeparator
-				//legendSet
 			]
 		};
 
@@ -2858,6 +2851,7 @@ Ext.onReady( function() {
 					showSubTotals: false,
 					hideEmptyRows: false,
                     hideNaData: false,
+					completedOnly: completedOnly.getValue(),
                     sortOrder: 0,
                     topLimit: 0,
 					showHierarchy: false,
@@ -2868,22 +2862,21 @@ Ext.onReady( function() {
 				};
 			},
 			setOptions: function(layout) {
-				//showHierarchy.setValue(Ext.isBoolean(layout.showHierarchy) ? layout.showHierarchy : false);
+                completedOnly.setValue(Ext.isBoolean(layout.completedOnly) ? layout.completedOnly : false);
 				displayDensity.setValue(Ext.isString(layout.displayDensity) ? layout.displayDensity : 'normal');
 				fontSize.setValue(Ext.isString(layout.fontSize) ? layout.fontSize : 'normal');
 				digitGroupSeparator.setValue(Ext.isString(layout.digitGroupSeparator) ? layout.digitGroupSeparator : 'space');
-				//legendSet.setValue(Ext.isObject(layout.legendSet) && Ext.isString(layout.legendSet.id) ? layout.legendSet.id : 0);
 			},
 			items: [
-				//{
-					//bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
-					//style: 'margin-bottom:6px; margin-left:2px',
-					//html: NS.i18n.organisation_units
-				//},
-				//organisationUnits,
-				//{
-					//bodyStyle: 'border:0 none; padding:5px'
-				//},
+				{
+					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
+					style: 'margin-top:4px; margin-bottom:6px; margin-left:5px',
+					html: NS.i18n.data
+				},
+				data,
+				{
+					bodyStyle: 'border:0 none; padding:7px'
+				},
 				{
 					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
 					style: 'margin-top:2px; margin-bottom:6px; margin-left:3px',
@@ -2930,12 +2923,8 @@ Ext.onReady( function() {
 						}
 					}
 
-					//if (!legendSet.store.isLoaded) {
-						//legendSet.store.load();
-					//}
-
 					// cmp
-					//w.showHierarchy = showHierarchy;
+                    w.completedOnly = completedOnly;
 					w.displayDensity = displayDensity;
 					w.fontSize = fontSize;
 					w.digitGroupSeparator = digitGroupSeparator;
@@ -5075,27 +5064,27 @@ Ext.onReady( function() {
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('THIS_WEEK') - 1],
+                    relativePeriodId: 'THIS_WEEK',
                     boxLabel: NS.i18n.this_week
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_WEEK') - 1],
+                    relativePeriodId: 'LAST_WEEK',
                     boxLabel: NS.i18n.last_week
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_4_WEEKS') - 1],
+                    relativePeriodId: 'LAST_4_WEEKS',
                     boxLabel: NS.i18n.last_4_weeks
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_12_WEEKS') - 1],
+                    relativePeriodId: 'LAST_12_WEEKS',
                     boxLabel: NS.i18n.last_12_weeks
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_52_WEEKS') - 1],
+                    relativePeriodId: 'LAST_52_WEEKS',
                     boxLabel: NS.i18n.last_52_weeks
                 }
             ]
@@ -5115,27 +5104,27 @@ Ext.onReady( function() {
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('THIS_MONTH') - 1],
+                    relativePeriodId: 'THIS_MONTH',
                     boxLabel: NS.i18n.this_month
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_MONTH') - 1],
+                    relativePeriodId: 'LAST_MONTH',
                     boxLabel: NS.i18n.last_month
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_3_MONTHS') - 1],
+                    relativePeriodId: 'LAST_3_MONTHS',
                     boxLabel: NS.i18n.last_3_months
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_6_MONTHS') - 1],
+                    relativePeriodId: 'LAST_6_MONTHS',
                     boxLabel: NS.i18n.last_6_months
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_12_MONTHS') - 1],
+                    relativePeriodId: 'LAST_12_MONTHS',
                     boxLabel: NS.i18n.last_12_months,
                     checked: true
                 }
@@ -5156,17 +5145,17 @@ Ext.onReady( function() {
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('THIS_BIMONTH') - 1],
+                    relativePeriodId: 'THIS_BIMONTH',
                     boxLabel: NS.i18n.this_bimonth
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_BIMONTH') - 1],
+                    relativePeriodId: 'LAST_BIMONTH',
                     boxLabel: NS.i18n.last_bimonth
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_6_BIMONTHS') - 1],
+                    relativePeriodId: 'LAST_6_BIMONTHS',
                     boxLabel: NS.i18n.last_6_bimonths
                 }
             ]
@@ -5186,17 +5175,17 @@ Ext.onReady( function() {
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('THIS_QUARTER') - 1],
+                    relativePeriodId: 'THIS_QUARTER',
                     boxLabel: NS.i18n.this_quarter
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_QUARTER') - 1],
+                    relativePeriodId: 'LAST_QUARTER',
                     boxLabel: NS.i18n.last_quarter
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_4_QUARTERS') - 1],
+                    relativePeriodId: 'LAST_4_QUARTERS',
                     boxLabel: NS.i18n.last_4_quarters
                 }
             ]
@@ -5216,17 +5205,17 @@ Ext.onReady( function() {
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('THIS_SIX_MONTH') - 1],
+                    relativePeriodId: 'THIS_SIX_MONTH',
                     boxLabel: NS.i18n.this_sixmonth
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_SIX_MONTH') - 1],
+                    relativePeriodId: 'LAST_SIX_MONTH',
                     boxLabel: NS.i18n.last_sixmonth
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_2_SIXMONTHS') - 1],
+                    relativePeriodId: 'LAST_2_SIXMONTHS',
                     boxLabel: NS.i18n.last_2_sixmonths
                 }
             ]
@@ -5247,17 +5236,17 @@ Ext.onReady( function() {
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('THIS_FINANCIAL_YEAR') - 1],
+                    relativePeriodId: 'THIS_FINANCIAL_YEAR',
                     boxLabel: NS.i18n.this_financial_year
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_FINANCIAL_YEAR') - 1],
+                    relativePeriodId: 'LAST_FINANCIAL_YEAR',
                     boxLabel: NS.i18n.last_financial_year
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_5_FINANCIAL_YEARS') - 1],
+                    relativePeriodId: 'LAST_5_FINANCIAL_YEARS',
                     boxLabel: NS.i18n.last_5_financial_years
                 }
             ]
@@ -5277,17 +5266,17 @@ Ext.onReady( function() {
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('THIS_YEAR') - 1],
+                    relativePeriodId: 'THIS_YEAR',
                     boxLabel: NS.i18n.this_year
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_YEAR') - 1],
+                    relativePeriodId: 'LAST_YEAR',
                     boxLabel: NS.i18n.last_year
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_5_YEARS') - 1],
+                    relativePeriodId: 'LAST_5_YEARS',
                     boxLabel: NS.i18n.last_5_years
                 }
             ]
@@ -6715,13 +6704,13 @@ Ext.onReady( function() {
 	};
 
 	// core
-	extendCore = function(ns) {
-        var conf = ns.core.conf,
-			api = ns.core.api,
-			support = ns.core.support,
-			service = ns.core.service,
-			web = ns.core.web,
-			init = ns.core.init;
+	extendCore = function(core) {
+        var init = core.init,
+            conf = core.conf,
+			api = core.api,
+			support = core.support,
+			service = core.service,
+			web = core.web;
 
         // init
         (function() {
@@ -8310,14 +8299,19 @@ Ext.onReady( function() {
 		fn = function() {
 			if (++callbacks === requests.length) {
 
-				NS.instances.push(ns);
-
-                ns.core.init = init;
-				NS.getCore(ns);
-				extendCore(ns);
+				ns.core = NS.getCore(init);
+                ns.alert = ns.core.webAlert;
+				extendCore(ns.core);
 
 				dimConf = ns.core.conf.finals.dimension;
 				ns.app.viewport = createViewport();
+
+                ns.core.app.getViewportWidth = function() { return ns.app.viewport.getWidth(); };
+                ns.core.app.getViewportHeight = function() { return ns.app.viewport.getHeight(); };
+                ns.core.app.getCenterRegionWidth = function() { return ns.app.viewport.centerRegion.getWidth(); };
+                ns.core.app.getCenterRegionHeight = function() { return ns.app.viewport.centerRegion.getHeight(); };
+
+                NS.instances.push(ns);
 			}
 		};
 

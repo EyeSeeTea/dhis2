@@ -58,8 +58,6 @@ public class InitTableAlteror
     @Transactional
     public void execute()
     {
-        // domain type
-
         executeSql( "update dataelement set domaintype='AGGREGATE' where domaintype='aggregate' or domaintype is null;" );
         executeSql( "update dataelement set domaintype='TRACKER' where domaintype='patient';" );
         executeSql( "update users set invitation = false where invitation is null" );
@@ -68,8 +66,9 @@ public class InitTableAlteror
         executeSql( "UPDATE programstageinstance SET status='ACTIVE' WHERE status='0';" );
         executeSql( "UPDATE programstageinstance SET status='COMPLETED' WHERE status='1';" );
         executeSql( "UPDATE programstageinstance SET status='SKIPPED' WHERE status='5';" );
+        
         executeSql( "ALTER TABLE program DROP COLUMN displayonallorgunit" );
-
+        
         upgradeProgramStageDataElements();
         updateValueTypes();
 
@@ -93,20 +92,21 @@ public class InitTableAlteror
         executeSql( "update dataelement set valuetype='INTEGER_ZERO_OR_POSITIVE' where valuetype='int' and numbertype='zeroPositiveInt'" );
         executeSql( "update dataelement set valuetype='PERCENTAGE' where valuetype='int' and numbertype='percentage'" );
         executeSql( "update dataelement set valuetype='UNIT_INTERVAL' where valuetype='int' and numbertype='unitInterval'" );
-        executeSql( "update dataelement set valuetype='NUMBER' where valuetype='int'" );
+        executeSql( "update dataelement set valuetype='NUMBER' where valuetype='int' and numbertype is null" );
+
+        executeSql( "alter table dataelement drop column numbertype" );
 
         executeSql( "update dataelement set valuetype='TEXT' where valuetype='string' and texttype='text'" );
         executeSql( "update dataelement set valuetype='LONG_TEXT' where valuetype='string' and texttype='longText'" );
-        executeSql( "update dataelement set valuetype='TEXT' where valuetype='string'" );
+        executeSql( "update dataelement set valuetype='TEXT' where valuetype='string' and texttype is null" );
+
+        executeSql( "alter table dataelement drop column texttype" );
 
         executeSql( "update dataelement set valuetype='DATE' where valuetype='date'" );
         executeSql( "update dataelement set valuetype='DATETIME' where valuetype='datetime'" );
         executeSql( "update dataelement set valuetype='BOOLEAN' where valuetype='bool'" );
         executeSql( "update dataelement set valuetype='TRUE_ONLY' where valuetype='trueOnly'" );
         executeSql( "update dataelement set valuetype='USERNAME' where valuetype='username'" );
-
-        executeSql( "alter table dataelement drop column numbertype" );
-        executeSql( "alter table dataelement drop column texttype" );
 
         executeSql( "update trackedentityattribute set valuetype='TEXT' where valuetype='string'" );
         executeSql( "update trackedentityattribute set valuetype='PHONE_NUMBER' where valuetype='phoneNumber'" );
@@ -128,10 +128,11 @@ public class InitTableAlteror
         {
             String autoIncr = statementBuilder.getAutoIncrementValue();
 
-            String insertSql =
-                "insert into programstagedataelement(programstagedataelementid,programstageid,dataelementid,compulsory,allowprovidedelsewhere,sort_order,displayinreports,programstagesectionid,allowfuturedate,section_sort_order) " +
-                    "select " + autoIncr + ",programstageid,dataelementid,compulsory,allowprovidedelsewhere,sort_order,displayinreports,programstagesectionid,allowfuturedate,section_sort_order " +
-                    "from programstage_dataelements";
+            String insertSql = "insert into programstagedataelement(programstagedataelementid,programstageid,dataelementid,compulsory,allowprovidedelsewhere,sort_order,displayinreports,programstagesectionid,allowfuturedate,section_sort_order) "
+                + "select "
+                + autoIncr
+                + ",programstageid,dataelementid,compulsory,allowprovidedelsewhere,sort_order,displayinreports,programstagesectionid,allowfuturedate,section_sort_order "
+                + "from programstage_dataelements";
 
             executeSql( insertSql );
 

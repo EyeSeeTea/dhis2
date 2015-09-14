@@ -109,23 +109,23 @@
             <table class="dhis2-list-table-striped dhis2-table-hover">
                 <tr>
                     <td>
-                        {{selectedProgramForRelative.dateOfEnrollmentDescription}}
+                        {{selectedProgramForRelative.enrollmentDateLabel}}
                     </td>
                     <td>
                         <input type="text" 
-                               name="dateOfEnrollment" 
+                               name="enrollmentDate" 
                                class="form-control" 
                                d2-date 
                                max-date="selectedProgramForRelative.selectEnrollmentDatesInFuture ? '' : 0"
                                min-date=""
                                ng-model="enrollment.enrollmentDate" 
                                ng-required="true"/>
-                        <span ng-show="outerForm.submitted && outerForm.dateOfEnrollment.$invalid" class="error">{{'required'| translate}}</span>
+                        <span ng-show="outerForm.submitted && outerForm.enrollmentDate.$invalid" class="error">{{'required'| translate}}</span>
                     </td>
                 </tr>     
                 <tr ng-if="selectedProgramForRelative.displayIncidentDate">
                     <td>
-                        {{selectedProgramForRelative.dateOfIncidentDescription}}
+                        {{selectedProgramForRelative.incidentDateLabel}}
                     </td>
                     <td>
                         <input type="text" 

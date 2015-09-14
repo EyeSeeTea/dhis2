@@ -64,6 +64,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.google.common.collect.Sets;
 
 /**
  * This class is used for defining the standardized DataSets. A DataSet consists
@@ -289,18 +290,14 @@ public class DataSet
 
     public void updateOrganisationUnits( Set<OrganisationUnit> updates )
     {
-        for ( OrganisationUnit unit : new HashSet<>( sources ) )
-        {
-            if ( !updates.contains( unit ) )
-            {
-                removeOrganisationUnit( unit );
-            }
-        }
-
-        for ( OrganisationUnit unit : updates )
-        {
-            addOrganisationUnit( unit );
-        }
+        Set<OrganisationUnit> toRemove = Sets.difference( sources, updates );
+        Set<OrganisationUnit> toAdd = Sets.difference( updates, sources );
+        
+        toRemove.parallelStream().forEach( u -> u.getDataSets().remove( this ) );
+        toAdd.parallelStream().forEach( u -> u.getDataSets().add( this ) );
+        
+        sources.clear();
+        sources.addAll( updates );
     }
 
     public void addDataElement( DataElement dataElement )
@@ -317,18 +314,14 @@ public class DataSet
 
     public void updateDataElements( Set<DataElement> updates )
     {
-        for ( DataElement dataElement : new HashSet<>( dataElements ) )
-        {
-            if ( !updates.contains( dataElement ) )
-            {
-                removeDataElement( dataElement );
-            }
-        }
-
-        for ( DataElement dataElement : updates )
-        {
-            addDataElement( dataElement );
-        }
+        Set<DataElement> toRemove = Sets.difference( dataElements, updates );
+        Set<DataElement> toAdd = Sets.difference( updates, dataElements );
+        
+        toRemove.parallelStream().forEach( d -> d.getDataSets().remove( this ) );
+        toAdd.parallelStream().forEach( d -> d.getDataSets().add( this ) );
+        
+        dataElements.clear();
+        dataElements.addAll( updates );
     }
 
     public void addIndicator( Indicator indicator )

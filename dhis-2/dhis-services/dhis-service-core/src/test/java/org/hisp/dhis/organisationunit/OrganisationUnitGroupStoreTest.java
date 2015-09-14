@@ -41,7 +41,7 @@ public class OrganisationUnitGroupStoreTest
         new OrganisationUnitGroup( "GroupA" ),
         new OrganisationUnitGroup( "GroupB" ),
         new OrganisationUnitGroup( "GroupC" ) };
-
+    
     @Override
     protected OrganisationUnitGroup[] getObjects()
     {

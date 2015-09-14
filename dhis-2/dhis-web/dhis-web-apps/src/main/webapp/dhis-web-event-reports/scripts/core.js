@@ -17,17 +17,26 @@ Ext.onReady( function() {
 	NS.isSessionStorage = ('sessionStorage' in window && window['sessionStorage'] !== null);
 
     // core
-	NS.getCore = function(ns) {
-        var init = ns.core.init,
-            conf = {},
+	NS.getCore = function(init, appConfig) {
+        var conf = {},
             api = {},
             support = {},
             service = {},
             web = {},
+            app = {},
+            webAlert,
             dimConf;
 
-        // tmp
-        ns.alert = function() {};
+        appConfig = appConfig || {};
+
+        // alert
+        webAlert = function() {};
+
+        // app
+        app.getViewportWidth = function() {};
+        app.getViewportHeight = function() {};
+        app.getCenterRegionWidth = function() {};
+        app.getCenterRegionHeight = function() {};
 
 		// conf
 		(function() {
@@ -136,7 +145,33 @@ Ext.onReady( function() {
 					{id: 'FinancialJuly', name: NS.i18n.financial_july},
 					{id: 'FinancialApril', name: NS.i18n.financial_april}
 				],
-                relativePeriods: []
+                relativePeriods: [
+                    'THIS_WEEK',
+                    'LAST_WEEK',
+                    'LAST_4_WEEKS',
+                    'LAST_12_WEEKS',
+                    'LAST_52_WEEKS',
+                    'THIS_MONTH',
+                    'LAST_MONTH',
+                    'LAST_3_MONTHS',
+                    'LAST_6_MONTHS',
+                    'LAST_12_MONTHS',
+                    'THIS_BIMONTH',
+                    'LAST_BIMONTH',
+                    'LAST_6_BIMONTHS',
+                    'THIS_QUARTER',
+                    'LAST_QUARTER',
+                    'LAST_4_QUARTERS',
+                    'THIS_SIX_MONTH',
+                    'LAST_SIX_MONTH',
+                    'LAST_2_SIXMONTHS',
+                    'THIS_FINANCIAL_YEAR',
+                    'LAST_FINANCIAL_YEAR',
+                    'LAST_5_FINANCIAL_YEARS',
+                    'THIS_YEAR',
+                    'LAST_YEAR',
+                    'LAST_5_YEARS'
+                ]
 			};
 
                 // aggregation type
@@ -350,6 +385,10 @@ Ext.onReady( function() {
 
 				// hideEmptyRows: boolean (false)
 
+				// hideNaData: boolean (false)
+
+				// completedOnly: boolean (false)
+
                 // collapseDataDimensions: boolean (false)
 
                 // outputType: string ('EVENT') - 'EVENT', 'TRACKED_ENTITY_INSTANCE', 'ENROLLMENT'
@@ -535,8 +574,9 @@ Ext.onReady( function() {
                     layout.hideEmptyRows = Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : false;
                     layout.hideNaData = Ext.isBoolean(config.hideNaData) ? config.hideNaData : false;
                     layout.collapseDataDimensions = Ext.isBoolean(config.collapseDataDimensions) ? config.collapseDataDimensions : false;
-
 					layout.outputType = Ext.isString(config.outputType) && !Ext.isEmpty(config.outputType) ? config.outputType : 'EVENT';
+                    layout.completedOnly = Ext.isBoolean(config.completedOnly) ? config.completedOnly : false;
+
 					layout.showHierarchy = Ext.isBoolean(config.showHierarchy) ? config.showHierarchy : false;
 					layout.displayDensity = Ext.isString(config.displayDensity) && !Ext.isEmpty(config.displayDensity) ? config.displayDensity : 'normal';
 					layout.fontSize = Ext.isString(config.fontSize) && !Ext.isEmpty(config.fontSize) ? config.fontSize : 'normal';
@@ -986,6 +1026,17 @@ Ext.onReady( function() {
 				} : null;
 			};
 
+            // connection
+            support.connection = {};
+
+            support.connection.ajax = function(requestConfig, authConfig) {
+                if (authConfig.crossDomain && Ext.isString(authConfig.username) && Ext.isString(authConfig.password)) {
+                    requestConfig.headers = Ext.isObject(authConfig.headers) ? authConfig.headers : {};
+                    requestConfig.headers['Authorization'] = 'Basic ' + btoa(authConfig.username + ':' + authConfig.password);
+                }
+
+                Ext.Ajax.request(requestConfig);
+            };
 		}());
 
 		// service
@@ -2493,6 +2544,11 @@ Ext.onReady( function() {
                     paramString += '&outputType=' + view.outputType;
                 }
 
+                // completed only
+				if (view.completedOnly) {
+					paramString += '&completedOnly=true';
+				}
+                
                 // sorting
                 if (view.dataType === 'individual_cases' && view.sorting) {
                     if (view.sorting.id && view.sorting.direction) {
@@ -3542,14 +3598,17 @@ Ext.onReady( function() {
 		}());
 
 		// alert
-		ns.alert = web.message.alert;
+		webAlert = web.message.alert;
 
-		ns.core.conf = conf;
-		ns.core.api = api;
-		ns.core.support = support;
-		ns.core.service = service;
-		ns.core.web = web;
-
-		return ns;
+		return {
+            init: init,
+            conf: conf,
+            api: api,
+            support: support,
+            service: service,
+            web: web,
+            app: app,
+            webAlert: webAlert
+        };
 	};
 });

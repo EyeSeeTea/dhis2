@@ -28,7 +28,15 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.collect.Sets;
+import static org.hisp.dhis.i18n.I18nUtils.i18n;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.i18n.I18n;
@@ -36,6 +44,8 @@ import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.option.Option;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitQueryParams;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.trackedentity.TrackedEntity;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
@@ -50,14 +60,7 @@ import org.hisp.dhis.validation.ValidationCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.regex.Matcher;
-
-import static org.hisp.dhis.i18n.I18nUtils.i18n;
+import com.google.common.collect.Sets;
 
 /**
  * @author Abyot Asalefew
@@ -106,6 +109,13 @@ public class DefaultProgramService
     public void setUserService( UserService userService )
     {
         this.userService = userService;
+    }
+    
+    private OrganisationUnitService organisationUnitService;
+
+    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    {
+        this.organisationUnitService = organisationUnitService;
     }
 
     @Autowired
@@ -308,6 +318,23 @@ public class DefaultProgramService
         return programs;
     }
 
+    @Override
+    public void mergeWithCurrentUserOrganisationUnits( Program program, Collection<OrganisationUnit> mergeOrganisationUnits )
+    {
+        Set<OrganisationUnit> selectedOrgUnits = Sets.newHashSet( program.getOrganisationUnits() );
+        
+        OrganisationUnitQueryParams params = new OrganisationUnitQueryParams();
+        params.setParents( currentUserService.getCurrentUser().getOrganisationUnits() );
+
+        Set<OrganisationUnit> userOrganisationUnits = Sets.newHashSet( organisationUnitService.getOrganisationUnitsByQuery( params ) );
+
+        selectedOrgUnits.removeAll( userOrganisationUnits );
+        selectedOrgUnits.addAll( mergeOrganisationUnits );
+
+        program.updateOrganisationUnits( selectedOrgUnits );
+
+        updateProgram( program );
+    }
 
     @Override
     public String prepareDataEntryFormForAdd( String htmlCode, Program program, Collection<User> healthWorkers,

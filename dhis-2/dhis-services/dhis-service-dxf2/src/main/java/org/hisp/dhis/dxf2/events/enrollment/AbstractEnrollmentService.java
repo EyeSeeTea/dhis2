@@ -171,8 +171,8 @@ public abstract class AbstractEnrollmentService
         enrollment.setLastUpdated( programInstance.getLastUpdated() );
         enrollment.setProgram( programInstance.getProgram().getUid() );
         enrollment.setStatus( EnrollmentStatus.fromInt( programInstance.getStatus() ) );
-        enrollment.setDateOfEnrollment( programInstance.getEnrollmentDate() );
-        enrollment.setDateOfIncident( programInstance.getDateOfIncident() );
+        enrollment.setEnrollmentDate( programInstance.getEnrollmentDate() );
+        enrollment.setIncidentDate( programInstance.getIncidentDate() );
         enrollment.setFollowup( programInstance.getFollowup() );
 
         List<TrackedEntityComment> comments = programInstance.getComments();
@@ -283,7 +283,7 @@ public abstract class AbstractEnrollmentService
         OrganisationUnit organisationUnit = getOrganisationUnit( enrollment.getOrgUnit() );
 
         ProgramInstance programInstance = programInstanceService.enrollTrackedEntityInstance( entityInstance, program,
-            enrollment.getDateOfEnrollment(), enrollment.getDateOfIncident(), organisationUnit, enrollment.getEnrollment() );
+            enrollment.getEnrollmentDate(), enrollment.getIncidentDate(), organisationUnit, enrollment.getEnrollment() );
 
         if ( programInstance == null )
         {
@@ -372,8 +372,8 @@ public abstract class AbstractEnrollmentService
 
         programInstance.setProgram( program );
         programInstance.setEntityInstance( entityInstance );
-        programInstance.setDateOfIncident( enrollment.getDateOfIncident() );
-        programInstance.setEnrollmentDate( enrollment.getDateOfEnrollment() );
+        programInstance.setIncidentDate( enrollment.getIncidentDate() );
+        programInstance.setEnrollmentDate( enrollment.getEnrollmentDate() );
         programInstance.setFollowup( enrollment.getFollowup() );
 
         if ( programInstance.getStatus() != enrollment.getStatus().getValue() )

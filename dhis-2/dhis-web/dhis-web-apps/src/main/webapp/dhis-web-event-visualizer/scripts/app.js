@@ -2104,9 +2104,10 @@ Ext.onReady( function() {
 
     AggregateOptionsWindow = function() {
 		var showValues,
+            showTrendLine,
             hideEmptyRows,
             hideNaData,
-            showTrendLine,
+            completedOnly,
 			targetLineValue,
 			targetLineTitle,
 			baseLineValue,
@@ -2144,6 +2145,11 @@ Ext.onReady( function() {
 			checked: true
 		});
 
+		showTrendLine = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: NS.i18n.trend_line,
+			style: 'margin-bottom:' + checkboxBottomMargin + 'px'
+		});
+
 		hideEmptyRows = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: NS.i18n.hide_empty_category_items,
 			style: 'margin-bottom:' + checkboxBottomMargin + 'px'
@@ -2154,9 +2160,9 @@ Ext.onReady( function() {
 			style: 'margin-bottom:' + checkboxBottomMargin + 'px',
 		});
 
-		showTrendLine = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: NS.i18n.trend_line,
-			style: 'margin-bottom:' + checkboxBottomMargin + 'px'
+		completedOnly = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: NS.i18n.include_only_completed_events_only,
+			style: 'margin-bottom:' + checkboxBottomMargin + 'px',
 		});
 
 		targetLineValue = Ext.create('Ext.form.field.Number', {
@@ -2335,9 +2341,10 @@ Ext.onReady( function() {
 			style: 'margin-left:14px',
 			items: [
 				showValues,
+				showTrendLine,
 				hideEmptyRows,
                 hideNaData,
-				showTrendLine,
+                completedOnly,
 				{
 					xtype: 'container',
 					layout: 'column',
@@ -2417,9 +2424,10 @@ Ext.onReady( function() {
 			getOptions: function() {
 				return {
 					showValues: showValues.getValue(),
+					showTrendLine: showTrendLine.getValue(),
                     hideEmptyRows: hideEmptyRows.getValue(),
                     hideNaData: hideNaData.getValue(),
-					showTrendLine: showTrendLine.getValue(),
+					completedOnly: completedOnly.getValue(),
 					targetLineValue: targetLineValue.getValue(),
 					targetLineTitle: targetLineTitle.getValue(),
 					baseLineValue: baseLineValue.getValue(),
@@ -2439,8 +2447,10 @@ Ext.onReady( function() {
 			},
 			setOptions: function(layout) {
 				showValues.setValue(Ext.isBoolean(layout.showValues) ? layout.showValues : false);
-				hideEmptyRows.setValue(Ext.isBoolean(layout.hideEmptyRows) ? layout.hideEmptyRows : false);
 				showTrendLine.setValue(Ext.isBoolean(layout.showTrendLine) ? layout.showTrendLine : false);
+				hideEmptyRows.setValue(Ext.isBoolean(layout.hideEmptyRows) ? layout.hideEmptyRows : false);
+				hideNaData.setValue(Ext.isBoolean(layout.hideNaData) ? layout.hideNaData : false);
+                completedOnly.setValue(Ext.isBoolean(layout.completedOnly) ? layout.completedOnly : false);
 
 				// target line
 				if (Ext.isNumber(layout.targetLineValue)) {
@@ -2589,9 +2599,10 @@ Ext.onReady( function() {
 
 					// cmp
 					w.showValues = showValues;
+					w.showTrendLine = showTrendLine;
                     w.hideEmptyRows = hideEmptyRows;
                     w.hideNaData = hideNaData;
-					w.showTrendLine = showTrendLine;
+                    w.completedOnly = completedOnly;
 					w.targetLineValue = targetLineValue;
 					w.targetLineTitle = targetLineTitle;
 					w.baseLineValue = baseLineValue;
@@ -6376,13 +6387,13 @@ Ext.onReady( function() {
 	};
 
 	// core
-	extendCore = function(ns) {
-        var conf = ns.core.conf,
-			api = ns.core.api,
-			support = ns.core.support,
-			service = ns.core.service,
-			web = ns.core.web,
-			init = ns.core.init;
+	extendCore = function(core) {
+        var init = core.init,
+            conf = core.conf,
+			api = core.api,
+			support = core.support,
+			service = core.service,
+			web = core.web;
 
         // init
         (function() {
@@ -7986,19 +7997,25 @@ Ext.onReady( function() {
 		var requests = [],
 			callbacks = 0,
 			init = {},
+            appConfig,
             fn;
 
 		fn = function() {
 			if (++callbacks === requests.length) {
 
-				NS.instances.push(ns);
-
-                ns.core.init = init;
-				NS.getCore(ns);
-				extendCore(ns);
+				ns.core = NS.getCore(init);
+                ns.alert = ns.core.webAlert;
+				extendCore(ns.core);
 
 				dimConf = ns.core.conf.finals.dimension;
 				ns.app.viewport = createViewport();
+
+                ns.core.app.getViewportWidth = function() { return ns.app.viewport.getWidth(); };
+                ns.core.app.getViewportHeight = function() { return ns.app.viewport.getHeight(); };
+                ns.core.app.getCenterRegionWidth = function() { return ns.app.viewport.centerRegion.getWidth(); };
+                ns.core.app.getCenterRegionHeight = function() { return ns.app.viewport.centerRegion.getHeight(); };
+
+                NS.instances.push(ns);
 			}
 		};
 

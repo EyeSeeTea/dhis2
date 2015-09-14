@@ -516,14 +516,26 @@ Ext.onReady( function() {
 	NS.isDebug = false;
 	NS.isSessionStorage = ('sessionStorage' in window && window['sessionStorage'] !== null);
 
-	NS.getCore = function(ns) {
-        var init = ns.core.init,
-            conf = {},
+	NS.getCore = function(init, appConfig) {
+        var conf = {},
             api = {},
             support = {},
             service = {},
             web = {},
+            app = {},
+            webAlert,
             dimConf;
+
+        appConfig = appConfig || {};
+
+        // alert
+        webAlert = function() {};
+
+        // app
+        app.getViewportWidth = function() {};
+        app.getViewportHeight = function() {};
+        app.getCenterRegionWidth = function() {};
+        app.getCenterRegionHeight = function() {};
 
 		// conf
 		(function() {
@@ -899,6 +911,8 @@ Ext.onReady( function() {
 
                 // hideNaData: boolean (false)
 
+				// completedOnly: boolean (false)
+
                 // aggregationType: string ('default') - 'default', 'count', 'sum'
 
                 // showHierarchy: boolean (false)
@@ -1101,9 +1115,10 @@ Ext.onReady( function() {
 
 					// properties
                     layout.showValues = Ext.isBoolean(config.showData) ? config.showData : (Ext.isBoolean(config.showValues) ? config.showValues : true);
+                    layout.showTrendLine = Ext.isBoolean(config.regression) ? config.regression : (Ext.isBoolean(config.showTrendLine) ? config.showTrendLine : false);
                     layout.hideEmptyRows = Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : (Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : true);
                     layout.hideNaData = Ext.isBoolean(config.hideNaData) ? config.hideNaData : false;
-                    layout.showTrendLine = Ext.isBoolean(config.regression) ? config.regression : (Ext.isBoolean(config.showTrendLine) ? config.showTrendLine : false);
+                    layout.completedOnly = Ext.isBoolean(config.completedOnly) ? config.completedOnly : false;
                     layout.targetLineValue = Ext.isNumber(config.targetLineValue) ? config.targetLineValue : null;
                     layout.targetLineTitle = Ext.isString(config.targetLineLabel) && !Ext.isEmpty(config.targetLineLabel) ? config.targetLineLabel :
                         (Ext.isString(config.targetLineTitle) && !Ext.isEmpty(config.targetLineTitle) ? config.targetLineTitle : null);
@@ -1624,6 +1639,17 @@ Ext.onReady( function() {
 				} : null;
 			};
 
+            // connection
+            support.connection = {};
+
+            support.connection.ajax = function(requestConfig, authConfig) {
+                if (authConfig.crossDomain && Ext.isString(authConfig.username) && Ext.isString(authConfig.password)) {
+                    requestConfig.headers = Ext.isObject(authConfig.headers) ? authConfig.headers : {};
+                    requestConfig.headers['Authorization'] = 'Basic ' + btoa(authConfig.username + ':' + authConfig.password);
+                }
+
+                Ext.Ajax.request(requestConfig);
+            };
 		}());
 
 		// service
@@ -3056,6 +3082,11 @@ Ext.onReady( function() {
                     paramString += '&outputType=' + layout.outputType;
                 }
 
+                // completed only
+				if (layout.completedOnly) {
+					paramString += '&completedOnly=true';
+				}
+                
                 // display property
                 paramString += '&displayProperty=' + init.userAccount.settings.keyAnalysisDisplayProperty.toUpperCase();
 
@@ -3299,7 +3330,7 @@ Ext.onReady( function() {
                                 }
 
                                 trendLineFields.push(regressionKey);
-                                xResponse.metaData.names[regressionKey] = NS.i18n.trend + (ns.dashboard ? '' : ' (' + xResponse.metaData.names[failSafeColumnIds[i]] + ')');
+                                xResponse.metaData.names[regressionKey] = NS.i18n.trend + (appConfig.dashboard ? '' : ' (' + xResponse.metaData.names[failSafeColumnIds[i]] + ')');
                             }
                         }
                     }
@@ -3623,8 +3654,8 @@ Ext.onReady( function() {
                 };
 
                 getFormatedSeriesTitle = function(titles) {
-                    var itemLength = ns.dashboard ? 23 : 30,
-                        charLength = ns.dashboard ? 5 : 6,
+                    var itemLength = appConfig.dashboard ? 23 : 30,
+                        charLength = appConfig.dashboard ? 5 : 6,
                         numberOfItems = titles.length,
                         numberOfChars,
                         totalItemLength = numberOfItems * itemLength,
@@ -3881,8 +3912,8 @@ Ext.onReady( function() {
                 };
 
                 getDefaultLegend = function(store, chartConfig) {
-                    var itemLength = ns.dashboard ? 24 : 30,
-                        charLength = ns.dashboard ? 4 : 6,
+                    var itemLength = appConfig.dashboard ? 24 : 30,
+                        charLength = appConfig.dashboard ? 4 : 6,
                         numberOfItems = 0,
                         numberOfChars = 0,
                         width,
@@ -3979,7 +4010,7 @@ Ext.onReady( function() {
                         text = xLayout.startDate + ' - ' + xLayout.endDate;
                     }
 
-                    if (ns.dashboard && Ext.isString(xLayout.name)) {
+                    if (appConfig.dashboard && Ext.isString(xLayout.name)) {
                         text = xLayout.name;
                     }
                     else if (xLayout.title) {
@@ -4066,7 +4097,7 @@ Ext.onReady( function() {
                     }
 
                     // aggregation type
-                    if (!ns.dashboard && Ext.isObject(layout.value) && layout.value.id && layout.aggregationType) {
+                    if (!appConfig.dashboard && Ext.isObject(layout.value) && layout.value.id && layout.aggregationType) {
                         var value = layout.value.id;
 
                         text += text.length ? ', ' : '';
@@ -4099,7 +4130,7 @@ Ext.onReady( function() {
                         font: titleFont,
                         fill: titleColor,
                         height: 20,
-                        y: ns.dashboard ? 7 : 20
+                        y: appConfig.dashboard ? 7 : 20
                     });
                 };
 
@@ -4109,9 +4140,9 @@ Ext.onReady( function() {
                             height = ns.app.centerRegion.getHeight();
                             
 						this.animate = false;
-                        this.setWidth(ns.dashboard ? width : width - 15);
-                        this.setHeight(ns.dashboard ? height : height - 40);
-                        this.animate = !ns.dashboard;
+                        this.setWidth(appConfig.dashboard ? width : width - 15);
+                        this.setHeight(appConfig.dashboard ? height : height - 40);
+                        this.animate = !appConfig.dashboard;
                     };
                 };
 
@@ -4151,15 +4182,15 @@ Ext.onReady( function() {
                             //animate: true,
                             animate: false,
                             shadow: false,
-                            insetPadding: ns.dashboard ? 17 : 35,
+                            insetPadding: appConfig.dashboard ? 17 : 35,
                             insetPaddingObject: {
-                                top: ns.dashboard ? 12 : 32,
-                                right: ns.dashboard ? (isLineBased ? 5 : 3) : (isLineBased ? 25 : 15),
-                                bottom: ns.dashboard ? 2 : 10,
-                                left: ns.dashboard ? (isLineBased ? 15 : 7) : (isLineBased ? 70 : 50)
+                                top: appConfig.dashboard ? 12 : 32,
+                                right: appConfig.dashboard ? (isLineBased ? 5 : 3) : (isLineBased ? 25 : 15),
+                                bottom: appConfig.dashboard ? 2 : 10,
+                                left: appConfig.dashboard ? (isLineBased ? 15 : 7) : (isLineBased ? 70 : 50)
                             },
-                            width: ns.dashboard ? width : width - 15,
-                            height: ns.dashboard ? height : height - 40,
+                            width: appConfig.dashboard ? width : width - 15,
+                            height: appConfig.dashboard ? height : height - 40,
                             theme: 'dv1'
                         };
 
@@ -4168,15 +4199,15 @@ Ext.onReady( function() {
                         defaultConfig.legend = getDefaultLegend(store, config);
 
                         if (defaultConfig.legend.position === 'right') {
-                            defaultConfig.insetPaddingObject.top = ns.dashboard ? 22 : 40;
-                            defaultConfig.insetPaddingObject.right = ns.dashboard ? 5 : 40;
+                            defaultConfig.insetPaddingObject.top = appConfig.dashboard ? 22 : 40;
+                            defaultConfig.insetPaddingObject.right = appConfig.dashboard ? 5 : 40;
                         }
                     }
 
                     // title
                     if (xLayout.hideTitle) {
-                        defaultConfig.insetPadding = ns.dashboard ? 1 : 10;
-                        defaultConfig.insetPaddingObject.top = ns.dashboard ? 3 : 10;
+                        defaultConfig.insetPadding = appConfig.dashboard ? 1 : 10;
+                        defaultConfig.insetPaddingObject.top = appConfig.dashboard ? 3 : 10;
                     }
                     else {
                         defaultConfig.items = [getDefaultChartTitle(store)];
@@ -4355,7 +4386,7 @@ Ext.onReady( function() {
                             },
                             markerConfig: {
                                 type: 'circle',
-                                radius: ns.dashboard ? 3 : 4
+                                radius: appConfig.dashboard ? 3 : 4
                             },
                             tips: getDefaultTips(),
                             title: seriesTitles[i]
@@ -4537,10 +4568,10 @@ Ext.onReady( function() {
                         store: store,
                         series: series,
                         insetPaddingObject: {
-                            top: ns.dashboard ? 15 : 40,
-                            right: ns.dashboard ? 2 : 30,
-                            bottom: ns.dashboard ? 13: 30,
-                            left: ns.dashboard ? 7 : 30
+                            top: appConfig.dashboard ? 15 : 40,
+                            right: appConfig.dashboard ? 2 : 30,
+                            bottom: appConfig.dashboard ? 13: 30,
+                            left: appConfig.dashboard ? 7 : 30
                         }
                     });
 
@@ -4663,14 +4694,17 @@ Ext.onReady( function() {
 		}());
 
 		// alert
-		ns.alert = web.message.alert;
+		webAlert = web.message.alert;
 
-		ns.core.conf = conf;
-		ns.core.api = api;
-		ns.core.support = support;
-		ns.core.service = service;
-		ns.core.web = web;
-
-		return ns;
+		return {
+            init: init,
+            conf: conf,
+            api: api,
+            support: support,
+            service: service,
+            web: web,
+            app: app,
+            webAlert: webAlert
+        };
 	};
 });

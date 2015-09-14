@@ -843,6 +843,19 @@ public class TableAlteror
         executeSql( "update categoryoptiongroupset set datadimensiontype = 'DISAGGREGATION' where datadimensiontype is null" );
         executeSql( "update categoryoptiongroup set datadimensiontype = 'DISAGGREGATION' where datadimensiontype is null" );
 
+        executeSql( "update reporttable set completedonly = false where completedonly is null" );
+        executeSql( "update chart set completedonly = false where completedonly is null" );
+        executeSql( "update eventreport set completedonly = false where completedonly is null" );
+        executeSql( "update eventchart set completedonly = false where completedonly is null" );
+
+        executeSql( "update program set enrollmentdatelabel = dateofenrollmentdescription where enrollmentdatelabel is null" );
+        executeSql( "update program set incidentdatelabel = dateofincidentdescription where incidentdatelabel is null" );
+        executeSql( "update programinstance set incidentdate = dateofincident where incidentdate is null" );
+        executeSql( "alter table programinstance alter column incidentdate set not null" );
+        executeSql( "alter table program drop column dateofenrollmentdescription" );
+        executeSql( "alter table program drop column dateofincidentdescription" );
+        executeSql( "alter table programinstance drop column dateofincident" );
+        
         // Remove data mart
         executeSql( "drop table aggregateddatasetcompleteness" );
         executeSql( "drop table aggregateddatasetcompleteness_temp" );
@@ -856,6 +869,10 @@ public class TableAlteror
         executeSql( "drop table aggregatedorgunitdatavalue_temp" );
         executeSql( "drop table aggregatedorgunitindicatorvalue" );
         executeSql( "drop table aggregatedorgunitindicatorvalue_temp" );
+        
+        executeSql( "update report set type='JASPER_REPORT_TABLE' where type='jasperReportTable'" );
+        executeSql( "update report set type='JASPER_JDBC' where type='jasperJdbc'" );
+        executeSql( "update report set type='HTML' where type='html'" );
 
         oauth2();
 
@@ -1024,7 +1041,7 @@ public class TableAlteror
 
             while ( rs.next() )
             {
-                RelativePeriods r = new RelativePeriods( false, rs.getBoolean( "reportingmonth" ), false, false,
+                RelativePeriods rps = new RelativePeriods( false, rs.getBoolean( "reportingmonth" ), false, false,
                     rs.getBoolean( "reportingquarter" ), false, rs.getBoolean( "lastsixmonth" ), false,
                     rs.getBoolean( "monthsthisyear" ), rs.getBoolean( "quartersthisyear" ),
                     rs.getBoolean( "thisyear" ), false, false, rs.getBoolean( "lastyear" ),
@@ -1034,9 +1051,9 @@ public class TableAlteror
 
                 int chartId = rs.getInt( "chartid" );
 
-                if ( !r.isEmpty() )
+                if ( !rps.isEmpty() )
                 {
-                    int relativePeriodsId = batchHandler.insertObject( r, true );
+                    int relativePeriodsId = batchHandler.insertObject( rps, true );
 
                     String update = "update chart set relativeperiodsid=" + relativePeriodsId + " where chartid="
                         + chartId;
@@ -1083,7 +1100,7 @@ public class TableAlteror
 
             while ( rs.next() )
             {
-                RelativePeriods r = new RelativePeriods( false, rs.getBoolean( "reportingmonth" ), false, false,
+                RelativePeriods rps = new RelativePeriods( false, rs.getBoolean( "reportingmonth" ), false, false,
                     rs.getBoolean( "reportingbimonth" ), false, rs.getBoolean( "reportingquarter" ),
                     rs.getBoolean( "lastsixmonth" ), rs.getBoolean( "monthsthisyear" ),
                     rs.getBoolean( "quartersthisyear" ), rs.getBoolean( "thisyear" ),
@@ -1096,9 +1113,9 @@ public class TableAlteror
 
                 int reportTableId = rs.getInt( "reporttableid" );
 
-                if ( !r.isEmpty() )
+                if ( !rps.isEmpty() )
                 {
-                    int relativePeriodsId = batchHandler.insertObject( r, true );
+                    int relativePeriodsId = batchHandler.insertObject( rps, true );
 
                     String update = "update reporttable set relativeperiodsid=" + relativePeriodsId
                         + " where reporttableid=" + reportTableId;
@@ -1324,22 +1341,6 @@ public class TableAlteror
         }
     }
 
-    private int executeSql( String sql )
-    {
-        try
-        {
-            // TODO use jdbcTemplate
-
-            return statementManager.getHolder().executeUpdate( sql );
-        }
-        catch ( Exception ex )
-        {
-            log.debug( ex );
-
-            return -1;
-        }
-    }
-
     private Integer getDefaultOptionCombo()
     {
         String sql = "select coc.categoryoptioncomboid from categoryoptioncombo coc "
@@ -1367,6 +1368,22 @@ public class TableAlteror
         if ( result != -1 )
         {
             executeSql( "drop table optionsetmembers" );
+        }
+    }
+
+    private int executeSql( String sql )
+    {
+        try
+        {
+            // TODO use jdbcTemplate
+
+            return statementManager.getHolder().executeUpdate( sql );
+        }
+        catch ( Exception ex )
+        {
+            log.debug( ex );
+
+            return -1;
         }
     }
 }

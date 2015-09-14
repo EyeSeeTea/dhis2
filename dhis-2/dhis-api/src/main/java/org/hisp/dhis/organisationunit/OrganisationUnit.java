@@ -72,6 +72,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.google.common.base.Joiner;
+import com.google.common.collect.Sets;
 
 /**
  * @author Kristian Nordal
@@ -88,7 +89,7 @@ public class OrganisationUnit
     public static final String FEATURETYPE_MULTIPOLYGON = "MultiPolygon";
     public static final String FEATURETYPE_POLYGON = "Polygon";
     public static final String FEATURETYPE_POINT = "Point";
-    public static final String RESULTTYPE_SYMBOL = "Symbol";
+    public static final String FEATURETYPE_SYMBOL = "Symbol";
 
     public static final String KEY_USER_ORGUNIT = "USER_ORGUNIT";
     public static final String KEY_USER_ORGUNIT_CHILDREN = "USER_ORGUNIT_CHILDREN";
@@ -166,7 +167,7 @@ public class OrganisationUnit
 
     public OrganisationUnit()
     {
-        setAutoFields(); // to have getPath working properly, we need to set auto fields (for uid etc)
+        setAutoFields(); // Must be set to get UID and have getPath work properly
     }
 
     public OrganisationUnit( String name )
@@ -274,18 +275,14 @@ public class OrganisationUnit
 
     public void updateDataSets( Set<DataSet> updates )
     {
-        for ( DataSet dataSet : new HashSet<>( dataSets ) )
-        {
-            if ( !updates.contains( dataSet ) )
-            {
-                removeDataSet( dataSet );
-            }
-        }
-
-        for ( DataSet dataSet : updates )
-        {
-            addDataSet( dataSet );
-        }
+        Set<DataSet> toRemove = Sets.difference( dataSets, updates );
+        Set<DataSet> toAdd = Sets.difference( updates, dataSets );
+        
+        toRemove.parallelStream().forEach( d -> d.getSources().remove( this ) );
+        toAdd.parallelStream().forEach( d -> d.getSources().add( this ) );
+                
+        dataSets.clear();
+        dataSets.addAll( updates );
     }
 
     public void addUser( User user )
