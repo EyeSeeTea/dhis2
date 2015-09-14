@@ -72,7 +72,9 @@ dhis2.validation.isZeroOrPositiveInt = function(value) {
  * Allow coordinate.
  */
 dhis2.validation.isCoordinate = function(value) {
-	return true;
+  console.log("testing ", value);
+  var regex = /^([+-]?\d+\.?\d+)\s*,\s*([+-]?\d+\.?\d+)/$;
+  return regex.test(value);
 };
 
 /**
