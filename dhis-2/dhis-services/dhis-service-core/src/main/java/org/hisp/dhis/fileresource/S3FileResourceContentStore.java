@@ -29,6 +29,7 @@ package org.hisp.dhis.fileresource;
  */
 
 import org.hisp.dhis.system.configuration.SystemConfigurationProvider;
+import org.jclouds.domain.Credentials;
 
 /**
  * @author Halvdan Hoem Grelland
@@ -37,7 +38,6 @@ public class S3FileResourceContentStore
     extends BaseJCloudsFileResourceContentStore
 {
     private static final String KEY_S3_BUCKET = "amazon.s3.bucket";
-    private static final String KEY_S3_USERNAME = "amazon.s3.username";
     private static final String KEY_S3_ACCESSKEYID = "amazon.s3.accesskeyid";
     private static final String KEY_S3_SECRET = "amazon.s3.secret";
 
@@ -48,6 +48,14 @@ public class S3FileResourceContentStore
     public void setSystemConfigurationProvider( SystemConfigurationProvider systemConfigurationProvider )
     {
         this.systemConfigurationProvider = systemConfigurationProvider;
+    }
+
+    @Override
+    protected Credentials getCredentials()
+    {
+        String accessKeyId = systemConfigurationProvider.getProperties().getProperty( KEY_S3_ACCESSKEYID );
+        String secretKey = systemConfigurationProvider.getProperties().getProperty( KEY_S3_SECRET );
+        return new Credentials( accessKeyId, secretKey );
     }
 
     @Override
