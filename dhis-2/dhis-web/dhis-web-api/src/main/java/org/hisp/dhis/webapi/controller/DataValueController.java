@@ -70,10 +70,15 @@ import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.webapi.utils.InputUtils;
 import org.hisp.dhis.webapi.utils.WebMessageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -529,6 +534,10 @@ public class DataValueController
         return "value";
     }
 
+    // ---------------------------------------------------------------------
+    // File resource data values
+    // ---------------------------------------------------------------------
+
     @PreAuthorize( "hasRole('ALL') or hasRole('F_DATAVALUE_ADD')" )
     @RequestMapping( value = "/files", method = RequestMethod.POST )
     public @ResponseBody WebMessage saveDataValueFileResource(
@@ -694,5 +703,38 @@ public class DataValueController
         webMessage.setResponse( new FileResourceWebMessageResponse( fileResource ) );
 
         return webMessage;
+    }
+
+    @RequestMapping( value = "files/{fileResourceUid}", method = RequestMethod.GET )
+    public ResponseEntity<InputStreamResource> getDataValueFile( @PathVariable( value = "fileResourceUid" ) String uid )
+        throws WebMessageException, IOException
+    {
+        FileResource fileResource = fileResourceService.getFileResource( uid );
+
+        if ( fileResource == null )
+        {
+            throw new WebMessageException( WebMessageUtils.notFound( "The file resource reference id " + uid + " was not found." ) );
+        }
+
+        if ( fileResource.getDomain() != FileResourceDomain.DATA_VALUE )
+        {
+            throw  new WebMessageException( WebMessageUtils.conflict( "File resource domain must be of type DATA_VALUE" ) );
+        }
+
+        ByteSource content = fileResourceService.getFileResourceContent( fileResource );
+
+        if ( content == null || content.isEmpty() )
+        {
+            throw new WebMessageException( WebMessageUtils.notFound( "Could not locate the file associated with the file resource",
+                "The FileResource reference existed but the content could not be fetched from the storage provider." ) );
+        }
+
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setContentType( MediaType.parseMediaType( fileResource.getContentType() ) );
+        responseHeaders.setContentLength( content.size() );
+        responseHeaders.setContentDispositionFormData( null, fileResource.getName() );
+
+        InputStreamResource isr = new InputStreamResource( content.openStream() );
+        return new ResponseEntity<>( isr, responseHeaders, HttpStatus.OK );
     }
 }
