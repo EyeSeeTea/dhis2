@@ -40,15 +40,6 @@ public class DefaultSystemConfigurationProvider
 {
     private Properties properties;
 
-    // -------------------------------------------------------------------------
-    // File resource configuration TODO Generalize config to dhis2.properties
-    // -------------------------------------------------------------------------
-
-    private static final String KEY_S3_BUCKET = "amazon.s3.bucket";
-    private static final String KEY_S3_USERNAME = "amazon.s3.username";
-    private static final String KEY_S3_ACCESSKEYID = "amazon.s3.accesskeyid";
-    private static final String KEY_S3_SECRET = "amazon.s3.secret";
-
     // TODO Use general config provider
     private HibernateConfigurationProvider hibernateConfigurationProvider;
 

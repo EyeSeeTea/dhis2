@@ -28,29 +28,43 @@ package org.hisp.dhis.fileresource;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.system.configuration.SystemConfigurationProvider;
+
 /**
  * @author Halvdan Hoem Grelland
  */
 public class S3FileResourceContentStore
     extends BaseJCloudsFileResourceContentStore
 {
+    private static final String KEY_S3_BUCKET = "amazon.s3.bucket";
+    private static final String KEY_S3_USERNAME = "amazon.s3.username";
+    private static final String KEY_S3_ACCESSKEYID = "amazon.s3.accesskeyid";
+    private static final String KEY_S3_SECRET = "amazon.s3.secret";
 
+    private static final String S3_PROVIDER_KEY = "aws-s3";
+
+    private SystemConfigurationProvider systemConfigurationProvider;
+
+    public void setSystemConfigurationProvider( SystemConfigurationProvider systemConfigurationProvider )
+    {
+        this.systemConfigurationProvider = systemConfigurationProvider;
+    }
 
     @Override
     protected String getContainer()
     {
-        return null;
+        return "dataValues";
     }
 
     @Override
     protected String getRootLocation()
     {
-        return null;
+        return systemConfigurationProvider.getProperties().getProperty( KEY_S3_BUCKET );
     }
 
     @Override
     protected String getJCloudsProviderKey()
     {
-        return null;
+        return S3_PROVIDER_KEY;
     }
 }

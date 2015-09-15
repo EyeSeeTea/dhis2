@@ -50,7 +50,7 @@ public class FileSystemFileResourceContentStore
     // Constructors
     // -------------------------------------------------------------------------
 
-    FileSystemFileResourceContentStore( String rootLocation, String container )
+    public FileSystemFileResourceContentStore( String rootLocation, String container )
     {
         this.rootLocation = rootLocation;
         this.container = container;
