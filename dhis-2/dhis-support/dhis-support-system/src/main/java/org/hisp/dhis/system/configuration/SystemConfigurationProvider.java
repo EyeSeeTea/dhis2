@@ -1,4 +1,4 @@
-package org.hisp.dhis.system.fileresource;
+package org.hisp.dhis.system.configuration;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,10 +28,12 @@ package org.hisp.dhis.system.fileresource;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Properties;
+
 /**
  * @author Halvdan Hoem Grelland
  */
-public interface FileResourceConfigurationProvider
+public interface SystemConfigurationProvider
 {
-    FileResourceConfiguration getFileResourceConfiguration();
+    Properties getProperties();
 }

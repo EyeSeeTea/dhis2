@@ -15,6 +15,10 @@
   <bean id="databaseInfoProvider" class="org.hisp.dhis.system.database.HibernateDatabaseInfoProvider" init-method="init">
     <property name="hibernateConfigurationProvider" ref="hibernateConfigurationProvider" />
   </bean>
+  
+  <bean id="org.hisp.dhis.system.SystemConfigurationProvider" class="org.hisp.dhis.system.configuration.DefaultSystemConfigurationProvider" init-method="init">
+    <property name="hibernateConfigurationProvider" ref="hibernateConfigurationProvider" />
+  </bean>
 
   <bean id="taskScheduler" class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler">
     <property name="poolSize" value="10" />

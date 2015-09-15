@@ -1,4 +1,4 @@
-package org.hisp.dhis.system.fileresource;
+package org.hisp.dhis.system.configuration;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -30,30 +30,41 @@ package org.hisp.dhis.system.fileresource;
 
 import org.hisp.dhis.hibernate.HibernateConfigurationProvider;
 
+import java.util.Properties;
+
 /**
  * @author Halvdan Hoem Grelland
  */
-public class DefaultFileResourceConfigurationProvider
-    implements FileResourceConfigurationProvider
+public class DefaultSystemConfigurationProvider
+    implements SystemConfigurationProvider
 {
-    private FileResourceConfiguration fileResourceConfiguration = new FileResourceConfiguration();
+    private Properties properties;
 
-    private HibernateConfigurationProvider configurationProvider;
+    // -------------------------------------------------------------------------
+    // File resource configuration TODO Generalize config to dhis2.properties
+    // -------------------------------------------------------------------------
 
-    public void setConfigurationProvider( HibernateConfigurationProvider configurationProvider )
+    private static final String KEY_S3_BUCKET = "amazon.s3.bucket";
+    private static final String KEY_S3_USERNAME = "amazon.s3.username";
+    private static final String KEY_S3_ACCESSKEYID = "amazon.s3.accesskeyid";
+    private static final String KEY_S3_SECRET = "amazon.s3.secret";
+
+    // TODO Use general config provider
+    private HibernateConfigurationProvider hibernateConfigurationProvider;
+
+    public void setHibernateConfigurationProvider( HibernateConfigurationProvider hibernateConfigurationProvider )
     {
-        this.configurationProvider = configurationProvider;
+        this.hibernateConfigurationProvider = hibernateConfigurationProvider;
     }
 
     public void init()
     {
-        configurationProvider.get
+        properties = hibernateConfigurationProvider.getConfiguration().getProperties();
     }
 
     @Override
-    public FileResourceConfiguration getFileResourceConfiguration()
+    public Properties getProperties()
     {
-        return null;
+        return properties;
     }
-
 }
