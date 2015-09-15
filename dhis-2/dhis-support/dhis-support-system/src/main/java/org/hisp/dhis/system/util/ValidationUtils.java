@@ -33,6 +33,7 @@ import org.apache.commons.validator.routines.DateValidator;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.hisp.dhis.common.CodeGenerator;
+import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.commons.util.TextUtils;
 import org.hisp.dhis.dataelement.DataElement;
@@ -44,23 +45,21 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.hisp.dhis.dataelement.DataElement.*;
-
 /**
  * @author Lars Helge Overland
  */
 public class ValidationUtils
 {
-    private static Pattern POINT_PATTERN = Pattern.compile( "\\[(.+),\\s?(.+)\\]" );
-    private static Pattern DIGIT_PATTERN = Pattern.compile( ".*\\d.*" );
-    private static Pattern UPPERCASE_PATTERN = Pattern.compile( ".*[A-Z].*" );
-    private static Pattern HEX_COLOR_PATTERN = Pattern.compile( "^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$" );
+    private static final Pattern POINT_PATTERN = Pattern.compile( "\\[(.+),\\s?(.+)\\]" );
+    private static final Pattern DIGIT_PATTERN = Pattern.compile( ".*\\d.*" );
+    private static final Pattern UPPERCASE_PATTERN = Pattern.compile( ".*[A-Z].*" );
+    private static final Pattern HEX_COLOR_PATTERN = Pattern.compile( "^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$" );
 
-    private static int VALUE_MAX_LENGTH = 50000;
-    private static int LONG_MAX = 180;
-    private static int LONG_MIN = -180;
-    private static int LAT_MAX = 90;
-    private static int LAT_MIN = -90;
+    private static final int VALUE_MAX_LENGTH = 50000;
+    private static final int LONG_MAX = 180;
+    private static final int LONG_MIN = -180;
+    private static final int LAT_MAX = 90;
+    private static final int LAT_MIN = -90;
 
     private static final Set<Character> SQL_VALID_CHARS = Sets.newHashSet(
         '&', '|', '=', '!', '<', '>', '/', '%', '"', '\'', '*', '+', '-', '^', ',', '.' );
@@ -394,10 +393,10 @@ public class ValidationUtils
      */
     public static boolean dataValueIsZeroAndInsignificant( String value, DataElement dataElement )
     {
-        String aggOperator = dataElement.getAggregationOperator();
+        AggregationType aggregationType = dataElement.getAggregationType();
 
         return dataElement.getValueType().isNumeric() && MathUtils.isZero( value ) && !dataElement.isZeroIsSignificant() &&
-            !(AGGREGATION_OPERATOR_AVERAGE_SUM.equals( aggOperator ) || AGGREGATION_OPERATOR_AVERAGE.equals( aggOperator ));
+            !(aggregationType == AggregationType.AVERAGE_SUM_ORG_UNIT || aggregationType == AggregationType.AVERAGE);
     }
 
     /**
