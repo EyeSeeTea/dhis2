@@ -16,7 +16,7 @@
     <property name="hibernateConfigurationProvider" ref="hibernateConfigurationProvider" />
   </bean>
   
-  <bean id="org.hisp.dhis.system.SystemConfigurationProvider" class="org.hisp.dhis.system.configuration.DefaultSystemConfigurationProvider" init-method="init">
+  <bean id="org.hisp.dhis.system.configuration.SystemConfigurationProvider" class="org.hisp.dhis.system.configuration.DefaultSystemConfigurationProvider" init-method="init">
     <property name="hibernateConfigurationProvider" ref="hibernateConfigurationProvider" />
   </bean>
 
