@@ -732,7 +732,7 @@ public class DataValueController
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.setContentType( MediaType.parseMediaType( fileResource.getContentType() ) );
         responseHeaders.setContentLength( content.size() );
-        responseHeaders.setContentDispositionFormData( null, fileResource.getName() );
+        responseHeaders.setContentDispositionFormData( "file", fileResource.getName() );
 
         InputStreamResource isr = new InputStreamResource( content.openStream() );
         return new ResponseEntity<>( isr, responseHeaders, HttpStatus.OK );
