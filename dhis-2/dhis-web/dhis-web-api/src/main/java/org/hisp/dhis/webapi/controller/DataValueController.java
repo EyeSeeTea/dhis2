@@ -612,6 +612,7 @@ public class DataValueController
         // ---------------------------------------------------------------------
         // Get file resource
         // ---------------------------------------------------------------------
+
         String uid = dataValue.getValue();
 
         FileResource fileResource = fileResourceService.getFileResource( uid );
@@ -635,10 +636,21 @@ public class DataValueController
 
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.setContentType( MediaType.parseMediaType( fileResource.getContentType() ) );
-        responseHeaders.setContentLength( content.size() );
+        responseHeaders.setContentLength( fileResource.getContentLength() );
         responseHeaders.setContentDispositionFormData( "file", fileResource.getName() );
 
-        InputStreamResource isr = new InputStreamResource( content.openStream() );
+        InputStreamResource isr = null;
+        try
+        {
+            isr = new InputStreamResource( content.openStream() );
+        }
+        catch ( IOException e )
+        {
+            throw new WebMessageException( WebMessageUtils.error( "Failed fetching the file from storage",
+                "There was an exception when trying to fetch the file from the storage backend. " +
+                    "Depending on the provider the root cause could be network or file system related." ) );
+        }
+
         return new ResponseEntity<>( isr, responseHeaders, HttpStatus.OK );
     }
 
