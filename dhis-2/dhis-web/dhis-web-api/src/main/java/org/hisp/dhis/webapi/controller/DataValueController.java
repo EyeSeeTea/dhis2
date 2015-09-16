@@ -152,17 +152,16 @@ public class DataValueController
         // ---------------------------------------------------------------------
 
         DataElement dataElement = getAndValidateDataElement( de );
+
         DataElementCategoryOptionCombo categoryOptionCombo = getAndValidateCategoryOptionCombo( co, requireCategoryOptionCombo );
+
         DataElementCategoryOptionCombo attributeOptionCombo = getAndValidateAttributeOptionCombo( cc, cp );
+
         Period period = getAndValidatePeriod( pe );
+
         OrganisationUnit organisationUnit = getAndValidateOrganisationUnit( ou );
         
-        boolean invalidFuturePeriod = period.isFuture() && dataElement.getOpenFuturePeriods() <= 0;
-        
-        if ( invalidFuturePeriod )
-        {
-            throw new WebMessageException( WebMessageUtils.conflict( "One or more data sets for data element does not allow future periods: " + de ) );
-        }
+        validateInvalidFuturePeriod( period, dataElement );
 
         String valueValid = ValidationUtils.dataValueIsValid( value, dataElement );
 
@@ -204,10 +203,7 @@ public class DataValueController
         // Locking validation
         // ---------------------------------------------------------------------
 
-        if ( dataSetService.isLocked( dataElement, period, organisationUnit, null ) )
-        {
-            throw new WebMessageException( WebMessageUtils.conflict( "Data set is locked" ) );
-        }
+        validateDataSetNotLocked( dataElement, period, organisationUnit );
 
         // ---------------------------------------------------------------------
         // Deal with file resource
@@ -308,33 +304,28 @@ public class DataValueController
         @RequestParam( required = false ) String cc,
         @RequestParam( required = false ) String cp,
         @RequestParam String pe,
-        @RequestParam String ou, HttpServletResponse response ) throws WebMessageException
+        @RequestParam String ou, HttpServletResponse response )
+        throws WebMessageException
     {
         // ---------------------------------------------------------------------
         // Input validation
         // ---------------------------------------------------------------------
 
         DataElement dataElement = getAndValidateDataElement( de );
+
         DataElementCategoryOptionCombo categoryOptionCombo = getAndValidateCategoryOptionCombo( co, false );
+
         DataElementCategoryOptionCombo attributeOptionCombo = getAndValidateAttributeOptionCombo( cc, cp );
 
-        // TODO ??
-        if ( attributeOptionCombo == null )
-        {
-            return;
-        }
-
         Period period = getAndValidatePeriod( pe );
+
         OrganisationUnit organisationUnit = getAndValidateOrganisationUnit( ou );
 
         // ---------------------------------------------------------------------
         // Locking validation
         // ---------------------------------------------------------------------
 
-        if ( dataSetService.isLocked( dataElement, period, organisationUnit, null ) )
-        {
-            throw new WebMessageException( WebMessageUtils.conflict( "Data set is locked" ) );
-        }
+        validateDataSetNotLocked( dataElement, period, organisationUnit );
 
         // ---------------------------------------------------------------------
         // Delete data value
@@ -362,33 +353,28 @@ public class DataValueController
         @RequestParam( required = false ) String cp,
         @RequestParam String pe,
         @RequestParam String ou,
-        Model model, HttpServletResponse response ) throws WebMessageException
+        Model model, HttpServletResponse response )
+        throws WebMessageException
     {
         // ---------------------------------------------------------------------
         // Input validation
         // ---------------------------------------------------------------------
 
         DataElement dataElement = getAndValidateDataElement( de );
+
         DataElementCategoryOptionCombo categoryOptionCombo = getAndValidateCategoryOptionCombo( co, false );
+
         DataElementCategoryOptionCombo attributeOptionCombo = getAndValidateAttributeOptionCombo( cc, cp );
 
-        // TODO ??
-        if ( attributeOptionCombo == null )
-        {
-            return null;
-        }
-
         Period period = getAndValidatePeriod( pe );
+
         OrganisationUnit organisationUnit = getAndValidateOrganisationUnit( ou );
 
         // ---------------------------------------------------------------------
         // Locking validation
         // ---------------------------------------------------------------------
 
-        if ( dataSetService.isLocked( dataElement, period, organisationUnit, null ) )
-        {
-            throw new WebMessageException( WebMessageUtils.conflict( "Data set is locked" ) );
-        }
+        validateDataSetNotLocked( dataElement, period, organisationUnit );
 
         // ---------------------------------------------------------------------
         // Get data value
@@ -531,10 +517,7 @@ public class DataValueController
 //        // Locking validation
 //        // ---------------------------------------------------------------------
 //
-//        if ( dataSetService.isLocked( dataElement, period, organisationUnit, null ) )
-//        {
-//            throw new WebMessageException( WebMessageUtils.conflict( "Data set is locked" ) );
-//        }
+//        validateDataSetNotLocked( dataElement, period, organisationUnit );
 //
 //        // ---------------------------------------------------------------------
 //        // Assemble fileResource
@@ -704,5 +687,24 @@ public class DataValueController
         }
 
         return organisationUnit;
+    }
+
+    private void validateInvalidFuturePeriod( Period period, DataElement dataElement )
+    {
+        boolean invalidFuturePeriod = period.isFuture() && dataElement.getOpenFuturePeriods() <= 0;
+
+        if ( invalidFuturePeriod )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "One or more data sets for data element does not allow future periods: " + de ) );
+        }
+    }
+
+    private void validateDataSetNotLocked( DataElement dataElement, Period period, OrganisationUnit organisationUnit )
+        throws WebMessageException
+    {
+        if ( dataSetService.isLocked( dataElement, period, organisationUnit, null ) )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "Data set is locked" ) );
+        }
     }
 }
