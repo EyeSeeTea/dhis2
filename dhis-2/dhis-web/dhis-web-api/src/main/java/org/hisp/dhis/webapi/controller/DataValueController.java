@@ -696,7 +696,8 @@ public class DataValueController
 
         if ( invalidFuturePeriod )
         {
-            throw new WebMessageException( WebMessageUtils.conflict( "One or more data sets for data element does not allow future periods: " + dataElement.getUid() ) );
+            throw new WebMessageException(
+                WebMessageUtils.conflict( "One or more data sets for data element does not allow future periods: " + dataElement.getUid() ) );
         }
     }
 
