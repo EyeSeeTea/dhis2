@@ -505,7 +505,7 @@ public class DataValueController
 
         String storageKey = UUID.randomUUID().toString();
 
-        FileResource fileResource = new FileResource( filename, contentType, contentMD5, storageKey, FileResourceDomain.DATA_VALUE );
+        FileResource fileResource = new FileResource( filename, contentType, contentLength, contentMD5, storageKey, FileResourceDomain.DATA_VALUE );
         fileResource.setAssigned( false );
         fileResource.setCreated( new Date() );
         fileResource.setUser( currentUserService.getCurrentUser() );
