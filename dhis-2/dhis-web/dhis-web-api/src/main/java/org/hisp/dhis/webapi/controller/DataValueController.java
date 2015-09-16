@@ -563,44 +563,84 @@ public class DataValueController
 //        return webMessage;
 //    }
 
-//    @RequestMapping( value = "/files", method = RequestMethod.GET )
-//    public ResponseEntity<InputStreamResource> getDataValueFile(
-//        @RequestParam String de,
-//        @RequestParam( required = false ) String co,
-//        @RequestParam( required = false ) String cc,
-//        @RequestParam( required = false ) String cp,
-//        @RequestParam String pe,
-//        @RequestParam String ou )
-//        throws WebMessageException
-//    {
-//        FileResource fileResource = fileResourceService.getFileResource( uid );
-//
-//        if ( fileResource == null )
-//        {
-//            throw new WebMessageException( WebMessageUtils.notFound( "The file resource reference id " + uid + " was not found." ) );
-//        }
-//
-//        if ( fileResource.getDomain() != FileResourceDomain.DATA_VALUE )
-//        {
-//            throw  new WebMessageException( WebMessageUtils.conflict( "File resource domain must be of type DATA_VALUE" ) );
-//        }
-//
-//        ByteSource content = fileResourceService.getFileResourceContent( fileResource );
-//
-//        if ( content == null || content.isEmpty() )
-//        {
-//            throw new WebMessageException( WebMessageUtils.notFound( "Could not locate the file associated with the file resource",
-//                "The FileResource reference existed but the content could not be fetched from the storage provider." ) );
-//        }
-//
-//        HttpHeaders responseHeaders = new HttpHeaders();
-//        responseHeaders.setContentType( MediaType.parseMediaType( fileResource.getContentType() ) );
-//        responseHeaders.setContentLength( content.size() );
-//        responseHeaders.setContentDispositionFormData( "file", fileResource.getName() );
-//
-//        InputStreamResource isr = new InputStreamResource( content.openStream() );
-//        return new ResponseEntity<>( isr, responseHeaders, HttpStatus.OK );
-//    }
+    @RequestMapping( value = "/files", method = RequestMethod.GET )
+    public ResponseEntity<InputStreamResource> getDataValueFile(
+        @RequestParam String de,
+        @RequestParam( required = false ) String co,
+        @RequestParam( required = false ) String cc,
+        @RequestParam( required = false ) String cp,
+        @RequestParam String pe,
+        @RequestParam String ou )
+        throws WebMessageException
+    {
+        // ---------------------------------------------------------------------
+        // Input validation
+        // ---------------------------------------------------------------------
+
+        DataElement dataElement = getAndValidateDataElement( de );
+
+        if ( !dataElement.isFileType() )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "DataElement must be of type file" ) );
+        }
+
+        DataElementCategoryOptionCombo categoryOptionCombo = getAndValidateCategoryOptionCombo( co, false );
+
+        DataElementCategoryOptionCombo attributeOptionCombo = getAndValidateAttributeOptionCombo( cc, cp );
+
+        Period period = getAndValidatePeriod( pe );
+
+        OrganisationUnit organisationUnit = getAndValidateOrganisationUnit( ou );
+
+        // ---------------------------------------------------------------------
+        // Locking validation
+        // ---------------------------------------------------------------------
+
+        validateDataSetNotLocked( dataElement, period, organisationUnit );
+
+        // ---------------------------------------------------------------------
+        // Get data value
+        // ---------------------------------------------------------------------
+
+        DataValue dataValue = dataValueService.getDataValue( dataElement, period, organisationUnit, categoryOptionCombo, attributeOptionCombo );
+
+        if ( dataValue == null )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "Data value does not exist" ) );
+        }
+
+        // ---------------------------------------------------------------------
+        // Get file resource
+        // ---------------------------------------------------------------------
+        String uid = dataValue.getValue();
+
+        FileResource fileResource = fileResourceService.getFileResource( uid );
+
+        if ( fileResource == null )
+        {
+            throw new WebMessageException( WebMessageUtils.notFound( "The file resource reference id " + uid + " was not found." ) );
+        }
+
+        if ( fileResource.getDomain() != FileResourceDomain.DATA_VALUE )
+        {
+            throw  new WebMessageException( WebMessageUtils.conflict( "File resource domain must be of type DATA_VALUE" ) );
+        }
+
+        ByteSource content = fileResourceService.getFileResourceContent( fileResource );
+
+        if ( content == null )
+        {
+            throw new WebMessageException( WebMessageUtils.notFound( "The referenced file could not be found" ) );
+        }
+
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setContentType( MediaType.parseMediaType( fileResource.getContentType() ) );
+        responseHeaders.setContentLength( content.size() );
+        responseHeaders.setContentDispositionFormData( "file", fileResource.getName() );
+
+        InputStreamResource isr = new InputStreamResource( content.openStream() );
+        return new ResponseEntity<>( isr, responseHeaders, HttpStatus.OK );
+    }
 
     // ---------------------------------------------------------------------
     // Supportive methods

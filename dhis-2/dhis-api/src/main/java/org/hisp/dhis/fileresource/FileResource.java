@@ -37,33 +37,36 @@ import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
 
 /**
- * TODO Implement haveUniqueNames == false
  * @author Halvdan Hoem Grelland
  */
 public class FileResource
     extends BaseIdentifiableObject
 {
     private String contentType;         // MIME type
-
+    private long contentLength;         // Byte size of content
     private String contentMD5;          // MD5 digest of the content
-
     private String storageKey;          // Key to fetch content from external storage
-
     private boolean assigned = false;   // Is this resource assigned (e.g. to a datavalue)?
-
-    private FileResourceDomain domain;  // What is the domain of this fileResource? Might affect backend storage location or provider
+    private FileResourceDomain domain;
 
     public FileResource()
     {
     }
 
-    public FileResource( String name, String contentType, String contentMD5, String storageKey, FileResourceDomain domain )
+    public FileResource( String name, String contentType, long contentLength, String contentMD5, String storageKey, FileResourceDomain domain )
     {
         this.name = name;
         this.contentType = contentType;
+        this.contentLength = contentLength;
         this.contentMD5 = contentMD5;
         this.storageKey = storageKey;
         this.domain = domain;
+    }
+
+    @Override
+    public boolean haveUniqueNames()
+    {
+        return false;
     }
 
     @JsonProperty
@@ -90,6 +93,19 @@ public class FileResource
     public void setContentType( String contentType )
     {
         this.contentType = contentType;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public long getContentLength()
+    {
+        return contentLength;
+    }
+
+    public void setContentLength( long contentLength )
+    {
+        this.contentLength = contentLength;
     }
 
     @JsonProperty

@@ -33,7 +33,7 @@ package org.hisp.dhis.fileresource;
  */
 public enum FileResourceDomain
 {
-    DATA_VALUE("dataValue"), DOCUMENT("document");
+    DATA_VALUE( "dataValue" ), DOCUMENT( "document" );
 
     private String containerName;
 

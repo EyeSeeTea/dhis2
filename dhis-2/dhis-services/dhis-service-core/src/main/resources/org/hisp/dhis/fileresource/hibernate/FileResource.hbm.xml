@@ -20,6 +20,8 @@
 
     <property name="contentType" column="contenttype" not-null="true" unique="false" length="255" />
 
+    <property name="contentLength" column="contentlength" not-null="true" unique="false" />
+
     <property name="contentMD5" column="contentmd5" not-null="true" length="32" />
 
     <property name="storageKey" column="storagekey" not-null="true" unique="true" length="1024" />
