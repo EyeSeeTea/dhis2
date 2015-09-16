@@ -396,172 +396,140 @@ public class DataValueController
     }
 
     // ---------------------------------------------------------------------
-    // File resource data values
+    // POST file
     // ---------------------------------------------------------------------
 
-//    @PreAuthorize( "hasRole('ALL') or hasRole('F_DATAVALUE_ADD')" )
-//    @RequestMapping( value = "/files", method = RequestMethod.POST )
-//    public @ResponseBody WebMessage saveDataValueFileResource(
-//        @RequestParam String de,
-//        @RequestParam( required = false ) String co,
-//        @RequestParam( required = false ) String cc,
-//        @RequestParam( required = false ) String cp,
-//        @RequestParam String pe,
-//        @RequestParam String ou,
-//        @RequestParam( value = "file", required = true ) MultipartFile multipartFile )
-//        throws WebMessageException, IOException
-//    {
-//        boolean strictPeriods = (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_STRICT_PERIODS, false );
-//        boolean strictCategoryOptionCombos = (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_STRICT_CATEGORY_OPTION_COMBOS, false );
-//        boolean strictOrgUnits = (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_STRICT_ORGANISATION_UNITS, false );
-//        boolean requireCategoryOptionCombo = (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_REQUIRE_CATEGORY_OPTION_COMBO, false );
-//
-//        // ---------------------------------------------------------------------
-//        // Input validation
-//        // ---------------------------------------------------------------------
-//
-//        DataElement dataElement = idObjectManager.get( DataElement.class, de );
-//
-//        if ( dataElement == null )
-//        {
-//            throw new WebMessageException( WebMessageUtils.conflict( "Illegal data element identifier: " + de ) );
-//        }
-//
-//        if ( !dataElement.isFileType() )
-//        {
-//            throw new WebMessageException( WebMessageUtils.conflict( "Data element must be of type file resource",
-//                "This endpoint only accepts requests for data elements which correspond to a file type." ) );
-//        }
-//
-//        DataElementCategoryOptionCombo categoryOptionCombo = categoryService.getDataElementCategoryOptionCombo( co );
-//
-//        if ( categoryOptionCombo == null )
-//        {
-//            if ( requireCategoryOptionCombo )
-//            {
-//                throw new WebMessageException( WebMessageUtils.conflict( "Category option combo is required but is not specified" ) );
-//            }
-//            else if ( co != null )
-//            {
-//                throw new WebMessageException( WebMessageUtils.conflict( "Illegal category option combo identifier: " + co ) );
-//            }
-//            else
-//            {
-//                categoryOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
-//            }
-//        }
-//
-//        DataElementCategoryOptionCombo attributeOptionCombo = inputUtils.getAttributeOptionCombo( cc, cp );
-//
-//        if ( attributeOptionCombo == null )
-//        {
-//            throw new WebMessageException( WebMessageUtils.conflict( "Illegal attribute option combo identifier: " + cc + " " + cp ) );
-//        }
-//
-//        Period period = PeriodType.getPeriodFromIsoString( pe );
-//
-//        if ( period == null )
-//        {
-//            throw new WebMessageException( WebMessageUtils.conflict( "Illegal period identifier: " + pe ) );
-//        }
-//
-//        OrganisationUnit organisationUnit = idObjectManager.get( OrganisationUnit.class, ou );
-//
-//        if ( organisationUnit == null )
-//        {
-//            throw new WebMessageException( WebMessageUtils.conflict( "Illegal organisation unit identifier: " + ou ) );
-//        }
-//
-//        boolean inUserHierarchy = organisationUnitService.isInUserHierarchy( organisationUnit );
-//
-//        if ( !inUserHierarchy )
-//        {
-//            throw new WebMessageException( WebMessageUtils.conflict( "Organisation unit is not in the hierarchy of the current user: " + ou ) );
-//        }
-//
-//        boolean invalidFuturePeriod = period.isFuture() && dataElement.getOpenFuturePeriods() <= 0;
-//
-//        if ( invalidFuturePeriod )
-//        {
-//            throw new WebMessageException( WebMessageUtils.conflict( "One or more data sets for data element does not allow future periods: " + de ) );
-//        }
-//
-//        if ( multipartFile == null || multipartFile.isEmpty() )
-//        {
-//            throw new WebMessageException( WebMessageUtils.conflict( "File is missing", "The multipart request didn't contain a file or the file was empty." ) );
-//        }
-//
-//        // ---------------------------------------------------------------------
-//        // Optional constraints
-//        // ---------------------------------------------------------------------
-//
-//        if ( strictPeriods && !dataElement.getPeriodTypes().contains( period.getPeriodType() ) )
-//        {
-//            throw new WebMessageException( WebMessageUtils.conflict(
-//                "Period type of period: " + period.getIsoDate() + " not valid for data element: " + dataElement.getUid() ) );
-//        }
-//
-//        if ( strictCategoryOptionCombos && !dataElement.getCategoryCombo().getOptionCombos().contains( categoryOptionCombo ) )
-//        {
-//            throw new WebMessageException( WebMessageUtils.conflict(
-//                "Category option combo: " + categoryOptionCombo.getUid() + " must be part of category combo of data element: " + dataElement.getUid() ) );
-//        }
-//
-//        if ( strictOrgUnits && !dataElement.hasDataSetOrganisationUnit( organisationUnit ) )
-//        {
-//            throw new WebMessageException( WebMessageUtils.conflict(
-//                "Data element: " + dataElement.getUid() + " must be assigned through data sets to organisation unit: " + organisationUnit.getUid() ) );
-//        }
-//
-//        // ---------------------------------------------------------------------
-//        // Locking validation
-//        // ---------------------------------------------------------------------
-//
-//        validateDataSetNotLocked( dataElement, period, organisationUnit );
-//
-//        // ---------------------------------------------------------------------
-//        // Assemble fileResource
-//        // ---------------------------------------------------------------------
-//
-//        // TODO Validate multipart params: filename etc. Don't save nulls
-//        // TODO Validate filename. Disallow file system chars such as '/'
-//        // TODO Validate contentType or 'sniff' if not specified
-//        String filename = multipartFile.getOriginalFilename();
-//        String contentType = multipartFile.getContentType();
-//
-//        ByteSource content = new ByteSource()
-//        {
-//            @Override
-//            public InputStream openStream() throws IOException
-//            {
-//                return multipartFile.getInputStream();
-//            }
-//        };
-//
-//        String contentMD5 = content.hash( Hashing.md5() ).toString();
-//        String storageKey = "dataValue/" + UUID.randomUUID();
-//
-//        FileResource fileResource = new FileResource( filename, contentType, contentMD5, storageKey, FileResourceDomain.DATA_VALUE );
-//        fileResource.setAssigned( false );
-//        fileResource.setCreated( new Date() );
-//        fileResource.setUser( currentUserService.getCurrentUser() );
-//
-//        // ---------------------------------------------------------------------
-//        // Save file resource
-//        // ---------------------------------------------------------------------
-//
-//        String uid = fileResourceService.saveFileResource( fileResource, content );
-//
-//        if ( uid == null )
-//        {
-//            throw new WebMessageException( WebMessageUtils.error( "Saving the file failed" ) );
-//        }
-//
-//        WebMessage webMessage = new WebMessage( WebMessageStatus.OK, HttpStatus.CREATED );
-//        webMessage.setResponse( new FileResourceWebMessageResponse( fileResource ) );
-//
-//        return webMessage;
-//    }
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_DATAVALUE_ADD')" )
+    @RequestMapping( value = "/files", method = RequestMethod.POST )
+    public @ResponseBody WebMessage saveDataValueFileResource(
+        @RequestParam String de,
+        @RequestParam( required = false ) String co,
+        @RequestParam( required = false ) String cc,
+        @RequestParam( required = false ) String cp,
+        @RequestParam String pe,
+        @RequestParam String ou,
+        @RequestParam( value = "file", required = true ) MultipartFile multipartFile )
+        throws WebMessageException, IOException
+    {
+
+        boolean strictPeriods = (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_STRICT_PERIODS, false );
+        boolean strictCategoryOptionCombos = (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_STRICT_CATEGORY_OPTION_COMBOS, false );
+        boolean strictOrgUnits = (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_STRICT_ORGANISATION_UNITS, false );
+        boolean requireCategoryOptionCombo = (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_REQUIRE_CATEGORY_OPTION_COMBO, false );
+
+        // ---------------------------------------------------------------------
+        // Input validation
+        // ---------------------------------------------------------------------
+
+        DataElement dataElement = getAndValidateDataElement( de );
+
+        DataElementCategoryOptionCombo categoryOptionCombo = getAndValidateCategoryOptionCombo( co, requireCategoryOptionCombo );
+
+        DataElementCategoryOptionCombo attributeOptionCombo = getAndValidateAttributeOptionCombo( cc, cp );
+
+        Period period = getAndValidatePeriod( pe );
+
+        OrganisationUnit organisationUnit = getAndValidateOrganisationUnit( ou );
+
+        validateInvalidFuturePeriod( period, dataElement );
+
+        if ( multipartFile == null || multipartFile.isEmpty() )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "File is missing",
+                "The multipart request didn't contain a file or the file was empty." ) );
+        }
+
+        // ---------------------------------------------------------------------
+        // Optional constraints
+        // ---------------------------------------------------------------------
+
+        if ( strictPeriods && !dataElement.getPeriodTypes().contains( period.getPeriodType() ) )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict(
+                "Period type of period: " + period.getIsoDate() + " not valid for data element: " + dataElement.getUid() ) );
+        }
+
+        if ( strictCategoryOptionCombos && !dataElement.getCategoryCombo().getOptionCombos().contains( categoryOptionCombo ) )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict(
+                "Category option combo: " + categoryOptionCombo.getUid() + " must be part of category combo of data element: " + dataElement.getUid() ) );
+        }
+
+        if ( strictOrgUnits && !dataElement.hasDataSetOrganisationUnit( organisationUnit ) )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict(
+                "Data element: " + dataElement.getUid() + " must be assigned through data sets to organisation unit: " + organisationUnit.getUid() ) );
+        }
+
+        // ---------------------------------------------------------------------
+        // Locking validation
+        // ---------------------------------------------------------------------
+
+        validateDataSetNotLocked( dataElement, period, organisationUnit );
+
+        // ---------------------------------------------------------------------
+        // Assemble fileResource
+        // ---------------------------------------------------------------------
+
+        // TODO Validate multipart params: filename etc. Don't save nulls
+        // TODO Validate filename. Disallow file system chars such as '/'
+        // TODO Validate contentType or 'sniff' if not specified
+        String filename = multipartFile.getOriginalFilename();
+        String contentType = multipartFile.getContentType();
+        long contentLength = multipartFile.getSize();
+
+        ByteSource content = new ByteSource()
+        {
+            @Override
+            public InputStream openStream()
+            {
+                try
+                {
+                    return multipartFile.getInputStream();
+                }
+                catch ( IOException e )
+                {
+                    return null;
+                }
+            }
+        };
+
+        // TODO FIX!!!
+
+        if ( content == null )
+        {
+            throw new WebMessageException( WebMessageUtils.error( "File upload failed" ) );
+        }
+
+        String contentMD5 = content.hash( Hashing.md5() ).toString();
+
+        String storageKey = UUID.randomUUID().toString();
+
+        FileResource fileResource = new FileResource( filename, contentType, contentMD5, storageKey, FileResourceDomain.DATA_VALUE );
+        fileResource.setAssigned( false );
+        fileResource.setCreated( new Date() );
+        fileResource.setUser( currentUserService.getCurrentUser() );
+
+        // ---------------------------------------------------------------------
+        // Save file resource
+        // ---------------------------------------------------------------------
+
+        String uid = fileResourceService.saveFileResource( fileResource, content );
+
+        if ( uid == null )
+        {
+            throw new WebMessageException( WebMessageUtils.error( "Saving the file failed" ) );
+        }
+
+        WebMessage webMessage = new WebMessage( WebMessageStatus.OK, HttpStatus.CREATED );
+        webMessage.setResponse( new FileResourceWebMessageResponse( fileResource ) );
+
+        return webMessage;
+    }
+
+    // ---------------------------------------------------------------------
+    // GET file
+    // ---------------------------------------------------------------------
 
     @RequestMapping( value = "/files", method = RequestMethod.GET )
     public ResponseEntity<InputStreamResource> getDataValueFile(
