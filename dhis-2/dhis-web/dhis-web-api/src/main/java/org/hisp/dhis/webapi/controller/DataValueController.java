@@ -28,22 +28,9 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_DATA_IMPORT_REQUIRE_CATEGORY_OPTION_COMBO;
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_DATA_IMPORT_STRICT_CATEGORY_OPTION_COMBOS;
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_DATA_IMPORT_STRICT_ORGANISATION_UNITS;
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_DATA_IMPORT_STRICT_PERIODS;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.UUID;
-
-import javax.servlet.http.HttpServletResponse;
-
 import com.google.common.hash.Hashing;
 import com.google.common.io.ByteSource;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.ValueType;
@@ -70,11 +57,8 @@ import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.webapi.utils.InputUtils;
 import org.hisp.dhis.webapi.utils.WebMessageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -83,6 +67,19 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_DATA_IMPORT_REQUIRE_CATEGORY_OPTION_COMBO;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_DATA_IMPORT_STRICT_CATEGORY_OPTION_COMBOS;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_DATA_IMPORT_STRICT_ORGANISATION_UNITS;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_DATA_IMPORT_STRICT_PERIODS;
 
 /**
  * @author Lars Helge Overland
@@ -532,13 +529,13 @@ public class DataValueController
     // ---------------------------------------------------------------------
 
     @RequestMapping( value = "/files", method = RequestMethod.GET )
-    public ResponseEntity<InputStreamResource> getDataValueFile(
+    public void getDataValueFile(
         @RequestParam String de,
         @RequestParam( required = false ) String co,
         @RequestParam( required = false ) String cc,
         @RequestParam( required = false ) String cp,
         @RequestParam String pe,
-        @RequestParam String ou )
+        @RequestParam String ou, HttpServletResponse response )
         throws WebMessageException
     {
         // ---------------------------------------------------------------------
@@ -602,15 +599,20 @@ public class DataValueController
             throw new WebMessageException( WebMessageUtils.notFound( "The referenced file could not be found" ) );
         }
 
-        HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.setContentType( MediaType.parseMediaType( fileResource.getContentType() ) );
-        responseHeaders.setContentLength( fileResource.getContentLength() );
-        responseHeaders.setContentDispositionFormData( "file", fileResource.getName() );
+        // ---------------------------------------------------------------------
+        // Build response and return
+        // ---------------------------------------------------------------------
 
-        InputStreamResource isr = null;
+        response.setContentType( fileResource.getContentType() );
+        response.setContentLength( Math.round( fileResource.getContentLength() ) );
+        response.setHeader( HttpHeaders.CONTENT_DISPOSITION, "filename=" + fileResource.getName() );
+
+        InputStream inputStream = null;
+
         try
         {
-            isr = new InputStreamResource( content.openStream() );
+            inputStream = content.openStream();
+            IOUtils.copyLarge( inputStream, response.getOutputStream() );
         }
         catch ( IOException e )
         {
@@ -618,8 +620,10 @@ public class DataValueController
                 "There was an exception when trying to fetch the file from the storage backend. " +
                     "Depending on the provider the root cause could be network or file system related." ) );
         }
-
-        return new ResponseEntity<>( isr, responseHeaders, HttpStatus.OK );
+        finally
+        {
+            IOUtils.closeQuietly( inputStream );
+        }
     }
 
     // ---------------------------------------------------------------------
