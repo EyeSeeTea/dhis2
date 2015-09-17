@@ -21,7 +21,7 @@
             <div class="pull-right">
                 <div class="btn-group" dropdown is-open="status.isopen">
                     <button type="button" class="btn btn-default dropdown-toggle" ng-disabled="!upcomingEvents.length">
-                        <i class="fa fa-cog" title="{{'settings'| translate}}"></i>
+                        <i class="fa fa-cog" title="{{settingsLabel}}"></i>
                     </button>
                     <ul class="dropdown-menu pull-right" role="menu">
                         <li ng-show="upcomingEvents.length > 0"><a href ng-click="showHideColumns()">{{'show_hide_columns'| translate}}</a></li>
@@ -38,7 +38,7 @@
             <div class="col-sm-8 col-md-6">
                 <table class="table-borderless table-striped">
                     <tr>
-                        <td>{{'org_unit'| translate}}</td>
+                        <td>{{orgUnitLabel}}</td>
                         <td>
                             <input type="text" class="form-control" selected-org-unit ng-model="selectedOrgUnit.name" value="{{selectedOrgUnit.name || 'please_select'| translate}}" ng-disabled="true">                                                                                        
                         </td>

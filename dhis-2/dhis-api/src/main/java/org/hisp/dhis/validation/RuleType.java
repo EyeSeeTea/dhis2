@@ -1,4 +1,4 @@
-package org.hisp.dhis.system.objectmapper;
+package org.hisp.dhis.validation;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,36 +28,11 @@ package org.hisp.dhis.system.objectmapper;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import org.amplecode.quick.mapper.RowMapper;
-import org.hisp.dhis.completeness.DataSetCompletenessResult;
-
 /**
- * @author Lars Helge Overland
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class AggregatedDataSetCompletenessRowMapper
-    implements RowMapper<DataSetCompletenessResult>, org.springframework.jdbc.core.RowMapper<DataSetCompletenessResult>
+public enum RuleType
 {
-    @Override
-    public DataSetCompletenessResult mapRow( ResultSet resultSet )
-        throws SQLException
-    {
-        final DataSetCompletenessResult value = new DataSetCompletenessResult();
-        
-        value.setDataSetId( resultSet.getInt( "datasetid" ) );
-        value.setPeriodId( resultSet.getInt( "periodid" ) );
-        value.setOrganisationUnitId( resultSet.getInt( "organisationunitid" ) );
-        value.setValue( resultSet.getDouble( "value" ) );
-        
-        return value;
-    }
-
-    @Override
-    public DataSetCompletenessResult mapRow( ResultSet resultSet, int arg1 )
-        throws SQLException
-    {
-        return mapRow( resultSet );
-    }
+    VALIDATION,
+    SURVEILLANCE;
 }

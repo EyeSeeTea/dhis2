@@ -13,6 +13,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
                 $location,
                 $filter,
                 $timeout,
+                $translate,
                 Paginator,
                 SessionStorageService,
                 MetaDataFactory,
@@ -52,6 +53,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
     $scope.enrollment = {programStartDate: '', programEndDate: '', operator: $scope.defaultOperators[0]};
     $scope.searchMode = { listAll: 'LIST_ALL', freeText: 'FREE_TEXT', attributeBased: 'ATTRIBUTE_BASED' };    
     $scope.optionSets = null;
+    $scope.doSearch = true;
     
     //Registration
     $scope.showRegistrationDiv = false;
@@ -76,6 +78,27 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
                     CurrentSelection.setOptionSets($scope.optionSets);
                 });                
             }
+            
+            //Labels
+            $scope.orgUnitLabel = $translate.instant('org_unit');
+            $scope.listAllLabel = $translate.instant('list_all');
+            $scope.registerLabel = $translate.instant('register');
+            $scope.searchOusLabel = $translate.instant('locate_organisation_unit_by_name');
+            $scope.printLabel = $translate.instant('print');
+            $scope.searchLabel = $translate.instant('search');
+            $scope.findLabel = $translate.instant('find');    
+            $scope.advancedSearchLabel = $translate.instant('advanced_search');
+            $scope.allEnrollmentsLabel = $translate.instant('all_enrollment');
+            $scope.completedEnrollmentsLabel = $translate.instant('completed_enrollment');
+            $scope.activeEnrollmentsLabel = $translate.instant('active_enrollment');
+            $scope.cancelledEnrollmentsLabel = $translate.instant('cancelled_enrollment');
+            $scope.searchCriteriaLabel = $translate.instant('type_your_search_criteria_here');
+            $scope.programSelectLabel = $translate.instant('please_select_a_program');
+            $scope.settingsLabel = $translate.instant('settings');
+            $scope.showHideLabel = $translate.instant('show_hide_columns');
+            $scope.listProgramsLabel = $translate.instant('list_programs');
+            $scope.settingsLabel = $translate.instant('settings');
+            
             $scope.loadPrograms($scope.selectedOrgUnit);
         }
     });
@@ -225,6 +248,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
             $scope.searchingOrgUnit = $scope.selectedOrgUnit;
         }
         
+        $scope.doSearch = false;
         $scope.fetchTeis();
     };
     
@@ -259,6 +283,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
             //process tei grid
             $scope.trackedEntityList = TEIGridService.format(data,false, $scope.optionSets, null);
             $scope.showTrackedEntityDiv = true;
+            $scope.showSearchDiv = false;
             $scope.teiFetched = true;  
             $scope.doSearch = true;
             
@@ -363,7 +388,6 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
     };
        
     $scope.getHelpContent = function(){
-        console.log('I will get help content');
     };   
     
     //Get orgunits for the logged in user

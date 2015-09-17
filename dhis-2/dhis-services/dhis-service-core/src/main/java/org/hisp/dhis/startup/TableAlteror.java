@@ -42,6 +42,8 @@ import org.hisp.dhis.system.startup.AbstractStartupRoutine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.collect.Lists;
+
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -886,6 +888,8 @@ public class TableAlteror
         upgradeAggregationType( "chart" );
 
         updateRelativePeriods();
+        updateNameColumnLengths();
+        
         organisationUnitService.updatePaths();
 
         log.info( "Tables updated" );
@@ -940,6 +944,14 @@ public class TableAlteror
         executeSql( "update eventreport set fontsize='LARGE' where fontsize='large'" );
         executeSql( "update eventreport set fontsize='NORMAL' where fontsize='normal'" );
         executeSql( "update eventreport set fontsize='SMALL' where fontsize='small'" );
+        
+        executeSql( "update reporttable set digitgroupseparator='NONE' where digitgroupseparator='none'" );
+        executeSql( "update reporttable set digitgroupseparator='SPACE' where digitgroupseparator='space'" );
+        executeSql( "update reporttable set digitgroupseparator='COMMA' where digitgroupseparator='comma'" );
+
+        executeSql( "update eventreport set digitgroupseparator='NONE' where digitgroupseparator='none'" );
+        executeSql( "update eventreport set digitgroupseparator='SPACE' where digitgroupseparator='space'" );
+        executeSql( "update eventreport set digitgroupseparator='COMMA' where digitgroupseparator='comma'" );
 
         executeSql( "update eventreport set datatype='AGGREGATED_VALUES' where datatype='aggregated_values'" );
         executeSql( "update eventreport set datatype='EVENTS' where datatype='individual_cases'" );
@@ -1007,6 +1019,20 @@ public class TableAlteror
         executeSql( "update relativeperiods set lastquarter = false where lastquarter is null" );
         executeSql( "update relativeperiods set lastsixmonth = false where lastsixmonth is null" );
         executeSql( "update relativeperiods set lastweek = false where lastweek is null" );
+    }
+    
+    private void updateNameColumnLengths()
+    {
+        List<String> tables = Lists.newArrayList( "user", "usergroup", "organisationunit", "orgunitgroup", "orgunitgroupset", 
+            "section", "dataset", "sqlview", "dataelement", "dataelementgroup", "dataelementgroupset", "categorycombo", 
+            "dataelementcategory", "indicator", "indicatorgroup", "indicatorgroupset", "indicatortype", 
+            "validationrule", "validationrulegroup", "constant", "attribute", "attributegroup",
+            "program", "programstage", "programindicator", "trackedentity", "trackedentityattribute" );
+        
+        for ( String table : tables )
+        {
+            executeSql( "alter table " + table + " alter column name type character varying(230)" );
+        }
     }
 
     private void upgradeDataValuesWithAttributeOptionCombo()

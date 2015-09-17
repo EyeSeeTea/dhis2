@@ -1,4 +1,4 @@
-package org.hisp.dhis.system.objectmapper;
+package org.hisp.dhis.organisationunit;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,32 +28,19 @@ package org.hisp.dhis.system.objectmapper;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import org.hisp.dhis.aggregation.AggregatedIndicatorValue;
-
 /**
- * @author Lars Helge Overland
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class AggregatedOrgUnitIndicatorValueRowMapper
-    extends AggregatedIndicatorValueRowMapper
+public enum FeatureType
 {
-    @Override
-    public AggregatedIndicatorValue mapRow( ResultSet resultSet )
-        throws SQLException
+    NONE,
+    MULTI_POLYGON,
+    POLYGON,
+    POINT,
+    SYMBOL;
+
+    public boolean isPolygon()
     {
-        final AggregatedIndicatorValue value = super.mapRow( resultSet );
-        
-        value.setOrganisationUnitGroupId( resultSet.getInt( "organisationunitgroupid" ) );
-        
-        return value;
-    }
-    
-    @Override
-    public AggregatedIndicatorValue mapRow( ResultSet resultSet, int rowNum )
-        throws SQLException
-    {
-        return this.mapRow( resultSet );
+        return this == POLYGON || this == MULTI_POLYGON;
     }
 }

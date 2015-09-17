@@ -1,4 +1,4 @@
-package org.hisp.dhis.system.objectmapper;
+package org.hisp.dhis.dataset;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,32 +28,28 @@ package org.hisp.dhis.system.objectmapper;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import org.hisp.dhis.aggregation.AggregatedDataValue;
-
 /**
- * @author Lars Helge Overland
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class AggregatedOrgUnitDataValueRowMapper
-    extends AggregatedDataValueRowMapper
+public enum FormType
 {
-    @Override
-    public AggregatedDataValue mapRow( ResultSet resultSet )
-        throws SQLException
+    DEFAULT,
+    CUSTOM,
+    SECTION,
+    SECTION_MULTIORG;
+
+    public boolean isDefault()
     {
-        final AggregatedDataValue value = super.mapRow( resultSet );
-        
-        value.setOrganisationUnitGroupId( resultSet.getInt( "organisationunitgroupid" ) );
-        
-        return value;
+        return this == DEFAULT;
     }
-    
-    @Override
-    public AggregatedDataValue mapRow( ResultSet resultSet, int rowNum )
-        throws SQLException
+
+    public boolean isCustom()
     {
-        return this.mapRow( resultSet );
+        return this == CUSTOM;
+    }
+
+    public boolean isSection()
+    {
+        return this == SECTION || this == SECTION_MULTIORG;
     }
 }

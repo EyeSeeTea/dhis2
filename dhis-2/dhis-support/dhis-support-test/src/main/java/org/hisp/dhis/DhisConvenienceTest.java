@@ -32,6 +32,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.chart.Chart;
+import org.hisp.dhis.chart.ChartType;
 import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.ValueType;
@@ -91,6 +92,7 @@ import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserCredentials;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserService;
+import org.hisp.dhis.validation.RuleType;
 import org.hisp.dhis.validation.ValidationCriteria;
 import org.hisp.dhis.validation.ValidationRule;
 import org.hisp.dhis.validation.ValidationRuleGroup;
@@ -111,6 +113,7 @@ import javax.xml.namespace.NamespaceContext;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringReader;
@@ -980,7 +983,7 @@ public abstract class DhisConvenienceTest
 
         validationRule.setName( "MonitoringRule" + uniqueCharacter );
         validationRule.setDescription( "Description" + uniqueCharacter );
-        validationRule.setRuleType( ValidationRule.RULE_TYPE_SURVEILLANCE );
+        validationRule.setRuleType( RuleType.SURVEILLANCE );
         validationRule.setOperator( operator );
         validationRule.setLeftSide( leftSide );
         validationRule.setRightSide( rightSide );
@@ -1075,14 +1078,23 @@ public abstract class DhisConvenienceTest
 
         return legendSet;
     }
+    
+    public static Chart createChart( char uniqueCharacter )
+    {
+        Chart chart = new Chart();
+        chart.setAutoFields();
+        chart.setName( "Chart" + uniqueCharacter );
+        chart.setType( ChartType.COLUMN );
+        
+        return chart;
+        
+    }
 
     public static Chart createChart( char uniqueCharacter, List<Indicator> indicators, List<Period> periods,
         List<OrganisationUnit> units )
     {
-        Chart chart = new Chart();
-        chart.setAutoFields();
+        Chart chart = createChart( uniqueCharacter );
 
-        chart.setName( "Chart" + uniqueCharacter );
         chart.addAllDataDimensionItems( indicators );
         chart.setPeriods( periods );
         chart.setOrganisationUnits( units );

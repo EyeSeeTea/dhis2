@@ -1,4 +1,4 @@
-package org.hisp.dhis.system.filter;
+package org.hisp.dhis.validation;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,29 +28,12 @@ package org.hisp.dhis.system.filter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.commons.filter.Filter;
-
 /**
- * @author mortenoh
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class DataSetTypeFilter
-    implements Filter<DataSet>
+public enum Importance
 {
-    private List<String> dataSetTypes = new ArrayList<>();
-
-    public DataSetTypeFilter( String... types )
-    {
-        dataSetTypes = Arrays.asList( types );
-    }
-
-    @Override
-    public boolean retain( DataSet dataSet )
-    {
-        return dataSetTypes.contains( dataSet.getDataSetType() );
-    }
+    HIGH,
+    MEDIUM,
+    LOW;
 }

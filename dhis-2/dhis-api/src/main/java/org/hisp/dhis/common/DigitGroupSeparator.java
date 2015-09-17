@@ -1,4 +1,4 @@
-package org.hisp.dhis.aggregation;
+package org.hisp.dhis.common;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -29,32 +29,9 @@ package org.hisp.dhis.aggregation;
  */
 
 /**
- * @interface StoreIterator
- * Provides an object for processing a collection of Objects, such
- *  as from a jdbc resultset with a rowmapper
- *
- * @author bobj
+ * @author Lars Helge Overland
  */
-public interface StoreIterator<T> {
-
-    // ----------------------------------------------------------------------
-    // StoreIterator
-    // ----------------------------------------------------------------------
-
-    /**
-     * Gets the next object
-     *
-     * @return the object or null.
-     */
-    T next();
-
-    /**
-     * Close any underlying resources
-     *
-     * Note: if you do not iterate through the entire resultset, ie. until next()
-     *  returns NULL, you have the responsibility to call close() in order to release
-     *  the underlying resultset, connection etc
-     *
-     */
-    void close();
+public enum DigitGroupSeparator
+{
+    COMMA, SPACE, NONE;
 }
