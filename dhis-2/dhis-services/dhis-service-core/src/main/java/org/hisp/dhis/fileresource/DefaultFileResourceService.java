@@ -76,7 +76,7 @@ public class DefaultFileResourceService
     @Override
     public String saveFileResource( FileResource fileResource, ByteSource content )
     {
-        String storageKey = StringUtils.prependIfMissing( fileResource.getStorageKey(), fileResource.getDomain().getContainerName() );
+        String storageKey = getRelativeStorageKey( fileResource );
 
         String name = fileResourceContentStore.saveFileResourceContent( storageKey, content );
 
@@ -110,14 +110,14 @@ public class DefaultFileResourceService
 
         String storageKey = fileResource.getStorageKey();
 
-        fileResourceContentStore.deleteFileResourceContent( storageKey );
+        fileResourceContentStore.deleteFileResourceContent( getRelativeStorageKey( fileResource ) );
         fileResourceStore.delete( fileResource );
     }
 
     @Override
     public ByteSource getFileResourceContent( FileResource fileResource )
     {
-        return fileResourceContentStore.getFileResourceContent( fileResource.getStorageKey() );
+        return fileResourceContentStore.getFileResourceContent( getRelativeStorageKey( fileResource ) );
     }
 
     @Override
@@ -130,5 +130,14 @@ public class DefaultFileResourceService
     public void updateFileResource( FileResource fileResource )
     {
         fileResourceStore.update( fileResource );
+    }
+
+    // ---------------------------------------------------------------------
+    // Supportive methods
+    // ---------------------------------------------------------------------
+
+    private String getRelativeStorageKey( FileResource fileResource )
+    {
+        return StringUtils.prependIfMissing( fileResource.getStorageKey(), fileResource.getDomain().getContainerName() + "/" );
     }
 }

@@ -71,12 +71,6 @@ public class S3FileResourceContentStore
     }
 
     @Override
-    protected String getRootLocation()
-    {
-        return configurationProvider.getConfiguration().getProperties().getProperty( KEY_S3_BUCKET );
-    }
-
-    @Override
     protected String getJCloudsProviderKey()
     {
         return S3_PROVIDER_KEY;

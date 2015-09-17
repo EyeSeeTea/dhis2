@@ -31,7 +31,6 @@ package org.hisp.dhis.fileresource;
 import org.hisp.dhis.external.location.LocationManager;
 import org.jclouds.filesystem.reference.FilesystemConstants;
 
-import java.nio.file.Paths;
 import java.util.Properties;
 
 /**
@@ -78,9 +77,7 @@ public class FileSystemFileResourceContentStore
     protected Properties getOverrides()
     {
         Properties properties = new Properties();
-
-        String fileStoreRootDir = Paths.get( locationManager.getExternalDirectoryPath(), getRootLocation() ).toString();
-        properties.setProperty( FilesystemConstants.PROPERTY_BASEDIR, fileStoreRootDir );
+        properties.setProperty( FilesystemConstants.PROPERTY_BASEDIR, locationManager.getExternalDirectoryPath() );
 
         return properties;
     }

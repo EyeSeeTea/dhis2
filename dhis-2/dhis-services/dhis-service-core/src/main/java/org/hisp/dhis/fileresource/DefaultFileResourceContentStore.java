@@ -124,6 +124,8 @@ public class DefaultFileResourceContentStore
                 configureAWSS3Provider();
                 break;
         }
+
+        super.init();
     }
 
     // -------------------------------------------------------------------------

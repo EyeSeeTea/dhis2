@@ -44,7 +44,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.google.common.hash.Hashing;
 import com.google.common.io.ByteSource;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.ValueType;
