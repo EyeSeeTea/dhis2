@@ -136,7 +136,7 @@ public class DataValueController
         @RequestParam String ou,
         @RequestParam( required = false ) String value,
         @RequestParam( required = false ) String comment,
-        @RequestParam( required = false ) boolean followUp )
+        @RequestParam( required = false ) boolean followUp, HttpServletResponse response )
         throws WebMessageException
     {
         boolean strictPeriods = (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_STRICT_PERIODS, false );

@@ -108,8 +108,6 @@ public class DefaultFileResourceService
             return; // Doesn't exist
         }
 
-        String storageKey = fileResource.getStorageKey();
-
         fileResourceContentStore.deleteFileResourceContent( getRelativeStorageKey( fileResource ) );
         fileResourceStore.delete( fileResource );
     }
