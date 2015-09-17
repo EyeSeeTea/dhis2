@@ -44,15 +44,12 @@ public class FileSystemFileResourceContentStore
 
     private String container;
 
-    private String rootLocation;
-
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
 
-    public FileSystemFileResourceContentStore( String rootLocation, String container )
+    public FileSystemFileResourceContentStore( String container )
     {
-        this.rootLocation = rootLocation;
         this.container = container;
     }
 
@@ -75,12 +72,6 @@ public class FileSystemFileResourceContentStore
     protected String getContainer()
     {
         return container;
-    }
-
-    @Override
-    protected String getRootLocation()
-    {
-        return rootLocation;
     }
 
     @Override

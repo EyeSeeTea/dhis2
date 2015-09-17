@@ -73,8 +73,6 @@ public abstract class BaseJCloudsFileResourceContentStore
 
     protected abstract String getContainer();
 
-    protected abstract String getRootLocation();
-
     protected abstract String getJCloudsProviderKey();
 
     // -------------------------------------------------------------------------

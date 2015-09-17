@@ -568,15 +568,19 @@
     <property name="sessionFactory" ref="sessionFactory" />
   </bean>
 
-  <bean id="org.hisp.dhis.fileresource.FileResourceContentStore" class="org.hisp.dhis.fileresource.FileSystemFileResourceContentStore">
-    <property name="locationManager" ref="locationManager" />
-    <constructor-arg name="rootLocation" value="filestore" />
-    <constructor-arg name="container" value="testContainer" />
-  </bean>
+  <!--<bean id="org.hisp.dhis.fileresource.FileSystemFileResourceContentStore" class="org.hisp.dhis.fileresource.FileSystemFileResourceContentStore">-->
+    <!--<property name="locationManager" ref="locationManager" />-->
+    <!--<constructor-arg name="container" value="testContainer" />-->
+  <!--</bean>-->
 
-  <!--<bean id="org.hisp.dhis.fileresource.FileResourceContentStore" class="org.hisp.dhis.fileresource.S3FileResourceContentStore">-->
+  <!--<bean id="org.hisp.dhis.fileresource.S3FileResourceContentStore" class="org.hisp.dhis.fileresource.S3FileResourceContentStore">-->
     <!--<property name="configurationProvider" ref="hibernateConfigurationProvider" />-->
   <!--</bean>-->
+
+  <bean id="org.hisp.dhis.fileresource.FileResourceContentStore" class="org.hisp.dhis.fileresource.DefaultFileResourceContentStore" init-method="init">
+    <property name="configurationProvider" ref="hibernateConfigurationProvider" />
+    <property name="locationManager" ref="locationManager" />
+  </bean>
 
   <!-- Service definitions -->
 
