@@ -44,6 +44,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.google.common.hash.Hashing;
 import com.google.common.io.ByteSource;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.ValueType;
@@ -474,6 +475,7 @@ public class DataValueController
         // TODO Validate multipart params: filename etc. Don't save nulls
         // TODO Validate filename. Disallow file system chars such as '/'
         // TODO Validate contentType or 'sniff' if not specified
+        FilenameUtils.normalize()
         String filename = multipartFile.getOriginalFilename();
         String contentType = multipartFile.getContentType();
         long contentLength = multipartFile.getSize();

@@ -28,8 +28,10 @@ package org.hisp.dhis.fileresource;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.system.configuration.SystemConfigurationProvider;
+import org.hisp.dhis.hibernate.HibernateConfigurationProvider;
 import org.jclouds.domain.Credentials;
+
+import java.util.Properties;
 
 /**
  * @author Halvdan Hoem Grelland
@@ -37,24 +39,28 @@ import org.jclouds.domain.Credentials;
 public class S3FileResourceContentStore
     extends BaseJCloudsFileResourceContentStore
 {
+    // TODO use generic names
     private static final String KEY_S3_BUCKET = "amazon.s3.bucket";
     private static final String KEY_S3_ACCESSKEYID = "amazon.s3.accesskeyid";
     private static final String KEY_S3_SECRET = "amazon.s3.secret";
 
     private static final String S3_PROVIDER_KEY = "aws-s3";
 
-    private SystemConfigurationProvider systemConfigurationProvider;
+    private HibernateConfigurationProvider configurationProvider;
 
-    public void setSystemConfigurationProvider( SystemConfigurationProvider systemConfigurationProvider )
+    public void setConfigurationProvider( HibernateConfigurationProvider configurationProvider )
     {
-        this.systemConfigurationProvider = systemConfigurationProvider;
+        this.configurationProvider = configurationProvider;
     }
 
     @Override
     protected Credentials getCredentials()
     {
-        String accessKeyId = systemConfigurationProvider.getProperties().getProperty( KEY_S3_ACCESSKEYID );
-        String secretKey = systemConfigurationProvider.getProperties().getProperty( KEY_S3_SECRET );
+        Properties properties = configurationProvider.getConfiguration().getProperties();
+
+        String accessKeyId = properties.getProperty( KEY_S3_ACCESSKEYID );
+        String secretKey = properties.getProperty( KEY_S3_SECRET );
+
         return new Credentials( accessKeyId, secretKey );
     }
 
@@ -67,7 +73,7 @@ public class S3FileResourceContentStore
     @Override
     protected String getRootLocation()
     {
-        return systemConfigurationProvider.getProperties().getProperty( KEY_S3_BUCKET );
+        return configurationProvider.getConfiguration().getProperties().getProperty( KEY_S3_BUCKET );
     }
 
     @Override
