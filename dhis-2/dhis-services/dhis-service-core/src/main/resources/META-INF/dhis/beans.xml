@@ -574,9 +574,9 @@
     <constructor-arg name="container" value="testContainer" />
   </bean>
 
-  <bean id="org.hisp.dhis.fileresource.FileResourceContentStore" class="org.hisp.dhis.fileresource.S3FileResourceContentStore">
-    <property name="configurationProvider" ref="hibernateConfigurationProvider" />
-  </bean>
+  <!--<bean id="org.hisp.dhis.fileresource.FileResourceContentStore" class="org.hisp.dhis.fileresource.S3FileResourceContentStore">-->
+    <!--<property name="configurationProvider" ref="hibernateConfigurationProvider" />-->
+  <!--</bean>-->
 
   <!-- Service definitions -->
 
