@@ -31,6 +31,7 @@ package org.hisp.dhis.fileresource;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.google.common.io.ByteSource;
+import org.apache.commons.io.input.NullInputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jclouds.ContextBuilder;
@@ -129,12 +130,17 @@ public abstract class BaseJCloudsFileResourceContentStore
         {
             @Override
             public InputStream openStream()
-                throws IOException
             {
-                return blob.getPayload().openStream();
+                try
+                {
+                    return blob.getPayload().openStream();
+                }
+                catch ( IOException e )
+                {
+                    return new NullInputStream( 0 );
+                }
             }
         };
-
     }
 
     public String saveFileResourceContent( String key, ByteSource content )
@@ -148,7 +154,7 @@ public abstract class BaseJCloudsFileResourceContentStore
 
         putBlob( blob );
 
-        return blob.getMetadata().getName(); // Name == key ?
+        return key;
     }
 
     public void deleteFileResourceContent( String key )

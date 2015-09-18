@@ -78,9 +78,9 @@ public class DefaultFileResourceService
     {
         String storageKey = getRelativeStorageKey( fileResource );
 
-        String name = fileResourceContentStore.saveFileResourceContent( storageKey, content );
+        String key = fileResourceContentStore.saveFileResourceContent( storageKey, content );
 
-        if ( name == null )
+        if ( key == null )
         {
             log.debug( "Failed saving content for FileResource" );
             return null;
@@ -90,7 +90,7 @@ public class DefaultFileResourceService
 
         if ( id <= 0 )
         {
-            log.debug( "Failed to persist the FileResource: " + fileResource.getName() );
+            log.debug( "Failed persisting the FileResource: " + fileResource.getName() );
             return null;
         }
 
