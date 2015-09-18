@@ -51,6 +51,10 @@ public class DefaultFileResourceContentStore
 {
     private static final Log log = LogFactory.getLog( DefaultFileResourceContentStore.class );
 
+    // -------------------------------------------------------------------------
+    // Provider constants
+    // -------------------------------------------------------------------------
+
     private static final String JCLOUDS_PROVIDER_KEY_FILESYSTEM = "filesystem";
     private static final String JCLOUDS_PROVIDER_KEY_AWS_S3 = "aws-s3";
 
@@ -58,12 +62,21 @@ public class DefaultFileResourceContentStore
         addAll( Arrays.asList( JCLOUDS_PROVIDER_KEY_FILESYSTEM, JCLOUDS_PROVIDER_KEY_AWS_S3 ) );
     }};
 
+    // -------------------------------------------------------------------------
+    // Property keys
+    // -------------------------------------------------------------------------
+
     private static final String FILESTORE_CONFIG_NAMESPACE = "filestore";
+
     private static final String KEY_FILESTORE_PROVIDER = FILESTORE_CONFIG_NAMESPACE + ".provider";
     private static final String KEY_FILESTORE_CONTAINER = FILESTORE_CONFIG_NAMESPACE + ".container";
     private static final String KEY_FILESTORE_LOCATION = FILESTORE_CONFIG_NAMESPACE + ".location";
     private static final String KEY_FILESTORE_IDENTITY = FILESTORE_CONFIG_NAMESPACE + ".identity";
     private static final String KEY_FILESTORE_SECRET = FILESTORE_CONFIG_NAMESPACE + ".secret";
+
+    // -------------------------------------------------------------------------
+    // Defaults
+    // -------------------------------------------------------------------------
 
     private static final String DEFAULT_PROVIDER = "filesystem";
     private static final String DEFAULT_CONTAINER = "dhis2_filestore";
@@ -192,7 +205,7 @@ public class DefaultFileResourceContentStore
 
         if ( credentials.identity.isEmpty() || credentials.credential.isEmpty() )
         {
-            log.info( "AWS S3 configured with empty credentials. Will most likely fail." );
+            log.info( "AWS S3 configured with empty credentials. Authentication will fail" );
         }
     }
 }

@@ -143,9 +143,9 @@ public abstract class BaseJCloudsFileResourceContentStore
         };
     }
 
-    public String saveFileResourceContent( String key, ByteSource content )
+    public String saveFileResourceContent( String key, ByteSource content, long size, String contentMD5 )
     {
-        Blob blob = createBlob( key, content );
+        Blob blob = createBlob( key, content, size, contentMD5 );
 
         if ( blob == null )
         {
@@ -181,39 +181,12 @@ public abstract class BaseJCloudsFileResourceContentStore
         return blobStore.putBlob( getContainer(), blob );
     }
 
-    private Blob createBlob( String key, ByteSource content )
+    private Blob createBlob( String key, ByteSource content, long size, String contentMD5 )
     {
-        long size;
-
-        try
-        {
-            size = content.size();
-        }
-        catch ( IOException e )
-        {
-            size = -1;
-        }
-
-        if ( size < 0 )
-        {
-            return null;
-        }
-
-        HashCode hash;
-
-        try
-        {
-            hash = content.hash( Hashing.md5() );
-        }
-        catch ( IOException e )
-        {
-            return null;
-        }
-
         return blobStore.blobBuilder( key )
             .payload( content )
             .contentLength( size )
-            .contentMD5( hash )
+            .contentMD5( HashCode.fromString( contentMD5 ) )
             .build();
     }
 }

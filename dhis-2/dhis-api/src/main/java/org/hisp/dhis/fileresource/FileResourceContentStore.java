@@ -36,6 +36,6 @@ import com.google.common.io.ByteSource;
 public interface FileResourceContentStore
 {
     ByteSource getFileResourceContent( String key );
-    String saveFileResourceContent( String key, ByteSource content );
+    String saveFileResourceContent( String key, ByteSource content, long size, String contentMD5 );
     void deleteFileResourceContent( String key );
 }
