@@ -29,7 +29,6 @@ package org.hisp.dhis.fileresource;
  */
 
 import com.google.common.hash.HashCode;
-import com.google.common.hash.Hashing;
 import com.google.common.io.ByteSource;
 import org.apache.commons.io.input.NullInputStream;
 import org.apache.commons.logging.Log;
@@ -41,13 +40,10 @@ import org.jclouds.blobstore.domain.Blob;
 import org.jclouds.domain.Credentials;
 import org.jclouds.domain.Location;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.Set;
 
 /**
  * @author Halvdan Hoem Grelland
@@ -88,7 +84,6 @@ public abstract class BaseJCloudsFileResourceContentStore
     // Lifecycle management
     // -------------------------------------------------------------------------
 
-    @PostConstruct
     public void init()
     {
         blobStoreContext = ContextBuilder.newBuilder( getJCloudsProviderKey() )
@@ -97,17 +92,12 @@ public abstract class BaseJCloudsFileResourceContentStore
 
         blobStore = blobStoreContext.getBlobStore();
 
-        Set<? extends Location> assignableLocations = blobStore.listAssignableLocations();
-
-        assignableLocations.forEach( l -> System.out.println( l.getId() ) );
-
-        Optional<? extends Location> location = assignableLocations.stream()
-            .filter( l -> l.getId().equals( getLocation() ) ).findFirst();
+        Optional<? extends Location> location = blobStore.listAssignableLocations()
+            .stream().filter( l -> l.getId().equals( getLocation() ) ).findFirst();
 
         blobStore.createContainerInLocation( location.isPresent() ? location.get() : null, getContainer() );
     }
 
-    @PreDestroy
     public void cleanUp()
     {
         blobStoreContext.close();

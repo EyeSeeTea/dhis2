@@ -112,7 +112,7 @@ public class DefaultFileResourceContentStore
     }
 
     // -------------------------------------------------------------------------
-    // Init
+    // Lifecycle
     // -------------------------------------------------------------------------
 
     public void init()
@@ -150,6 +150,11 @@ public class DefaultFileResourceContentStore
         }
 
         super.init();
+    }
+
+    public void cleanUp()
+    {
+        super.cleanUp();
     }
 
     // -------------------------------------------------------------------------

@@ -568,7 +568,8 @@
     <property name="sessionFactory" ref="sessionFactory" />
   </bean>
 
-  <bean id="org.hisp.dhis.fileresource.FileResourceContentStore" class="org.hisp.dhis.fileresource.DefaultFileResourceContentStore" init-method="init">
+  <bean id="org.hisp.dhis.fileresource.FileResourceContentStore" class="org.hisp.dhis.fileresource.DefaultFileResourceContentStore"
+    init-method="init" destroy-method="cleanUp">
     <property name="configurationProvider" ref="hibernateConfigurationProvider" />
     <property name="locationManager" ref="locationManager" />
   </bean>

@@ -80,6 +80,10 @@ public class FileResource
     // Constructors
     // ---------------------------------------------------------------------
 
+    public FileResource()
+    {
+    }
+
     public FileResource( String name, String contentType, long contentLength, String contentMD5, FileResourceDomain domain )
     {
         this.name = name;
