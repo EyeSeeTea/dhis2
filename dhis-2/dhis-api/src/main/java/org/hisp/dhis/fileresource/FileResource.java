@@ -36,6 +36,8 @@ import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
 
+import java.util.UUID;
+
 /**
  * @author Halvdan Hoem Grelland
  */
@@ -78,14 +80,14 @@ public class FileResource
     // Constructors
     // ---------------------------------------------------------------------
 
-    public FileResource( String name, String contentType, long contentLength, String contentMD5, String storageKey, FileResourceDomain domain )
+    public FileResource( String name, String contentType, long contentLength, String contentMD5, FileResourceDomain domain )
     {
         this.name = name;
         this.contentType = contentType;
         this.contentLength = contentLength;
         this.contentMD5 = contentMD5;
-        this.storageKey = storageKey;
         this.domain = domain;
+        this.storageKey = generateStorageKey();
     }
 
     // ---------------------------------------------------------------------
@@ -182,5 +184,14 @@ public class FileResource
     public void setDomain( FileResourceDomain domain )
     {
         this.domain = domain;
+    }
+
+    // ---------------------------------------------------------------------
+    // Getters and setters
+    // ---------------------------------------------------------------------
+
+    private String generateStorageKey()
+    {
+        return UUID.randomUUID().toString();
     }
 }

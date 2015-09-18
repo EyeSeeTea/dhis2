@@ -32,7 +32,9 @@ import com.google.common.hash.Hashing;
 import com.google.common.io.ByteSource;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.NullInputStream;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.entity.ContentType;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.dataelement.DataElement;
@@ -63,6 +65,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.InvalidMimeTypeException;
+import org.springframework.util.MimeType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -75,7 +79,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 import static org.hisp.dhis.setting.SystemSettingManager.KEY_DATA_IMPORT_REQUIRE_CATEGORY_OPTION_COMBO;
 import static org.hisp.dhis.setting.SystemSettingManager.KEY_DATA_IMPORT_STRICT_CATEGORY_OPTION_COMBOS;
@@ -406,7 +409,8 @@ public class DataValueController
         @RequestParam( required = false ) String cp,
         @RequestParam String pe,
         @RequestParam String ou,
-        @RequestParam( value = "file", required = true ) MultipartFile multipartFile )
+        @RequestParam( value = "file", required = true ) MultipartFile multipartFile,
+        HttpServletResponse response )
         throws WebMessageException, IOException
     {
 
@@ -466,15 +470,20 @@ public class DataValueController
         validateDataSetNotLocked( dataElement, period, organisationUnit );
 
         // ---------------------------------------------------------------------
-        // Assemble fileResource
+        // Validate and assemble FileResource
         // ---------------------------------------------------------------------
 
-        // TODO Validate multipart params: filename etc. Don't save nulls
-        // TODO Validate filename. Disallow file system chars such as '/'
-        // TODO Validate contentType or 'sniff' if not specified
-        String filename = multipartFile.getOriginalFilename();
+        String filename = StringUtils.defaultIfBlank( FilenameUtils.getName( multipartFile.getOriginalFilename() ), "untitled" );
+
         String contentType = multipartFile.getContentType();
+        contentType = isValidContentType( contentType ) ? contentType : ContentType.APPLICATION_OCTET_STREAM.toString();
+
         long contentLength = multipartFile.getSize();
+
+        if ( contentLength <= 0 )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "Could not read file or file is empty" ) );
+        }
 
         ByteSource content = new ByteSource()
         {
@@ -487,23 +496,14 @@ public class DataValueController
                 }
                 catch ( IOException e )
                 {
-                    return null;
+                    return new NullInputStream( 0 );
                 }
             }
         };
 
-        // TODO FIX!!!
+        String contentMD5 = content.hash( Hashing.md5() ).toString(); // TODO Consider letting filestore create the hash
 
-        if ( content == null )
-        {
-            throw new WebMessageException( WebMessageUtils.error( "File upload failed" ) );
-        }
-
-        String contentMD5 = content.hash( Hashing.md5() ).toString();
-
-        String storageKey = UUID.randomUUID().toString();
-
-        FileResource fileResource = new FileResource( filename, contentType, contentLength, contentMD5, storageKey, FileResourceDomain.DATA_VALUE );
+        FileResource fileResource = new FileResource( filename, contentType, contentLength, contentMD5, FileResourceDomain.DATA_VALUE );
         fileResource.setAssigned( false );
         fileResource.setCreated( new Date() );
         fileResource.setUser( currentUserService.getCurrentUser() );
@@ -733,5 +733,19 @@ public class DataValueController
         {
             throw new WebMessageException( WebMessageUtils.conflict( "Data set is locked" ) );
         }
+    }
+
+    private boolean isValidContentType( String contentType )
+    {
+        try
+        {
+            MimeType.valueOf( contentType );
+        }
+        catch ( InvalidMimeTypeException e )
+        {
+            return false;
+        }
+
+        return true;
     }
 }
