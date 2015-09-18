@@ -96,12 +96,7 @@ public abstract class BaseJCloudsFileResourceContentStore
 
         blobStore = blobStoreContext.getBlobStore();
 
-//        log.info( "Built BlobStore with provider " + getJCloudsProviderKey() );
-//        log.info( "Using location: " + getLocation() );
-
         Set<? extends Location> assignableLocations = blobStore.listAssignableLocations();
-
-//        log.info( "Found assignable locations: " + assignableLocations.size() );
 
         assignableLocations.forEach( l -> System.out.println( l.getId() ) );
 
