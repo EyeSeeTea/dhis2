@@ -35,6 +35,9 @@ public enum FileResourceDomain
 {
     DATA_VALUE( "dataValue" );
 
+    /**
+     * Container name to use when storing blobs of this FileResourceDomain
+     */
     private String containerName;
 
     FileResourceDomain( String containerName )

@@ -42,16 +42,41 @@ import org.hisp.dhis.common.view.ExportView;
 public class FileResource
     extends BaseIdentifiableObject
 {
-    private String contentType;         // MIME type
-    private long contentLength;         // Byte size of content
-    private String contentMD5;          // MD5 digest of the content
-    private String storageKey;          // Key to fetch content from external storage
-    private boolean assigned = false;   // Is this resource assigned (e.g. to a datavalue)?
+    /**
+     * MIME type
+     */
+    private String contentType;
+
+    /**
+     * Byte size of content, non negative
+     */
+    private long contentLength;
+
+    /**
+     * MD5 digest of content
+     */
+    private String contentMD5;
+
+    /**
+     * Key used for content storage at external location
+     */
+    private String storageKey;
+
+    /**
+     * Flag indicating wether the resource is assigned (e.g. to a DataValue) or not.
+     * Unassigned FileResources are generally safe to delete when reaching a certain age
+     * (unassigned objects might be in staging).
+     */
+    private boolean assigned = false;
+
+    /**
+     * The domain which this FileResource belongs to
+     */
     private FileResourceDomain domain;
 
-    public FileResource()
-    {
-    }
+    // ---------------------------------------------------------------------
+    // Constructors
+    // ---------------------------------------------------------------------
 
     public FileResource( String name, String contentType, long contentLength, String contentMD5, String storageKey, FileResourceDomain domain )
     {
@@ -63,11 +88,19 @@ public class FileResource
         this.domain = domain;
     }
 
+    // ---------------------------------------------------------------------
+    // Overrides
+    // ---------------------------------------------------------------------
+
     @Override
     public boolean haveUniqueNames()
     {
         return false;
     }
+
+    // ---------------------------------------------------------------------
+    // Getters and setters
+    // ---------------------------------------------------------------------
 
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
