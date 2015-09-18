@@ -106,7 +106,7 @@ public class DefaultFileResourceService
 
         if ( fileResource == null )
         {
-            return; // Doesn't exist
+            return;
         }
 
         fileResourceContentStore.deleteFileResourceContent( getRelativeStorageKey( fileResource ) );
