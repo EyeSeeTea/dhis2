@@ -44,6 +44,7 @@ import java.util.Properties;
 import java.util.stream.Collectors;
 
 /**
+ * TODO Merge with BaseJCloudsFileResourceContentStore ?
  * @author Halvdan Hoem Grelland
  */
 public class DefaultFileResourceContentStore
