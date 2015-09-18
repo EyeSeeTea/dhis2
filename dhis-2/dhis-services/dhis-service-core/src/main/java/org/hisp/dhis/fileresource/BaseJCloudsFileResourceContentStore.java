@@ -186,7 +186,6 @@ public abstract class BaseJCloudsFileResourceContentStore
         catch ( IOException e )
         {
             size = -1;
-            e.printStackTrace(); // TODO
         }
 
         if ( size < 0 )
@@ -202,7 +201,6 @@ public abstract class BaseJCloudsFileResourceContentStore
         }
         catch ( IOException e )
         {
-            e.printStackTrace(); // TODO
             return null;
         }
 
