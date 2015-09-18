@@ -385,10 +385,10 @@ public class DefaultEventAnalyticsService
     public EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate,
         Set<String> dimension, Set<String> filter, String value, AggregationType aggregationType, boolean skipMeta, boolean skipData, boolean skipRounding, 
         boolean completedOnly, boolean hierarchyMeta, boolean showHierarchy, SortOrder sortOrder, Integer limit, EventOutputType outputType, boolean collapseDataDimensions, 
-        boolean aggregateData, DisplayProperty displayProperty, I18nFormat format )
+        boolean aggregateData, DisplayProperty displayProperty, String userOrgUnit, I18nFormat format )
     {
         EventQueryParams params = getFromUrl( program, stage, startDate, endDate, dimension, filter, null, null, null,
-            skipMeta, skipData, completedOnly, hierarchyMeta, false, displayProperty, null, null, format );
+            skipMeta, skipData, completedOnly, hierarchyMeta, false, displayProperty, userOrgUnit, null, null, format );
                 
         params.setValue( getValueDimension( value ) );
         params.setAggregationType( aggregationType );
@@ -407,9 +407,11 @@ public class DefaultEventAnalyticsService
     public EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate,
         Set<String> dimension, Set<String> filter, String ouMode, Set<String> asc, Set<String> desc,
         boolean skipMeta, boolean skipData, boolean completedOnly, boolean hierarchyMeta, boolean coordinatesOnly, 
-        DisplayProperty displayProperty, Integer page, Integer pageSize, I18nFormat format )
+        DisplayProperty displayProperty, String userOrgUnit, Integer page, Integer pageSize, I18nFormat format )
     {
         EventQueryParams params = new EventQueryParams();
+        
+        List<OrganisationUnit> userOrgUnits = analyticsService.getUserOrgUnits( userOrgUnit );
 
         Program pr = programService.getProgram( program );
 
@@ -447,7 +449,7 @@ public class DefaultEventAnalyticsService
             {
                 String dimensionId = getDimensionFromParam( dim );
                 List<String> items = getDimensionItemsFromParam( dim );                
-                DimensionalObject dimObj = analyticsService.getDimension( dimensionId, items, null, null, format, true );
+                DimensionalObject dimObj = analyticsService.getDimension( dimensionId, items, null, userOrgUnits, format, true );
                 
                 if ( dimObj != null )
                 {
@@ -466,7 +468,7 @@ public class DefaultEventAnalyticsService
             {
                 String dimensionId = getDimensionFromParam( dim );
                 List<String> items = getDimensionItemsFromParam( dim );                
-                DimensionalObject dimObj = analyticsService.getDimension( dimensionId, items, null, null, format, true );
+                DimensionalObject dimObj = analyticsService.getDimension( dimensionId, items, null, userOrgUnits, format, true );
                 
                 if ( dimObj != null )
                 {
