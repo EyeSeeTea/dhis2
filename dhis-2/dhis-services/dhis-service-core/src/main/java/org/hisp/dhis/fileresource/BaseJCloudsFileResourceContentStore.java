@@ -28,21 +28,25 @@ package org.hisp.dhis.fileresource;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.base.Optional;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.google.common.io.ByteSource;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jclouds.ContextBuilder;
 import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
 import org.jclouds.blobstore.domain.Blob;
 import org.jclouds.domain.Credentials;
+import org.jclouds.domain.Location;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * @author Halvdan Hoem Grelland
@@ -50,6 +54,8 @@ import java.util.Properties;
 public abstract class BaseJCloudsFileResourceContentStore
     implements FileResourceContentStore
 {
+    Log log = LogFactory.getLog( BaseJCloudsFileResourceContentStore.class );
+
     private BlobStore blobStore;
     private BlobStoreContext blobStoreContext;
 
@@ -59,7 +65,7 @@ public abstract class BaseJCloudsFileResourceContentStore
 
     protected Credentials getCredentials()
     {
-        return new Credentials( "Unused", Optional.absent().toString() );
+        return new Credentials( "Unused", "Unused" );
     }
 
     protected Properties getOverrides()
@@ -75,6 +81,8 @@ public abstract class BaseJCloudsFileResourceContentStore
 
     protected abstract String getJCloudsProviderKey();
 
+    protected abstract String getLocation();
+
     // -------------------------------------------------------------------------
     // Lifecycle management
     // -------------------------------------------------------------------------
@@ -87,7 +95,20 @@ public abstract class BaseJCloudsFileResourceContentStore
             .overrides( getOverrides() ).build( BlobStoreContext.class );
 
         blobStore = blobStoreContext.getBlobStore();
-        blobStore.createContainerInLocation( null, getContainer() );
+
+//        log.info( "Built BlobStore with provider " + getJCloudsProviderKey() );
+//        log.info( "Using location: " + getLocation() );
+
+        Set<? extends Location> assignableLocations = blobStore.listAssignableLocations();
+
+//        log.info( "Found assignable locations: " + assignableLocations.size() );
+
+        assignableLocations.forEach( l -> System.out.println( l.getId() ) );
+
+        Optional<? extends Location> location = assignableLocations.stream()
+            .filter( l -> l.getId().equals( getLocation() ) ).findFirst();
+
+        blobStore.createContainerInLocation( location.isPresent() ? location.get() : null, getContainer() );
     }
 
     @PreDestroy

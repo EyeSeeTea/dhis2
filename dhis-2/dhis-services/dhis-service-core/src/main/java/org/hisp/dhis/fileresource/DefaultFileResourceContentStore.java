@@ -28,6 +28,7 @@ package org.hisp.dhis.fileresource;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.external.location.LocationManager;
@@ -60,6 +61,7 @@ public class DefaultFileResourceContentStore
     private static final String FILESTORE_CONFIG_NAMESPACE = "filestore";
     private static final String KEY_FILESTORE_PROVIDER = FILESTORE_CONFIG_NAMESPACE + ".provider";
     private static final String KEY_FILESTORE_CONTAINER = FILESTORE_CONFIG_NAMESPACE + ".container";
+    private static final String KEY_FILESTORE_LOCATION = FILESTORE_CONFIG_NAMESPACE + ".location";
     private static final String KEY_FILESTORE_IDENTITY = FILESTORE_CONFIG_NAMESPACE + ".identity";
     private static final String KEY_FILESTORE_SECRET = FILESTORE_CONFIG_NAMESPACE + ".secret";
 
@@ -75,6 +77,7 @@ public class DefaultFileResourceContentStore
     private String provider;
     private String container;
     private Credentials credentials;
+    private String location;
     private Properties overrides = new Properties();
 
     // -------------------------------------------------------------------------
@@ -102,8 +105,12 @@ public class DefaultFileResourceContentStore
     public void init()
     {
         filestoreConfiguration = configurationProvider.getConfiguration().getProperties()
-            .entrySet().stream().filter( p -> ((String) p.getKey()).startsWith( FILESTORE_CONFIG_NAMESPACE ) )
-            .collect( Collectors.toMap( p -> (String) p.getKey(), p -> (String) p.getValue() ) );
+            .entrySet().stream().filter(
+                p -> ( (String) p.getKey() ).startsWith( FILESTORE_CONFIG_NAMESPACE ) )
+            .collect( Collectors.toMap(
+                p -> StringUtils.strip( (String) p.getKey() ),
+                p -> StringUtils.strip( (String) p.getValue() )
+            ) );
 
         provider = filestoreConfiguration.getOrDefault( KEY_FILESTORE_PROVIDER, DEFAULT_PROVIDER );
 
@@ -115,6 +122,8 @@ public class DefaultFileResourceContentStore
 
         container = filestoreConfiguration.getOrDefault( KEY_FILESTORE_CONTAINER, DEFAULT_CONTAINER );
 
+        location = filestoreConfiguration.getOrDefault( KEY_FILESTORE_LOCATION, null );
+
         switch ( provider )
         {
             case JCLOUDS_PROVIDER_KEY_FILESYSTEM:
@@ -123,6 +132,8 @@ public class DefaultFileResourceContentStore
             case JCLOUDS_PROVIDER_KEY_AWS_S3:
                 configureAWSS3Provider();
                 break;
+            default:
+                throw new IllegalArgumentException( "The filestore provider " + provider + " is not supported." );
         }
 
         super.init();
@@ -148,6 +159,12 @@ public class DefaultFileResourceContentStore
     protected String getContainer()
     {
         return container;
+    }
+
+    @Override
+    protected String getLocation()
+    {
+        return location;
     }
 
     @Override
