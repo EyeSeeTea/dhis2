@@ -133,6 +133,57 @@ public class OrganisationUnitServiceTest
     }
 
     @Test
+    public void testGetOrganisationUnitWithChildrenB()
+    {
+        OrganisationUnit unitA = createOrganisationUnit( 'A' );
+        OrganisationUnit unitB = createOrganisationUnit( 'B', unitA );
+        OrganisationUnit unitC = createOrganisationUnit( 'C', unitB );
+        OrganisationUnit unitD = createOrganisationUnit( 'D', unitB );
+        OrganisationUnit unitE = createOrganisationUnit( 'E', unitC );
+
+        int idA = organisationUnitService.addOrganisationUnit( unitA );
+        int idB = organisationUnitService.addOrganisationUnit( unitB );
+        int idC = organisationUnitService.addOrganisationUnit( unitC );
+        int idD = organisationUnitService.addOrganisationUnit( unitD );
+        organisationUnitService.addOrganisationUnit( unitE );
+
+        List<OrganisationUnit> actualA = new ArrayList<>( organisationUnitService.getOrganisationUnitWithChildren( idA ) );
+        List<OrganisationUnit> actualB = new ArrayList<>( organisationUnitService.getOrganisationUnitWithChildren( idB ) );
+        List<OrganisationUnit> actualC = new ArrayList<>( organisationUnitService.getOrganisationUnitWithChildren( idC ) );
+        List<OrganisationUnit> actualD = new ArrayList<>( organisationUnitService.getOrganisationUnitWithChildren( idD ) );
+
+        assertEquals( 5, actualA.size() );
+        assertEquals( 4, actualB.size() );
+        assertEquals( 2, actualC.size() );
+        assertEquals( 1, actualD.size() );
+        
+        assertEquals( Sets.newHashSet( unitB, unitC, unitD, unitE ), Sets.newHashSet( actualB ) );
+        assertEquals( Sets.newHashSet( unitC, unitE ), Sets.newHashSet( actualC ) );
+    }
+    
+    @Test
+    public void testGetOrganisationUnitLevel()
+    {
+        OrganisationUnit unitA = createOrganisationUnit( 'A' );
+        OrganisationUnit unitB = createOrganisationUnit( 'B', unitA );
+        OrganisationUnit unitC = createOrganisationUnit( 'C', unitB );
+        OrganisationUnit unitD = createOrganisationUnit( 'D', unitB );
+        OrganisationUnit unitE = createOrganisationUnit( 'E', unitC );
+
+        organisationUnitService.addOrganisationUnit( unitA );
+        organisationUnitService.addOrganisationUnit( unitB );
+        organisationUnitService.addOrganisationUnit( unitC );
+        organisationUnitService.addOrganisationUnit( unitD );
+        organisationUnitService.addOrganisationUnit( unitE );
+
+        assertEquals( 1, unitA.getLevel() );
+        assertEquals( 2, unitB.getLevel() );
+        assertEquals( 3, unitC.getLevel() );
+        assertEquals( 3, unitD.getLevel() );
+        assertEquals( 4, unitE.getLevel() );
+    }
+
+    @Test
     public void testGetOrganisationUnitWithChildrenMaxLevel()
     {
         OrganisationUnit unit1 = createOrganisationUnit( 'A' );
@@ -191,29 +242,6 @@ public class OrganisationUnitServiceTest
     }
 
     @Test
-    public void testGetOrganisationUnitWithChildrenWithCorrectLevel()
-    {
-        OrganisationUnit unit1 = createOrganisationUnit( 'A' );
-        OrganisationUnit unit2 = createOrganisationUnit( 'B', unit1 );
-        OrganisationUnit unit3 = createOrganisationUnit( 'C', unit2 );
-
-        int id1 = organisationUnitService.addOrganisationUnit( unit1 );
-        unit1.getChildren().add( unit2 );
-        int id2 = organisationUnitService.addOrganisationUnit( unit2 );
-        organisationUnitService.addOrganisationUnit( unit3 );
-
-        List<OrganisationUnit> actual1 = new ArrayList<>( organisationUnitService.getOrganisationUnitWithChildren( id1 ) );
-        List<OrganisationUnit> actual2 = new ArrayList<>( organisationUnitService.getOrganisationUnitWithChildren( id2 ) );
-
-        assertEquals( 1, actual1.get( 0 ).getLevel() );
-        assertEquals( 2, actual1.get( 1 ).getLevel() );
-        assertEquals( 3, actual1.get( 2 ).getLevel() );
-
-        assertEquals( 2, actual2.get( 0 ).getLevel() );
-        assertEquals( 3, actual2.get( 1 ).getLevel() );
-    }
-
-    @Test
     public void testGetOrganisationUnitsByFields()
     {
         String oU1Name = "OU1name";
@@ -245,28 +273,6 @@ public class OrganisationUnitServiceTest
 
         OrganisationUnit unit4 = organisationUnitService.getOrganisationUnitByCode( "foo" );
         assertNull( unit4 );
-    }
-
-    @Test
-    public void testGetOrganisationUnitGraph()
-    {
-        OrganisationUnit organisationUnit1 = createOrganisationUnit( 'A' );
-        OrganisationUnit organisationUnit2 = createOrganisationUnit( 'B', organisationUnit1 );
-        OrganisationUnit organisationUnit3 = createOrganisationUnit( 'C', organisationUnit2 );
-
-        int orgId1 = organisationUnitService.addOrganisationUnit( organisationUnit1 );
-        int orgId2 = organisationUnitService.addOrganisationUnit( organisationUnit2 );
-        int orgId3 = organisationUnitService.addOrganisationUnit( organisationUnit3 );
-
-        List<OrganisationUnit> graph = organisationUnitService.getOrganisationUnitBranch( orgId3 );
-        assertNotNull( graph );
-        assertEquals( 3, graph.size() );
-        OrganisationUnit orgUnit = graph.get( 0 );
-        assertEquals( orgId1, orgUnit.getId() );
-        orgUnit = graph.get( 1 );
-        assertEquals( orgId2, orgUnit.getId() );
-        orgUnit = graph.get( 2 );
-        assertEquals( orgId3, orgUnit.getId() );
     }
 
     @Test
@@ -336,9 +342,9 @@ public class OrganisationUnitServiceTest
         assertTrue( organisationUnitService.getOrganisationUnitsAtLevel( 1 ).size() == 2 );
         assertTrue( organisationUnitService.getOrganisationUnitsAtLevel( 3 ).size() == 3 );
         assertTrue( organisationUnitService.getNumberOfOrganisationalLevels() == 4 );
-        assertTrue( organisationUnitService.getOrganisationUnit( unit4.getId() ).getOrganisationUnitLevel() == 3 );
-        assertTrue( organisationUnitService.getOrganisationUnit( unit1.getId() ).getOrganisationUnitLevel() == 1 );
-        assertTrue( organisationUnitService.getOrganisationUnit( unit6.getId() ).getOrganisationUnitLevel() == 4 );
+        assertTrue( unit4.getLevel() == 3 );
+        assertTrue( unit1.getLevel() == 1 );
+        assertTrue( unit6.getLevel() == 4 );
     }
     
     @Test
@@ -412,21 +418,6 @@ public class OrganisationUnitServiceTest
         OrganisationUnit unitN = createOrganisationUnit( 'N', unitG );
         OrganisationUnit unitO = createOrganisationUnit( 'O', unitG );
 
-        unitA.getChildren().add( unitB );
-        unitA.getChildren().add( unitC );
-        unitB.getChildren().add( unitD );
-        unitB.getChildren().add( unitE );
-        unitC.getChildren().add( unitF );
-        unitC.getChildren().add( unitG );
-        unitD.getChildren().add( unitH );
-        unitD.getChildren().add( unitI );
-        unitE.getChildren().add( unitJ );
-        unitE.getChildren().add( unitK );
-        unitF.getChildren().add( unitL );
-        unitF.getChildren().add( unitM );
-        unitG.getChildren().add( unitN );
-        unitG.getChildren().add( unitO );
-
         organisationUnitService.addOrganisationUnit( unitA );
         organisationUnitService.addOrganisationUnit( unitB );
         organisationUnitService.addOrganisationUnit( unitC );
@@ -443,9 +434,9 @@ public class OrganisationUnitServiceTest
         organisationUnitService.addOrganisationUnit( unitN );
         organisationUnitService.addOrganisationUnit( unitO );
 
-        assertTrue( equals( organisationUnitService.getOrganisationUnitsAtLevel( 2, unitB ), unitB ) );
-        assertTrue( equals( organisationUnitService.getOrganisationUnitsAtLevel( 3, unitB ), unitD, unitE ) );
-        assertTrue( equals( organisationUnitService.getOrganisationUnitsAtLevel( 4, unitB ), unitH, unitI, unitJ, unitK ) );
+        assertEquals( Sets.newHashSet( unitB ), Sets.newHashSet( organisationUnitService.getOrganisationUnitsAtLevel( 2, unitB ) ) );
+        assertEquals( Sets.newHashSet( unitD, unitE ), Sets.newHashSet( organisationUnitService.getOrganisationUnitsAtLevel( 3, unitB ) ) );
+        assertEquals( Sets.newHashSet( unitH, unitI, unitJ, unitK ), Sets.newHashSet( organisationUnitService.getOrganisationUnitsAtLevel( 4, unitB ) ) );
 
         assertEquals( 2, unitB.getLevel() );
         assertEquals( 3, unitD.getLevel() );
@@ -509,12 +500,9 @@ public class OrganisationUnitServiceTest
         List<OrganisationUnit> unitsA = new ArrayList<>( Arrays.asList( unitB, unitC ) );
         List<OrganisationUnit> unitsB = new ArrayList<>( Arrays.asList( unitD, unitE ) );
 
-        OrganisationUnit nill = null;
-
-        assertTrue( equals( organisationUnitService.getOrganisationUnitsAtLevel( 3, unitsA ), unitD, unitE, unitF, unitG ) );
-        assertTrue( equals( organisationUnitService.getOrganisationUnitsAtLevel( 4, unitsA ), unitH, unitI, unitJ, unitK, unitL, unitM, unitN, unitO ) );
-        assertTrue( equals( organisationUnitService.getOrganisationUnitsAtLevel( 4, unitsB ), unitH, unitI, unitJ, unitK ) );
-        assertTrue( equals( organisationUnitService.getOrganisationUnitsAtLevel( 2, nill ), unitB, unitC ) );
+        assertEquals( Sets.newHashSet( unitD, unitE, unitF, unitG ), Sets.newHashSet( organisationUnitService.getOrganisationUnitsAtLevels( Sets.newHashSet( 3 ), unitsA ) ) );
+        assertEquals( Sets.newHashSet( unitH, unitI, unitJ, unitK, unitL, unitM, unitN, unitO ), Sets.newHashSet( organisationUnitService.getOrganisationUnitsAtLevels( Sets.newHashSet( 4 ), unitsA ) ) );
+        assertEquals( Sets.newHashSet( unitH, unitI, unitJ, unitK ), Sets.newHashSet( organisationUnitService.getOrganisationUnitsAtLevels( Sets.newHashSet( 4 ), unitsB ) ) );
 
         assertEquals( 2, unitB.getLevel() );
         assertEquals( 3, unitD.getLevel() );

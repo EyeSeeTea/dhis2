@@ -148,21 +148,38 @@ Ext.onReady( function() {
 				},
 				root: {
 					id: 'root'
-				}
+				},
+                style: {
+                    'normal': 'NORMAL',
+                    'compact': 'COMPACT',
+                    'xcompact': 'XCOMPACT',
+                    'comfortable': 'COMFORTABLE',
+                    'xcomfortable': 'XCOMFORTABLE',
+                    'small': 'SMALL',
+                    'xsmall': 'XSMALL',
+                    'large': 'LARGE',
+                    'xlarge': 'XLARGE',
+                    'space': 'SPACE',
+                    'comma': 'COMMA',
+                    'none': 'NONE',
+                    'default_': 'DEFAULT'
+                }
 			};
 
-			dimConf = conf.finals.dimension;
+            (function() {
+                dimConf = conf.finals.dimension;
 
-			dimConf.objectNameMap = {};
-			dimConf.objectNameMap[dimConf.data.objectName] = dimConf.data;
-			dimConf.objectNameMap[dimConf.indicator.objectName] = dimConf.indicator;
-			dimConf.objectNameMap[dimConf.dataElement.objectName] = dimConf.dataElement;
-			dimConf.objectNameMap[dimConf.operand.objectName] = dimConf.operand;
-			dimConf.objectNameMap[dimConf.dataSet.objectName] = dimConf.dataSet;
-			dimConf.objectNameMap[dimConf.category.objectName] = dimConf.category;
-			dimConf.objectNameMap[dimConf.period.objectName] = dimConf.period;
-			dimConf.objectNameMap[dimConf.organisationUnit.objectName] = dimConf.organisationUnit;
-			dimConf.objectNameMap[dimConf.dimension.objectName] = dimConf.dimension;
+                dimConf.objectNameMap = {};
+                dimConf.objectNameMap[dimConf.data.objectName] = dimConf.data;
+                dimConf.objectNameMap[dimConf.indicator.objectName] = dimConf.indicator;
+                dimConf.objectNameMap[dimConf.dataElement.objectName] = dimConf.dataElement;
+                dimConf.objectNameMap[dimConf.operand.objectName] = dimConf.operand;
+                dimConf.objectNameMap[dimConf.dataSet.objectName] = dimConf.dataSet;
+                dimConf.objectNameMap[dimConf.category.objectName] = dimConf.category;
+                dimConf.objectNameMap[dimConf.period.objectName] = dimConf.period;
+                dimConf.objectNameMap[dimConf.organisationUnit.objectName] = dimConf.organisationUnit;
+                dimConf.objectNameMap[dimConf.dimension.objectName] = dimConf.dimension;
+            })();
 
 			conf.period = {
 				periodTypes: [
@@ -234,26 +251,34 @@ Ext.onReady( function() {
 				multiselect_fill_reportingrates: 315
 			};
 
-			conf.report = {
-				digitGroupSeparator: {
-					'comma': ',',
-					'space': '&nbsp;'
-				},
-				displayDensity: {
-                    'xcompact': '2px',
-					'compact': '4px',
-					'normal': '6px',
-					'comfortable': '8px',
-                    'xcomfortable': '10px'
-				},
-				fontSize: {
-					'xsmall': '9px',
-					'small': '10px',
-					'normal': '11px',
-					'large': '12px',
-					'xlarge': '14px'
-				}
-			};
+			conf.style = {
+				displayDensity: {},
+				fontSize: {},
+				digitGroupSeparator: {}
+            };
+
+            (function() {
+                var map = conf.finals.style,
+                    displayDensity = conf.style.displayDensity,
+                    fontSize = conf.style.fontSize,
+                    digitGroupSeparator = conf.style.digitGroupSeparator;
+
+                displayDensity[map.xcompact] = '2px';
+                displayDensity[map.compact] = '4px';
+                displayDensity[map.normal] = '6px';
+                displayDensity[map.comfortable] = '8px';
+                displayDensity[map.xcomfortable] = '10px';
+
+                fontSize[map.xsmall] = '9px';
+                fontSize[map.small] = '10px';
+                fontSize[map.normal] = '11px';
+                fontSize[map.large] = '12px';
+                fontSize[map.xlarge] = '14px';
+
+                digitGroupSeparator[map.space] = '&nbsp;';
+                digitGroupSeparator[map.comma] = ',';
+                digitGroupSeparator[map.none] = '';
+            })();
 
             conf.url = {
                 analysisFields: [
@@ -392,11 +417,11 @@ Ext.onReady( function() {
 
 				// completedOnly: boolean (false)
 
-				// displayDensity: string ('normal') - 'compact', 'normal', 'comfortable'
+				// displayDensity: string ('NORMAL') - 'COMPACT', 'NORMAL', 'COMFORTABLE'
 
-				// fontSize: string ('normal') - 'small', 'normal', 'large'
+				// fontSize: string ('NORMAL') - 'SMALL', 'NORMAL', 'LARGE'
 
-				// digitGroupSeparator: string ('space') - 'none', 'comma', 'space'
+				// digitGroupSeparator: string ('SPACE') - 'NONE', 'COMMA', 'SPACE'
 
 				// legendSet: object
 
@@ -501,7 +526,7 @@ Ext.onReady( function() {
 					}
 
                     // in and aggregation type
-                    if (objectNameDimensionMap[dimConf.indicator.objectName] && config.aggregationType !== 'DEFAULT') {
+                    if (objectNameDimensionMap[dimConf.indicator.objectName] && config.aggregationType !== conf.finals.style.default_) {
                         webAlert('Indicators and aggregation types cannot be specified together', true);
                         return;
                     }
@@ -565,16 +590,16 @@ Ext.onReady( function() {
 					layout.showRowSubTotals = Ext.isBoolean(config.rowSubTotals) ? config.rowSubTotals : (Ext.isBoolean(config.showRowSubTotals) ? config.showRowSubTotals : true);
 					layout.showDimensionLabels = Ext.isBoolean(config.showDimensionLabels) ? config.showDimensionLabels : (Ext.isBoolean(config.showDimensionLabels) ? config.showDimensionLabels : true);
 					layout.hideEmptyRows = Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : false;
-                    layout.aggregationType = Ext.isString(config.aggregationType) ? config.aggregationType : 'DEFAULT';
+                    layout.aggregationType = Ext.isString(config.aggregationType) ? config.aggregationType : conf.finals.style.default_;
 					layout.dataApprovalLevel = Ext.isObject(config.dataApprovalLevel) && Ext.isString(config.dataApprovalLevel.id) ? config.dataApprovalLevel : null;
 
 					layout.showHierarchy = Ext.isBoolean(config.showHierarchy) ? config.showHierarchy : false;
 
                     layout.completedOnly = Ext.isBoolean(config.completedOnly) ? config.completedOnly : false;
 
-					layout.displayDensity = Ext.isString(config.displayDensity) && !Ext.isEmpty(config.displayDensity) ? config.displayDensity : 'normal';
-					layout.fontSize = Ext.isString(config.fontSize) && !Ext.isEmpty(config.fontSize) ? config.fontSize : 'normal';
-					layout.digitGroupSeparator = Ext.isString(config.digitGroupSeparator) && !Ext.isEmpty(config.digitGroupSeparator) ? config.digitGroupSeparator : 'space';
+					layout.displayDensity = Ext.isString(config.displayDensity) && !Ext.isEmpty(config.displayDensity) ? config.displayDensity : conf.finals.style.normal;
+					layout.fontSize = Ext.isString(config.fontSize) && !Ext.isEmpty(config.fontSize) ? config.fontSize : conf.finals.style.normal;
+					layout.digitGroupSeparator = Ext.isString(config.digitGroupSeparator) && !Ext.isEmpty(config.digitGroupSeparator) ? config.digitGroupSeparator : conf.finals.style.space;
 					layout.legendSet = Ext.isObject(config.legendSet) && Ext.isString(config.legendSet.id) ? config.legendSet : null;
 
 					layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
@@ -834,13 +859,13 @@ Ext.onReady( function() {
 			};
 
 			support.prototype.number.prettyPrint = function(number, separator) {
-				separator = separator || 'space';
+				separator = separator || conf.finals.style.space;
 
-				if (separator === 'none') {
+				if (separator === conf.finals.style.space.none) {
 					return number;
 				}
 
-				return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, conf.report.digitGroupSeparator[separator]);
+				return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, conf.style.digitGroupSeparator[separator]);
 			};
 
                 // date
@@ -1733,15 +1758,15 @@ Ext.onReady( function() {
 					delete layout.completedOnly;
 				}
 
-				if (layout.displayDensity === 'normal') {
+				if (layout.displayDensity === conf.finals.style.normal) {
 					delete layout.displayDensity;
 				}
 
-				if (layout.fontSize === 'normal') {
+				if (layout.fontSize === conf.finals.style.normal) {
 					delete layout.fontSize;
 				}
 
-				if (layout.digitGroupSeparator === 'space') {
+				if (layout.digitGroupSeparator === conf.finals.style.space) {
 					delete layout.digitGroupSeparator;
 				}
 
@@ -1753,11 +1778,11 @@ Ext.onReady( function() {
 					delete layout.sorting;
 				}
 
-				if (layout.aggregationType === 'DEFAULT') {
+				if (layout.aggregationType === conf.finals.style.default_) {
 					delete layout.aggregationType;
 				}
 
-				if (layout.dataApprovalLevel && layout.dataApprovalLevel.id === 'DEFAULT') {
+				if (layout.dataApprovalLevel && layout.dataApprovalLevel.id === conf.finals.style.default_) {
 					delete layout.dataApprovalLevel;
 				}
 
@@ -2145,7 +2170,7 @@ Ext.onReady( function() {
 				}
 
 				// data approval level
-				if (Ext.isObject(xLayout.dataApprovalLevel) && Ext.isString(xLayout.dataApprovalLevel.id) && xLayout.dataApprovalLevel.id !== 'DEFAULT') {
+				if (Ext.isObject(xLayout.dataApprovalLevel) && Ext.isString(xLayout.dataApprovalLevel.id) && xLayout.dataApprovalLevel.id !== conf.finals.style.default_) {
 					paramString += '&approvalLevel=' + xLayout.dataApprovalLevel.id;
 				}
 
@@ -3020,8 +3045,8 @@ Ext.onReady( function() {
                     var cls = 'pivot',
                         table;
 
-                    cls += xLayout.displayDensity && xLayout.displayDensity !== 'normal' ? ' displaydensity-' + xLayout.displayDensity : '';
-                    cls += xLayout.fontSize && xLayout.fontSize !== 'normal' ? ' fontsize-' + xLayout.fontSize : '';
+                    cls += xLayout.displayDensity && xLayout.displayDensity !== conf.finals.style.normal ? ' displaydensity-' + xLayout.displayDensity : '';
+                    cls += xLayout.fontSize && xLayout.fontSize !== conf.finals.style.normal ? ' fontsize-' + xLayout.fontSize : '';
 
 					table = '<table id="' + xLayout.tableUuid + '" class="' + cls + '">';
 
@@ -3444,57 +3469,72 @@ Ext.onReady( function() {
 			web.pivot.getData = function(layout, isUpdateGui) {
 				var xLayout,
 					paramString,
-                    success,
-                    failure,
-                    config = {};
+                    sortedParamString,
+                    onFailure;
 
 				if (!layout) {
 					return;
 				}
 
+                onFailure = function(r) {
+                    if (!appConfig.skipMask) {
+                        web.mask.hide(ns.app.centerRegion);
+                    }
+                };
+
 				xLayout = service.layout.getExtendedLayout(layout);
-				paramString = web.analytics.getParamString(xLayout, true);
+				paramString = web.analytics.getParamString(xLayout) + '&skipData=true';
+				sortedParamString = web.analytics.getParamString(xLayout, true) + '&skipMeta=true';
 
 				// mask
                 if (!appConfig.skipMask) {
                     web.mask.show(ns.app.centerRegion);
                 }
 
-                success = function(r) {
-                    var response = api.response.Response((r.responseText ? Ext.decode(r.responseText) : r));
+                ns.ajax({
+					url: init.contextPath + '/api/analytics.json' + paramString,
+					timeout: 60000,
+					headers: {
+						'Content-Type': 'application/json',
+						'Accepts': 'application/json'
+					},
+					disableCaching: false,
+					failure: function(r) {
+                        onFailure(r);
+					},
+					success: function(r) {
+                        var metaData = Ext.decode(r.responseText).metaData;
 
-                    if (!response) {
-                        web.mask.hide(ns.app.centerRegion);
-                        return;
+                        Ext.Ajax.request({
+                            url: init.contextPath + '/api/analytics.json' + sortedParamString,
+                            timeout: 60000,
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accepts': 'application/json'
+                            },
+                            disableCaching: false,
+                            failure: function(r) {
+                                onFailure(r);
+                            },
+                            success: function(r) {
+                                ns.app.dateCreate = new Date();
+
+                                var response = api.response.Response(Ext.decode(r.responseText));
+
+                                if (!response) {
+                                    onFailure();
+                                    return;
+                                }
+
+                                response.metaData = metaData;
+
+                                ns.app.paramString = sortedParamString;
+
+                                web.pivot.createTable(layout, response, null, isUpdateGui);
+                            }
+                        }, ns);
                     }
-
-                    // sync xLayout with response
-                    //xLayout = service.layout.getSyncronizedXLayout(xLayout, response);
-
-                    //if (!xLayout) {
-                        //web.mask.hide(ns.app.centerRegion);
-                        //return;
-                    //}
-
-                    ns.app.paramString = paramString;
-
-                    web.pivot.createTable(layout, response, null, isUpdateGui);
-                };
-
-                failure = function(r) {
-                    if (!appConfig.skipMask) {
-                        web.mask.hide(ns.app.centerRegion);
-                    }
-                };
-
-                config.url = init.contextPath + '/api/analytics.' + type + paramString;
-                config.disableCaching = false;
-                config.timeout = 60000;
-                config.headers = headers;
-                config.success = success;
-                config.failure = failure;
-
-                ns.ajax(config, ns);
+                }, ns);
 			};
 
 			web.pivot.createTable = function(layout, response, xResponse, isUpdateGui) {

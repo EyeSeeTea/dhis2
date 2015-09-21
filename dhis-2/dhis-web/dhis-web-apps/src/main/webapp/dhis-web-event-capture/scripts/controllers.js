@@ -79,6 +79,8 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
             $scope.eventCaptureLabel = $translate.instant('event_capture');
             $scope.programLabel = $translate.instant('program');
             $scope.searchLabel = $translate.instant('search');
+            $scope.findLabel = $translate.instant('find');
+            $scope.searchOusLabel = $translate.instant('locate_organisation_unit_by_name');
             $scope.yesLabel = $translate.instant('yes');
             $scope.noLabel = $translate.instant('no');
             
@@ -418,7 +420,13 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                 bodyText: 'unsaved_data_exists_proceed'
             };
 
-            ModalService.showModal({}, modalOptions).then(function(result){            
+            ModalService.showModal({}, modalOptions).then(function(result){
+                for(var i=0; i<$scope.dhis2Events.length; i++){
+                    if($scope.dhis2Events[i].event === $scope.currentEvent.event){
+                        $scope.dhis2Events[i] = $scope.currentEventOriginialValue;                        
+                        break;
+                    }
+                }                
                 $scope.showEventList();
             });
         }
@@ -878,6 +886,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
     };
     
     //listen for rule effect changes
+    $scope.warningMessages = [];
     $scope.$on('ruleeffectsupdated', function(event, args) {
         if($rootScope.ruleeffects[args.event]) {
             //Establish which event was affected:
@@ -890,9 +899,8 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                     }
                 });
             }
-            
-            angular.forEach($rootScope.ruleeffects[args.event], function(effect) {
-                if( effect.dataElement ) {
+            angular.forEach($rootScope.ruleeffects[args.event], function(effect) {                
+                if( effect.dataElement && effect.ineffect ) {
                     //in the data entry controller we only care about the "hidefield" actions
                     if(effect.action === "HIDEFIELD") {
                         if(effect.dataElement) {
@@ -916,6 +924,23 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                         else {
                             $log.warn("ProgramRuleAction " + effect.id + " is of type HIDEFIELD, bot does not have a dataelement defined");
                         }
+                    }
+                    if(effect.action === "SHOWERROR" && effect.dataElement.id){
+                        var dialogOptions = {
+                            headerText: 'validation_error',
+                            bodyText: effect.content
+                        };
+                        DialogService.showDialog({}, dialogOptions);
+            
+                        $scope.currentEvent[effect.dataElement.id] = $scope.currentEventOriginialValue[effect.dataElement.id];
+                    }
+                    if(effect.action === "SHOWWARNING"){
+                        $scope.warningMessages[effect.dataElement.id] = effect.content + '<br>';
+                        var dialogOptions = {
+                            headerText: 'validation_warning',
+                            bodyText: effect.content
+                        };
+                        DialogService.showDialog({}, dialogOptions);
                     }
                 }
             });
@@ -951,7 +976,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         }
     }; 
     
-    $scope.saveDatavalue = function(){
+    $scope.saveDatavalue = function(){        
         $scope.executeRules();
     };
     /*$scope.getInputNotifcationClass = function(id, custom, event){

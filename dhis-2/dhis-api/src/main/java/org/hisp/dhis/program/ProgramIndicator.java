@@ -32,7 +32,6 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.hisp.dhis.analytics.AggregationType;
-import org.hisp.dhis.analytics.EventOutputType;
 import org.hisp.dhis.common.BaseDimensionalObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DimensionType;
@@ -71,6 +70,9 @@ public class ProgramIndicator
     public static final String VAR_CURRENT_DATE = "current_date";
     public static final String VAR_VALUE_COUNT = "value_count";
     public static final String VAR_ZERO_POS_VALUE_COUNT = "zero_pos_value_count";
+    public static final String VAR_EVENT_COUNT = "event_count";
+    public static final String VAR_ENROLLMENT_COUNT = "enrollment_count";
+    public static final String VAR_TEI_COUNT = "tei_count";
 
     public static final String EXPRESSION_PREFIX_REGEXP = KEY_DATAELEMENT + "|" + KEY_ATTRIBUTE + "|" + KEY_PROGRAM_VARIABLE + "|" + KEY_CONSTANT;
     public static final String EXPRESSION_REGEXP = "(" + EXPRESSION_PREFIX_REGEXP + ")\\{([\\w\\_]+)" + SEPARATOR_ID + "?(\\w*)\\}";
@@ -93,8 +95,6 @@ public class ProgramIndicator
     private String expression;
 
     private String filter;
-
-    private EventOutputType eventOutputType;
 
     /**
      * Number of decimals to use for indicator value, null implies default.
@@ -199,19 +199,6 @@ public class ProgramIndicator
     public void setFilter( String filter )
     {
         this.filter = filter;
-    }
-
-    @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public EventOutputType getEventOutputType()
-    {
-        return eventOutputType;
-    }
-
-    public void setEventOutputType( EventOutputType eventOutputType )
-    {
-        this.eventOutputType = eventOutputType;
     }
 
     @JsonProperty

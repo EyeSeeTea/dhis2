@@ -1,4 +1,4 @@
-package org.hisp.dhis.system.objectmapper;
+package org.hisp.dhis.dashboard;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,32 +28,10 @@ package org.hisp.dhis.system.objectmapper;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import org.hisp.dhis.aggregation.AggregatedDataValue;
-
 /**
  * @author Lars Helge Overland
  */
-public class AggregatedOrgUnitDataValueRowMapper
-    extends AggregatedDataValueRowMapper
+public enum DashboardItemShape
 {
-    @Override
-    public AggregatedDataValue mapRow( ResultSet resultSet )
-        throws SQLException
-    {
-        final AggregatedDataValue value = super.mapRow( resultSet );
-        
-        value.setOrganisationUnitGroupId( resultSet.getInt( "organisationunitgroupid" ) );
-        
-        return value;
-    }
-    
-    @Override
-    public AggregatedDataValue mapRow( ResultSet resultSet, int rowNum )
-        throws SQLException
-    {
-        return this.mapRow( resultSet );
-    }
+    NORMAL, DOUBLE_WIDTH, FULL_WIDTH;
 }

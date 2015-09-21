@@ -30,6 +30,7 @@ package org.hisp.dhis.dxf2.csv;
 
 import com.csvreader.CsvReader;
 import org.apache.commons.lang3.StringUtils;
+import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.common.IdentifiableObject;
@@ -49,10 +50,13 @@ import org.hisp.dhis.expression.MissingValueStrategy;
 import org.hisp.dhis.expression.Operator;
 import org.hisp.dhis.option.Option;
 import org.hisp.dhis.option.OptionSet;
+import org.hisp.dhis.organisationunit.FeatureType;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.validation.Importance;
+import org.hisp.dhis.validation.RuleType;
 import org.hisp.dhis.validation.ValidationRule;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -195,7 +199,7 @@ public class DefaultCsvImportService
                 object.setDomainType( DataElementDomain.fromValue( domainType ) );
                 object.setValueType( ValueType.valueOf( getSafe( values, 7, ValueType.TEXT.toString(), 50 ) ) );
 
-                object.setAggregationOperator( getSafe( values, 8, DataElement.AGGREGATION_OPERATOR_SUM, 16 ) );
+                object.setAggregationType( AggregationType.valueOf( getSafe( values, 8, AggregationType.SUM.toString(), 50 ) ) );
                 String categoryComboUid = getSafe( values, 9, null, 11 );
                 object.setUrl( getSafe( values, 10, null, 255 ) );
                 object.setZeroIsSignificant( Boolean.valueOf( getSafe( values, 11, "false", null ) ) );
@@ -272,8 +276,8 @@ public class DefaultCsvImportService
                 setIdentifiableObject( object, values );
                 object.setDescription( getSafe( values, 3, null, 255 ) );
                 object.setInstruction( getSafe( values, 4, null, 255 ) );
-                object.setImportance( getSafe( values, 5, ValidationRule.IMPORTANCE_MEDIUM, 255 ) );
-                object.setRuleType( getSafe( values, 6, ValidationRule.RULE_TYPE_VALIDATION, 255 ) );
+                object.setImportance( Importance.valueOf( getSafe( values, 5, Importance.MEDIUM.toString(), 255 ) ) );
+                object.setRuleType( RuleType.valueOf( getSafe( values, 6, RuleType.VALIDATION.toString(), 255 ) ) );
                 object.setOperator( Operator.safeValueOf( getSafe( values, 7, Operator.equal_to.toString(), 255 ) ) );
                 object.setPeriodType( PeriodType.getByNameIgnoreCase( getSafe( values, 8, MonthlyPeriodType.NAME, 255 ) ) );
 
@@ -317,7 +321,7 @@ public class DefaultCsvImportService
                 object.setOpeningDate( getMediumDate( getSafe( values, 7, "1970-01-01", null ) ) );
                 object.setClosedDate( getMediumDate( getSafe( values, 8, null, null ) ) );
                 object.setComment( getSafe( values, 9, null, null ) );
-                object.setFeatureType( getSafe( values, 10, null, 50 ) );
+                object.setFeatureType( FeatureType.valueOf( getSafe( values, 10, null, 50 ) ) );
                 object.setCoordinates( getSafe( values, 11, null, null ) );
                 object.setUrl( getSafe( values, 12, null, 255 ) );
                 object.setContactPerson( getSafe( values, 13, null, 255 ) );

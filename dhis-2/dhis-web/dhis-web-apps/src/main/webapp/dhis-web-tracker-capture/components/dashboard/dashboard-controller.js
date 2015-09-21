@@ -31,6 +31,16 @@ trackerCapture.controller('DashboardController',
     $scope.userAuthority = AuthorityService.getUserAuthorities(SessionStorageService.get('USER_ROLES'));
     $scope.sortedTeiIds = CurrentSelection.getSortedTeiIds();    
     
+    //Labels
+    $scope.removeLabel = $translate.instant('remove');
+    $scope.expandLabel = $translate.instant('expand');
+    $scope.collapseLabel = $translate.instant('collapse');
+    $scope.noDataReportLabel = $translate.instant('no_data_report');
+    $scope.noRelationshipLabel = $translate.instant('no_relationship');
+    $scope.settingsLabel = $translate.instant('settings');
+    $scope.showHideWidgetsLabel = $translate.instant('show_hide_widgets');
+    $scope.notEnrolledLabel = $translate.instant('not_yet_enrolled_data_entry');
+    
     $scope.previousTeiExists = false;
     $scope.nextTeiExists = false;
     
@@ -161,14 +171,28 @@ trackerCapture.controller('DashboardController',
                         //get enrollments for the selected tei
                         EnrollmentService.getByEntity($scope.selectedTeiId).then(function(response){                    
                             var enrollments = angular.isObject(response) && response.enrollments ? response.enrollments : [];
-                            var selectedEnrollment = null;
-                            if(enrollments.length === 1 && enrollments[0].status === 'ACTIVE'){
-                                selectedEnrollment = enrollments[0];
+                            var selectedEnrollment = null, backupSelectedEnrollment = null;                            
+                            if(enrollments.length === 1 ){
+                                selectedEnrollment = enrollments[0];                               
                             }
-
+                            else{
+                                if( $scope.selectedProgramId ){
+                                    angular.forEach(enrollments, function(en){
+                                        if( en.program === $scope.selectedProgramId ){
+                                            if( en.status === 'ACTIVE'){
+                                                selectedEnrollment = en;
+                                            }
+                                            else{
+                                                backupSelectedEnrollment = en;
+                                            }
+                                        }
+                                    });
+                                }                                
+                            }                            
+                            selectedEnrollment = selectedEnrollment ? selectedEnrollment : backupSelectedEnrollment;
+                            
                             ProgramFactory.getAll().then(function(programs){
                                 $scope.programs = [];
-
                                 $scope.programNames = [];  
                                 $scope.programStageNames = [];        
 

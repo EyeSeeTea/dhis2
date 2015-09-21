@@ -1210,13 +1210,6 @@ public class DefaultAnalyticsService
                 }
             }
 
-            // -----------------------------------------------------------------
-            // Set level property
-            // -----------------------------------------------------------------
-
-            Collection<OrganisationUnit> typedOus = NameableObjectUtils.asTypedList( ous );
-            organisationUnitService.setOrganisationUnitLevel( typedOus );
-            
             List<NameableObject> orgUnits = new UniqueArrayList<>();
             List<OrganisationUnit> ousList = NameableObjectUtils.asTypedList( ous );
 
@@ -1284,6 +1277,35 @@ public class DefaultAnalyticsService
         }
 
         throw new IllegalQueryException( "Dimension identifier does not reference any dimension: " + dimension );
+    }
+
+    @Override
+    public List<OrganisationUnit> getUserOrgUnits( String userOrgUnit )
+    {
+        List<OrganisationUnit> units = new ArrayList<>();
+        
+        User currentUser = currentUserService.getCurrentUser();
+        
+        if ( userOrgUnit != null )
+        {
+            List<String> ous = DimensionalObjectUtils.getItemsFromParam( userOrgUnit );
+            
+            for ( String ou : ous )
+            {
+                OrganisationUnit unit = idObjectManager.get( OrganisationUnit.class, ou );
+                
+                if ( unit != null )
+                {
+                    units.add( unit );
+                }
+            }
+        }
+        else if ( currentUser != null && currentUser.hasOrganisationUnit() )
+        {
+            units = currentUser.getSortedOrganisationUnits();
+        }
+        
+        return units;
     }
 
     // -------------------------------------------------------------------------
@@ -1447,42 +1469,6 @@ public class DefaultAnalyticsService
         return metaData;
     }
     
-    /**
-     * Returns a list of user organisation units, looking first at the given user 
-     * org unit parameter, second at the organisation units associated with the
-     * current user. Returns an empty list if no organisation units are found.
-     * 
-     * @param userOrgUnit the user org unit parameter string.
-     * @return a list of organisation units.
-     */
-    private List<OrganisationUnit> getUserOrgUnits( String userOrgUnit )
-    {
-        List<OrganisationUnit> units = new ArrayList<>();
-        
-        User currentUser = currentUserService.getCurrentUser();
-        
-        if ( userOrgUnit != null )
-        {
-            List<String> ous = DimensionalObjectUtils.getItemsFromParam( userOrgUnit );
-            
-            for ( String ou : ous )
-            {
-                OrganisationUnit unit = idObjectManager.get( OrganisationUnit.class, ou );
-                
-                if ( unit != null )
-                {
-                    units.add( unit );
-                }
-            }
-        }
-        else if ( currentUser != null && currentUser.hasOrganisationUnit() )
-        {
-            units = currentUser.getSortedOrganisationUnits();
-        }
-        
-        return units;
-    }
-
     /**
      * Gets the number of available cores. Uses explicit number from system
      * setting if available. Detects number of cores from current server runtime

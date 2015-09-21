@@ -32,7 +32,7 @@ import java.sql.SQLException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.analytics.AggregationType;
 
 import com.ibatis.sqlmap.client.extensions.ParameterSetter;
 import com.ibatis.sqlmap.client.extensions.ResultGetter;
@@ -48,11 +48,11 @@ public class AggregationOperatorTypeHandler
     private static final String JDBC_SUM = "Sum";
     private static final String JDBC_AVERAGE = "Avg";
     private static final String JDBC_COUNT = "Count";
-    
-    private static final Integer NON_EXISTING = -1;
-    
+
+    //private static final Integer NON_EXISTING = -1;
+
     private static final Log log = LogFactory.getLog( AggregationOperatorTypeHandler.class );
-    
+
     // -------------------------------------------------------------------------
     // TypeHandlerCallback implementation
     // -------------------------------------------------------------------------
@@ -60,52 +60,54 @@ public class AggregationOperatorTypeHandler
     @Override
     public Object getResult( ResultGetter getter )
         throws SQLException
-    {   
+    {        
         String result = getter.getString();
-        
+
         if ( result != null )
         {
             if ( result.equalsIgnoreCase( JDBC_SUM ) )
             {
-                return DataElement.AGGREGATION_OPERATOR_SUM;
+                return AggregationType.SUM;
             }
             else if ( result.equalsIgnoreCase( JDBC_AVERAGE ) )
             {
-                return DataElement.AGGREGATION_OPERATOR_AVERAGE_SUM;
+                return AggregationType.AVERAGE;
             }
             else if ( result.equalsIgnoreCase( JDBC_COUNT ) )
             {
-                return DataElement.AGGREGATION_OPERATOR_COUNT;
+                return AggregationType.COUNT;
             }
             else
             {
                 log.warn( "Unknow aggregation operator, returning sum " + result );
                 
-                return DataElement.AGGREGATION_OPERATOR_SUM;
+                return AggregationType.SUM;
             }
         }
         else
         {
             log.warn( "Aggregation operator is null, returning sum " + result );
             
-            return DataElement.AGGREGATION_OPERATOR_SUM;
+            return AggregationType.SUM;
         }
     }
-    
+
     @Override
     public void setParameter( ParameterSetter setter, Object parameter )
         throws SQLException
     {
         // Not in use
     }
-    
+
     @Override
     public Object valueOf( String result )
     {
+        return result;
+        /*
         if ( result == null )
         {
             return NON_EXISTING;
-        }        
+        }
         else if ( result.equalsIgnoreCase( JDBC_SUM ) )
         {
             return DataElement.AGGREGATION_OPERATOR_SUM;
@@ -122,5 +124,6 @@ public class AggregationOperatorTypeHandler
         {
             throw new RuntimeException( "Illegal aggregation operator: " + result );
         }
+        */
     }
 }

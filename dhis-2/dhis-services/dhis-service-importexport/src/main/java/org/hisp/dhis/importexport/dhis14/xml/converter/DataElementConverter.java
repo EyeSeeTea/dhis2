@@ -28,6 +28,12 @@ package org.hisp.dhis.importexport.dhis14.xml.converter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.dataelement.DataElementCategoryCombo.DEFAULT_CATEGORY_COMBO_NAME;
+import static org.hisp.dhis.importexport.dhis14.util.Dhis14TypeHandler.convertBooleanToDhis14;
+
+import java.util.Collection;
+import java.util.Map;
+
 import org.amplecode.staxwax.reader.XMLReader;
 import org.amplecode.staxwax.writer.XMLWriter;
 import org.hisp.dhis.dataelement.DataElement;
@@ -43,13 +49,6 @@ import org.hisp.dhis.importexport.analysis.ImportAnalyser;
 import org.hisp.dhis.importexport.dhis14.util.Dhis14DateUtil;
 import org.hisp.dhis.importexport.dhis14.util.Dhis14ParsingUtils;
 import org.hisp.dhis.importexport.importer.DataElementImporter;
-import org.hisp.dhis.importexport.mapping.NameMappingUtil;
-
-import java.util.Collection;
-import java.util.Map;
-
-import static org.hisp.dhis.dataelement.DataElementCategoryCombo.DEFAULT_CATEGORY_COMBO_NAME;
-import static org.hisp.dhis.importexport.dhis14.util.Dhis14TypeHandler.*;
 
 /**
  * @author Lars Helge Overland
@@ -97,7 +96,7 @@ public class DataElementConverter
 
     private static final String FIELD_AGGREGATION_START_LEVEL = "AggregateStartLevel";
 
-    private static final String FIELD_AGGREGATION_OPERATOR = "AggregateOperator";
+    //private static final String FIELD_AGGREGATION_OPERATOR = "AggregateOperator";
 
     private static final String FIELD_SELECTED = "Selected";
 
@@ -224,8 +223,11 @@ public class DataElementConverter
                 writer.writeElement( FIELD_CALCULATED_VALID_TO, "" );
                 writer.writeElement( FIELD_SAVE_CALCULATED, convertBooleanToDhis14( false ) );
                 writer.writeElement( FIELD_AGGREGATION_START_LEVEL, String.valueOf( AGG_START_LEVEL ) );
+
+                /*
                 writer.writeElement( FIELD_AGGREGATION_OPERATOR,
                     convertAggregationOperatorToDhis14( object.getAggregationOperator() ) );
+                */
                 writer.writeElement( FIELD_SELECTED, String.valueOf( 0 ) );
                 writer.writeElement( FIELD_LAST_USER, String.valueOf( 1 ) );
                 writer.writeElement( FIELD_LAST_UPDATED, Dhis14DateUtil.getDateString( object.getLastUpdated() ) );
@@ -247,8 +249,10 @@ public class DataElementConverter
 
                 writer.closeElement();
 
+                /*
                 NameMappingUtil.addDataElementAggregationOperatorMapping( object.getId(),
                     object.getAggregationOperator() );
+                    */
             }
         }
     }
@@ -273,7 +277,7 @@ public class DataElementConverter
         element.setDomainType( DataElementDomain.AGGREGATE );
         element.setZeroIsSignificant( false );
         // element.setType( Dhis14ObjectMappingUtil.getDataElementTypeMap().get(Integer.parseInt( values.get( FIELD_DATA_TYPE ) ) ) );
-        element.setAggregationOperator( convertAggregationOperatorFromDhis14( values.get( FIELD_AGGREGATION_OPERATOR ) ) );
+        // element.setAggregationOperator( convertAggregationOperatorFromDhis14( values.get( FIELD_AGGREGATION_OPERATOR ) ) );
         element.setLastUpdated( Dhis14DateUtil.getDate( values.get( FIELD_LAST_UPDATED ) ) );
 
         if ( values.get( FIELD_CALCULATED ).equals( "0" ) ) // Ignore calculated

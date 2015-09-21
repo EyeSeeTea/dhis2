@@ -42,6 +42,8 @@ import org.hisp.dhis.system.startup.AbstractStartupRoutine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.collect.Lists;
+
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -840,8 +842,9 @@ public class TableAlteror
         executeSql( "update dataelementcategory set datadimensiontype = 'ATTRIBUTE' where dimensiontype = 'attribute'" );
         executeSql( "update dataelementcategory set datadimensiontype = 'DISAGGREGATION' where datadimensiontype is null" );
         executeSql( "alter table dataelementcategory drop column dimensiontype" );
-        executeSql( "update categoryoptiongroupset set datadimensiontype = 'DISAGGREGATION' where datadimensiontype is null" );
-        executeSql( "update categoryoptiongroup set datadimensiontype = 'DISAGGREGATION' where datadimensiontype is null" );
+        
+        executeSql( "update categoryoptiongroupset set datadimensiontype = 'ATTRIBUTE' where datadimensiontype is null" );
+        executeSql( "update categoryoptiongroup set datadimensiontype = 'ATTRIBUTE' where datadimensiontype is null" );
 
         executeSql( "update reporttable set completedonly = false where completedonly is null" );
         executeSql( "update chart set completedonly = false where completedonly is null" );
@@ -870,10 +873,8 @@ public class TableAlteror
         executeSql( "drop table aggregatedorgunitindicatorvalue" );
         executeSql( "drop table aggregatedorgunitindicatorvalue_temp" );
         
-        executeSql( "update report set type='JASPER_REPORT_TABLE' where type='jasperReportTable'" );
-        executeSql( "update report set type='JASPER_JDBC' where type='jasperJdbc'" );
-        executeSql( "update report set type='HTML' where type='html'" );
-
+        updateEnums();
+        
         oauth2();
 
         upgradeDataValuesWithAttributeOptionCombo();
@@ -887,6 +888,8 @@ public class TableAlteror
         upgradeAggregationType( "chart" );
 
         updateRelativePeriods();
+        updateNameColumnLengths();
+        
         organisationUnitService.updatePaths();
 
         log.info( "Tables updated" );
@@ -916,6 +919,73 @@ public class TableAlteror
             ")" );
     }
 
+    private void updateEnums()
+    {
+        executeSql( "update report set type='JASPER_REPORT_TABLE' where type='jasperReportTable'" );
+        executeSql( "update report set type='JASPER_JDBC' where type='jasperJdbc'" );
+        executeSql( "update report set type='HTML' where type='html'" );
+        
+        executeSql( "update dashboarditem set shape='NORMAL' where shape ='normal'" );
+        executeSql( "update dashboarditem set shape='DOUBLE_WIDTH' where shape ='double_width'" );
+        executeSql( "update dashboarditem set shape='FULL_WIDTH' where shape ='full_width'" );
+        
+        executeSql( "update reporttable set displaydensity='COMFORTABLE' where displaydensity='comfortable'" );
+        executeSql( "update reporttable set displaydensity='NORMAL' where displaydensity='normal'" );
+        executeSql( "update reporttable set displaydensity='COMPACT' where displaydensity='compact'" );
+
+        executeSql( "update eventreport set displaydensity='COMFORTABLE' where displaydensity='comfortable'" );
+        executeSql( "update eventreport set displaydensity='NORMAL' where displaydensity='normal'" );
+        executeSql( "update eventreport set displaydensity='COMPACT' where displaydensity='compact'" );
+
+        executeSql( "update reporttable set fontsize='LARGE' where fontsize='large'" );
+        executeSql( "update reporttable set fontsize='NORMAL' where fontsize='normal'" );
+        executeSql( "update reporttable set fontsize='SMALL' where fontsize='small'" );
+
+        executeSql( "update eventreport set fontsize='LARGE' where fontsize='large'" );
+        executeSql( "update eventreport set fontsize='NORMAL' where fontsize='normal'" );
+        executeSql( "update eventreport set fontsize='SMALL' where fontsize='small'" );
+        
+        executeSql( "update reporttable set digitgroupseparator='NONE' where digitgroupseparator='none'" );
+        executeSql( "update reporttable set digitgroupseparator='SPACE' where digitgroupseparator='space'" );
+        executeSql( "update reporttable set digitgroupseparator='COMMA' where digitgroupseparator='comma'" );
+
+        executeSql( "update eventreport set digitgroupseparator='NONE' where digitgroupseparator='none'" );
+        executeSql( "update eventreport set digitgroupseparator='SPACE' where digitgroupseparator='space'" );
+        executeSql( "update eventreport set digitgroupseparator='COMMA' where digitgroupseparator='comma'" );
+
+        executeSql( "update eventreport set datatype='AGGREGATED_VALUES' where datatype='aggregated_values'" );
+        executeSql( "update eventreport set datatype='EVENTS' where datatype='individual_cases'" );
+
+        executeSql( "update chart set type='COLUMN' where type='column'" );
+        executeSql( "update chart set type='STACKED_COLUMN' where type='stackedcolumn'" );
+        executeSql( "update chart set type='STACKED_COLUMN' where type='stackedColumn'" );
+        executeSql( "update chart set type='BAR' where type='bar'" );
+        executeSql( "update chart set type='STACKED_BAR' where type='stackedbar'" );
+        executeSql( "update chart set type='STACKED_BAR' where type='stackedBar'" );
+        executeSql( "update chart set type='LINE' where type='line'" );
+        executeSql( "update chart set type='AREA' where type='area'" );
+        executeSql( "update chart set type='PIE' where type='pie'" );
+        executeSql( "update chart set type='RADAR' where type='radar'" );
+        executeSql( "update chart set type='GAUGE' where type='gauge'" );
+
+        executeSql( "update eventchart set type='COLUMN' where type='column'" );
+        executeSql( "update eventchart set type='STACKED_COLUMN' where type='stackedcolumn'" );
+        executeSql( "update eventchart set type='STACKED_COLUMN' where type='stackedColumn'" );
+        executeSql( "update eventchart set type='BAR' where type='bar'" );
+        executeSql( "update eventchart set type='STACKED_BAR' where type='stackedbar'" );
+        executeSql( "update eventchart set type='STACKED_BAR' where type='stackedBar'" );
+        executeSql( "update eventchart set type='LINE' where type='line'" );
+        executeSql( "update eventchart set type='AREA' where type='area'" );
+        executeSql( "update eventchart set type='PIE' where type='pie'" );
+        executeSql( "update eventchart set type='RADAR' where type='radar'" );
+        executeSql( "update eventchart set type='GAUGE' where type='gauge'" );
+        
+        executeSql( "update dataentryform set style='COMFORTABLE' where style='comfortable'" );
+        executeSql( "update dataentryform set style='NORMAL' where style='regular'" );
+        executeSql( "update dataentryform set style='COMPACT' where style='compact'" );
+        executeSql( "update dataentryform set style='NONE' where style='none'" );
+    }
+    
     private void upgradeAggregationType( String table )
     {
         executeSql( "update " + table + " set aggregationtype='SUM' where aggregationtype='sum'" );
@@ -949,6 +1019,20 @@ public class TableAlteror
         executeSql( "update relativeperiods set lastquarter = false where lastquarter is null" );
         executeSql( "update relativeperiods set lastsixmonth = false where lastsixmonth is null" );
         executeSql( "update relativeperiods set lastweek = false where lastweek is null" );
+    }
+    
+    private void updateNameColumnLengths()
+    {
+        List<String> tables = Lists.newArrayList( "user", "usergroup", "organisationunit", "orgunitgroup", "orgunitgroupset", 
+            "section", "dataset", "sqlview", "dataelement", "dataelementgroup", "dataelementgroupset", "categorycombo", 
+            "dataelementcategory", "indicator", "indicatorgroup", "indicatorgroupset", "indicatortype", 
+            "validationrule", "validationrulegroup", "constant", "attribute", "attributegroup",
+            "program", "programstage", "programindicator", "trackedentity", "trackedentityattribute" );
+        
+        for ( String table : tables )
+        {
+            executeSql( "alter table " + table + " alter column name type character varying(230)" );
+        }
     }
 
     private void upgradeDataValuesWithAttributeOptionCombo()

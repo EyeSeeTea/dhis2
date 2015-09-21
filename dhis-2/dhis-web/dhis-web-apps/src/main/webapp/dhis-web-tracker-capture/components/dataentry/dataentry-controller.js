@@ -7,6 +7,7 @@ trackerCapture.controller('DataEntryController',
                 $filter,
                 $log,
                 $timeout,
+                $translate,
                 Paginator,
                 DateUtils,
                 EventUtils,
@@ -39,6 +40,11 @@ trackerCapture.controller('DataEntryController',
     $scope.errorMessages = {};
     $scope.warningMessages = {};
     $scope.tableMaxNumberOfDataElements = 10;
+    
+    //Labels
+    $scope.dataElementLabel = $translate.instant('data_element');
+    $scope.valueLabel = $translate.instant('value');
+    $scope.providedElsewhereLabel = $translate.instant('provided_elsewhere');
     
 
     var userProfile = SessionStorageService.get('USER_PROFILE');
@@ -146,8 +152,17 @@ trackerCapture.controller('DataEntryController',
         }
     };
 
-    $scope.executeRules = function () {        
-        var evs = {all: $scope.allEventsSorted, byStage: $scope.eventsByStageAsc};
+    $scope.executeRules = function () {
+        //$scope.allEventsSorted cannot be used, as it is not reflecting updates that happened within the current session
+        var allSorted = [];
+        for(var ps = 0; ps < $scope.programStages.length; ps++ ) {
+            for(var e = 0; e < $scope.eventsByStageAsc[$scope.programStages[ps].id].length; e++) {
+                allSorted.push($scope.eventsByStageAsc[$scope.programStages[ps].id][e]);
+            }
+        }
+        allSorted = orderByFilter(allSorted, '-sortingDate').reverse();
+        
+        var evs = {all: allSorted, byStage: $scope.eventsByStageAsc};
         var flag = {debug: true, verbose: false};
         //If the events is displayed in a table, it is necessary to run the rules for all visible events.
         if ($scope.currentStage.displayEventsInTable) {
@@ -438,12 +453,12 @@ trackerCapture.controller('DataEntryController',
         });
 
         $scope.customForm = CustomFormService.getForProgramStage($scope.currentStage, $scope.prStDes);
-        $scope.displayCustomForm = "default";
+        $scope.displayCustomForm = "DEFAULT";
         if ($scope.customForm) {
-            $scope.displayCustomForm = "custom";
+            $scope.displayCustomForm = "CUSTOM";
         }
         else if ($scope.currentStage.displayEventsInTable) {
-            $scope.displayCustomForm = "table";
+            $scope.displayCustomForm = "TABLE";
         }
 
         $scope.currentEventOriginal = angular.copy($scope.currentEvent);

@@ -46,7 +46,7 @@ public interface OrganisationUnitService
 {
     String ID = OrganisationUnitService.class.getName();
 
-    final int MAX_LIMIT = 500;
+    int MAX_LIMIT = 500;
 
     // -------------------------------------------------------------------------
     // OrganisationUnit
@@ -206,20 +206,6 @@ public interface OrganisationUnitService
     List<OrganisationUnit> getRootOrganisationUnits();
 
     /**
-     * Returns the level of the organisation unit with the given identifier.
-     *
-     * @return the level of the organisation unit with the given identifier.
-     */
-    int getLevelOfOrganisationUnit( int id );
-
-    /**
-     * Returns the level of the organisation unit (whether loaded or not.)
-     *
-     * @return the level of the organisation unit with the given identifier.
-     */
-    int getLevelOfOrganisationUnit( OrganisationUnit unit );
-
-    /**
      * Returns the intersection of the members of the given OrganisationUnitGroups
      * and the OrganisationUnits which are children of the given collection of
      * parents in the hierarchy. If the given parent collection is null or empty,
@@ -307,18 +293,6 @@ public interface OrganisationUnitService
     List<OrganisationUnit> getOrganisationUnitsWithChildren( Collection<String> uids, Integer maxLevels );
 
     /**
-     * Returns the branch of OrganisationUnits from a root to a given
-     * OrganisationUnit. Both root and target OrganisationUnits are included in
-     * the returned collection.
-     *
-     * @param id the id of the OrganisationUnit to trace upwards from.
-     * @return the list of OrganisationUnits from a root to the given
-     * OrganisationUnit, or an empty list if the given OrganisationUnit
-     * doesn't exist.
-     */
-    List<OrganisationUnit> getOrganisationUnitBranch( int id );
-
-    /**
      * Returns all OrganisationUnits at a given hierarchical level. The root
      * OrganisationUnits are at level 1.
      *
@@ -354,19 +328,6 @@ public interface OrganisationUnitService
      * @throws IllegalArgumentException if the level is illegal.
      */
     List<OrganisationUnit> getOrganisationUnitsAtLevels( Collection<Integer> levels, Collection<OrganisationUnit> parents );
-
-    /**
-     * Returns all OrganisationUnits which are children of the given units and are
-     * at the given hierarchical level. The root OrganisationUnits are at level 1.
-     * If parents is null, then all OrganisationUnits at the given level are returned.
-     *
-     * @param level  the hierarchical level.
-     * @param parent the parent units.
-     * @return all OrganisationUnits which are children of the given units and are
-     * at the given hierarchical level.
-     * @throws IllegalArgumentException if the level is illegal.
-     */
-    List<OrganisationUnit> getOrganisationUnitsAtLevel( int level, Collection<OrganisationUnit> parents );
 
     /**
      * Returns the number of levels in the OrganisationUnit hierarchy.
@@ -435,14 +396,6 @@ public interface OrganisationUnitService
      */
     boolean isInUserHierarchy( String uid, Set<OrganisationUnit> organisationUnits );
     
-    /**
-     * Sets the transient level property of each organisation unit in the given
-     * list. Fetches the organisation unit from the database.
-     * 
-     * @param organisationUnits the collection of organisation units.
-     */
-    void setOrganisationUnitLevel( Collection<OrganisationUnit> organisationUnits );
-
     // -------------------------------------------------------------------------
     // OrganisationUnitHierarchy
     // -------------------------------------------------------------------------

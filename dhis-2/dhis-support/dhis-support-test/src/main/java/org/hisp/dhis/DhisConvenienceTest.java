@@ -30,7 +30,9 @@ package org.hisp.dhis;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.chart.Chart;
+import org.hisp.dhis.chart.ChartType;
 import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.ValueType;
@@ -90,6 +92,7 @@ import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserCredentials;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserService;
+import org.hisp.dhis.validation.RuleType;
 import org.hisp.dhis.validation.ValidationCriteria;
 import org.hisp.dhis.validation.ValidationRule;
 import org.hisp.dhis.validation.ValidationRuleGroup;
@@ -110,6 +113,7 @@ import javax.xml.namespace.NamespaceContext;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringReader;
@@ -354,7 +358,7 @@ public abstract class DhisConvenienceTest
         dataElement.setDescription( "DataElementDescription" + uniqueCharacter );
         dataElement.setValueType( ValueType.INTEGER );
         dataElement.setDomainType( DataElementDomain.AGGREGATE );
-        dataElement.setAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM );
+        dataElement.setAggregationType( AggregationType.SUM );
 
         return dataElement;
     }
@@ -374,7 +378,7 @@ public abstract class DhisConvenienceTest
         dataElement.setDescription( "DataElementDescription" + uniqueCharacter );
         dataElement.setValueType( valueType );
         dataElement.setDomainType( DataElementDomain.AGGREGATE );
-        dataElement.setAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM );
+        dataElement.setAggregationType( AggregationType.SUM );
 
         return dataElement;
     }
@@ -394,33 +398,33 @@ public abstract class DhisConvenienceTest
     }
 
     /**
-     * @param uniqueCharacter     A unique character to identify the object.
-     * @param valueType           The value type.
-     * @param aggregationOperator The aggregation operator.
+     * @param uniqueCharacter A unique character to identify the object.
+     * @param valueType       The value type.
+     * @param aggregationType The aggregation type.
      */
-    public static DataElement createDataElement( char uniqueCharacter, ValueType valueType, String aggregationOperator )
+    public static DataElement createDataElement( char uniqueCharacter, ValueType valueType, AggregationType aggregationType )
     {
         DataElement dataElement = createDataElement( uniqueCharacter );
         dataElement.setValueType( valueType );
         dataElement.setDomainType( DataElementDomain.AGGREGATE );
-        dataElement.setAggregationOperator( aggregationOperator );
+        dataElement.setAggregationType( aggregationType );
 
         return dataElement;
     }
 
     /**
-     * @param uniqueCharacter     A unique character to identify the object.
-     * @param valueType           The value type.
-     * @param aggregationOperator The aggregation operator.
-     * @param categoryCombo       The category combo.
+     * @param uniqueCharacter A unique character to identify the object.
+     * @param valueType       The value type.
+     * @param aggregationType The aggregation type.
+     * @param categoryCombo   The category combo.
      */
-    public static DataElement createDataElement( char uniqueCharacter, ValueType valueType, String aggregationOperator,
+    public static DataElement createDataElement( char uniqueCharacter, ValueType valueType, AggregationType aggregationType,
         DataElementCategoryCombo categoryCombo )
     {
         DataElement dataElement = createDataElement( uniqueCharacter );
         dataElement.setValueType( valueType );
         dataElement.setDomainType( DataElementDomain.AGGREGATE );
-        dataElement.setAggregationOperator( aggregationOperator );
+        dataElement.setAggregationType( aggregationType );
         dataElement.setCategoryCombo( categoryCombo );
 
         return dataElement;
@@ -433,8 +437,7 @@ public abstract class DhisConvenienceTest
      *                                      category options.
      * @return DataElementCategoryOptionCombo
      */
-    public static DataElementCategoryCombo createCategoryCombo( char categoryComboUniqueIdentifier,
-        DataElementCategory... categories )
+    public static DataElementCategoryCombo createCategoryCombo( char categoryComboUniqueIdentifier, DataElementCategory... categories )
     {
         DataElementCategoryCombo categoryCombo = new DataElementCategoryCombo( "CategoryCombo" + categoryComboUniqueIdentifier, new ArrayList<>() );
         categoryCombo.setAutoFields();
@@ -980,7 +983,7 @@ public abstract class DhisConvenienceTest
 
         validationRule.setName( "MonitoringRule" + uniqueCharacter );
         validationRule.setDescription( "Description" + uniqueCharacter );
-        validationRule.setRuleType( ValidationRule.RULE_TYPE_SURVEILLANCE );
+        validationRule.setRuleType( RuleType.SURVEILLANCE );
         validationRule.setOperator( operator );
         validationRule.setLeftSide( leftSide );
         validationRule.setRightSide( rightSide );
@@ -1075,14 +1078,23 @@ public abstract class DhisConvenienceTest
 
         return legendSet;
     }
+    
+    public static Chart createChart( char uniqueCharacter )
+    {
+        Chart chart = new Chart();
+        chart.setAutoFields();
+        chart.setName( "Chart" + uniqueCharacter );
+        chart.setType( ChartType.COLUMN );
+        
+        return chart;
+        
+    }
 
     public static Chart createChart( char uniqueCharacter, List<Indicator> indicators, List<Period> periods,
         List<OrganisationUnit> units )
     {
-        Chart chart = new Chart();
-        chart.setAutoFields();
+        Chart chart = createChart( uniqueCharacter );
 
-        chart.setName( "Chart" + uniqueCharacter );
         chart.addAllDataDimensionItems( indicators );
         chart.setPeriods( periods );
         chart.setOrganisationUnits( units );

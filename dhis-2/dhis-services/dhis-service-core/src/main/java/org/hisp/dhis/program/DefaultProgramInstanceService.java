@@ -241,14 +241,6 @@ public class DefaultProgramInstanceService
             params.setOrganisationUnits( organisationUnits );
         }
 
-        for ( OrganisationUnit organisationUnit : params.getOrganisationUnits() )
-        {
-            if ( !organisationUnit.hasLevel() )
-            {
-                organisationUnit.setLevel( organisationUnitService.getLevelOfOrganisationUnit( organisationUnit.getId() ) );
-            }
-        }
-
         if ( !params.isPaging() && !params.isSkipPaging() )
         {
             params.setDefaultPaging();
@@ -281,14 +273,6 @@ public class DefaultProgramInstanceService
             }
 
             params.setOrganisationUnits( organisationUnits );
-        }
-
-        for ( OrganisationUnit organisationUnit : params.getOrganisationUnits() )
-        {
-            if ( !organisationUnit.hasLevel() )
-            {
-                organisationUnit.setLevel( organisationUnitService.getLevelOfOrganisationUnit( organisationUnit.getId() ) );
-            }
         }
 
         params.setSkipPaging( true );
@@ -501,17 +485,6 @@ public class DefaultProgramInstanceService
 
         programInstance.setStatus( ProgramInstance.STATUS_ACTIVE );
         addProgramInstance( programInstance );
-
-        // ---------------------------------------------------------------------
-        // Generate event if program is single event
-        // ---------------------------------------------------------------------
-
-        if ( program.isRegistration() && program.isSingleProgramStage() )
-        {
-            ProgramStage programStage = program.getProgramStages().iterator().next();
-            programStageInstanceService.createProgramStageInstance( programInstance, programStage, enrollmentDate,
-                incidentDate, organisationUnit );
-        }
 
         // -----------------------------------------------------------------
         // Send messages after enrolling in program

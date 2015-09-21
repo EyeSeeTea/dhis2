@@ -28,23 +28,21 @@ package org.hisp.dhis.web.ohie.fred.webapi.v1.utils;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.web.ohie.fred.webapi.v1.controller.FacilityController;
-import org.hisp.dhis.web.ohie.fred.webapi.v1.domain.Facility;
-import org.hisp.dhis.web.ohie.fred.webapi.v1.domain.Identifier;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.convert.converter.Converter;
-import org.springframework.stereotype.Component;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
+import org.hisp.dhis.web.ohie.fred.webapi.v1.controller.FacilityController;
+import org.hisp.dhis.web.ohie.fred.webapi.v1.domain.Facility;
+import org.hisp.dhis.web.ohie.fred.webapi.v1.domain.Identifier;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -52,9 +50,6 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 @Component
 public class OrganisationUnitToFacilityConverter implements Converter<OrganisationUnit, Facility>
 {
-    @Autowired
-    private OrganisationUnitService organisationUnitService;
-
     @Override
     public Facility convert( OrganisationUnit organisationUnit )
     {
@@ -72,8 +67,7 @@ public class OrganisationUnitToFacilityConverter implements Converter<Organisati
         {
         }
 
-        if ( organisationUnit.getFeatureType() != null && organisationUnit.getFeatureType().equalsIgnoreCase( "POINT" )
-            && organisationUnit.getCoordinates() != null )
+        if ( organisationUnit.getFeatureType() != null && organisationUnit.isPoint() && organisationUnit.getCoordinates() != null )
         {
             try
             {
@@ -126,7 +120,7 @@ public class OrganisationUnitToFacilityConverter implements Converter<Organisati
             facility.getProperties().put( "dataSets", dataSets );
         }
 
-        facility.getProperties().put( "level", organisationUnit.getOrganisationUnitLevel() );
+        facility.getProperties().put( "level", organisationUnit.getLevel() );
 
         for ( OrganisationUnitGroup group : organisationUnit.getGroups() )
         {

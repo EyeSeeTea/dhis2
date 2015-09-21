@@ -1,4 +1,4 @@
-package org.hisp.dhis.system.objectmapper;
+package org.hisp.dhis.fileresource;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,32 +28,22 @@ package org.hisp.dhis.system.objectmapper;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import org.hisp.dhis.aggregation.AggregatedIndicatorValue;
+import com.google.common.io.ByteSource;
 
 /**
- * @author Lars Helge Overland
+ * @author Halvdan Hoem Grelland
  */
-public class AggregatedOrgUnitIndicatorValueRowMapper
-    extends AggregatedIndicatorValueRowMapper
+public interface FileResourceService
 {
-    @Override
-    public AggregatedIndicatorValue mapRow( ResultSet resultSet )
-        throws SQLException
-    {
-        final AggregatedIndicatorValue value = super.mapRow( resultSet );
-        
-        value.setOrganisationUnitGroupId( resultSet.getInt( "organisationunitgroupid" ) );
-        
-        return value;
-    }
+    FileResource getFileResource( String uid );
     
-    @Override
-    public AggregatedIndicatorValue mapRow( ResultSet resultSet, int rowNum )
-        throws SQLException
-    {
-        return this.mapRow( resultSet );
-    }
+    String saveFileResource( FileResource fileResource, ByteSource content );
+    
+    void deleteFileResource( String uid );
+    
+    ByteSource getFileResourceContent( FileResource fileResource );
+    
+    boolean fileResourceExists( String uid );
+    
+    void updateFileResource( FileResource fileResource );
 }

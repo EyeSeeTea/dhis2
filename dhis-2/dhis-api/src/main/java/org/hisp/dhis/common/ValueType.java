@@ -59,6 +59,7 @@ public enum ValueType
     TRACKER_ASSOCIATE( TrackedEntityInstance.class ),
     OPTION_SET( String.class ),
     USERNAME( String.class ),
+    FILE_RESOURCE( String.class ),
     COORDINATE( String.class);
 
     public static final List<ValueType> INTEGER_TYPES = Lists.newArrayList(
@@ -105,5 +106,15 @@ public enum ValueType
     public boolean isDate()
     {
         return this == DATE || this == DATETIME;
+    }
+
+    public boolean isFile()
+    {
+        return this == FILE_RESOURCE;
+    }
+    
+    public boolean isCoordinate()
+    {
+    	return this == COORDINATE;
     }
 }
