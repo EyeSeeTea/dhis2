@@ -32,9 +32,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.DxfNamespaces;
@@ -295,34 +297,29 @@ public class DataElementCategoryOptionCombo
         {
             return name;
         }
-
-        StringBuilder name = new StringBuilder();
-
-        if ( categoryOptions != null && categoryOptions.size() > 0 )
+        
+        StringBuilder builder = new StringBuilder();
+        
+        List<DataElementCategory> categories = this.categoryCombo.getCategories();
+        
+        for ( DataElementCategory category : categories )
         {
-            name.append( "(" );
-
-            Iterator<DataElementCategoryOption> iterator = categoryOptions.iterator();
-
-            if ( iterator.hasNext() )
+            builder.append( "(" );
+            
+            List<DataElementCategoryOption> options = category.getCategoryOptions();
+            
+            for ( DataElementCategoryOption option : this.categoryOptions )
             {
-                name.append( iterator.next().getDisplayName() );
-            }
-
-            while ( iterator.hasNext() )
-            {
-                DataElementCategoryOption categoryOption = iterator.next();
-
-                if ( categoryOption != null )
+                if ( options.contains( option ) )
                 {
-                    name.append( ", " ).append( categoryOption.getDisplayName() );
+                    builder.append( option.getDisplayName() ).append( ", " );
                 }
             }
-
-            name.append( ")" );
+            
+            builder.delete( Math.max( builder.length() - 2, 0 ), builder.length() ).append( ")" );
         }
-
-        return name.toString();
+        
+        return StringUtils.substring( builder.toString(), 0, 255 );
     }
 
     @Override

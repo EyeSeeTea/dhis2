@@ -442,6 +442,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         $scope.editingEventInGrid = false;
         $scope.currentElement.updated = false;        
         $scope.currentEvent = {};
+        $scope.currentElement = {};
         $scope.currentEventOriginialValue = angular.copy($scope.currentEvent);
     };
     
@@ -882,6 +883,8 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
     $scope.$on('ruleeffectsupdated', function(event, args) {
         $scope.warningMessages = [];
         $scope.hiddenSections = [];
+        $scope.hiddenFields = [];
+        
         //console.log('args.event:  ', $rootScope.ruleeffects['SINGLE_EVENT'][0]);
         if($rootScope.ruleeffects[args.event]) {
             //Establish which event was affected:
@@ -896,11 +899,11 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
             }
             angular.forEach($rootScope.ruleeffects[args.event], function(effect) {
                 
-                if( effect.dataElement && effect.ineffect ) {
+                if(effect.dataElement && effect.ineffect) {
                     //in the data entry controller we only care about the "hidefield" actions
                     if(effect.action === "HIDEFIELD") {
                         if(effect.dataElement) {
-                            if(effect.ineffect && affectedEvent[effect.dataElement.id]) {
+                            if(affectedEvent[effect.dataElement.id]) {
                                 //If a field is going to be hidden, but contains a value, we need to take action;
                                 if(effect.content) {
                                     //TODO: Alerts is going to be replaced with a proper display mecanism.
@@ -958,30 +961,28 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         return dhis2.validation.isNumber(val) ? val : '';
     };
     
-    //check if field is hidden
-    $scope.isHidden = function(id) {
-        //In case the field contains a value, we cant hide it. 
-        //If we hid a field with a value, it would falsely seem the user was aware that the value was entered in the UI.
-        if($scope.currentEvent[id]) {
-           return false; 
-        }
-        else {
-            return $scope.hiddenFields[id];
-        }
-    }; 
-    
     $scope.saveDatavalue = function(){        
         $scope.executeRules();
     };
-    /*$scope.getInputNotifcationClass = function(id, custom, event){
-        var style = "";
-        if($scope.currentElement.id && $scope.currentElement.id === id){            
-            style = $scope.currentElement.updated ? 'update-success' : 'update-error';
-        }
-        return style + ' form-control'; 
-    };*/
     
-    $scope.getInputNotifcationClass = function(id, custom){        
-        return '; ';
+    $scope.getInputNotifcationClass = function(id, custom){
+        if($scope.currentElement.id && $scope.currentElement.id === id){
+            if($scope.currentElement.updated){
+                if(custom){
+                    return 'input-success';
+                }
+                return 'form-control input-success';
+            }            
+            else{
+                if(custom){
+                    return 'input-error';
+                }
+                return 'form-control input-error';
+            }            
+        }  
+        if(custom){
+            return '';
+        }
+        return 'form-control';
     };
 });
