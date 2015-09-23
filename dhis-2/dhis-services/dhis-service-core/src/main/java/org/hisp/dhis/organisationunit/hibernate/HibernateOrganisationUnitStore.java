@@ -185,19 +185,12 @@ public class HibernateOrganisationUnitStore
         
         if ( params.hasLevels() )
         {
-            hql += hlp.whereAnd() + " (";
-            
-            for ( Integer level : params.getLevels() )
-            {
-                hql += " length(o.path) = :levelPathLength" + level + " or ";
-            }
-            
-            hql = TextUtils.removeLastOr( hql ) + ") ";
+            hql += hlp.whereAnd() + " o.hierarchyLevel in (:levels) ";
         }
         
         if ( params.getMaxLevels() != null )
         {
-            hql += hlp.whereAnd() + " length(o.path) <= :pathLength ";
+            hql += hlp.whereAnd() + " o.hierarchyLevel <= :maxLevels ";
         }
         
         hql += "order by o.name";
@@ -214,7 +207,7 @@ public class HibernateOrganisationUnitStore
         {
             for ( OrganisationUnit parent : params.getParents() )
             {
-                query.setString( parent.getUid(), "%" + parent.getUid() + "%" );
+                query.setString( parent.getUid(), parent.getPath() + "%" );
             }
         }
         
@@ -228,15 +221,12 @@ public class HibernateOrganisationUnitStore
         
         if ( params.hasLevels() )
         {
-            for ( Integer level : params.getLevels() )
-            {
-                query.setInteger( "levelPathLength" + level, params.getLevelPathLength( level ) );
-            }
+            query.setParameterList( "levels", params.getLevels() );
         }
         
         if ( params.getMaxLevels() != null )
         {
-            query.setInteger( "pathLength", params.getMaxLevelsPathLength() );
+            query.setInteger( "maxLevels", params.getMaxLevels() );
         }
 
         if ( params.getFirst() != null )
@@ -327,7 +317,7 @@ public class HibernateOrganisationUnitStore
     @SuppressWarnings( "unchecked" )
     public void updatePaths()
     {
-        List<OrganisationUnit> organisationUnits = new ArrayList<>( getQuery( "from OrganisationUnit ou where ou.path IS NULL" ).list() );
+        List<OrganisationUnit> organisationUnits = new ArrayList<>( getQuery( "from OrganisationUnit ou where ou.path is null or ou.hierarchyLevel is null" ).list() );
         updatePaths( organisationUnits );
     }
 
@@ -348,7 +338,7 @@ public class HibernateOrganisationUnitStore
         {
             session.update( organisationUnit );
 
-            if ( (counter % 400) == 0 )
+            if ( ( counter % 400 ) == 0 )
             {
                 dbmsManager.clearSession();
             }
@@ -360,17 +350,10 @@ public class HibernateOrganisationUnitStore
     @Override
     public int getMaxLevel()
     {
-        String hql = "select max(length(ou.path)) from OrganisationUnit ou";
+        String hql = "select max(ou.hierarchyLevel) from OrganisationUnit ou";
 
         Integer maxLength = (Integer) getQuery( hql ).uniqueResult();
         
-        if ( maxLength != null )
-        {        
-            int level = maxLength / OrganisationUnitQueryParams.CODE_SEP_LENGTH;
-        
-            return level;
-        }
-        
-        return 0;
+        return maxLength != null ? maxLength.intValue() : 0;
     }
 }

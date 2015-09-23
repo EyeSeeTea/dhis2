@@ -35,7 +35,7 @@ import static org.hisp.dhis.system.util.DateUtils.getMediumDateString;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.common.DataDimensionItem.DataDimensionItemType;
 import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.common.IllegalQueryException;
@@ -71,17 +71,15 @@ public class AnalyticsUtils
         String sql = 
             "select de.name as de_name, de.uid as de_uid, de.dataelementid as de_id, pe.startdate as start_date, pe.enddate as end_date, pt.name as pt_name, " +
             "ou.name as ou_name, ou.uid as ou_uid, ou.organisationunitid as ou_id, " +
-            "cocn.categoryoptioncomboname as coc_name, coc.uid as coc_uid, coc.categoryoptioncomboid as coc_id, " +
-            "aocn.categoryoptioncomboname as aoc_name, aoc.uid as aoc_uid, aoc.categoryoptioncomboid as aoc_id, dv.value as datavalue " +
+            "coc.name as coc_name, coc.uid as coc_uid, coc.categoryoptioncomboid as coc_id, " +
+            "aoc.name as aoc_name, aoc.uid as aoc_uid, aoc.categoryoptioncomboid as aoc_id, dv.value as datavalue " +
             "from datavalue dv " + 
             "inner join dataelement de on dv.dataelementid = de.dataelementid " +
             "inner join period pe on dv.periodid = pe.periodid " +
             "inner join periodtype pt on pe.periodtypeid = pt.periodtypeid " +
             "inner join organisationunit ou on dv.sourceid = ou.organisationunitid " +
             "inner join categoryoptioncombo coc on dv.categoryoptioncomboid = coc.categoryoptioncomboid " +
-            "inner join _categoryoptioncomboname cocn on dv.categoryoptioncomboid = cocn.categoryoptioncomboid " +
             "inner join categoryoptioncombo aoc on dv.attributeoptioncomboid = aoc.categoryoptioncomboid " +
-            "inner join _categoryoptioncomboname aocn on dv.attributeoptioncomboid = aocn.categoryoptioncomboid " +
             "where dv.dataelementid in (" + StringUtils.join( IdentifiableObjectUtils.getIdentifiers( dataElements ), "," ) + ") " +
             "and (";
         

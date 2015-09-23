@@ -5,6 +5,7 @@ trackerCapture.controller('RegistrationController',
                 $scope,
                 $location,
                 $timeout,
+                $modal,
                 AttributesFactory,
                 DHIS2EventFactory,
                 TEService,
@@ -27,6 +28,8 @@ trackerCapture.controller('RegistrationController',
     $scope.tei = {};
     $scope.registrationMode = 'REGISTRATION';    
     $scope.hiddenFields = {};
+    
+    //$scope.editingDisabled = angular.isUndefined($scope.editingDisabled) ? false : $scope.editingDisabled;
     
     $scope.attributesById = CurrentSelection.getAttributesById();
     if(!$scope.attributesById){
@@ -371,4 +374,43 @@ trackerCapture.controller('RegistrationController',
         }
         return status;        
     };
+    
+    $scope.getTrackerAssociate = function(selectedAttribute){
+        
+        
+        var modalInstance = $modal.open({
+            templateUrl: 'components/teiadd/tei-add.html',
+            controller: 'TEIAddController',
+            windowClass: 'modal-full-window',
+            resolve: {
+                relationshipTypes: function () {
+                    return $scope.relationshipTypes;
+                },
+                addingRelationship: function(){
+                    return false;
+                },
+                selections: function () {
+                    return CurrentSelection.get();
+                },
+                selectedTei: function(){
+                    return $scope.selectedTei;
+                },
+                selectedAttribute: function(){
+                    return selectedAttribute;
+                },
+                selectedProgram: function(){
+                    return $scope.selectedProgram;
+                },
+                relatedProgramRelationship: function(){
+                    return $scope.relatedProgramRelationship;
+                }
+            }
+        });
+
+        modalInstance.result.then(function (res) {
+            if(res && res.id){
+                $scope.selectedTei[selectedAttribute.id] = res.id;
+            }
+        });
+    };    
 });

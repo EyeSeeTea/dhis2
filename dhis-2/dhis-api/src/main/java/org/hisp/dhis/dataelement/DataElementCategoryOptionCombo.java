@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.DxfNamespaces;
@@ -262,6 +262,7 @@ public class DataElementCategoryOptionCombo
      * Creates a mapping between the category option combo identifier and name
      * for the given collection of elements.
      */
+    @Deprecated
     public static Map<Integer, String> getCategoryOptionComboMap( Collection<DataElementCategoryOptionCombo> categoryOptionCombos )
     {
         Map<Integer, String> map = new HashMap<>();
@@ -301,23 +302,23 @@ public class DataElementCategoryOptionCombo
         StringBuilder builder = new StringBuilder();
         
         List<DataElementCategory> categories = this.categoryCombo.getCategories();
-        
+            
         for ( DataElementCategory category : categories )
         {
-            builder.append( "(" );
-            
             List<DataElementCategoryOption> options = category.getCategoryOptions();
             
-            for ( DataElementCategoryOption option : this.categoryOptions )
+            optionLoop: for ( DataElementCategoryOption option : this.categoryOptions )
             {
                 if ( options.contains( option ) )
                 {
                     builder.append( option.getDisplayName() ).append( ", " );
+                    
+                    continue optionLoop;
                 }
             }
-            
-            builder.delete( Math.max( builder.length() - 2, 0 ), builder.length() ).append( ")" );
         }
+        
+        builder.delete( Math.max( builder.length() - 2, 0 ), builder.length() );
         
         return StringUtils.substring( builder.toString(), 0, 255 );
     }
