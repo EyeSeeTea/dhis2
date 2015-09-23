@@ -1,4 +1,4 @@
-package org.hisp.dhis.eventreport;
+package org.hisp.dhis.schema.descriptors;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,62 +28,31 @@ package org.hisp.dhis.eventreport;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
-
-import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
-import org.springframework.transaction.annotation.Transactional;
+import org.hisp.dhis.fileresource.FileResource;
+import org.hisp.dhis.schema.Schema;
+import org.hisp.dhis.schema.SchemaDescriptor;
+import org.springframework.stereotype.Component;
 
 /**
-* @author Lars Helge Overland
-*/
-@Transactional
-public class DefaultEventReportService
-    implements EventReportService
+ * @author Halvdan Hoem Grelland
+ */
+@Component
+public class FileResourceSchemaDescriptor
+    implements SchemaDescriptor
 {
-    private HibernateIdentifiableObjectStore<EventReport> eventReportStore;
+    public static final String SINGULAR = "fileResource";
 
-    public void setEventReportStore( HibernateIdentifiableObjectStore<EventReport> eventReportStore )
-    {
-        this.eventReportStore = eventReportStore;
-    }
+    public static final String PLURAL = "fileResources";
 
-    // -------------------------------------------------------------------------
-    // EventReportService implementation
-    // -------------------------------------------------------------------------
+    public static final String API_ENDPOINT = "/" + PLURAL;
 
-    @Override
-    public int saveEventReport( EventReport report )
+    @Override 
+    public Schema getSchema()
     {
-        return eventReportStore.save( report );
-    }
-    
-    @Override
-    public void updateEventReport( EventReport report )
-    {
-        eventReportStore.update( report );
-    }
-    
-    @Override
-    public EventReport getEventReport( int id )
-    {
-        return eventReportStore.get( id );
-    }
-    
-    @Override
-    public EventReport getEventReport( String uid )
-    {
-        return eventReportStore.getByUid( uid );
-    }
-    
-    @Override
-    public void deleteEventReport( EventReport report )
-    {
-        eventReportStore.delete( report );
-    }
-    
-    @Override
-    public List<EventReport> getAllEventReports()
-    {
-        return eventReportStore.getAll();
+        Schema schema = new Schema( FileResource.class, SINGULAR, PLURAL );
+        schema.setRelativeApiEndpoint( API_ENDPOINT );
+        schema.setShareable( false );
+        schema.setOrder( 1250 );
+        return schema;
     }
 }

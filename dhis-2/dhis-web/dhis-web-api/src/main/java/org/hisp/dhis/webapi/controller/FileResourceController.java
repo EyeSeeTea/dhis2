@@ -1,4 +1,4 @@
-package org.hisp.dhis.eventreport;
+package org.hisp.dhis.webapi.controller;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,62 +28,37 @@ package org.hisp.dhis.eventreport;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
-
-import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
-import org.springframework.transaction.annotation.Transactional;
+import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.dxf2.webmessage.WebMessageException;
+import org.hisp.dhis.fileresource.FileResource;
+import org.hisp.dhis.schema.descriptors.FileResourceSchemaDescriptor;
+import org.hisp.dhis.webapi.utils.WebMessageUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
-* @author Lars Helge Overland
-*/
-@Transactional
-public class DefaultEventReportService
-    implements EventReportService
+ * @author Halvdan Hoem Grelland
+ */
+@Controller
+@RequestMapping( value = FileResourceSchemaDescriptor.API_ENDPOINT )
+public class FileResourceController
 {
-    private HibernateIdentifiableObjectStore<EventReport> eventReportStore;
+    @Autowired
+    private IdentifiableObjectManager idObjectManager;
 
-    public void setEventReportStore( HibernateIdentifiableObjectStore<EventReport> eventReportStore )
+    @RequestMapping( value = "/{uid}" )
+    public @ResponseBody FileResource getFileResource( @PathVariable String uid )
+        throws WebMessageException
     {
-        this.eventReportStore = eventReportStore;
-    }
+        FileResource fileResource = idObjectManager.get( FileResource.class, uid );
 
-    // -------------------------------------------------------------------------
-    // EventReportService implementation
-    // -------------------------------------------------------------------------
+        if ( fileResource == null ) {
+            throw new WebMessageException( WebMessageUtils.notFound( FileResource.class, uid ) );
+        }
 
-    @Override
-    public int saveEventReport( EventReport report )
-    {
-        return eventReportStore.save( report );
-    }
-    
-    @Override
-    public void updateEventReport( EventReport report )
-    {
-        eventReportStore.update( report );
-    }
-    
-    @Override
-    public EventReport getEventReport( int id )
-    {
-        return eventReportStore.get( id );
-    }
-    
-    @Override
-    public EventReport getEventReport( String uid )
-    {
-        return eventReportStore.getByUid( uid );
-    }
-    
-    @Override
-    public void deleteEventReport( EventReport report )
-    {
-        eventReportStore.delete( report );
-    }
-    
-    @Override
-    public List<EventReport> getAllEventReports()
-    {
-        return eventReportStore.getAll();
+        return fileResource;
     }
 }
