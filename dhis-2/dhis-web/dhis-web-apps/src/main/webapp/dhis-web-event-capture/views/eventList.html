@@ -1,5 +1,5 @@
 <div ng-if="selectedProgramStage && !eventRegistration && !editingEventInFull" class="small-vertical-spacing">
-    <i ng-if="!eventFetched" class="fa fa-spinner fa-spin fa-2x"></i>
+    <i ng-if="!eventFetched && selectedOptions.length === selectedCategories.length" class="fa fa-spinner fa-spin fa-2x"></i>    
     <div ng-if="eventFetched" ng-switch="dhis2Events.length">                        
         <div ng-switch-when="undefined">
             <h4>
@@ -174,7 +174,7 @@
                                                                          placeholder="{{'select_or_search' | translate}}">
                                                             {{$select.selected.name || $select.selected}}
                                                         </ui-select-match>
-                                                        <ui-select-choices  repeat="option.name as option in optionSets[prStDes[eventGridColumn.id].dataElement.optionSet.id].options | filter: $select.search | limitTo:infiniteScroll.currentOptions">
+                                                        <ui-select-choices  repeat="option.name as option in optionSets[prStDes[eventGridColumn.id].dataElement.optionSet.id].options | filter: $select.search | limitTo:maxOptionSize">
                                                             <span ng-bind-html="option.name | highlight: $select.search"></span>
                                                         </ui-select-choices>
                                                     </ui-select>
