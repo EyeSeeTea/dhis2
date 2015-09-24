@@ -189,7 +189,6 @@ public class StaticContentController
             throw new WebMessageException( (WebMessageUtils
                 .error( "Error saving file, make sure dhis_home envoirement variable is set" )) );
         }
-
     }
 
     /**
