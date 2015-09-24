@@ -66,7 +66,6 @@ public class MathUtils
     private static final Pattern POSITIVE_OR_ZERO_INT_PATTERN = Pattern.compile( "(^0$)|(^[1-9]\\d*$)" );
     private static final Pattern NEGATIVE_INT_PATTERN = Pattern.compile( "^-[1-9]\\d*$" );
     private static final Pattern ZERO_PATTERN = Pattern.compile( "^0(\\.0*)?$" );
-    private static final Pattern COORDINATE_PATTERN = Pattern.compile( "^([+-]?\\d+\\.?\\d+)\\s*,\\s*([+-]?\\d+\\.?\\d+)$" );
 
     /**
      * Evaluates whether an expression is true or false.
@@ -434,11 +433,14 @@ public class MathUtils
      */
     public static boolean isCoordinate( String value )
     {
-    	if (value == null) {
+    	try {
+    		String[] lnglat = value.trim().split(",");
+    		float lng = Float.parseFloat(lnglat[0]);
+    		float lat = Float.parseFloat(lnglat[1]);    		
+    		return (lng >= -180 && lng <= 180 && lat >= -90 && lat <= 90);
+    	} catch (Exception x) {
     		return false;
     	}
-    	value = value.trim();
-        return COORDINATE_PATTERN.matcher( value ).matches();
     }
 
     /**

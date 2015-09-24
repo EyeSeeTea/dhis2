@@ -297,8 +297,11 @@ public class MathUtilsTest
         assertTrue( MathUtils.isCoordinate( "18.56,65.342" ) );
         assertTrue( MathUtils.isCoordinate( "-18.56,-65.342" ) );
         assertTrue( MathUtils.isCoordinate( "   18.56 ,  65.342    " ) );
+        assertTrue( MathUtils.isCoordinate( "   -180 ,  -90    " ) );
         
         assertFalse( MathUtils.isCoordinate( "" ) );
+        assertFalse( MathUtils.isCoordinate( null ) );
+        assertFalse( MathUtils.isCoordinate( "18.56a, 65.342b" ) );
         assertFalse( MathUtils.isCoordinate( "0" ) );
         assertFalse( MathUtils.isCoordinate( "-0" ) );
         assertFalse( MathUtils.isCoordinate( "Hey" ) );
@@ -306,6 +309,8 @@ public class MathUtilsTest
         assertFalse( MathUtils.isCoordinate( "1 " ) );
         assertFalse( MathUtils.isCoordinate( "1.2345,123, 123" ) );
         assertFalse( MathUtils.isCoordinate( "12147483647" ) );
+        assertFalse( MathUtils.isCoordinate( "-181 ,-90" ) );
+        assertFalse( MathUtils.isCoordinate( "-180 , 91" ) );
     }
 
     @Test
