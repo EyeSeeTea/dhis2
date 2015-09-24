@@ -95,9 +95,6 @@ public class StaticContentController
         HttpServletResponse response )
         throws WebMessageException
     {
-
-        System.out.println(styleManager.getCurrentStyle() + " :: " + styleManager.getCurrentStyleDirectory() + " :: " + styleManager.getSystemStyle());
-
         if ( !KEY_WHITELIST_MAP.containsKey( key ) )
         {
             throw new WebMessageException( WebMessageUtils.notFound( "This key does not exist" ) );
@@ -167,7 +164,7 @@ public class StaticContentController
         if ( !file.getContentType().equalsIgnoreCase( "image/png" ) )
         {
             throw new WebMessageException(
-                new WebMessage(WebMessageStatus.valueOf( "File type not supported." ), HttpStatus.UNSUPPORTED_MEDIA_TYPE ) );
+                new WebMessage(WebMessageStatus.WARNING, HttpStatus.UNSUPPORTED_MEDIA_TYPE ) );
         }
 
         // Only keys in the white list is accepted at the current time
@@ -203,7 +200,7 @@ public class StaticContentController
         
         if ( key.equals( LOGO_BANNER ) )
         {
-            relativeUrlToImage = "/dhis-web-commons/css/light_blue/logo_banner.png";
+            relativeUrlToImage = "/dhis-web-commons/css/" + styleManager.getCurrentStyleDirectory() + "/logo_banner.png";
         }
 
         if ( key.equals( LOGO_FRONT ) )
