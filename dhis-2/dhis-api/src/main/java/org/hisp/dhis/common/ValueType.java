@@ -69,7 +69,7 @@ public enum ValueType
         INTEGER, INTEGER_POSITIVE, INTEGER_NEGATIVE, INTEGER_ZERO_OR_POSITIVE, NUMBER, UNIT_INTERVAL, PERCENTAGE );
 
     public static final List<ValueType> TEXT_TYPES = Lists.newArrayList( 
-        TEXT, LONG_TEXT, LETTER );
+        TEXT, LONG_TEXT, LETTER, COORDINATE );
     
     private final Class<?> javaClass;
 
@@ -100,7 +100,7 @@ public enum ValueType
 
     public boolean isText()
     {
-        return this == TEXT || this == LONG_TEXT;
+        return this == TEXT || this == LONG_TEXT || this == COORDINATE;
     }
 
     public boolean isDate()
