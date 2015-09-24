@@ -515,6 +515,7 @@ Ext.onReady( function() {
             showRowSubTotals,
 			showDimensionLabels,
 			hideEmptyRows,
+            skipRounding,
             aggregationType,
             dataApprovalLevel,
 			showHierarchy,
@@ -570,7 +571,12 @@ Ext.onReady( function() {
 
 		hideEmptyRows = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: NS.i18n.hide_empty_rows,
-			style: 'margin-bottom:' + checkboxBottomMargin + 'px',
+			style: 'margin-bottom:' + checkboxBottomMargin + 'px'
+		});
+
+		skipRounding = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: NS.i18n.skip_rounding,
+			style: 'margin-top:' + separatorTopMargin + 'px; margin-bottom:' + comboBottomMargin + 'px'
 		});
 
 		aggregationType = Ext.create('Ext.form.field.ComboBox', {
@@ -796,6 +802,7 @@ Ext.onReady( function() {
                 showRowSubTotals,
                 showDimensionLabels,
 				hideEmptyRows,
+                skipRounding,
                 aggregationType,
                 dataApprovalLevel
 			]
@@ -859,6 +866,7 @@ Ext.onReady( function() {
                     showRowSubTotals: showRowSubTotals.getValue(),
                     showDimensionLabels: showDimensionLabels.getValue(),
 					hideEmptyRows: hideEmptyRows.getValue(),
+					skipRounding: skipRounding.getValue(),
                     aggregationType: aggregationType.getValue(),
                     dataApprovalLevel: {id: dataApprovalLevel.getValue()},
 					showHierarchy: showHierarchy.getValue(),
@@ -883,6 +891,7 @@ Ext.onReady( function() {
 				showRowSubTotals.setValue(Ext.isBoolean(layout.showRowSubTotals) ? layout.showRowSubTotals : true);
 				showDimensionLabels.setValue(Ext.isBoolean(layout.showDimensionLabels) ? layout.showDimensionLabels : true);
 				hideEmptyRows.setValue(Ext.isBoolean(layout.hideEmptyRows) ? layout.hideEmptyRows : false);
+                skipRounding.setValue(Ext.isBoolean(layout.skipRounding) ? layout.skipRounding : false);
                 aggregationType.setValue(Ext.isString(layout.aggregationType) ? layout.aggregationType : finalsStyleConf.default_);
 				dataApprovalLevel.setValue(Ext.isObject(layout.dataApprovalLevel) && Ext.isString(layout.dataApprovalLevel.id) ? layout.dataApprovalLevel.id : finalsStyleConf.default_);
 				showHierarchy.setValue(Ext.isBoolean(layout.showHierarchy) ? layout.showHierarchy : false);
@@ -1009,6 +1018,7 @@ Ext.onReady( function() {
 					w.showRowSubTotals = showRowSubTotals;
                     w.showDimensionLabels = showDimensionLabels;
 					w.hideEmptyRows = hideEmptyRows;
+                    w.skipRounding = skipRounding;
                     w.aggregationType = aggregationType;
                     w.dataApprovalLevel = dataApprovalLevel;
 					w.showHierarchy = showHierarchy;
@@ -2812,8 +2822,9 @@ Ext.onReady( function() {
             dimensionPanelMap = {},
 			getDimensionPanel,
 			getDimensionPanels,
-			update,
 
+            getLayout,
+			update,
 			accordionBody,
             accordion,
             westRegion,
@@ -2823,6 +2834,7 @@ Ext.onReady( function() {
             getParamString,
             openTableLayoutTab,
             openPlainDataSource,
+            openDataDump,
             downloadButton,
             interpretationItem,
             pluginItem,
@@ -6410,15 +6422,16 @@ Ext.onReady( function() {
 
 		// viewport
 
+        getLayout = function() {
+            return ns.core.api.layout.Layout(ns.core.web.pivot.getLayoutConfig());
+        };
+
 		update = function() {
-			var config = ns.core.web.pivot.getLayoutConfig(),
-                layout = ns.core.api.layout.Layout(config);
+			var layout;
 
-			if (!layout) {
-				return;
-			}
-
-			ns.core.web.pivot.getData(layout, false);
+			if (layout = getLayout()) {
+                ns.core.web.pivot.getData(layout, false);
+            }
 		};
 
 		accordionBody = Ext.create('Ext.panel.Panel', {
@@ -6516,6 +6529,78 @@ Ext.onReady( function() {
 			}
 		});
 
+        updateButton = Ext.create('Ext.button.Split', {
+            text: '<b>' + NS.i18n.update + '</b>&nbsp;',
+            handler: function() {
+                update();
+            },
+            arrowHandler: function(b) {
+                b.menu = Ext.create('Ext.menu.Menu', {
+                    closeAction: 'destroy',
+                    shadow: false,
+                    showSeparator: false,
+                    items: [
+                        {
+                            xtype: 'label',
+                            text: NS.i18n.download_data,
+                            style: 'padding:7px 40px 5px 7px; font-weight:bold; color:#111; border:0 none'
+                        },
+                        {
+                            text: 'CSV',
+                            iconCls: 'ns-menu-item-datasource',
+                            handler: function() {
+                                openDataDump('csv', 'ID');
+                            },
+                            menu: [
+                                {
+                                    xtype: 'label',
+                                    text: NS.i18n.metadata_id_scheme,
+                                    style: 'padding:7px 18px 5px 7px; font-weight:bold; color:#333'
+                                },
+                                {
+                                    text: 'ID',
+                                    iconCls: 'ns-menu-item-scheme',
+                                    handler: function() {
+                                        openDataDump('csv', 'ID');
+                                    }
+                                },
+                                {
+                                    text: 'Code',
+                                    iconCls: 'ns-menu-item-scheme',
+                                    handler: function() {
+                                        openDataDump('csv', 'CODE');
+                                    }
+                                },
+                                {
+                                    text: 'Name',
+                                    iconCls: 'ns-menu-item-scheme',
+                                    handler: function() {
+                                        openDataDump('csv', 'NAME');
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    listeners: {
+                        added: function() {
+                            ns.app.updateButton = this;
+                        },
+                        show: function() {
+                            ns.core.web.window.setAnchorPosition(b.menu, b);
+                        },
+                        hide: function() {
+                            b.menu.destroy();
+                        },
+                        destroy: function(m) {
+                            b.menu = null;
+                        }
+                    }
+                });
+
+                this.menu.show();
+            }
+        });
+
 		layoutButton = Ext.create('Ext.button.Button', {
 			text: 'Layout',
 			menu: {},
@@ -6569,10 +6654,12 @@ Ext.onReady( function() {
 			}
 		});
 
-		getParamString = function() {
-			var paramString = ns.core.web.analytics.getParamString(ns.core.service.layout.getExtendedLayout(ns.app.layout));
+		getParamString = function(layout) {
+            layout = layout || ns.app.layout;
 
-			if (ns.app.layout.showHierarchy) {
+			var paramString = ns.core.web.analytics.getParamString(ns.core.service.layout.getExtendedLayout(layout));
+
+			if (layout.showHierarchy) {
 				paramString += '&showHierarchy=true';
 			}
 
@@ -6596,6 +6683,7 @@ Ext.onReady( function() {
 				url += '&columns=' + columnNames.join(';');
 				url += '&rows=' + rowNames.join(';');
 				url += ns.app.layout.hideEmptyRows ? '&hideEmptyRows=true' : '';
+                url += ns.app.layout.skipRounding ? '&skipRounding=true' : '';
 
 				window.open(url, isNewTab ? '_blank' : '_top');
 			}
@@ -6606,6 +6694,17 @@ Ext.onReady( function() {
                 if (ns.core.init.contextPath && ns.app.paramString) {
                     window.open(url, isNewTab ? '_blank' : '_top');
                 }
+            }
+        };
+
+        openDataDump = function(format, scheme, isNewTab) {
+            var layout;
+
+            format = format || 'csv';
+            scheme = scheme || 'ID';
+
+            if (layout = getLayout()) {
+                window.open(ns.core.init.contextPath + '/api/analytics.' + format + getParamString(layout) + (scheme ? '&outputIdScheme=' + scheme : ''), isNewTab ? '_blank' : '_top');
             }
         };
 
@@ -7173,12 +7272,7 @@ Ext.onReady( function() {
 							westRegion.toggleCollapse();
 						}
 					},
-					{
-						text: '<b>' + NS.i18n.update + '</b>',
-						handler: function() {
-							update();
-						}
-					},
+                    updateButton,
 					layoutButton,
 					optionsButton,
 					{

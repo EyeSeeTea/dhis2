@@ -28,8 +28,8 @@ trackerCapture.controller('RegistrationController',
     $scope.tei = {};
     $scope.registrationMode = 'REGISTRATION';    
     $scope.hiddenFields = {};
-    $scope.errorMessages = {};
-    $scope.warningMessages = {};
+    
+    //$scope.editingDisabled = angular.isUndefined($scope.editingDisabled) ? false : $scope.editingDisabled;
     
     $scope.attributesById = CurrentSelection.getAttributesById();
     if(!$scope.attributesById){
@@ -67,14 +67,13 @@ trackerCapture.controller('RegistrationController',
     //watch for selection of program
     $scope.$watch('selectedProgram', function() {        
         $scope.trackedEntityForm = null;
-        $scope.customForm = null;
-        
-        $scope.allProgramRules = [];
+        $scope.customForm = null;        
+        $scope.allProgramRules = {constants: [], programIndicators: {}, programValidations: [], programVariables: [], programRules: []};
         if( angular.isObject($scope.selectedProgram) && $scope.selectedProgram.id ){
-			TrackerRulesFactory.getRules($scope.selectedProgram.id).then(function(rules){                    
-				$scope.allProgramRules = rules;
-			});
-		}        
+            TrackerRulesFactory.getRules($scope.selectedProgram.id).then(function(rules){                    
+                $scope.allProgramRules = rules;
+            });
+        }
         
         if($scope.registrationMode === 'REGISTRATION'){
             $scope.getAttributes($scope.registrationMode);
@@ -89,7 +88,8 @@ trackerCapture.controller('RegistrationController',
         
         if($scope.registrationMode !== 'REGISTRATION'){
             $scope.selectedTei = args.selectedTei;            
-            $scope.tei = angular.copy(args.selectedTei);            
+            $scope.tei = angular.copy(args.selectedTei);  
+            //$scope.teiOriginal = angular.copy(args.selectedTei);  
         }
         
         if($scope.registrationMode === 'PROFILE'){
@@ -254,38 +254,14 @@ trackerCapture.controller('RegistrationController',
         //but there could be a case where attributes are non-mandatory and
         //registration form comes empty, in this case enforce at least one value        
         
-        var result = RegistrationService.processForm($scope.tei, $scope.selectedTei, $scope.attributesById, $scope.selectedProgram);
+        var result = RegistrationService.processForm($scope.tei, $scope.selectedTei, $scope.attributesById);
         $scope.formEmpty = result.formEmpty;
         $scope.tei = result.tei;
         
         if($scope.formEmpty){//registration form is empty
             return false;
-        }
-        
-        if(!result.validation.valid){//validation exists           
-            var modalInstance = $modal.open({
-                templateUrl: 'components/registration/validation-message.html',
-                controller: 'ValidationMessageController',
-                resolve: {
-                    validation: function () {
-                        return result.validation;
-                    }
-                }
-            });
-
-            modalInstance.result.then(function (res) {
-                if(!res) {//strict validation
-                    return false;
-                }
-                else{//not-strict validation
-                    performRegistration(destination);
-                }
-            }, function () {
-            });        
-        }
-        else{//no validation
-            performRegistration(destination);
         }        
+        performRegistration(destination);
     };
     
     $scope.cancelRelativeRegistration = function(){
@@ -295,8 +271,8 @@ trackerCapture.controller('RegistrationController',
     };   
    
     
-    var processRuleEffect = function(){
-
+    var processRuleEffect = function(){        
+        $scope.warningMessages = [];        
         angular.forEach($rootScope.ruleeffects['registration'], function (effect) {
             if (effect.trackedEntityAttribute) {
                 //in the data entry controller we only care about the "hidefield", showerror and showwarning actions
@@ -323,12 +299,14 @@ trackerCapture.controller('RegistrationController',
                         $log.warn("ProgramRuleAction " + effect.id + " is of type HIDEFIELD, bot does not have an attribute defined");
                     }
                 } else if (effect.action === "SHOWERROR") {
-                    if (effect.trackedEntityAttribute) {
-                        
+                    if (effect.trackedEntityAttribute) {                        
                         if(effect.ineffect) {
-                            $scope.errorMessages[effect.trackedEntityAttribute.id] = effect.content;
-                        } else {
-                            $scope.errorMessages[effect.trackedEntityAttribute.id] = false;
+                            var dialogOptions = {
+                                headerText: 'validation_error',
+                                bodyText: effect.content
+                            };
+                            DialogService.showDialog({}, dialogOptions);
+                            $scope.selectedTei[effect.trackedEntityAttribute.id] = $scope.tei[effect.trackedEntityAttribute.id];
                         }
                     }
                     else {
@@ -337,9 +315,7 @@ trackerCapture.controller('RegistrationController',
                 } else if (effect.action === "SHOWWARNING") {
                     if (effect.trackedEntityAttribute) {
                         if(effect.ineffect) {
-                            $scope.warningMessages[effect.trackedEntityAttribute.id] = effect.content;
-                        } else {
-                            $scope.warningMessages[effect.trackedEntityAttribute.id] = false;
+                            $scope.warningMessages.push(effect.content);
                         }
                     }
                     else {
@@ -368,8 +344,10 @@ trackerCapture.controller('RegistrationController',
             
            $scope.selectedTei.attributes.push(newAttributeInArray);
         });
-        TrackerRulesExecutionService.executeRules($scope.allProgramRules, 'registration', null, null, $scope.selectedTei, $scope.selectedEnrollment, flag);
-
+        
+        if($scope.selectedProgram && $scope.selectedProgram.id){
+            TrackerRulesExecutionService.executeRules($scope.allProgramRules, 'registration', null, null, $scope.selectedTei, $scope.selectedEnrollment, flag);
+        }        
     };
     
     //check if field is hidden
@@ -396,20 +374,43 @@ trackerCapture.controller('RegistrationController',
         }
         return status;        
     };
-})
+    
+    $scope.getTrackerAssociate = function(selectedAttribute){
+        
+        
+        var modalInstance = $modal.open({
+            templateUrl: 'components/teiadd/tei-add.html',
+            controller: 'TEIAddController',
+            windowClass: 'modal-full-window',
+            resolve: {
+                relationshipTypes: function () {
+                    return $scope.relationshipTypes;
+                },
+                addingRelationship: function(){
+                    return false;
+                },
+                selections: function () {
+                    return CurrentSelection.get();
+                },
+                selectedTei: function(){
+                    return $scope.selectedTei;
+                },
+                selectedAttribute: function(){
+                    return selectedAttribute;
+                },
+                selectedProgram: function(){
+                    return $scope.selectedProgram;
+                },
+                relatedProgramRelationship: function(){
+                    return $scope.relatedProgramRelationship;
+                }
+            }
+        });
 
-.controller('ValidationMessageController',
-        function ($scope,
-                $modalInstance,                
-                validation) {
-                    
-    $scope.validationResult = validation;
-
-    $scope.proceed = function () {
-        $modalInstance.close(true);
-    };
-
-    $scope.cancel = function () {
-        $modalInstance.close(false);
-    };
+        modalInstance.result.then(function (res) {
+            if(res && res.id){
+                $scope.selectedTei[selectedAttribute.id] = res.id;
+            }
+        });
+    };    
 });

@@ -158,26 +158,6 @@ public class H2StatementBuilder
     }
 
     @Override
-    public String getDeflatedDataValues( int dataElementId, String dataElementName, int categoryOptionComboId,
-    		String periodIds, int organisationUnitId, String organisationUnitName, int lowerBound, int upperBound )
-    {	
-    	return "SELECT dv.dataelementid, dv.periodid, dv.sourceid, dv.categoryoptioncomboid, dv.value, dv.storedby, dv.lastupdated, " +
-            "dv.comment, dv.followup, '" + lowerBound + "' AS minimumvalue, '" + upperBound + "' AS maximumvalue, " +
-            encode( dataElementName ) + " AS dataelementname, pt.name AS periodtypename, pe.startdate, pe.enddate, " + 
-            encode( organisationUnitName ) + " AS sourcename, cc.categoryoptioncomboname " +
-            "FROM datavalue AS dv " +
-            "JOIN period AS pe USING (periodid) " +
-            "JOIN periodtype AS pt USING (periodtypeid) " +
-            "LEFT JOIN _categoryoptioncomboname AS cc USING (categoryoptioncomboid) " +
-            "WHERE dv.dataelementid='" + dataElementId + "' " +
-            "AND dv.categoryoptioncomboid='" + categoryOptionComboId + "' " +
-            "AND dv.periodid IN (" + periodIds + ") " +
-            "AND dv.sourceid='" + organisationUnitId + "' " +
-            "AND ( CAST( dv.value AS " + getDoubleColumnType() + " ) < '" + lowerBound + "' " +
-            "OR CAST( dv.value AS " + getDoubleColumnType() + " ) > '" + upperBound + "' )";
-    }
-
-    @Override
     public String getAddDate( String dateField, int days )
     {
         return "DATEADD('DAY'," + days + "," + dateField + ")";
@@ -188,10 +168,10 @@ public class H2StatementBuilder
     {
         StringBuffer sqlsb = new StringBuffer();
         
-        sqlsb.append( "(SELECT DISTINCT de.dataelementid, (de.name || ' ' || cc.categoryoptioncomboname) AS DataElement " );
+        sqlsb.append( "(SELECT DISTINCT de.dataelementid, (de.name || ' ' || cc.name) AS DataElement " );
         sqlsb.append( "FROM dataelement AS de " );
         sqlsb.append( "INNER JOIN categorycombos_optioncombos cat_opts on de.categorycomboid = cat_opts.categorycomboid ");
-        sqlsb.append( "INNER JOIN _categoryoptioncomboname cc on cat_opts.categoryoptioncomboid = cc.categoryoptioncomboid ");
+        sqlsb.append( "INNER JOIN categoryoptioncombo cc on cat_opts.categoryoptioncomboid = cc.categoryoptioncomboid ");
         sqlsb.append( "ORDER BY DataElement) " );
         
         return sqlsb.toString();
@@ -208,12 +188,12 @@ public class H2StatementBuilder
         {
             i++;
 
-            sqlsb.append( "SELECT de.dataelementid, (de.name || ' ' || cc.categoryoptioncomboname) AS DataElement, dv.value AS counts_of_aggregated_values, p.periodid AS PeriodId, p.startDate AS ColumnHeader " );
+            sqlsb.append( "SELECT de.dataelementid, (de.name || ' ' || cc.name) AS DataElement, dv.value AS counts_of_aggregated_values, p.periodid AS PeriodId, p.startDate AS ColumnHeader " );
             sqlsb.append( "FROM dataelement AS de " );
             sqlsb.append( "INNER JOIN datavalue AS dv ON (de.dataelementid = dv.dataelementid) " );
             sqlsb.append( "INNER JOIN period p ON (dv.periodid = p.periodid) " );
             sqlsb.append( "INNER JOIN categorycombos_optioncombos cat_opts on de.categorycomboid = cat_opts.categorycomboid ");
-            sqlsb.append( "INNER JOIN _categoryoptioncomboname cc on cat_opts.categoryoptioncomboid = cc.categoryoptioncomboid ");
+            sqlsb.append( "INNER JOIN categoryoptioncombo cc on cat_opts.categoryoptioncomboid = cc.categoryoptioncomboid ");
             sqlsb.append( "WHERE dv.sourceid = '" + orgUnitId + "' " );
             sqlsb.append( "AND dv.periodid = '" + periodId + "' " );
 

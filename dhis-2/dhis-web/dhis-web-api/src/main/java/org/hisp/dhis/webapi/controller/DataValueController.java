@@ -34,7 +34,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.NullInputStream;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.entity.ContentType;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.dataelement.DataElement;
@@ -66,7 +65,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.InvalidMimeTypeException;
-import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -413,7 +412,6 @@ public class DataValueController
         HttpServletResponse response )
         throws WebMessageException, IOException
     {
-
         boolean strictPeriods = (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_STRICT_PERIODS, false );
         boolean strictCategoryOptionCombos = (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_STRICT_CATEGORY_OPTION_COMBOS, false );
         boolean strictOrgUnits = (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_STRICT_ORGANISATION_UNITS, false );
@@ -427,7 +425,7 @@ public class DataValueController
 
         DataElementCategoryOptionCombo categoryOptionCombo = getAndValidateCategoryOptionCombo( co, requireCategoryOptionCombo );
 
-        DataElementCategoryOptionCombo attributeOptionCombo = getAndValidateAttributeOptionCombo( cc, cp );
+        getAndValidateAttributeOptionCombo( cc, cp );
 
         Period period = getAndValidatePeriod( pe );
 
@@ -476,7 +474,7 @@ public class DataValueController
         String filename = StringUtils.defaultIfBlank( FilenameUtils.getName( multipartFile.getOriginalFilename() ), "untitled" );
 
         String contentType = multipartFile.getContentType();
-        contentType = isValidContentType( contentType ) ? contentType : ContentType.APPLICATION_OCTET_STREAM.toString();
+        contentType = isValidContentType( contentType ) ? contentType : MimeTypeUtils.APPLICATION_OCTET_STREAM_VALUE;
 
         long contentLength = multipartFile.getSize();
 
@@ -590,7 +588,7 @@ public class DataValueController
 
         if ( fileResource.getDomain() != FileResourceDomain.DATA_VALUE )
         {
-            throw  new WebMessageException( WebMessageUtils.conflict( "File resource domain must be of type DATA_VALUE" ) );
+            throw  new WebMessageException( WebMessageUtils.conflict( "File resource domain must be DATA_VALUE" ) );
         }
 
         ByteSource content = fileResourceService.getFileResourceContent( fileResource );
@@ -613,7 +611,7 @@ public class DataValueController
         try
         {
             inputStream = content.openStream();
-            IOUtils.copyLarge( inputStream, response.getOutputStream() );
+            IOUtils.copy( inputStream, response.getOutputStream() );
         }
         catch ( IOException e )
         {
@@ -739,7 +737,7 @@ public class DataValueController
     {
         try
         {
-            MimeType.valueOf( contentType );
+            MimeTypeUtils.parseMimeType( contentType );
         }
         catch ( InvalidMimeTypeException e )
         {

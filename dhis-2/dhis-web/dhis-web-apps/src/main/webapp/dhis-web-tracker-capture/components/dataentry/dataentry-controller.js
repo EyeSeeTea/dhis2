@@ -39,6 +39,7 @@ trackerCapture.controller('DataEntryController',
     $scope.hiddenFields = {};
     $scope.errorMessages = {};
     $scope.warningMessages = {};
+    $scope.hiddenSections = {};
     $scope.tableMaxNumberOfDataElements = 10;
     
     //Labels
@@ -135,7 +136,19 @@ trackerCapture.controller('DataEntryController',
                     else {
                         $log.warn("ProgramRuleAction " + effect.id + " is of type HIDEFIELD, bot does not have a dataelement defined");
                     }
+                } else if (effect.action === "HIDESECTION"){                    
+                    if(effect.programStageSection){
+                        if(effect.ineffect){
+                            $scope.hiddenSections[effect.programStageSection] = true;
+                        } else{
+                            $scope.hiddenSections[effect.programStageSection] = false;
+                        }
+                    }
+                    else {
+                        $log.warn("ProgramRuleAction " + effect.id + " is of type HIDESECTION, bot does not have a section defined");
+                    }
                 }
+                
             }
         });
     };
@@ -172,8 +185,6 @@ trackerCapture.controller('DataEntryController',
         } else {
             TrackerRulesExecutionService.executeRules($scope.allProgramRules, $scope.currentEvent, evs, $scope.prStDes, $scope.selectedTei, $scope.selectedEnrollment, flag);
         }
-        
-        processRuleEffect($scope.currentEvent);
     };
 
 
@@ -736,30 +747,29 @@ trackerCapture.controller('DataEntryController',
 
     };
 
-    /*$scope.getInputNotifcationClass = function(id, custom, event){
-     if(!event) {
-     event = $scope.currentEvent;
-     }
-     if($scope.currentElement.id && $scope.currentElement.event){
-     if($scope.currentElement.saved && ($scope.currentElement.id === id && $scope.currentElement.event === event.event)){
-
-     if(custom){
-     return 'input-success';
-     }
-     return 'form-control input-success';
-     }            
-     if(!$scope.currentElement.saved && ($scope.currentElement.id === id && $scope.currentElement.event === event.event)){
-     if(custom){
-     return 'input-error';
-     }
-     return 'form-control input-error';
-     }            
-     }  
-     if(custom){
-     return '';
-     }
-     return 'form-control';
-     };*/
+    $scope.getInputNotifcationClass = function(id, custom, event){
+        if(!event) {
+            event = $scope.currentEvent;
+        }
+        if($scope.currentElement.id && $scope.currentElement.id === id && $scope.currentElement.event && $scope.currentElement.event === event.event){
+            if($scope.currentElement.saved){
+                if(custom){
+                    return 'input-success';
+                }
+                return 'form-control input-success';
+            }            
+            else{
+                if(custom){
+                    return 'input-error';
+                }
+                return 'form-control input-error';
+            }            
+        }  
+        if(custom){
+            return '';
+        }
+        return 'form-control';
+    };
 
     //Infinite Scroll
     $scope.infiniteScroll = {};
@@ -772,20 +782,6 @@ trackerCapture.controller('DataEntryController',
 
     $scope.addMoreOptions = function () {
         $scope.infiniteScroll.currentOptions += $scope.infiniteScroll.optionsToAdd;
-    };
-
-    $scope.getInputNotifcationClass = function (id, custom, event) {
-        if (!event) {
-            event = $scope.currentEvent;
-        }
-        if ($scope.currentElement.id &&
-                $scope.currentElement.event &&
-                $scope.currentElement.id === id &&
-                $scope.currentElement.event === event.event) {
-            return $scope.currentElement.saved ? 'input-success; ' : 'input-error; ';
-        }
-
-        return '';
     };
 
     var completeEnrollment = function () {
@@ -1187,8 +1183,6 @@ trackerCapture.controller('DataEntryController',
                 DialogService.showDialog({}, dialogOptions);
             }
         });
-
-
     };
 
     //If the caller wants to create right away, go ahead and save.

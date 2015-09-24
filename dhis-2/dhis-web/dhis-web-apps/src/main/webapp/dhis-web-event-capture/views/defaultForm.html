@@ -69,7 +69,7 @@
                     </div>
                 </td>                                                            
             </tr>            
-            <tr ng-repeat="eventGridColumn in eventGridColumns" ng-if="eventGridColumn.id !== 'comment' && eventGridColumn.id !== 'uid' && eventGridColumn.id !== 'event_date' && !isHidden(eventGridColumn.id)">
+            <tr ng-repeat="eventGridColumn in eventGridColumns" ng-if="eventGridColumn.id !== 'comment' && eventGridColumn.id !== 'uid' && eventGridColumn.id !== 'event_date' && !hiddenFields[eventGridColumn.id]">
                 <td >
                     {{eventGridColumn.name}}<span ng-if="eventGridColumn.compulsory" class="required">*</span>
                 </td>
@@ -115,7 +115,7 @@
                             <div ng-switch-when="NUMBER">
                                 <input type="number"                                         
                                        d2-number-validator
-                                       number-type={{prStDes[eventGridColumn.id].dataElement.numberType}}
+                                       number-type={{eventGridColumn.valueType}}
                                        ng-model="currentEvent[eventGridColumn.id]"                                        
                                        ng-required={{eventGridColumn.compulsory}}
                                        name="foo" 
@@ -126,7 +126,7 @@
                             <div ng-switch-when="INTEGER">
                                 <input type="number"                                         
                                        d2-number-validator
-                                       number-type={{prStDes[eventGridColumn.id].dataElement.numberType}}
+                                       number-type={{eventGridColumn.valueType}}
                                        ng-model="currentEvent[eventGridColumn.id]"                                        
                                        ng-required={{eventGridColumn.compulsory}}
                                        name="foo" 
@@ -137,7 +137,7 @@
                             <div ng-switch-when="INTEGER_POSITIVE">
                                 <input type="number"                                         
                                        d2-number-validator
-                                       number-type={{prStDes[eventGridColumn.id].dataElement.numberType}}
+                                       number-type={{eventGridColumn.valueType}}
                                        ng-model="currentEvent[eventGridColumn.id]"                                        
                                        ng-required={{eventGridColumn.compulsory}}
                                        name="foo" 
@@ -148,7 +148,7 @@
                             <div ng-switch-when="INTEGER_NEGATIVE">
                                 <input type="number"                                         
                                        d2-number-validator
-                                       number-type={{prStDes[eventGridColumn.id].dataElement.numberType}}
+                                       number-type={{eventGridColumn.valueType}}
                                        ng-model="currentEvent[eventGridColumn.id]"                                        
                                        ng-required={{eventGridColumn.compulsory}}
                                        name="foo" 
@@ -159,7 +159,7 @@
                             <div ng-switch-when="INTEGER_ZERO_OR_POSITIVE">
                                 <input type="number"                                         
                                        d2-number-validator
-                                       number-type={{prStDes[eventGridColumn.id].dataElement.numberType}}
+                                       number-type={{eventGridColumn.valueType}}
                                        ng-model="currentEvent[eventGridColumn.id]"                                        
                                        ng-required={{eventGridColumn.compulsory}}
                                        name="foo" 
@@ -249,7 +249,6 @@
     </table>    
 </div>
 
-
 <div ng-if='selectedProgramStage.programStageSections.length'>
     <table class="dhis2-list-table-striped">        
         <tbody>
@@ -314,7 +313,7 @@
         </tbody>
     </table>    
 
-    <div ng-repeat='section in selectedProgramStage.programStageSections' ng-if="section.id === selectedSection.id || selectedSection.id === 'ALL'">
+    <div ng-repeat='section in selectedProgramStage.programStageSections' ng-if="section.id === selectedSection.id || selectedSection.id === 'ALL' && !hiddenSections[section.id] ">
         <div class="vertical-spacing section-label">
            {{section.name}}
         </div>
@@ -331,7 +330,7 @@
                 </tr>                        
             </thead>
             <tbody>       
-                <tr ng-repeat="de in section.programStageDataElements" ng-if="!isHidden(de.dataElement.id)">
+                <tr ng-repeat="de in section.programStageDataElements" ng-if="!hiddenFields[de.dataElement.id]">
                     <td >
                         {{prStDes[de.dataElement.id].dataElement.formName ? prStDes[de.dataElement.id].dataElement.formName : prStDes[de.dataElement.id].dataElement.name}}                         
                         <span ng-if="prStDes[de.dataElement.id].compulsory" class="required">*</span>
@@ -378,7 +377,7 @@
                                 <div ng-switch-when="NUMBER">
                                     <input type="number"                                                
                                            d2-number-validator 
-                                           number-type={{prStDes[de.dataElement.id].dataElement.numberType}}
+                                           number-type={{prStDes[de.dataElement.id].dataElement.valueType}}
                                            ng-model="currentEvent[de.dataElement.id]"                                                
                                            ng-required={{prStDes[de.dataElement.id].compulsory}}
                                            name="foo" 
@@ -507,6 +506,9 @@
                             </div>                        
                             <div ng-messages="innerForm.foo.$error" ng-if="interacted(innerForm.foo)" class="required" ng-messages-include="../dhis-web-commons/angular-forms/error-messages.html">                                         
                             </div>
+                            <div ng-if="warningMessages[de.dataElement.id]">
+                                {{warningMessages[de.dataElement.id]}}
+                            </div>
                         </ng-form>
                     </td>
                 </tr>
@@ -516,6 +518,6 @@
 
 </div>
 
-<div ng-if="allProgramRules.programIndicators.rules && allProgramRules.programIndicators.rules.length > 0" ng-include="'views/indicators-section.html'"></div>
-<div ng-include="'views/comments-section.html'"></div>
-<div ng-include="'views/buttons-section.html'"></div>
+
+<!--<div ng-include="'views/comments-section.html'"></div>
+<div ng-include="'views/buttons-section.html'"></div>-->

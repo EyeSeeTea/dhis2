@@ -412,7 +412,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
     
     $scope.cancel = function(){
         
-        if($scope.formHasUnsavedData()){
+        if($scope.formIsChanged()){
             var modalOptions = {
                 closeButtonText: 'no',
                 actionButtonText: 'yes',
@@ -442,6 +442,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         $scope.editingEventInGrid = false;
         $scope.currentElement.updated = false;        
         $scope.currentEvent = {};
+        $scope.currentElement = {};
         $scope.currentEventOriginialValue = angular.copy($scope.currentEvent);
     };
     
@@ -803,7 +804,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         var isChanged = false;
         for(var i=0; i<$scope.selectedProgramStage.programStageDataElements.length && !isChanged; i++){
             var deId = $scope.selectedProgramStage.programStageDataElements[i].dataElement.id;
-            if($scope.currentEvent[deId] && $scope.currentEventOriginialValue[deId] !== $scope.currentEvent[deId]){
+            if($scope.currentEventOriginialValue[deId] !== $scope.currentEvent[deId]){
                 isChanged = true;
             }
         }        
@@ -844,13 +845,6 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         
         return formIsInvalid;
     };
-
-    $scope.formHasUnsavedData = function(){        
-        if(angular.isObject($scope.currentEvent) && angular.isObject($scope.currentEventOriginialValue)){
-            return !angular.equals($scope.currentEvent, $scope.currentEventOriginialValue);
-        }
-        return false;
-    };
     
     //watch for event editing
     $scope.$watchCollection('[editingEventInFull, eventRegistration]', function() {        
@@ -885,9 +879,13 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         $scope.infiniteScroll.currentOptions += $scope.infiniteScroll.optionsToAdd;
     };
     
-    //listen for rule effect changes
-    $scope.warningMessages = [];
+    //listen for rule effect changes    
     $scope.$on('ruleeffectsupdated', function(event, args) {
+        $scope.warningMessages = [];
+        $scope.hiddenSections = [];
+        $scope.hiddenFields = [];
+        
+        //console.log('args.event:  ', $rootScope.ruleeffects['SINGLE_EVENT'][0]);
         if($rootScope.ruleeffects[args.event]) {
             //Establish which event was affected:
             var affectedEvent = $scope.currentEvent;
@@ -899,12 +897,13 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                     }
                 });
             }
-            angular.forEach($rootScope.ruleeffects[args.event], function(effect) {                
-                if( effect.dataElement && effect.ineffect ) {
+            angular.forEach($rootScope.ruleeffects[args.event], function(effect) {
+                
+                if(effect.dataElement && effect.ineffect) {
                     //in the data entry controller we only care about the "hidefield" actions
                     if(effect.action === "HIDEFIELD") {
                         if(effect.dataElement) {
-                            if(effect.ineffect && affectedEvent[effect.dataElement.id]) {
+                            if(affectedEvent[effect.dataElement.id]) {
                                 //If a field is going to be hidden, but contains a value, we need to take action;
                                 if(effect.content) {
                                     //TODO: Alerts is going to be replaced with a proper display mecanism.
@@ -925,6 +924,11 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                             $log.warn("ProgramRuleAction " + effect.id + " is of type HIDEFIELD, bot does not have a dataelement defined");
                         }
                     }
+                    if(effect.action === "HIDESECTION") {
+                        if(effect.programStageSection){
+                            $scope.hiddenSections[effect.programStageSection] = effect.programStageSection;
+                        }
+                    }
                     if(effect.action === "SHOWERROR" && effect.dataElement.id){
                         var dialogOptions = {
                             headerText: 'validation_error',
@@ -935,12 +939,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                         $scope.currentEvent[effect.dataElement.id] = $scope.currentEventOriginialValue[effect.dataElement.id];
                     }
                     if(effect.action === "SHOWWARNING"){
-                        $scope.warningMessages[effect.dataElement.id] = effect.content + '<br>';
-                        var dialogOptions = {
-                            headerText: 'validation_warning',
-                            bodyText: effect.content
-                        };
-                        DialogService.showDialog({}, dialogOptions);
+                        $scope.warningMessages.push(effect.content);
                     }
                 }
             });
@@ -953,9 +952,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         $scope.eventsByStage[$scope.selectedProgramStage.id] = [$scope.currentEvent];
         var evs = {all: [$scope.currentEvent], byStage: $scope.eventsByStage};
         
-        var flag = {debug: true, verbose: false};
-        
-        //TrackerRulesExecutionService.executeRules($scope.selectedProgram.id,$scope.currentEvent,$scope.eventsByStage,$scope.prStDes,null,false);
+        var flag = {debug: true, verbose: false};        
         TrackerRulesExecutionService.executeRules($scope.allProgramRules, $scope.currentEvent, evs, $scope.prStDes, $scope.selectedTei, $scope.selectedEnrollment, flag);
     };
        
@@ -964,30 +961,28 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         return dhis2.validation.isNumber(val) ? val : '';
     };
     
-    //check if field is hidden
-    $scope.isHidden = function(id) {
-        //In case the field contains a value, we cant hide it. 
-        //If we hid a field with a value, it would falsely seem the user was aware that the value was entered in the UI.
-        if($scope.currentEvent[id]) {
-           return false; 
-        }
-        else {
-            return $scope.hiddenFields[id];
-        }
-    }; 
-    
     $scope.saveDatavalue = function(){        
         $scope.executeRules();
     };
-    /*$scope.getInputNotifcationClass = function(id, custom, event){
-        var style = "";
-        if($scope.currentElement.id && $scope.currentElement.id === id){            
-            style = $scope.currentElement.updated ? 'update-success' : 'update-error';
-        }
-        return style + ' form-control'; 
-    };*/
     
-    $scope.getInputNotifcationClass = function(id, custom){        
-        return '; ';
+    $scope.getInputNotifcationClass = function(id, custom){
+        if($scope.currentElement.id && $scope.currentElement.id === id){
+            if($scope.currentElement.updated){
+                if(custom){
+                    return 'input-success';
+                }
+                return 'form-control input-success';
+            }            
+            else{
+                if(custom){
+                    return 'input-error';
+                }
+                return 'form-control input-error';
+            }            
+        }  
+        if(custom){
+            return '';
+        }
+        return 'form-control';
     };
 });

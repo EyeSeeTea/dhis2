@@ -48,6 +48,8 @@ import org.springframework.util.StringUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -442,19 +444,25 @@ public class Schema implements Ordered, Klass
         this.propertyMap = propertyMap;
     }
 
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "references", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "reference", namespace = DxfNamespaces.DXF_2_0 )
+    @SuppressWarnings( "rawtypes" )
+    public Set<Class> getReferences()
+    {
+        return getProperties().stream()
+            .filter( p -> p.isCollection() ? PropertyType.REFERENCE == p.getItemPropertyType() : PropertyType.REFERENCE == p.getPropertyType() )
+            .map( p -> p.isCollection() ? p.getItemKlass() : p.getKlass() ).collect( Collectors.toSet() );
+    }
+
     public Map<String, Property> getPersistedProperties()
     {
         if ( persistedProperties == null )
         {
             persistedProperties = new HashMap<>();
 
-            for ( Map.Entry<String, Property> entry : getPropertyMap().entrySet() )
-            {
-                if ( entry.getValue().isPersisted() )
-                {
-                    persistedProperties.put( entry.getKey(), entry.getValue() );
-                }
-            }
+            getPropertyMap().entrySet().stream().filter( entry -> entry.getValue().isPersisted() )
+                .forEach( entry -> persistedProperties.put( entry.getKey(), entry.getValue() ) );
         }
 
         return persistedProperties;
@@ -466,13 +474,8 @@ public class Schema implements Ordered, Klass
         {
             nonPersistedProperties = new HashMap<>();
 
-            for ( Map.Entry<String, Property> entry : getPropertyMap().entrySet() )
-            {
-                if ( !entry.getValue().isPersisted() )
-                {
-                    nonPersistedProperties.put( entry.getKey(), entry.getValue() );
-                }
-            }
+            getPropertyMap().entrySet().stream().filter( entry -> !entry.getValue().isPersisted() )
+                .forEach( entry -> nonPersistedProperties.put( entry.getKey(), entry.getValue() ) );
         }
 
         return nonPersistedProperties;
@@ -520,13 +523,8 @@ public class Schema implements Ordered, Klass
         {
             List<String> authorityList = Lists.newArrayList();
 
-            for ( Authority authority : authorities )
-            {
-                if ( type.equals( authority.getType() ) )
-                {
-                    authorityList.addAll( authority.getAuthorities() );
-                }
-            }
+            authorities.stream().filter( authority -> type.equals( authority.getType() ) )
+                .forEach( authority -> authorityList.addAll( authority.getAuthorities() ) );
 
             authorityMap.put( type, authorityList );
         }

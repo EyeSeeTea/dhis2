@@ -32,10 +32,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.analytics.AnalyticsService;
 import org.hisp.dhis.analytics.DataQueryParams;
@@ -46,7 +49,12 @@ import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.common.IllegalQueryException;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementDomain;
+import org.hisp.dhis.dataelement.DataElementGroup;
+import org.hisp.dhis.dataelement.DataElementGroupSet;
+import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
@@ -58,12 +66,15 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.period.RelativePeriodEnum;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.hisp.dhis.common.DimensionalObject.*;
 
 /**
  * @author Lars Helge Overland
@@ -77,6 +88,8 @@ public class AnalyticsServiceTest
     private DataElement deD;
     private DataElement deE;
     private DataElement deF;
+    
+    private DataElementCategoryOptionCombo cocA;
     
     private DataSet dsA;
     private DataSet dsB;
@@ -96,6 +109,12 @@ public class AnalyticsServiceTest
     
     private OrganisationUnitGroupSet ouGroupSetA;
     
+    private DataElementGroup deGroupA;
+    private DataElementGroup deGroupB;
+    private DataElementGroup deGroupC;
+    
+    private DataElementGroupSet deGroupSetA;
+    
     private PeriodType monthly = PeriodType.getPeriodTypeByName( MonthlyPeriodType.NAME );
     
     @Autowired
@@ -103,6 +122,9 @@ public class AnalyticsServiceTest
     
     @Autowired
     private DataElementService dataElementService;
+    
+    @Autowired
+    private DataElementCategoryService categoryService;
     
     @Autowired
     private DataSetService dataSetService;
@@ -135,6 +157,8 @@ public class AnalyticsServiceTest
         dataElementService.addDataElement( deD );
         dataElementService.addDataElement( deE );
         dataElementService.addDataElement( deF );
+        
+        cocA = categoryService.getDefaultDataElementCategoryOptionCombo();
 
         dsA = createDataSet( 'A', monthly );
         dsB = createDataSet( 'B', monthly );
@@ -172,11 +196,7 @@ public class AnalyticsServiceTest
         ouGroupA = createOrganisationUnitGroup( 'A' );
         ouGroupB = createOrganisationUnitGroup( 'B' );
         ouGroupC = createOrganisationUnitGroup( 'C' );
-        
-        ouGroupA.setGroupSet( ouGroupSetA );
-        ouGroupB.setGroupSet( ouGroupSetA );
-        ouGroupC.setGroupSet( ouGroupSetA );
-        
+                
         ouGroupA.addOrganisationUnit( ouA );
         ouGroupA.addOrganisationUnit( ouB );
         ouGroupA.addOrganisationUnit( ouC );
@@ -185,12 +205,39 @@ public class AnalyticsServiceTest
         organisationUnitGroupService.addOrganisationUnitGroup( ouGroupB );
         organisationUnitGroupService.addOrganisationUnitGroup( ouGroupC );
         
-        ouGroupSetA.getOrganisationUnitGroups().add( ouGroupA );
-        ouGroupSetA.getOrganisationUnitGroups().add( ouGroupB );
-        ouGroupSetA.getOrganisationUnitGroups().add( ouGroupC );
+        ouGroupSetA.addOrganisationUnitGroup( ouGroupA );
+        ouGroupSetA.addOrganisationUnitGroup( ouGroupB );
+        ouGroupSetA.addOrganisationUnitGroup( ouGroupC );
         
         organisationUnitGroupService.updateOrganisationUnitGroupSet( ouGroupSetA );
 
+        deGroupSetA = createDataElementGroupSet( 'A' );
+        
+        dataElementService.addDataElementGroupSet( deGroupSetA );
+        
+        deGroupA = createDataElementGroup( 'A' );
+        deGroupB = createDataElementGroup( 'B' );
+        deGroupC = createDataElementGroup( 'C' );
+        
+        deGroupA.setGroupSet( deGroupSetA );
+        deGroupB.setGroupSet( deGroupSetA );
+        deGroupC.setGroupSet( deGroupSetA );
+        
+        deGroupA.setGroupSet( deGroupSetA );
+        deGroupA.addDataElement( deA );
+        deGroupA.addDataElement( deB );
+        deGroupA.addDataElement( deC );
+                
+        dataElementService.addDataElementGroup( deGroupA );
+        dataElementService.addDataElementGroup( deGroupB );
+        dataElementService.addDataElementGroup( deGroupC );
+        
+        deGroupSetA.addDataElementGroup( deGroupA );
+        deGroupSetA.addDataElementGroup( deGroupB );
+        deGroupSetA.addDataElementGroup( deGroupC );
+        
+        dataElementService.updateDataElementGroupSet( deGroupSetA );
+        
         // ---------------------------------------------------------------------
         // Mock injection
         // ---------------------------------------------------------------------
@@ -202,11 +249,56 @@ public class AnalyticsServiceTest
         
         setDependency( analyticsService, "currentUserService", currentUserService );
     }
+
+    @Test
+    public void testGetDimensionalObjects()
+    {
+        Set<String> dimensionParams = new LinkedHashSet<>();
+        dimensionParams.add( DimensionalObject.DATA_X_DIM_ID + DIMENSION_NAME_SEP + deA.getUid() + OPTION_SEP + deB.getUid() + OPTION_SEP + dsA.getUid() );
+        dimensionParams.add( DimensionalObject.ORGUNIT_DIM_ID + DIMENSION_NAME_SEP + ouA.getUid() + OPTION_SEP + ouB.getUid() );
+        
+        List<DimensionalObject> dimensionalObject = analyticsService.getDimensionalObjects( dimensionParams, null, null, null );
+        
+        DimensionalObject dxObject = dimensionalObject.get( 0 );
+        DimensionalObject ouObject = dimensionalObject.get( 1 );
+
+        List<NameableObject> dxItems = Lists.newArrayList( deA, deB, dsA );
+        List<NameableObject> ouItems = Lists.newArrayList( ouA, ouB );
+
+        assertEquals( DimensionalObject.DATA_X_DIM_ID, dxObject.getDimension() );
+        assertEquals( DimensionType.DATA_X, dxObject.getDimensionType() );
+        assertEquals( DataQueryParams.DISPLAY_NAME_DATA_X, dxObject.getDisplayName() );
+        assertEquals( dxItems, dxObject.getItems() );
+
+        assertEquals( DimensionalObject.ORGUNIT_DIM_ID, ouObject.getDimension() );
+        assertEquals( DimensionType.ORGANISATIONUNIT, ouObject.getDimensionType() );
+        assertEquals( DataQueryParams.DISPLAY_NAME_ORGUNIT, ouObject.getDisplayName() );
+        assertEquals( ouItems, ouObject.getItems() );
+    }
     
     @Test
     public void testGetDimensionData()
     {
         List<NameableObject> items = Lists.newArrayList( deA, deB, deC, dsA, dsB );
+        
+        List<String> itemUids = IdentifiableObjectUtils.getUids( items );
+        
+        DimensionalObject actual = analyticsService.getDimension( DimensionalObject.DATA_X_DIM_ID, itemUids, null, null, null, false );
+        
+        assertEquals( DimensionalObject.DATA_X_DIM_ID, actual.getDimension() );
+        assertEquals( DimensionType.DATA_X, actual.getDimensionType() );
+        assertEquals( DataQueryParams.DISPLAY_NAME_DATA_X, actual.getDisplayName() );
+        assertEquals( items, actual.getItems() );
+    }
+
+    @Test
+    public void testGetDimensionOperand()
+    {
+        DataElementOperand opA = new DataElementOperand( deA, cocA );
+        DataElementOperand opB = new DataElementOperand( deB, cocA );
+        DataElementOperand opC = new DataElementOperand( deC, cocA );
+        
+        List<NameableObject> items = Lists.newArrayList( opA, opB, opC );
         
         List<String> itemUids = IdentifiableObjectUtils.getUids( items );
         
@@ -230,7 +322,36 @@ public class AnalyticsServiceTest
         assertEquals( DimensionalObject.ORGUNIT_DIM_ID, actual.getDimension() );
         assertEquals( DimensionType.ORGANISATIONUNIT, actual.getDimensionType() );
         assertEquals( DataQueryParams.DISPLAY_NAME_ORGUNIT, actual.getDisplayName() );
-        assertEquals( items, actual.getItems() );        
+        assertEquals( items, actual.getItems() );
+    }
+
+    @Test
+    public void testGetDimensionOrgUnitGroup()
+    {        
+        String ouGroupAUid = OrganisationUnit.KEY_ORGUNIT_GROUP + ouGroupA.getUid();
+        
+        List<String> itemUids = Lists.newArrayList( ouGroupAUid );
+
+        DimensionalObject actual = analyticsService.getDimension( DimensionalObject.ORGUNIT_DIM_ID, itemUids, null, null, null, false );
+        
+        assertEquals( DimensionalObject.ORGUNIT_DIM_ID, actual.getDimension() );
+        assertEquals( DimensionType.ORGANISATIONUNIT, actual.getDimensionType() );
+        assertEquals( DataQueryParams.DISPLAY_NAME_ORGUNIT, actual.getDisplayName() );
+        assertEquals( ouGroupA.getMembers(), Sets.newHashSet( actual.getItems() ) );        
+    }
+    
+    @Test
+    public void testGetDimensionPeriod()
+    {
+        List<String> itemUids = Lists.newArrayList( "199501", "1999", 
+            RelativePeriodEnum.LAST_4_QUARTERS.toString(), RelativePeriodEnum.THIS_YEAR.toString() );
+
+        DimensionalObject actual = analyticsService.getDimension( DimensionalObject.PERIOD_DIM_ID, itemUids, null, null, null, false );
+        
+        assertEquals( DimensionalObject.PERIOD_DIM_ID, actual.getDimension() );
+        assertEquals( DimensionType.PERIOD, actual.getDimensionType() );
+        assertEquals( DataQueryParams.DISPLAY_NAME_PERIOD, actual.getDisplayName() );
+        assertEquals( 7, actual.getItems().size() );
     }
     
     @Test
@@ -245,6 +366,21 @@ public class AnalyticsServiceTest
         assertEquals( ouGroupSetA.getUid(), actual.getDimension() );
         assertEquals( DimensionType.ORGANISATIONUNIT_GROUPSET, actual.getDimensionType() );
         assertEquals( ouGroupSetA.getName(), actual.getDisplayName() );
+        assertEquals( items, actual.getItems() );  
+    }
+
+    @Test
+    public void testGetDimensionDataElementGroupSet()
+    {
+        List<NameableObject> items = Lists.newArrayList( deGroupA, deGroupB );
+        
+        List<String> itemUids = IdentifiableObjectUtils.getUids( items );
+        
+        DimensionalObject actual = analyticsService.getDimension( deGroupSetA.getUid(), itemUids, null, null, null, false );
+        
+        assertEquals( deGroupSetA.getUid(), actual.getDimension() );
+        assertEquals( DimensionType.DATAELEMENT_GROUPSET, actual.getDimensionType() );
+        assertEquals( deGroupSetA.getName(), actual.getDisplayName() );
         assertEquals( items, actual.getItems() );  
     }
     

@@ -55,10 +55,10 @@ public class SqlViewServiceTest
 
     private String sqlA = "SELECT   *  FROM     _categorystructure;;  ; ;;;  ;; ; ";
 
-    private String sqlB = "SELECT COUNT(_ous.*) AS so_dem FROM _orgunitstructure AS _ous";
+    private String sqlB = "SELECT COUNT(*) from organisationunit;";
 
     private String sqlC = "SELECT COUNT(_cocn.*) AS so_dem, _icgss.indicatorid AS in_id"
-        + "FROM _indicatorgroupsetstructure AS _icgss, _categoryoptioncomboname AS _cocn "
+        + "FROM _indicatorgroupsetstructure AS _icgss, categoryoptioncombo AS _cocn "
         + "GROUP BY _icgss.indicatorid;";
 
     private String sqlD = "SELECT de.name, dv.sourceid, dv.value, p.startdate "

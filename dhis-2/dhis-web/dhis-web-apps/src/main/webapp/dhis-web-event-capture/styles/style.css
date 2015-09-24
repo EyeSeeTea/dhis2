@@ -53,11 +53,11 @@ div.paging a.active
 }
 
 .input-error {
-    background-color: #fffe8c;
+    background-color: #ff8a8a !important;
 }
 
-.update-success {
-    background-color: #b9ffb9;
+.input-success {
+    background-color: #b9ffb9 !important;
 }
 
 .red {
@@ -324,7 +324,11 @@ div#orgUnitTree {
     font-size: 14pt;
     color: #585D61;
     border-bottom: 1px solid #e3e3e3;
-    //text-align: center;
+}
+
+.warning-message-label {
+    height: 34px;
+    font-size: 14px;
 }
 
 .selectionGroup{
@@ -362,4 +366,8 @@ div#orgUnitTree {
 .form-control{
     color: black;
     padding: 5px !important;
+}
+
+.bold {
+    font-weight: bold;
 }
