@@ -237,7 +237,7 @@ class DataApprovalPermissionsEvaluator
         try
         {
             userApprovalLevel = USER_APPROVAL_LEVEL_CACHE.get( user.getId() + "-" + da.getOrganisationUnit().getId(),
-                () -> dataApprovalLevelService.getUserApprovalLevel( user, dataApproval.getOrganisationUnit() ) );
+                () -> dataApprovalLevelService.getUserApprovalLevel( user, dataApproval.getOrganisationUnit(), dataApprovalWorkflow.getMembersSortedByLevel() ) );
         }
         catch ( CacheLoader.InvalidCacheLoadException ex )
         {
