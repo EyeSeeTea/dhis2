@@ -421,7 +421,7 @@ public class JDBCDataBrowserStore
         List<Integer> headerIds = new ArrayList<>();
         setHeaderStructure( grid, rs, headerIds, isZeroAdded );
 
-        if ( rs.first() != true )
+        if ( !rs.first() )
         {
             return countRows;
         }
@@ -483,7 +483,7 @@ public class JDBCDataBrowserStore
             maxLevel = organisationUnitService.getMaxOfOrganisationUnitLevels();
         }
 
-        int curLevel = organisationUnitService.getLevelOfOrganisationUnit( orgUnitSelected );
+        int curLevel = organisationUnitService.getOrganisationUnit( orgUnitSelected ).getLevel();
         int loopSize = betweenPeriodIds.size();
 
         String descendantQuery = this.setUpQueryGetDescendants( curLevel, maxLevel, orgUnitSelected );

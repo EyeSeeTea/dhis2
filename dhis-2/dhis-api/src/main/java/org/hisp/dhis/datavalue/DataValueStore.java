@@ -79,22 +79,6 @@ public interface DataValueStore
     void deleteDataValue( DataValue dataValue );
     
     /**
-     * Deletes all DataValues registered for the given Source.
-     * 
-     * @param source the Source for which the DataValues should be deleted.
-     * @return the number of deleted DataValues.
-     */
-    int deleteDataValuesBySource( OrganisationUnit source );
-    
-    /**
-     * Deletes all DataValues registered for the given DataElement.
-     * 
-     * @param dataElement the DataElement for which the DataValues should be deleted.
-     * @return the number of deleted DataValues.
-     */
-    int deleteDataValuesByDataElement( DataElement dataElement );
-    
-    /**
      * Returns a DataValue.
      * 
      * @param dataElement the DataElement of the DataValue.
@@ -294,7 +278,7 @@ public interface DataValueStore
      * @param lastUpdatedMap map in which to return the lastUpdated date for each value
      * @return map of values by attribute option combo id, then DataElementOperand
      */
-    public MapMap<Integer, DataElementOperand, Double> getDataValueMapByAttributeCombo( Collection<DataElement> dataElements, Date date,
+    MapMap<Integer, DataElementOperand, Double> getDataValueMapByAttributeCombo( Collection<DataElement> dataElements, Date date,
         OrganisationUnit source, Collection<PeriodType> periodTypes, DataElementCategoryOptionCombo attributeCombo,
         Set<CategoryOptionGroup> cogDimensionConstraints, Set<DataElementCategoryOption> coDimensionConstraints,
         MapMap<Integer, DataElementOperand, Date> lastUpdatedMap );

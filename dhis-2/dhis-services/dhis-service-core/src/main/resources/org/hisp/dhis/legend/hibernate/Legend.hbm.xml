@@ -11,16 +11,9 @@
     <id name="id" column="maplegendid">
       <generator class="native" />
     </id>
+    &identifiableProperties;
 
     <property name="name" column="name" not-null="true" unique="false" length="230" />
-
-    <property name="uid" column="uid" length="11" />
-
-    <property name="code" column="code" not-null="false" unique="true" length="50" />
-
-    <property name="created" type="timestamp" />
-
-    <property name="lastUpdated" type="timestamp" />
 
     <property name="startValue" column="startvalue" index="maplegend_startvalue" />
 

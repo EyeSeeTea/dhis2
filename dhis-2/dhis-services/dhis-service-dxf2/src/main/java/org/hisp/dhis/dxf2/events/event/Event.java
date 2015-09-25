@@ -34,6 +34,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseLinkableObject;
 import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.dxf2.events.enrollment.EnrollmentStatus;
 import org.hisp.dhis.event.EventStatus;
 
 import java.util.ArrayList;
@@ -56,7 +57,7 @@ public class Event
 
     private String enrollment;
 
-    private EventStatus enrollmentStatus;
+    private EnrollmentStatus enrollmentStatus;
 
     private String orgUnit;
 
@@ -81,6 +82,8 @@ public class Event
     private String created;
 
     private String lastUpdated;
+    
+    private String attributeCategoryOptions;
 
     public Event()
     {
@@ -100,12 +103,12 @@ public class Event
 
     @JsonProperty( required = true )
     @JacksonXmlProperty( isAttribute = true )
-    public EventStatus getEnrollmentStatus()
+    public EnrollmentStatus getEnrollmentStatus()
     {
         return enrollmentStatus;
     }
 
-    public void setEnrollmentStatus( EventStatus programStatus )
+    public void setEnrollmentStatus( EnrollmentStatus programStatus )
     {
         this.enrollmentStatus = programStatus;
     }
@@ -303,6 +306,18 @@ public class Event
     {
         this.lastUpdated = lastUpdated;
     }
+    
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getAttributeCategoryOptions()
+    {
+        return attributeCategoryOptions;
+    }
+
+    public void setAttributeCategoryOptions( String attributeCategoryOptions )
+    {
+        this.attributeCategoryOptions = attributeCategoryOptions;
+    } 
 
     @Override
     public boolean equals( Object o )
@@ -338,6 +353,7 @@ public class Event
             ", storedBy='" + storedBy + '\'' +
             ", coordinate=" + coordinate +
             ", dataValues=" + dataValues +
+            ", attributeCategoryOptions=" + attributeCategoryOptions +
             '}';
-    }
+    }       
 }

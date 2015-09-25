@@ -36,8 +36,9 @@ public interface SqlFunction
     /**
      * Evaluates the function using the given column name.
      * 
-     * @param column the quoted column name.
+     * @param args the arguments.
+     * 
      * @return the result of the evaluation.
      */
-    String evaluate( String column );
+    String evaluate( String... args );
 }

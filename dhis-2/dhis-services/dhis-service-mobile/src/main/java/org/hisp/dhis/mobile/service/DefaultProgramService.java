@@ -28,12 +28,6 @@ package org.hisp.dhis.mobile.service;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.hisp.dhis.api.mobile.IProgramService;
 import org.hisp.dhis.api.mobile.model.DataElement;
 import org.hisp.dhis.api.mobile.model.Model;
@@ -41,6 +35,7 @@ import org.hisp.dhis.api.mobile.model.ModelList;
 import org.hisp.dhis.api.mobile.model.OptionSet;
 import org.hisp.dhis.api.mobile.model.Program;
 import org.hisp.dhis.api.mobile.model.ProgramStage;
+import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.ProgramStageDataElement;
 import org.hisp.dhis.program.ProgramStageSection;
@@ -50,6 +45,12 @@ import org.hisp.dhis.relationship.RelationshipTypeService;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class DefaultProgramService
     implements IProgramService
@@ -199,9 +200,9 @@ public class DefaultProgramService
         pr.setName( program.getName() );
         pr.setType( program.getProgramType().getValue() );
         pr.setVersion( program.getVersion() );
-        pr.setDateOfEnrollmentDescription( program.getDateOfEnrollmentDescription() );
-        pr.setDateOfIncidentDescription( program.getDateOfIncidentDescription() );
-        if( program.getTrackedEntity() != null && program.getTrackedEntity().getName() != null)
+        pr.setDateOfEnrollmentDescription( program.getEnrollmentDateLabel() );
+        pr.setDateOfIncidentDescription( program.getIncidentDateLabel() );
+        if ( program.getTrackedEntity() != null && program.getTrackedEntity().getName() != null )
         {
             pr.setTrackedEntityName( program.getTrackedEntity().getName() );
         }
@@ -219,7 +220,7 @@ public class DefaultProgramService
             prStg.setReportDate( "" );
 
             prStg.setReportDateDescription( programStage.getReportDateDescription() );
-            
+
             prStg.setDueDate( "" );
 
             prStg.setId( programStage.getId() );
@@ -248,13 +249,11 @@ public class DefaultProgramService
             for ( ProgramStageDataElement programStageDataElement : programStageDataElements )
             {
                 org.hisp.dhis.dataelement.DataElement dataElement = programStageDataElement.getDataElement();
-
                 org.hisp.dhis.api.mobile.model.LWUITmodel.ProgramStageDataElement de = ModelMapping
                     .getDataElementLWUIT( dataElement );
 
                 de.setCompulsory( programStageDataElement.isCompulsory() );
-
-                de.setNumberType( programStageDataElement.getDataElement().getNumberType() );
+                de.setNumberType( null );
 
                 des.add( de );
             }
@@ -263,6 +262,7 @@ public class DefaultProgramService
 
             // Set all program sections
             List<org.hisp.dhis.api.mobile.model.LWUITmodel.Section> mobileSections = new ArrayList<>();
+
             if ( programStage.getProgramStageSections().size() > 0 )
             {
                 for ( ProgramStageSection eachSection : programStage.getProgramStageSections() )
@@ -274,11 +274,13 @@ public class DefaultProgramService
                     // Set all data elements' id, then we could have full from
                     // data element list of program stage
                     List<Integer> dataElementIds = new ArrayList<>();
+
                     for ( ProgramStageDataElement eachPogramStageDataElement : eachSection
                         .getProgramStageDataElements() )
                     {
                         dataElementIds.add( eachPogramStageDataElement.getDataElement().getId() );
                     }
+
                     mobileSection.setDataElementIds( dataElementIds );
                     mobileSections.add( mobileSection );
                 }
@@ -290,8 +292,7 @@ public class DefaultProgramService
 
         pr.setProgramStages( prStgs );
 
-        List<ProgramTrackedEntityAttribute> programPatientAttributes = new ArrayList<>(
-            program.getProgramAttributes() );
+        List<ProgramTrackedEntityAttribute> programPatientAttributes = new ArrayList<>( program.getProgramAttributes() );
 
         for ( ProgramTrackedEntityAttribute ppa : programPatientAttributes )
         {
@@ -326,10 +327,10 @@ public class DefaultProgramService
         {
             mobileAttribute.setDisplayedInList( false );
         }
-        
+
         mobileAttribute.setMandatory( ppa.isMandatory() );
 
-        if ( pa.getValueType().equals( TrackedEntityAttribute.TYPE_OPTION_SET ) )
+        if ( ValueType.OPTION_SET == pa.getValueType() )
         {
             OptionSet optionSet = new OptionSet();
 
@@ -337,7 +338,7 @@ public class DefaultProgramService
             {
                 optionSet.setId( pa.getOptionSet().getId() );
                 optionSet.setName( pa.getOptionSet().getName() );
-                // optionSet.setOptions( pa.getOptionSet().getOptions() );
+                optionSet.setOptions( pa.getOptionSet().getOptionValues() );
 
                 mobileAttribute.setOptionSet( optionSet );
             }
@@ -357,10 +358,10 @@ public class DefaultProgramService
     {
         try
         {
-            List<RelationshipType> relationshipTypes = new ArrayList<RelationshipType>(
+            List<RelationshipType> relationshipTypes = new ArrayList<>(
                 relationshipTypeService.getAllRelationshipTypes() );
 
-            List<org.hisp.dhis.api.mobile.model.LWUITmodel.RelationshipType> mobileRelationshipTypes = new ArrayList<org.hisp.dhis.api.mobile.model.LWUITmodel.RelationshipType>();
+            List<org.hisp.dhis.api.mobile.model.LWUITmodel.RelationshipType> mobileRelationshipTypes = new ArrayList<>();
             for ( RelationshipType relType : relationshipTypes )
             {
                 org.hisp.dhis.api.mobile.model.LWUITmodel.RelationshipType mobileRelType = new org.hisp.dhis.api.mobile.model.LWUITmodel.RelationshipType();

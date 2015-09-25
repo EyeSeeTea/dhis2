@@ -28,14 +28,8 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.commons.lang3.BooleanUtils;
+import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.i18n.I18n;
@@ -43,6 +37,13 @@ import org.hisp.dhis.option.Option;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValue;
 import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValueService;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Chau Thu Tran
@@ -187,12 +188,6 @@ public class DefaultProgramDataEntryService
                 }
 
                 // -------------------------------------------------------------
-                // Find type of data element
-                // -------------------------------------------------------------
-
-                String dataElementType = dataElement.getDetailedNumberType();
-
-                // -------------------------------------------------------------
                 // Find existing value of data element in data set
                 // -------------------------------------------------------------
 
@@ -232,12 +227,12 @@ public class DefaultProgramDataEntryService
                 if ( inputHTML.contains( "title=\"\"" ) )
                 {
                     inputHTML = inputHTML.replace( "title=\"\"", "title=\"[ " + dataElement.getUid() + " - "
-                        + dataElement.getName() + " - " + dataElementType + " ]\" " );
+                        + dataElement.getName() + " - " + dataElement.getValueType() + " ]\" " );
                 }
                 else
                 {
                     inputHTML += "title=\"[ " + dataElement.getUid() + " - " + dataElement.getName() + " - "
-                        + dataElementType + " ]\" ";
+                        + dataElement.getValueType() + " ]\" ";
                 }
 
                 // -------------------------------------------------------------
@@ -246,27 +241,27 @@ public class DefaultProgramDataEntryService
 
                 tabindex++;
 
+                ValueType valueType = dataElement.getValueType();
+
                 if ( dataElement.getOptionSet() != null && dataElement.getOptionSet().getOptions().size() < 7
                     && programStage.getProgram().getDataEntryMethod() )
                 {
                     String idField = programStageUid + "-" + dataElementUid + "-val";
                     inputHTML = populateCustomDataEntryForOptionSet( dataElement, idField, entityInstanceDataValue, i18n );
                 }
-                else if ( DataElement.VALUE_TYPE_INT.equals( dataElement.getType() )
-                    || DataElement.VALUE_TYPE_STRING.equals( dataElement.getType() )
-                    || DataElement.VALUE_TYPE_USER_NAME.equals( dataElement.getType() ) )
+                else if ( valueType.isText() || valueType.isNumeric() || ValueType.USERNAME == valueType )
                 {
                     inputHTML = populateCustomDataEntryForTextBox( dataElement, inputHTML, dataElementValue );
                 }
-                else if ( DataElement.VALUE_TYPE_DATE.equals( dataElement.getType() ) )
+                else if ( ValueType.DATE == valueType || ValueType.DATETIME == valueType )
                 {
                     inputHTML = populateCustomDataEntryForDate( inputHTML, dataElementValue );
                 }
-                else if ( DataElement.VALUE_TYPE_TRUE_ONLY.equals( dataElement.getType() ) )
+                else if ( ValueType.TRUE_ONLY == valueType )
                 {
                     inputHTML = populateCustomDataEntryForTrueOnly( dataElement, inputHTML, dataElementValue );
                 }
-                else if ( DataElement.VALUE_TYPE_BOOL.equals( dataElement.getType() ) )
+                else if ( ValueType.BOOLEAN == valueType )
                 {
                     inputHTML = populateCustomDataEntryForBoolean( dataElement, inputHTML, dataElementValue, i18n );
                 }
@@ -284,7 +279,7 @@ public class DefaultProgramDataEntryService
                 }
                 else
                 {
-                    if ( DataElement.VALUE_TYPE_DATE.equals( dataElement.getType() ) )
+                    if ( ValueType.DATE == valueType || ValueType.DATETIME == valueType )
                     {
                         inputHTML += jQueryCalendar;
                     }
@@ -305,7 +300,7 @@ public class DefaultProgramDataEntryService
                 inputHTML = inputHTML.replace( "$PROGRAMSTAGEID", String.valueOf( programStageUid ) );
                 inputHTML = inputHTML.replace( "$PROGRAMSTAGENAME", programStageName );
                 inputHTML = inputHTML.replace( "$DATAELEMENTNAME", dataElement.getFormNameFallback() );
-                inputHTML = inputHTML.replace( "$DATAELEMENTTYPE", dataElementType );
+                inputHTML = inputHTML.replace( "$DATAELEMENTTYPE", dataElement.getValueType().toString() );
                 inputHTML = inputHTML.replace( "$DISABLED", disabled );
                 inputHTML = inputHTML.replace( "$COMPULSORY", compulsory );
                 inputHTML = inputHTML.replace( "$SAVEMODE", "false" );
@@ -404,12 +399,6 @@ public class DefaultProgramDataEntryService
                 }
 
                 // -------------------------------------------------------------
-                // Find type of data element
-                // -------------------------------------------------------------
-
-                String dataElementType = dataElement.getDetailedNumberType();
-
-                // -------------------------------------------------------------
                 // Find existing value of data element in data set
                 // -------------------------------------------------------------
 
@@ -425,12 +414,12 @@ public class DefaultProgramDataEntryService
                 if ( inputHTML.contains( "title=\"\"" ) )
                 {
                     inputHTML = inputHTML.replace( "title=\"\"", "title=\"[ " + dataElement.getUid() + " - "
-                        + dataElement.getName() + " - " + dataElementType + " ]\" " );
+                        + dataElement.getName() + " - " + dataElement.getValueType() + " ]\" " );
                 }
                 else
                 {
                     inputHTML += "title=\"[ " + dataElement.getUid() + " - " + dataElement.getName() + " - "
-                        + dataElementType + " ]\" ";
+                        + dataElement.getValueType() + " ]\" ";
                 }
 
                 // -------------------------------------------------------------
@@ -439,21 +428,21 @@ public class DefaultProgramDataEntryService
 
                 tabindex++;
 
-                if ( DataElement.VALUE_TYPE_INT.equals( dataElement.getType() )
-                    || DataElement.VALUE_TYPE_STRING.equals( dataElement.getType() )
-                    || DataElement.VALUE_TYPE_USER_NAME.equals( dataElement.getType() ) )
+                ValueType valueType = dataElement.getValueType();
+
+                if ( valueType.isText() || valueType.isNumeric() || ValueType.USERNAME == valueType )
                 {
                     inputHTML = populateCustomDataEntryForTextBox( dataElement, inputHTML, dataElementValue );
                 }
-                else if ( DataElement.VALUE_TYPE_DATE.equals( dataElement.getType() ) )
+                else if ( ValueType.DATE == valueType || ValueType.DATETIME == valueType )
                 {
                     inputHTML = populateCustomDataEntryForDate( inputHTML, dataElementValue );
                 }
-                else if ( DataElement.VALUE_TYPE_TRUE_ONLY.equals( dataElement.getType() ) )
+                else if ( ValueType.TRUE_ONLY == valueType )
                 {
                     inputHTML = populateCustomDataEntryForTrueOnly( dataElement, inputHTML, dataElementValue );
                 }
-                else if ( DataElement.VALUE_TYPE_BOOL.equals( dataElement.getType() ) )
+                else if ( ValueType.BOOLEAN == valueType )
                 {
                     inputHTML = populateCustomDataEntryForBoolean( dataElement, inputHTML, dataElementValue, i18n );
                 }
@@ -471,7 +460,7 @@ public class DefaultProgramDataEntryService
                 }
                 else
                 {
-                    if ( DataElement.VALUE_TYPE_DATE.equals( dataElement.getType() ) )
+                    if ( ValueType.DATE == valueType || ValueType.DATETIME == valueType )
                     {
                         inputHTML += jQueryCalendar;
                     }
@@ -488,7 +477,7 @@ public class DefaultProgramDataEntryService
                 inputHTML = inputHTML.replace( "$PROGRAMSTAGEID", String.valueOf( programStageUid ) );
                 inputHTML = inputHTML.replace( "$PROGRAMSTAGENAME", programStageName );
                 inputHTML = inputHTML.replace( "$DATAELEMENTNAME", dataElement.getName() );
-                inputHTML = inputHTML.replace( "$DATAELEMENTTYPE", dataElementType );
+                inputHTML = inputHTML.replace( "$DATAELEMENTTYPE", dataElement.getValueType().toString() );
                 inputHTML = inputHTML.replace( "$DISABLED", disabled );
                 inputHTML = inputHTML.replace( "$COMPULSORY", compulsory );
                 inputHTML = inputHTML.replace( "$SAVEMODE", "false" );
@@ -572,7 +561,7 @@ public class DefaultProgramDataEntryService
             String metaData = "<input class='optionset' id=\'" + id + "\' name=\'" + id + "\' options=\'no\' type=\'radio\' optionset='"
                 + dataElement.getOptionSet().getUid() + "'";
             metaData += " data=\"{compulsory:$COMPULSORY, deName:\'$DATAELEMENTNAME\', deType:\'"
-                + dataElement.getDetailedNumberType() + "\' }\" ";
+                + dataElement.getValueType() + "\' }\" ";
 
             inputHTML = "<table style=\'width:100%\'>";
             inputHTML += "<tr>";
@@ -632,7 +621,7 @@ public class DefaultProgramDataEntryService
                 + "]\" ";
 
             String displayTitle = dataElement.getUid() + " - " + dataElement.getName() + " - "
-                + dataElement.getDetailedNumberType();
+                + dataElement.getValueType();
             inputHTML = inputHTML.contains( EMPTY_TITLE_TAG ) ? inputHTML.replace( EMPTY_TITLE_TAG, "title=\"[ "
                 + displayTitle + " ]\"" ) : inputHTML + " title=\"[ " + displayTitle + " ]\"";
         }
@@ -683,7 +672,8 @@ public class DefaultProgramDataEntryService
     private String populateCustomDataEntryForTrueOnly( DataElement dataElement, String inputHTML,
         String dataElementValue )
     {
-        final String jsCodeForInputs = " name=\"entryfield\" tabIndex=\"$TABINDEX\" $DISABLED data=\"{compulsory:$COMPULSORY, deName:'$DATAELEMENTNAME', deType:'$DATAELEMENTTYPE'}\" onchange=\"saveVal( '$DATAELEMENTID' )\" onkeypress=\"return keyPress(event, this)\" ";
+        final String jsCodeForInputs = " name=\"entryfield\" tabIndex=\"$TABINDEX\" $DISABLED data=\"{compulsory:$COMPULSORY, deName:'$DATAELEMENTNAME', deType:'$DATAELEMENTTYPE'}\" onchange=\"saveVal( '$DATAELEMENTID' )\" onkeypress=\"return keyPress" +
+            "(event, this)\" ";
 
         String checked = "";
         if ( !dataElementValue.equals( EMPTY ) && dataElementValue.equals( "true" ) )
@@ -738,7 +728,7 @@ public class DefaultProgramDataEntryService
                 + "\" data-optionset=\"" + dataElement.getOptionSet().getUid() + "\" ";
         }
 
-        if ( DataElement.VALUE_TYPE_LONG_TEXT.equals( dataElement.getDetailedTextType() ) )
+        if ( ValueType.LONG_TEXT == dataElement.getValueType() )
         {
             inputHTML = inputHTML.replaceFirst( "input", "textarea" );
             inputHTML += " >$VALUE</textarea>";
@@ -826,7 +816,7 @@ public class DefaultProgramDataEntryService
         {
             return null;
         }
-        
+
         List<DataElement> dataElements = programStage.getAllDataElements();
 
         Map<String, DataElement> map = new HashMap<>();
@@ -841,9 +831,9 @@ public class DefaultProgramDataEntryService
 
     /**
      * Replaces i18n string in the custom form code.
-     * 
+     *
      * @param dataEntryFormCode the data entry form html.
-     * @param i18n the I18n object.
+     * @param i18n              the I18n object.
      * @return internationalized data entry form html.
      */
     private String populateI18nStrings( String dataEntryFormCode, I18n i18n )

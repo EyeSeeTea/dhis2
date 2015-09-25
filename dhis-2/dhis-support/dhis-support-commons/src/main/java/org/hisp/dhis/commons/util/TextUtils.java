@@ -193,8 +193,8 @@ public class TextUtils
     }
     
     /**
-     * Removes the last occurence of the word "or" from the given string,
-     * including potential trailing spaces, case-insentitive.
+     * Removes the last occurrence of the word "or" from the given string,
+     * including potential trailing spaces, case-insensitive.
      * 
      * @param string the string.
      * @return the chopped string.
@@ -207,8 +207,8 @@ public class TextUtils
     }
 
     /**
-     * Removes the last occurence of the word "and" from the given string,
-     * including potential trailing spaces, case-insentitive.
+     * Removes the last occurrence of the word "and" from the given string,
+     * including potential trailing spaces, case-insensitive.
      * 
      * @param string the string.
      * @return the chopped string.
@@ -221,7 +221,7 @@ public class TextUtils
     }
 
     /**
-     * Removes the last occurence of comma (",") from the given string,
+     * Removes the last occurrence of comma (",") from the given string,
      * including potential trailing spaces.
      * 
      * @param string the string.
@@ -232,6 +232,31 @@ public class TextUtils
         string = StringUtils.stripEnd( string, " " );
         
         return StringUtils.removeEndIgnoreCase( string, "," );
+    }
+
+    /**
+     * Removes the last occurrence of the the given string, including potential 
+     * trailing spaces.
+     * 
+     * @param string the string.
+     * @return the chopped string.
+     */
+    public static String removeLast( String string, String remove )
+    {
+        string = StringUtils.stripEnd( string, " " );
+        
+        return StringUtils.removeEndIgnoreCase( string,  remove );
+    }
+    
+    /**
+     * Removes line breaks form the given string.
+     * 
+     * @param string the string.
+     * @return the chopped string.
+     */
+    public static String removeNewlines( String string )
+    {
+        return string.replaceAll( "\r", EMPTY ).replaceAll( "\n", EMPTY );
     }
     
     /**
@@ -281,7 +306,7 @@ public class TextUtils
             return null;
         }
         
-        List<T> objects = new ArrayList<T>( list );
+        List<T> objects = new ArrayList<>( list );
         
         if ( nullReplacement != null )
         {
@@ -509,7 +534,7 @@ public class TextUtils
         
         return null;
     }
-    
+        
     /**
      * Indicates whether the given string contains any of the given search
      * strings. The operation ignores case and leading and trailing blanks.

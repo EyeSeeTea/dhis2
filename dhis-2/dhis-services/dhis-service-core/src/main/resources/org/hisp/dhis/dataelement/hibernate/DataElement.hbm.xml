@@ -22,19 +22,26 @@
 
     <property name="formName" length="230" />
 
-    <property name="type" column="valuetype" length="16" not-null="true" />
-
-    <property name="numberType" column="numbertype" length="16" />
-
-    <property name="textType" column="textType" length="16" />
+    <property name="valueType" length="50">
+      <type name="org.hibernate.type.EnumType">
+        <param name="enumClass">org.hisp.dhis.common.ValueType</param>
+        <param name="useNamed">true</param>
+        <param name="type">12</param>
+      </type>
+    </property>
 
     <property name="domainType" column="domainType" type="org.hisp.dhis.dataelement.DataElementDomainUserType" not-null="true" />
 
-    <property name="aggregationOperator" not-null="true" column="aggregationtype" length="16" />
+    <property name="aggregationType" length="50" column="aggregationtype">
+      <type name="org.hibernate.type.EnumType">
+        <param name="enumClass">org.hisp.dhis.analytics.AggregationType</param>
+        <param name="useNamed">true</param>
+        <param name="type">12</param>
+      </type>
+    </property>
 
     <many-to-one name="categoryCombo" class="org.hisp.dhis.dataelement.DataElementCategoryCombo"
-      column="categorycomboid"
-      foreign-key="fk_dataelement_categorycomboid" />
+      column="categorycomboid" foreign-key="fk_dataelement_categorycomboid" />
 
     <property name="url" />
 

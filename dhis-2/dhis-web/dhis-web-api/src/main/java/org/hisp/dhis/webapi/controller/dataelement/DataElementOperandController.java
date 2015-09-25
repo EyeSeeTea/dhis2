@@ -29,9 +29,9 @@ package org.hisp.dhis.webapi.controller.dataelement;
  */
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
+import org.hisp.dhis.commons.collection.CollectionUtils;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementGroup;
@@ -60,38 +60,28 @@ public class DataElementOperandController extends AbstractCrudController<DataEle
     @Override
     protected List<DataElementOperand> getEntityList( WebMetaData metaData, WebOptions options, List<String> filters, List<Order> orders )
     {
-        List<DataElementOperand> dataElementOperands;
-
+        List<DataElementOperand> dataElementOperands = Lists.newArrayList();
+        
         if ( options.isTrue( "persisted" ) )
         {
             dataElementOperands = Lists.newArrayList( manager.getAll( DataElementOperand.class ) );
         }
         else
         {
-            Iterator<String> iterator = filters.iterator();
-            String deGroup = null;
-
-            while ( iterator.hasNext() )
-            {
-                String filter = iterator.next();
-
-                if ( filter.startsWith( "dataElement.dataElementGroups.id:eq:" ) )
-                {
-                    deGroup = filter.substring( "dataElement.dataElementGroups.id:eq:".length() );
-                    iterator.remove();
-                    break;
-                }
-            }
+            boolean totals = options.isTrue( "totals" );
+            
+            String deGroup = CollectionUtils.popStartsWith( filters, "dataElement.dataElementGroups.id:eq:" );
+            deGroup = deGroup != null ? deGroup.substring( "dataElement.dataElementGroups.id:eq:".length() ) : null;
 
             if ( deGroup != null )
             {
                 DataElementGroup dataElementGroup = manager.get( DataElementGroup.class, deGroup );
-                dataElementOperands = new ArrayList<>( dataElementCategoryService.getFullOperands( dataElementGroup.getMembers() ) );
+                dataElementOperands = new ArrayList<>( dataElementCategoryService.getOperands( dataElementGroup.getMembers(), totals ) );
             }
             else
             {
                 List<DataElement> dataElements = new ArrayList<>( manager.getAllSorted( DataElement.class ) );
-                dataElementOperands = new ArrayList<>( dataElementCategoryService.getFullOperands( dataElements ) );
+                dataElementOperands = new ArrayList<>( dataElementCategoryService.getOperands( dataElements, totals ) );
             }
         }
 

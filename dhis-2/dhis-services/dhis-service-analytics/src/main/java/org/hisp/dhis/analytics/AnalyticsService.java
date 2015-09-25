@@ -156,6 +156,7 @@ public interface AnalyticsService
      * @param skipData whether to skip the data part of the response.
      * @param skipRounding whether to skip rounding and provide full precision 
      *        for values.
+     * @param completedOnly whether to only include completed events.
      * @param hierarchyMeta whether to include meta data about the organisation 
      *        units in the hierarchy.
      * @param ignoreLimit whether to ignore the max number of cells limit.
@@ -166,6 +167,7 @@ public interface AnalyticsService
      * @param displayProperty the property to display for meta-data.
      * @param outputIdScheme the identifier scheme to use in the query response.
      * @param approvalLevel the approval level identifier.
+     * @param relativePeriodDate the date to use as basis for relative periods.
      * @param userOrgUnit the user organisation unit to use, overrides current user.
      * @param program the program identifier.
      * @param stage the program stage identifier.
@@ -173,9 +175,9 @@ public interface AnalyticsService
      * @return a data query parameter object created based on the given URL info.
      */
     DataQueryParams getFromUrl( Set<String> dimensionParams, Set<String> filterParams, AggregationType aggregationType, String measureCriteria, 
-        boolean skipMeta, boolean skipData, boolean skipRounding, boolean hierarchyMeta, boolean ignoreLimit, boolean hideEmptyRows, boolean showHierarchy, 
-        DisplayProperty displayProperty, IdentifiableProperty outputIdScheme, String approvalLevel, String userOrgUnit, 
-        String program, String stage, I18nFormat format );
+        boolean skipMeta, boolean skipData, boolean skipRounding, boolean completedOnly, boolean hierarchyMeta, boolean ignoreLimit, 
+        boolean hideEmptyRows, boolean showHierarchy, DisplayProperty displayProperty, IdentifiableProperty outputIdScheme, String approvalLevel, 
+        Date relativePeriodDate, String userOrgUnit, String program, String stage, I18nFormat format );
     
     /**
      * Creates a data query parameter object from the given BaseAnalyticalObject.
@@ -190,12 +192,13 @@ public interface AnalyticsService
      * Creates a list of DimensionalObject from the given set of dimension params.
      * 
      * @param dimensionParams the dimension URL params.
+     * @param relativePeriodDate the date to use as basis for relative periods.
      * @param userOrgUnit the user organisation unit param, overrides current
      *        user, can be null.
      * @param format the i18n format.
      * @return a list of DimensionalObject.
      */
-    List<DimensionalObject> getDimensionalObjects( Set<String> dimensionParams, String userOrgUnit, I18nFormat format );
+    List<DimensionalObject> getDimensionalObjects( Set<String> dimensionParams, Date relativePeriodDate, String userOrgUnit, I18nFormat format );
     
     /**
      * Returns a persisted DimensionalObject generated from the given  dimension 
@@ -219,4 +222,14 @@ public interface AnalyticsService
      */
     DimensionalObject getDimension( String dimension, List<String> items, Date relativePeriodDate, 
         List<OrganisationUnit> userOrgUnits, I18nFormat format, boolean allowNull );
+    
+    /**
+     * Returns a list of user organisation units, looking first at the given user 
+     * org unit parameter, second at the organisation units associated with the
+     * current user. Returns an empty list if no organisation units are found.
+     * 
+     * @param userOrgUnit the user org unit parameter string.
+     * @return a list of organisation units.
+     */
+    List<OrganisationUnit> getUserOrgUnits( String userOrgUnit );
 }

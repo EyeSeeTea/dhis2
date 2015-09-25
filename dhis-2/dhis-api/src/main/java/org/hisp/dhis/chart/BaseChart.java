@@ -64,24 +64,11 @@ import static org.apache.commons.lang3.StringUtils.join;
 public abstract class BaseChart
     extends BaseAnalyticalObject
 {
-    public static final String SIZE_NORMAL = "normal";
-    public static final String SIZE_WIDE = "wide";
-    public static final String SIZE_TALL = "tall";
-    public static final String TYPE_COLUMN = "column";
-    public static final String TYPE_STACKED_COLUMN = "stackedcolumn";
-    public static final String TYPE_BAR = "bar";
-    public static final String TYPE_STACKED_BAR = "stackedbar";
-    public static final String TYPE_LINE = "line";
-    public static final String TYPE_AREA = "area";
-    public static final String TYPE_PIE = "pie";
-    public static final String TYPE_RADAR = "radar";
-    public static final String TYPE_METER = "gauge";
-
     protected String domainAxisLabel;
 
     protected String rangeAxisLabel;
 
-    protected String type;
+    protected ChartType type;
 
     protected boolean hideLegend;
 
@@ -149,9 +136,9 @@ public abstract class BaseChart
     // Logic
     // -------------------------------------------------------------------------
 
-    public boolean isType( String type )
+    public boolean isType( ChartType type )
     {
-        return this.type != null && this.type.equalsIgnoreCase( type );
+        return this.type != null && this.type.equals( type );
     }
 
     public boolean isTargetLine()
@@ -282,12 +269,12 @@ public abstract class BaseChart
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String getType()
+    public ChartType getType()
     {
         return type;
     }
 
-    public void setType( String type )
+    public void setType( ChartType type )
     {
         this.type = type;
     }

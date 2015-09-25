@@ -39,6 +39,8 @@ import org.hisp.dhis.DhisSpringTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.google.common.collect.Sets;
+
 /**
  * @author Lars Helge Overland
  * @version $Id$
@@ -47,8 +49,172 @@ public class OrganisationUnitStoreTest
     extends DhisSpringTest
 {
     @Autowired
-    private OrganisationUnitLevelStore organisationUnitLevelStore;
+    private OrganisationUnitLevelStore orgUnitLevelStore;
+    
+    @Autowired
+    private OrganisationUnitStore orgUnitStore;
+    
+    @Autowired
+    private OrganisationUnitGroupStore orgUnitGroupStore;
 
+    // -------------------------------------------------------------------------
+    // OrganisationUnitLevel
+    // -------------------------------------------------------------------------
+
+    @Test
+    public void testGetOrganisationUnits()
+    {
+        OrganisationUnit ouA = createOrganisationUnit( 'A' ); // 1
+        OrganisationUnit ouB = createOrganisationUnit( 'B', ouA ); // 2
+        OrganisationUnit ouC = createOrganisationUnit( 'C', ouA ); // 2
+        OrganisationUnit ouD = createOrganisationUnit( 'D', ouB ); // 3
+        OrganisationUnit ouE = createOrganisationUnit( 'E', ouB ); // 3
+        OrganisationUnit ouF = createOrganisationUnit( 'F', ouC ); // 3
+        OrganisationUnit ouG = createOrganisationUnit( 'G', ouC ); // 3
+        
+        orgUnitStore.save( ouA );
+        orgUnitStore.save( ouB );
+        orgUnitStore.save( ouC );
+        orgUnitStore.save( ouD );
+        orgUnitStore.save( ouE );
+        orgUnitStore.save( ouF );
+        orgUnitStore.save( ouG );
+        
+        OrganisationUnitGroup ogA = createOrganisationUnitGroup( 'A' );
+        ogA.getMembers().addAll( Sets.newHashSet( ouD, ouF ) );
+        OrganisationUnitGroup ogB = createOrganisationUnitGroup( 'B' );
+        ogB.getMembers().addAll( Sets.newHashSet( ouE, ouG ) );
+        
+        orgUnitGroupStore.save( ogA );
+        orgUnitGroupStore.save( ogB );
+        
+        // Query
+        
+        OrganisationUnitQueryParams params = new OrganisationUnitQueryParams();
+        params.setQuery( "UnitC" );
+        
+        List<OrganisationUnit> ous = orgUnitStore.getOrganisationUnits( params );
+
+        assertEquals( 1, ous.size() );
+        assertTrue( ous.contains( ouC ) );
+
+        // Query
+        
+        params = new OrganisationUnitQueryParams();
+        params.setQuery( "OrganisationUnitCodeA" );
+        
+        ous = orgUnitStore.getOrganisationUnits( params );
+        
+        assertTrue( ous.contains( ouA ) );
+        assertEquals( 1, ous.size() );
+
+        // Parents
+        
+        params = new OrganisationUnitQueryParams();
+        params.setParents( Sets.newHashSet( ouC, ouF ) );
+
+        ous = orgUnitStore.getOrganisationUnits( params );
+
+        assertEquals( 3, ous.size() );
+        assertTrue( ous.containsAll( Sets.newHashSet( ouC, ouF, ouG ) ) );
+
+        // Groups
+        
+        params = new OrganisationUnitQueryParams();
+        params.setGroups( Sets.newHashSet( ogA ) );
+
+        ous = orgUnitStore.getOrganisationUnits( params );
+
+        assertEquals( 2, ous.size() );
+        assertTrue( ous.containsAll( Sets.newHashSet( ouD, ouF ) ) );
+
+        // Levels
+        
+        params = new OrganisationUnitQueryParams();
+        params.setLevels( Sets.newHashSet( 2 ) );
+
+        ous = orgUnitStore.getOrganisationUnits( params );
+
+        assertEquals( 2, ous.size() );
+        assertTrue( ous.containsAll( Sets.newHashSet( ouB, ouC ) ) );
+
+        // Levels
+        
+        params = new OrganisationUnitQueryParams();
+        params.setLevels( Sets.newHashSet( 2, 3 ) );
+
+        ous = orgUnitStore.getOrganisationUnits( params );
+
+        assertEquals( 6, ous.size() );
+        assertTrue( ous.containsAll( Sets.newHashSet( ouB, ouC, ouD, ouE, ouF, ouG ) ) );
+
+        // Levels and groups
+        
+        params = new OrganisationUnitQueryParams();
+        params.setLevels( Sets.newHashSet( 3 ) );
+        params.setGroups( Sets.newHashSet( ogA ) );
+
+        ous = orgUnitStore.getOrganisationUnits( params );
+
+        assertEquals( 2, ous.size() );
+        assertTrue( ous.containsAll( Sets.newHashSet( ouD, ouF ) ) );
+
+        // Parents and groups
+        
+        params = new OrganisationUnitQueryParams();
+        params.setParents( Sets.newHashSet( ouC ) );        
+        params.setGroups( Sets.newHashSet( ogB ) );
+
+        ous = orgUnitStore.getOrganisationUnits( params );
+
+        assertEquals( 1, ous.size() );
+        assertTrue( ous.containsAll( Sets.newHashSet( ouG ) ) );
+
+        // Parents and max levels
+        
+        params = new OrganisationUnitQueryParams();
+        params.setParents( Sets.newHashSet( ouA ) );
+        params.setMaxLevels( 2 );
+
+        ous = orgUnitStore.getOrganisationUnits( params );
+
+        assertEquals( 3, ous.size() );
+        assertTrue( ous.containsAll( Sets.newHashSet( ouA, ouB, ouC ) ) );
+
+        // Parents and max levels
+        
+        params = new OrganisationUnitQueryParams();
+        params.setParents( Sets.newHashSet( ouA ) );
+        params.setMaxLevels( 3 );
+
+        ous = orgUnitStore.getOrganisationUnits( params );
+
+        assertEquals( 7, ous.size() );
+        assertTrue( ous.containsAll( Sets.newHashSet( ouA, ouB, ouC, ouD, ouE, ouF, ouG ) ) );
+
+        // Parents and max levels
+        
+        params = new OrganisationUnitQueryParams();
+        params.setParents( Sets.newHashSet( ouA ) );
+        params.setMaxLevels( 1 );
+
+        ous = orgUnitStore.getOrganisationUnits( params );
+
+        assertEquals( 1, ous.size() );
+        assertTrue( ous.containsAll( Sets.newHashSet( ouA ) ) );
+
+        // Parents and max levels
+        
+        params = new OrganisationUnitQueryParams();
+        params.setParents( Sets.newHashSet( ouB ) );
+        params.setMaxLevels( 3 );
+
+        ous = orgUnitStore.getOrganisationUnits( params );
+
+        assertEquals( 3, ous.size() );
+        assertTrue( ous.containsAll( Sets.newHashSet( ouB, ouD, ouE ) ) );
+    }
+    
     // -------------------------------------------------------------------------
     // OrganisationUnitLevel
     // -------------------------------------------------------------------------
@@ -59,11 +225,11 @@ public class OrganisationUnitStoreTest
         OrganisationUnitLevel levelA = new OrganisationUnitLevel( 1, "National" );
         OrganisationUnitLevel levelB = new OrganisationUnitLevel( 2, "District" );
 
-        int idA = organisationUnitLevelStore.save( levelA );
-        int idB = organisationUnitLevelStore.save( levelB );
+        int idA = orgUnitLevelStore.save( levelA );
+        int idB = orgUnitLevelStore.save( levelB );
 
-        assertEquals( levelA, organisationUnitLevelStore.get( idA ) );
-        assertEquals( levelB, organisationUnitLevelStore.get( idB ) );
+        assertEquals( levelA, orgUnitLevelStore.get( idA ) );
+        assertEquals( levelB, orgUnitLevelStore.get( idB ) );
     }
 
     @Test
@@ -72,10 +238,10 @@ public class OrganisationUnitStoreTest
         OrganisationUnitLevel levelA = new OrganisationUnitLevel( 1, "National" );
         OrganisationUnitLevel levelB = new OrganisationUnitLevel( 2, "District" );
 
-        organisationUnitLevelStore.save( levelA );
-        organisationUnitLevelStore.save( levelB );
+        orgUnitLevelStore.save( levelA );
+        orgUnitLevelStore.save( levelB );
 
-        List<OrganisationUnitLevel> actual = organisationUnitLevelStore.getAll();
+        List<OrganisationUnitLevel> actual = orgUnitLevelStore.getAll();
 
         assertNotNull( actual );
         assertEquals( 2, actual.size() );
@@ -89,20 +255,50 @@ public class OrganisationUnitStoreTest
         OrganisationUnitLevel levelA = new OrganisationUnitLevel( 1, "National" );
         OrganisationUnitLevel levelB = new OrganisationUnitLevel( 2, "District" );
 
-        int idA = organisationUnitLevelStore.save( levelA );
-        int idB = organisationUnitLevelStore.save( levelB );
+        int idA = orgUnitLevelStore.save( levelA );
+        int idB = orgUnitLevelStore.save( levelB );
 
-        assertNotNull( organisationUnitLevelStore.get( idA ) );
-        assertNotNull( organisationUnitLevelStore.get( idB ) );
+        assertNotNull( orgUnitLevelStore.get( idA ) );
+        assertNotNull( orgUnitLevelStore.get( idB ) );
 
-        organisationUnitLevelStore.delete( levelA );
+        orgUnitLevelStore.delete( levelA );
 
-        assertNull( organisationUnitLevelStore.get( idA ) );
-        assertNotNull( organisationUnitLevelStore.get( idB ) );
+        assertNull( orgUnitLevelStore.get( idA ) );
+        assertNotNull( orgUnitLevelStore.get( idB ) );
 
-        organisationUnitLevelStore.delete( levelB );
+        orgUnitLevelStore.delete( levelB );
 
-        assertNull( organisationUnitLevelStore.get( idA ) );
-        assertNull( organisationUnitLevelStore.get( idB ) );
+        assertNull( orgUnitLevelStore.get( idA ) );
+        assertNull( orgUnitLevelStore.get( idB ) );
     }
+
+    @Test
+    public void testGetMaxLevel()
+    {
+        OrganisationUnit ouA = createOrganisationUnit( 'A' ); // 1
+        OrganisationUnit ouB = createOrganisationUnit( 'B', ouA ); // 2
+        OrganisationUnit ouC = createOrganisationUnit( 'C', ouA ); // 2
+        OrganisationUnit ouD = createOrganisationUnit( 'D', ouB ); // 3
+        OrganisationUnit ouE = createOrganisationUnit( 'E', ouB ); // 3
+        OrganisationUnit ouF = createOrganisationUnit( 'F', ouC ); // 3
+        OrganisationUnit ouG = createOrganisationUnit( 'G', ouC ); // 3
+        
+        assertEquals( 0, orgUnitStore.getMaxLevel() );
+        
+        orgUnitStore.save( ouA );
+        
+        assertEquals( 1, orgUnitStore.getMaxLevel() );
+        
+        orgUnitStore.save( ouB );
+        orgUnitStore.save( ouC );
+        
+        assertEquals( 2, orgUnitStore.getMaxLevel() );
+
+        orgUnitStore.save( ouD );
+        orgUnitStore.save( ouE );
+        orgUnitStore.save( ouF );
+        orgUnitStore.save( ouG );
+        
+        assertEquals( 3, orgUnitStore.getMaxLevel() );
+    }        
 }

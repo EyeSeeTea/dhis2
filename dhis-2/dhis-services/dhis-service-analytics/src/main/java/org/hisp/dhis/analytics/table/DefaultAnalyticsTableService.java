@@ -138,16 +138,11 @@ public class DefaultAnalyticsTableService
         createIndexes( tables );
         
         clock.logTime( "Created indexes" );
-        notifier.notify( taskId, "Vacuuming tables" );
-        
-        vacuumTables( tables );
-        
-        clock.logTime( "Vacuumed tables" );
         notifier.notify( taskId, "Swapping analytics tables" );
         
-        swapTables( tables );
+        swapTables( tables, clock, taskId );
         
-        clock.logTime( "Partition tables: " + tables + ", last years: " + lastYears );
+        clock.logTime( "Swapped tables" );
         notifier.notify( taskId, "Clearing caches" );
 
         partitionManager.clearCaches();
@@ -215,10 +210,12 @@ public class DefaultAnalyticsTableService
         
         ConcurrentUtils.waitForCompletion( futures );
     }
-        
+    
     private void applyAggregationLevels( List<AnalyticsTable> tables )
     {
         int maxLevels = organisationUnitService.getMaxOfOrganisationUnitLevels();
+        
+        boolean hasAggLevels = false;
         
         levelLoop : for ( int i = 0; i < maxLevels; i++ )
         {
@@ -231,7 +228,9 @@ public class DefaultAnalyticsTableService
             {
                 continue levelLoop;
             }
-                        
+
+            hasAggLevels = true;
+            
             ConcurrentLinkedQueue<AnalyticsTable> tableQ = new ConcurrentLinkedQueue<>( tables );
 
             List<Future<?>> futures = new ArrayList<>();
@@ -243,6 +242,27 @@ public class DefaultAnalyticsTableService
 
             ConcurrentUtils.waitForCompletion( futures );
         }
+        
+        if ( hasAggLevels )
+        {
+            vacuumTables( tables );
+
+            log.info( "Vacuumed tables" );
+        }
+    }
+
+    private void vacuumTables( List<AnalyticsTable> tables )
+    {
+        ConcurrentLinkedQueue<AnalyticsTable> tableQ = new ConcurrentLinkedQueue<>( tables );
+        
+        List<Future<?>> futures = new ArrayList<>();
+        
+        for ( int i = 0; i < getProcessNo(); i++ )
+        {
+            tableManager.vacuumTablesAsync( tableQ );
+        }
+        
+        ConcurrentUtils.waitForCompletion( futures );        
     }
     
     private void createIndexes( List<AnalyticsTable> tables )
@@ -271,28 +291,20 @@ public class DefaultAnalyticsTableService
         ConcurrentUtils.waitForCompletion( futures );
     }
 
-    private void vacuumTables( List<AnalyticsTable> tables )
-    {
-        ConcurrentLinkedQueue<AnalyticsTable> tableQ = new ConcurrentLinkedQueue<>( tables );
-        
-        List<Future<?>> futures = new ArrayList<>();
-        
-        for ( int i = 0; i < getProcessNo(); i++ )
-        {
-            tableManager.vacuumTablesAsync( tableQ );
-        }
-        
-        ConcurrentUtils.waitForCompletion( futures );        
-    }
-    
-    private void swapTables( List<AnalyticsTable> tables )
+    private void swapTables( List<AnalyticsTable> tables, Clock clock, TaskId taskId )
     {
         resourceTableService.dropAllSqlViews();
+        
+        clock.logTime( "Dropped SQL views"  );
+        notifier.notify( taskId, "Swapping tables" );
         
         for ( AnalyticsTable table : tables )
         {
             tableManager.swapTable( table );
         }
+
+        clock.logTime( "Swapped tables"  );
+        notifier.notify( taskId, "Creating SQL views" );
         
         resourceTableService.createAllSqlViews();
     }

@@ -1,6 +1,8 @@
-<div class="container-1-1">    
+<div class="container-1-1">
+    <!-- dashboard top menu begins-->
     <div class="col-sm-12 vertical-spacing  hideInPrint">
-
+        
+        <!-- dashboard buttons begin -->
         <button type="button" class="btn btn-default" ng-click="back()">{{'back'| translate}}</button>
         
         <button ng-disabled="!previousTeiExists" type="button" class="btn btn-default small-horizonal-spacing" ng-click="fetchTei('PREV')" title="{{'previous'| translate}}"><i class="fa fa-caret-left"></i></button>
@@ -14,24 +16,30 @@
                 ng-change="applySelectedProgram()">
             <option value="">{{programs.length > 0 ? 'please_select_a_program' : 'no_program_exists' | translate}}</option>
         </select>
-
+        <!-- dashboard buttons end -->
+        
+        <!-- dashboard setting begins -->
         <div class="pull-right">
             <div class="btn-group trim" dropdown is-open="status.isopen">
-                <button type="button" title="{{'settings'| translate}}" class="btn btn-default dropdown-toggle" dropdown-toggle>                    
+                <button type="button" title="{{settingsLabel}}" class="btn btn-default dropdown-toggle" dropdown-toggle>                    
                     <i class="fa fa-cog"></i>
                 </button>
                 <ul class="dropdown-menu pull-right" role="menu">
-                    <li><a href ng-click="showHideWidgets()">{{'show_hide_widgets'| translate}}</a></li>
-                    <li ng-if="userAuthority.canAdministerDashboard"><a href ng-click="saveDashboarLayoutAsDefault()">{{'save_layout_as_default'| translate}}</a></li>                    
+                    <li><a href ng-click="showHideWidgets()">{{showHideWidgetsLabel}}</a></li>
+                    <li ng-if="userAuthority.canAdministerDashboard"><a href ng-click="saveDashboarLayoutAsDefault()">{{'save_layout_as_default'| translate}}</a></li>
+                    <li><a href ng-click="activiateTEI()">{{selectedTei.inactive ? 'activate_tei' : 'deactivate_tei' | translate}}</a></li>
                 </ul>
             </div>
         </div>
+        <!-- dashboard setting ends -->
+        
     </div>
-
-    <div class='separator'></div>
+    <!-- dashboard top menu ends-->
     
+    <!-- dashboard widgets begin -->
     <div class="col-sm-12">
-        <div class="row">            
+        <div class="row">
+            <!-- dashboard bigger widgets begin -->
             <div ng-class="widgetSize.bigger">
                 <div id="biggerWidget"
                     d2-sortable  
@@ -41,8 +49,11 @@
                     <div class="col-sm-12" id={{biggerWidget.title}} ng-repeat="biggerWidget in dashboardWidgets | orderBy:'order' | filter: {parent: 'biggerWidget'}"">
                         <div ng-show="biggerWidget.show" ng-include="biggerWidget.view" ng-class="{true: 'hideInPrint'} [biggerWidget.title != 'report']"></div>
                     </div>                                       
-                </div>                
-            </div>            
+                </div>
+            </div>
+            <!-- dashboard bigger widgets end -->
+
+            <!-- dashboard smaller widgets begin -->
             <div ng-class="widgetSize.smaller">
                 <div id="smallerWidget" 
                     d2-sortable 
@@ -54,7 +65,10 @@
                     </div>                   
                 </div>
             </div>
-        </div>
-    </div>    
+            <!-- dashboard smaller widgets end -->   
+        </div>        
+    </div>
+    <!-- dashboard widgets end -->
+    
 </div>
 

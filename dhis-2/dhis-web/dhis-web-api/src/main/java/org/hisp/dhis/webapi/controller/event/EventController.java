@@ -219,8 +219,6 @@ public class EventController
         }
 
         csvEventService.writeEvents( outputStream, events, !skipHeader );
-        response.getOutputStream().flush();
-        response.getOutputStream().close();
     }
 
     @RequestMapping( value = "/eventRows", method = RequestMethod.GET )
@@ -301,7 +299,7 @@ public class EventController
     @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_DATAVALUE_ADD')" )
     public void postXmlEvent( @RequestParam( defaultValue = "CREATE" ) ImportStrategy strategy, HttpServletResponse response, HttpServletRequest request, ImportOptions importOptions ) throws Exception
     {
-        importOptions.setImportStrategy( strategy.name() );
+        importOptions.setImportStrategy( strategy );
         InputStream inputStream = StreamUtils.wrapAndCheckCompressionFormat( request.getInputStream() );
 
         if ( !importOptions.isAsync() )
@@ -347,7 +345,7 @@ public class EventController
     @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_DATAVALUE_ADD')" )
     public void postJsonEvent( @RequestParam( defaultValue = "CREATE" ) ImportStrategy strategy, HttpServletResponse response, HttpServletRequest request, ImportOptions importOptions ) throws Exception
     {
-        importOptions.setImportStrategy( strategy.name() );
+        importOptions.setImportStrategy( strategy );
         InputStream inputStream = StreamUtils.wrapAndCheckCompressionFormat( request.getInputStream() );
 
         if ( !importOptions.isAsync() )

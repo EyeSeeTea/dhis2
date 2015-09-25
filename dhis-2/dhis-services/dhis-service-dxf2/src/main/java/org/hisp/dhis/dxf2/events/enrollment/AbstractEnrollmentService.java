@@ -35,6 +35,7 @@ import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.common.QueryOperator;
+import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.commons.collection.CachingMap;
 import org.hisp.dhis.dbms.DbmsManager;
 import org.hisp.dhis.dxf2.events.event.Note;
@@ -169,9 +170,9 @@ public abstract class AbstractEnrollmentService
         enrollment.setCreated( programInstance.getCreated() );
         enrollment.setLastUpdated( programInstance.getLastUpdated() );
         enrollment.setProgram( programInstance.getProgram().getUid() );
-        enrollment.setStatus( EnrollmentStatus.fromInt( programInstance.getStatus() ) );
-        enrollment.setDateOfEnrollment( programInstance.getEnrollmentDate() );
-        enrollment.setDateOfIncident( programInstance.getDateOfIncident() );
+        enrollment.setStatus( EnrollmentStatus.fromProgramStatus( programInstance.getStatus() ) );
+        enrollment.setEnrollmentDate( programInstance.getEnrollmentDate() );
+        enrollment.setIncidentDate( programInstance.getIncidentDate() );
         enrollment.setFollowup( programInstance.getFollowup() );
 
         List<TrackedEntityComment> comments = programInstance.getComments();
@@ -282,7 +283,7 @@ public abstract class AbstractEnrollmentService
         OrganisationUnit organisationUnit = getOrganisationUnit( enrollment.getOrgUnit() );
 
         ProgramInstance programInstance = programInstanceService.enrollTrackedEntityInstance( entityInstance, program,
-            enrollment.getDateOfEnrollment(), enrollment.getDateOfIncident(), organisationUnit, enrollment.getEnrollment() );
+            enrollment.getEnrollmentDate(), enrollment.getIncidentDate(), organisationUnit, enrollment.getEnrollment() );
 
         if ( programInstance == null )
         {
@@ -371,11 +372,11 @@ public abstract class AbstractEnrollmentService
 
         programInstance.setProgram( program );
         programInstance.setEntityInstance( entityInstance );
-        programInstance.setDateOfIncident( enrollment.getDateOfIncident() );
-        programInstance.setEnrollmentDate( enrollment.getDateOfEnrollment() );
+        programInstance.setIncidentDate( enrollment.getIncidentDate() );
+        programInstance.setEnrollmentDate( enrollment.getEnrollmentDate() );
         programInstance.setFollowup( enrollment.getFollowup() );
 
-        if ( programInstance.getStatus() != enrollment.getStatus().getValue() )
+        if ( EnrollmentStatus.fromProgramStatus( programInstance.getStatus() ) != enrollment.getStatus() )
         {
             if ( EnrollmentStatus.CANCELLED == enrollment.getStatus() )
             {
@@ -387,8 +388,7 @@ public abstract class AbstractEnrollmentService
             }
             else
             {
-                importSummary = new ImportSummary( ImportStatus.ERROR,
-                    "Re-enrollment is not allowed, please create a new enrollment." );
+                importSummary = new ImportSummary( ImportStatus.ERROR, "Re-enrollment is not allowed, please create a new enrollment." );
                 importSummary.getImportCount().incrementIgnored();
 
                 return importSummary;
@@ -619,34 +619,30 @@ public abstract class AbstractEnrollmentService
             importConflicts.add( new ImportConflict( "Attribute.value", "Value length is greater than 256 chars." ) );
         }
 
-        if ( TrackedEntityAttribute.TYPE_NUMBER.equals( teAttribute.getValueType() )
-            && !MathUtils.isNumeric( attribute.getValue() ) )
+        if ( ValueType.NUMBER == teAttribute.getValueType() && !MathUtils.isNumeric( attribute.getValue() ) )
         {
             importConflicts.add( new ImportConflict( "Attribute.value", "Value is not numeric." ) );
         }
-        else if ( TrackedEntityAttribute.TYPE_BOOL.equals( teAttribute.getValueType() )
-            && !MathUtils.isBool( attribute.getValue() ) )
+        else if ( ValueType.BOOLEAN == teAttribute.getValueType() && !MathUtils.isBool( attribute.getValue() ) )
         {
             importConflicts.add( new ImportConflict( "Attribute.value", "Value is not boolean." ) );
         }
-        else if ( TrackedEntityAttribute.TYPE_DATE.equals( teAttribute.getValueType() )
-            && !DateUtils.dateIsValid( attribute.getValue() ) )
+        else if ( ValueType.DATE == teAttribute.getValueType() && !DateUtils.dateIsValid( attribute.getValue() ) )
         {
             importConflicts.add( new ImportConflict( "Attribute.value", "Value is not date." ) );
         }
-        else if ( TrackedEntityAttribute.TYPE_TRUE_ONLY.equals( teAttribute.getValueType() )
-            && "true".equals( attribute.getValue() ) )
+        else if ( ValueType.TRUE_ONLY == teAttribute.getValueType() && "true".equals( attribute.getValue() ) )
         {
             importConflicts.add( new ImportConflict( "Attribute.value", "Value is not true (true-only value type)." ) );
         }
-        else if ( TrackedEntityAttribute.TYPE_USERS.equals( teAttribute.getValueType() ) )
+        else if ( ValueType.USERNAME == teAttribute.getValueType() )
         {
             if ( userService.getUserCredentialsByUsername( attribute.getValue() ) == null )
             {
                 importConflicts.add( new ImportConflict( "Attribute.value", "Value is not pointing to a valid username." ) );
             }
         }
-        else if ( TrackedEntityAttribute.TYPE_OPTION_SET.equals( teAttribute.getValueType() )
+        else if ( ValueType.OPTION_SET == teAttribute.getValueType()
             && !teAttribute.getOptionSet().getOptionCodes().contains( attribute.getValue() ) )
         {
             importConflicts.add( new ImportConflict( "Attribute.value", "Value is not pointing to a valid option code." ) );

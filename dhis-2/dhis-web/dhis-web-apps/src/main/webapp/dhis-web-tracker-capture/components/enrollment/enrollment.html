@@ -5,7 +5,7 @@
         <span class="nav-pills" ng-show="selectedProgram && currentEnrollment && currentEnrollment !== selectedEnrollment">
             | <a href ng-click="loadEnrollmentDetails(currentEnrollment)" title="{{'current'| translate}}"><span ng-class="{true: 'widget - link - active', false: 'widget - link'} [showEnrollmentDiv]">{{'current'| translate}}</span></a>
         </span>
-        <span class="nav-pills" ng-show="selectedProgram && !currentEnrollment">
+        <span class="nav-pills" ng-show="selectedProgram && !currentEnrollment && !selectedTei.inactive">
             | <a href ng-click="showNewEnrollment()" title="{{'new'| translate}}"><span ng-class="{true: 'widget - link - active', false: 'widget - link'} [showEnrollmentDiv]">{{'new'| translate}}</span></a>
         </span>
         <span class="nav-pills" ng-show="hasEnrollmentHistory">
@@ -14,10 +14,10 @@
 
         <span class="pull-right widget-link">            
             <a class="small-horizonal-spacing" href ng-click="expandCollapse(enrollmentWidget)">
-                <span ng-show="enrollmentWidget.expand"><i class="fa fa-chevron-up" title="{{'collapse'| translate}}"></i></span>
-                <span ng-show="!enrollmentWidget.expand"><i class="fa fa-chevron-down" title="{{'expand'| translate}}"></i></span>
+                <span ng-show="enrollmentWidget.expand"><i class="fa fa-chevron-up" title="{{collapseLabel}}"></i></span>
+                <span ng-show="!enrollmentWidget.expand"><i class="fa fa-chevron-down" title="{{expandLabel}}"></i></span>
             </a>
-            <a class="small-horizonal-spacing" href ng-click="removeWidget(enrollmentWidget)" title="{{'remove'| translate}}"><i class="fa fa-times-circle"></i></a>            
+            <a class="small-horizonal-spacing" href ng-click="removeWidget(enrollmentWidget)" title="{{removeLabel}}"><i class="fa fa-times-circle"></i></a>            
         </span>
     </div>
     <div ng-show="enrollmentWidget.expand" class="panel-body dashboard-widget-container">
@@ -36,18 +36,18 @@
                 </tr>
                 <tr class="col-md-12">
                     <td class="col-md-6">
-                        {{selectedProgram.dateOfEnrollmentDescription}}
+                        {{selectedProgram.enrollmentDateLabel}}
                     </td>
                     <td class="col-md-6">
-                        <input type="text" placeholder="{{dhis2CalendarFormat.keyDateFormat}}" class="form-control" d2-date ng-model="selectedEnrollment.dateOfEnrollment" ng-disabled="true"/>
+                        <input type="text" placeholder="{{dhis2CalendarFormat.keyDateFormat}}" class="form-control" d2-date ng-model="selectedEnrollment.enrollmentDate" ng-disabled="true"/>
                     </td>
                 </tr>
                 <tr class="col-md-12" ng-if="selectedProgram.displayIncidentDate">                    
                     <td class="col-md-6">
-                        {{selectedProgram.dateOfIncidentDescription}}
+                        {{selectedProgram.incidentDateLabel}}
                     </td>
                     <td class="col-md-6">
-                        <input type="text" placeholder="{{dhis2CalendarFormat.keyDateFormat}}" class="form-control" d2-date ng-model="selectedEnrollment.dateOfIncident" ng-disabled="true"/>
+                        <input type="text" placeholder="{{dhis2CalendarFormat.keyDateFormat}}" class="form-control" d2-date ng-model="selectedEnrollment.incidentDate" ng-disabled="true"/>
                     </td>
                 </tr>                
             </table>
@@ -56,13 +56,13 @@
 
                 <button type="button" 
                         class="btn btn-primary"
-                        ng-disabled="selectedEnrollment.status !== 'ACTIVE'"
+                        ng-disabled="selectedEnrollment.status !== 'ACTIVE' || selectedTei.inactive"
                         ng-click="completeEnrollment()">
                     {{'complete'| translate}}
                 </button>
                 <button type="button" 
                         class="btn btn-warning"
-                        ng-disabled="selectedEnrollment.status !== 'ACTIVE'"
+                        ng-disabled="selectedEnrollment.status !== 'ACTIVE' || selectedTei.inactive"
                         ng-click="terminateEnrollment()">
                     {{'terminate'| translate}}
                 </button>   
@@ -70,7 +70,7 @@
                 <button type="button"
                         title="{{'unmark_for_followup'| translate}}"
                         class="btn btn-danger horizonal-spacing"
-                        ng-disabled="selectedEnrollment.status !== 'ACTIVE'"
+                        ng-disabled="selectedEnrollment.status !== 'ACTIVE' || selectedTei.inactive"
                         ng-if="selectedEnrollment.followup"
                         ng-click="markForFollowup()">
                     <i class="fa fa-exclamation-triangle"></i>
@@ -78,7 +78,7 @@
                 <button type="button" 
                         title="{{'mark_for_followup'| translate}}"
                         class="btn btn-default horizonal-spacing"
-                        ng-disabled="selectedEnrollment.status !== 'ACTIVE'"
+                        ng-disabled="selectedEnrollment.status !== 'ACTIVE' || selectedTei.inactive"
                         ng-if="!selectedEnrollment.followup"
                         ng-click="markForFollowup()">
                     <i class="fa fa-exclamation-triangle"></i>
@@ -99,18 +99,18 @@
                 <table class="table table-bordered table-striped dhis2-table-hover">
                     <tr>
                         <th>
-                            {{selectedProgram.dateOfEnrollmentDescription}}
+                            {{selectedProgram.enrollmentDateLabel}}
                         </th>
                         <th ng-if="selectedProgram.displayIncidentDate">
-                            {{selectedProgram.dateOfIncidentDescription}}
+                            {{selectedProgram.incidentDateLabel}}
                         </th>
                     </tr>
                     <tr ng-click="loadEnrollmentDetails(en)" ng-repeat="en in historicalEnrollments" title="{{'details'| translate}}">
                         <td>
-                            {{en.dateOfEnrollment}}
+                            {{en.enrollmentDate}}
                         </td>
                         <td ng-if="selectedProgram.displayIncidentDate">
-                            {{en.dateOfIncident}}
+                            {{en.incidentDate}}
                         </td>
                     </tr>
                 </table>

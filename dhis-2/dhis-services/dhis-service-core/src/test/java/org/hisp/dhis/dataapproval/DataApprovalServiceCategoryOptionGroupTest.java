@@ -295,13 +295,6 @@ public class DataApprovalServiceCategoryOptionGroupTest
         china = createOrganisationUnit( "China", asia );
         india = createOrganisationUnit( "India", asia );
 
-        global.setLevel( 1 );
-        americas.setLevel( 2 );
-        asia.setLevel( 2 );
-        brazil.setLevel( 3 );
-        china.setLevel( 3 );
-        india.setLevel( 3 );
-
         organisationUnitService.addOrganisationUnit( global );
         organisationUnitService.addOrganisationUnit( americas );
         organisationUnitService.addOrganisationUnit( asia );
@@ -551,18 +544,13 @@ public class DataApprovalServiceCategoryOptionGroupTest
         }
     }
 
-    private String getOptionNamesFromCombo( DataElementCategoryOptionCombo combo )
-    {
-        return combo.getName().substring( 1, combo.getName().length() - 1);
-    }
-
     private String getStatusString( DataApprovalStatus status )
     {
-        DataApproval a = status.getDataApproval();
-        String approval = a == null ? "approval=null" :
-                "ou=" + ( a.getOrganisationUnit() == null ? "(null)" : a.getOrganisationUnit().getName() )
-                        + " mechanism=" + ( a.getAttributeOptionCombo() == null ? "(null)" : getOptionNamesFromCombo( a.getAttributeOptionCombo() ) )
-                        + " level=" + ( a.getDataApprovalLevel() == null ? "(null)" : a.getDataApprovalLevel().getLevel() );
+        DataApproval da = status.getDataApproval();
+        String approval = da == null ? "approval=null" :
+                "ou=" + ( da.getOrganisationUnit() == null ? "(null)" : da.getOrganisationUnit().getName() )
+                        + " mechanism=" + ( da.getAttributeOptionCombo() == null ? "(null)" : da.getAttributeOptionCombo().getName() )
+                        + " level=" + ( da.getDataApprovalLevel() == null ? "(null)" : da.getDataApprovalLevel().getLevel() );
 
         DataApprovalPermissions p = status.getPermissions();
 
@@ -686,8 +674,6 @@ public class DataApprovalServiceCategoryOptionGroupTest
     {
         String[] approvalStrings = getUserApprovalsAndPermissions( mockUserService, dataSet, period, orgUnit );
 
-        System.out.println( "assertArrayEquals( new String[] {" );
-
         int count = 0;
 
         for ( String s : approvalStrings )
@@ -704,6 +690,7 @@ public class DataApprovalServiceCategoryOptionGroupTest
         System.out.println();
     }
 
+    @SuppressWarnings("unused")
     private void generateAllApprovalsAndPermissions()
     {
         generateUserApprovalsAndPermissions( superUser, dataSetA, periodA, null );

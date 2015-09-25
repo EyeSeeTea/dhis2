@@ -116,6 +116,8 @@ public class ProgramStageDataEntrySMSListener
 
         Date date = lookForDate( message );
         
+        //TODO and?
+        
         String senderPhoneNumber = StringUtils.replace( sms.getOriginator(), "+", "" );
         Collection<OrganisationUnit> orgUnits = getOrganisationUnitsByPhoneNumber( senderPhoneNumber );
 
@@ -142,11 +144,11 @@ public class ProgramStageDataEntrySMSListener
                 + smsCommand.getSeparator().trim() + "|$)*\\s*";
             pattern = Pattern.compile( x );
         }
-        Matcher m = pattern.matcher( message );
-        while ( m.find() )
+        Matcher matcher = pattern.matcher( message );
+        while ( matcher.find() )
         {
-            String key = m.group( 1 );
-            String value = m.group( 2 );
+            String key = matcher.group( 1 );
+            String value = matcher.group( 2 );
 
             if ( !StringUtils.isEmpty( key ) && !StringUtils.isEmpty( value ) )
             {

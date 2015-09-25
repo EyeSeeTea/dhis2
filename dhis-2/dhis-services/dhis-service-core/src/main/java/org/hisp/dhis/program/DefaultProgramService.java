@@ -38,11 +38,14 @@ import java.util.Set;
 import java.util.regex.Matcher;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.option.Option;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitQueryParams;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.trackedentity.TrackedEntity;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
@@ -107,13 +110,20 @@ public class DefaultProgramService
     {
         this.userService = userService;
     }
+    
+    private OrganisationUnitService organisationUnitService;
+
+    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    {
+        this.organisationUnitService = organisationUnitService;
+    }
 
     @Autowired
     private TrackedEntityAttributeService attributeService;
 
     @Autowired
     private TrackedEntityAttributeValueService attributeValueService;
-    
+
     // -------------------------------------------------------------------------
     // Implementation methods
     // -------------------------------------------------------------------------
@@ -177,7 +187,7 @@ public class DefaultProgramService
     }
 
     @Override
-    public List<Program> getPrograms( ProgramType type)
+    public List<Program> getPrograms( ProgramType type )
     {
         return i18n( i18nService, programStore.getByType( type ) );
     }
@@ -201,7 +211,7 @@ public class DefaultProgramService
     }
 
     @Override
-    public List<Program> getProgramsByCurrentUser( ProgramType type)
+    public List<Program> getProgramsByCurrentUser( ProgramType type )
     {
         return i18n( i18nService, getByCurrentUser( type ) );
     }
@@ -230,7 +240,7 @@ public class DefaultProgramService
     @Override
     public Integer getProgramCountByName( String name )
     {
-        return i18n( i18nService, programStore.getCountLikeName( name ) );
+        return programStore.getCountLikeName( name );
     }
 
     @Override
@@ -283,7 +293,7 @@ public class DefaultProgramService
     }
 
     @Override
-    public List<Program> getByCurrentUser( ProgramType type)
+    public List<Program> getByCurrentUser( ProgramType type )
     {
         List<Program> programs = new ArrayList<>();
 
@@ -307,7 +317,24 @@ public class DefaultProgramService
 
         return programs;
     }
-    
+
+    @Override
+    public void mergeWithCurrentUserOrganisationUnits( Program program, Collection<OrganisationUnit> mergeOrganisationUnits )
+    {
+        Set<OrganisationUnit> selectedOrgUnits = Sets.newHashSet( program.getOrganisationUnits() );
+        
+        OrganisationUnitQueryParams params = new OrganisationUnitQueryParams();
+        params.setParents( currentUserService.getCurrentUser().getOrganisationUnits() );
+
+        Set<OrganisationUnit> userOrganisationUnits = Sets.newHashSet( organisationUnitService.getOrganisationUnitsByQuery( params ) );
+
+        selectedOrgUnits.removeAll( userOrganisationUnits );
+        selectedOrgUnits.addAll( mergeOrganisationUnits );
+
+        program.updateOrganisationUnits( selectedOrgUnits );
+
+        updateProgram( program );
+    }
 
     @Override
     public String prepareDataEntryFormForAdd( String htmlCode, Program program, Collection<User> healthWorkers,
@@ -466,22 +493,23 @@ public class DefaultProgramService
             + "\" tabindex=\"" + index + "\" style=\"" + style + "\"";
 
         inputHtml += "\" class=\"" + hidden + " {validate:{required:" + mandatory;
-        if ( TrackedEntityAttribute.TYPE_NUMBER.equals( attribute.getValueType() ) )
+
+        if ( ValueType.NUMBER == attribute.getValueType() )
         {
             inputHtml += ",number:true";
         }
-        else   if ( TrackedEntityAttribute.TYPE_PHONE_NUMBER.equals( attribute.getValueType() ) )
+        else if ( ValueType.PHONE_NUMBER == attribute.getValueType() )
         {
             inputHtml += ",phone:true";
         }
+
         inputHtml += "}}\" ";
 
-
-        if ( attribute.getValueType().equals( TrackedEntityAttribute.TYPE_PHONE_NUMBER ) )
-        {            
+        if ( ValueType.PHONE_NUMBER == attribute.getValueType() )
+        {
             inputHtml += " phoneNumber value=\"" + value + "\"" + TAG_CLOSE;
         }
-        else if ( attribute.getValueType().equals( TrackedEntityAttribute.TYPE_TRUE_ONLY ) )
+        else if ( ValueType.TRUE_ONLY == attribute.getValueType() )
         {
             inputHtml += " type='checkbox' value='true' ";
             if ( value.equals( "true" ) )
@@ -489,7 +517,7 @@ public class DefaultProgramService
                 inputHtml += " checked ";
             }
         }
-        else if ( attribute.getValueType().equals( TrackedEntityAttribute.TYPE_BOOL ) )
+        else if ( ValueType.BOOLEAN == attribute.getValueType() )
         {
             inputHtml = inputHtml.replaceFirst( "input", "select" ) + ">";
 
@@ -514,7 +542,7 @@ public class DefaultProgramService
 
             inputHtml += "</select>";
         }
-        else if ( attribute.getValueType().equals( TrackedEntityAttribute.TYPE_OPTION_SET ) )
+        else if ( ValueType.OPTION_SET == attribute.getValueType() )
         {
             inputHtml = inputHtml.replaceFirst( "input", "select" ) + ">";
             inputHtml += "<option value=\"\" selected>" + i18n.getString( "no_value" ) + "</option>";
@@ -530,18 +558,20 @@ public class DefaultProgramService
             }
             inputHtml += "</select>";
         }
-        else if ( attribute.getValueType().equals( TrackedEntityAttribute.TYPE_DATE ) )
+        else if ( ValueType.DATE == attribute.getValueType() )
         {
             String jQueryCalendar = "<script>";
-            if( allowDateInFuture ){
+            if ( allowDateInFuture )
+            {
                 jQueryCalendar += "datePicker";
             }
-            else{
+            else
+            {
                 jQueryCalendar += "datePickerValid";
             }
             jQueryCalendar += "(\"attr" + attribute.getId() + "\", false, false);</script>";
-            
-           inputHtml += " value=\"" + value + "\"" + TAG_CLOSE;
+
+            inputHtml += " value=\"" + value + "\"" + TAG_CLOSE;
             inputHtml += jQueryCalendar;
         }
         else

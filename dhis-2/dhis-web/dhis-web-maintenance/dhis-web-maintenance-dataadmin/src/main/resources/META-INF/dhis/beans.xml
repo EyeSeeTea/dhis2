@@ -10,8 +10,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     scope="prototype">
     <property name="maintenanceService" ref="org.hisp.dhis.maintenance.MaintenanceService" />
     <property name="completenessService" ref="compulsoryDataCompletenessService" />
-    <property name="aggregatedDataValueService" ref="org.hisp.dhis.aggregation.AggregatedDataValueService" />
-    <property name="dataMartManager" ref="org.hisp.dhis.datamart.DataMartManager" />
     <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
     <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
     <property name="resourceTableService" ref="org.hisp.dhis.resourcetable.ResourceTableService" />
@@ -65,15 +63,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     class="org.hisp.dhis.dataadmin.action.databrowser.ExportResultAction"
     scope="prototype" />
 
-  <!-- Organisation unit merge -->
-
-  <bean id="org.hisp.dhis.dataadmin.action.organisationunitmerge.MergeOrganisationUnitsAction"
-    class="org.hisp.dhis.dataadmin.action.organisationunitmerge.MergeOrganisationUnitsAction"
-    scope="prototype">
-    <property name="dataMergeService" ref="org.hisp.dhis.datamerge.DataMergeService" />
-    <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
-  </bean>
-
   <!-- I18nLocale -->
 
   <bean id="org.hisp.dhis.dataadmin.action.locale.GetLocaleListAction"
@@ -99,16 +88,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
   <bean id="org.hisp.dhis.dataadmin.action.locale.ValidateLocaleAction"
     class="org.hisp.dhis.dataadmin.action.locale.ValidateLocaleAction"
     scope="prototype" />
-
-  <!-- Duplicate data elimination -->
-
-  <bean id="org.hisp.dhis.dataadmin.action.duplicatedataelimination.EliminateDuplicateDataAction"
-    class="org.hisp.dhis.dataadmin.action.duplicatedataelimination.EliminateDuplicateDataAction"
-    scope="prototype">
-    <property name="dataMergeService" ref="org.hisp.dhis.datamerge.DataMergeService" />
-    <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
-    <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
-  </bean>
 
   <!-- Min/Max validation -->
 

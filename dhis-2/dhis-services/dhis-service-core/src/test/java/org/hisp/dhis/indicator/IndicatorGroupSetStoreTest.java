@@ -44,7 +44,7 @@ public class IndicatorGroupSetStoreTest
     
     @Override
     protected IndicatorGroupSet[] getObjects()
-    {
+    {   
         return objects;
     }
 

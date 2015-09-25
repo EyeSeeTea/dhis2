@@ -28,7 +28,9 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.common.ListMap;
+import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.hierarchy.HierarchyViolationException;
 import org.hisp.dhis.period.PeriodType;
@@ -114,7 +116,7 @@ public interface DataElementService
      *
      * @param key the name of the DataElement to return.
      * @return List of DataElements with a given key, or all dataelements if no
-     *         match.
+     * match.
      */
     List<DataElement> searchDataElementsByName( String key );
 
@@ -130,7 +132,7 @@ public interface DataElementService
      * Returns all DataElements.
      *
      * @return a list of all DataElements, or an empty list if there
-     *         are no DataElements.
+     * are no DataElements.
      */
     List<DataElement> getAllDataElements();
 
@@ -163,13 +165,13 @@ public interface DataElementService
     /**
      * Returns all DataElements with a given aggregation operator.
      *
-     * @param aggregationOperator the aggregation operator of the DataElements
-     *                            to return.
+     * @param aggregationType the aggregation type of the DataElements
+     *                        to return.
      * @return a list of all DataElements with the given aggregation
-     *         operator, or an empty collection if no DataElements have the
-     *         aggregation operator.
+     * operator, or an empty collection if no DataElements have the
+     * aggregation operator.
      */
-    List<DataElement> getDataElementsByAggregationOperator( String aggregationOperator );
+    List<DataElement> getDataElementsByAggregationType( AggregationType aggregationType );
 
     /**
      * Returns all DataElements with the given domain type.
@@ -188,13 +190,20 @@ public interface DataElementService
     List<DataElement> getDataElementsByDomainType( DataElementDomain domainType, int first, int max );
 
     /**
+     * Returns all DataElements with the given value types.
+     *
+     * @param valueTypes The value types.
+     * @return all DataElements with the given value types.
+     */
+    List<DataElement> getDataElementsByValueTypes( List<ValueType> valueTypes );
+
+    /**
      * Returns all DataElements with the given type.
      *
-     * @param type the type.
-     * @return all DataElements with the given type.
+     * @param valueType The value type.
+     * @return all DataElements with the given value type.
      */
-
-    List<DataElement> getDataElementsByType( String type );
+    List<DataElement> getDataElementsByValueType( ValueType valueType );
 
     /**
      * Returns the DataElements with the given PeriodType.
@@ -237,7 +246,7 @@ public interface DataElementService
      * DataElementGroupSets.
      *
      * @return all DataElements which are associated with one or more
-     *         DataElementGroupSets.
+     * DataElementGroupSets.
      */
     List<DataElement> getDataElementsWithGroupSets();
 
@@ -380,7 +389,7 @@ public interface DataElementService
      * Returns all DataElementGroups.
      *
      * @return a collection of all DataElementGroups, or an empty collection if
-     *         no DataElementGroups exist.
+     * no DataElementGroups exist.
      */
     List<DataElementGroup> getAllDataElementGroups();
 
@@ -400,17 +409,6 @@ public interface DataElementService
      * @return the DataElementGroup with the given code, or null if no match.
      */
     DataElementGroup getDataElementGroupByCode( String code );
-
-
-    /**
-     * Returns all DataElementGroups which contain the given DataElement.
-     *
-     * @param dataElement the DataElement which the DataElementGroups must
-     *                    contain.
-     * @return a collection of all DataElementGroups that contain the given
-     *         DataElement.
-     */
-    List<DataElementGroup> getGroupsContainingDataElement( DataElement dataElement );
 
     /**
      * Returns data elements with identifier in the given id.
@@ -475,11 +473,7 @@ public interface DataElementService
 
     DataElementGroupSet getDataElementGroupSetByName( String name );
 
-    List<DataElementGroupSet> getCompulsoryDataElementGroupSets();
-
     List<DataElementGroupSet> getCompulsoryDataElementGroupSetsWithMembers();
-
-    List<DataElementGroupSet> getCompulsoryDataElementGroupSetsNotAssignedTo( DataElement dataElement );
 
     List<DataElementGroupSet> getAllDataElementGroupSets();
 

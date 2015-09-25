@@ -28,10 +28,15 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import org.hisp.dhis.DhisSpringTest;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.trackedentity.TrackedEntityInstance;
+import org.hisp.dhis.trackedentity.TrackedEntityInstanceReminder;
+import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
+import org.joda.time.DateTime;
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,19 +45,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.hisp.dhis.DhisSpringTest;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.sms.config.SmsConfigurationManager;
-import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
-import org.hisp.dhis.trackedentity.TrackedEntityInstance;
-import org.hisp.dhis.trackedentity.TrackedEntityInstanceReminder;
-import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
-import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueService;
-import org.joda.time.DateTime;
-import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
+import static org.junit.Assert.*;
 
 /**
  * @author Chau Thu Tran
@@ -74,15 +67,6 @@ public class ProgramInstanceServiceTest
 
     @Autowired
     private ProgramStageService programStageService;
-
-    @Autowired
-    private SmsConfigurationManager smsConfigurationManager;
-
-    @Autowired
-    private TrackedEntityAttributeService attributeService;
-
-    @Autowired
-    private TrackedEntityAttributeValueService attributeValueService;
 
     private Date incidenDate;
 
@@ -110,9 +94,6 @@ public class ProgramInstanceServiceTest
 
     private Collection<Integer> orgunitIds;
 
-    @Autowired
-    JdbcTemplate jdbcTemplate;
-
     @Override
     public void setUpTest()
     {
@@ -126,7 +107,7 @@ public class ProgramInstanceServiceTest
         orgunitIds.add( idA );
         orgunitIds.add( idB );
 
-        programA = createProgram( 'A', new HashSet<ProgramStage>(), organisationUnitA );
+        programA = createProgram( 'A', new HashSet<>(), organisationUnitA );
 
         TrackedEntityInstanceReminder reminderA = new TrackedEntityInstanceReminder( "A", 0,
             "Test program message template", TrackedEntityInstanceReminder.ENROLLEMENT_DATE_TO_COMPARE,
@@ -158,10 +139,10 @@ public class ProgramInstanceServiceTest
         programA.setProgramStages( programStages );
         programService.updateProgram( programA );
 
-        programB = createProgram( 'B', new HashSet<ProgramStage>(), organisationUnitA );
+        programB = createProgram( 'B', new HashSet<>(), organisationUnitA );
         programService.addProgram( programB );
 
-        programC = createProgram( 'C', new HashSet<ProgramStage>(), organisationUnitA );
+        programC = createProgram( 'C', new HashSet<>(), organisationUnitA );
         programService.addProgram( programC );
 
         entityInstanceA = createTrackedEntityInstance( 'A', organisationUnitA );
@@ -174,7 +155,7 @@ public class ProgramInstanceServiceTest
         testDate1.withTimeAtStartOfDay();
         testDate1 = testDate1.minusDays( 70 );
         incidenDate = testDate1.toDate();
-        
+
         DateTime testDate2 = DateTime.now();
         testDate2.withTimeAtStartOfDay();
         enrollmentDate = testDate2.toDate();
@@ -184,11 +165,11 @@ public class ProgramInstanceServiceTest
 
         programInstanceB = new ProgramInstance( enrollmentDate, incidenDate, entityInstanceA, programB );
         programInstanceB.setUid( "UID-B" );
-        programInstanceB.setStatus( ProgramInstance.STATUS_CANCELLED );
+        programInstanceB.setStatus( ProgramStatus.CANCELLED );
 
         programInstanceC = new ProgramInstance( enrollmentDate, incidenDate, entityInstanceA, programC );
         programInstanceC.setUid( "UID-C" );
-        programInstanceC.setStatus( ProgramInstance.STATUS_COMPLETED );
+        programInstanceC.setStatus( ProgramStatus.COMPLETED );
 
         programInstanceD = new ProgramInstance( enrollmentDate, incidenDate, entityInstanceB, programA );
         programInstanceD.setUid( "UID-D" );
@@ -232,10 +213,10 @@ public class ProgramInstanceServiceTest
 
         assertNotNull( programInstanceService.getProgramInstance( idA ) );
 
-        programInstanceA.setDateOfIncident( enrollmentDate );
+        programInstanceA.setIncidentDate( enrollmentDate );
         programInstanceService.updateProgramInstance( programInstanceA );
 
-        assertEquals( enrollmentDate, programInstanceService.getProgramInstance( idA ).getDateOfIncident() );
+        assertEquals( enrollmentDate, programInstanceService.getProgramInstance( idA ).getIncidentDate() );
     }
 
     @Test
@@ -302,7 +283,7 @@ public class ProgramInstanceServiceTest
 
         ProgramInstance programInstance = programInstanceService.enrollTrackedEntityInstance( entityInstanceA, programA, enrollmentDate,
             incidenDate, organisationUnitA );
-        programInstance.setStatus( ProgramInstance.STATUS_COMPLETED );
+        programInstance.setStatus( ProgramStatus.COMPLETED );
         programInstanceService.updateProgramInstance( programInstance );
 
         List<ProgramInstance> programInstances = programInstanceService.getProgramInstances( entityInstanceA, programA );
@@ -318,22 +299,20 @@ public class ProgramInstanceServiceTest
 
         ProgramInstance programInstance1 = programInstanceService.enrollTrackedEntityInstance( entityInstanceA, programA, enrollmentDate,
             incidenDate, organisationUnitA );
-        programInstance1.setStatus( ProgramInstance.STATUS_COMPLETED );
+        programInstance1.setStatus( ProgramStatus.COMPLETED );
         programInstanceService.updateProgramInstance( programInstance1 );
 
         ProgramInstance programInstance2 = programInstanceService.enrollTrackedEntityInstance( entityInstanceA, programA, enrollmentDate,
             incidenDate, organisationUnitA );
-        programInstance2.setStatus( ProgramInstance.STATUS_COMPLETED );
+        programInstance2.setStatus( ProgramStatus.COMPLETED );
         programInstanceService.updateProgramInstance( programInstance2 );
 
-        List<ProgramInstance> programInstances = programInstanceService.getProgramInstances( entityInstanceA, programA,
-            ProgramInstance.STATUS_COMPLETED );
+        List<ProgramInstance> programInstances = programInstanceService.getProgramInstances( entityInstanceA, programA, ProgramStatus.COMPLETED );
         assertEquals( 2, programInstances.size() );
         assertTrue( programInstances.contains( programInstance1 ) );
         assertTrue( programInstances.contains( programInstance2 ) );
 
-        programInstances = programInstanceService.getProgramInstances( entityInstanceA, programA,
-            ProgramInstance.STATUS_ACTIVE );
+        programInstances = programInstanceService.getProgramInstances( entityInstanceA, programA, ProgramStatus.ACTIVE );
         assertEquals( 1, programInstances.size() );
         assertTrue( programInstances.contains( programInstanceA ) );
     }
@@ -384,7 +363,7 @@ public class ProgramInstanceServiceTest
         programInstanceService.addProgramInstance( programInstanceD );
 
         List<ProgramInstance> programInstances = programInstanceService.getProgramInstancesByStatus(
-            ProgramInstance.STATUS_ACTIVE, programA, orgunitIds, incidenDate, enrollmentDate );
+            ProgramStatus.ACTIVE, programA, orgunitIds, incidenDate, enrollmentDate );
         assertEquals( 2, programInstances.size() );
         assertTrue( programInstances.contains( programInstanceA ) );
         assertTrue( programInstances.contains( programInstanceD ) );
@@ -397,7 +376,7 @@ public class ProgramInstanceServiceTest
         programInstanceService.addProgramInstance( programInstanceB );
         programInstanceService.addProgramInstance( programInstanceD );
 
-        int count = programInstanceService.countProgramInstancesByStatus( ProgramInstance.STATUS_ACTIVE, programA,
+        int count = programInstanceService.countProgramInstancesByStatus( ProgramStatus.ACTIVE, programA,
             orgunitIds, incidenDate, enrollmentDate );
         assertEquals( 2, count );
     }
@@ -430,8 +409,8 @@ public class ProgramInstanceServiceTest
         programInstanceService.completeProgramInstanceStatus( programInstanceA );
         programInstanceService.completeProgramInstanceStatus( programInstanceD );
 
-        assertEquals( ProgramInstance.STATUS_COMPLETED, programInstanceService.getProgramInstance( idA ).getStatus() );
-        assertEquals( ProgramInstance.STATUS_COMPLETED, programInstanceService.getProgramInstance( idD ).getStatus() );
+        assertEquals( ProgramStatus.COMPLETED, programInstanceService.getProgramInstance( idA ).getStatus() );
+        assertEquals( ProgramStatus.COMPLETED, programInstanceService.getProgramInstance( idD ).getStatus() );
     }
 
     @Test
@@ -443,8 +422,7 @@ public class ProgramInstanceServiceTest
         programInstanceService.cancelProgramInstanceStatus( programInstanceA );
         programInstanceService.cancelProgramInstanceStatus( programInstanceD );
 
-        assertEquals( ProgramInstance.STATUS_CANCELLED, programInstanceService.getProgramInstance( idA ).getStatus() );
-        assertEquals( ProgramInstance.STATUS_CANCELLED, programInstanceService.getProgramInstance( idD ).getStatus() );
+        assertEquals( ProgramStatus.CANCELLED, programInstanceService.getProgramInstance( idA ).getStatus() );
+        assertEquals( ProgramStatus.CANCELLED, programInstanceService.getProgramInstance( idD ).getStatus() );
     }
-
 }

@@ -29,17 +29,18 @@ package org.hisp.dhis.trackedentity.action.program;
  */
 
 import com.opensymphony.xwork2.Action;
-
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.attribute.AttributeService;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageService;
-import org.hisp.dhis.program.ProgramType;
+import org.hisp.dhis.program.ProgramStatus;
 import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
+import org.hisp.dhis.program.ProgramType;
 import org.hisp.dhis.relationship.RelationshipType;
 import org.hisp.dhis.relationship.RelationshipTypeService;
 import org.hisp.dhis.system.util.AttributeUtils;
@@ -88,6 +89,9 @@ public class AddProgramAction
     @Autowired
     private AttributeService attributeService;
 
+    @Autowired
+    private DataElementCategoryService categoryService;
+
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
@@ -106,25 +110,25 @@ public class AddProgramAction
         this.description = description;
     }
 
-    private String dateOfEnrollmentDescription;
+    private String enrollmentDateLabel;
 
-    public void setDateOfEnrollmentDescription( String dateOfEnrollmentDescription )
+    public void setEnrollmentDateLabel( String enrollmentDateLabel )
     {
-        this.dateOfEnrollmentDescription = dateOfEnrollmentDescription;
+        this.enrollmentDateLabel = enrollmentDateLabel;
     }
 
-    private String dateOfIncidentDescription;
+    private String incidentDateLabel;
 
-    public void setDateOfIncidentDescription( String dateOfIncidentDescription )
+    public void setIncidentDateDescription( String incidentDateLabel )
     {
-        this.dateOfIncidentDescription = dateOfIncidentDescription;
+        this.incidentDateLabel = incidentDateLabel;
     }
 
-    private String type;
+    private ProgramType programType;
 
-    public void setType( String type )
+    public void setProgramType( ProgramType programType )
     {
-        this.type = type;
+        this.programType = programType;
     }
 
     private Boolean displayIncidentDate;
@@ -239,6 +243,13 @@ public class AddProgramAction
         this.jsonAttributeValues = jsonAttributeValues;
     }
 
+    private Integer categoryComboId;
+
+    public void setCategoryComboId( Integer categoryComboId )
+    {
+        this.categoryComboId = categoryComboId;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -253,15 +264,14 @@ public class AddProgramAction
         selectEnrollmentDatesInFuture = (selectEnrollmentDatesInFuture == null) ? false : selectEnrollmentDatesInFuture;
         selectIncidentDatesInFuture = (selectIncidentDatesInFuture == null) ? false : selectIncidentDatesInFuture;
         dataEntryMethod = (dataEntryMethod == null) ? false : dataEntryMethod;
-        ProgramType programType = ProgramType.fromValue( type );
-        
+
         Program program = new Program();
 
         program.setName( StringUtils.trimToNull( name ) );
         program.setDescription( StringUtils.trimToNull( description ) );
         program.setVersion( 1 );
-        program.setDateOfEnrollmentDescription( StringUtils.trimToNull( dateOfEnrollmentDescription ) );
-        program.setDateOfIncidentDescription( StringUtils.trimToNull( dateOfIncidentDescription ) );
+        program.setEnrollmentDateLabel( StringUtils.trimToNull( enrollmentDateLabel ) );
+        program.setIncidentDateLabel( StringUtils.trimToNull( incidentDateLabel ) );
         program.setProgramType( programType );
         program.setDisplayIncidentDate( displayIncidentDate );
         program.setOnlyEnrollOnce( onlyEnrollOnce );
@@ -283,8 +293,8 @@ public class AddProgramAction
             RelationshipType relationshipType = relationshipTypeService.getRelationshipType( relationshipTypeId );
             program.setRelationshipType( relationshipType );
             program.setRelationshipFromA( relationshipFromA );
-            program.setRelationshipText( relationshipText ); 
-            
+            program.setRelationshipText( relationshipText );
+
             Program relatedProgram = programService.getProgram( relatedProgramId );
             program.setRelatedProgram( relatedProgram );
         }
@@ -300,6 +310,11 @@ public class AddProgramAction
         {
             TrackedEntity trackedEntity = trackedEntityService.getTrackedEntity( trackedEntityId );
             program.setTrackedEntity( trackedEntity );
+        }
+
+        if ( categoryComboId != null )
+        {
+            program.setCategoryCombo( categoryService.getDataElementCategoryCombo( categoryComboId ) );
         }
 
         programService.addProgram( program );
@@ -353,9 +368,9 @@ public class AddProgramAction
             // Add a new program-instance
             ProgramInstance programInstance = new ProgramInstance();
             programInstance.setEnrollmentDate( new Date() );
-            programInstance.setDateOfIncident( new Date() );
+            programInstance.setIncidentDate( new Date() );
             programInstance.setProgram( program );
-            programInstance.setStatus( ProgramInstance.STATUS_ACTIVE );
+            programInstance.setStatus( ProgramStatus.ACTIVE );
 
             programInstanceService.addProgramInstance( programInstance );
         }

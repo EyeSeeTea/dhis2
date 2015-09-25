@@ -64,17 +64,11 @@ public class ProgramInstance
      */
     private static final long serialVersionUID = -1235315582356509653L;
 
-    public static int STATUS_ACTIVE = 0;
-
-    private Integer status = STATUS_ACTIVE;
-
-    public static int STATUS_COMPLETED = 1;
-
-    public static int STATUS_CANCELLED = 2;
+    private ProgramStatus status = ProgramStatus.ACTIVE;
 
     private OrganisationUnit organisationUnit;
 
-    private Date dateOfIncident; // TODO rename to incidenceDate
+    private Date incidentDate;
 
     private Date enrollmentDate;
 
@@ -102,10 +96,10 @@ public class ProgramInstance
     {
     }
 
-    public ProgramInstance( Date enrollmentDate, Date dateOfIncident, TrackedEntityInstance entityInstance, Program program )
+    public ProgramInstance( Date enrollmentDate, Date incidentDate, TrackedEntityInstance entityInstance, Program program )
     {
         this.enrollmentDate = enrollmentDate;
-        this.dateOfIncident = dateOfIncident;
+        this.incidentDate = incidentDate;
         this.entityInstance = entityInstance;
         this.program = program;
     }
@@ -183,7 +177,7 @@ public class ProgramInstance
         final int prime = 31;
         int result = super.hashCode();
 
-        result = prime * result + ((dateOfIncident == null) ? 0 : dateOfIncident.hashCode());
+        result = prime * result + ((incidentDate == null) ? 0 : incidentDate.hashCode());
         result = prime * result + ((enrollmentDate == null) ? 0 : enrollmentDate.hashCode());
         result = prime * result + ((entityInstance == null) ? 0 : entityInstance.hashCode());
         result = prime * result + ((program == null) ? 0 : program.hashCode());
@@ -211,14 +205,14 @@ public class ProgramInstance
 
         final ProgramInstance other = (ProgramInstance) object;
 
-        if ( dateOfIncident == null )
+        if ( incidentDate == null )
         {
-            if ( other.dateOfIncident != null )
+            if ( other.incidentDate != null )
             {
                 return false;
             }
         }
-        else if ( !dateOfIncident.equals( other.dateOfIncident ) )
+        else if ( !incidentDate.equals( other.incidentDate ) )
         {
             return false;
         }
@@ -282,14 +276,14 @@ public class ProgramInstance
 
     @JsonProperty
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public Date getDateOfIncident()
+    public Date getIncidentDate()
     {
-        return dateOfIncident;
+        return incidentDate;
     }
 
-    public void setDateOfIncident( Date dateOfIncident )
+    public void setIncidentDate( Date incidentDate )
     {
-        this.dateOfIncident = dateOfIncident;
+        this.incidentDate = incidentDate;
     }
 
     @JsonProperty
@@ -318,12 +312,12 @@ public class ProgramInstance
 
     @JsonProperty
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public int getStatus()
+    public ProgramStatus getStatus()
     {
         return status;
     }
 
-    public void setStatus( Integer status )
+    public void setStatus( ProgramStatus status )
     {
         this.status = status;
     }

@@ -30,8 +30,9 @@ package org.hisp.dhis.trackedentity.action.program;
 
 import com.opensymphony.xwork2.Action;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.attribute.AttributeService;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
@@ -74,6 +75,9 @@ public class UpdateProgramAction
 
     @Autowired
     private AttributeService attributeService;
+    
+    @Autowired
+    private DataElementCategoryService categoryService;
 
     // -------------------------------------------------------------------------
     // Input/Output
@@ -100,25 +104,25 @@ public class UpdateProgramAction
         this.description = description;
     }
 
-    private String dateOfEnrollmentDescription;
+    private String enrollmentDateLabel;
 
-    public void setDateOfEnrollmentDescription( String dateOfEnrollmentDescription )
+    public void setEnrollmentDateLabel( String enrollmentDateLabel )
     {
-        this.dateOfEnrollmentDescription = dateOfEnrollmentDescription;
+        this.enrollmentDateLabel = enrollmentDateLabel;
     }
 
-    private String dateOfIncidentDescription;
+    private String incidentDateLabel;
 
-    public void setDateOfIncidentDescription( String dateOfIncidentDescription )
+    public void setIncidentDateLabel( String incidentDateLabel )
     {
-        this.dateOfIncidentDescription = dateOfIncidentDescription;
+        this.incidentDateLabel = incidentDateLabel;
     }
 
-    private String type;
+    private ProgramType programType;
 
-    public void setType( String type )
+    public void setProgramType( ProgramType programType )
     {
-        this.type = type;
+        this.programType = programType;
     }
 
     private Boolean displayProvidedOtherFacility;
@@ -260,6 +264,13 @@ public class UpdateProgramAction
     {
         this.jsonAttributeValues = jsonAttributeValues;
     }
+    
+    private Integer categoryComboId;
+
+    public void setCategoryComboId( Integer categoryComboId )
+    {
+        this.categoryComboId = categoryComboId;
+    }
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -278,13 +289,12 @@ public class UpdateProgramAction
         selectEnrollmentDatesInFuture = (selectEnrollmentDatesInFuture == null) ? false : selectEnrollmentDatesInFuture;
         selectIncidentDatesInFuture = (selectIncidentDatesInFuture == null) ? false : selectIncidentDatesInFuture;
         dataEntryMethod = (dataEntryMethod == null) ? false : dataEntryMethod;
-        ProgramType programType = ProgramType.fromValue( type );
         
         Program program = programService.getProgram( id );
         program.setName( StringUtils.trimToNull( name ) );
         program.setDescription( StringUtils.trimToNull( description ) );
-        program.setDateOfEnrollmentDescription( StringUtils.trimToNull( dateOfEnrollmentDescription ) );
-        program.setDateOfIncidentDescription( StringUtils.trimToNull( dateOfIncidentDescription ) );
+        program.setEnrollmentDateLabel( StringUtils.trimToNull( enrollmentDateLabel ) );
+        program.setIncidentDateLabel( StringUtils.trimToNull( incidentDateLabel ) );
         program.setProgramType( programType );
         program.setDisplayIncidentDate( displayIncidentDate );
         program.setOnlyEnrollOnce( onlyEnrollOnce );
@@ -358,6 +368,11 @@ public class UpdateProgramAction
         if ( jsonAttributeValues != null )
         {
             AttributeUtils.updateAttributeValuesFromJson( program.getAttributeValues(), jsonAttributeValues, attributeService );
+        }
+        
+        if ( categoryComboId != null )
+        {
+                program.setCategoryCombo( categoryService.getDataElementCategoryCombo( categoryComboId ) );
         }
 
         programService.updateProgram( program );

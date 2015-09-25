@@ -33,11 +33,9 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
 import org.hisp.dhis.cache.HibernateCacheManager;
 import org.hisp.dhis.common.IdentifiableObject;
-import org.hisp.dhis.common.MergeStrategy;
 import org.hisp.dhis.commons.timer.SystemTimer;
 import org.hisp.dhis.commons.timer.Timer;
 import org.hisp.dhis.dxf2.common.ImportOptions;
-import org.hisp.dhis.importexport.ImportStrategy;
 import org.hisp.dhis.scheduling.TaskId;
 import org.hisp.dhis.schema.Schema;
 import org.hisp.dhis.schema.SchemaService;
@@ -98,19 +96,15 @@ public class DefaultImportService
     //-------------------------------------------------------------------------------------------------------
 
     @Override
-    public <T extends IdentifiableObject> ImportTypeSummary importObject( String userUid, T object, ImportStrategy importStrategy, MergeStrategy mergeStrategy )
+    public <T extends IdentifiableObject> ImportTypeSummary importObject( String userUid, T object, ImportOptions importOptions )
     {
         User user = userService.getUser( userUid );
 
-        ImportOptions importOptions = new ImportOptions();
-        importOptions.setDryRun( false );
-        importOptions.setPreheatCache( false );
-        importOptions.setImportStrategy( importStrategy.toString() );
-        importOptions.setMergeStrategy( mergeStrategy );
-
         objectBridge.setWriteEnabled( !importOptions.isDryRun() );
         objectBridge.setPreheatCache( importOptions.isPreheatCache() );
-        objectBridge.init();
+
+        Schema schema = schemaService.getDynamicSchema( object.getClass() );
+        objectBridge.init( schema.getReferences() );
 
         ImportTypeSummary importTypeSummary = doImport( user, object, importOptions );
 
@@ -153,7 +147,7 @@ public class DefaultImportService
 
         objectBridge.setWriteEnabled( !importOptions.isDryRun() );
         objectBridge.setPreheatCache( importOptions.isPreheatCache() );
-        objectBridge.init();
+        objectBridge.init( new HashSet<>() );
 
         for ( Schema schema : schemaService.getMetadataSchemas() )
         {
@@ -163,7 +157,7 @@ public class DefaultImportService
             {
                 if ( Collection.class.isAssignableFrom( value.getClass() ) )
                 {
-                    List<?> objects = new ArrayList<Object>( (Collection<?>) value );
+                    List<?> objects = new ArrayList<>( (Collection<?>) value );
 
                     if ( !objects.isEmpty() )
                     {

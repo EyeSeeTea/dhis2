@@ -31,7 +31,6 @@ package org.hisp.dhis.organisationunit;
 import static org.hisp.dhis.common.NameableObjectUtils.getDisplayProperty;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -72,6 +71,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.google.common.base.Joiner;
+import com.google.common.collect.Sets;
 
 /**
  * @author Kristian Nordal
@@ -82,21 +82,14 @@ public class OrganisationUnit
 {
     private static final long serialVersionUID = 1228298379303894619L;
 
-    private static final Joiner PATH_JOINER = Joiner.on( "/" );
-
-    public static final String FEATURETYPE_NONE = "None";
-    public static final String FEATURETYPE_MULTIPOLYGON = "MultiPolygon";
-    public static final String FEATURETYPE_POLYGON = "Polygon";
-    public static final String FEATURETYPE_POINT = "Point";
-    public static final String RESULTTYPE_SYMBOL = "Symbol";
+    private static final String PATH_SEP = "/";
+    private static final Joiner PATH_JOINER = Joiner.on( PATH_SEP );
 
     public static final String KEY_USER_ORGUNIT = "USER_ORGUNIT";
     public static final String KEY_USER_ORGUNIT_CHILDREN = "USER_ORGUNIT_CHILDREN";
     public static final String KEY_USER_ORGUNIT_GRANDCHILDREN = "USER_ORGUNIT_GRANDCHILDREN";
     public static final String KEY_LEVEL = "LEVEL-";
     public static final String KEY_ORGUNIT_GROUP = "OU_GROUP-";
-
-    private static final List<String> FEATURETYPES = Arrays.asList( FEATURETYPE_NONE, FEATURETYPE_MULTIPOLYGON, FEATURETYPE_POLYGON, FEATURETYPE_POINT );
 
     private static final Pattern JSON_POINT_PATTERN = Pattern.compile( "(\\[.*?\\])" );
     private static final Pattern JSON_COORDINATE_PATTERN = Pattern.compile( "(\\[{3}.*?\\]{3})" );
@@ -110,13 +103,15 @@ public class OrganisationUnit
 
     private String path;
 
+    private Integer hierarchyLevel;
+    
     private Date openingDate;
 
     private Date closedDate;
 
     private String comment;
 
-    private String featureType;
+    private FeatureType featureType = FeatureType.NONE;
 
     private String coordinates;
 
@@ -152,8 +147,6 @@ public class OrganisationUnit
 
     private transient boolean currentParent;
 
-    private transient int level;
-
     private transient String type;
 
     private transient List<String> groupNames = new ArrayList<>();
@@ -166,7 +159,7 @@ public class OrganisationUnit
 
     public OrganisationUnit()
     {
-        setAutoFields(); // to have getPath working properly, we need to set auto fields (for uid etc)
+        setAutoFields(); // Must be set to get UID and have getPath work properly
     }
 
     public OrganisationUnit( String name )
@@ -274,18 +267,14 @@ public class OrganisationUnit
 
     public void updateDataSets( Set<DataSet> updates )
     {
-        for ( DataSet dataSet : new HashSet<>( dataSets ) )
-        {
-            if ( !updates.contains( dataSet ) )
-            {
-                removeDataSet( dataSet );
-            }
-        }
+        Set<DataSet> toRemove = Sets.difference( dataSets, updates );
+        Set<DataSet> toAdd = Sets.difference( updates, dataSets );
 
-        for ( DataSet dataSet : updates )
-        {
-            addDataSet( dataSet );
-        }
+        toRemove.parallelStream().forEach( d -> d.getSources().remove( this ) );
+        toAdd.parallelStream().forEach( d -> d.getSources().add( this ) );
+
+        dataSets.clear();
+        dataSets.addAll( updates );
     }
 
     public void addUser( User user )
@@ -321,25 +310,25 @@ public class OrganisationUnit
 
     public static List<OrganisationUnit> getSortedChildren( Collection<OrganisationUnit> units )
     {
-        List<OrganisationUnit> children = new ArrayList<OrganisationUnit>();
-        
+        List<OrganisationUnit> children = new ArrayList<>();
+
         for ( OrganisationUnit unit : units )
         {
             children.addAll( unit.getSortedChildren() );
         }
-        
+
         return children;
     }
 
     public static List<OrganisationUnit> getSortedGrandChildren( Collection<OrganisationUnit> units )
     {
-        List<OrganisationUnit> children = new ArrayList<OrganisationUnit>();
-        
+        List<OrganisationUnit> children = new ArrayList<>();
+
         for ( OrganisationUnit unit : units )
         {
             children.addAll( unit.getSortedGrandChildren() );
         }
-        
+
         return children;
     }
 
@@ -454,7 +443,7 @@ public class OrganisationUnit
 
     public boolean hasFeatureType()
     {
-        return featureType != null && FEATURETYPES.contains( featureType );
+        return featureType != null;
     }
 
     public List<CoordinatesTuple> getCoordinatesAsList()
@@ -533,7 +522,7 @@ public class OrganisationUnit
         this.coordinates = StringUtils.trimToNull( builder.toString() );
     }
 
-    public String getChildrenFeatureType()
+    public FeatureType getChildrenFeatureType()
     {
         for ( OrganisationUnit child : children )
         {
@@ -543,7 +532,7 @@ public class OrganisationUnit
             }
         }
 
-        return FEATURETYPE_NONE;
+        return FeatureType.NONE;
     }
 
     public String getValidCoordinates()
@@ -706,32 +695,19 @@ public class OrganisationUnit
 
     @JsonProperty( "level" )
     @JacksonXmlProperty( localName = "level", isAttribute = true )
-    public int getOrganisationUnitLevel()
+    public int getLevel()
     {
-        int currentLevel = 1;
-
-        OrganisationUnit thisParent = this.parent;
-
-        while ( thisParent != null )
-        {
-            ++currentLevel;
-
-            thisParent = thisParent.getParent();
-        }
-
-        this.level = currentLevel;
-
-        return currentLevel;
+        return StringUtils.countMatches( path, PATH_SEP );
     }
 
     public boolean isPolygon()
     {
-        return featureType.equals( FEATURETYPE_MULTIPOLYGON ) || featureType.equals( FEATURETYPE_POLYGON );
+        return featureType != null && featureType.isPolygon();
     }
 
     public boolean isPoint()
     {
-        return featureType.equals( FEATURETYPE_POINT );
+        return featureType != null && featureType == FeatureType.POINT;
     }
 
     /**
@@ -811,11 +787,6 @@ public class OrganisationUnit
 
         return map;
     }
-    
-    public boolean hasLevel()
-    {
-        return level > 0;
-    }
 
     @Override
     public boolean haveUniqueNames()
@@ -879,8 +850,7 @@ public class OrganisationUnit
             }
             else
             {
-                // we have tests in the system which needs cyclic OU graphs, so we need to short-circuit here if we encounter that
-                currentParent = null;
+                currentParent = null; // Protect against cyclic org unit graphs
             }
         }
 
@@ -891,9 +861,45 @@ public class OrganisationUnit
         return path;
     }
 
+    /**
+     * Do not set directly.
+     */
     public void setPath( String path )
     {
         this.path = path;
+    }
+
+    /**
+     * Used by persistence layer. Purpose is to have a column for use in database 
+     * queries. For application use see {@link getLevel()} which has better performance.
+     */
+    public Integer getHierarchyLevel()
+    {
+        Set<String> uids = Sets.newHashSet( uid );
+        
+        OrganisationUnit current = this;
+        
+        while ( ( current = current.getParent() ) != null )
+        {
+            boolean add = uids.add( current.getUid() );
+            
+            if ( !add )
+            {
+                break; // Protect against cyclic org unit graphs
+            }
+        }
+        
+        hierarchyLevel = uids.size();
+        
+        return hierarchyLevel;
+    }
+
+    /**
+     * Do not set directly.
+     */
+    public void setHierarchyLevel( Integer hierarchyLevel )
+    {
+        this.hierarchyLevel = hierarchyLevel;
     }
 
     @JsonProperty
@@ -909,15 +915,6 @@ public class OrganisationUnit
     public void setChildren( Set<OrganisationUnit> children )
     {
         this.children = children;
-    }
-
-    public String getAlternativeName()
-    {
-        return getShortName();
-    }
-
-    public void setAlternativeName( String alternativeName )
-    {
     }
 
     @JsonProperty
@@ -963,12 +960,12 @@ public class OrganisationUnit
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String getFeatureType()
+    public FeatureType getFeatureType()
     {
         return featureType;
     }
 
-    public void setFeatureType( String featureType )
+    public void setFeatureType( FeatureType featureType )
     {
         this.featureType = featureType;
     }
@@ -1145,16 +1142,6 @@ public class OrganisationUnit
     // -------------------------------------------------------------------------
     // Getters and setters for transient fields
     // -------------------------------------------------------------------------
-
-    public int getLevel()
-    {
-        return level;
-    }
-
-    public void setLevel( int level )
-    {
-        this.level = level;
-    }
 
     public List<String> getGroupNames()
     {

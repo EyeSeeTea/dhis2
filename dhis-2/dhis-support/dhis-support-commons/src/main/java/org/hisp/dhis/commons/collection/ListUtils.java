@@ -141,7 +141,7 @@ public class ListUtils
      * @param comparator the comparator.
      * @return a set of duplicates from the given list.
      */
-    public static <T> Set<T> getDuplicates( List<T> list, Comparator<T> comparator )
+    public static <T> Set<T> getDuplicates( List<T> list, Comparator<? super T> comparator )
     {
         Set<T> duplicates = new HashSet<>();
         
@@ -254,7 +254,7 @@ public class ListUtils
      */
     public static List<Integer> getClosedOpenList( int a, int b )
     {
-        List<Integer> list = new ArrayList<Integer>();
+        List<Integer> list = new ArrayList<>();
         
         for ( int i = a; i < b; i++ )
         {
@@ -314,7 +314,7 @@ public class ListUtils
      */
     public static <T> List<T> sort( List<T> list, Comparator<? super T> comparator )
     {
-        List<T> copy = new ArrayList<T>( list );
+        List<T> copy = new ArrayList<>( list );
         Collections.sort( copy, comparator );
         return copy;
     }

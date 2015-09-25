@@ -667,7 +667,7 @@ public class DefaultAnalyticsService
             {
                 reportTable.getColumnDimensions().add( dimension );
 
-                tableColumns.add( params.getDimensionArrayCollapseDxExplodeCoc( dimension ) );
+                tableColumns.add( params.getDimensionArrayExplodeCoc( dimension ) );
             }
         }
 
@@ -677,7 +677,7 @@ public class DefaultAnalyticsService
             {
                 reportTable.getRowDimensions().add( dimension );
 
-                tableRows.add( params.getDimensionArrayCollapseDxExplodeCoc( dimension ) );
+                tableRows.add( params.getDimensionArrayExplodeCoc( dimension ) );
             }
         }
 
@@ -859,11 +859,11 @@ public class DefaultAnalyticsService
 
         int maxLimit = getMaxLimit();
         
-        Timer t = new Timer().start().disablePrint();
+        Timer timer = new Timer().start().disablePrint();
 
         DataQueryGroups queryGroups = queryPlanner.planQuery( params, optimalQueries, tableName );
 
-        t.getSplitTime( "Planned analytics query, got: " + queryGroups.getLargestGroupSize() + " for optimal: " + optimalQueries );
+        timer.getSplitTime( "Planned analytics query, got: " + queryGroups.getLargestGroupSize() + " for optimal: " + optimalQueries );
 
         Map<String, Object> map = new HashMap<>();
 
@@ -897,7 +897,7 @@ public class DefaultAnalyticsService
             }
         }
 
-        t.getTime( "Got analytics values" );
+        timer.getTime( "Got analytics values" );
 
         return map;
     }
@@ -908,9 +908,9 @@ public class DefaultAnalyticsService
 
     @Override
     public DataQueryParams getFromUrl( Set<String> dimensionParams, Set<String> filterParams, AggregationType aggregationType,
-        String measureCriteria, boolean skipMeta, boolean skipData, boolean skipRounding, boolean hierarchyMeta, boolean ignoreLimit,
+        String measureCriteria, boolean skipMeta, boolean skipData, boolean skipRounding, boolean completedOnly, boolean hierarchyMeta, boolean ignoreLimit,
         boolean hideEmptyRows, boolean showHierarchy, DisplayProperty displayProperty, IdentifiableProperty outputIdScheme, 
-        String approvalLevel, String userOrgUnit, String program, String stage, I18nFormat format )
+        String approvalLevel, Date relativePeriodDate, String userOrgUnit, String program, String stage, I18nFormat format )
     {
         DataQueryParams params = new DataQueryParams();
         
@@ -919,12 +919,12 @@ public class DefaultAnalyticsService
 
         if ( dimensionParams != null && !dimensionParams.isEmpty() )
         {
-            params.addDimensions( getDimensionalObjects( dimensionParams, userOrgUnit, format ) );
+            params.addDimensions( getDimensionalObjects( dimensionParams, relativePeriodDate, userOrgUnit, format ) );
         }
 
         if ( filterParams != null && !filterParams.isEmpty() )
         {
-            params.getFilters().addAll( getDimensionalObjects( filterParams, userOrgUnit, format ) );
+            params.getFilters().addAll( getDimensionalObjects( filterParams, relativePeriodDate, userOrgUnit, format ) );
         }
 
         if ( measureCriteria != null && !measureCriteria.isEmpty() )
@@ -935,6 +935,7 @@ public class DefaultAnalyticsService
         params.setSkipMeta( skipMeta );
         params.setSkipData( skipData );
         params.setSkipRounding( skipRounding );
+        params.setCompletedOnly( completedOnly );
         params.setHierarchyMeta( hierarchyMeta );
         params.setHideEmptyRows( hideEmptyRows );
         params.setShowHierarchy( showHierarchy );
@@ -988,7 +989,7 @@ public class DefaultAnalyticsService
     }
 
     @Override
-    public List<DimensionalObject> getDimensionalObjects( Set<String> dimensionParams, String userOrgUnit, I18nFormat format )
+    public List<DimensionalObject> getDimensionalObjects( Set<String> dimensionParams, Date relativePeriodDate, String userOrgUnit, I18nFormat format )
     {
         List<DimensionalObject> list = new ArrayList<>();
         
@@ -1003,7 +1004,7 @@ public class DefaultAnalyticsService
 
                 if ( dimension != null && items != null )
                 {
-                    list.add( getDimension( dimension, items, null, userOrgUnits, format, false ) );
+                    list.add( getDimension( dimension, items, relativePeriodDate, userOrgUnits, format, false ) );
                 }
             }
         }
@@ -1140,7 +1141,9 @@ public class DefaultAnalyticsService
 
             for ( Period period : periods )
             {
-                period.setName( format != null ? format.formatPeriod( period ) : null );
+                String name = format != null ? format.formatPeriod( period ) : null;
+                period.setName( name );
+                period.setShortName( name );
 
                 if ( !calendar.isIso8601() )
                 {
@@ -1207,13 +1210,6 @@ public class DefaultAnalyticsService
                 }
             }
 
-            // -----------------------------------------------------------------
-            // Set level property
-            // -----------------------------------------------------------------
-
-            Collection<OrganisationUnit> typedOus = NameableObjectUtils.asTypedList( ous );
-            organisationUnitService.setOrganisationUnitLevel( typedOus );
-            
             List<NameableObject> orgUnits = new UniqueArrayList<>();
             List<OrganisationUnit> ousList = NameableObjectUtils.asTypedList( ous );
 
@@ -1270,7 +1266,7 @@ public class DefaultAnalyticsService
             
             List<NameableObject> dimItems = !allItems ? asList( idObjectManager.getByUidOrdered( itemClass, items ) ) : dimObject.getItems();
                         
-            DimensionalObject object = new BaseDimensionalObject( dimension, dimObject.getDimensionType(), null, null, dimItems, allItems );
+            DimensionalObject object = new BaseDimensionalObject( dimension, dimObject.getDimensionType(), null, dimObject.getName(), dimItems, allItems );
             
             return object;
         }
@@ -1281,6 +1277,35 @@ public class DefaultAnalyticsService
         }
 
         throw new IllegalQueryException( "Dimension identifier does not reference any dimension: " + dimension );
+    }
+
+    @Override
+    public List<OrganisationUnit> getUserOrgUnits( String userOrgUnit )
+    {
+        List<OrganisationUnit> units = new ArrayList<>();
+        
+        User currentUser = currentUserService.getCurrentUser();
+        
+        if ( userOrgUnit != null )
+        {
+            List<String> ous = DimensionalObjectUtils.getItemsFromParam( userOrgUnit );
+            
+            for ( String ou : ous )
+            {
+                OrganisationUnit unit = idObjectManager.get( OrganisationUnit.class, ou );
+                
+                if ( unit != null )
+                {
+                    units.add( unit );
+                }
+            }
+        }
+        else if ( currentUser != null && currentUser.hasOrganisationUnit() )
+        {
+            units = currentUser.getSortedOrganisationUnits();
+        }
+        
+        return units;
     }
 
     // -------------------------------------------------------------------------
@@ -1444,42 +1469,6 @@ public class DefaultAnalyticsService
         return metaData;
     }
     
-    /**
-     * Returns a list of user organisation units, looking first at the given user 
-     * org unit parameter, second at the organisation units associated with the
-     * current user. Returns an empty list if no organisation units are found.
-     * 
-     * @param userOrgUnit the user org unit parameter string.
-     * @return a list of organisation units.
-     */
-    private List<OrganisationUnit> getUserOrgUnits( String userOrgUnit )
-    {
-        List<OrganisationUnit> units = new ArrayList<>();
-        
-        User currentUser = currentUserService.getCurrentUser();
-        
-        if ( userOrgUnit != null )
-        {
-            List<String> ous = DimensionalObjectUtils.getItemsFromParam( userOrgUnit );
-            
-            for ( String ou : ous )
-            {
-                OrganisationUnit unit = idObjectManager.get( OrganisationUnit.class, ou );
-                
-                if ( unit != null )
-                {
-                    units.add( unit );
-                }
-            }
-        }
-        else if ( currentUser != null && currentUser.hasOrganisationUnit() )
-        {
-            units = currentUser.getSortedOrganisationUnits();
-        }
-        
-        return units;
-    }
-
     /**
      * Gets the number of available cores. Uses explicit number from system
      * setting if available. Detects number of cores from current server runtime

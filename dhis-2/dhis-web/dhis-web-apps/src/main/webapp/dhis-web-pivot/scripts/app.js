@@ -11,6 +11,8 @@ Ext.onReady( function() {
 		extendCore,
 		createViewport,
 		dimConf,
+        styleConf,
+        finalsStyleConf,
 
 		ns = {
 			core: {},
@@ -513,9 +515,11 @@ Ext.onReady( function() {
             showRowSubTotals,
 			showDimensionLabels,
 			hideEmptyRows,
+            skipRounding,
             aggregationType,
             dataApprovalLevel,
 			showHierarchy,
+            completedOnly,
 			digitGroupSeparator,
 			displayDensity,
 			fontSize,
@@ -524,6 +528,8 @@ Ext.onReady( function() {
 			parentOrganisationUnit,
 
 			data,
+            organisationUnits,
+            events,
 			style,
 			parameters,
 
@@ -565,7 +571,12 @@ Ext.onReady( function() {
 
 		hideEmptyRows = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: NS.i18n.hide_empty_rows,
-			style: 'margin-bottom:' + checkboxBottomMargin + 'px',
+			style: 'margin-bottom:' + checkboxBottomMargin + 'px'
+		});
+
+		skipRounding = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: NS.i18n.skip_rounding,
+			style: 'margin-top:' + separatorTopMargin + 'px; margin-bottom:' + comboBottomMargin + 'px'
 		});
 
 		aggregationType = Ext.create('Ext.form.field.ComboBox', {
@@ -578,11 +589,11 @@ Ext.onReady( function() {
 			queryMode: 'local',
 			valueField: 'id',
 			editable: false,
-			value: 'DEFAULT',
+			value: finalsStyleConf.default_,
 			store: Ext.create('Ext.data.Store', {
 				fields: ['id', 'text'],
 				data: [
-					{id: 'DEFAULT', text: NS.i18n.by_data_element},
+					{id: finalsStyleConf.default_, text: NS.i18n.by_data_element},
 					{id: 'COUNT', text: NS.i18n.count},
 					{id: 'SUM', text: NS.i18n.sum},
 					{id: 'STDDEV', text: NS.i18n.stddev},
@@ -605,11 +616,11 @@ Ext.onReady( function() {
 			displayField: 'name',
 			editable: false,
 			hidden: !(ns.core.init.systemInfo.hideUnapprovedDataInAnalytics && ns.core.init.user.viewUnapprovedData),
-			value: 'DEFAULT',
+			value: finalsStyleConf.default_,
 			store: Ext.create('Ext.data.Store', {
 				fields: ['id', 'name'],
 				data: function() {
-					var data = [{id: 'DEFAULT', name: NS.i18n.show_all_data}],
+					var data = [{id: finalsStyleConf.default_, name: NS.i18n.show_all_data}],
 						levels = ns.core.init.dataApprovalLevels;
 
 					for (var i = 0; i < levels.length; i++) {
@@ -629,6 +640,11 @@ Ext.onReady( function() {
 			style: 'margin-bottom:' + checkboxBottomMargin + 'px',
 		});
 
+		completedOnly = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: NS.i18n.include_only_completed_events_only,
+			style: 'margin-bottom:' + checkboxBottomMargin + 'px',
+		});
+
 		displayDensity = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'ns-combo',
 			style: 'margin-bottom:' + comboBottomMargin + 'px',
@@ -639,13 +655,13 @@ Ext.onReady( function() {
 			queryMode: 'local',
 			valueField: 'id',
 			editable: false,
-			value: 'normal',
+            value: finalsStyleConf.normal,
 			store: Ext.create('Ext.data.Store', {
 				fields: ['id', 'text'],
 				data: [
-					{id: 'comfortable', text: NS.i18n.comfortable},
-					{id: 'normal', text: NS.i18n.normal},
-					{id: 'compact', text: NS.i18n.compact}
+					{id: finalsStyleConf.compact, text: NS.i18n.compact},
+					{id: finalsStyleConf.normal, text: NS.i18n.normal},
+					{id: finalsStyleConf.comfortable, text: NS.i18n.comfortable}
 				]
 			})
 		});
@@ -660,13 +676,13 @@ Ext.onReady( function() {
 			queryMode: 'local',
 			valueField: 'id',
 			editable: false,
-			value: 'normal',
+			value: finalsStyleConf.normal,
 			store: Ext.create('Ext.data.Store', {
 				fields: ['id', 'text'],
 				data: [
-					{id: 'large', text: NS.i18n.large},
-					{id: 'normal', text: NS.i18n.normal},
-					{id: 'small', text: NS.i18n.small_}
+					{id: finalsStyleConf.large, text: NS.i18n.large},
+					{id: finalsStyleConf.normal, text: NS.i18n.normal},
+					{id: finalsStyleConf.small, text: NS.i18n.small_}
 				]
 			})
 		});
@@ -681,13 +697,13 @@ Ext.onReady( function() {
 			queryMode: 'local',
 			valueField: 'id',
 			editable: false,
-			value: 'space',
+			value: finalsStyleConf.space,
 			store: Ext.create('Ext.data.Store', {
 				fields: ['id', 'text'],
 				data: [
-					{id: 'comma', text: 'Comma'},
-					{id: 'space', text: 'Space'},
-					{id: 'none', text: 'None'}
+					{id: finalsStyleConf.none, text: NS.i18n.none},
+					{id: finalsStyleConf.space, text: NS.i18n.space},
+					{id: finalsStyleConf.comma, text: NS.i18n.comma}
 				]
 			})
 		});
@@ -786,6 +802,7 @@ Ext.onReady( function() {
                 showRowSubTotals,
                 showDimensionLabels,
 				hideEmptyRows,
+                skipRounding,
                 aggregationType,
                 dataApprovalLevel
 			]
@@ -796,6 +813,14 @@ Ext.onReady( function() {
 			style: 'margin-left:14px',
 			items: [
 				showHierarchy
+			]
+		};
+
+		events = {
+			bodyStyle: 'border:0 none',
+			style: 'margin-left:14px',
+			items: [
+				completedOnly
 			]
 		};
 
@@ -841,9 +866,11 @@ Ext.onReady( function() {
                     showRowSubTotals: showRowSubTotals.getValue(),
                     showDimensionLabels: showDimensionLabels.getValue(),
 					hideEmptyRows: hideEmptyRows.getValue(),
+					skipRounding: skipRounding.getValue(),
                     aggregationType: aggregationType.getValue(),
                     dataApprovalLevel: {id: dataApprovalLevel.getValue()},
 					showHierarchy: showHierarchy.getValue(),
+					completedOnly: completedOnly.getValue(),
 					displayDensity: displayDensity.getValue(),
 					fontSize: fontSize.getValue(),
 					digitGroupSeparator: digitGroupSeparator.getValue(),
@@ -864,12 +891,14 @@ Ext.onReady( function() {
 				showRowSubTotals.setValue(Ext.isBoolean(layout.showRowSubTotals) ? layout.showRowSubTotals : true);
 				showDimensionLabels.setValue(Ext.isBoolean(layout.showDimensionLabels) ? layout.showDimensionLabels : true);
 				hideEmptyRows.setValue(Ext.isBoolean(layout.hideEmptyRows) ? layout.hideEmptyRows : false);
-                aggregationType.setValue(Ext.isString(layout.aggregationType) ? layout.aggregationType : 'DEFAULT');
-				dataApprovalLevel.setValue(Ext.isObject(layout.dataApprovalLevel) && Ext.isString(layout.dataApprovalLevel.id) ? layout.dataApprovalLevel.id : 'DEFAULT');
+                skipRounding.setValue(Ext.isBoolean(layout.skipRounding) ? layout.skipRounding : false);
+                aggregationType.setValue(Ext.isString(layout.aggregationType) ? layout.aggregationType : finalsStyleConf.default_);
+				dataApprovalLevel.setValue(Ext.isObject(layout.dataApprovalLevel) && Ext.isString(layout.dataApprovalLevel.id) ? layout.dataApprovalLevel.id : finalsStyleConf.default_);
 				showHierarchy.setValue(Ext.isBoolean(layout.showHierarchy) ? layout.showHierarchy : false);
-				displayDensity.setValue(Ext.isString(layout.displayDensity) ? layout.displayDensity : 'normal');
-				fontSize.setValue(Ext.isString(layout.fontSize) ? layout.fontSize : 'normal');
-				digitGroupSeparator.setValue(Ext.isString(layout.digitGroupSeparator) ? layout.digitGroupSeparator : 'space');
+                completedOnly.setValue(Ext.isBoolean(layout.completedOnly) ? layout.completedOnly : false);
+				displayDensity.setValue(Ext.isString(layout.displayDensity) ? layout.displayDensity : finalsStyleConf.normal);
+				fontSize.setValue(Ext.isString(layout.fontSize) ? layout.fontSize : finalsStyleConf.normal);
+				digitGroupSeparator.setValue(Ext.isString(layout.digitGroupSeparator) ? layout.digitGroupSeparator : finalsStyleConf.space);
 				legendSet.setValue(Ext.isObject(layout.legendSet) && Ext.isString(layout.legendSet.id) ? layout.legendSet.id : 0);
 				reportingPeriod.setValue(Ext.isBoolean(layout.reportingPeriod) ? layout.reportingPeriod : false);
 				organisationUnit.setValue(Ext.isBoolean(layout.organisationUnit) ? layout.organisationUnit : false);
@@ -895,6 +924,15 @@ Ext.onReady( function() {
 					html: NS.i18n.organisation_units
 				},
 				organisationUnits,
+				{
+					bodyStyle: 'border:0 none; padding:7px'
+				},
+				{
+					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
+					style: 'margin-bottom:6px; margin-left:5px',
+					html: NS.i18n.events
+				},
+				events,
 				{
 					bodyStyle: 'border:0 none; padding:7px'
 				},
@@ -980,9 +1018,11 @@ Ext.onReady( function() {
 					w.showRowSubTotals = showRowSubTotals;
                     w.showDimensionLabels = showDimensionLabels;
 					w.hideEmptyRows = hideEmptyRows;
+                    w.skipRounding = skipRounding;
                     w.aggregationType = aggregationType;
                     w.dataApprovalLevel = dataApprovalLevel;
 					w.showHierarchy = showHierarchy;
+                    w.completedOnly = completedOnly;
 					w.displayDensity = displayDensity;
 					w.fontSize = fontSize;
 					w.digitGroupSeparator = digitGroupSeparator;
@@ -2003,12 +2043,12 @@ Ext.onReady( function() {
 
 	// core
 	extendCore = function(core) {
-        var conf = core.conf,
+        var init = core.init,
+            conf = core.conf,
 			api = core.api,
 			support = core.support,
 			service = core.service,
-			web = core.web,
-			init = core.init;
+			web = core.web;
 
         // init
         (function() {
@@ -2782,8 +2822,9 @@ Ext.onReady( function() {
             dimensionPanelMap = {},
 			getDimensionPanel,
 			getDimensionPanels,
-			update,
 
+            getLayout,
+			update,
 			accordionBody,
             accordion,
             westRegion,
@@ -2793,6 +2834,7 @@ Ext.onReady( function() {
             getParamString,
             openTableLayoutTab,
             openPlainDataSource,
+            openDataDump,
             downloadButton,
             interpretationItem,
             pluginItem,
@@ -2805,9 +2847,7 @@ Ext.onReady( function() {
             setGui,
             viewport,
 
-			accordionPanels = [],
-
-            dimConf = ns.core.conf.finals.dimension;
+			accordionPanels = [];
 
 		ns.app.stores = ns.app.stores || {};
 
@@ -3665,7 +3705,7 @@ Ext.onReady( function() {
                 data: [
                      {id: 'in', name: NS.i18n.indicators},
                      {id: 'de', name: NS.i18n.data_elements},
-                     {id: 'ds', name: NS.i18n.data_sets},
+                     {id: 'ds', name: NS.i18n.reporting_rates},
                      {id: 'di', name: NS.i18n.event_data_items},
                      {id: 'pi', name: NS.i18n.program_indicators}
                 ]
@@ -4404,7 +4444,7 @@ Ext.onReady( function() {
             }
 
             Ext.Ajax.request({
-                url: ns.core.init.contextPath + '/api/programs.json?paging=false&fields=programTrackedEntityAttributes[trackedEntityAttribute[id,name,valueType]],programStages[programStageDataElements[dataElement[id,name,type]]]&filter=id:eq:' + programId,
+                url: ns.core.init.contextPath + '/api/programs.json?paging=false&fields=programTrackedEntityAttributes[trackedEntityAttribute[id,name,valueType]],programStages[programStageDataElements[dataElement[id,name,valueType]]]&filter=id:eq:' + programId,
                 success: function(r) {
                     r = Ext.decode(r.responseText);
 
@@ -4415,7 +4455,7 @@ Ext.onReady( function() {
                         teas = isO(program) && isA(program.programTrackedEntityAttributes) ? Ext.Array.pluck(program.programTrackedEntityAttributes, 'trackedEntityAttribute') : [],
                         dataElements = [],
                         attributes = [],
-                        types = ['int', 'string', 'bool', 'trueonly', 'number', 'optionSet'],
+                        types = ns.core.conf.valueType.aggregateTypes,
                         data;
 
                     // data elements
@@ -4426,7 +4466,7 @@ Ext.onReady( function() {
                             elements = Ext.Array.pluck(stage.programStageDataElements, 'dataElement') || [];
 
                             for (var j = 0; j < elements.length; j++) {
-                                if (Ext.Array.contains(types, (elements[j].type || '').toLowerCase())) {
+                                if (Ext.Array.contains(types, elements[j].valueType)) {
                                     dataElements.push(elements[j]);
                                 }
                             }
@@ -4435,7 +4475,7 @@ Ext.onReady( function() {
 
                     // attributes
                     for (i = 0; i < teas.length; i++) {
-                        if (Ext.Array.contains(types, (teas[i].valueType || '').toLowerCase())) {
+                        if (Ext.Array.contains(types, teas[i].valueType)) {
                             attributes.push(teas[i]);
                         }
                     }
@@ -6382,15 +6422,16 @@ Ext.onReady( function() {
 
 		// viewport
 
+        getLayout = function() {
+            return ns.core.api.layout.Layout(ns.core.web.pivot.getLayoutConfig());
+        };
+
 		update = function() {
-			var config = ns.core.web.pivot.getLayoutConfig(),
-                layout = ns.core.api.layout.Layout(config);
+			var layout;
 
-			if (!layout) {
-				return;
-			}
-
-			ns.core.web.pivot.getData(layout, false);
+			if (layout = getLayout()) {
+                ns.core.web.pivot.getData(layout, false);
+            }
 		};
 
 		accordionBody = Ext.create('Ext.panel.Panel', {
@@ -6488,6 +6529,78 @@ Ext.onReady( function() {
 			}
 		});
 
+        updateButton = Ext.create('Ext.button.Split', {
+            text: '<b>' + NS.i18n.update + '</b>&nbsp;',
+            handler: function() {
+                update();
+            },
+            arrowHandler: function(b) {
+                b.menu = Ext.create('Ext.menu.Menu', {
+                    closeAction: 'destroy',
+                    shadow: false,
+                    showSeparator: false,
+                    items: [
+                        {
+                            xtype: 'label',
+                            text: NS.i18n.download_data,
+                            style: 'padding:7px 40px 5px 7px; font-weight:bold; color:#111; border:0 none'
+                        },
+                        {
+                            text: 'CSV',
+                            iconCls: 'ns-menu-item-datasource',
+                            handler: function() {
+                                openDataDump('csv', 'ID');
+                            },
+                            menu: [
+                                {
+                                    xtype: 'label',
+                                    text: NS.i18n.metadata_id_scheme,
+                                    style: 'padding:7px 18px 5px 7px; font-weight:bold; color:#333'
+                                },
+                                {
+                                    text: 'ID',
+                                    iconCls: 'ns-menu-item-scheme',
+                                    handler: function() {
+                                        openDataDump('csv', 'ID');
+                                    }
+                                },
+                                {
+                                    text: 'Code',
+                                    iconCls: 'ns-menu-item-scheme',
+                                    handler: function() {
+                                        openDataDump('csv', 'CODE');
+                                    }
+                                },
+                                {
+                                    text: 'Name',
+                                    iconCls: 'ns-menu-item-scheme',
+                                    handler: function() {
+                                        openDataDump('csv', 'NAME');
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    listeners: {
+                        added: function() {
+                            ns.app.updateButton = this;
+                        },
+                        show: function() {
+                            ns.core.web.window.setAnchorPosition(b.menu, b);
+                        },
+                        hide: function() {
+                            b.menu.destroy();
+                        },
+                        destroy: function(m) {
+                            b.menu = null;
+                        }
+                    }
+                });
+
+                this.menu.show();
+            }
+        });
+
 		layoutButton = Ext.create('Ext.button.Button', {
 			text: 'Layout',
 			menu: {},
@@ -6541,10 +6654,12 @@ Ext.onReady( function() {
 			}
 		});
 
-		getParamString = function() {
-			var paramString = ns.core.web.analytics.getParamString(ns.core.service.layout.getExtendedLayout(ns.app.layout));
+		getParamString = function(layout) {
+            layout = layout || ns.app.layout;
 
-			if (ns.app.layout.showHierarchy) {
+			var paramString = ns.core.web.analytics.getParamString(ns.core.service.layout.getExtendedLayout(layout));
+
+			if (layout.showHierarchy) {
 				paramString += '&showHierarchy=true';
 			}
 
@@ -6568,6 +6683,7 @@ Ext.onReady( function() {
 				url += '&columns=' + columnNames.join(';');
 				url += '&rows=' + rowNames.join(';');
 				url += ns.app.layout.hideEmptyRows ? '&hideEmptyRows=true' : '';
+                url += ns.app.layout.skipRounding ? '&skipRounding=true' : '';
 
 				window.open(url, isNewTab ? '_blank' : '_top');
 			}
@@ -6578,6 +6694,17 @@ Ext.onReady( function() {
                 if (ns.core.init.contextPath && ns.app.paramString) {
                     window.open(url, isNewTab ? '_blank' : '_top');
                 }
+            }
+        };
+
+        openDataDump = function(format, scheme, isNewTab) {
+            var layout;
+
+            format = format || 'csv';
+            scheme = scheme || 'ID';
+
+            if (layout = getLayout()) {
+                window.open(ns.core.init.contextPath + '/api/analytics.' + format + getParamString(layout) + (scheme ? '&outputIdScheme=' + scheme : ''), isNewTab ? '_blank' : '_top');
             }
         };
 
@@ -6869,9 +6996,9 @@ Ext.onReady( function() {
                     version = 'v' + parseFloat(ns.core.init.systemInfo.version.split('.').join(''));
 
 				text += '<html>\n<head>\n';
-				text += '<link rel="stylesheet" href="http://dhis2-cdn.org/' + version + '/ext/resources/css/ext-plugin-gray.css" />\n';
-				text += '<script src="http://dhis2-cdn.org/' + version + '/ext/ext-all.js"></script>\n';
-				text += '<script src="http://dhis2-cdn.org/' + version + '/plugin/table.js"></script>\n';
+				text += '<link rel="stylesheet" href="//dhis2-cdn.org/' + version + '/ext/resources/css/ext-plugin-gray.css" />\n';
+				text += '<script src="//dhis2-cdn.org/' + version + '/ext/ext-all.js"></script>\n';
+				text += '<script src="//dhis2-cdn.org/' + version + '/plugin/table.js"></script>\n';
 				text += '</head>\n\n<body>\n';
 				text += '<div id="table1"></div>\n\n';
 				text += '<script>\n\n';
@@ -7145,12 +7272,7 @@ Ext.onReady( function() {
 							westRegion.toggleCollapse();
 						}
 					},
-					{
-						text: '<b>' + NS.i18n.update + '</b>',
-						handler: function() {
-							update();
-						}
-					},
+                    updateButton,
 					layoutButton,
 					optionsButton,
 					{
@@ -7634,6 +7756,8 @@ Ext.onReady( function() {
 			period: period,
 			treePanel: treePanel,
 			setGui: setGui,
+            westRegion: westRegion,
+            centerRegion: centerRegion,
 			items: [
 				westRegion,
 				centerRegion
@@ -7740,14 +7864,22 @@ Ext.onReady( function() {
 		fn = function() {
 			if (++callbacks === requests.length) {
 
-				NS.instances.push(ns);
-
-                ns.init = init;
-				ns.core = NS.getCore(ns);
+				ns.core = NS.getCore(init);
+                ns.alert = ns.core.webAlert;
 				extendCore(ns.core);
 
 				dimConf = ns.core.conf.finals.dimension;
+                finalsStyleConf = ns.core.conf.finals.style;
+                styleConf = ns.core.conf.style;
+
 				ns.app.viewport = createViewport();
+
+                ns.core.app.getViewportWidth = function() { return ns.app.viewport.getWidth(); };
+                ns.core.app.getViewportHeight = function() { return ns.app.viewport.getHeight(); };
+                ns.core.app.getCenterRegionWidth = function() { return ns.app.viewport.centerRegion.getWidth(); };
+                ns.core.app.getCenterRegionHeight = function() { return ns.app.viewport.centerRegion.getHeight(); };
+
+                NS.instances.push(ns);
 			}
 		};
 

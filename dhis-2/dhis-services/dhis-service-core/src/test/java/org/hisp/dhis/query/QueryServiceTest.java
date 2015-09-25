@@ -28,10 +28,17 @@ package org.hisp.dhis.query;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.collect.Lists;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Collection;
+import java.util.Iterator;
+
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.schema.Schema;
 import org.hisp.dhis.schema.SchemaService;
@@ -39,10 +46,7 @@ import org.jfree.data.time.Year;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Collection;
-import java.util.Iterator;
-
-import static org.junit.Assert.*;
+import com.google.common.collect.Lists;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -62,22 +66,22 @@ public class QueryServiceTest
     private void createDataElements()
     {
         DataElement dataElementA = createDataElement( 'A' );
-        dataElementA.setNumberType( DataElement.VALUE_TYPE_NUMBER );
+        dataElementA.setValueType( ValueType.NUMBER );
 
         DataElement dataElementB = createDataElement( 'B' );
-        dataElementB.setNumberType( DataElement.VALUE_TYPE_BOOL );
+        dataElementB.setValueType( ValueType.BOOLEAN );
 
         DataElement dataElementC = createDataElement( 'C' );
-        dataElementC.setNumberType( DataElement.VALUE_TYPE_INT );
+        dataElementC.setValueType( ValueType.INTEGER );
 
         DataElement dataElementD = createDataElement( 'D' );
-        dataElementD.setNumberType( DataElement.VALUE_TYPE_NUMBER );
+        dataElementD.setValueType( ValueType.NUMBER );
 
         DataElement dataElementE = createDataElement( 'E' );
-        dataElementE.setNumberType( DataElement.VALUE_TYPE_BOOL );
+        dataElementE.setValueType( ValueType.BOOLEAN );
 
         DataElement dataElementF = createDataElement( 'F' );
-        dataElementF.setNumberType( DataElement.VALUE_TYPE_INT );
+        dataElementF.setValueType( ValueType.INTEGER );
 
         dataElementA.setCreated( Year.parseYear( "2001" ).getStart() );
         dataElementB.setCreated( Year.parseYear( "2002" ).getStart() );
@@ -376,47 +380,28 @@ public class QueryServiceTest
         createDataElements();
         Query query = Query.from( schemaService.getDynamicSchema( DataElement.class ) );
 
-        Result result = queryService.query( query, new ResultTransformer()
-        {
-            @Override
-            public Result transform( MutableResult result )
-            {
-                return new Result();
-            }
-        } );
+        Result result = queryService.query( query, result1 -> new Result() );
 
         assertEquals( 0, result.size() );
 
-        result = queryService.query( query, new ResultTransformer()
-        {
-            @Override
-            public Result transform( MutableResult result )
-            {
-                return new Result( result.getItems() );
-            }
-        } );
+        result = queryService.query( query, result1 -> new Result( result1.getItems() ) );
 
         assertEquals( 6, result.size() );
 
-        result = queryService.query( query, new ResultTransformer()
-        {
-            @Override
-            public Result transform( MutableResult result )
+        result = queryService.query( query, result1 -> {
+            Iterator<? extends IdentifiableObject> iterator = result1.getItems().iterator();
+
+            while ( iterator.hasNext() )
             {
-                Iterator<? extends IdentifiableObject> iterator = result.getItems().iterator();
+                IdentifiableObject identifiableObject = iterator.next();
 
-                while ( iterator.hasNext() )
+                if ( identifiableObject.getUid().equals( "deabcdefghD" ) )
                 {
-                    IdentifiableObject identifiableObject = iterator.next();
-
-                    if ( identifiableObject.getUid().equals( "deabcdefghD" ) )
-                    {
-                        iterator.remove();
-                    }
+                    iterator.remove();
                 }
-
-                return result;
             }
+
+            return result1;
         } );
 
         assertEquals( 5, result.size() );
@@ -522,69 +507,6 @@ public class QueryServiceTest
         Result result = queryService.query( query );
 
         assertEquals( 0, result.size() );
-    }
-
-    @Test
-    public void testNumberTypeNumber()
-    {
-        createDataElements();
-        Query query = Query.from( schemaService.getDynamicSchema( DataElement.class ) );
-
-        Disjunction disjunction = query.disjunction();
-        disjunction.add( Restrictions.eq( "numberType", DataElement.VALUE_TYPE_NUMBER ) );
-        query.add( disjunction );
-
-        Result result = queryService.query( query );
-
-        assertEquals( 2, result.size() );
-
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghA" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghD" ) );
-    }
-
-    @Test
-    public void testNumberTypeBoolOrInt()
-    {
-        createDataElements();
-        Query query = Query.from( schemaService.getDynamicSchema( DataElement.class ) );
-
-        Disjunction disjunction = query.disjunction();
-        disjunction.add( Restrictions.eq( "numberType", DataElement.VALUE_TYPE_BOOL ) );
-        disjunction.add( Restrictions.eq( "numberType", DataElement.VALUE_TYPE_INT ) );
-        query.add( disjunction );
-
-        Result result = queryService.query( query );
-
-        assertEquals( 4, result.size() );
-
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghB" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghC" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghE" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghF" ) );
-    }
-
-    @Test
-    public void testNumberTypeBoolOrIntOrNumber()
-    {
-        createDataElements();
-        Query query = Query.from( schemaService.getDynamicSchema( DataElement.class ) );
-
-        Disjunction disjunction = query.disjunction();
-        disjunction.add( Restrictions.eq( "numberType", DataElement.VALUE_TYPE_NUMBER ) );
-        disjunction.add( Restrictions.eq( "numberType", DataElement.VALUE_TYPE_BOOL ) );
-        disjunction.add( Restrictions.eq( "numberType", DataElement.VALUE_TYPE_INT ) );
-        query.add( disjunction );
-
-        Result result = queryService.query( query );
-
-        assertEquals( 6, result.size() );
-
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghA" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghB" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghC" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghD" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghE" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghF" ) );
     }
 
     @Test

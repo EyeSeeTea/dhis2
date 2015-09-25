@@ -80,7 +80,7 @@ public class SmsConfigurationController
 
         SmsConfiguration smsConfiguration = new SmsConfiguration();
 
-        SmsGatewayConfig gatewayConfig = new GenericHttpGatewayConfig( "http://storset.org/", new HashMap<String, String>() );
+        SmsGatewayConfig gatewayConfig = new GenericHttpGatewayConfig( "http://storset.org/", new HashMap<>() );
         smsConfiguration.setGateways( Collections.singletonList( gatewayConfig ) );
 
         model.addAttribute( "model", smsConfiguration );
@@ -99,7 +99,7 @@ public class SmsConfigurationController
     {
         if ( smsConfiguration == null )
         {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException( "SMS configuration not set" );
         }
 
         smsConfigurationManager.updateSmsConfiguration( smsConfiguration );

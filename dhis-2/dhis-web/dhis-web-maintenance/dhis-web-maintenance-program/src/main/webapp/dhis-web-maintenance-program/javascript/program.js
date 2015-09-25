@@ -13,10 +13,6 @@ function programIndicatorManagementForm( context ) {
   location.href = 'programIndicator.action?programId=' + context.id;
 }
 
-function showProgramUserRoleForm( context ) {
-  location.href = 'showProgramUserroleForm.action?id=' + context.id;
-}
-
 function showUpdateProgramForm( context ) {
   location.href = 'showUpdateProgramForm.action?id=' + context.id;
 }
@@ -54,7 +50,7 @@ function showProgramDetails( context ) {
     setInnerHTML('idField', json.program.uid);
 
     var type = i18n_with_registration;
-    if( json.program.programType == "without_registration" ){
+    if( json.program.programType == "WITHOUT_REGISTRATION" ){
 		type = i18n_without_registration;
 	}
 	setInnerHTML('typeField', type);
@@ -123,10 +119,10 @@ function relationshipTypeOnchange() {
 }
 
 function programOnChange() {
-  var type = getFieldValue('type');
+  var type = getFieldValue('programType');
   
   // anonymous
-  if( type == "without_registration" ) {
+  if( type == "WITHOUT_REGISTRATION" ) {
     disable('onlyEnrollOnce');
     disable('dateOfEnrollmentDescription');
     disable("displayIncidentDate");

@@ -52,7 +52,7 @@ import javax.xml.stream.XMLStreamWriter;
 
 import org.amplecode.staxwax.factory.XMLFactory;
 import org.amplecode.staxwax.reader.XMLReader;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xerces.util.XMLChar;
@@ -125,7 +125,6 @@ public class DefaultADXDataService
 
     @Override
     public ImportSummaries postData( InputStream in, ImportOptions importOptions )
-        throws IOException
     {
         XMLReader adxReader = XMLFactory.getXMLReader( in );
 
@@ -284,7 +283,7 @@ public class DefaultADXDataService
 
         DataElement dataElement = identifiableObjectManager.getObject( DataElement.class, dataElementIdScheme,dvAttributes.get( ADXConstants.DATAELEMENT));
         
-        if (dataElement == null)
+        if ( dataElement == null )
         {
             throw new ADXException(dvAttributes.get( ADXConstants.DATAELEMENT), "No matching dataelement");
         }
@@ -297,7 +296,7 @@ public class DefaultADXDataService
             attributesToDXF( ADXConstants.CATOPTCOMBO, categoryCombo, dvAttributes, dataElementIdScheme );
         }
         // if dataelement type is string we need to pick out the 'annotation' element
-        if ( dataElement.getType().equals( DataElement.VALUE_TYPE_STRING ) )
+        if ( dataElement.getValueType().isText() )
         {
             adxReader.moveToStartElement( ADXConstants.ANNOTATION, ADXConstants.DATAVALUE );
             if ( adxReader.isStartElement( ADXConstants.ANNOTATION ) )
@@ -400,11 +399,12 @@ public class DefaultADXDataService
     {
         log.debug( "adx attributes: " + attributes );
 
-        if ( catCombo == categoryService.getDefaultDataElementCategoryCombo() )
+        if ( catCombo.isDefault() )
         {
             // nothing to do
             return;
         }
+        
         Map<String, DataElementCategory> categoryMap = createCategoryMap( catCombo );
 
         Map<String, String> attributeOptions = new HashMap<>();
@@ -430,7 +430,6 @@ public class DefaultADXDataService
 
     // TODO this should be part of staxwax library
     protected Map<String, String> readAttributes( XMLReader staxWaxReader )
-        throws XMLStreamException
     {
         Map<String, String> attributes = new HashMap<>();
 

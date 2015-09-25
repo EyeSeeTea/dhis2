@@ -28,38 +28,30 @@ package org.hisp.dhis.system.filter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.commons.filter.Filter;
+import org.hisp.dhis.organisationunit.FeatureType;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.system.util.GeoUtils;
 
 public class OrganisationUnitPolygonCoveringCoordinateFilter
     implements Filter<OrganisationUnit>
-{    
+{
     private double longitude;
     private double latitude;
-    
+
     public OrganisationUnitPolygonCoveringCoordinateFilter( double longitude, double latitude )
     {
         this.longitude = longitude;
         this.latitude = latitude;
     }
-    
+
     @Override
     public boolean retain( OrganisationUnit unit )
     {
-        String featureType = unit.getFeatureType();
+        FeatureType featureType = unit.getFeatureType();
         String coordinate = unit.getCoordinates();
 
-        if ( featureType != null
-            && coordinate != null
-            && !coordinate.isEmpty()
-            && ( featureType.equals( OrganisationUnit.FEATURETYPE_POLYGON )
-            || featureType.equals( OrganisationUnit.FEATURETYPE_MULTIPOLYGON ) )
-            && GeoUtils.checkPointWithMultiPolygon( longitude, latitude, unit.getCoordinates(), featureType ) )
-        {
-            return true;
-        }
-        
-        return false;
+        return featureType != null && coordinate != null && !coordinate.isEmpty() && featureType.isPolygon()
+            && GeoUtils.checkPointWithMultiPolygon( longitude, latitude, unit.getCoordinates(), featureType );
     }
 }

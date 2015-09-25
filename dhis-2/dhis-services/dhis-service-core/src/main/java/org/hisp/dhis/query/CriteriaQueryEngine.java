@@ -210,7 +210,6 @@ public class CriteriaQueryEngine<T> implements QueryEngine<T>
     }
 
     // TODO verify parameters length
-    @SuppressWarnings( "unchecked" )
     private Criterion getHibernateCriterion( Schema schema, Restriction restriction )
     {
         if ( restriction == null || restriction.getOperator() == null )
@@ -290,7 +289,7 @@ public class CriteriaQueryEngine<T> implements QueryEngine<T>
             return null;
         }
 
-        org.hibernate.criterion.Order criteriaOrder;
+        org.hibernate.criterion.Order criteriaOrder = null;
 
         if ( order.isAscending() )
         {

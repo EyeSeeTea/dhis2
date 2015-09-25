@@ -30,7 +30,9 @@ package org.hisp.dhis.dd.action.dataelement;
 
 import com.opensymphony.xwork2.Action;
 import org.apache.commons.lang3.StringUtils;
+import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.attribute.AttributeService;
+import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.commons.collection.ListUtils;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
@@ -121,20 +123,6 @@ public class AddDataElementAction
         this.domainType = domainType;
     }
 
-    private String numberType;
-
-    public void setNumberType( String numberType )
-    {
-        this.numberType = numberType;
-    }
-
-    private String textType;
-
-    public void setTextType( String textType )
-    {
-        this.textType = textType;
-    }
-
     private String valueType;
 
     public void setValueType( String valueType )
@@ -142,11 +130,11 @@ public class AddDataElementAction
         this.valueType = valueType;
     }
 
-    private String aggregationOperator;
+    private String aggregationType;
 
-    public void setAggregationOperator( String aggregationOperator )
+    public void setAggregationType( String aggregationType )
     {
-        this.aggregationOperator = aggregationOperator;
+        this.aggregationType = aggregationType;
     }
 
     private String url;
@@ -221,8 +209,7 @@ public class AddDataElementAction
     {
         DataElement dataElement = new DataElement();
 
-        DataElementCategoryCombo categoryCombo = dataElementCategoryService
-            .getDataElementCategoryCombo( selectedCategoryComboId );
+        DataElementCategoryCombo categoryCombo = dataElementCategoryService.getDataElementCategoryCombo( selectedCategoryComboId );
 
         OptionSet optionSet = optionService.getOptionSet( selectedOptionSetId );
         OptionSet commentOptionSet = optionService.getOptionSet( selectedCommentOptionSetId );
@@ -234,18 +221,8 @@ public class AddDataElementAction
         dataElement.setDescription( StringUtils.trimToNull( description ) );
         dataElement.setFormName( StringUtils.trimToNull( formName ) );
         dataElement.setDomainType( DataElementDomain.fromValue( domainType ) );
-        dataElement.setType( valueType );
-
-        if ( DataElement.VALUE_TYPE_STRING.equalsIgnoreCase( valueType ) )
-        {
-            dataElement.setTextType( textType );
-        }
-        else
-        {
-            dataElement.setNumberType( numberType );
-        }
-
-        dataElement.setAggregationOperator( aggregationOperator );
+        dataElement.setValueType( ValueType.valueOf( valueType ) );
+        dataElement.setAggregationType( AggregationType.valueOf( aggregationType ) );
         dataElement.setUrl( url );
         dataElement.setZeroIsSignificant( zeroIsSignificant );
         dataElement.setCategoryCombo( categoryCombo );
@@ -256,8 +233,7 @@ public class AddDataElementAction
 
         if ( jsonAttributeValues != null )
         {
-            AttributeUtils.updateAttributeValuesFromJson( dataElement.getAttributeValues(), jsonAttributeValues,
-                attributeService );
+            AttributeUtils.updateAttributeValuesFromJson( dataElement.getAttributeValues(), jsonAttributeValues, attributeService );
         }
 
         dataElementService.addDataElement( dataElement );

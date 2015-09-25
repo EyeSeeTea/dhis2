@@ -628,9 +628,12 @@ Ext.onReady( function() {
 			hideTitle,
 			title,
 
+            completedOnly,
+
 			data,
 			axes,
 			general,
+            events,
 			window,
 
             comboBottomMargin = 1,
@@ -782,6 +785,26 @@ Ext.onReady( function() {
 			minValue: 0
 		});
 
+		rangeAxisTitle = Ext.create('Ext.form.field.Text', {
+			width: cmpWidth,
+			fieldLabel: NS.i18n.range_axis_label,
+			labelStyle: 'color:#333',
+			labelWidth: 125,
+			maxLength: 100,
+			enforceMaxLength: true,
+			style: 'margin-bottom:1px'
+		});
+
+		domainAxisTitle = Ext.create('Ext.form.field.Text', {
+			width: cmpWidth,
+			fieldLabel: NS.i18n.domain_axis_label,
+			labelStyle: 'color:#333',
+			labelWidth: 125,
+			maxLength: 100,
+			enforceMaxLength: true,
+			style: 'margin-bottom:1px'
+		});
+
         // general
 		hideLegend = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: NS.i18n.hide_legend,
@@ -811,24 +834,10 @@ Ext.onReady( function() {
 			}
 		});
 
-		rangeAxisTitle = Ext.create('Ext.form.field.Text', {
-			width: cmpWidth,
-			fieldLabel: NS.i18n.range_axis_label,
-			labelStyle: 'color:#333',
-			labelWidth: 125,
-			maxLength: 100,
-			enforceMaxLength: true,
-			style: 'margin-bottom:1px'
-		});
-
-		domainAxisTitle = Ext.create('Ext.form.field.Text', {
-			width: cmpWidth,
-			fieldLabel: NS.i18n.domain_axis_label,
-			labelStyle: 'color:#333',
-			labelWidth: 125,
-			maxLength: 100,
-			enforceMaxLength: true,
-			style: 'margin-bottom:1px'
+        // events
+		completedOnly = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: NS.i18n.include_only_completed_events_only,
+			style: 'margin-bottom:' + checkboxBottomMargin + 'px',
 		});
 
         data = {
@@ -907,6 +916,14 @@ Ext.onReady( function() {
 			]
 		};
 
+		events = {
+			bodyStyle: 'border:0 none',
+			style: 'margin-left:14px',
+			items: [
+				completedOnly
+			]
+		};
+
 		window = Ext.create('Ext.window.Window', {
 			title: NS.i18n.chart_options,
 			bodyStyle: 'background-color:#fff; padding:3px',
@@ -920,6 +937,7 @@ Ext.onReady( function() {
 					showValues: showValues.getValue(),
                     hideEmptyRows: hideEmptyRows.getValue(),
 					showTrendLine: showTrendLine.getValue(),
+					completedOnly: completedOnly.getValue(),
 					targetLineValue: targetLineValue.getValue(),
 					targetLineTitle: targetLineTitle.getValue(),
 					baseLineValue: baseLineValue.getValue(),
@@ -941,6 +959,8 @@ Ext.onReady( function() {
 				showValues.setValue(Ext.isBoolean(layout.showValues) ? layout.showValues : false);
 				hideEmptyRows.setValue(Ext.isBoolean(layout.hideEmptyRows) ? layout.hideEmptyRows : false);
 				showTrendLine.setValue(Ext.isBoolean(layout.showTrendLine) ? layout.showTrendLine : false);
+
+                completedOnly.setValue(Ext.isBoolean(layout.completedOnly) ? layout.completedOnly : false);
 
 				// target line
 				if (Ext.isNumber(layout.targetLineValue)) {
@@ -1047,6 +1067,15 @@ Ext.onReady( function() {
 				{
 					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
 					style: 'margin-bottom:6px; margin-left:2px',
+					html: NS.i18n.events
+				},
+				events,
+				{
+					bodyStyle: 'border:0 none; padding:5px'
+				},
+				{
+					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
+					style: 'margin-bottom:6px; margin-left:2px',
 					html: NS.i18n.axes
 				},
 				axes,
@@ -1091,20 +1120,19 @@ Ext.onReady( function() {
 					w.showValues = showValues;
                     w.hideEmptyRows = hideEmptyRows;
 					w.showTrendLine = showTrendLine;
+                    w.completedOnly = completedOnly;
 					w.targetLineValue = targetLineValue;
 					w.targetLineTitle = targetLineTitle;
 					w.baseLineValue = baseLineValue;
 					w.baseLineTitle = baseLineTitle;
                     w.sortOrder = sortOrder;
                     w.aggregationType = aggregationType;
-
 					w.rangeAxisMaxValue = rangeAxisMaxValue;
 					w.rangeAxisMinValue = rangeAxisMinValue;
 					w.rangeAxisSteps = rangeAxisSteps;
 					w.rangeAxisDecimals = rangeAxisDecimals;
 					w.rangeAxisTitle = rangeAxisTitle;
 					w.domainAxisTitle = domainAxisTitle;
-
 					w.hideLegend = hideLegend;
 					w.hideTitle = hideTitle;
 					w.title = title;
@@ -2116,12 +2144,12 @@ Ext.onReady( function() {
 
 	// core
     extendCore = function(core) {
-        var conf = core.conf,
+        var init = core.init,
+            conf = core.conf,
 			api = core.api,
 			support = core.support,
 			service = core.service,
-			web = core.web,
-			init = core.init;
+			web = core.web;
 
         // init
         (function() {
@@ -4476,7 +4504,7 @@ Ext.onReady( function() {
             }
 
             Ext.Ajax.request({
-                url: ns.core.init.contextPath + '/api/programs.json?paging=false&fields=programTrackedEntityAttributes[trackedEntityAttribute[id,name]],programStages[programStageDataElements[dataElement[id,name,type]]]&filter=id:eq:' + programId,
+                url: ns.core.init.contextPath + '/api/programs.json?paging=false&fields=programTrackedEntityAttributes[trackedEntityAttribute[id,name,valueType]],programStages[programStageDataElements[dataElement[id,name,valueType]]]&filter=id:eq:' + programId,
                 success: function(r) {
                     r = Ext.decode(r.responseText);
 
@@ -4487,7 +4515,7 @@ Ext.onReady( function() {
                         teas = isO(program) && isA(program.programTrackedEntityAttributes) ? Ext.Array.pluck(program.programTrackedEntityAttributes, 'trackedEntityAttribute') : [],
                         dataElements = [],
                         attributes = [],
-                        types = ['int', 'number', 'string', 'bool', 'trueonly'],
+                        types = ns.core.conf.valueType.aggregateTypes,
                         data;
 
                     // data elements
@@ -4498,7 +4526,7 @@ Ext.onReady( function() {
                             elements = Ext.Array.pluck(stage.programStageDataElements, 'dataElement') || [];
 
                             for (var j = 0; j < elements.length; j++) {
-                                if (Ext.Array.contains(types, (elements[j].type || '').toLowerCase())) {
+                                if (Ext.Array.contains(types, elements[j].valueType)) {
                                     dataElements.push(elements[j]);
                                 }
                             }
@@ -4507,7 +4535,7 @@ Ext.onReady( function() {
 
                     // attributes
                     for (i = 0; i < teas.length; i++) {
-                        if (Ext.Array.contains(types, (teas[i].type || '').toLowerCase())) {
+                        if (Ext.Array.contains(types, teas[i].valueType)) {
                             attributes.push(teas[i]);
                         }
                     }
@@ -7677,6 +7705,8 @@ Ext.onReady( function() {
 			period: period,
 			treePanel: treePanel,
 			setGui: setGui,
+            westRegion: westRegion,
+            centerRegion: centerRegion,
             update: update,
 			items: [
 				westRegion,
@@ -7780,19 +7810,25 @@ Ext.onReady( function() {
 		var requests = [],
 			callbacks = 0,
 			init = {},
+            appConfig,
 			fn;
 
 		fn = function() {
 			if (++callbacks === requests.length) {
 
-				NS.instances.push(ns);
-
-                ns.init = init;
-				ns.core = NS.getCore(ns);
+				ns.core = NS.getCore(init);
+                ns.alert = ns.core.webAlert;
 				extendCore(ns.core);
 
 				dimConf = ns.core.conf.finals.dimension;
 				ns.app.viewport = createViewport();
+
+                ns.core.app.getViewportWidth = function() { return ns.app.viewport.getWidth(); };
+                ns.core.app.getViewportHeight = function() { return ns.app.viewport.getHeight(); };
+                ns.core.app.getCenterRegionWidth = function() { return ns.app.viewport.centerRegion.getWidth(); };
+                ns.core.app.getCenterRegionHeight = function() { return ns.app.viewport.centerRegion.getHeight(); };
+
+                NS.instances.push(ns);
 			}
 		};
 

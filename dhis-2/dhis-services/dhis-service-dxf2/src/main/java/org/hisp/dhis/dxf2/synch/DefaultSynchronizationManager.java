@@ -28,18 +28,29 @@ package org.hisp.dhis.dxf2.synch;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.apache.commons.lang3.StringUtils.trimToNull;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_LAST_SUCCESSFUL_DATA_SYNC;
+
+import java.io.IOException;
+import java.util.Date;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.commons.util.CodecUtils;
 import org.hisp.dhis.configuration.Configuration;
 import org.hisp.dhis.configuration.ConfigurationService;
 import org.hisp.dhis.datavalue.DataValueService;
+import org.hisp.dhis.dxf2.common.IdSchemes;
+import org.hisp.dhis.dxf2.common.ImportSummaryResponseExtractor;
+import org.hisp.dhis.dxf2.common.JacksonUtils;
 import org.hisp.dhis.dxf2.datavalueset.DataValueSetService;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
-import org.hisp.dhis.dxf2.common.IdSchemes;
-import org.hisp.dhis.dxf2.common.ImportSummaryResponseExtractor;
+import org.hisp.dhis.dxf2.metadata.ImportService;
+import org.hisp.dhis.dxf2.metadata.MetaData;
 import org.hisp.dhis.setting.SystemSettingManager;
-import org.hisp.dhis.commons.util.CodecUtils;
+import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.user.User;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -49,19 +60,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequest;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
-
-import java.io.IOException;
-import java.util.Date;
-
-import static org.apache.commons.lang3.StringUtils.trimToNull;
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_LAST_SUCCESSFUL_DATA_SYNC;
 
 /**
  * @author Lars Helge Overland
@@ -84,13 +88,16 @@ public class DefaultSynchronizationManager
     private ConfigurationService configurationService;
 
     @Autowired
+    private ImportService importService;
+
+    @Autowired
+    private CurrentUserService currentUserService;
+
+    @Autowired
     private SystemSettingManager systemSettingManager;
 
     @Autowired
     private RestTemplate restTemplate;
-
-    @Autowired
-    private TaskScheduler taskScheduler;
 
     // -------------------------------------------------------------------------
     // SynchronizatonManager implementation
@@ -166,8 +173,7 @@ public class DefaultSynchronizationManager
     }
 
     @Override
-    public ImportSummary executeDataSynch()
-        throws HttpServerErrorException
+    public ImportSummary executeDataPush()
     {
         AvailabilityStatus availability = isRemoteServerAvailable();
 
@@ -203,7 +209,6 @@ public class DefaultSynchronizationManager
 
         final RequestCallback requestCallback = new RequestCallback()
         {
-
             @Override
             public void doWithRequest( ClientHttpRequest request ) throws IOException
             {
@@ -234,6 +239,33 @@ public class DefaultSynchronizationManager
         return (Date) systemSettingManager.getSystemSetting( KEY_LAST_SUCCESSFUL_DATA_SYNC );
     }
 
+    @Override
+    public org.hisp.dhis.dxf2.metadata.ImportSummary executeMetadataPull( String url )
+    {
+        User user = currentUserService.getCurrentUser();
+        
+        String userUid = user != null ? user.getUid() : null;
+        
+        log.info( "Metadata pull, url: " + url + ", user: " + userUid );
+        
+        String json = restTemplate.getForObject( url, String.class );
+        
+        MetaData metaData = null;
+        
+        try
+        {
+            metaData = JacksonUtils.fromJson( json, MetaData.class );
+        }
+        catch ( IOException ex )
+        {
+            throw new RuntimeException( "Failed to parse remote JSON document", ex );
+        }
+        
+        org.hisp.dhis.dxf2.metadata.ImportSummary summary = importService.importMetaData( userUid, metaData );
+        
+        return summary;
+    }
+    
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------

@@ -61,9 +61,9 @@ public class Enrollment
 
     private String orgUnit;
 
-    private Date dateOfEnrollment;
+    private Date enrollmentDate;
 
-    private Date dateOfIncident;
+    private Date incidentDate;
 
     private List<Attribute> attributes = new ArrayList<>();
 
@@ -173,26 +173,26 @@ public class Enrollment
 
     @JsonProperty( required = true )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public Date getDateOfEnrollment()
+    public Date getEnrollmentDate()
     {
-        return dateOfEnrollment;
+        return enrollmentDate;
     }
 
-    public void setDateOfEnrollment( Date dateOfEnrollment )
+    public void setEnrollmentDate( Date enrollmentDate )
     {
-        this.dateOfEnrollment = dateOfEnrollment;
+        this.enrollmentDate = enrollmentDate;
     }
 
     @JsonProperty( required = true )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public Date getDateOfIncident()
+    public Date getIncidentDate()
     {
-        return dateOfIncident;
+        return incidentDate;
     }
 
-    public void setDateOfIncident( Date dateOfIncident )
+    public void setIncidentDate( Date incidentDate )
     {
-        this.dateOfIncident = dateOfIncident;
+        this.incidentDate = incidentDate;
     }
 
     @JsonProperty
@@ -240,8 +240,8 @@ public class Enrollment
         Enrollment that = (Enrollment) o;
 
         if ( attributes != null ? !attributes.equals( that.attributes ) : that.attributes != null ) return false;
-        if ( dateOfEnrollment != null ? !dateOfEnrollment.equals( that.dateOfEnrollment ) : that.dateOfEnrollment != null ) return false;
-        if ( dateOfIncident != null ? !dateOfIncident.equals( that.dateOfIncident ) : that.dateOfIncident != null ) return false;
+        if ( enrollmentDate != null ? !enrollmentDate.equals( that.enrollmentDate ) : that.enrollmentDate != null ) return false;
+        if ( incidentDate != null ? !incidentDate.equals( that.incidentDate ) : that.incidentDate != null ) return false;
         if ( enrollment != null ? !enrollment.equals( that.enrollment ) : that.enrollment != null ) return false;
         if ( trackedEntityInstance != null ? !trackedEntityInstance.equals( that.trackedEntityInstance ) : that.trackedEntityInstance != null )
             return false;
@@ -259,8 +259,8 @@ public class Enrollment
         result = 31 * result + (trackedEntityInstance != null ? trackedEntityInstance.hashCode() : 0);
         result = 31 * result + (program != null ? program.hashCode() : 0);
         result = 31 * result + (status != null ? status.hashCode() : 0);
-        result = 31 * result + (dateOfEnrollment != null ? dateOfEnrollment.hashCode() : 0);
-        result = 31 * result + (dateOfIncident != null ? dateOfIncident.hashCode() : 0);
+        result = 31 * result + (enrollmentDate != null ? enrollmentDate.hashCode() : 0);
+        result = 31 * result + (incidentDate != null ? incidentDate.hashCode() : 0);
         result = 31 * result + (attributes != null ? attributes.hashCode() : 0);
         result = 31 * result + (notes != null ? notes.hashCode() : 0);
         return result;
@@ -274,8 +274,8 @@ public class Enrollment
             ", trackedEntityInstance='" + trackedEntityInstance + '\'' +
             ", program='" + program + '\'' +
             ", status=" + status +
-            ", dateOfEnrollment=" + dateOfEnrollment +
-            ", dateOfIncident=" + dateOfIncident +
+            ", dateOfEnrollment=" + enrollmentDate +
+            ", incidentDate=" + incidentDate +
             ", attributes=" + attributes +
             ", notes=" + notes +
             '}';

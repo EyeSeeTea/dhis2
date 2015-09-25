@@ -48,17 +48,26 @@ Ext.onReady( function() {
 	PT.isDebug = false;
 	PT.isSessionStorage = ('sessionStorage' in window && window['sessionStorage'] !== null);
 
-	PT.getCore = function(ns) {
-        var init = ns.init,
-            conf = {},
+	PT.getCore = function(init, appConfig) {
+        var conf = {},
             api = {},
             support = {},
             service = {},
             web = {},
+            app = {},
+            webAlert,
             dimConf;
 
-        // tmp
-        ns.alert = function() {};
+        appConfig = appConfig || {};
+
+        // alert
+        webAlert = function() {};
+
+        // app
+        app.getViewportWidth = function() {};
+        app.getViewportHeight = function() {};
+        app.getCenterRegionWidth = function() {};
+        app.getCenterRegionHeight = function() {};
 
 		// conf
 		(function() {
@@ -139,25 +148,38 @@ Ext.onReady( function() {
 				},
 				root: {
 					id: 'root'
-				}
+				},
+                style: {
+                    'normal': 'NORMAL',
+                    'compact': 'COMPACT',
+                    'xcompact': 'XCOMPACT',
+                    'comfortable': 'COMFORTABLE',
+                    'xcomfortable': 'XCOMFORTABLE',
+                    'small': 'SMALL',
+                    'xsmall': 'XSMALL',
+                    'large': 'LARGE',
+                    'xlarge': 'XLARGE',
+                    'space': 'SPACE',
+                    'comma': 'COMMA',
+                    'none': 'NONE',
+                    'default_': 'DEFAULT'
+                }
 			};
 
-			dimConf = conf.finals.dimension;
+            (function() {
+                dimConf = conf.finals.dimension;
 
-			dimConf.objectNameMap = {};
-			dimConf.objectNameMap[dimConf.data.objectName] = dimConf.data;
-			dimConf.objectNameMap[dimConf.indicator.objectName] = dimConf.indicator;
-			dimConf.objectNameMap[dimConf.dataElement.objectName] = dimConf.dataElement;
-			dimConf.objectNameMap[dimConf.operand.objectName] = dimConf.operand;
-			dimConf.objectNameMap[dimConf.dataSet.objectName] = dimConf.dataSet;
-			dimConf.objectNameMap[dimConf.category.objectName] = dimConf.category;
-			dimConf.objectNameMap[dimConf.period.objectName] = dimConf.period;
-			dimConf.objectNameMap[dimConf.organisationUnit.objectName] = dimConf.organisationUnit;
-			dimConf.objectNameMap[dimConf.dimension.objectName] = dimConf.dimension;
-
-			dimConf.objectNameMap['ou1'] = dimConf.organisationUnit;
-			dimConf.objectNameMap['ou2'] = dimConf.organisationUnit;
-			dimConf.objectNameMap['ou3'] = dimConf.organisationUnit;
+                dimConf.objectNameMap = {};
+                dimConf.objectNameMap[dimConf.data.objectName] = dimConf.data;
+                dimConf.objectNameMap[dimConf.indicator.objectName] = dimConf.indicator;
+                dimConf.objectNameMap[dimConf.dataElement.objectName] = dimConf.dataElement;
+                dimConf.objectNameMap[dimConf.operand.objectName] = dimConf.operand;
+                dimConf.objectNameMap[dimConf.dataSet.objectName] = dimConf.dataSet;
+                dimConf.objectNameMap[dimConf.category.objectName] = dimConf.category;
+                dimConf.objectNameMap[dimConf.period.objectName] = dimConf.period;
+                dimConf.objectNameMap[dimConf.organisationUnit.objectName] = dimConf.organisationUnit;
+                dimConf.objectNameMap[dimConf.dimension.objectName] = dimConf.dimension;
+            })();
 
 			conf.period = {
 				periodTypes: [
@@ -175,6 +197,14 @@ Ext.onReady( function() {
 				],
                 relativePeriods: []
 			};
+
+            conf.valueType = {
+            	numericTypes: ['NUMBER','UNIT_INTERVAL','PERCENTAGE','INTEGER','INTEGER_POSITIVE','INTEGER_NEGATIVE','INTEGER_ZERO_OR_POSITIVE'],
+            	textTypes: ['TEXT','LONG_TEXT','LETTER','PHONE_NUMBER','EMAIL'],
+            	booleanTypes: ['BOOLEAN','TRUE_ONLY'],
+            	dateTypes: ['DATE','DATETIME'],
+            	aggregateTypes: ['NUMBER','UNIT_INTERVAL','PERCENTAGE','INTEGER','INTEGER_POSITIVE','INTEGER_NEGATIVE','INTEGER_ZERO_OR_POSITIVE','BOOLEAN','TRUE_ONLY']
+            };
 
 			conf.layout = {
 				west_width: 424,
@@ -221,26 +251,34 @@ Ext.onReady( function() {
 				multiselect_fill_reportingrates: 315
 			};
 
-			conf.report = {
-				digitGroupSeparator: {
-					'comma': ',',
-					'space': '&nbsp;'
-				},
-				displayDensity: {
-                    'xcompact': '2px',
-					'compact': '4px',
-					'normal': '6px',
-					'comfortable': '8px',
-                    'xcomfortable': '10px'
-				},
-				fontSize: {
-					'xsmall': '9px',
-					'small': '10px',
-					'normal': '11px',
-					'large': '12px',
-					'xlarge': '14px'
-				}
-			};
+			conf.style = {
+				displayDensity: {},
+				fontSize: {},
+				digitGroupSeparator: {}
+            };
+
+            (function() {
+                var map = conf.finals.style,
+                    displayDensity = conf.style.displayDensity,
+                    fontSize = conf.style.fontSize,
+                    digitGroupSeparator = conf.style.digitGroupSeparator;
+
+                displayDensity[map.xcompact] = '2px';
+                displayDensity[map.compact] = '4px';
+                displayDensity[map.normal] = '6px';
+                displayDensity[map.comfortable] = '8px';
+                displayDensity[map.xcomfortable] = '10px';
+
+                fontSize[map.xsmall] = '9px';
+                fontSize[map.small] = '10px';
+                fontSize[map.normal] = '11px';
+                fontSize[map.large] = '12px';
+                fontSize[map.xlarge] = '14px';
+
+                digitGroupSeparator[map.space] = '&nbsp;';
+                digitGroupSeparator[map.comma] = ',';
+                digitGroupSeparator[map.none] = '';
+            })();
 
             conf.url = {
                 analysisFields: [
@@ -377,11 +415,13 @@ Ext.onReady( function() {
 
 				// showHierarchy: boolean (false)
 
-				// displayDensity: string ('normal') - 'compact', 'normal', 'comfortable'
+				// completedOnly: boolean (false)
 
-				// fontSize: string ('normal') - 'small', 'normal', 'large'
+				// displayDensity: string ('NORMAL') - 'COMPACT', 'NORMAL', 'COMFORTABLE'
 
-				// digitGroupSeparator: string ('space') - 'none', 'comma', 'space'
+				// fontSize: string ('NORMAL') - 'SMALL', 'NORMAL', 'LARGE'
+
+				// digitGroupSeparator: string ('SPACE') - 'NONE', 'COMMA', 'SPACE'
 
 				// legendSet: object
 
@@ -443,19 +483,19 @@ Ext.onReady( function() {
 
 							// Indicators as filter
 							if (layout.filters[i].dimension === dimConf.indicator.objectName) {
-								ns.alert(PT.i18n.indicators_cannot_be_specified_as_filter || 'Indicators cannot be specified as filter');
+								webAlert(PT.i18n.indicators_cannot_be_specified_as_filter || 'Indicators cannot be specified as filter');
 								return;
 							}
 
 							// Categories as filter
 							if (layout.filters[i].dimension === dimConf.category.objectName) {
-								ns.alert(PT.i18n.categories_cannot_be_specified_as_filter || 'Categories cannot be specified as filter');
+								webAlert(PT.i18n.categories_cannot_be_specified_as_filter || 'Categories cannot be specified as filter');
 								return;
 							}
 
 							// Data sets as filter
 							if (layout.filters[i].dimension === dimConf.dataSet.objectName) {
-								ns.alert(PT.i18n.data_sets_cannot_be_specified_as_filter || 'Data sets cannot be specified as filter');
+								webAlert(PT.i18n.data_sets_cannot_be_specified_as_filter || 'Data sets cannot be specified as filter');
 								return;
 							}
 						}
@@ -463,31 +503,31 @@ Ext.onReady( function() {
 
 					// dc and in
 					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.indicator.objectName]) {
-						ns.alert('Indicators and detailed data elements cannot be specified together');
+						webAlert('Indicators and detailed data elements cannot be specified together');
 						return;
 					}
 
 					// dc and de
 					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.dataElement.objectName]) {
-						ns.alert('Detailed data elements and totals cannot be specified together');
+						webAlert('Detailed data elements and totals cannot be specified together');
 						return;
 					}
 
 					// dc and ds
 					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.dataSet.objectName]) {
-						ns.alert('Data sets and detailed data elements cannot be specified together');
+						webAlert('Data sets and detailed data elements cannot be specified together');
 						return;
 					}
 
 					// dc and co
 					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.category.objectName]) {
-						ns.alert('Assigned categories and detailed data elements cannot be specified together');
+						webAlert('Assigned categories and detailed data elements cannot be specified together');
 						return;
 					}
 
                     // in and aggregation type
-                    if (objectNameDimensionMap[dimConf.indicator.objectName] && config.aggregationType !== 'DEFAULT') {
-                        ns.alert('Indicators and aggregation types cannot be specified together', true);
+                    if (objectNameDimensionMap[dimConf.indicator.objectName] && config.aggregationType !== conf.finals.style.default_) {
+                        webAlert('Indicators and aggregation types cannot be specified together', true);
                         return;
                     }
 
@@ -510,7 +550,7 @@ Ext.onReady( function() {
 
 					// at least one dimension specified as column or row
 					if (!(config.columns || config.rows)) {
-						ns.alert(PT.i18n.at_least_one_dimension_must_be_specified_as_row_or_column);
+						webAlert(PT.i18n.at_least_one_dimension_must_be_specified_as_row_or_column);
 						return;
 					}
 
@@ -525,7 +565,7 @@ Ext.onReady( function() {
 
 					// at least one period
 					if (!Ext.Array.contains(objectNames, dimConf.period.objectName)) {
-						ns.alert(PT.i18n.at_least_one_period_must_be_specified_as_column_row_or_filter);
+						webAlert(PT.i18n.at_least_one_period_must_be_specified_as_column_row_or_filter);
 						return;
 					}
 
@@ -550,14 +590,16 @@ Ext.onReady( function() {
 					layout.showRowSubTotals = Ext.isBoolean(config.rowSubTotals) ? config.rowSubTotals : (Ext.isBoolean(config.showRowSubTotals) ? config.showRowSubTotals : true);
 					layout.showDimensionLabels = Ext.isBoolean(config.showDimensionLabels) ? config.showDimensionLabels : (Ext.isBoolean(config.showDimensionLabels) ? config.showDimensionLabels : true);
 					layout.hideEmptyRows = Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : false;
-                    layout.aggregationType = Ext.isString(config.aggregationType) ? config.aggregationType : 'DEFAULT';
+                    layout.aggregationType = Ext.isString(config.aggregationType) ? config.aggregationType : conf.finals.style.default_;
 					layout.dataApprovalLevel = Ext.isObject(config.dataApprovalLevel) && Ext.isString(config.dataApprovalLevel.id) ? config.dataApprovalLevel : null;
 
 					layout.showHierarchy = Ext.isBoolean(config.showHierarchy) ? config.showHierarchy : false;
 
-					layout.displayDensity = Ext.isString(config.displayDensity) && !Ext.isEmpty(config.displayDensity) ? config.displayDensity : 'normal';
-					layout.fontSize = Ext.isString(config.fontSize) && !Ext.isEmpty(config.fontSize) ? config.fontSize : 'normal';
-					layout.digitGroupSeparator = Ext.isString(config.digitGroupSeparator) && !Ext.isEmpty(config.digitGroupSeparator) ? config.digitGroupSeparator : 'space';
+                    layout.completedOnly = Ext.isBoolean(config.completedOnly) ? config.completedOnly : false;
+
+					layout.displayDensity = Ext.isString(config.displayDensity) && !Ext.isEmpty(config.displayDensity) ? config.displayDensity : conf.finals.style.normal;
+					layout.fontSize = Ext.isString(config.fontSize) && !Ext.isEmpty(config.fontSize) ? config.fontSize : conf.finals.style.normal;
+					layout.digitGroupSeparator = Ext.isString(config.digitGroupSeparator) && !Ext.isEmpty(config.digitGroupSeparator) ? config.digitGroupSeparator : conf.finals.style.space;
 					layout.legendSet = Ext.isObject(config.legendSet) && Ext.isString(config.legendSet.id) ? config.legendSet : null;
 
 					layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
@@ -584,6 +626,11 @@ Ext.onReady( function() {
                     // TODO program
                     if (Ext.isObject(config.program)) {
                         layout.program = config.program;
+                    }
+
+                    // relative period date
+                    if (support.prototype.date.getYYYYMMDD(config.relativePeriodDate)) {
+                        layout.relativePeriodDate = support.prototype.date.getYYYYMMDD(config.relativePeriodDate);
                     }
 
                     // validate
@@ -812,14 +859,34 @@ Ext.onReady( function() {
 			};
 
 			support.prototype.number.prettyPrint = function(number, separator) {
-				separator = separator || 'space';
+				separator = separator || conf.finals.style.space;
 
-				if (separator === 'none') {
+				if (separator === conf.finals.style.space.none) {
 					return number;
 				}
 
-				return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, conf.report.digitGroupSeparator[separator]);
+				return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, conf.style.digitGroupSeparator[separator]);
 			};
+
+                // date
+            support.prototype.date = {};
+
+            support.prototype.date.getYYYYMMDD = function(param) {
+                if (!Ext.isString(param)) {
+                    if (!(Object.prototype.toString.call(param) === '[object Date]' && param.toString() !== 'Invalid date')) {
+                        return null;
+                    }
+                }
+
+                var date = new Date(param),
+                    month = '' + (1 + date.getMonth()),
+                    day = '' + date.getDate();
+
+                month = month.length === 1 ? '0' + month : month;
+                day = day.length === 1 ? '0' + day : day;
+
+                return date.getFullYear() + '-' + month + '-' + day;
+            };
 
 			// color
 			support.color = {};
@@ -841,6 +908,17 @@ Ext.onReady( function() {
 				} : null;
 			};
 
+            // connection
+            support.connection = {};
+
+            support.connection.ajax = function(requestConfig, authConfig) {
+                if (authConfig.crossDomain && Ext.isString(authConfig.username) && Ext.isString(authConfig.password)) {
+                    requestConfig.headers = Ext.isObject(authConfig.headers) ? authConfig.headers : {};
+                    requestConfig.headers['Authorization'] = 'Basic ' + btoa(authConfig.username + ':' + authConfig.password);
+                }
+
+                Ext.Ajax.request(requestConfig);
+            };
 		}());
 
 		// service
@@ -1676,15 +1754,19 @@ Ext.onReady( function() {
 					delete layout.showHierarchy;
 				}
 
-				if (layout.displayDensity === 'normal') {
+				if (!layout.completedOnly) {
+					delete layout.completedOnly;
+				}
+
+				if (layout.displayDensity === conf.finals.style.normal) {
 					delete layout.displayDensity;
 				}
 
-				if (layout.fontSize === 'normal') {
+				if (layout.fontSize === conf.finals.style.normal) {
 					delete layout.fontSize;
 				}
 
-				if (layout.digitGroupSeparator === 'space') {
+				if (layout.digitGroupSeparator === conf.finals.style.space) {
 					delete layout.digitGroupSeparator;
 				}
 
@@ -1696,11 +1778,11 @@ Ext.onReady( function() {
 					delete layout.sorting;
 				}
 
-				if (layout.aggregationType === 'DEFAULT') {
+				if (layout.aggregationType === conf.finals.style.default_) {
 					delete layout.aggregationType;
 				}
 
-				if (layout.dataApprovalLevel && layout.dataApprovalLevel.id === 'DEFAULT') {
+				if (layout.dataApprovalLevel && layout.dataApprovalLevel.id === conf.finals.style.default_) {
 					delete layout.dataApprovalLevel;
 				}
 
@@ -1917,7 +1999,7 @@ Ext.onReady( function() {
 			web.window = web.window || {};
 
 			web.window.setAnchorPosition = function(w, target) {
-				var vpw = ns.app.viewport.getWidth(),
+				var vpw = app.getViewportWidth(),
 					targetx = target ? target.getPosition()[0] : 4,
 					winw = w.getWidth(),
 					y = target ? target.getPosition()[1] + target.getHeight() + 4 : 33;
@@ -1993,7 +2075,7 @@ Ext.onReady( function() {
                 config.html += obj.message + (obj.message.substr(obj.message.length - 1) === '.' ? '' : '.');
 
                 // bodyStyle
-                config.bodyStyle = 'padding: 12px; background: #fff; max-width: 600px; max-height: ' + ns.app.centerRegion.getHeight() / 2 + 'px';
+                config.bodyStyle = 'padding: 12px; background: #fff; max-width: 600px; max-height: ' + app.getCenterRegionHeight() / 2 + 'px';
 
                 // destroy handler
                 config.modal = true;
@@ -2066,6 +2148,10 @@ Ext.onReady( function() {
 					paramString += '&hierarchyMeta=true';
 				}
 
+				if (xLayout.completedOnly) {
+					paramString += '&completedOnly=true';
+				}
+
 				// aggregation type
 				if (Ext.Array.contains(aggTypes, xLayout.aggregationType)) {
 					paramString += '&aggregationType=' + xLayout.aggregationType;
@@ -2084,13 +2170,18 @@ Ext.onReady( function() {
 				}
 
 				// data approval level
-				if (Ext.isObject(xLayout.dataApprovalLevel) && Ext.isString(xLayout.dataApprovalLevel.id) && xLayout.dataApprovalLevel.id !== 'DEFAULT') {
+				if (Ext.isObject(xLayout.dataApprovalLevel) && Ext.isString(xLayout.dataApprovalLevel.id) && xLayout.dataApprovalLevel.id !== conf.finals.style.default_) {
 					paramString += '&approvalLevel=' + xLayout.dataApprovalLevel.id;
 				}
 
                 // TODO program
                 if (xLayout.program && xLayout.program.id) {
                     paramString += '&program=' + xLayout.program.id;
+                }
+
+                // relative period date
+                if (xLayout.relativePeriodDate) {
+                    paramString += '&relativePeriodDate=' + xLayout.relativePeriodDate;
                 }
 
 				return paramString.replace(/#/g, '.');
@@ -2109,7 +2200,7 @@ Ext.onReady( function() {
 
                 msg += '\n\n' + 'Hint: A good way to reduce the number of items is to use relative periods and level/group organisation unit selection modes.';
 
-                ns.alert(msg, 'warning');
+                webAlert(msg, 'warning');
 			};
 
 			// pivot
@@ -2954,8 +3045,8 @@ Ext.onReady( function() {
                     var cls = 'pivot',
                         table;
 
-                    cls += xLayout.displayDensity && xLayout.displayDensity !== 'normal' ? ' displaydensity-' + xLayout.displayDensity : '';
-                    cls += xLayout.fontSize && xLayout.fontSize !== 'normal' ? ' fontsize-' + xLayout.fontSize : '';
+                    cls += xLayout.displayDensity && xLayout.displayDensity !== conf.finals.style.normal ? ' displaydensity-' + xLayout.displayDensity : '';
+                    cls += xLayout.fontSize && xLayout.fontSize !== conf.finals.style.normal ? ' fontsize-' + xLayout.fontSize : '';
 
 					table = '<table id="' + xLayout.tableUuid + '" class="' + cls + '">';
 
@@ -2979,7 +3070,6 @@ Ext.onReady( function() {
 					};
 				}();
 			};
-
 		}());
 
 		// extend init
@@ -3012,15 +3102,18 @@ Ext.onReady( function() {
 		}());
 
 		// alert
-		ns.alert = web.message.alert;
+		webAlert = web.message.alert;
 
-		ns.conf = conf;
-		ns.api = api;
-		ns.support = support;
-		ns.service = service;
-		ns.web = web;
-
-		return ns;
+		return {
+            init: init,
+            conf: conf,
+            api: api,
+            support: support,
+            service: service,
+            web: web,
+            app: app,
+            webAlert: webAlert
+        };
 	};
 
 	// PLUGIN
@@ -3041,7 +3134,8 @@ Ext.onReady( function() {
 		var isInit = false,
 			requests = [],
 			callbackCount = 0,
-            type = config.plugin && config.crossDomain ? 'jsonp' : 'json',
+            type = 'json',
+            ajax,
 			fn;
 
         init.contextPath = config.url;
@@ -3057,6 +3151,15 @@ Ext.onReady( function() {
 				configs = [];
 			}
 		};
+
+        ajax = function(requestConfig, authConfig) {
+            if (authConfig.crossDomain && Ext.isString(authConfig.username) && Ext.isString(authConfig.password)) {
+                requestConfig.headers = Ext.isObject(authConfig.headers) ? authConfig.headers : {};
+                requestConfig.headers['Authorization'] = 'Basic ' + btoa(authConfig.username + ':' + authConfig.password);
+            }
+
+            Ext.Ajax.request(requestConfig);
+        };
 
         // user-account
         requests.push({
@@ -3119,7 +3222,7 @@ Ext.onReady( function() {
 			}
 		});
 
-        // user orgunit
+        // dimensions
 		requests.push({
 			url: init.contextPath + '/api/dimensions.' + type + '?fields=id,name&paging=false',
             disableCaching: false,
@@ -3138,21 +3241,15 @@ Ext.onReady( function() {
             }
         });
 
-        //init.legendSets = [];
-
 		for (var i = 0; i < requests.length; i++) {
-            if (type === 'jsonp') {
-                Ext.data.JsonP.request(requests[i]);
-            }
-            else {
-                Ext.Ajax.request(requests[i]);
-            }
+            ajax(requests[i], config);
 		}
 	};
 
     applyCss = function(config) {
         var css = '',
-            arrowUrl = config.dashboard ? init.contextPath + '/dhis-web-commons/javascripts/plugin/images/arrowupdown.png' : '//dhis2-cdn.org/v217/plugin/images/arrowupdown.png';
+            arrowUrl = config.dashboard ? init.contextPath + '/dhis-web-commons/javascripts/plugin/images/arrowupdown.png' : '//dhis2-cdn.org/v220/plugin/images/arrowupdown.png',
+            errorUrl = config.dashboard ? init.contextPath + '/dhis-web-commons/javascripts/plugin/images/error_m.png' : '//dhis2-cdn.org/v220/plugin/images/error_m.png';
 
         css += 'table.pivot { font-family: arial,sans-serif,ubuntu,consolas; border-collapse: collapse; border-spacing: 0px; border: 0 none; } \n';
         css += '.td-nobreak { white-space: nowrap; } \n';
@@ -3198,6 +3295,10 @@ Ext.onReady( function() {
         // alert
         css += '.ns-plugin-alert { width: 90%; padding: 5%; color: #777 } \n';
 
+        css += '.x-window-body { font-size: 13px; } \n';
+        css += '.ns-window-title-messagebox { padding-left: 16px; background-position-y: 1px; } \n';
+        css += '.ns-window-title-messagebox.error { background-image: url("' + errorUrl + '"); } \n';
+
         Ext.util.CSS.createStyleSheet(css);
     };
 
@@ -3227,14 +3328,14 @@ Ext.onReady( function() {
 			return true;
 		};
 
-        extendInstance = function(ns) {
+        extendInstance = function(ns, appConfig) {
             var init = ns.core.init,
 				api = ns.core.api,
                 conf = ns.core.conf,
 				support = ns.core.support,
 				service = ns.core.service,
 				web = ns.core.web,
-                type = ns.plugin && ns.crossDomain ? 'jsonp' : 'json',
+                type = 'json',
                 headerMap = {
                     json: 'application/json',
                     jsonp: 'application/javascript'
@@ -3244,6 +3345,19 @@ Ext.onReady( function() {
                     'Accepts': headerMap[type]
                 },
                 el = Ext.get(init.el);
+
+			init.el = config.el;
+
+			// ns
+            ns.plugin = appConfig.plugin;
+            ns.dashboard = appConfig.dashboard;
+            ns.crossDomain = appConfig.crossDomain;
+            ns.skipMask = appConfig.skipMask;
+            ns.skipFade = appConfig.skipFade;
+            ns.el = appConfig.el;
+            ns.username = appConfig.username;
+            ns.password = appConfig.password;
+            ns.ajax = support.connection.ajax;
 
 			// message
 			web.message = web.message || {};
@@ -3349,73 +3463,78 @@ Ext.onReady( function() {
                 config.success = success;
                 config.failure = failure;
 
-                if (type === 'jsonp') {
-                    Ext.data.JsonP.request(config);
-                }
-                else {
-                    Ext.Ajax.request(config);
-                }
+                ns.ajax(config, ns);
 			};
 
 			web.pivot.getData = function(layout, isUpdateGui) {
 				var xLayout,
 					paramString,
-                    success,
-                    failure,
-                    config = {};
+                    sortedParamString,
+                    onFailure;
 
 				if (!layout) {
 					return;
 				}
 
+                onFailure = function(r) {
+                    if (!appConfig.skipMask) {
+                        web.mask.hide(ns.app.centerRegion);
+                    }
+                };
+
 				xLayout = service.layout.getExtendedLayout(layout);
-				paramString = web.analytics.getParamString(xLayout, true);
+				paramString = web.analytics.getParamString(xLayout) + '&skipData=true';
+				sortedParamString = web.analytics.getParamString(xLayout, true) + '&skipMeta=true';
 
 				// mask
-                if (!ns.skipMask) {
+                if (!appConfig.skipMask) {
                     web.mask.show(ns.app.centerRegion);
                 }
 
-                success = function(r) {
-                    var response = api.response.Response((r.responseText ? Ext.decode(r.responseText) : r));
+                ns.ajax({
+					url: init.contextPath + '/api/analytics.json' + paramString,
+					timeout: 60000,
+					headers: {
+						'Content-Type': 'application/json',
+						'Accepts': 'application/json'
+					},
+					disableCaching: false,
+					failure: function(r) {
+                        onFailure(r);
+					},
+					success: function(r) {
+                        var metaData = Ext.decode(r.responseText).metaData;
 
-                    if (!response) {
-                        web.mask.hide(ns.app.centerRegion);
-                        return;
+                        Ext.Ajax.request({
+                            url: init.contextPath + '/api/analytics.json' + sortedParamString,
+                            timeout: 60000,
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accepts': 'application/json'
+                            },
+                            disableCaching: false,
+                            failure: function(r) {
+                                onFailure(r);
+                            },
+                            success: function(r) {
+                                ns.app.dateCreate = new Date();
+
+                                var response = api.response.Response(Ext.decode(r.responseText));
+
+                                if (!response) {
+                                    onFailure();
+                                    return;
+                                }
+
+                                response.metaData = metaData;
+
+                                ns.app.paramString = sortedParamString;
+
+                                web.pivot.createTable(layout, response, null, isUpdateGui);
+                            }
+                        }, ns);
                     }
-
-                    // sync xLayout with response
-                    //xLayout = service.layout.getSyncronizedXLayout(xLayout, response);
-
-                    //if (!xLayout) {
-                        //web.mask.hide(ns.app.centerRegion);
-                        //return;
-                    //}
-
-                    ns.app.paramString = paramString;
-
-                    web.pivot.createTable(layout, response, null, isUpdateGui);
-                };
-
-                failure = function(r) {
-                    if (!ns.skipMask) {
-                        web.mask.hide(ns.app.centerRegion);
-                    }
-                };
-
-                config.url = init.contextPath + '/api/analytics.' + type + paramString;
-                config.disableCaching = false;
-                config.timeout = 60000;
-                config.headers = headers;
-                config.success = success;
-                config.failure = failure;
-
-                if (type === 'jsonp') {
-                    Ext.data.JsonP.request(config);
-                }
-                else {
-                    Ext.Ajax.request(config);
-                }
+                }, ns);
 			};
 
 			web.pivot.createTable = function(layout, response, xResponse, isUpdateGui) {
@@ -3429,7 +3548,7 @@ Ext.onReady( function() {
 					getXResponse = service.response.getExtendedResponse,
 					getXAxis = service.layout.getExtendedAxis,
                     getTitleHtml = function(title) {
-                        return ns.dashboard && title ? '<div style="height: 19px; line-height: 14px; width: 100%; font: bold 12px LiberationSans; color: #333; text-align: center; letter-spacing: -0.1px"">' + title + '</div>' : '';
+                        return appConfig.dashboard && title ? '<div style="height: 19px; line-height: 14px; width: 100%; font: bold 12px LiberationSans; color: #333; text-align: center; letter-spacing: -0.1px"">' + title + '</div>' : '';
                     };
 
 				getHtml = function(xLayout, xResponse) {
@@ -3534,17 +3653,6 @@ Ext.onReady( function() {
 				//web.pivot.createTable(layout, null, response, false);
 			//};
 
-			// ns
-            ns.plugin = init.plugin;
-            ns.dashboard = init.dashboard;
-            ns.crossDomain = init.crossDomain;
-            ns.skipMask = init.skipMask;
-            ns.skipFade = init.skipFade;
-
-            ns.alert = web.message.alert;
-
-			init.el = config.el;
-
             //if (!ns.skipFade && el) {
 				//el.setStyle('opacity', 0);
             //}
@@ -3557,30 +3665,35 @@ Ext.onReady( function() {
 		};
 
 		initialize = function() {
-            var el = Ext.get(config.el);
+            var el = Ext.get(config.el),
+                appConfig;
 
 			if (!validateConfig(config)) {
 				return;
 			}
 
+            appConfig = {
+                plugin: true,
+                dashboard: Ext.isBoolean(config.dashboard) ? config.dashboard : false,
+                crossDomain: Ext.isBoolean(config.crossDomain) ? config.crossDomain : true,
+                skipMask: Ext.isBoolean(config.skipMask) ? config.skipMask : false,
+                skipFade: Ext.isBoolean(config.skipFade) ? config.skipFade : false,
+                el: Ext.isString(config.el) ? config.el : null,
+                username: Ext.isString(config.username) ? config.username : null,
+                password: Ext.isString(config.password) ? config.password : null
+            };
+
             // css
             applyCss(config);
 
-            // config
-            init.plugin = true;
-            init.dashboard = Ext.isBoolean(config.dashboard) ? config.dashboard : false;
-            init.crossDomain = Ext.isBoolean(config.crossDomain) ? config.crossDomain : true;
-            init.skipMask = Ext.isBoolean(config.skipMask) ? config.skipMask : false;
-            init.skipFade = Ext.isBoolean(config.skipFade) ? config.skipFade : false;
-
-			// init
-            ns.init = init;
-            PT.instances.push(ns);
-			ns.core = PT.getCore(ns);
-			extendInstance(ns);
+			// core
+			ns.core = PT.getCore(init, appConfig);
+			extendInstance(ns, appConfig);
 
 			ns.app.viewport = createViewport();
 			ns.app.centerRegion = ns.app.viewport.centerRegion;
+
+            PT.instances.push(ns);
 
             if (el) {
                 el.setViewportWidth = function(width) {

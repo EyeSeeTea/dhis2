@@ -69,7 +69,7 @@
                     </div>
                 </td>                                                            
             </tr>            
-            <tr ng-repeat="eventGridColumn in eventGridColumns" ng-if="eventGridColumn.id !== 'comment' && eventGridColumn.id !== 'uid' && eventGridColumn.id !== 'event_date' && !isHidden(eventGridColumn.id)">
+            <tr ng-repeat="eventGridColumn in eventGridColumns" ng-if="eventGridColumn.id !== 'comment' && eventGridColumn.id !== 'uid' && eventGridColumn.id !== 'event_date' && !hiddenFields[eventGridColumn.id]">
                 <td >
                     {{eventGridColumn.name}}<span ng-if="eventGridColumn.compulsory" class="required">*</span>
                 </td>
@@ -82,10 +82,10 @@
                                            ng-required={{eventGridColumn.compulsory}}
                                            name="foo" 
                                            input-field-id={{eventGridColumn.id}} 
-                                           on-select={{saveDatavalue()}} 
-                                           class='form-control'>
-                                    <ui-select-match allow-clear="true" class="form-control" placeholder="{{'select_or_search' | translate}}">{{$select.selected.name  || $select.selected}}</ui-select-match>
-                                    <ui-select-choices  repeat="option.name as option in optionSets[prStDes[eventGridColumn.id].dataElement.optionSet.id].options | filter: $select.search | limitTo:30">
+                                           on-select="saveDatavalue()"
+                                           style="width:100%;">
+                                    <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{'select_or_search' | translate}}">{{$select.selected.name  || $select.selected}}</ui-select-match>
+                                    <ui-select-choices  repeat="option.name as option in optionSets[prStDes[eventGridColumn.id].dataElement.optionSet.id].options | filter: $select.search | limitTo:maxOptionSize">
                                       <span ng-bind-html="option.name | highlight: $select.search"></span>
                                     </ui-select-choices>
                                 </ui-select>
@@ -111,11 +111,11 @@
                                 </label>
                             </div>
                         </div>
-                        <div ng-if="!prStDes[eventGridColumn.id].dataElement.optionSetValue" ng-switch="eventGridColumn.type">
-                            <div ng-switch-when="int">
+                        <div ng-if="!prStDes[eventGridColumn.id].dataElement.optionSetValue" ng-switch="eventGridColumn.valueType">
+                            <div ng-switch-when="NUMBER">
                                 <input type="number"                                         
                                        d2-number-validator
-                                       number-type={{prStDes[eventGridColumn.id].dataElement.numberType}}
+                                       number-type={{eventGridColumn.valueType}}
                                        ng-model="currentEvent[eventGridColumn.id]"                                        
                                        ng-required={{eventGridColumn.compulsory}}
                                        name="foo" 
@@ -123,40 +123,82 @@
                                        ng-blur="saveDatavalue()" 
                                        class="form-control"/>
                             </div>
-                            <div ng-switch-when="string">     
-                                <span ng-if="eventGridColumn.textType==='longText'">
-                                    <textarea rows="3"
+                            <div ng-switch-when="INTEGER">
+                                <input type="number"                                         
+                                       d2-number-validator
+                                       number-type={{eventGridColumn.valueType}}
+                                       ng-model="currentEvent[eventGridColumn.id]"                                        
+                                       ng-required={{eventGridColumn.compulsory}}
+                                       name="foo" 
+                                       input-field-id={{eventGridColumn.id}} 
+                                       ng-blur="saveDatavalue()" 
+                                       class="form-control"/>
+                            </div>
+                            <div ng-switch-when="INTEGER_POSITIVE">
+                                <input type="number"                                         
+                                       d2-number-validator
+                                       number-type={{eventGridColumn.valueType}}
+                                       ng-model="currentEvent[eventGridColumn.id]"                                        
+                                       ng-required={{eventGridColumn.compulsory}}
+                                       name="foo" 
+                                       input-field-id={{eventGridColumn.id}} 
+                                       ng-blur="saveDatavalue()" 
+                                       class="form-control"/>
+                            </div>
+                            <div ng-switch-when="INTEGER_NEGATIVE">
+                                <input type="number"                                         
+                                       d2-number-validator
+                                       number-type={{eventGridColumn.valueType}}
+                                       ng-model="currentEvent[eventGridColumn.id]"                                        
+                                       ng-required={{eventGridColumn.compulsory}}
+                                       name="foo" 
+                                       input-field-id={{eventGridColumn.id}} 
+                                       ng-blur="saveDatavalue()" 
+                                       class="form-control"/>
+                            </div>
+                            <div ng-switch-when="INTEGER_ZERO_OR_POSITIVE">
+                                <input type="number"                                         
+                                       d2-number-validator
+                                       number-type={{eventGridColumn.valueType}}
+                                       ng-model="currentEvent[eventGridColumn.id]"                                        
+                                       ng-required={{eventGridColumn.compulsory}}
+                                       name="foo" 
+                                       input-field-id={{eventGridColumn.id}} 
+                                       ng-blur="saveDatavalue()" 
+                                       class="form-control"/>
+                            </div>
+                            <div ng-switch-when="TEXT">     
+                                <input type="text"                                             
+                                        ng-model="currentEvent[eventGridColumn.id]"                                        
+                                        ng-required={{eventGridColumn.compulsory}}
+                                        name="foo" 
+                                        input-field-id={{eventGridColumn.id}} 
+                                        ng-blur="saveDatavalue()" 
+                                        class="form-control"/>                                               
+                            </div>
+                            <div ng-switch-when="LONG_TEXT">     
+                                <textarea rows="3"
                                         ng-model="currentEvent[eventGridColumn.id]"                                        
                                         ng-required={{eventGridColumn.compulsory}}
                                         name="foo" 
                                         input-field-id={{eventGridColumn.id}} 
                                         ng-blur="saveDatavalue()" 
                                         class="form-control">
-                                    </textarea>
-                                </span>
-                                <span ng-if="eventGridColumn.textType!=='longText'">
-                                    <input type="text"                                             
-                                        ng-model="currentEvent[eventGridColumn.id]"                                        
-                                        ng-required={{eventGridColumn.compulsory}}
-                                        name="foo" 
-                                        input-field-id={{eventGridColumn.id}} 
-                                        ng-blur="saveDatavalue()" 
-                                        class="form-control"/>                  
-                                </span>                                              
+                                </textarea>                                              
                             </div>
-                            <div ng-switch-when="bool">
+                            <div ng-switch-when="BOOLEAN">
                                 <select ng-model="currentEvent[eventGridColumn.id]"                                                                
                                         ng-required={{eventGridColumn.compulsory}}
                                         name="foo" 
                                         input-field-id={{eventGridColumn.id}} 
                                         ng-change="saveDatavalue()" 
                                         class="form-control">
-                                <option value="">{{'please_select'| translate}}</option>                        
+                                <option value="">{{pleaseSelectLabel}}</option>                        
                                 <option value="false">{{'no'| translate}}</option>
                                 <option value="true">{{'yes'| translate}}</option>
                                 </select>
                             </div>
-                            <div ng-switch-when="date">
+                            <div ng-switch-when="DATE">
                                 <input type="text"                                                                
                                        placeholder="{{dhis2CalendarFormat.keyDateFormat}}"
                                        d2-date
@@ -169,7 +211,7 @@
                                        blur-or-change="saveDatavalue()" 
                                        class="form-control">
                             </div>
-                            <div ng-switch-when="datetime">
+                            <div ng-switch-when="DATETIME">
                                 <input type="text"
                                        placeholder="{{dhis2CalendarFormat.keyDateFormat}}"
                                        d2-date
@@ -180,7 +222,7 @@
                                        input-field-id={{eventGridColumn.id}}
                                        style="width:99%;"/>
                             </div>
-                            <div ng-switch-when="trueOnly">
+                            <div ng-switch-when="TRUE_ONLY">
                                 <input type="checkbox"                                         
                                        ng-model="currentEvent[eventGridColumn.id]"                                                               
                                        ng-required={{eventGridColumn.compulsory}}
@@ -199,14 +241,13 @@
                             </div>
                         </div>                        
                         <div ng-messages="innerForm.foo.$error" ng-if="interacted(innerForm.foo)" class="required" ng-messages-include="../dhis-web-commons/angular-forms/error-messages.html">                                         
-                        </div>
+                        </div>                        
                     </ng-form>                    
                 </td>
             </tr>        
         </tbody>
     </table>    
 </div>
-
 
 <div ng-if='selectedProgramStage.programStageSections.length'>
     <table class="dhis2-list-table-striped">        
@@ -272,7 +313,7 @@
         </tbody>
     </table>    
 
-    <div ng-repeat='section in selectedProgramStage.programStageSections' ng-if="section.id === selectedSection.id || selectedSection.id === 'ALL'">
+    <div ng-repeat='section in selectedProgramStage.programStageSections' ng-if="section.id === selectedSection.id || selectedSection.id === 'ALL' && !hiddenSections[section.id] ">
         <div class="vertical-spacing section-label">
            {{section.name}}
         </div>
@@ -289,52 +330,56 @@
                 </tr>                        
             </thead>
             <tbody>       
-                <tr ng-repeat="de in section.programStageDataElements" ng-if="!isHidden(de.dataElement.id)">
+                <tr ng-repeat="de in section.programStageDataElements" ng-if="!hiddenFields[de.dataElement.id]">
                     <td >
-                        {{prStDes[de.dataElement.id].dataElement.formName ? prStDes[de.dataElement.id].dataElement.formName : prStDes[de.dataElement.id].dataElement.name}}<span ng-if="prStDes[de.dataElement.id].compulsory" class="required">*</span>                        </td>
+                        {{prStDes[de.dataElement.id].dataElement.formName ? prStDes[de.dataElement.id].dataElement.formName : prStDes[de.dataElement.id].dataElement.name}}                         
+                        <span ng-if="prStDes[de.dataElement.id].compulsory" class="required">*</span>
+                    </td>
                     <td >
                         <ng-form name="innerForm">
                             <div ng-if="prStDes[de.dataElement.id].dataElement.optionSetValue">
-                                <span ng-if="!selectedProgram.dataEntryMethod || optionSets[prStDes[de.dataElement.id].dataElement.optionSet.id].options.length > 8">
+                                <span ng-if="!selectedProgram.dataEntryMethod || optionSets[prStDes[de.dataElement.id].dataElement.optionSet.id].options.length >= 7">
                                     <ui-select ng-model="currentEvent[de.dataElement.id]" 
                                                theme="select2" 
                                                ng-required={{prStDes[de.dataElement.id].compulsory}}
                                                name="foo" 
                                                input-field-id={{de.dataElement.id}} 
-                                               on-select={{saveDatavalue()}} 
-                                               class='form-control'>
-                                        <ui-select-match allow-clear="true" class="form-control" placeholder="{{'select_or_search' | translate}}">{{$select.selected.name || $select.selected}}</ui-select-match>
-                                        <ui-select-choices  repeat="option.name as option in optionSets[prStDes[de.dataElement.id].dataElement.optionSet.id].options | filter: $select.search | limitTo:30">
+                                               on-select="saveDatavalue()"
+                                               style="width:100%;">
+                                        <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{'select_or_search' | translate}}">{{$select.selected.name || $select.selected}}</ui-select-match>
+                                        <ui-select-choices  repeat="option.name as option in optionSets[prStDes[de.dataElement.id].dataElement.optionSet.id].options | filter: $select.search | limitTo:maxOptionSize">
                                           <span ng-bind-html="option.name | highlight: $select.search"></span>
                                         </ui-select-choices>
                                     </ui-select>
                                 </span>
-                                <span ng-if="selectedProgram.dataEntryMethod && prStDes[de.dataElement.id].dataElement.optionSet.options.length < 7">                                    
+                                <span ng-if="selectedProgram.dataEntryMethod && optionSets[prStDes[de.dataElement.id].dataElement.optionSet.id].options.length < 7">                                    
                                     <label>
                                         <input type="radio" 
-                                               name="foo"  
+                                               name={{de.dataElement.id}}
                                                input-field-id={{de.dataElement.id}} 
                                                ng-change="saveDatavalue()" 
                                                ng-required={{prStDes[de.dataElement.id].compulsory}}
                                                ng-model="currentEvent[de.dataElement.id]"
                                                value="">{{'no_value' | translate}}<br>
-                                    </label>                                    
-                                    <label ng-repeat="option in optionSets[prStDes[de.dataElement.id].dataElement.optionSet.id].options">
-                                        <input type="radio" 
-                                               name={{de.dataElement.id}}   
-                                               input-field-id={{de.dataElement.id}} 
-                                               ng-change="saveDatavalue()" 
-                                               ng-required={{prStDes[de.dataElement.id].compulsory}}
-                                               ng-model="currentEvent[de.dataElement.id]"
-                                               value={{option.name}}> {{option.name}}<br>                                        
-                                    </label>
+                                    </label><br>
+                                    <span ng-repeat="option in optionSets[prStDes[de.dataElement.id].dataElement.optionSet.id].options">
+                                        <label>
+                                            <input type="radio" 
+                                                   name={{de.dataElement.id}}   
+                                                   input-field-id={{de.dataElement.id}} 
+                                                   ng-change="saveDatavalue()" 
+                                                   ng-required={{prStDes[de.dataElement.id].compulsory}}
+                                                   ng-model="currentEvent[de.dataElement.id]"
+                                                   value={{option.name}}> {{option.name}}<br>                                        
+                                        </label><br>
+                                    </span>                                    
                                 </span>
                             </div>
-                            <div ng-if="!prStDes[de.dataElement.id].dataElement.optionSetValue" ng-switch="prStDes[de.dataElement.id].dataElement.type">
-                                <div ng-switch-when="int">
+                            <div ng-if="!prStDes[de.dataElement.id].dataElement.optionSetValue" ng-switch="prStDes[de.dataElement.id].dataElement.valueType">                                
+                                <div ng-switch-when="NUMBER">
                                     <input type="number"                                                
                                            d2-number-validator 
-                                           number-type={{prStDes[de.dataElement.id].dataElement.numberType}}
+                                           number-type={{prStDes[de.dataElement.id].dataElement.valueType}}
                                            ng-model="currentEvent[de.dataElement.id]"                                                
                                            ng-required={{prStDes[de.dataElement.id].compulsory}}
                                            name="foo" 
@@ -342,40 +387,82 @@
                                            ng-blur="saveDatavalue()" 
                                            class="form-control"/>
                                 </div>
-                                <div ng-switch-when="string">
-                                    <span ng-if="prStDes[de.dataElement.id].dataElement.textType==='longText'">
-                                        <textarea rows="3"
-                                            ng-model="currentEvent[de.dataElement.id]"                                       
-                                            ng-required={{prStDes[de.dataElement.id].compulsory}}
-                                            name="foo" 
-                                            input-field-id={{de.dataElement.id}} 
-                                            ng-blur="saveDatavalue()" 
-                                            class="form-control">
-                                        </textarea>
-                                    </span>
-                                    <span ng-if="prStDes[de.dataElement.id].dataElement.textType!=='longText'">
-                                        <input type="text"                                             
+                                <div ng-switch-when="INTEGER">
+                                    <input type="number"                                                
+                                           d2-number-validator 
+                                           number-type={{prStDes[de.dataElement.id].dataElement.valueType}}
+                                           ng-model="currentEvent[de.dataElement.id]"                                                
+                                           ng-required={{prStDes[de.dataElement.id].compulsory}}
+                                           name="foo" 
+                                           input-field-id={{de.dataElement.id}} 
+                                           ng-blur="saveDatavalue()" 
+                                           class="form-control"/>
+                                </div>
+                                <div ng-switch-when="INTEGER_POSITIVE">
+                                    <input type="number"                                                
+                                           d2-number-validator 
+                                           number-type={{prStDes[de.dataElement.id].dataElement.valueType}}
+                                           ng-model="currentEvent[de.dataElement.id]"                                                
+                                           ng-required={{prStDes[de.dataElement.id].compulsory}}
+                                           name="foo" 
+                                           input-field-id={{de.dataElement.id}} 
+                                           ng-blur="saveDatavalue()" 
+                                           class="form-control"/>
+                                </div>
+                                <div ng-switch-when="INTEGER_NEGATIVE">
+                                    <input type="number"                                                
+                                           d2-number-validator 
+                                           number-type={{prStDes[de.dataElement.id].dataElement.valueType}}
+                                           ng-model="currentEvent[de.dataElement.id]"                                                
+                                           ng-required={{prStDes[de.dataElement.id].compulsory}}
+                                           name="foo" 
+                                           input-field-id={{de.dataElement.id}} 
+                                           ng-blur="saveDatavalue()" 
+                                           class="form-control"/>
+                                </div>
+                                <div ng-switch-when="INTEGER_ZERO_OR_POSITIVE">
+                                    <input type="number"                                                
+                                           d2-number-validator 
+                                           number-type={{prStDes[de.dataElement.id].dataElement.valueType}}
+                                           ng-model="currentEvent[de.dataElement.id]"                                                
+                                           ng-required={{prStDes[de.dataElement.id].compulsory}}
+                                           name="foo" 
+                                           input-field-id={{de.dataElement.id}} 
+                                           ng-blur="saveDatavalue()" 
+                                           class="form-control"/>
+                                </div>
+                                <div ng-switch-when="TEXT">     
+                                    <input type="text"                                             
                                             ng-model="currentEvent[de.dataElement.id]"                                   
                                             ng-required={{prStDes[de.dataElement.id].compulsory}}
                                             name="foo" 
                                             input-field-id={{de.dataElement.id}} 
                                             ng-blur="saveDatavalue()" 
-                                            class="form-control">                  
-                                    </span>
+                                            class="form-control">                                               
                                 </div>
-                                <div ng-switch-when="bool">
+                                <div ng-switch-when="LONG_TEXT">     
+                                    <textarea rows="3"
+                                        ng-model="currentEvent[de.dataElement.id]"                                       
+                                        ng-required={{prStDes[de.dataElement.id].compulsory}}
+                                        name="foo" 
+                                        input-field-id={{de.dataElement.id}} 
+                                        ng-blur="saveDatavalue()" 
+                                        class="form-control">
+                                    </textarea>                                             
+                                </div>
+                                <div ng-switch-when="BOOLEAN">
                                     <select ng-model="currentEvent[de.dataElement.id]"                                                 
                                             ng-required={{prStDes[de.dataElement.id].compulsory}}
                                             name="foo" 
                                             input-field-id={{de.dataElement.id}} 
                                             ng-change="saveDatavalue()" 
                                             class="form-control">
-                                    <option value="">{{'please_select'| translate}}</option>                        
-                                    <option value="false">{{'no'| translate}}</option>
-                                    <option value="true">{{'yes'| translate}}</option>
+                                        <option value="">{{pleaseSelectLabel}}</option>                        
+                                        <option value="false">{{'no'| translate}}</option>
+                                        <option value="true">{{'yes'| translate}}</option>
                                     </select>
                                 </div>
-                                <div ng-switch-when="date">
+                                <div ng-switch-when="DATE">
                                     <input type="text"                                                                
                                            placeholder="{{dhis2CalendarFormat.keyDateFormat}}"
                                            d2-date
@@ -388,7 +475,7 @@
                                            blur-or-change="saveDatavalue()" 
                                            class="form-control"/>
                                 </div>
-                                <div ng-switch-when="datetime">
+                                <div ng-switch-when="DATETIME">
                                     <input type="text"
                                            placeholder="{{dhis2CalendarFormat.keyDateFormat}}"
                                            d2-date
@@ -401,7 +488,7 @@
                                            blur-or-change="saveDatavalue()"
                                            class="form-control"/>
                                 </div>
-                                <div ng-switch-when="trueOnly">
+                                <div ng-switch-when="TRUE_ONLY">
                                     <input type="checkbox"                                                  
                                            ng-model="currentEvent[de.dataElement.id]"                                                               
                                            ng-required={{prStDes[de.dataElement.id].compulsory}}
@@ -416,12 +503,15 @@
                                         name="foo" 
                                         input-field-id={{de.dataElement.id}} 
                                         ng-blur="saveDatavalue()" 
-                                        class="form-control"/>
+                                        class="form-control"/> 
                                 </div>
-                            </div>
+                            </div>                        
                             <div ng-messages="innerForm.foo.$error" ng-if="interacted(innerForm.foo)" class="required" ng-messages-include="../dhis-web-commons/angular-forms/error-messages.html">                                         
                             </div>
-                        </ng-form>                            
+                            <div ng-if="warningMessages[de.dataElement.id]">
+                                {{warningMessages[de.dataElement.id]}}
+                            </div>
+                        </ng-form>
                     </td>
                 </tr>
             </tbody>
@@ -430,6 +520,6 @@
 
 </div>
 
-<div ng-if="allProgramRules.programIndicators.rules && allProgramRules.programIndicators.rules.length > 0" ng-include="'views/indicators-section.html'"></div>
-<div ng-include="'views/comments-section.html'"></div>
-<div ng-include="'views/buttons-section.html'"></div>
+
+<!--<div ng-include="'views/comments-section.html'"></div>
+<div ng-include="'views/buttons-section.html'"></div>-->

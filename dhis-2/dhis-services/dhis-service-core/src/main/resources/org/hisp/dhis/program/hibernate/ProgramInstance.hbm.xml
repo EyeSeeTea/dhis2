@@ -16,7 +16,7 @@
 
     <property name="lastUpdated" type="timestamp" />
 
-    <property name="dateOfIncident" column="dateofincident" not-null="true" />
+    <property name="incidentDate" column="incidentDate" />
 
     <property name="enrollmentDate" column="enrollmentdate" not-null="true" />
 
@@ -24,7 +24,13 @@
 
     <property name="followup" column="followup" />
 
-    <property name="status" />
+    <property name="status" length="50">
+      <type name="org.hibernate.type.EnumType">
+        <param name="enumClass">org.hisp.dhis.program.ProgramStatus</param>
+        <param name="useNamed">true</param>
+        <param name="type">12</param>
+      </type>
+    </property>
 
     <many-to-one name="entityInstance"
       class="org.hisp.dhis.trackedentity.TrackedEntityInstance" column="trackedentityinstanceid"
@@ -60,10 +66,6 @@
 
     <many-to-one name="organisationUnit" class="org.hisp.dhis.organisationunit.OrganisationUnit" column="organisationunitid"
       foreign-key="fk_programinstance_organisationunitid" not-null="false" lazy="false" />
-
-    <!--<many-to-one name="comment" cascade="all"
-      class="org.hisp.dhis.trackedentitycomment.TrackedEntityComment"
-      column="trackedentitycommentid" foreign-key="fk_programinstance_commentid" />-->
 
   </class>
 </hibernate-mapping>

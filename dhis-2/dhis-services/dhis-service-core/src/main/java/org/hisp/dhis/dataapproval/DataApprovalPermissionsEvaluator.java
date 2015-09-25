@@ -31,9 +31,9 @@ package org.hisp.dhis.dataapproval;
 import static org.hisp.dhis.setting.SystemSettingManager.KEY_ACCEPTANCE_REQUIRED_FOR_APPROVAL;
 import static org.hisp.dhis.setting.SystemSettingManager.KEY_HIDE_UNAPPROVED_DATA_IN_ANALYTICS;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -42,9 +42,9 @@ import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
 
 /**
  * This package private class holds the context for deciding on data approval permissions.
@@ -93,7 +93,7 @@ class DataApprovalPermissionsEvaluator
      * @param dataApprovalLevelService Data approval level service
      * @return context for determining user permissions
      */
-    static DataApprovalPermissionsEvaluator makePermissionsEvaluator( CurrentUserService currentUserService,
+    public static DataApprovalPermissionsEvaluator makePermissionsEvaluator( CurrentUserService currentUserService,
             OrganisationUnitService organisationUnitService, SystemSettingManager systemSettingManager,
             DataApprovalLevelService dataApprovalLevelService )
     {
@@ -135,7 +135,7 @@ class DataApprovalPermissionsEvaluator
      * @param workflow the data approval workflow
      * @return the data approval permissions for the object
      */
-    DataApprovalPermissions getPermissions( DataApprovalStatus status, OrganisationUnit orgUnit, DataApprovalWorkflow workflow )
+    public DataApprovalPermissions getPermissions( DataApprovalStatus status, OrganisationUnit orgUnit, DataApprovalWorkflow workflow )
     {
         DataApproval da = status.getDataApproval();
 
@@ -226,7 +226,7 @@ class DataApprovalPermissionsEvaluator
 
     private DataApprovalLevel getUserApprovalLevelWithCache( DataApproval da, DataApprovalWorkflow workflow )
     {
-        DataApprovalLevel userApprovalLevel;
+        DataApprovalLevel userApprovalLevel = null;
 
         final DataApproval dataApproval = da;
 
@@ -236,14 +236,8 @@ class DataApprovalPermissionsEvaluator
 
         try
         {
-            userApprovalLevel = ( USER_APPROVAL_LEVEL_CACHE.get( key, new Callable<DataApprovalLevel>()
-            {
-                @Override
-                public DataApprovalLevel call() throws ExecutionException
-                {
-                    return dataApprovalLevelService.getUserApprovalLevel( user, dataApproval.getOrganisationUnit(), dataApprovalWorkflow.getMembersSortedByLevel() );
-                }
-            } ) );
+            userApprovalLevel = USER_APPROVAL_LEVEL_CACHE.get( user.getId() + "-" + da.getOrganisationUnit().getId(),
+                () -> dataApprovalLevelService.getUserApprovalLevel( user, dataApproval.getOrganisationUnit() ) );
         }
         catch ( CacheLoader.InvalidCacheLoadException ex )
         {

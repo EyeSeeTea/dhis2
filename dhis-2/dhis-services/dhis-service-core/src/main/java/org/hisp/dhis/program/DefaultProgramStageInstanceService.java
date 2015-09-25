@@ -28,18 +28,7 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.hisp.dhis.common.Grid;
-import org.hisp.dhis.common.GridHeader;
 import org.hisp.dhis.event.EventStatus;
-import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.message.MessageConversation;
 import org.hisp.dhis.message.MessageService;
@@ -48,14 +37,20 @@ import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.sms.SmsSender;
 import org.hisp.dhis.sms.SmsServiceException;
 import org.hisp.dhis.sms.outbound.OutboundSms;
-import org.hisp.dhis.system.grid.ListGrid;
 import org.hisp.dhis.system.util.DateUtils;
-import org.hisp.dhis.system.util.MathUtils;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceReminder;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceReminderService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Abyot Asalefew
@@ -169,7 +164,7 @@ public class DefaultProgramStageInstanceService
     public long getProgramStageInstanceCount( int days )
     {
         Calendar cal = PeriodType.createCalendarInstance();
-        cal.add( Calendar.DAY_OF_YEAR, ( days * -1 ) );
+        cal.add( Calendar.DAY_OF_YEAR, (days * -1) );
 
         return programStageInstanceStore.getProgramStageInstanceCountLastUpdatedAfter( cal.getTime() );
     }
@@ -177,145 +172,7 @@ public class DefaultProgramStageInstanceService
     @Override
     public Collection<SchedulingProgramObject> getSendMesssageEvents()
     {
-        return programStageInstanceStore.getSendMesssageEvents();
-    }
-
-    @Override
-    public Grid getStatisticalReport( Program program, Collection<Integer> orgunitIds, Date startDate, Date endDate,
-        I18n i18n, I18nFormat format )
-    {
-        Grid grid = new ListGrid();
-        grid.setTitle( i18n.getString( "program_overview" ) + " - " + program.getDisplayName() );
-        grid.setSubtitle( i18n.getString( "from" ) + " " + format.formatDate( startDate ) + "  "
-            + i18n.getString( "to" ) + " " + format.formatDate( endDate ) );
-
-        grid.addHeader( new GridHeader( "", false, true ) );
-        grid.addHeader( new GridHeader( "", false, false ) );
-        grid.addHeader( new GridHeader( "", false, false ) );
-        grid.addHeader( new GridHeader( "", false, false ) );
-        grid.addHeader( new GridHeader( "", false, false ) );
-        grid.addHeader( new GridHeader( "", false, false ) );
-        grid.addHeader( new GridHeader( "", false, false ) );
-        grid.addHeader( new GridHeader( "", false, false ) );
-
-        // Total new enrollments in the period
-
-        int total = programInstanceService.countProgramInstances( program, orgunitIds, startDate, endDate );
-        grid.addRow();
-        grid.addValue( i18n.getString( "total_new_enrollments_in_this_period" ) );
-        grid.addValue( total ).addEmptyValues( 6 );
-
-        // Total programs completed in this period
-
-        int totalCompleted = programInstanceService.countProgramInstancesByStatus( ProgramInstance.STATUS_COMPLETED,
-            program, orgunitIds, startDate, endDate );
-        grid.addRow();
-        grid.addValue( i18n.getString( "total_programs_completed_in_this_period" ) );
-        grid.addValue( totalCompleted ).addEmptyValues( 6 );
-
-        // Total programs discontinued (un-enrollments)
-
-        int totalDiscontinued = programInstanceService.countProgramInstancesByStatus( ProgramInstance.STATUS_CANCELLED,
-            program, orgunitIds, startDate, endDate );
-        grid.addRow();
-        grid.addValue( i18n.getString( "total_programs_discontinued_unenrollments" ) );
-        grid.addValue( totalDiscontinued ).addEmptyValues( 6 );
-
-        // Average number of stages for complete programs
-
-        grid.addRow();
-        grid.addValue( i18n.getString( "average_number_of_stages_for_complete_programs" ) );
-        double percent = 0.0;
-        if ( totalCompleted != 0 )
-        {
-            int stageCompleted = programStageInstanceStore.averageNumberCompleted( program, orgunitIds, startDate,
-                endDate, ProgramInstance.STATUS_ACTIVE );
-            percent = (stageCompleted + 0.0) / totalCompleted;
-        }
-        grid.addValue( MathUtils.getRounded( percent ) ).addEmptyValues( 6 );
-
-        // Add empty row
-
-        grid.addRow().addEmptyValues( 8 );
-
-        // Summary by stage
-
-        grid.addRow();
-        grid.addValue( i18n.getString( "summary_by_stage" ) ).addEmptyValues( 7 );
-
-        // Add titles for stage details
-
-        grid.addRow();
-        grid.addValue( i18n.getString( "program_stages" ) );
-        grid.addValue( i18n.getString( "visits_scheduled_all" ) );
-        grid.addValue( i18n.getString( "visits_done" ) );
-        grid.addValue( i18n.getString( "visits_done_percent" ) );
-        grid.addValue( i18n.getString( "forms_completed" ) );
-        grid.addValue( i18n.getString( "forms_completed_percent" ) );
-        grid.addValue( i18n.getString( "visits_overdue" ) );
-        grid.addValue( i18n.getString( "visits_overdue_percent" ) );
-
-        // Add values for stage details
-
-        for ( ProgramStage programStage : program.getProgramStages() )
-        {
-            grid.addRow();
-            grid.addValue( programStage.getDisplayName() );
-
-            // Visits scheduled (All)
-            int totalAll = programStageInstanceStore.count( programStage, orgunitIds, startDate, endDate, null );
-            grid.addValue( totalAll );
-
-            // Visits done (#) = Incomplete + Complete stages.
-            int totalCompletedEvent = programStageInstanceStore.count( programStage, orgunitIds, startDate, endDate,
-                true );
-            int totalVisit = totalCompletedEvent
-                + programStageInstanceStore.count( programStage, orgunitIds, startDate, endDate, false );
-            grid.addValue( totalVisit );
-
-            // Visits done (%)
-
-            percent = 0.0;
-            if ( totalAll != 0 )
-            {
-                percent = (totalVisit + 0.0) * 100 / totalAll;
-            }
-            grid.addValue( MathUtils.getRounded( percent ) + "%" );
-
-            // Forms completed (#) = Program stage instances where the user has
-            // clicked complete.
-
-            grid.addValue( totalCompletedEvent );
-
-            // Forms completed (%)
-            if ( totalAll != 0 )
-            {
-                percent = (totalCompletedEvent + 0.0) * 100 / totalAll;
-            }
-            grid.addValue( MathUtils.getRounded( percent ) + "%" );
-
-            // Visits overdue (#)
-            int overdue = programStageInstanceStore.getOverDueCount( programStage, orgunitIds, startDate, endDate );
-            grid.addValue( overdue );
-
-            // Visits overdue (%)
-
-            percent = 0.0;
-            if ( totalAll != 0 )
-            {
-                percent = (overdue + 0.0) * 100 / totalAll;
-            }
-            grid.addValue( MathUtils.getRounded( percent ) + "%" );
-        }
-
-        return grid;
-    }
-
-    @Override
-    public Grid getCompletenessProgramStageInstance( Collection<Integer> orgunitIds, Program program, String startDate,
-        String endDate, I18n i18n )
-    {
-        return programStageInstanceStore.getCompleteness( orgunitIds, program, startDate, endDate, i18n );
+        return programStageInstanceStore.getSendMessageEvents();
     }
 
     @Override
@@ -381,21 +238,6 @@ public class DefaultProgramStageInstanceService
     }
 
     @Override
-    public void setExecutionDate( ProgramStageInstance programStageInstance, Date executionDate,
-        OrganisationUnit organisationUnit )
-    {
-        programStageInstance.setExecutionDate( executionDate );
-        programStageInstance.setOrganisationUnit( organisationUnit );
-
-        if ( programStageInstance.getProgramInstance().getProgram().isWithoutRegistration() )
-        {
-            programStageInstance.setDueDate( executionDate );
-        }
-
-        updateProgramStageInstance( programStageInstance );
-    }
-
-    @Override
     public ProgramStageInstance createProgramStageInstance( TrackedEntityInstance instance, Program program,
         Date executionDate, OrganisationUnit organisationUnit )
     {
@@ -405,21 +247,21 @@ public class DefaultProgramStageInstanceService
         {
             programStage = program.getProgramStages().iterator().next();
         }
-        
+
         ProgramInstance programInstance = null;
-        
-        if ( program.isWithoutRegistration()  )
+
+        if ( program.isWithoutRegistration() )
         {
             Collection<ProgramInstance> programInstances = programInstanceService.getProgramInstances( program );
-            
+
             if ( programInstances == null || programInstances.size() == 0 )
             {
                 // Add a new program instance if it doesn't exist
                 programInstance = new ProgramInstance();
                 programInstance.setEnrollmentDate( executionDate );
-                programInstance.setDateOfIncident( executionDate );
+                programInstance.setIncidentDate( executionDate );
                 programInstance.setProgram( program );
-                programInstance.setStatus( ProgramInstance.STATUS_ACTIVE );
+                programInstance.setStatus( ProgramStatus.ACTIVE );
                 programInstanceService.addProgramInstance( programInstance );
             }
             else
@@ -443,11 +285,11 @@ public class DefaultProgramStageInstanceService
 
     @Override
     public ProgramStageInstance createProgramStageInstance( ProgramInstance programInstance, ProgramStage programStage,
-        Date enrollmentDate, Date dateOfIncident, OrganisationUnit organisationUnit )
+        Date enrollmentDate, Date incidentDate, OrganisationUnit organisationUnit )
     {
         ProgramStageInstance programStageInstance = null;
         Date currentDate = new Date();
-        Date dateCreatedEvent;
+        Date dateCreatedEvent = null;
 
         if ( programStage.getGeneratedByEnrollmentDate() )
         {
@@ -455,7 +297,7 @@ public class DefaultProgramStageInstanceService
         }
         else
         {
-            dateCreatedEvent = dateOfIncident;
+            dateCreatedEvent = incidentDate;
         }
 
         Date dueDate = DateUtils.getDateAfterAddition( dateCreatedEvent, programStage.getMinDaysFromStart() );
@@ -489,13 +331,13 @@ public class DefaultProgramStageInstanceService
     private OutboundSms sendEventMessage( TrackedEntityInstanceReminder reminder,
         ProgramStageInstance programStageInstance, TrackedEntityInstance entityInstance, I18nFormat format )
     {
-        Set<String> phoneNumbers = reminderService.getPhonenumbers( reminder, entityInstance );
+        Set<String> phoneNumbers = reminderService.getPhoneNumbers( reminder, entityInstance );
         OutboundSms outboundSms = null;
 
         if ( phoneNumbers.size() > 0 )
         {
             String msg = reminderService.getMessageFromTemplate( reminder, programStageInstance, format );
-            
+
             try
             {
                 outboundSms = new OutboundSms();
@@ -550,7 +392,7 @@ public class DefaultProgramStageInstanceService
                 && rm.getWhenToSend() != null
                 && rm.getWhenToSend() == status
                 && (rm.getMessageType() == TrackedEntityInstanceReminder.MESSAGE_TYPE_DHIS_MESSAGE || rm
-                    .getMessageType() == TrackedEntityInstanceReminder.MESSAGE_TYPE_BOTH) )
+                .getMessageType() == TrackedEntityInstanceReminder.MESSAGE_TYPE_BOTH) )
             {
                 int id = messageService.sendMessage( programStageInstance.getProgramStage().getDisplayName(),
                     reminderService.getMessageFromTemplate( rm, programStageInstance, format ), null,

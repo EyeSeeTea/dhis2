@@ -216,6 +216,97 @@ var d2Services = angular.module('d2Services', ['ngResource'])
     };
 })
 
+/* Service for option name<->code conversion */
+.factory('OptionSetService', function() { 
+    return {        
+        getCode: function(options, key){
+            if(options){
+                for(var i=0; i<options.length; i++){
+                    if( key === options[i].name){
+                        return options[i].code;
+                    }
+                }
+            }            
+            return key;
+        },        
+        getName: function(options, key){
+            if(options){
+                for(var i=0; i<options.length; i++){                    
+                    if( key === options[i].code){
+                        return options[i].name;
+                    }
+                }
+            }            
+            return key;
+        }
+    };
+})
+
+/*Orgunit service for local db */
+.service('OrgUnitService', function($rootScope, $q){
+    
+    return {        
+        get: function(uid){            
+            var def = $q.defer();
+            selection.getOrganisationUnit(uid).then(function(response){
+                var ou = response && response[uid] && response[uid].n ? {id: uid, name: response[uid].n} : null;
+                $rootScope.$apply(function(){
+                    def.resolve(ou);
+                });
+            }, function(){
+                def.resolve(null);
+            });
+            return def.promise;
+        }
+    };
+})
+
+/* service for common utils */
+.service('CommonUtils', function(DateUtils, OptionSetService){    
+    
+    return {
+        formatDataValue: function(val, obj, optionSets, destination){                               
+            if(val && 
+                    obj.valueType === 'NUMBER' || 
+                    obj.valueType === 'INTEGER' ||
+                    obj.valueType === 'INTEGER_POSITIVE' ||
+                    obj.valueType === 'INTEGER_NEGATIVE' ||
+                    obj.valueType === 'INTEGER_ZERO_OR_POSITIVE'){
+                if( dhis2.validation.isNumber(val)  ){                            
+                    val = parseInt(val);
+                }
+            }
+            if(val && obj.optionSetValue && obj.optionSet && obj.optionSet.id && optionSets[obj.optionSet.id].options  ){
+                if(destination === 'USER'){
+                    val = OptionSetService.getName(optionSets[obj.optionSet.id].options, val);
+                }
+                else{
+                    val = OptionSetService.getCode(optionSets[obj.optionSet.id].options, val);
+                }
+
+            }
+            if(val && obj.valueType === 'DATE'){
+                if(destination === 'USER'){
+                    val = DateUtils.formatFromApiToUser(val);
+                }
+                else{
+                    val = DateUtils.formatFromUserToApi(val);
+                }            
+            }
+            if(obj.valueType === 'TRUE_ONLY'){
+
+                if(destination === 'USER'){
+                    val = val === 'true' ? true : '';
+                }
+                else{
+                    val = val === true ? 'true' : '';
+                }            
+            }         
+            return val;
+        }
+    };    
+})
+
 /* service for dealing with custom form */
 .service('CustomFormService', function ($translate) {
 
@@ -259,7 +350,6 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                             newInputField = '<input type="text" ' +
                                     this.getAttributesAsString(attributes) +
                                     ' ng-model="currentEvent.' + fieldId + '"' +
-                                    ' style="width:100%;" ' +
                                     ' input-field-id="' + fieldId + '"' +
                                     ' d2-date ' +
                                     ' d2-date-validator ' +
@@ -281,66 +371,79 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 
                             var commonInputFieldProperty = this.getAttributesAsString(attributes) +
                                     ' ng-model="currentEvent.' + fieldId + '" ' +
-                                    ' style="width:100%;" ' +
-                                    ' input-field-id="' + fieldId + '"' +
-                                    ' ng-class="{{getInputNotifcationClass(prStDes.' + fieldId + '.dataElement.id, true)}}" ' +
+                                    ' input-field-id="' + fieldId + '"' +                                   
                                     ' ng-disabled="isHidden(prStDes.' + fieldId + '.dataElement.id) || selectedEnrollment.status===\'CANCELLED\' || selectedEnrollment.status===\'COMPLETED\' || currentEvent[uid]==\'uid\' || currentEvent.editingNotAllowed"' +
                                     ' ng-required="{{prStDes.' + fieldId + '.compulsory}}" ';
 
-                            if (prStDe && prStDe.dataElement && prStDe.dataElement.type) {
+                            if (prStDe && prStDe.dataElement && prStDe.dataElement.valueType) {
                                 //check if dataelement has optionset								
                                 if (prStDe.dataElement.optionSetValue) {
                                     var optionSetId = prStDe.dataElement.optionSet.id;                 
                                     newInputField = '<ui-select theme="select2" ' + commonInputFieldProperty + ' on-select="saveDatavalue(prStDes.' + fieldId + ', outerForm.' + fieldId + ')" >' +
-                                            '<ui-select-match allow-clear="true" style="width:100%;" placeholder="' + $translate.instant('select_or_search') + '">{{$select.selected.name || $select.selected}}</ui-select-match>' +
+                                            '<ui-select-match ng-class="getInputNotifcationClass(prStDes.' + fieldId + '.dataElement.id, true)" allow-clear="true" placeholder="' + $translate.instant('select_or_search') + '">{{$select.selected.name || $select.selected}}</ui-select-match>' +
                                             '<ui-select-choices ' +
-                                            ' repeat="option.name as option in optionSets.' + optionSetId + '.options | filter: $select.search | limitTo:30">' +
+                                            ' repeat="option.name as option in optionSets.' + optionSetId + '.options | filter: $select.search | limitTo:maxOptionSize">' +
                                             '<span ng-bind-html="option.name | highlight: $select.search"></span>' +
                                             '</ui-select-choices>' +
                                             '</ui-select>';
                                 }
                                 else {
                                     //check data element type and generate corresponding angular input field
-                                    if (prStDe.dataElement.type === "int") {
+                                    if (prStDe.dataElement.valueType === "NUMBER" || 
+                                    		prStDe.dataElement.valueType === "INTEGER" || 
+                                    		prStDe.dataElement.valueType === "INTEGER_POSITIVE" ||
+                                    		prStDe.dataElement.valueType === "INTEGER_NEGATIVE" ||
+                                    		prStDe.dataElement.valueType === "INTEGER_ZERO_OR_POSITIVE") {
                                         newInputField = '<input type="number" ' +
                                                 ' d2-number-validator ' +
-                                                ' number-type="' + prStDe.dataElement.numberType + '" ' +
+                                                ' ng-class="{{getInputNotifcationClass(prStDes.' + fieldId + '.dataElement.id, true)}}" ' +
+                                                ' number-type="' + prStDe.dataElement.valueType + '" ' +
                                                 ' ng-blur="saveDatavalue(prStDes.' + fieldId + ', outerForm.' + fieldId + ')"' +
                                                 commonInputFieldProperty + ' >';
                                     }
-                                    else if (prStDe.dataElement.type === "bool") {
+                                    else if (prStDe.dataElement.valueType === "BOOLEAN") {
                                         newInputField = '<select ' +
                                                 ' ng-change="saveDatavalue(prStDes.' + fieldId + ', outerForm.' + fieldId + ')" ' +
+                                                ' ng-class="{{getInputNotifcationClass(prStDes.' + fieldId + '.dataElement.id, true)}}" ' +
                                                 commonInputFieldProperty + '>' +
                                                 '<option value="">{{\'please_select\'| translate}}</option>' +
                                                 '<option value="false">{{\'no\'| translate}}</option>' +
                                                 '<option value="true">{{\'yes\'| translate}}</option>' +
                                                 '</select> ';
                                     }
-                                    else if (prStDe.dataElement.type === "date") {
+                                    else if (prStDe.dataElement.valueType === "DATE") {
                                         var maxDate = prStDe.allowFutureDate ? '' : 0;
                                         newInputField = '<input type="text" ' +
                                                 ' placeholder="{{dhis2CalendarFormat.keyDateFormat}}" ' +
+                                                ' ng-class="{{getInputNotifcationClass(prStDes.' + fieldId + '.dataElement.id, true)}}" ' +
                                                 ' d2-date ' +
                                                 ' d2-date-validator ' +
                                                 ' max-date="' + maxDate + '"' +
                                                 ' blur-or-change="saveDatavalue(prStDes.' + fieldId + ', outerForm.' + fieldId + ')"' +
                                                 commonInputFieldProperty + ' >';
                                     }
-                                    else if (prStDe.dataElement.type === "trueOnly") {
+                                    else if (prStDe.dataElement.valueType === "TRUE_ONLY") {
                                         newInputField = '<input type="checkbox" ' +
+                                                ' ng-class="{{getInputNotifcationClass(prStDes.' + fieldId + '.dataElement.id, true)}}" ' +
                                                 ' ng-change="saveDatavalue(prStDes.' + fieldId + ', outerForm.' + fieldId + ')"' +
+                                                commonInputFieldProperty + ' >';
+                                    }
+                                    else if (prStDe.dataElement.valueType === "LONG_TEXT") {
+                                        newInputField = '<textarea row ="3" ' +
+                                                ' ng-class="{{getInputNotifcationClass(prStDes.' + fieldId + '.dataElement.id, true)}}" ' +
+                                                ' ng-blur="saveDatavalue(prStDes.' + fieldId + ', outerForm.' + fieldId + ')"' +
                                                 commonInputFieldProperty + ' >';
                                     }
                                     else {
                                         newInputField = '<input type="text" ' +
+                                                ' ng-class="{{getInputNotifcationClass(prStDes.' + fieldId + '.dataElement.id, true)}}" ' +
                                                 ' ng-blur="saveDatavalue(prStDes.' + fieldId + ', outerForm.' + fieldId + ')"' +
                                                 commonInputFieldProperty + ' >';
                                     }
                                 }
                             }
                         }
-                        newInputField = newInputField + ' <div ng-messages="outerForm.' + fieldId + '.$error" class="required" ng-if="interacted(outerForm.' + fieldId + ')" ng-messages-include="../dhis-web-commons/angular-forms/error-messages.html"></div>';
+                        newInputField = newInputField + ' <span ng-messages="outerForm.' + fieldId + '.$error" class="required" ng-if="interacted(outerForm.' + fieldId + ')" ng-messages-include="../dhis-web-commons/angular-forms/error-messages.html"></span>';
 
                         htmlCode = htmlCode.replace(inputField, newInputField);
                     }
@@ -391,21 +494,20 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 
                             var commonInputFieldProperty = ' name="' + fieldName + '"' +
                                     ' element-id="' + i + '"' +
-                                    ' style="width:100%;" ' +
                                     this.getAttributesAsString(attributes) +
                                     ' d2-focus-next-on-enter' +
                                     ' ng-model="selectedTei.' + attId + '" ' +
-                                    ' ng-disabled="editingDisabled"' +
+                                    ' ng-disabled="editingDisabled || isHidden(attributesById.' + attId + '.id)"' +
                                     ' d2-validation ' +
                                     ' ng-required=" ' + (att.mandatory || att.unique) + '" ';
 
                             //check if attribute has optionset
                             if (att.optionSetValue) {
                                 var optionSetId = att.optionSet.id;                                
-                                newInputField = '<ui-select theme="select2" ' + commonInputFieldProperty + '  on-select="validationAndSkipLogic(selectedTei,\'' + attId + '\')" >' +
-                                        '<ui-select-match style="width:100%;" allow-clear="true" placeholder="' + $translate.instant('select_or_search') + '">{{$select.selected.name || $select.selected}}</ui-select-match>' +
+                                newInputField = '<ui-select theme="select2" ' + commonInputFieldProperty + '  on-select="teiValueUpdated(selectedTei,\'' + attId + '\')" >' +
+                                        '<ui-select-match allow-clear="true" placeholder="' + $translate.instant('select_or_search') + '">{{$select.selected.name || $select.selected}}</ui-select-match>' +
                                         '<ui-select-choices ' +
-                                        'repeat="option.name as option in optionSets.' + optionSetId + '.options | filter: $select.search | limitTo:30">' +
+                                        'repeat="option.name as option in optionSets.' + optionSetId + '.options | filter: $select.search | limitTo:maxOptionSize">' +
                                         '<span ng-bind-html="option.name | highlight: $select.search"></span>' +
                                         '</ui-select-choices>' +
                                         '</ui-select>';
@@ -415,12 +517,12 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                 if (att.valueType === "number") {
                                     newInputField = '<input type="number" ' +
                                             ' d2-number-validator ' +
-                                            ' ng-blur="validationAndSkipLogic(selectedTei,\'' + attId + '\')" ' +
+                                            ' ng-blur="teiValueUpdated(selectedTei,\'' + attId + '\')" ' +
                                             commonInputFieldProperty + ' >';
                                 }
                                 else if (att.valueType === "bool") {
                                     newInputField = '<select ' +
-                                            ' ng-change="validationAndSkipLogic(selectedTei,\'' + attId + '\')" ' +
+                                            ' ng-change="teiValueUpdated(selectedTei,\'' + attId + '\')" ' +
                                             commonInputFieldProperty + ' > ' +
                                             ' <option value="">{{\'please_select\'| translate}}</option>' +
                                             ' <option value="false">{{\'no\'| translate}}</option>' +
@@ -432,22 +534,22 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                             ' placeholder="{{dhis2CalendarFormat.keyDateFormat}}" ' +
                                             ' max-date="' + attMaxDate + '"' + '\'' +
                                             ' d2-date' +
-                                            ' blur-or-change="validationAndSkipLogic(selectedTei,\'' + attId + '\')" ' +
+                                            ' blur-or-change="teiValueUpdated(selectedTei,\'' + attId + '\')" ' +
                                             commonInputFieldProperty + ' >';
                                 }
                                 else if (att.valueType === "trueOnly") {
                                     newInputField = '<input type="checkbox" ' +
-                                            ' ng-change="validationAndSkipLogic(selectedTei,\'' + attId + '\')" ' +
+                                            ' ng-change="teiValueUpdated(selectedTei,\'' + attId + '\')" ' +
                                             commonInputFieldProperty + ' >';
                                 }
                                 else if (att.valueType === "email") {
                                     newInputField = '<input type="email" ' +
-                                            ' ng-blur="validationAndSkipLogic(selectedTei,\'' + attId + '\')" ' +
+                                            ' ng-blur="teiValueUpdated(selectedTei,\'' + attId + '\')" ' +
                                             commonInputFieldProperty + ' >';
                                 }
                                 else {
                                     newInputField = '<input type="text" ' +
-                                            ' ng-blur="validationAndSkipLogic(selectedTei,\'' + attId + '\')" ' +
+                                            ' ng-blur="teiValueUpdated(selectedTei,\'' + attId + '\')" ' +
                                             commonInputFieldProperty + ' >';
                                 }
                             }
@@ -489,7 +591,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                         }
                     }
 
-                    newInputField = newInputField + ' <div ng-messages="outerForm.' + fieldName + '.$error" class="required" ng-if="interacted(outerForm.' + fieldName + ')" ng-messages-include="../dhis-web-commons/angular-forms/error-messages.html"></div>';
+                    newInputField = newInputField + ' <span ng-messages="outerForm.' + fieldName + '.$error" class="required" ng-if="interacted(outerForm.' + fieldName + ')" ng-messages-include="../dhis-web-commons/angular-forms/error-messages.html"></span>';
 
                     htmlCode = htmlCode.replace(inputField, newInputField);
                 }
@@ -715,44 +817,69 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 
 /* service for building variables based on the data in users fields */
 .service('VariableService', function(DateUtils,$filter,$log){
-    
-    var pushVariable = function(variables, variablename, variableValue, variableType, variablefound, variablePrefix) {
+    var processSingleValue = function(processedValue,valueType){
         //First clean away single or double quotation marks at the start and end of the variable name.
-        variableValue = $filter('trimquotes')(variableValue);
+        processedValue = $filter('trimquotes')(processedValue);
 
         //Append single quotation marks in case the variable is of text or date type:
-        if(variableType === 'string' || variableType === 'date') {
-            variableValue = "'" + variableValue + "'";
+        if(valueType === 'LONG_TEXT' || valueType === 'TEXT' || valueType === 'DATE' || valueType === 'OPTION_SET') {
+            if(processedValue) {
+                processedValue = "'" + processedValue + "'";
+            } else {
+                processedValue = "''";
+            }
         }
-        else if(variableType === 'bool' || variableType === 'trueOnly') {
-            if(eval(variableValue)) {
-                variableValue = true;
+        else if(valueType === 'BOOLEAN' || valueType === 'TRUE_ONLY') {
+            if(processedValue && eval(processedValue)) {
+                processedValue = true;
             }
             else {
-                variableValue = false;
+                processedValue = false;
             }
         }
-        else if(variableType === "int" || variableType === "number") {
-            variableValue = Number(variableValue);
+        else if(valueType === "INTEGER" || valueType === "NUMBER" || valueType === "INTEGER_POSITIVE" || valueType === "INTEGER_NEGATIVE" || valueType === "INTEGER_ZERO_OR_POSITIVE" || valueType === "PERCENTAGE") {
+            if(processedValue) {
+                processedValue = Number(processedValue);
+            } else {
+                processedValue = 0;
+            }  
         }
         else{
-            $log.warn("unknown datatype:" + variableType);
+            $log.warn("unknown datatype:" + valueType);
         }
+        
+        return processedValue;
+    };
 
+    var pushVariable = function(variables, variablename, varValue, allValues, varType, variablefound, variablePrefix) {
+        
+
+        
+        var processedValues = [];
+        
+        angular.forEach(allValues, function(alternateValue) {
+            processedValues.push(processSingleValue(alternateValue,varType));
+        });
+        
         variables[variablename] = {
-                        variableValue:variableValue,
-                        variableType:variableType,
+                        variableValue:processSingleValue(varValue, varType),
+                        variableType:varType,
                         hasValue:variablefound,
-                        variablePrefix:variablePrefix
+                        variablePrefix:variablePrefix,
+                        allValues:processedValues
                     };
         return variables;            
     };
     
-    return {        
+    return {
+        processValue: function(value, type) {
+            return processSingleValue(value,type);
+        },
         processVariables: function(variables, variablename, variableValue, variableType, variablefound, variablePrefix) {            
             return pushVariable(variables, variablename, variableValue, variableType, variablefound, variablePrefix);
         },
         getVariables: function(allProgramRules, executingEvent, evs, allDes, selectedEntity, selectedEnrollment) {
+            
             var variables = {};
             
             var programVariables = allProgramRules.programVariables;            
@@ -760,9 +887,15 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             programVariables = programVariables.concat(allProgramRules.programIndicators.variables);
 
             angular.forEach(programVariables, function(programVariable) {
+                
                 var dataElementId = programVariable.dataElement;
                 if(programVariable.dataElement && programVariable.dataElement.id) {
                     dataElementId = programVariable.dataElement.id;
+                }
+                
+                var trackedEntityAttributeId = programVariable.trackedEntityAttribute;
+                if(programVariable.trackedEntityAttribute && programVariable.trackedEntityAttribute.id) {
+                    trackedEntityAttributeId = programVariable.trackedEntityAttribute.id;
                 }
 
                 var programStageId = programVariable.programStage;
@@ -771,13 +904,17 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                 }
 
                 var valueFound = false;
-                if(programVariable.programRuleVariableSourceType === "DATAELEMENT_NEWEST_EVENT_PROGRAM_STAGE"){
+                //If variable evs is not defined, it means the rules is run before any events is registered, skip the types that require an event
+                if(programVariable.programRuleVariableSourceType === "DATAELEMENT_NEWEST_EVENT_PROGRAM_STAGE" && evs){
                     if(programStageId) {
+                        var allValues = [];
                         angular.forEach(evs.byStage[programStageId], function(event) {
-                            if(angular.isDefined(event[dataElementId])
-                                    && event[dataElementId] !== null ){
-                                valueFound = true;
-                                variables = pushVariable(variables, programVariable.name, event[dataElementId], allDes[dataElementId].dataElement.type, valueFound, '#');
+                            if(event[dataElementId] !== null) {
+                                if(angular.isDefined(event[dataElementId])){
+                                    allValues.push(event[dataElementId]);
+                                    valueFound = true;
+                                    variables = pushVariable(variables, programVariable.name, event[dataElementId],allValues, allDes[dataElementId].dataElement.valueType, valueFound, '#');
+                                }
                             }
                         });
                     } else {
@@ -785,27 +922,29 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                 + "' does not have a programstage defined,"
                                 + " despite that the variable has sourcetype DATAELEMENT_NEWEST_EVENT_PROGRAM_STAGE" );
                     }
-
                 }
-                else if(programVariable.programRuleVariableSourceType === "DATAELEMENT_NEWEST_EVENT_PROGRAM"){
+                else if(programVariable.programRuleVariableSourceType === "DATAELEMENT_NEWEST_EVENT_PROGRAM" && evs){
+                    var allValues = [];
                     angular.forEach(evs.all, function(event) {
                         if(angular.isDefined(event[dataElementId])
                                 && event[dataElementId] !== null ){
+                            allValues.push(event[dataElementId]);
                             valueFound = true;
-                            variables = pushVariable(variables, programVariable.name, event[dataElementId], allDes[dataElementId].dataElement.type, valueFound, '#' );
+                            variables = pushVariable(variables, programVariable.name, event[dataElementId], allValues, allDes[dataElementId].dataElement.valueType, valueFound, '#' );
                          }
                     });
                 }
-                else if(programVariable.programRuleVariableSourceType === "DATAELEMENT_CURRENT_EVENT"){
+                else if(programVariable.programRuleVariableSourceType === "DATAELEMENT_CURRENT_EVENT" && evs){
                     if(angular.isDefined(executingEvent[dataElementId])
                             && executingEvent[dataElementId] !== null ){
                         valueFound = true;
-                        variables = pushVariable(variables, programVariable.name, executingEvent[dataElementId], allDes[dataElementId].dataElement.type, valueFound, '#' );
-                    }      
+                        variables = pushVariable(variables, programVariable.name, executingEvent[dataElementId], null, allDes[dataElementId].dataElement.valueType, valueFound, '#' );
+                    }
                 }
-                else if(programVariable.programRuleVariableSourceType === "DATAELEMENT_PREVIOUS_EVENT"){
+                else if(programVariable.programRuleVariableSourceType === "DATAELEMENT_PREVIOUS_EVENT" && evs){
                     //Only continue checking for a value if there is more than one event.
                     if(evs.all && evs.all.length > 1) {
+                        var allValues = [];
                         var previousvalue = null;
                         var currentEventPassed = false;
                         for(var i = 0; i < evs.all.length; i++) {
@@ -814,12 +953,13 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                             if(!currentEventPassed && evs.all[i] !== executingEvent && 
                                     angular.isDefined(evs.all[i][dataElementId])) {
                                 previousvalue = evs.all[i][dataElementId];
+                                allValues.push(previousvalue);
                                 valueFound = true;
                             }
                             else if(evs.all[i] === executingEvent) {
                                 //We have iterated to the newest event - store the last collected variable value - if any is found:
                                 if(valueFound) {
-                                    variables = pushVariable(variables, programVariable.name, previousvalue, allDes[dataElementId].dataElement.type, valueFound, '#' );
+                                    variables = pushVariable(variables, programVariable.name, previousvalue, allValues, allDes[dataElementId].dataElement.valueType, valueFound, '#' );
                                 }
                                 //Set currentEventPassed, ending the iteration:
                                 currentEventPassed = true;
@@ -830,9 +970,11 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                 else if(programVariable.programRuleVariableSourceType === "TEI_ATTRIBUTE"){
                     angular.forEach(selectedEntity.attributes , function(attribute) {
                         if(!valueFound) {
-                            if(attribute.attribute === programVariable.trackedEntityAttribute.id) {
+                            if(attribute.attribute === trackedEntityAttributeId) {
                                 valueFound = true;
-                                variables = pushVariable(variables, programVariable.name, attribute.value, attribute.type, valueFound, 'A' );
+                                //In registration, the attribute type is found in .type, while in data entry the same data is found in .valueType. 
+                                //Handling here, but planning refactor in registration so it will always be .valueType
+                                variables = pushVariable(variables, programVariable.name, attribute.value, null, attribute.type ? attribute.type : attribute.valueType, valueFound, 'A' );
                             }
                         }
                     });
@@ -840,57 +982,64 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                 else if(programVariable.programRuleVariableSourceType === "CALCULATED_VALUE"){
                     //We won't assign the calculated variables at this step. The rules execution will calculate and assign the variable.
                 }
-                else if(programVariable.programRuleVariableSourceType === "NUMBEROFEVENTS_PROGRAMSTAGE"){
+                else if(programVariable.programRuleVariableSourceType === "NUMBEROFEVENTS_PROGRAMSTAGE" && evs){
                     var numberOfEvents = 0;
                     if( programStageId && evs.byStage[programStageId] ) {
                         numberOfEvents = evs.byStage[programStageId].length;
                     }
                     valueFound = true;
-                    variables = pushVariable(variables, programVariable.name, numberOfEvents, 'int', valueFound, '#' );
+                    variables = pushVariable(variables, programVariable.name, numberOfEvents, null, 'int', valueFound, 'V' );
                 }
                 else {
-                    //Missing handing of ruletype
-                    $log.warn("Unknown programRuleVariableSourceType:" + programVariable.programRuleVariableSourceType);
+                    //If the rules was executed without events, we ended up in this else clause as expected, as most of the variables require an event to be mapped
+                    if(evs)
+                    {
+                        //If the rules was executed and events was supplied, we should have found an if clause for the the source type, and not ended up in this dead end else. 
+                        $log.warn("Unknown programRuleVariableSourceType:" + programVariable.programRuleVariableSourceType);
+                    }
                 }
 
 
                 if(!valueFound){
                     //If there is still no value found, assign default value:
-                    if(dataElementId) {
+                    if(dataElementId && allDes) {
                         var dataElement = allDes[dataElementId];
                         if( dataElement ) {
-                            variables = pushVariable(variables, programVariable.name, "", dataElement.dataElement.type, false, '#' );
+                            variables = pushVariable(variables, programVariable.name, "", null, dataElement.dataElement.valueType, false, '#' );
                         } 
                         else {
                             $log.warn("Variable #{" + programVariable.name + "} is linked to a dataelement that is not part of the program");
-                            variables = pushVariable(variables, programVariable.name, "", "string",false, '#' );
+                            variables = pushVariable(variables, programVariable.name, "", null, "TEXT",false, '#' );
                         }
                     }
                     else if (programVariable.trackedEntityAttribute) {
                         //The variable is an attribute, set correct prefix and a blank value
-                        variables = pushVariable(variables, programVariable.name, "", "string",false, 'A' );
+                        variables = pushVariable(variables, programVariable.name, "", null, "TEXT",false, 'A' );
                     }
                     else {
                         //Fallback for calculated(assigned) values:
-                        variables = pushVariable(variables, programVariable.name, "", "string",false, '#' );
+                        variables = pushVariable(variables, programVariable.name, "", null, "TEXT",false, '#' );
                     }
                 }
             });
 
             //add context variables:
             //last parameter "valuefound" is always true for event date
-            variables = pushVariable(variables, 'incident_date', executingEvent.eventDate, 'date', true, 'V' );
-            variables = pushVariable(variables, 'current_date', DateUtils.getToday(), 'date', true, 'V' );
-            if(selectedEnrollment){
-                variables = pushVariable(variables, 'enrollment_date', selectedEnrollment.dateOfEnrollment, 'date', true, 'V' );
-            }
-
-            //variables = pushVariable(variables, 'value_count', executingEvent.eventDate, 'date', true, 'V' );
-            //variables = pushVariable(variables, 'zero_pos_value_count', executingEvent.eventDate, 'date', true, 'V' );
-
+            variables = pushVariable(variables, 'current_date', DateUtils.getToday(), null, 'DATE', true, 'V' );
+            
+            variables = pushVariable(variables, 'event_date', executingEvent.eventDate, null, 'DATE', true, 'V' );
+            variables = pushVariable(variables, 'due_date', executingEvent.eventDate, null, 'DATE', true, 'V' );
+            variables = pushVariable(variables, 'event_count', evs ? evs.all.length : 0, null, 'INTEGER', true, 'V' );
+    
+            variables = pushVariable(variables, 'enrollment_date', selectedEnrollment ? selectedEnrollment.enrollmentDate : '', null, 'DATE', selectedEnrollment ? true : false, 'V' );
+            variables = pushVariable(variables, 'enrollment_id', selectedEnrollment ? selectedEnrollment.enrollment : '', null, 'TEXT',  selectedEnrollment ? true : false, 'V');
+            variables = pushVariable(variables, 'incident_date', selectedEnrollment ? selectedEnrollment.incidentDate : '', null, 'DATE',  selectedEnrollment ? true : false, 'V');
+            variables = pushVariable(variables, 'enrollment_count', selectedEnrollment ? 1 : 0, null, 'INTEGER', true, 'V');
+            variables = pushVariable(variables, 'tei_count', selectedEnrollment ? 1 : 0, null, 'INTEGER', true, 'V');
+    
             //Push all constant values:
             angular.forEach(allProgramRules.constants, function(constant){
-                variables = pushVariable(variables, constant.id, constant.value, 'int', true, 'C' );
+                variables = pushVariable(variables, constant.id, constant.value, null, 'INTEGER', true, 'C' );
             });
 
             return variables;
@@ -996,95 +1145,247 @@ var d2Services = angular.module('d2Services', ['ngResource'])
     };
     
     var runDhisFunctions = function(expression, variablesHash, flag){
-        //Called from "runExpression". Only proceed with this logic in case there seems to be dhis function calls: "dhis." is present.
-        if(angular.isDefined(expression) && expression.indexOf("dhis.") !== -1){   
-            var dhisFunctions = [{name:"dhis.daysbetween",parameters:2},
-                                {name:"dhis.yearsbetween",parameters:2},
-                                {name:"dhis.floor",parameters:1},
-                                {name:"dhis.modulus",parameters:2},
-                                {name:"dhis.concatenate"},
-                                {name:"dhis.adddays",parameters:2}];
+        //Called from "runExpression". Only proceed with this logic in case there seems to be dhis function calls: "d2:" is present.
+        if(angular.isDefined(expression) && expression.indexOf("d2:") !== -1){   
+            var dhisFunctions = [{name:"d2:daysBetween",parameters:2},
+                                {name:"d2:yearsBetween",parameters:2},
+                                {name:"d2:floor",parameters:1},
+                                {name:"d2:modulus",parameters:2},
+                                {name:"d2:concatenate"},
+                                {name:"d2:addDays",parameters:2},
+                                {name:"d2:zing",parameters:1},
+                                {name:"d2:oizp",parameters:1},
+                                {name:"d2:count",parameters:1},
+                                {name:"d2:countIfZeroPos",parameters:1},
+                                {name:"d2:countIfValue",parameters:2},
+                                {name:"d2:ceil",parameters:1},
+                                {name:"d2:round",parameters:1}];
+            var continueLooping = true;
+            //Safety harness on 10 loops, in case of unanticipated syntax causing unintencontinued looping
+            for(var i = 0; i < 10 && continueLooping; i++ ) { 
+                var successfulExecution = false;
+                angular.forEach(dhisFunctions, function(dhisFunction){
+                    //Select the function call, with any number of parameters inside single quotations, or number parameters witout quotations
+                    var regularExFunctionCall = new RegExp(dhisFunction.name + "\\( *(([\\d/\\*\\+\\-%]+)|( *'[^']*'))*( *, *(([\\d/\\*\\+\\-%]+)|'[^']*'))* *\\)",'g');
+                    var callsToThisFunction = expression.match(regularExFunctionCall);
+                    angular.forEach(callsToThisFunction, function(callToThisFunction){
+                        //Remove the function name and paranthesis:
+                        var justparameters = callToThisFunction.replace(/(^[^\(]+\()|\)$/g,"");
+                        //Then split into single parameters:
+                        var parameters = justparameters.match(/(('[^']+')|([^,]+))/g);
 
-            angular.forEach(dhisFunctions, function(dhisFunction){
-                //Replace each * with a regex that matches each parameter, allowing commas only inside single quotation marks.
-                var regularExFunctionCall = new RegExp(dhisFunction.name.replace(".","\\.") + "\\([^\\)]*\\)",'g');
-                var callsToThisFunction = expression.match(regularExFunctionCall);
-                angular.forEach(callsToThisFunction, function(callToThisFunction){
-                    //Remove the function name and paranthesis:
-                    var justparameters = callToThisFunction.replace(/(^[^\(]+\()|\)$/g,"");
-                    //Then split into single parameters:
-                    var parameters = justparameters.match(/(('[^']+')|([^,]+))/g);
-
-                    //Show error if no parameters is given and the function requires parameters,
-                    //or if the number of parameters is wrong.
-                    if(angular.isDefined(dhisFunction.parameters)){
-                        //But we are only checking parameters where the dhisFunction actually has a defined set of parameters(concatenate, for example, does not have a fixed number);
-                        if((!angular.isDefined(parameters) && dhisFunction.parameters > 0)
-                                || parameters.length !== dhisFunction.parameters){
-                            $log.warn(dhisFunction.name + " was called with the incorrect number of parameters");
+                        //Show error if no parameters is given and the function requires parameters,
+                        //or if the number of parameters is wrong.
+                        if(angular.isDefined(dhisFunction.parameters)){
+                            //But we are only checking parameters where the dhisFunction actually has a defined set of parameters(concatenate, for example, does not have a fixed number);
+                            if((!angular.isDefined(parameters) && dhisFunction.parameters > 0)
+                                    || parameters.length !== dhisFunction.parameters){
+                                $log.warn(dhisFunction.name + " was called with the incorrect number of parameters");
+                            }
                         }
-                    }
 
-                    //In case the function call is nested, the parameter itself contains an expression, run the expression.
-                    if(angular.isDefined(parameters)) {
-                        for (var i = 0; i < parameters.length; i++) {
-                            parameters[i] = runExpression(parameters[i],dhisFunction.name,"parameter:" + i, flag, variablesHash);
+                        //In case the function call is nested, the parameter itself contains an expression, run the expression.
+                        if(angular.isDefined(parameters)) {
+                            for (var i = 0; i < parameters.length; i++) {
+                                parameters[i] = runExpression(parameters[i],dhisFunction.name,"parameter:" + i, flag, variablesHash);
+                            }
                         }
-                    }
 
-                    //Special block for dhis.weeksBetween(*,*) - add such a block for all other dhis functions.
-                    if(dhisFunction.name === "dhis.daysbetween")
-                    {
-                        var firstdate = $filter('trimquotes')(parameters[0]);
-                        var seconddate = $filter('trimquotes')(parameters[1]);
-                        firstdate = moment(firstdate);
-                        seconddate = moment(seconddate);
-                        //Replace the end evaluation of the dhis function:
-                        expression = expression.replace(callToThisFunction, seconddate.diff(firstdate,'days'));
-                    }
-                    else if(dhisFunction.name === "dhis.yearsbetween")
-                    {
-                        var firstdate = $filter('trimquotes')(parameters[0]);
-                        var seconddate = $filter('trimquotes')(parameters[1]);
-                        firstdate = moment(firstdate);
-                        seconddate = moment(seconddate);
-                        //Replace the end evaluation of the dhis function:
-                        expression = expression.replace(callToThisFunction, seconddate.diff(firstdate,'years'));
-                    }
-                    else if(dhisFunction.name === "dhis.floor")
-                    {
-                        var floored = Math.floor(parameters[0]);
-                        //Replace the end evaluation of the dhis function:
-                        expression = expression.replace(callToThisFunction, floored);
-                    }
-                    else if(dhisFunction.name === "dhis.modulus")
-                    {
-                        var dividend = Number(parameters[0]);
-                        var divisor = Number(parameters[1]);
-                        var rest = dividend % divisor;
-                        //Replace the end evaluation of the dhis function:
-                        expression = expression.replace(callToThisFunction, rest);
-                    }
-                    else if(dhisFunction.name === "dhis.concatenate")
-                    {
-                        var returnString = "'";
-                        for (var i = 0; i < parameters.length; i++) {
-                            returnString += parameters[i];
+                        //Special block for d2:weeksBetween(*,*) - add such a block for all other dhis functions.
+                        if(dhisFunction.name === "d2:daysBetween") {
+                            var firstdate = $filter('trimquotes')(parameters[0]);
+                            var seconddate = $filter('trimquotes')(parameters[1]);
+                            firstdate = moment(firstdate);
+                            seconddate = moment(seconddate);
+                            //Replace the end evaluation of the dhis function:
+                            expression = expression.replace(callToThisFunction, seconddate.diff(firstdate,'days'));
+                            successfulExecution = true;
+                        } 
+                        else if(dhisFunction.name === "d2:yearsBetween") {
+                            var firstdate = $filter('trimquotes')(parameters[0]);
+                            var seconddate = $filter('trimquotes')(parameters[1]);
+                            firstdate = moment(firstdate);
+                            seconddate = moment(seconddate);
+                            //Replace the end evaluation of the dhis function:
+                            expression = expression.replace(callToThisFunction, seconddate.diff(firstdate,'years'));
+                            successfulExecution = true;
+                        } 
+                        else if(dhisFunction.name === "d2:floor") {
+                            var floored = Math.floor(parameters[0]);
+                            //Replace the end evaluation of the dhis function:
+                            expression = expression.replace(callToThisFunction, floored);
+                            successfulExecution = true;
+                        } 
+                        else if(dhisFunction.name === "d2:modulus") {
+                            var dividend = Number(parameters[0]);
+                            var divisor = Number(parameters[1]);
+                            var rest = dividend % divisor;
+                            //Replace the end evaluation of the dhis function:
+                            expression = expression.replace(callToThisFunction, rest);
+                            successfulExecution = true;
+                        } 
+                        else if(dhisFunction.name === "d2:concatenate") {
+                            var returnString = "'";
+                            for (var i = 0; i < parameters.length; i++) {
+                                returnString += parameters[i];
+                            }
+                            returnString += "'";
+                            expression = expression.replace(callToThisFunction, returnString);
+                            successfulExecution = true;
+                        } 
+                        else if(dhisFunction.name === "d2:addDays") {
+                            var date = $filter('trimquotes')(parameters[0]);
+                            var daystoadd = $filter('trimquotes')(parameters[1]);
+                            var newdate = DateUtils.format( moment(date, CalendarService.getSetting().momentFormat).add(daystoadd, 'days') );
+                            var newdatestring = "'" + newdate + "'";
+                            //Replace the end evaluation of the dhis function:
+                            expression = expression.replace(callToThisFunction, newdatestring);
+                            successfulExecution = true;
+                        } 
+                        else if(dhisFunction.name === "d2:zing") {
+                            var number = parameters[0];
+                            if( number < 0 ) {
+                                number = 0;
+                            }
+
+                            //Replace the end evaluation of the dhis function:
+                            expression = expression.replace(callToThisFunction, number);
+                            successfulExecution = true;
+                        } 
+                        else if(dhisFunction.name === "d2:oizp") {
+                            var number = parameters[0];
+                            var output = 1;
+                            if( number < 0 ) {
+                                output = 0;
+                            }
+
+                            //Replace the end evaluation of the dhis function:
+                            expression = expression.replace(callToThisFunction, output);
+                            successfulExecution = true;
                         }
-                        returnString += "'";
-                        expression = expression.replace(callToThisFunction, returnString);
-                    }
-                    else if(dhisFunction.name === "dhis.adddays")
-                    {
-                        var date = $filter('trimquotes')(parameters[0]);
-                        var daystoadd = $filter('trimquotes')(parameters[1]);
-                        var newdate = DateUtils.format( moment(date, CalendarService.getSetting().momentFormat).add(daystoadd, 'days') );
-                        var newdatestring = "'" + newdate + "'";
-                        //Replace the end evaluation of the dhis function:
-                        expression = expression.replace(callToThisFunction, newdatestring);
-                    }
+                        else if(dhisFunction.name === "d2:count") {
+                            var variableName = parameters[0];
+                            var variableObject = variablesHash[variableName];
+                            var count = 0;
+                            if(variableObject)
+                            {
+                                if(variableObject.hasValue){
+                                    if(variableObject.allValues)
+                                    {
+                                        count = variableObject.allValues.length;
+                                    } else {
+                                        //If there is a value found for the variable, the count is 1 even if there is no list of alternate values
+                                        //This happens for variables of "DATAELEMENT_CURRENT_STAGE" and "TEI_ATTRIBUTE"
+                                        count = 1;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                $log.warn("could not find variable to count: " + variableName);
+                            }
+
+                            //Replace the end evaluation of the dhis function:
+                            expression = expression.replace(callToThisFunction, count);
+                            successfulExecution = true;
+                        }
+                        else if(dhisFunction.name === "d2:countIfZeroPos") {
+                            var variableName = $filter('trimvariablequalifiers') (parameters[0]);
+                            var variableObject = variablesHash[variableName];
+
+                            var count = 0;
+                            if(variableObject)
+                            {
+                                if( variableObject.hasValue ) {
+                                    if(variableObject.allValues && variableObject.allValues.length > 0)
+                                    {
+                                        for(var i = 0; i < variableObject.allValues.length; i++)
+                                        {
+                                            if(variableObject.allValues[i] >= 0) {
+                                                count++;
+                                            }
+                                        }
+                                    }
+                                    else {
+                                        //The variable has a value, but no list of alternates. This means we only compare the elements real value
+                                        if(variableObject.variableValue >= 0) {
+                                            count = 1;
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                $log.warn("could not find variable to countifzeropos: " + variableName);
+                            }
+
+                            //Replace the end evaluation of the dhis function:
+                            expression = expression.replace(callToThisFunction, count);
+                            successfulExecution = true;
+                        }
+                        else if(dhisFunction.name === "d2:countIfValue") {
+                            var variableName = parameters[0];
+                            var variableObject = variablesHash[variableName];
+
+                            var valueToCompare = VariableService.processValue(parameters[1],variableObject.variableType);
+
+                            var count = 0;
+                            if(variableObject)
+                            {
+                                if( variableObject.hasValue )
+                                {
+                                    if( variableObject.allValues )
+                                    {
+                                        for(var i = 0; i < variableObject.allValues.length; i++)
+                                        {
+                                            if(valueToCompare === variableObject.allValues[i]) {
+                                                count++;
+                                            }
+                                        }
+                                    } else {
+                                        //The variable has a value, but no list of alternates. This means we compare the standard variablevalue
+                                        if(valueToCompare === variableObject.variableValue) {
+                                            count = 1;
+                                        }
+                                    }
+
+                                }
+                            }
+                            else
+                            {
+                                $log.warn("could not find variable to countifvalue: " + variableName);
+                            }
+
+                            //Replace the end evaluation of the dhis function:
+                            expression = expression.replace(callToThisFunction, count);
+                            successfulExecution = true;
+                        }
+                        else if(dhisFunction.name === "d2:ceil") {
+                            var ceiled = Math.ceil(parameters[0]);
+                            //Replace the end evaluation of the dhis function:
+                            expression = expression.replace(callToThisFunction, ceiled);
+                            successfulExecution = true;
+                        }
+                        else if(dhisFunction.name === "d2:round") {
+                            var rounded = Math.round(parameters[0]);
+                            //Replace the end evaluation of the dhis function:
+                            expression = expression.replace(callToThisFunction, rounded);
+                            successfulExecution = true;
+                        }
+                    });
                 });
-            });
+                
+                //We only want to continue looping until we made a successful replacement,
+                //and there is still occurrences of "d2:" in the code. In cases where d2: occur outside
+                //the expected d2: function calls, one unneccesary iteration will be done and the 
+                //successfulExecution will be false coming back here, ending the loop. The last iteration
+                //should be zero to marginal performancewise.
+                if(successfulExecution && expression.indexOf("d2:") !== -1) {
+                    continueLooping = true;
+                } else {
+                    continueLooping = false;
+                }
+            }
         }
 
         return expression;
@@ -1152,8 +1453,13 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                         $rootScope.ruleeffects = {};
                     }
 
-                    if(angular.isUndefined( $rootScope.ruleeffects[executingEvent.event] )){
-                        $rootScope.ruleeffects[executingEvent.event] = {};
+                    var ruleEffectKey = executingEvent.event ? executingEvent.event : executingEvent;
+                    if( executingEvent.event && angular.isUndefined( $rootScope.ruleeffects[ruleEffectKey] )){
+                        $rootScope.ruleeffects[ruleEffectKey] = {};
+                    }
+                    
+                    if(!angular.isObject(executingEvent) && angular.isUndefined( $rootScope.ruleeffects[ruleEffectKey] )){
+                        $rootScope.ruleeffects[ruleEffectKey] = {};
                     }
 
                     var updatedEffectsExits = false;
@@ -1175,12 +1481,14 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 
                         angular.forEach(rule.programRuleActions, function(action){
                             //In case the effect-hash is not populated, add entries
-                            if(angular.isUndefined( $rootScope.ruleeffects[executingEvent.event][action.id] )){
-                                $rootScope.ruleeffects[executingEvent.event][action.id] =  {
+                            if(angular.isUndefined( $rootScope.ruleeffects[ruleEffectKey][action.id] )){
+                                $rootScope.ruleeffects[ruleEffectKey][action.id] =  {
                                     id:action.id,
                                     location:action.location, 
                                     action:action.programRuleActionType,
                                     dataElement:action.dataElement,
+                                    trackedEntityAttribute:action.trackedEntityAttribute,
+                                    programStageSection: action.programStageSection && action.programStageSection.id ? action.programStageSection.id : null,
                                     content:action.content,
                                     data:action.data,
                                     ineffect:undefined
@@ -1193,7 +1501,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                             if(ruleEffective && action.data)
                             {
                                 //Preserve old data for comparison:
-                                var oldData = $rootScope.ruleeffects[executingEvent.event][action.id].data;
+                                var oldData = $rootScope.ruleeffects[ruleEffectKey][action.id].data;
                                 
                                 //The key data might be containing a dollar sign denoting that the key data is a variable.
                                 //To make a lookup in variables hash, we must make a lookup without the dollar sign in the variable name
@@ -1203,37 +1511,38 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                 if(angular.isDefined(variablesHash[nameWithoutBrackets]))
                                 {
                                     //The variable exists, and is replaced with its corresponding value
-                                    $rootScope.ruleeffects[executingEvent.event][action.id].data =
+                                    $rootScope.ruleeffects[ruleEffectKey][action.id].data =
                                         variablesHash[nameWithoutBrackets].variableValue;
                                 }
-                                else if(action.data.indexOf('{') !== -1)
+                                else if(action.data.indexOf('{') !== -1 || action.data.indexOf('d2:') !== -1)
                                 {
-                                    //Since the value couldnt be looked up directly, and contains a dollar sign, the expression was more complex
+                                    //Since the value couldnt be looked up directly, and contains a curly brace or a dhis function call,
+                                    //the expression was more complex than replacing a single variable value.
                                     //Now we will have to make a thorough replacement and separate evaluation to find the correct value:
-                                    $rootScope.ruleeffects[executingEvent.event][action.id].data = replaceVariables(action.data, variablesHash);
+                                    $rootScope.ruleeffects[ruleEffectKey][action.id].data = replaceVariables(action.data, variablesHash);
                                     //In a scenario where the data contains a complex expression, evaluate the expression to compile(calculate) the result:
-                                    $rootScope.ruleeffects[executingEvent.event][action.id].data = runExpression($rootScope.ruleeffects[executingEvent.event][action.id].data, action.data, "action:" + action.id, flag, variablesHash);
+                                    $rootScope.ruleeffects[ruleEffectKey][action.id].data = runExpression($rootScope.ruleeffects[ruleEffectKey][action.id].data, action.data, "action:" + action.id, flag, variablesHash);
                                 }
                                 
-                                if(oldData !== $rootScope.ruleeffects[executingEvent.event][action.id].data) {
+                                if(oldData !== $rootScope.ruleeffects[ruleEffectKey][action.id].data) {
                                     updatedEffectsExits = true;
                                 }
                             }
 
                             //Update the rule effectiveness if it changed in this evaluation;
-                            if($rootScope.ruleeffects[executingEvent.event][action.id].ineffect !== ruleEffective)
+                            if($rootScope.ruleeffects[ruleEffectKey][action.id].ineffect !== ruleEffective)
                             {
                                 //There is a change in the rule outcome, we need to update the effect object.
                                 updatedEffectsExits = true;
-                                $rootScope.ruleeffects[executingEvent.event][action.id].ineffect = ruleEffective;
+                                $rootScope.ruleeffects[ruleEffectKey][action.id].ineffect = ruleEffective;
                             }
 
                             //In case the rule is of type "assign variable" and the rule is effective,
                             //the variable data result needs to be applied to the correct variable:
-                            if($rootScope.ruleeffects[executingEvent.event][action.id].action === "ASSIGNVARIABLE" && $rootScope.ruleeffects[executingEvent.event][action.id].ineffect){
+                            if($rootScope.ruleeffects[ruleEffectKey][action.id].action === "ASSIGNVARIABLE" && $rootScope.ruleeffects[ruleEffectKey][action.id].ineffect){
                                 //from earlier evaluation, the data portion of the ruleeffect now contains the value of the variable to be assign.
                                 //the content portion of the ruleeffect defines the name for the variable, when dollar is removed:
-                                var variabletoassign = $rootScope.ruleeffects[executingEvent.event][action.id].content.replace("#{","").replace("}","");
+                                var variabletoassign = $rootScope.ruleeffects[ruleEffectKey][action.id].content.replace("#{","").replace("}","");
 
                                 if(!angular.isDefined(variablesHash[variabletoassign])){
                                     $log.warn("Variable " + variabletoassign + " was not defined.");
@@ -1241,11 +1550,11 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 
                                 //Even if the variable is not defined: we assign it:
                                 if(variablesHash[variabletoassign] && 
-                                        variablesHash[variabletoassign].variableValue !== $rootScope.ruleeffects[executingEvent.event][action.id].data){
+                                        variablesHash[variabletoassign].variableValue !== $rootScope.ruleeffects[ruleEffectKey][action.id].data){
                                     //If the variable was actually updated, we assume that there is an updated ruleeffect somewhere:
                                     updatedEffectsExits = true;
                                     //Then we assign the new value:
-                                    variablesHash[variabletoassign].variableValue = $rootScope.ruleeffects[executingEvent.event][action.id].data;
+                                    variablesHash[variabletoassign].variableValue = $rootScope.ruleeffects[ruleEffectKey][action.id].data;
                                 }
                             }
                         });
@@ -1253,7 +1562,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 
                     //Broadcast rules finished if there was any actual changes to the event.
                     if(updatedEffectsExits){
-                        $rootScope.$broadcast("ruleeffectsupdated", { event: executingEvent.event });
+                        $rootScope.$broadcast("ruleeffectsupdated", { event: ruleEffectKey });
                     }
                 }
 

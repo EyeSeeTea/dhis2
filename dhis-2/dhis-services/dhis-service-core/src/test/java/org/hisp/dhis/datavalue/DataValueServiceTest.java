@@ -147,7 +147,6 @@ public class DataValueServiceTest
 
     @Test
     public void testAddDataValue()
-        throws Exception
     {
         DataValue dataValueA = new DataValue( dataElementA, periodA, sourceA, optionCombo, optionCombo );
         dataValueA.setValue( "1" );
@@ -187,7 +186,6 @@ public class DataValueServiceTest
 
     @Test
     public void testUpdataDataValue()
-        throws Exception
     {
         DataValue dataValueA = new DataValue( dataElementA, periodA, sourceA, optionCombo, optionCombo );
         dataValueA.setValue( "1" );
@@ -214,7 +212,6 @@ public class DataValueServiceTest
 
     @Test
     public void testDeleteAndGetDataValue()
-        throws Exception
     {
         DataValue dataValueA = new DataValue( dataElementA, periodA, sourceA, optionCombo, optionCombo );
         dataValueA.setValue( "1" );
@@ -260,109 +257,12 @@ public class DataValueServiceTest
         assertNull( dataValueService.getDataValue( dataElementD, periodC, sourceB, optionCombo ) );
     }
 
-    @Test
-    public void testDeleteDataValuesBySource()
-        throws Exception
-    {
-        DataValue dataValueA = new DataValue( dataElementA, periodA, sourceA, optionCombo, optionCombo );
-        dataValueA.setValue( "1" );
-        DataValue dataValueB = new DataValue( dataElementB, periodA, sourceA, optionCombo, optionCombo );
-        dataValueB.setValue( "2" );
-        DataValue dataValueC = new DataValue( dataElementC, periodC, sourceD, optionCombo, optionCombo );
-        dataValueC.setValue( "3" );
-        DataValue dataValueD = new DataValue( dataElementD, periodC, sourceB, optionCombo, optionCombo );
-        dataValueD.setValue( "4" );
-
-        dataValueService.addDataValue( dataValueA );
-        dataValueService.addDataValue( dataValueB );
-        dataValueService.addDataValue( dataValueC );
-        dataValueService.addDataValue( dataValueD );
-
-        assertNotNull( dataValueService.getDataValue( dataElementA, periodA, sourceA, optionCombo ) );
-        assertNotNull( dataValueService.getDataValue( dataElementB, periodA, sourceA, optionCombo ) );
-        assertNotNull( dataValueService.getDataValue( dataElementC, periodC, sourceD, optionCombo ) );
-        assertNotNull( dataValueService.getDataValue( dataElementD, periodC, sourceB, optionCombo ) );
-
-        dataValueService.deleteDataValuesBySource( sourceA );
-        assertNull( dataValueService.getDataValue( dataElementA, periodA, sourceA, optionCombo ) );
-        assertNull( dataValueService.getDataValue( dataElementB, periodA, sourceA, optionCombo ) );
-        assertNotNull( dataValueService.getDataValue( dataElementC, periodC, sourceD, optionCombo ) );
-        assertNotNull( dataValueService.getDataValue( dataElementD, periodC, sourceB, optionCombo ) );
-
-        dataValueService.deleteDataValuesBySource( sourceB );
-        assertNull( dataValueService.getDataValue( dataElementA, periodA, sourceA, optionCombo ) );
-        assertNull( dataValueService.getDataValue( dataElementB, periodA, sourceA, optionCombo ) );
-        assertNotNull( dataValueService.getDataValue( dataElementC, periodC, sourceD, optionCombo ) );
-        assertNull( dataValueService.getDataValue( dataElementD, periodC, sourceB, optionCombo ) );
-
-        dataValueService.deleteDataValuesBySource( sourceC );
-        assertNull( dataValueService.getDataValue( dataElementA, periodA, sourceA, optionCombo ) );
-        assertNull( dataValueService.getDataValue( dataElementB, periodA, sourceA, optionCombo ) );
-        assertNotNull( dataValueService.getDataValue( dataElementC, periodC, sourceD, optionCombo ) );
-        assertNull( dataValueService.getDataValue( dataElementD, periodC, sourceB, optionCombo ) );
-
-        dataValueService.deleteDataValuesBySource( sourceD );
-        assertNull( dataValueService.getDataValue( dataElementA, periodA, sourceA, optionCombo ) );
-        assertNull( dataValueService.getDataValue( dataElementB, periodA, sourceA, optionCombo ) );
-        assertNull( dataValueService.getDataValue( dataElementC, periodC, sourceD, optionCombo ) );
-        assertNull( dataValueService.getDataValue( dataElementD, periodC, sourceB, optionCombo ) );
-    }
-
-    @Test
-    public void testDeleteDataValuesByDataElement()
-        throws Exception
-    {
-        DataValue dataValueA = new DataValue( dataElementA, periodA, sourceA, optionCombo, optionCombo );
-        dataValueA.setValue( "1" );
-        DataValue dataValueB = new DataValue( dataElementB, periodA, sourceA, optionCombo, optionCombo );
-        dataValueB.setValue( "2" );
-        DataValue dataValueC = new DataValue( dataElementC, periodC, sourceD, optionCombo, optionCombo );
-        dataValueC.setValue( "3" );
-        DataValue dataValueD = new DataValue( dataElementD, periodC, sourceB, optionCombo, optionCombo );
-        dataValueD.setValue( "4" );
-
-        dataValueService.addDataValue( dataValueA );
-        dataValueService.addDataValue( dataValueB );
-        dataValueService.addDataValue( dataValueC );
-        dataValueService.addDataValue( dataValueD );
-
-        assertNotNull( dataValueService.getDataValue( dataElementA, periodA, sourceA, optionCombo ) );
-        assertNotNull( dataValueService.getDataValue( dataElementB, periodA, sourceA, optionCombo ) );
-        assertNotNull( dataValueService.getDataValue( dataElementC, periodC, sourceD, optionCombo ) );
-        assertNotNull( dataValueService.getDataValue( dataElementD, periodC, sourceB, optionCombo ) );
-
-        dataValueService.deleteDataValuesByDataElement( dataElementA );
-        assertNull( dataValueService.getDataValue( dataElementA, periodA, sourceA, optionCombo ) );
-        assertNotNull( dataValueService.getDataValue( dataElementB, periodA, sourceA, optionCombo ) );
-        assertNotNull( dataValueService.getDataValue( dataElementC, periodC, sourceD, optionCombo ) );
-        assertNotNull( dataValueService.getDataValue( dataElementD, periodC, sourceB, optionCombo ) );
-
-        dataValueService.deleteDataValuesByDataElement( dataElementB );
-        assertNull( dataValueService.getDataValue( dataElementA, periodA, sourceA, optionCombo ) );
-        assertNull( dataValueService.getDataValue( dataElementB, periodA, sourceA, optionCombo ) );
-        assertNotNull( dataValueService.getDataValue( dataElementC, periodC, sourceD, optionCombo ) );
-        assertNotNull( dataValueService.getDataValue( dataElementD, periodC, sourceB, optionCombo ) );
-
-        dataValueService.deleteDataValuesByDataElement( dataElementC );
-        assertNull( dataValueService.getDataValue( dataElementA, periodA, sourceA, optionCombo ) );
-        assertNull( dataValueService.getDataValue( dataElementB, periodA, sourceA, optionCombo ) );
-        assertNull( dataValueService.getDataValue( dataElementC, periodC, sourceD, optionCombo ) );
-        assertNotNull( dataValueService.getDataValue( dataElementD, periodC, sourceB, optionCombo ) );
-
-        dataValueService.deleteDataValuesByDataElement( dataElementD );
-        assertNull( dataValueService.getDataValue( dataElementA, periodA, sourceA, optionCombo ) );
-        assertNull( dataValueService.getDataValue( dataElementB, periodA, sourceA, optionCombo ) );
-        assertNull( dataValueService.getDataValue( dataElementC, periodC, sourceD, optionCombo ) );
-        assertNull( dataValueService.getDataValue( dataElementD, periodC, sourceB, optionCombo ) );
-    }
-
     // -------------------------------------------------------------------------
     // Collections of DataValues
     // -------------------------------------------------------------------------
 
     @Test
     public void testGetAllDataValues()
-        throws Exception
     {
         DataValue dataValueA = new DataValue( dataElementA, periodA, sourceA, optionCombo, optionCombo );
         dataValueA.setValue( "1" );
@@ -385,7 +285,6 @@ public class DataValueServiceTest
 
     @Test
     public void testGetDataValuesSourcePeriod()
-        throws Exception
     {
         DataValue dataValueA = new DataValue( dataElementA, periodA, sourceA, optionCombo, optionCombo );
         dataValueA.setValue( "1" );
@@ -416,7 +315,6 @@ public class DataValueServiceTest
 
     @Test
     public void testGetDataValuesSourceDataElement()
-        throws Exception
     {
         DataValue dataValueA = new DataValue( dataElementA, periodA, sourceA, optionCombo, optionCombo );
         dataValueA.setValue( "1" );
@@ -447,7 +345,6 @@ public class DataValueServiceTest
 
     @Test
     public void testGetDataValuesSourcesDataElement()
-        throws Exception
     {
         DataValue dataValueA = new DataValue( dataElementA, periodA, sourceA, optionCombo, optionCombo );
         dataValueA.setValue( "1" );
@@ -482,7 +379,6 @@ public class DataValueServiceTest
 
     @Test
     public void testGetDataValuesSourcePeriodDataElements()
-        throws Exception
     {
         DataValue dataValueA = new DataValue( dataElementA, periodA, sourceA, optionCombo, optionCombo );
         dataValueA.setValue( "1" );
@@ -517,7 +413,6 @@ public class DataValueServiceTest
 
     @Test
     public void testGetDataValuesDataElementPeriodsSources()
-        throws Exception
     {
         DataValue dataValueA = new DataValue( dataElementA, periodA, sourceB, optionCombo, optionCombo );
         dataValueA.setValue( "1" );
@@ -550,7 +445,6 @@ public class DataValueServiceTest
 
     @Test
     public void testGetDataValuesOptionComboDataElementPeriodsSources()
-        throws Exception
     {
         DataValue dataValueA = new DataValue( dataElementA, periodA, sourceB, optionCombo, optionCombo );
         dataValueA.setValue( "1" );

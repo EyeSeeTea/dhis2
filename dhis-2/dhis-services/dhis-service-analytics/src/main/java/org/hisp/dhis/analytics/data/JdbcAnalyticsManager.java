@@ -136,7 +136,7 @@ public class JdbcAnalyticsManager
 
             log.debug( sql );
 
-            Map<String, Object> map;
+            Map<String, Object> map = null;
 
             try
             {
@@ -174,7 +174,7 @@ public class JdbcAnalyticsManager
             }
 
             Set<String> keys = new HashSet<>( dataValueMap.keySet() );
-
+            
             for ( String key : keys )
             {
                 String[] keyArray = key.split( DIMENSION_SEP );

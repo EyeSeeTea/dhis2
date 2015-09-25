@@ -28,14 +28,17 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.hisp.dhis.analytics.AggregationType;
+import org.hisp.dhis.common.BaseDimensionalObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.BaseNameableObject;
+import org.hisp.dhis.common.DimensionType;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeStrategy;
+import org.hisp.dhis.common.RegexUtils;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
 
@@ -44,13 +47,14 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.google.common.collect.Sets;
 
 /**
  * @author Chau Thu Tran
  */
 @JacksonXmlRootElement( localName = "programIndicator", namespace = DxfNamespaces.DXF_2_0 )
 public class ProgramIndicator
-    extends BaseNameableObject
+    extends BaseDimensionalObject
 {
     public static final String SEPARATOR_ID = "\\.";
     public static final String SEP_OBJECT = ":";
@@ -58,38 +62,40 @@ public class ProgramIndicator
     public static final String KEY_ATTRIBUTE = "A";
     public static final String KEY_PROGRAM_VARIABLE = "V";
     public static final String KEY_CONSTANT = "C";
+
+    public static final String VAR_EXECUTION_DATE = "execution_date";
+    public static final String VAR_DUE_DATE = "due_date";
     public static final String VAR_INCIDENT_DATE = "incident_date";
     public static final String VAR_ENROLLMENT_DATE = "enrollment_date";
     public static final String VAR_CURRENT_DATE = "current_date";
     public static final String VAR_VALUE_COUNT = "value_count";
     public static final String VAR_ZERO_POS_VALUE_COUNT = "zero_pos_value_count";
-    public static final String VALUE_TYPE_DATE = "date";
-    public static final String VALUE_TYPE_INT = "int";
-    
-    private static final String EXPRESSION_REGEXP = "(" + KEY_DATAELEMENT + "|" + KEY_ATTRIBUTE + "|" + KEY_PROGRAM_VARIABLE + "|" + KEY_CONSTANT + ")\\{(\\w+|" + 
-        VAR_INCIDENT_DATE + "|" + VAR_ENROLLMENT_DATE + "|" + VAR_CURRENT_DATE + ")" + SEPARATOR_ID + "?(\\w*)\\}";
-    private static final String SQL_FUNC_REGEXP = "d2:(.+?)\\((.+?)\\)";
+    public static final String VAR_EVENT_COUNT = "event_count";
+    public static final String VAR_ENROLLMENT_COUNT = "enrollment_count";
+    public static final String VAR_TEI_COUNT = "tei_count";
+
+    public static final String EXPRESSION_PREFIX_REGEXP = KEY_DATAELEMENT + "|" + KEY_ATTRIBUTE + "|" + KEY_PROGRAM_VARIABLE + "|" + KEY_CONSTANT;
+    public static final String EXPRESSION_REGEXP = "(" + EXPRESSION_PREFIX_REGEXP + ")\\{([\\w\\_]+)" + SEPARATOR_ID + "?(\\w*)\\}";
+    public static final String SQL_FUNC_REGEXP = "d2:(.+?)\\((.*?)\\)";
+    public static final String ARGS_SPLIT = ",";
 
     public static final Pattern EXPRESSION_PATTERN = Pattern.compile( EXPRESSION_REGEXP );
     public static final Pattern SQL_FUNC_PATTERN = Pattern.compile( SQL_FUNC_REGEXP );
     public static final Pattern DATAELEMENT_PATTERN = Pattern.compile( KEY_DATAELEMENT + "\\{(\\w{11})" + SEPARATOR_ID + "(\\w{11})\\}" );
     public static final Pattern ATTRIBUTE_PATTERN = Pattern.compile( KEY_ATTRIBUTE + "\\{(\\w{11})\\}" );
+    public static final Pattern VARIABLE_PATTERN = Pattern.compile( KEY_PROGRAM_VARIABLE + "\\{([\\w\\_]+)}" );
     public static final Pattern VALUECOUNT_PATTERN = Pattern.compile( "V\\{(" + VAR_VALUE_COUNT + "|" + VAR_ZERO_POS_VALUE_COUNT + ")\\}" );
-    
+
     public static final String VALID = "valid";
     public static final String EXPRESSION_NOT_WELL_FORMED = "expression_not_well_formed";
     public static final String INVALID_IDENTIFIERS_IN_EXPRESSION = "invalid_identifiers_in_expression";
     public static final String FILTER_NOT_EVALUATING_TO_TRUE_OR_FALSE = "filter_not_evaluating_to_true_or_false";
 
     private Program program;
-    
-    private String valueType;
 
     private String expression;
-    
+
     private String filter;
-    
-    private AggregationType aggregationType;
 
     /**
      * Number of decimals to use for indicator value, null implies default.
@@ -97,8 +103,6 @@ public class ProgramIndicator
     private Integer decimals;
 
     private Boolean displayInForm;
-    
-    private String rootDate;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -121,7 +125,7 @@ public class ProgramIndicator
     {
         return decimals != null && decimals >= 0;
     }
-    
+
     /**
      * Returns aggregation type, if not exists returns AVERAGE.
      */
@@ -130,8 +134,32 @@ public class ProgramIndicator
         return aggregationType != null ? aggregationType : AggregationType.AVERAGE;
     }
 
+    /**
+     * Returns a set of data element and attribute identifiers part of the given
+     * input expression.
+     *
+     * @param input the expression.
+     * @return a set of UIDs.
+     */
+    public static Set<String> getDataElementAndAttributeIdentifiers( String input )
+    {
+        return Sets.union(
+            RegexUtils.getMatches( DATAELEMENT_PATTERN, input, 2 ),
+            RegexUtils.getMatches( ATTRIBUTE_PATTERN, input, 1 ) );
+    }
+
     // -------------------------------------------------------------------------
-    // Getters && Setters
+    // DimensionalObject
+    // -------------------------------------------------------------------------
+
+    @Override
+    public DimensionType getDimensionType()
+    {
+        return DimensionType.PROGRAM_INDICATOR;
+    }
+    
+    // -------------------------------------------------------------------------
+    // Getters and setters
     // -------------------------------------------------------------------------
 
     @JsonProperty
@@ -146,19 +174,6 @@ public class ProgramIndicator
     public void setProgram( Program program )
     {
         this.program = program;
-    }
-
-    @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String getValueType()
-    {
-        return valueType;
-    }
-
-    public void setValueType( String valueType )
-    {
-        this.valueType = valueType;
     }
 
     @JsonProperty
@@ -190,19 +205,6 @@ public class ProgramIndicator
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public AggregationType getAggregationType()
-    {
-        return aggregationType;
-    }
-
-    public void setAggregationType( AggregationType aggregationType )
-    {
-        this.aggregationType = aggregationType;
-    }
-
-    @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Integer getDecimals()
     {
         return decimals;
@@ -226,19 +228,6 @@ public class ProgramIndicator
         this.displayInForm = displayInForm;
     }
 
-    @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String getRootDate()
-    {
-        return rootDate;
-    }
-
-    public void setRootDate( String rootDate )
-    {
-        this.rootDate = rootDate;
-    }
-
     @Override
     public void mergeWith( IdentifiableObject other, MergeStrategy strategy )
     {
@@ -247,26 +236,22 @@ public class ProgramIndicator
         if ( other.getClass().isInstance( this ) )
         {
             ProgramIndicator programIndicator = (ProgramIndicator) other;
-            
+
             if ( strategy.isReplace() )
             {
                 program = programIndicator.getProgram();
-                valueType = programIndicator.getValueType();
                 expression = programIndicator.getExpression();
                 filter = programIndicator.getFilter();
                 decimals = programIndicator.getDecimals();
                 displayInForm = programIndicator.getDisplayInForm();
-                rootDate = programIndicator.getRootDate();
             }
             else if ( strategy.isMerge() )
             {
                 program = programIndicator.getProgram() == null ? program : programIndicator.getProgram();
-                valueType = programIndicator.getValueType() == null ? valueType : programIndicator.getValueType();
                 expression = programIndicator.getExpression() == null ? expression : programIndicator.getExpression();
                 filter = programIndicator.getFilter() == null ? filter : programIndicator.getFilter();
                 decimals = programIndicator.getDecimals() == null ? decimals : programIndicator.getDecimals();
                 displayInForm = programIndicator.getDisplayInForm() == null ? displayInForm : programIndicator.getDisplayInForm();
-                rootDate = programIndicator.getRootDate() == null ? rootDate : programIndicator.getRootDate();
             }
         }
     }

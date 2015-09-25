@@ -30,7 +30,9 @@ package org.hisp.dhis.dd.action.dataelement;
 
 import com.opensymphony.xwork2.Action;
 import org.apache.commons.lang3.StringUtils;
+import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.attribute.AttributeService;
+import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.commons.collection.ListUtils;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
@@ -134,13 +136,6 @@ public class UpdateDataElementAction
         this.domainType = domainType;
     }
 
-    private String numberType;
-
-    public void setNumberType( String numberType )
-    {
-        this.numberType = numberType;
-    }
-
     private String valueType;
 
     public void setValueType( String valueType )
@@ -148,18 +143,11 @@ public class UpdateDataElementAction
         this.valueType = valueType;
     }
 
-    private String textType;
+    private String aggregationType;
 
-    public void setTextType( String textType )
+    public void setAggregationType( String aggregationType )
     {
-        this.textType = textType;
-    }
-
-    private String aggregationOperator;
-
-    public void setAggregationOperator( String aggregationOperator )
-    {
-        this.aggregationOperator = aggregationOperator;
+        this.aggregationType = aggregationType;
     }
 
     private String url;
@@ -254,25 +242,12 @@ public class UpdateDataElementAction
         dataElement.setDescription( StringUtils.trimToNull( description ) );
         dataElement.setFormName( StringUtils.trimToNull( formName ) );
         dataElement.setDomainType( DataElementDomain.fromValue( domainType ) );
-        dataElement.setType( valueType );
-
-        if ( DataElement.VALUE_TYPE_STRING.equalsIgnoreCase( valueType ) )
-        {
-            dataElement.setTextType( textType );
-            dataElement.setNumberType( null );
-        }
-        else
-        {
-            dataElement.setNumberType( numberType );
-            dataElement.setTextType( null );
-        }
-
-        dataElement.setAggregationOperator( aggregationOperator );
+        dataElement.setValueType( ValueType.valueOf( valueType ) );
+        dataElement.setAggregationType( AggregationType.valueOf( aggregationType ) );
         dataElement.setUrl( url );
         dataElement.setZeroIsSignificant( zeroIsSignificant );
         dataElement.setCategoryCombo( categoryCombo );
-        dataElement.setAggregationLevels( new ArrayList<>( ListUtils
-            .getIntegerCollection( aggregationLevels ) ) );
+        dataElement.setAggregationLevels( new ArrayList<>( ListUtils.getIntegerCollection( aggregationLevels ) ) );
         dataElement.setOptionSet( optionSet );
         dataElement.setCommentOptionSet( commentOptionSet );
         dataElement.setLegendSet( legendSet );
@@ -291,8 +266,7 @@ public class UpdateDataElementAction
                 .parseInt( dataElementGroupSets.get( i ) ) );
 
             DataElementGroup oldGroup = groupSet.getGroup( dataElement );
-            DataElementGroup newGroup = dataElementService.getDataElementGroup( Integer.parseInt( dataElementGroups
-                .get( i ) ) );
+            DataElementGroup newGroup = dataElementService.getDataElementGroup( Integer.parseInt( dataElementGroups.get( i ) ) );
 
             if ( oldGroup != null && oldGroup.getMembers().remove( dataElement ) )
             {
@@ -309,8 +283,7 @@ public class UpdateDataElementAction
 
         if ( jsonAttributeValues != null )
         {
-            AttributeUtils.updateAttributeValuesFromJson( dataElement.getAttributeValues(), jsonAttributeValues,
-                attributeService );
+            AttributeUtils.updateAttributeValuesFromJson( dataElement.getAttributeValues(), jsonAttributeValues, attributeService );
         }
 
         dataElementService.updateDataElement( dataElement );

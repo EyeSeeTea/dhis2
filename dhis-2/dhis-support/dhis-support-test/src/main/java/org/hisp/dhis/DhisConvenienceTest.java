@@ -28,31 +28,14 @@ package org.hisp.dhis;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.File;
-import java.io.PrintWriter;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
-import javax.xml.XMLConstants;
-import javax.xml.namespace.NamespaceContext;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.chart.Chart;
+import org.hisp.dhis.chart.ChartType;
 import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.common.DimensionalObject;
+import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.common.cache.CacheStrategy;
 import org.hisp.dhis.constant.Constant;
 import org.hisp.dhis.dataelement.CategoryOptionGroup;
@@ -109,6 +92,7 @@ import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserCredentials;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserService;
+import org.hisp.dhis.validation.RuleType;
 import org.hisp.dhis.validation.ValidationCriteria;
 import org.hisp.dhis.validation.ValidationRule;
 import org.hisp.dhis.validation.ValidationRuleGroup;
@@ -124,6 +108,26 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.Assert;
 import org.xml.sax.InputSource;
 
+import javax.xml.XMLConstants;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
+import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
 /**
  * @author Lars Helge Overland
  * @version $Id$
@@ -132,7 +136,7 @@ public abstract class DhisConvenienceTest
 {
     protected static final Log log = LogFactory.getLog( DhisConvenienceTest.class );
 
-    protected static final String BASE_UID = "123456789a";
+    protected static final String BASE_UID = "abcdefghij";
 
     protected static final String BASE_IN_UID = "inabcdefgh";
 
@@ -153,7 +157,7 @@ public abstract class DhisConvenienceTest
     // -------------------------------------------------------------------------
 
     protected UserService userService;
-    
+
     static
     {
         DateTime dateTime = new DateTime( 1970, 1, 1, 0, 0 );
@@ -163,7 +167,7 @@ public abstract class DhisConvenienceTest
     // -------------------------------------------------------------------------
     // Convenience methods
     // -------------------------------------------------------------------------
-    
+
     /**
      * Creates a date.
      *
@@ -174,7 +178,7 @@ public abstract class DhisConvenienceTest
      */
     public static Date getDate( int year, int month, int day )
     {
-        DateTime dateTime = new DateTime(year, month, day, 0, 0);
+        DateTime dateTime = new DateTime( year, month, day, 0, 0 );
         return dateTime.toDate();
     }
 
@@ -187,7 +191,7 @@ public abstract class DhisConvenienceTest
     public Date getDay( int day )
     {
         DateTime dataTime = DateTime.now();
-        dataTime = dataTime.withTimeAtStartOfDay() ;
+        dataTime = dataTime.withTimeAtStartOfDay();
         dataTime = dataTime.withDayOfYear( day );
 
         return dataTime.toDate();
@@ -323,7 +327,7 @@ public abstract class DhisConvenienceTest
      *
      * @param object the object.
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     private <T> T getRealObject( T object )
         throws Exception
     {
@@ -352,9 +356,29 @@ public abstract class DhisConvenienceTest
         dataElement.setShortName( "DataElementShort" + uniqueCharacter );
         dataElement.setCode( "DataElementCode" + uniqueCharacter );
         dataElement.setDescription( "DataElementDescription" + uniqueCharacter );
-        dataElement.setType( DataElement.VALUE_TYPE_INT );
+        dataElement.setValueType( ValueType.INTEGER );
         dataElement.setDomainType( DataElementDomain.AGGREGATE );
-        dataElement.setAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM );
+        dataElement.setAggregationType( AggregationType.SUM );
+
+        return dataElement;
+    }
+
+    /**
+     * @param uniqueCharacter A unique character to identify the object.
+     */
+    public static DataElement createDataElement( char uniqueCharacter, ValueType valueType )
+    {
+        DataElement dataElement = new DataElement();
+        dataElement.setAutoFields();
+
+        dataElement.setUid( BASE_DE_UID + uniqueCharacter );
+        dataElement.setName( "DataElement" + uniqueCharacter );
+        dataElement.setShortName( "DataElementShort" + uniqueCharacter );
+        dataElement.setCode( "DataElementCode" + uniqueCharacter );
+        dataElement.setDescription( "DataElementDescription" + uniqueCharacter );
+        dataElement.setValueType( valueType );
+        dataElement.setDomainType( DataElementDomain.AGGREGATE );
+        dataElement.setAggregationType( AggregationType.SUM );
 
         return dataElement;
     }
@@ -374,33 +398,33 @@ public abstract class DhisConvenienceTest
     }
 
     /**
-     * @param uniqueCharacter     A unique character to identify the object.
-     * @param type                The value type.
-     * @param aggregationOperator The aggregation operator.
+     * @param uniqueCharacter A unique character to identify the object.
+     * @param valueType       The value type.
+     * @param aggregationType The aggregation type.
      */
-    public static DataElement createDataElement( char uniqueCharacter, String type, String aggregationOperator )
+    public static DataElement createDataElement( char uniqueCharacter, ValueType valueType, AggregationType aggregationType )
     {
         DataElement dataElement = createDataElement( uniqueCharacter );
-        dataElement.setType( type );
+        dataElement.setValueType( valueType );
         dataElement.setDomainType( DataElementDomain.AGGREGATE );
-        dataElement.setAggregationOperator( aggregationOperator );
+        dataElement.setAggregationType( aggregationType );
 
         return dataElement;
     }
 
     /**
-     * @param uniqueCharacter     A unique character to identify the object.
-     * @param type                The value type.
-     * @param aggregationOperator The aggregation operator.
-     * @param categoryCombo       The category combo.
+     * @param uniqueCharacter A unique character to identify the object.
+     * @param valueType       The value type.
+     * @param aggregationType The aggregation type.
+     * @param categoryCombo   The category combo.
      */
-    public static DataElement createDataElement( char uniqueCharacter, String type, String aggregationOperator,
+    public static DataElement createDataElement( char uniqueCharacter, ValueType valueType, AggregationType aggregationType,
         DataElementCategoryCombo categoryCombo )
     {
         DataElement dataElement = createDataElement( uniqueCharacter );
-        dataElement.setType( type );
+        dataElement.setValueType( valueType );
         dataElement.setDomainType( DataElementDomain.AGGREGATE );
-        dataElement.setAggregationOperator( aggregationOperator );
+        dataElement.setAggregationType( aggregationType );
         dataElement.setCategoryCombo( categoryCombo );
 
         return dataElement;
@@ -413,11 +437,9 @@ public abstract class DhisConvenienceTest
      *                                      category options.
      * @return DataElementCategoryOptionCombo
      */
-    public static DataElementCategoryCombo createCategoryCombo( char categoryComboUniqueIdentifier,
-        DataElementCategory... categories )
+    public static DataElementCategoryCombo createCategoryCombo( char categoryComboUniqueIdentifier, DataElementCategory... categories )
     {
-        DataElementCategoryCombo categoryCombo = new DataElementCategoryCombo( "CategoryCombo" + categoryComboUniqueIdentifier,
-            new ArrayList<DataElementCategory>() );
+        DataElementCategoryCombo categoryCombo = new DataElementCategoryCombo( "CategoryCombo" + categoryComboUniqueIdentifier, new ArrayList<>() );
         categoryCombo.setAutoFields();
 
         for ( DataElementCategory category : categories )
@@ -495,7 +517,6 @@ public abstract class DhisConvenienceTest
         for ( DataElementCategoryOption categoryOption : categoryOptions )
         {
             categoryOptionCombo.getCategoryOptions().add( categoryOption );
-
             categoryOption.getCategoryOptionCombos().add( categoryOptionCombo );
         }
 
@@ -512,7 +533,7 @@ public abstract class DhisConvenienceTest
         DataElementCategoryOption... categoryOptions )
     {
         DataElementCategory dataElementCategory = new DataElementCategory( "DataElementCategory" + categoryUniqueIdentifier,
-            new ArrayList<DataElementCategoryOption>() );
+            new ArrayList<>() );
         dataElementCategory.setAutoFields();
 
         for ( DataElementCategoryOption categoryOption : categoryOptions )
@@ -533,8 +554,8 @@ public abstract class DhisConvenienceTest
 
     /**
      * @param uniqueIdentifier A unique character to identify the
-     *                                      category option group.
-     * @param categoryOptions               the category options.
+     *                         category option group.
+     * @param categoryOptions  the category options.
      * @return CategoryOptionGroup
      */
     public static CategoryOptionGroup createCategoryOptionGroup( char uniqueIdentifier,
@@ -544,7 +565,7 @@ public abstract class DhisConvenienceTest
         categoryOptionGroup.setShortName( "ShortName" + uniqueIdentifier );
         categoryOptionGroup.setAutoFields();
 
-        categoryOptionGroup.setMembers( new HashSet<DataElementCategoryOption>() );
+        categoryOptionGroup.setMembers( new HashSet<>() );
 
         for ( DataElementCategoryOption categoryOption : categoryOptions )
         {
@@ -962,7 +983,7 @@ public abstract class DhisConvenienceTest
 
         validationRule.setName( "MonitoringRule" + uniqueCharacter );
         validationRule.setDescription( "Description" + uniqueCharacter );
-        validationRule.setRuleType( ValidationRule.RULE_TYPE_SURVEILLANCE );
+        validationRule.setRuleType( RuleType.SURVEILLANCE );
         validationRule.setOperator( operator );
         validationRule.setLeftSide( leftSide );
         validationRule.setRightSide( rightSide );
@@ -1057,14 +1078,23 @@ public abstract class DhisConvenienceTest
 
         return legendSet;
     }
+    
+    public static Chart createChart( char uniqueCharacter )
+    {
+        Chart chart = new Chart();
+        chart.setAutoFields();
+        chart.setName( "Chart" + uniqueCharacter );
+        chart.setType( ChartType.COLUMN );
+        
+        return chart;
+        
+    }
 
     public static Chart createChart( char uniqueCharacter, List<Indicator> indicators, List<Period> periods,
         List<OrganisationUnit> units )
     {
-        Chart chart = new Chart();
-        chart.setAutoFields();
+        Chart chart = createChart( uniqueCharacter );
 
-        chart.setName( "Chart" + uniqueCharacter );
         chart.addAllDataDimensionItems( indicators );
         chart.setPeriods( periods );
         chart.setOrganisationUnits( units );
@@ -1101,10 +1131,10 @@ public abstract class DhisConvenienceTest
         credentials.setPassword( "Password" + uniqueCharacter );
         credentials.setUser( user );
         user.setUserCredentials( credentials );
-        
+
         return credentials;
     }
-    
+
     public static UserGroup createUserGroup( char uniqueCharacter, Set<User> users )
     {
         UserGroup userGroup = new UserGroup();
@@ -1115,7 +1145,7 @@ public abstract class DhisConvenienceTest
 
         return userGroup;
     }
-    
+
     public static UserAuthorityGroup createUserAuthorityGroup( char uniqueCharacter )
     {
         UserAuthorityGroup role = new UserAuthorityGroup();
@@ -1123,7 +1153,7 @@ public abstract class DhisConvenienceTest
 
         role.setUid( BASE_UID + uniqueCharacter );
         role.setName( "UserAuthorityGroup" + uniqueCharacter );
-        
+
         return role;
     }
 
@@ -1131,24 +1161,24 @@ public abstract class DhisConvenienceTest
         OrganisationUnit unit )
     {
         Set<OrganisationUnit> units = new HashSet<>();
-        
+
         if ( unit != null )
         {
             units.add( unit );
         }
-        
+
         return createProgram( uniqueCharacter, programStages, null, units );
     }
-    
+
     public static Program createProgram( char uniqueCharacter, Set<ProgramStage> programStages,
         Set<TrackedEntityAttribute> attributes, Set<OrganisationUnit> organisationUnits )
     {
         Program program = new Program();
-        
+
         program.setName( "Program" + uniqueCharacter );
         program.setDescription( "Description" + uniqueCharacter );
-        program.setDateOfEnrollmentDescription( "DateOfEnrollmentDescription" );
-        program.setDateOfIncidentDescription( "DateOfIncidentDescription" );
+        program.setEnrollmentDateLabel( "DateOfEnrollmentDescription" );
+        program.setIncidentDateLabel( "DateOfIncidentDescription" );
         program.setProgramStages( programStages );
         program.setProgramType( ProgramType.WITH_REGISTRATION );
 
@@ -1160,11 +1190,11 @@ public abstract class DhisConvenienceTest
                 program.getProgramStages().add( programStage );
             }
         }
-        
+
         if ( attributes != null )
         {
             int i = 0;
-            
+
             for ( TrackedEntityAttribute attribute : attributes )
             {
                 program.getProgramAttributes().add( new ProgramTrackedEntityAttribute( attribute, i++, false ) );
@@ -1172,47 +1202,47 @@ public abstract class DhisConvenienceTest
         }
 
         if ( organisationUnits != null )
-        {            
+        {
             program.getOrganisationUnits().addAll( organisationUnits );
         }
-        
+
         return program;
     }
-        
-    public static ProgramRule createProgramRule ( char uniqueCharacter, Program parentProgram )
+
+    public static ProgramRule createProgramRule( char uniqueCharacter, Program parentProgram )
     {
         ProgramRule programRule = new ProgramRule();
         programRule.setName( "ProgramRule" + uniqueCharacter );
         programRule.setProgram( parentProgram );
-        programRule.setCondition("true");
-    
+        programRule.setCondition( "true" );
+
         return programRule;
     }
-    
-    public static ProgramRuleAction createProgramRuleAction ( char uniqueCharacter )
+
+    public static ProgramRuleAction createProgramRuleAction( char uniqueCharacter )
     {
         ProgramRuleAction programRuleAction = new ProgramRuleAction();
         programRuleAction.setName( "ProgramRuleAction" + uniqueCharacter );
         programRuleAction.setProgramRuleActionType( ProgramRuleActionType.HIDEFIELD );
-    
+
         return programRuleAction;
     }
-    
-    public static ProgramRuleAction createProgramRuleAction ( char uniqueCharacter, ProgramRule parentRule )
+
+    public static ProgramRuleAction createProgramRuleAction( char uniqueCharacter, ProgramRule parentRule )
     {
         ProgramRuleAction programRuleAction = createProgramRuleAction( uniqueCharacter );
         programRuleAction.setProgramRule( parentRule );
-    
+
         return programRuleAction;
     }
-    
-    public static ProgramRuleVariable createProgramRuleVariable ( char uniqueCharacter, Program parentProgram )
+
+    public static ProgramRuleVariable createProgramRuleVariable( char uniqueCharacter, Program parentProgram )
     {
         ProgramRuleVariable programRuleVariable = new ProgramRuleVariable();
         programRuleVariable.setName( "ProgramRuleVariable" + uniqueCharacter );
         programRuleVariable.setProgram( parentProgram );
         programRuleVariable.setSourceType( ProgramRuleVariableSourceType.DATAELEMENT_CURRENT_EVENT );
-        
+
         return programRuleVariable;
     }
 
@@ -1232,11 +1262,11 @@ public abstract class DhisConvenienceTest
 
         return programStage;
     }
-    
+
     public static ProgramStage createProgramStage( char uniqueCharacter, Set<DataElement> dataElements )
     {
         ProgramStage programStage = createProgramStage( uniqueCharacter, 0 );
-        
+
         if ( dataElements != null )
         {
             for ( DataElement dataElement : dataElements )
@@ -1245,7 +1275,7 @@ public abstract class DhisConvenienceTest
                 programStage.getProgramStageDataElements().add( psd );
             }
         }
-        
+
         return programStage;
     }
 
@@ -1254,18 +1284,16 @@ public abstract class DhisConvenienceTest
         ProgramIndicator indicator = new ProgramIndicator();
         indicator.setAutoFields();
         indicator.setName( "Indicator" + uniqueCharacter );
-        indicator.setShortName( "IndicatorShort" + uniqueCharacter  );
-        indicator.setCode( "IndicatorCode" + uniqueCharacter  );
+        indicator.setShortName( "IndicatorShort" + uniqueCharacter );
+        indicator.setCode( "IndicatorCode" + uniqueCharacter );
         indicator.setDescription( "IndicatorDescription" + uniqueCharacter );
         indicator.setProgram( program );
-        indicator.setValueType( ProgramIndicator.VALUE_TYPE_INT );
         indicator.setExpression( expression );
         indicator.setFilter( filter );
-        indicator.setRootDate( ProgramIndicator.VAR_INCIDENT_DATE );
-        
+
         return indicator;
     }
-    
+
     public static TrackedEntity createTrackedEntity( char uniqueChar )
     {
         TrackedEntity trackedEntity = new TrackedEntity();
@@ -1284,7 +1312,7 @@ public abstract class DhisConvenienceTest
 
         return entityInstance;
     }
-    
+
     public static ProgramStageInstance createProgramStageInstance()
     {
         ProgramStageInstance programStageInstance = new ProgramStageInstance();
@@ -1329,7 +1357,7 @@ public abstract class DhisConvenienceTest
 
         attribute.setName( "Attribute" + uniqueChar );
         attribute.setDescription( "Attribute" + uniqueChar );
-        attribute.setValueType( TrackedEntityAttribute.TYPE_STRING );
+        attribute.setValueType( ValueType.TEXT );
 
         return attribute;
     }
@@ -1338,14 +1366,14 @@ public abstract class DhisConvenienceTest
      * @param uniqueChar A unique character to identify the object.
      * @return TrackedEntityAttribute
      */
-    public static TrackedEntityAttribute createTrackedEntityAttribute( char uniqueChar, String type )
+    public static TrackedEntityAttribute createTrackedEntityAttribute( char uniqueChar, ValueType valueType )
     {
         TrackedEntityAttribute attribute = new TrackedEntityAttribute();
         attribute.setAutoFields();
 
         attribute.setName( "Attribute" + uniqueChar );
         attribute.setDescription( "Attribute" + uniqueChar );
-        attribute.setValueType( type );
+        attribute.setValueType( valueType );
 
         return attribute;
     }
@@ -1531,7 +1559,7 @@ public abstract class DhisConvenienceTest
             return null;
         }
     }
-    
+
     /**
      * Creates a user and injects into the security context with username
      * "username". Requires <code>identifiableObjectManager</code> and
@@ -1629,7 +1657,7 @@ public abstract class DhisConvenienceTest
         t.printStackTrace( pw );
         pw.flush();
         sw.flush();
-        
+
         return sw.toString();
     }
 }

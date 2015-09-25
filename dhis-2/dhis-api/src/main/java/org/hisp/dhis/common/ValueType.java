@@ -29,10 +29,11 @@ package org.hisp.dhis.common;
  */
 
 import java.util.Date;
+import java.util.List;
 
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
-import org.joda.time.DateTime;
+import org.hisp.dhis.trackedentity.TrackedEntityInstance;
+
+import com.google.common.collect.Lists;
 
 /**
  * @author Lars Helge Overland
@@ -42,12 +43,12 @@ public enum ValueType
     TEXT( String.class ),
     LONG_TEXT( String.class ),
     LETTER( String.class ),
-    TYPE_PHONE_NUMBER( String.class ),
+    PHONE_NUMBER( String.class ),
     EMAIL( String.class ),
     BOOLEAN( Boolean.class ),
     TRUE_ONLY( Boolean.class ),
     DATE( Date.class ),
-    DATETIME( DateTime.class ),
+    DATETIME( Date.class ),
     NUMBER( Double.class ),
     UNIT_INTERVAL( Double.class ),
     PERCENTAGE( Double.class ),
@@ -55,112 +56,59 @@ public enum ValueType
     INTEGER_POSITIVE( Integer.class ),
     INTEGER_NEGATIVE( Integer.class ),
     INTEGER_ZERO_OR_POSITIVE( Integer.class ),
-    NEGATIVE_INTEGER( Integer.class );
+    TRACKER_ASSOCIATE( TrackedEntityInstance.class ),
+    OPTION_SET( String.class ),
+    USERNAME( String.class ),
+    FILE_RESOURCE( String.class );
+
+    public static final List<ValueType> INTEGER_TYPES = Lists.newArrayList(
+        INTEGER, INTEGER_POSITIVE, INTEGER_NEGATIVE, INTEGER_ZERO_OR_POSITIVE );
+
+    public static final List<ValueType> NUMERIC_TYPES = Lists.newArrayList(
+        INTEGER, INTEGER_POSITIVE, INTEGER_NEGATIVE, INTEGER_ZERO_OR_POSITIVE, NUMBER, UNIT_INTERVAL, PERCENTAGE );
+
+    public static final List<ValueType> TEXT_TYPES = Lists.newArrayList( 
+        TEXT, LONG_TEXT, LETTER );
     
     private final Class<?> javaClass;
-    
-    ValueType()
+
+    private ValueType()
     {
         this.javaClass = null;
     }
-    
-    ValueType( Class<?> javaClass )
+
+    private ValueType( Class<?> javaClass )
     {
         this.javaClass = javaClass;
     }
-    
+
     public Class<?> getJavaClass()
     {
         return javaClass;
     }
 
-    /**
-     * TODO replace string value type on data element with ValueType and remove
-     * this method.
-     */
-    public static ValueType getFromDataElement( DataElement dataElement )
-    {        
-        if ( DataElement.VALUE_TYPE_STRING.equals( dataElement.getType() ) )
-        {
-            if ( DataElement.VALUE_TYPE_LONG_TEXT.equals( dataElement.getTextType() ) )
-            {
-                return ValueType.LONG_TEXT;
-            }
-            else
-            {
-                return ValueType.TEXT;
-            }
-        }
-        else if ( DataElement.VALUE_TYPE_INT.equals( dataElement.getType() ) )
-        {
-            if ( DataElement.VALUE_TYPE_UNIT_INTERVAL.equals( dataElement.getNumberType() ) )
-            {
-                return ValueType.UNIT_INTERVAL;
-            }
-            else if ( DataElement.VALUE_TYPE_PERCENTAGE.equals( dataElement.getNumberType() ) )
-            {
-                return ValueType.PERCENTAGE;
-            }
-            else if ( DataElement.VALUE_TYPE_INT.equals( dataElement.getNumberType() ) )
-            {
-                return ValueType.INTEGER;
-            }
-            else if ( DataElement.VALUE_TYPE_POSITIVE_INT.equals( dataElement.getNumberType() ) )
-            {
-                return ValueType.INTEGER_POSITIVE;
-            }
-            else if ( DataElement.VALUE_TYPE_ZERO_OR_POSITIVE_INT.equals( dataElement.getNumberType() ) )
-            {
-                return ValueType.INTEGER_ZERO_OR_POSITIVE;
-            }
-            else if ( DataElement.VALUE_TYPE_NEGATIVE_INT.equals( dataElement.getNumberType() ) )
-            {
-                return ValueType.INTEGER_NEGATIVE;
-            }
-            else
-            {
-                return ValueType.NUMBER;
-            }
-        }
-        else if ( DataElement.VALUE_TYPE_BOOL.equals( dataElement.getType() ) )
-        {
-            return ValueType.BOOLEAN;
-        }
-        else if ( DataElement.VALUE_TYPE_TRUE_ONLY.equals( dataElement.getType() ) )
-        {
-            return ValueType.TRUE_ONLY;
-        }
-        else if ( DataElement.VALUE_TYPE_DATE.equals( dataElement.getType() ) )
-        {
-            return ValueType.DATE;
-        }
-        else if ( DataElement.VALUE_TYPE_DATETIME.equals( dataElement.getType() ) )
-        {
-            return ValueType.DATETIME;
-        }
-
-        return ValueType.TEXT; // Fall back
+    public boolean isInteger()
+    {
+        return this == INTEGER || this == INTEGER_POSITIVE || this == INTEGER_NEGATIVE || this == INTEGER_ZERO_OR_POSITIVE;
     }
 
-    /**
-     * TODO replace string value type on attribute with ValueType and remove
-     * this method.
-     */
-    public static ValueType getFromAttribute( TrackedEntityAttribute attribute )
+    public boolean isNumeric()
     {
-        if ( TrackedEntityAttribute.TYPE_NUMBER.equals( attribute.getValueType() ) || DataElement.VALUE_TYPE_INT.equals( attribute.getValueType() ) )
-        {
-            return ValueType.NUMBER;
-        }
-        else if ( TrackedEntityAttribute.TYPE_BOOL.equals( attribute.getValueType() ) || TrackedEntityAttribute.TYPE_TRUE_ONLY.equals( attribute.getValueType() ) )
-        {
-            return ValueType.BOOLEAN;
-        }
-        else if ( TrackedEntityAttribute.TYPE_DATE.equals( attribute.getValueType() ) )
-        {
-            return ValueType.DATE;
-        }
-        
-        return ValueType.TEXT; // Fall back
-    }    
+        return this.isInteger() || this == NUMBER || this == UNIT_INTERVAL || this == PERCENTAGE;
+    }
+
+    public boolean isText()
+    {
+        return this == TEXT || this == LONG_TEXT;
+    }
+
+    public boolean isDate()
+    {
+        return this == DATE || this == DATETIME;
+    }
+
+    public boolean isFile()
+    {
+        return this == FILE_RESOURCE;
+    }
 }

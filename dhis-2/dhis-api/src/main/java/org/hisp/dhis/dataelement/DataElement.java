@@ -28,27 +28,28 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.dataset.DataSet.NO_EXPIRY;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.hisp.dhis.analytics.AggregationType;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.google.common.collect.Sets;
 import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.common.BaseDimensionalObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.DimensionType;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeStrategy;
+import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.DimensionalView;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.comparator.DataSetFrequencyComparator;
 import org.hisp.dhis.option.OptionSet;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.period.YearlyPeriodType;
 import org.hisp.dhis.schema.PropertyType;
@@ -56,12 +57,14 @@ import org.hisp.dhis.schema.annotation.Property;
 import org.hisp.dhis.schema.annotation.PropertyRange;
 import org.hisp.dhis.util.ObjectUtils;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.hisp.dhis.dataset.DataSet.NO_EXPIRY;
 
 /**
  * A DataElement is a definition (meta-information about) of the entities that
@@ -72,7 +75,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
  * children. The sum of the children represent the same entity as the parent.
  * Hierarchies of DataElements are used to give more fine- or course-grained
  * representations of the entities.
- * <p/>
+ * <p>
  * DataElement acts as a DimensionSet in the dynamic dimensional model, and as a
  * DimensionOption in the static DataElement dimension.
  *
@@ -89,32 +92,10 @@ public class DataElement
      */
     private static final long serialVersionUID = -7131541880444446669L;
 
-    public static final String VALUE_TYPE_INT = "int";
-    public static final String VALUE_TYPE_STRING = "string";
-    public static final String VALUE_TYPE_USER_NAME = "username";
-    public static final String VALUE_TYPE_BOOL = "bool";
-    public static final String VALUE_TYPE_TRUE_ONLY = "trueOnly";
-    public static final String VALUE_TYPE_DATE = "date";
-    public static final String VALUE_TYPE_DATETIME = "datetime";
-    public static final String VALUE_TYPE_UNIT_INTERVAL = "unitInterval";
-    public static final String VALUE_TYPE_PERCENTAGE = "percentage";
-
-    public static final String VALUE_TYPE_NUMBER = "number";
-    public static final String VALUE_TYPE_POSITIVE_INT = "posInt";
-    public static final String VALUE_TYPE_NEGATIVE_INT = "negInt";
-    public static final String VALUE_TYPE_ZERO_OR_POSITIVE_INT = "zeroPositiveInt";
-    public static final String VALUE_TYPE_TEXT = "text";
-    public static final String VALUE_TYPE_LONG_TEXT = "longText";
-
-    public static final String AGGREGATION_OPERATOR_SUM = "sum";
-    public static final String AGGREGATION_OPERATOR_AVERAGE_SUM = "avg_sum_org_unit"; // Sum in organisation unit
-    public static final String AGGREGATION_OPERATOR_AVERAGE = "avg";
-    public static final String AGGREGATION_OPERATOR_COUNT = "count";
-    public static final String AGGREGATION_OPERATOR_STDDEV = "stddev";
-    public static final String AGGREGATION_OPERATOR_VARIANCE = "variance";
-    public static final String AGGREGATION_OPERATOR_MIN = "min";
-    public static final String AGGREGATION_OPERATOR_MAX = "max";
-    public static final String AGGREGATION_OPERATOR_NONE = "none";
+    /**
+     * Data element value type (int, boolean, etc)
+     */
+    private ValueType valueType;
 
     /**
      * The name to appear in forms.
@@ -127,32 +108,10 @@ public class DataElement
     protected transient String displayFormName;
 
     /**
-     * The domain of this DataElement; e.g. DataElementDomainType.aggregate or
+     * The domain of this DataElement; e.g. DataElementDomainType.AGGREGATE or
      * DataElementDomainType.TRACKER.
      */
     private DataElementDomain domainType;
-
-    /**
-     * The value type of this DataElement; e.g. DataElement.VALUE_TYPE_INT or
-     * DataElement.VALUE_TYPE_BOOL.
-     */
-    private String type;
-
-    /**
-     * The number type. Is relevant when type is VALUE_TYPE_INT.
-     */
-    private String numberType;
-
-    /**
-     * The text type. Is relevant when type is VALUE_TYPE_STRING.
-     */
-    private String textType;
-
-    /**
-     * The aggregation operator of this DataElement; e.g. DataElement.SUM og
-     * DataElement.AVERAGE.
-     */
-    private String aggregationOperator;
 
     /**
      * A combination of categories to capture data.
@@ -206,7 +165,6 @@ public class DataElement
 
     public DataElement()
     {
-
     }
 
     public DataElement( String name )
@@ -241,10 +199,7 @@ public class DataElement
             }
         }
 
-        for ( DataElementGroup group : updates )
-        {
-            addDataElementGroup( group );
-        }
+        updates.forEach( this::addDataElementGroup );
     }
 
     public void addDataSet( DataSet dataSet )
@@ -264,57 +219,24 @@ public class DataElement
      */
     public boolean isNumericType()
     {
-        return VALUE_TYPE_INT.equals( type );
+        return getValueType().isNumeric();
     }
 
     /**
-     * Returns the value type. If value type is int and the number type exists,
-     * the number type is returned, otherwise the type is returned.
+     * Indicates whether the value type of this data element is date.
      */
-    public String getDetailedNumberType()
+    public boolean isDateType()
     {
-        return (type != null && type.equals( VALUE_TYPE_INT ) && numberType != null) ? numberType : type;
+        // TODO optimize when using persisted valueType
+        return ValueType.DATE == getValueType() || ValueType.DATETIME == getValueType();
     }
 
     /**
-     * Returns the value type. If value type is string and the text type exists,
-     * the text type is returned, if the type is string and the text type does
-     * not exist string is returned.
+     * Indicates whether the value type of this data element is a file (externally stored resource)
      */
-    public String getDetailedTextType()
+    public boolean isFileType()
     {
-        return (type != null && type.equals( VALUE_TYPE_STRING ) && textType != null) ? textType : type;
-    }
-
-    /**
-     * Returns the detailed data element type. If value type is int, the number
-     * type is returned. If value type is string, the text type is returned.
-     * Otherwise the type is returned.
-     */
-    public String getDetailedType()
-    {
-        if ( VALUE_TYPE_INT.equals( type ) )
-        {
-            return numberType;
-        }
-        else if ( VALUE_TYPE_STRING.equals( type ) )
-        {
-            return textType;
-        }
-        else
-        {
-            return type;
-        }
-    }
-
-    /**
-     * Returns whether aggregation should be skipped for this data element, based
-     * on the setting of the data set which this data element is a members of,
-     * if any.
-     */
-    public boolean isSkipAggregation()
-    {
-        return dataSets != null && dataSets.size() > 0 && dataSets.iterator().next().isSkipAggregation();
+        return getValueType().isFile();
     }
 
     /**
@@ -330,8 +252,57 @@ public class DataElement
     }
 
     /**
+     * Returns the category combinations associated with the data sets of this
+     * data element.
+     */
+    public Set<DataElementCategoryCombo> getDataSetCategoryCombos()
+    {
+        Set<DataElementCategoryCombo> categoryCombos = new HashSet<>();
+
+        for ( DataSet dataSet : dataSets )
+        {
+            categoryCombos.add( dataSet.getCategoryCombo() );
+        }
+
+        return categoryCombos;
+    }
+
+    /**
+     * Returns the category options combinations associated with the data sets of this
+     * data element.
+     */
+    public Set<DataElementCategoryOptionCombo> getDataSetCategoryOptionCombos()
+    {
+        Set<DataElementCategoryOptionCombo> categoryOptionCombos = new HashSet<>();
+
+        for ( DataSet dataSet : dataSets )
+        {
+            categoryOptionCombos.addAll( dataSet.getCategoryCombo().getOptionCombos() );
+        }
+
+        return categoryOptionCombos;
+    }
+
+    /**
+     * Indicates whether the data sets of this data element is associated with
+     * the given organisation unit.
+     */
+    public boolean hasDataSetOrganisationUnit( OrganisationUnit unit )
+    {
+        for ( DataSet dataSet : dataSets )
+        {
+            if ( dataSet.getSources().contains( unit ) )
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Returns the PeriodType of the DataElement, based on the PeriodType of the
-     * DataSet which the DataElement is registered for. If this data element has
+     * DataSet which the DataElement is associated with. If this data element has
      * multiple data sets, the data set with the highest collection frequency is
      * returned.
      */
@@ -340,6 +311,15 @@ public class DataElement
         DataSet dataSet = getDataSet();
 
         return dataSet != null ? dataSet.getPeriodType() : null;
+    }
+
+    /**
+     * Returns the PeriodTypes of the DataElement, based on the PeriodType of the
+     * DataSets which the DataElement is associated with.
+     */
+    public Set<PeriodType> getPeriodTypes()
+    {
+        return Sets.newHashSet( dataSets ).stream().map( dataSet -> dataSet.getPeriodType() ).collect( Collectors.toSet() );
     }
 
     /**
@@ -364,16 +344,16 @@ public class DataElement
      * Number of periods in the future to open for data capture, 0 means capture
      * not allowed for current period. Based on the data sets of which this data
      * element is a member.
-     */    
+     */
     public int getOpenFuturePeriods()
     {
         Set<Integer> openPeriods = new HashSet<>();
-        
+
         for ( DataSet dataSet : dataSets )
         {
             openPeriods.add( dataSet.getOpenFuturePeriods() );
         }
-        
+
         return ObjectUtils.firstNonNull( Collections.max( openPeriods ), 0 );
     }
 
@@ -422,7 +402,7 @@ public class DataElement
     {
         return categoryCombo != null;
     }
-    
+
     /**
      * Tests whether the DataElement is associated with a
      * DataElementCategoryCombo with more than one DataElementCategory, or any
@@ -518,26 +498,46 @@ public class DataElement
         return legendSet != null;
     }
 
+    // -------------------------------------------------------------------------
+    // DimensionalObject
+    // -------------------------------------------------------------------------
+
     @Override
-    public AggregationType getAggregationType()
+    public DimensionType getDimensionType()
     {
-        return aggregationOperator != null ? AggregationType.fromValue( aggregationOperator ) : null;
+        return DimensionType.PROGRAM_DATAELEMENT;
     }
-    
+
     // -------------------------------------------------------------------------
     // Helper getters
     // -------------------------------------------------------------------------
 
     @JsonProperty
     @JsonView( { DetailedView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public boolean isOptionSetValue()
     {
         return optionSet != null;
     }
-    
+
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public ValueType getValueType()
+    {
+        //TODO
+        //return optionSet != null ? optionSet.getValueType() : valueType;
+        return valueType;
+    }
+
+    public void setValueType( ValueType valueType )
+    {
+        this.valueType = valueType;
+    }
 
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
@@ -564,45 +564,6 @@ public class DataElement
     public void setDomainType( DataElementDomain domainType )
     {
         this.domainType = domainType;
-    }
-
-    @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String getTextType()
-    {
-        return textType;
-    }
-
-    public void setTextType( String textType )
-    {
-        this.textType = textType;
-    }
-
-    @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String getType()
-    {
-        return type;
-    }
-
-    public void setType( String type )
-    {
-        this.type = type;
-    }
-
-    @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String getAggregationOperator()
-    {
-        return aggregationOperator;
-    }
-
-    public void setAggregationOperator( String aggregationOperator )
-    {
-        this.aggregationOperator = aggregationOperator;
     }
 
     @JsonProperty
@@ -689,19 +650,6 @@ public class DataElement
         this.zeroIsSignificant = zeroIsSignificant;
     }
 
-    @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String getNumberType()
-    {
-        return numberType;
-    }
-
-    public void setNumberType( String numberType )
-    {
-        this.numberType = numberType;
-    }
-
     @JsonProperty( "attributeValues" )
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlElementWrapper( localName = "attributeValues", namespace = DxfNamespaces.DXF_2_0 )
@@ -757,10 +705,7 @@ public class DataElement
             {
                 formName = dataElement.getFormName();
                 domainType = dataElement.getDomainType();
-                type = dataElement.getType();
-                numberType = dataElement.getNumberType();
-                textType = dataElement.getTextType();
-                aggregationOperator = dataElement.getAggregationOperator();
+                valueType = dataElement.getValueType();
                 categoryCombo = dataElement.getCategoryCombo();
                 url = dataElement.getUrl();
                 optionSet = dataElement.getOptionSet();
@@ -770,10 +715,7 @@ public class DataElement
             {
                 formName = dataElement.getFormName() == null ? formName : dataElement.getFormName();
                 domainType = dataElement.getDomainType() == null ? domainType : dataElement.getDomainType();
-                type = dataElement.getType() == null ? type : dataElement.getType();
-                numberType = dataElement.getNumberType() == null ? numberType : dataElement.getNumberType();
-                textType = dataElement.getTextType() == null ? textType : dataElement.getTextType();
-                aggregationOperator = dataElement.getAggregationOperator() == null ? aggregationOperator : dataElement.getAggregationOperator();
+                valueType = dataElement.getValueType() == null ? valueType : dataElement.getValueType();
                 categoryCombo = dataElement.getCategoryCombo() == null ? categoryCombo : dataElement.getCategoryCombo();
                 url = dataElement.getUrl() == null ? url : dataElement.getUrl();
                 optionSet = dataElement.getOptionSet() == null ? optionSet : dataElement.getOptionSet();

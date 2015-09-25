@@ -112,10 +112,12 @@ public interface StatementBuilder
     
     /**
      * Returns the name of a double column type.
-     * @return the name of a double column type.
      */
     String getDoubleColumnType();
 
+    /**
+     * Returns the name of a longvar column type.
+     */
     String getLongVarBinaryType();
 
     /**
@@ -143,39 +145,6 @@ public interface StatementBuilder
     String getPeriodIdentifierStatement( Period period );
     
     /**
-     * Creates a create table statement for the aggregated datavalue table.
-     */
-    String getCreateAggregatedDataValueTable( boolean temp );
-
-    /**
-     * Creates a create table statement for the aggregated organisation unit
-     * group datavalue table.
-     */
-    String getCreateAggregatedOrgUnitDataValueTable( boolean temp );
-    
-    /**
-     * Creates a create table statement for the aggregated indicatorvalue table.
-     */
-    String getCreateAggregatedIndicatorTable( boolean temp );
-
-    /**
-     * Creates a create table statement for the aggregated organisation unit
-     * group indicatorvalue table.
-     */
-    String getCreateAggregatedOrgUnitIndicatorTable( boolean temp );
-
-    /**
-     * Creates a create table statement for the aggregated datasetcompleteness table.
-     */
-    String getCreateDataSetCompletenessTable();
-
-    /**
-     * Creates a create table statement for the aggregated organisation unit
-     * group datasetcompleteness table.
-     */
-    String getCreateOrgUnitDataSetCompletenessTable();
-    
-    /**
      * Returns the number of columns part of the primary key for the given table.
      */
     String getNumberOfColumnsInPrimaryKey( String table );
@@ -199,9 +168,6 @@ public interface StatementBuilder
     String getStandardDeviation( int dataElementId, int categoryOptionComboId, int organisationUnitId );
     
     String getAverage( int dataElementId, int categoryOptionComboId, int organisationUnitId );
-    
-    String getDeflatedDataValues( int dataElementId, String dataElementName, int categoryOptionComboId,
-    	String periodIds, int organisationUnitId, String organisationUnitName, int lowerBound, int upperBound );
     
     String getAddDate( String dateField, int days );
     

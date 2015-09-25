@@ -29,6 +29,8 @@
       foreign-key="fk_parentid" index="in_parentid" />
 
     <property name="path" column="path" access="property" unique="true" index="in_organisationunit_path" />
+    
+    <property name="hierarchyLevel" column="hierarchylevel" access="property" index="in_organisationunit_hierarchylevel" />
 
     <property name="uuid" unique="true" length="36" />
 
@@ -40,7 +42,13 @@
 
     <property name="comment" type="text" />
 
-    <property name="featureType" length="50" />
+    <property name="featureType" length="50">
+      <type name="org.hibernate.type.EnumType">
+        <param name="enumClass">org.hisp.dhis.organisationunit.FeatureType</param>
+        <param name="useNamed">true</param>
+        <param name="type">12</param>
+      </type>
+    </property>
 
     <property name="coordinates" type="text" />
 

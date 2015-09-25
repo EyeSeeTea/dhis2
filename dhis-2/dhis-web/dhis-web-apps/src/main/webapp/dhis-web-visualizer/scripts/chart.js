@@ -574,17 +574,26 @@ Ext.onReady(function() {
 	DV.isDebug = false;
 	DV.isSessionStorage = ('sessionStorage' in window && window['sessionStorage'] !== null);
 
-	DV.getCore = function(ns) {
-        var init = ns.init,
-            conf = {},
+	DV.getCore = function(init, appConfig) {
+        var conf = {},
             api = {},
             support = {},
             service = {},
             web = {},
+            app = {},
+            webAlert,
             dimConf;
 
-        // tmp
-        ns.alert = function() {};
+        appConfig = appConfig || {};
+
+        // alert
+        webAlert = function() {};
+
+        // app
+        app.getViewportWidth = function() {};
+        app.getViewportHeight = function() {};
+        app.getCenterRegionWidth = function() {};
+        app.getCenterRegionHeight = function() {};
 
 		// conf
         (function() {
@@ -725,6 +734,14 @@ Ext.onReady(function() {
 					{id: 'FinancialApril', name: DV.i18n.financial_april}
 				]
 			};
+
+            conf.valueType = {
+            	numericTypes: ['NUMBER','UNIT_INTERVAL','PERCENTAGE','INTEGER','INTEGER_POSITIVE','INTEGER_NEGATIVE','INTEGER_ZERO_OR_POSITIVE'],
+            	textTypes: ['TEXT','LONG_TEXT','LETTER','PHONE_NUMBER','EMAIL'],
+            	booleanTypes: ['BOOLEAN','TRUE_ONLY'],
+            	dateTypes: ['DATE','DATETIME'],
+            	aggregateTypes: ['NUMBER','UNIT_INTERVAL','PERCENTAGE','INTEGER','INTEGER_POSITIVE','INTEGER_NEGATIVE','INTEGER_ZERO_OR_POSITIVE','BOOLEAN','TRUE_ONLY']
+            };
 
             conf.layout = {
                 west_width: 424,
@@ -916,6 +933,8 @@ Ext.onReady(function() {
 
                 // showTrendLine: boolean (false)
 
+				// completedOnly: boolean (false)
+
                 // targetLineValue: number
 
                 // targetLineTitle: string
@@ -1063,19 +1082,19 @@ Ext.onReady(function() {
 
 							// Indicators as filter
 							if (layout.filters[i].dimension === dimConf.indicator.objectName) {
-								ns.alert(DV.i18n.indicators_cannot_be_specified_as_filter || 'Indicators cannot be specified as filter.');
+								webAlert(DV.i18n.indicators_cannot_be_specified_as_filter || 'Indicators cannot be specified as filter.');
 								return;
 							}
 
 							// Categories as filter
 							if (layout.filters[i].dimension === dimConf.category.objectName) {
-								ns.alert(DV.i18n.categories_cannot_be_specified_as_filter || 'Categories cannot be specified as filter.');
+								webAlert(DV.i18n.categories_cannot_be_specified_as_filter || 'Categories cannot be specified as filter.');
 								return;
 							}
 
 							// Data sets as filter
 							if (layout.filters[i].dimension === dimConf.dataSet.objectName) {
-								ns.alert(DV.i18n.data_sets_cannot_be_specified_as_filter || 'Data sets cannot be specified as filter.');
+								webAlert(DV.i18n.data_sets_cannot_be_specified_as_filter || 'Data sets cannot be specified as filter.');
 								return;
 							}
 						}
@@ -1083,31 +1102,31 @@ Ext.onReady(function() {
 
 					// dc and in
 					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.indicator.objectName]) {
-						ns.alert('Indicators and detailed data elements cannot be specified together.', true);
+						webAlert('Indicators and detailed data elements cannot be specified together.', true);
 						return;
 					}
 
 					// dc and de
 					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.dataElement.objectName]) {
-						ns.alert('Detailed data elements and totals cannot be specified together.', true);
+						webAlert('Detailed data elements and totals cannot be specified together.', true);
 						return;
 					}
 
 					// dc and ds
 					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.dataSet.objectName]) {
-						ns.alert('Data sets and detailed data elements cannot be specified together.', true);
+						webAlert('Data sets and detailed data elements cannot be specified together.', true);
 						return;
 					}
 
 					// dc and co
 					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.category.objectName]) {
-						ns.alert('Categories and detailed data elements cannot be specified together.', true);
+						webAlert('Categories and detailed data elements cannot be specified together.', true);
 						return;
 					}
 
                     // in and aggregation type
                     if (objectNameDimensionMap[dimConf.indicator.objectName] && config.aggregationType !== 'DEFAULT') {
-                        ns.alert('Indicators and aggregation types cannot be specified together.', true);
+                        webAlert('Indicators and aggregation types cannot be specified together.', true);
                         return;
                     }
 
@@ -1120,7 +1139,7 @@ Ext.onReady(function() {
 
 					// config must be an object
 					if (!(config && Ext.isObject(config))) {
-						ns.alert('Layout: config is not an object (' + init.el + ')', true);
+						webAlert('Layout: config is not an object (' + init.el + ')', true);
 						return;
 					}
 
@@ -1130,12 +1149,12 @@ Ext.onReady(function() {
 
 					// at least one dimension specified as column and row
 					if (!config.columns) {
-						ns.alert('No series items selected');
+						webAlert('No series items selected');
 						return;
 					}
 
 					if (!config.rows) {
-						ns.alert('No category items selected');
+						webAlert('No category items selected');
 						return;
 					}
 
@@ -1150,7 +1169,7 @@ Ext.onReady(function() {
 
 					// at least one period
 					if (!Ext.Array.contains(objectNames, dimConf.period.objectName)) {
-						ns.alert('At least one period must be specified as series, category or filter');
+						webAlert('At least one period must be specified as series, category or filter');
 						return;
 					}
 
@@ -1177,6 +1196,9 @@ Ext.onReady(function() {
                     layout.showValues = Ext.isBoolean(config.showData) ? config.showData : (Ext.isBoolean(config.showValues) ? config.showValues : true);
                     layout.hideEmptyRows = Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : (Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : true);
                     layout.showTrendLine = Ext.isBoolean(config.regression) ? config.regression : (Ext.isBoolean(config.showTrendLine) ? config.showTrendLine : false);
+
+                    layout.completedOnly = Ext.isBoolean(config.completedOnly) ? config.completedOnly : false;
+
                     layout.targetLineValue = Ext.isNumber(config.targetLineValue) ? config.targetLineValue : null;
                     layout.targetLineTitle = Ext.isString(config.targetLineLabel) && !Ext.isEmpty(config.targetLineLabel) ? config.targetLineLabel :
                         (Ext.isString(config.targetLineTitle) && !Ext.isEmpty(config.targetLineTitle) ? config.targetLineTitle : null);
@@ -1214,6 +1236,11 @@ Ext.onReady(function() {
                         layout.program = config.program;
                     }
 
+                    // relative period date
+                    if (support.prototype.date.getYYYYMMDD(config.relativePeriodDate)) {
+                        layout.relativePeriodDate = support.prototype.date.getYYYYMMDD(config.relativePeriodDate);
+                    }
+
                     // style
                     if (Ext.isObject(config.domainAxisStyle)) {
                         layout.domainAxisStyle = config.domainAxisStyle;
@@ -1231,6 +1258,7 @@ Ext.onReady(function() {
                         layout.seriesStyle = config.seriesStyle;
                     }
 
+                    // validate
 					if (!validateSpecialCases()) {
 						return;
 					}
@@ -1486,7 +1514,39 @@ Ext.onReady(function() {
 
                 return variable;
 			};
-		}());
+
+                // date
+            support.prototype.date = {};
+
+            support.prototype.date.getYYYYMMDD = function(param) {
+                if (!Ext.isString(param)) {
+                    if (!(Object.prototype.toString.call(param) === '[object Date]' && param.toString() !== 'Invalid date')) {
+                        return null;
+                    }
+                }
+
+                var date = new Date(param),
+                    month = '' + (1 + date.getMonth()),
+                    day = '' + date.getDate();
+
+                month = month.length === 1 ? '0' + month : month;
+                day = day.length === 1 ? '0' + day : day;
+
+                return date.getFullYear() + '-' + month + '-' + day;
+            };
+
+            // connection
+            support.connection = {};
+
+            support.connection.ajax = function(requestConfig, authConfig) {
+                if (authConfig.crossDomain && Ext.isString(authConfig.username) && Ext.isString(authConfig.password)) {
+                    requestConfig.headers = Ext.isObject(authConfig.headers) ? authConfig.headers : {};
+                    requestConfig.headers['Authorization'] = 'Basic ' + btoa(authConfig.username + ':' + authConfig.password);
+                }
+
+                Ext.Ajax.request(requestConfig);
+            };
+        }());
 
 		// service
 		(function() {
@@ -1931,6 +1991,10 @@ Ext.onReady(function() {
 					delete layout.showTrendLine;
 				}
 
+				if (!layout.completedOnly) {
+					delete layout.completedOnly;
+				}
+
 				if (!layout.targetLineValue) {
 					delete layout.targetLineValue;
 				}
@@ -2233,7 +2297,7 @@ Ext.onReady(function() {
 			web.window = {};
 
 			web.window.setAnchorPosition = function(w, target) {
-				var vpw = ns.app.viewport.getWidth(),
+				var vpw = app.getViewportWidth(),
 					targetx = target ? target.getPosition()[0] : 4,
 					winw = w.getWidth(),
 					y = target ? target.getPosition()[1] + target.getHeight() + 4 : 33;
@@ -2310,7 +2374,7 @@ Ext.onReady(function() {
                 config.html += obj.message + (obj.message.substr(obj.message.length - 1) === '.' ? '' : '.');
 
                 // bodyStyle
-                config.bodyStyle = 'padding: 12px; background: #fff; max-width: 600px; max-height: ' + ns.app.centerRegion.getHeight() / 2 + 'px';
+                config.bodyStyle = 'padding: 12px; background: #fff; max-width: 600px; max-height: ' + app.getCenterRegionHeight() / 2 + 'px';
 
                 // destroy handler
                 config.modal = true;
@@ -2379,6 +2443,10 @@ Ext.onReady(function() {
                     }
                 }
 
+				if (xLayout.completedOnly) {
+					paramString += '&completedOnly=true';
+				}
+
 				// aggregation type
 				if (Ext.Array.contains(aggTypes, xLayout.aggregationType)) {
 					paramString += '&aggregationType=' + xLayout.aggregationType;
@@ -2401,6 +2469,11 @@ Ext.onReady(function() {
                     paramString += '&program=' + xLayout.program.id;
                 }
 
+                // relative period date
+                if (xLayout.relativePeriodDate) {
+                    paramString += '&relativePeriodDate=' + xLayout.relativePeriodDate;
+                }
+
                 return paramString.replace(/#/g, '.');
             };
 
@@ -2417,7 +2490,7 @@ Ext.onReady(function() {
 
                 msg += '\n\n' + 'Hint: A good way to reduce the number of items is to use relative periods and level/group organisation unit selection modes.';
 
-                ns.alert(msg, 'warning');
+                webAlert(msg, 'warning');
 			};
 
 			// chart
@@ -2581,7 +2654,7 @@ Ext.onReady(function() {
                                 }
 
                                 trendLineFields.push(regressionKey);
-                                xResponse.metaData.names[regressionKey] = DV.i18n.trend + (ns.dashboard ? '' : ' (' + xResponse.metaData.names[failSafeColumnIds[i]] + ')');
+                                xResponse.metaData.names[regressionKey] = DV.i18n.trend + (appConfig.dashboard ? '' : ' (' + xResponse.metaData.names[failSafeColumnIds[i]] + ')');
                             }
                         }
                     }
@@ -2904,15 +2977,15 @@ Ext.onReady(function() {
                 };
 
                 getFormatedSeriesTitle = function(titles) {
-                    var itemLength = ns.dashboard ? 23 : 30,
-                        charLength = ns.dashboard ? 5 : 6,
+                    var itemLength = appConfig.dashboard ? 23 : 30,
+                        charLength = appConfig.dashboard ? 5 : 6,
                         numberOfItems = titles.length,
                         numberOfChars,
                         totalItemLength = numberOfItems * itemLength,
                         //minLength = 5,
                         maxLength = support.prototype.array.getMaxLength(titles),
                         fallbackLength = 10,
-                        maxWidth = ns.app.centerRegion.getWidth(),
+                        maxWidth = app.getCenterRegionWidth(),
                         width,
                         validateTitles;
 
@@ -2974,7 +3047,7 @@ Ext.onReady(function() {
                         }
                     }
 
-                    return ns.dashboard ? getFormatedSeriesTitle(a) : a;
+                    return appConfig.dashboard ? getFormatedSeriesTitle(a) : a;
 				};
 
                 getPieSeriesTitle = function(store) {
@@ -3003,7 +3076,7 @@ Ext.onReady(function() {
                         });
                     }
 
-                    return ns.dashboard ? getFormatedSeriesTitle(a) : a;
+                    return appConfig.dashboard ? getFormatedSeriesTitle(a) : a;
 				};
 
                 getDefaultSeries = function(store) {
@@ -3162,8 +3235,8 @@ Ext.onReady(function() {
                 };
 
                 getDefaultLegend = function(store, chartConfig) {
-                    var itemLength = ns.dashboard ? 24 : 30,
-                        charLength = ns.dashboard ? 4 : 6,
+                    var itemLength = appConfig.dashboard ? 24 : 30,
+                        charLength = appConfig.dashboard ? 4 : 6,
                         numberOfItems = 0,
                         numberOfChars = 0,
                         width,
@@ -3192,7 +3265,7 @@ Ext.onReady(function() {
 
                     width = (numberOfItems * itemLength) + (numberOfChars * charLength);
 
-                    if (width > ns.app.centerRegion.getWidth() - 6) {
+                    if (width > app.getCenterRegionWidth() - 6) {
                         position = 'right';
                     }
 
@@ -3268,7 +3341,7 @@ Ext.onReady(function() {
                         text = xLayout.title;
                     }
 
-                    fontSize = (ns.app.centerRegion.getWidth() / text.length) < 11.6 ? 12 : 17;
+                    fontSize = (app.getCenterRegionWidth() / text.length) < 11.6 ? 12 : 17;
                     titleFont = 'normal ' + fontSize + 'px ' + conf.chart.style.fontFamily;
                     titleColor = 'black';
 
@@ -3294,19 +3367,19 @@ Ext.onReady(function() {
                         font: titleFont,
                         fill: titleColor,
                         height: 20,
-                        y: ns.dashboard ? 7 : 20
+                        y: appConfig.dashboard ? 7 : 20
                     });
                 };
 
                 getDefaultChartSizeHandler = function() {
                     return function() {
-                        var width = ns.app.centerRegion.getWidth(),
-                            height = ns.app.centerRegion.getHeight();
+                        var width = app.getCenterRegionWidth(),
+                            height = app.getCenterRegionHeight();
 
 						this.animate = false;
-                        this.setWidth(ns.dashboard ? width : width - 15);
-                        this.setHeight(ns.dashboard ? height : height - 40);
-                        this.animate = !ns.dashboard;
+                        this.setWidth(appConfig.dashboard ? width : width - 15);
+                        this.setHeight(appConfig.dashboard ? height : height - 40);
+                        this.animate = !appConfig.dashboard;
                     };
                 };
 
@@ -3339,22 +3412,22 @@ Ext.onReady(function() {
                 getDefaultChart = function(config) {
                     var chart,
                         store = config.store || {},
-                        width = ns.app.centerRegion.getWidth(),
-                        height = ns.app.centerRegion.getHeight(),
+                        width = app.getCenterRegionWidth(),
+                        height = app.getCenterRegionHeight(),
                         isLineBased = Ext.Array.contains(['line', 'area'], xLayout.type),
                         defaultConfig = {
                             //animate: true,
                             animate: false,
                             shadow: false,
-                            insetPadding: ns.dashboard ? 17 : 35,
+                            insetPadding: appConfig.dashboard ? 17 : 35,
                             insetPaddingObject: {
-                                top: ns.dashboard ? 12 : 32,
-                                right: ns.dashboard ? (isLineBased ? 5 : 3) : (isLineBased ? 25 : 15),
-                                bottom: ns.dashboard ? 2 : 10,
-                                left: ns.dashboard ? (isLineBased ? 15 : 7) : (isLineBased ? 70 : 50)
+                                top: appConfig.dashboard ? 12 : 32,
+                                right: appConfig.dashboard ? (isLineBased ? 5 : 3) : (isLineBased ? 25 : 15),
+                                bottom: appConfig.dashboard ? 2 : 10,
+                                left: appConfig.dashboard ? (isLineBased ? 15 : 7) : (isLineBased ? 70 : 50)
                             },
-                            width: ns.dashboard ? width : width - 15,
-                            height: ns.dashboard ? height : height - 40,
+                            width: appConfig.dashboard ? width : width - 15,
+                            height: appConfig.dashboard ? height : height - 40,
                             theme: 'dv1'
                         };
 
@@ -3363,15 +3436,15 @@ Ext.onReady(function() {
                         defaultConfig.legend = getDefaultLegend(store, config);
 
                         if (defaultConfig.legend.position === 'right') {
-                            defaultConfig.insetPaddingObject.top = ns.dashboard ? 22 : 40;
-                            defaultConfig.insetPaddingObject.right = ns.dashboard ? 5 : 40;
+                            defaultConfig.insetPaddingObject.top = appConfig.dashboard ? 22 : 40;
+                            defaultConfig.insetPaddingObject.right = appConfig.dashboard ? 5 : 40;
                         }
                     }
 
                     // title
                     if (xLayout.hideTitle) {
-                        defaultConfig.insetPadding = ns.dashboard ? 1 : 10;
-                        defaultConfig.insetPaddingObject.top = ns.dashboard ? 3 : 10;
+                        defaultConfig.insetPadding = appConfig.dashboard ? 1 : 10;
+                        defaultConfig.insetPaddingObject.top = appConfig.dashboard ? 3 : 10;
                     }
                     else {
                         defaultConfig.items = [getDefaultChartTitle(store)];
@@ -3550,7 +3623,7 @@ Ext.onReady(function() {
                             },
                             markerConfig: {
                                 type: 'circle',
-                                radius: ns.dashboard ? 3 : 4
+                                radius: appConfig.dashboard ? 3 : 4
                             },
                             tips: getDefaultTips(),
                             title: seriesTitles[i]
@@ -3732,10 +3805,10 @@ Ext.onReady(function() {
                         store: store,
                         series: series,
                         insetPaddingObject: {
-                            top: ns.dashboard ? 15 : 40,
-                            right: ns.dashboard ? 2 : 30,
-                            bottom: ns.dashboard ? 13: 30,
-                            left: ns.dashboard ? 7 : 30
+                            top: appConfig.dashboard ? 15 : 40,
+                            right: appConfig.dashboard ? 2 : 30,
+                            bottom: appConfig.dashboard ? 13: 30,
+                            left: appConfig.dashboard ? 7 : 30
                         }
                     });
 
@@ -3864,10 +3937,10 @@ Ext.onReady(function() {
                     chart = getDefaultChart({
                         axes: [axis],
                         series: [series],
-                        width: ns.app.centerRegion.getWidth(),
-                        height: ns.app.centerRegion.getHeight() * 0.6,
+                        width: app.getCenterRegionWidth(),
+                        height: app.getCenterRegionHeight() * 0.6,
                         store: store,
-                        insetPadding: ns.dashboard ? 50 : 100,
+                        insetPadding: appConfig.dashboard ? 50 : 100,
                         theme: null,
                         //animate: {
                             //easing: 'elasticIn',
@@ -3889,8 +3962,8 @@ Ext.onReady(function() {
 
                     chart.setChartSize = function() {
 						//this.animate = false;
-                        this.setWidth(ns.app.centerRegion.getWidth());
-                        this.setHeight(ns.app.centerRegion.getHeight() * 0.6);
+                        this.setWidth(app.getCenterRegionWidth());
+                        this.setHeight(app.getCenterRegionHeight() * 0.6);
                         //this.animate = true;
                     };
 
@@ -3902,7 +3975,7 @@ Ext.onReady(function() {
 
                             if (title) {
                                 var titleWidth = Ext.isIE ? title.el.dom.scrollWidth : title.el.getWidth(),
-                                    titleX = titleWidth ? (ns.app.centerRegion.getWidth() / 2) - (titleWidth / 2) : titleXFallback;
+                                    titleX = titleWidth ? (app.getCenterRegionWidth() / 2) - (titleWidth / 2) : titleXFallback;
                                 title.setAttributes({
                                     x: titleX
                                 }, true);
@@ -3910,7 +3983,7 @@ Ext.onReady(function() {
 
                             if (subTitle) {
                                 var subTitleWidth = Ext.isIE ? subTitle.el.dom.scrollWidth : subTitle.el.getWidth(),
-                                    subTitleX = subTitleWidth ? (ns.app.centerRegion.getWidth() / 2) - (subTitleWidth / 2) : titleXFallback;
+                                    subTitleX = subTitleWidth ? (app.getCenterRegionWidth() / 2) - (subTitleWidth / 2) : titleXFallback;
                                 subTitle.setAttributes({
                                     x: subTitleX
                                 }, true);
@@ -3949,15 +4022,18 @@ Ext.onReady(function() {
 		}());
 
 		// alert
-        ns.alert = web.message.alert;
+		webAlert = web.message.alert;
 
-		ns.conf = conf;
-		ns.api = api;
-		ns.support = support;
-		ns.service = service;
-		ns.web = web;
-
-		return ns;
+		return {
+            init: init,
+            conf: conf,
+            api: api,
+            support: support,
+            service: service,
+            web: web,
+            app: app,
+            webAlert: webAlert
+        };
     };
 
     // PLUGIN
@@ -3985,7 +4061,8 @@ Ext.onReady(function() {
 		var isInit = false,
 			requests = [],
 			callbacks = 0,
-            type = config.plugin && config.crossDomain ? 'jsonp' : 'json',
+            type = 'json',
+            ajax,
 			fn;
 
         init.contextPath = config.url;
@@ -4001,6 +4078,15 @@ Ext.onReady(function() {
 				configs = [];
 			}
 		};
+
+        ajax = function(requestConfig, authConfig) {
+            if (authConfig.crossDomain && Ext.isString(authConfig.username) && Ext.isString(authConfig.password)) {
+                requestConfig.headers = Ext.isObject(authConfig.headers) ? authConfig.headers : {};
+                requestConfig.headers['Authorization'] = 'Basic ' + btoa(authConfig.username + ':' + authConfig.password);
+            }
+
+            Ext.Ajax.request(requestConfig);
+        };
 
         // user-account
         requests.push({
@@ -4074,17 +4160,13 @@ Ext.onReady(function() {
 		});
 
 		for (var i = 0; i < requests.length; i++) {
-            if (type === 'jsonp') {
-                Ext.data.JsonP.request(requests[i]);
-            }
-            else {
-                Ext.Ajax.request(requests[i]);
-            }
+            ajax(requests[i], config);
 		}
 	};
 
-	applyCss = function() {
-        var css = '';
+	applyCss = function(config) {
+        var css = '',
+            errorUrl = config.dashboard ? init.contextPath + '/dhis-web-commons/javascripts/plugin/images/error_m.png' : '//dhis2-cdn.org/v220/plugin/images/error_m.png';
 
         // tooltip
         css += '.dv-chart-tips { border-radius: 2px; padding: 2px 3px 0; border: 0 none; background-color: #000; opacity: 0.9 } \n';
@@ -4099,6 +4181,10 @@ Ext.onReady(function() {
 
         // alert
         css += '.ns-plugin-alert { width: 90%; padding: 5%; color: #777 } \n';
+
+        css += '.x-window-body { font-size: 13px; } \n';
+        css += '.ns-window-title-messagebox { padding-left: 16px; background-position-y: 1px; } \n';
+        css += '.ns-window-title-messagebox.error { background-image: url("' + errorUrl + '"); } \n';
 
         Ext.util.CSS.createStyleSheet(css);
     };
@@ -4130,14 +4216,14 @@ Ext.onReady(function() {
 			return true;
 		};
 
-        extendInstance = function(ns) {
+        extendInstance = function(ns, appConfig) {
             var init = ns.core.init,
 				api = ns.core.api,
                 conf = ns.core.conf,
 				support = ns.core.support,
 				service = ns.core.service,
 				web = ns.core.web,
-                type = ns.plugin && ns.crossDomain ? 'jsonp' : 'json',
+                type = 'json',
                 headerMap = {
                     json: 'application/json',
                     jsonp: 'application/javascript'
@@ -4147,6 +4233,19 @@ Ext.onReady(function() {
                     'Accepts': headerMap[type]
                 },
                 el = Ext.get(config.el);
+
+			init.el = config.el;
+
+			// ns
+            ns.plugin = appConfig.plugin;
+            ns.dashboard = appConfig.dashboard;
+            ns.crossDomain = appConfig.crossDomain;
+            ns.skipMask = appConfig.skipMask;
+            ns.skipFade = appConfig.skipFade;
+            ns.el = appConfig.el;
+            ns.username = appConfig.username;
+            ns.password = appConfig.password;
+            ns.ajax = support.connection.ajax;
 
 			// message
 			web.message = web.message || {};
@@ -4200,62 +4299,116 @@ Ext.onReady(function() {
 			web.chart.getData = function(layout, isUpdateGui) {
 				var xLayout,
 					paramString,
-                    success,
-                    failure,
-                    config = {};
+                    sortedParamString,
+                    onFailure;
 
 				if (!layout) {
 					return;
 				}
 
+                onFailure = function(r) {
+                    if (!ns.skipMask) {
+                        web.mask.hide(ns.app.centerRegion);
+                    }
+                };
+
 				xLayout = service.layout.getExtendedLayout(layout);
-				paramString = web.analytics.getParamString(xLayout, true);
+				paramString = web.analytics.getParamString(xLayout) + '&skipData=true';
+				sortedParamString = web.analytics.getParamString(xLayout, true) + '&skipMeta=true';
 
 				// mask
                 if (!ns.skipMask) {
                     web.mask.show(ns.app.centerRegion);
                 }
 
-                success = function(r) {
-                    var response = api.response.Response((r.responseText ? Ext.decode(r.responseText) : r));
+                ns.ajax({
+					url: init.contextPath + '/api/analytics.json' + paramString,
+					timeout: 60000,
+					headers: {
+						'Content-Type': 'application/json',
+						'Accepts': 'application/json'
+					},
+					disableCaching: false,
+					failure: function(r) {
+                        onFailure(r);
+					},
+					success: function(r) {
+                        var metaData = Ext.decode(r.responseText).metaData;
 
-                    if (!response) {
-                        web.mask.hide(ns.app.centerRegion);
-                        return;
-                    }
+                        ns.ajax({
+                            url: init.contextPath + '/api/analytics.json' + sortedParamString,
+                            timeout: 60000,
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accepts': 'application/json'
+                            },
+                            disableCaching: false,
+                            failure: function(r) {
+                                onFailure(r);
+                            },
+                            success: function(r) {
+                                var response = api.response.Response(Ext.decode(r.responseText));
 
-                    // sync xLayout with response
-                    xLayout = service.layout.getSyncronizedXLayout(xLayout, response);
+                                if (!response) {
+                                    onFailure();
+                                    return;
+                                }
 
-                    if (!xLayout) {
-                        web.mask.hide(ns.app.centerRegion);
-                        return;
-                    }
+                                response.metaData = metaData;
 
-                    ns.app.paramString = paramString;
+                                // sync xLayout with response
+                                xLayout = service.layout.getSyncronizedXLayout(xLayout, response);
 
-                    web.chart.getChart(layout, xLayout, response, isUpdateGui);
-                };
+                                if (!xLayout) {
+                                    return;
+                                }
 
-                failure = function(r) {
-                    if (!ns.skipMask) {
-                        web.mask.hide(ns.app.centerRegion);
-                    }
-                };
+                                ns.app.paramString = sortedParamString;
 
-                config.url = init.contextPath + '/api/analytics.' + type + paramString;
-                config.disableCaching = false;
-                config.timeout = 60000;
-                config.headers = headers;
-                config.success = success;
-                config.failure = failure;
+                                web.chart.getChart(layout, xLayout, response, isUpdateGui);
+                            }
+                        }, ns);
+					}
+				}, ns);
 
-                if (type === 'jsonp') {
-                    Ext.data.JsonP.request(config);
-                }
-                else {
-                    Ext.Ajax.request(config);
-                }
+
+
+
+
+                //success = function(r) {
+                    //var response = api.response.Response((r.responseText ? Ext.decode(r.responseText) : r));
+
+                    //if (!response) {
+                        //web.mask.hide(ns.app.centerRegion);
+                        //return;
+                    //}
+
+                    //// sync xLayout with response
+                    //xLayout = service.layout.getSyncronizedXLayout(xLayout, response);
+
+                    //if (!xLayout) {
+                        //web.mask.hide(ns.app.centerRegion);
+                        //return;
+                    //}
+
+                    //ns.app.paramString = paramString;
+
+                    //web.chart.getChart(layout, xLayout, response, isUpdateGui);
+                //};
+
+                //config.url = init.contextPath + '/api/analytics.' + type + paramString;
+                //config.disableCaching = false;
+                //config.timeout = 60000;
+                //config.headers = headers;
+                //config.success = success;
+                //config.failure = failure;
+
+                //if (type === 'jsonp') {
+                    //Ext.data.JsonP.request(config);
+                //}
+                //else {
+                    //Ext.Ajax.request(config);
+                //}
 			};
 
 			web.chart.getChart = function(layout, xLayout, response, isUpdateGui) {
@@ -4354,17 +4507,6 @@ Ext.onReady(function() {
                     }
                 }
 			};
-
-            // ns
-            ns.plugin = init.plugin;
-            ns.dashboard = init.dashboard;
-            ns.crossDomain = init.crossDomain;
-            ns.skipMask = init.skipMask;
-            ns.skipFade = init.skipFade;
-
-            ns.alert = web.message.alert;
-
-			init.el = config.el;
         };
 
 		createViewport = function() {
@@ -4393,6 +4535,12 @@ Ext.onReady(function() {
 			});
 
 			return {
+                getWidth: function() {
+                    return el.getWidth();
+                },
+                getHeight: function() {
+                    return el.getHeight();
+                },
 				centerRegion: centerRegion
 			};
 		};
@@ -4404,24 +4552,33 @@ Ext.onReady(function() {
 				return;
 			}
 
+            appConfig = {
+                plugin: true,
+                dashboard: Ext.isBoolean(config.dashboard) ? config.dashboard : false,
+                crossDomain: Ext.isBoolean(config.crossDomain) ? config.crossDomain : true,
+                skipMask: Ext.isBoolean(config.skipMask) ? config.skipMask : false,
+                skipFade: Ext.isBoolean(config.skipFade) ? config.skipFade : false,
+                el: Ext.isString(config.el) ? config.el : null,
+                username: Ext.isString(config.username) ? config.username : null,
+                password: Ext.isString(config.password) ? config.password : null
+            };
+
             // css
-			applyCss();
+			applyCss(config);
 
-            // config
-            init.plugin = true;
-            init.dashboard = Ext.isBoolean(config.dashboard) ? config.dashboard : false;
-            init.crossDomain = Ext.isBoolean(config.crossDomain) ? config.crossDomain : true;
-            init.skipMask = Ext.isBoolean(config.skipMask) ? config.skipMask : false;
-            init.skipFade = Ext.isBoolean(config.skipFade) ? config.skipFade : false;
-
-            // init
-            ns.init = init;
-            DV.instances.push(ns);
-			ns.core = DV.getCore(ns);
-			extendInstance(ns);
+            // core
+			ns.core = DV.getCore(init, appConfig);
+			extendInstance(ns, appConfig);
 
 			ns.app.viewport = createViewport();
 			ns.app.centerRegion = ns.app.viewport.centerRegion;
+
+            ns.core.app.getViewportWidth = function() { return ns.app.viewport.getWidth(); };
+            ns.core.app.getViewportHeight = function() { return ns.app.viewport.getHeight(); };
+            ns.core.app.getCenterRegionWidth = function() { return ns.app.viewport.centerRegion.getWidth(); };
+            ns.core.app.getCenterRegionHeight = function() { return ns.app.viewport.centerRegion.getHeight(); };
+
+            DV.instances.push(ns);
 
             if (el) {
                 el.setViewportWidth = function(width) {

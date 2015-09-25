@@ -44,14 +44,13 @@ import org.hisp.dhis.common.PagerUtils;
 import org.hisp.dhis.dxf2.common.ImportOptions;
 import org.hisp.dhis.dxf2.common.OrderOptions;
 import org.hisp.dhis.dxf2.common.TranslateParams;
-import org.hisp.dhis.dxf2.fieldfilter.FieldFilterService;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.metadata.ImportService;
 import org.hisp.dhis.dxf2.metadata.ImportTypeSummary;
-import org.hisp.dhis.dxf2.objectfilter.ObjectFilterService;
 import org.hisp.dhis.dxf2.render.DefaultRenderService;
 import org.hisp.dhis.dxf2.render.RenderService;
 import org.hisp.dhis.dxf2.webmessage.WebMessageException;
+import org.hisp.dhis.fieldfilter.FieldFilterService;
 import org.hisp.dhis.hibernate.exception.CreateAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.DeleteAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.ReadAccessDeniedException;
@@ -65,6 +64,7 @@ import org.hisp.dhis.node.types.CollectionNode;
 import org.hisp.dhis.node.types.ComplexNode;
 import org.hisp.dhis.node.types.RootNode;
 import org.hisp.dhis.node.types.SimpleNode;
+import org.hisp.dhis.objectfilter.ObjectFilterService;
 import org.hisp.dhis.query.Order;
 import org.hisp.dhis.query.Query;
 import org.hisp.dhis.query.QueryService;
@@ -101,12 +101,15 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public abstract class AbstractCrudController<T extends IdentifiableObject>
 {
+    protected static final WebOptions NO_WEB_OPTIONS = new WebOptions( new HashMap<>() );
+
     //--------------------------------------------------------------------------
     // Dependencies
     //--------------------------------------------------------------------------
@@ -314,8 +317,11 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             property.getSetterMethod().invoke( persistedObject, value );
         }
 
-        ImportTypeSummary importTypeSummary = importService.importObject( currentUserService.getCurrentUser().getUid(), persistedObject,
-            ImportStrategy.UPDATE, MergeStrategy.MERGE );
+        ImportOptions importOptions = new ImportOptions();
+        importOptions.setStrategy( ImportStrategy.UPDATE );
+        importOptions.setMergeStrategy( MergeStrategy.MERGE );
+
+        ImportTypeSummary importTypeSummary = importService.importObject( currentUserService.getCurrentUser().getUid(), persistedObject, importOptions );
 
         webMessageService.send( WebMessageUtils.importTypeSummary( importTypeSummary ), response, request );
     }
@@ -339,16 +345,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     private List<String> getPersistedProperties( List<String> properties )
     {
         List<String> persistedProperties = new ArrayList<>();
-
-        Schema schema = getSchema();
-
-        for ( String property : properties )
-        {
-            if ( schema.havePersistedProperty( property ) )
-            {
-                persistedProperties.add( property );
-            }
-        }
+        persistedProperties.addAll( properties.stream().filter( getSchema()::havePersistedProperty ).collect( Collectors.toList() ) );
 
         return persistedProperties;
     }
@@ -395,8 +392,10 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         property.getSetterMethod().invoke( persistedObject, value );
 
-        ImportTypeSummary importTypeSummary = importService.importObject( currentUserService.getCurrentUser().getUid(), persistedObject,
-            ImportStrategy.UPDATE, MergeStrategy.MERGE );
+        ImportOptions importOptions = new ImportOptions();
+        importOptions.setStrategy( ImportStrategy.UPDATE );
+        importOptions.setMergeStrategy( MergeStrategy.MERGE );
+        ImportTypeSummary importTypeSummary = importService.importObject( currentUserService.getCurrentUser().getUid(), persistedObject, importOptions );
 
         webMessageService.send( WebMessageUtils.importTypeSummary( importTypeSummary ), response, request );
     }
@@ -496,8 +495,8 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         preCreateEntity( parsed );
 
-        ImportTypeSummary importTypeSummary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed,
-            ImportStrategy.CREATE, importOptions.getMergeStrategy() );
+        importOptions.setStrategy( ImportStrategy.CREATE );
+        ImportTypeSummary importTypeSummary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, importOptions );
 
         if ( ImportStatus.SUCCESS.equals( importTypeSummary.getStatus() ) )
         {
@@ -526,8 +525,8 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         preCreateEntity( parsed );
 
-        ImportTypeSummary importTypeSummary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed,
-            ImportStrategy.CREATE, importOptions.getMergeStrategy() );
+        importOptions.setStrategy( ImportStrategy.CREATE );
+        ImportTypeSummary importTypeSummary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, importOptions );
 
         if ( ImportStatus.SUCCESS.equals( importTypeSummary.getStatus() ) )
         {
@@ -567,8 +566,8 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         preUpdateEntity( parsed );
 
-        ImportTypeSummary importTypeSummary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed,
-            ImportStrategy.UPDATE, importOptions.getMergeStrategy() );
+        importOptions.setStrategy( ImportStrategy.UPDATE );
+        ImportTypeSummary importTypeSummary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, importOptions );
 
         if ( ImportStatus.SUCCESS.equals( importTypeSummary.getStatus() ) )
         {
@@ -598,8 +597,8 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         preUpdateEntity( parsed );
 
-        ImportTypeSummary importTypeSummary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed,
-            ImportStrategy.UPDATE, importOptions.getMergeStrategy() );
+        importOptions.setStrategy( ImportStrategy.UPDATE );
+        ImportTypeSummary importTypeSummary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, importOptions );
 
         if ( ImportStatus.SUCCESS.equals( importTypeSummary.getStatus() ) )
         {
@@ -823,7 +822,6 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
      * Override to process entities after it has been retrieved from
      * storage and before it is returned to the view. Entities is null-safe.
      */
-
     protected void postProcessEntities( List<T> entityList, WebOptions options, Map<String, String> parameters )
     {
     }
@@ -911,12 +909,9 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         return entityList;
     }
 
-    /**
-     * Should not be overridden, instead override {@link getEntity(String, WebOptions}.
-     */
-    protected final List<T> getEntity( String uid )
+    private final List<T> getEntity( String uid )
     {
-        return getEntity( uid, new WebOptions( new HashMap<String, String>() ) );
+        return getEntity( uid, new WebOptions( new HashMap<>() ) );
     }
 
     protected List<T> getEntity( String uid, WebOptions options )

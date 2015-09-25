@@ -28,31 +28,30 @@ package org.hisp.dhis.dataelement.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.common.IdentifiableObjectUtils.getIdentifiers;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.common.ListMap;
+import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.hisp.dhis.commons.util.TextUtils;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementDomain;
 import org.hisp.dhis.dataelement.DataElementStore;
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.commons.util.TextUtils;
 import org.springframework.jdbc.BadSqlGrammarException;
-import org.springframework.jdbc.core.RowCallbackHandler;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static org.hisp.dhis.common.IdentifiableObjectUtils.getIdentifiers;
 
 /**
  * @author Torgeir Lorange Ostby
@@ -68,36 +67,43 @@ public class HibernateDataElementStore
     // -------------------------------------------------------------------------
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<DataElement> searchDataElementsByName( String key )
     {
         return getCriteria( Restrictions.ilike( "name", "%" + key + "%" ) ).list();
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<DataElement> getAggregateableDataElements()
     {
-        Set<String> types = new HashSet<>();
+        Set<ValueType> valueTypes = new HashSet<>();
 
-        types.add( DataElement.VALUE_TYPE_INT );
-        types.add( DataElement.VALUE_TYPE_BOOL );
-        
-        return getCriteria( Restrictions.in( "type", types ) ).list();
+        valueTypes.addAll( ValueType.NUMERIC_TYPES );
+        valueTypes.add( ValueType.BOOLEAN );
+
+        return getCriteria( Restrictions.in( "valueType", valueTypes ) ).list();
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public List<DataElement> getDataElementsByAggregationOperator( String aggregationOperator )
+    @SuppressWarnings( "unchecked" )
+    public List<DataElement> getDataElementsByAggregationType( AggregationType aggregationType )
     {
-        return getCriteria( Restrictions.eq( "aggregationOperator", aggregationOperator ) ).list();
+        return getCriteria( Restrictions.eq( "aggregationType", aggregationType ) ).list();
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public List<DataElement> getDataElementsByType( String type )
+    @SuppressWarnings( "unchecked" )
+    public List<DataElement> getDataElementsByValueTypes( List<ValueType> valueTypes )
     {
-        return getCriteria( Restrictions.eq( "type", type ) ).list();
+        return getCriteria( Restrictions.in( "valueType", valueTypes ) ).list();
+    }
+
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public List<DataElement> getDataElementsByValueType( ValueType valueType )
+    {
+        return getCriteria( Restrictions.eq( "valueType", valueType ) ).list();
     }
 
     @Override
@@ -108,7 +114,7 @@ public class HibernateDataElementStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<DataElement> getDataElementsByDomainType( DataElementDomain domainType, int first, int max )
     {
         Criteria criteria = getCriteria();
@@ -122,14 +128,14 @@ public class HibernateDataElementStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<DataElement> getDataElementByCategoryCombo( DataElementCategoryCombo categoryCombo )
     {
         return getCriteria( Restrictions.eq( "categoryCombo", categoryCombo ) ).list();
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<DataElement> getDataElementsWithGroupSets()
     {
         String hql = "from DataElement d where d.groupSets.size > 0";
@@ -145,7 +151,7 @@ public class HibernateDataElementStore
         Query query = getQuery( hql );
 
         query.executeUpdate();
-        
+
         //TODO improve
 
         if ( !dataElementIds.isEmpty() )
@@ -160,18 +166,18 @@ public class HibernateDataElementStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<DataElement> getDataElementsByZeroIsSignificant( boolean zeroIsSignificant )
     {
         Criteria criteria = getCriteria();
         criteria.add( Restrictions.eq( "zeroIsSignificant", zeroIsSignificant ) );
-        criteria.add( Restrictions.eq( "type", DataElement.VALUE_TYPE_INT ) );
+        criteria.add( Restrictions.in( "valueType", ValueType.NUMERIC_TYPES ) );
 
         return criteria.list();
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<DataElement> getDataElementsWithoutGroups()
     {
         String hql = "from DataElement d where d.groups.size = 0";
@@ -180,7 +186,7 @@ public class HibernateDataElementStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<DataElement> getDataElementsWithoutDataSets()
     {
         String hql = "from DataElement d where d.dataSets.size = 0 and d.domainType =:domainType";
@@ -189,7 +195,7 @@ public class HibernateDataElementStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<DataElement> getDataElementsWithDataSets()
     {
         String hql = "from DataElement d where d.dataSets.size > 0";
@@ -198,7 +204,7 @@ public class HibernateDataElementStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<DataElement> getDataElementsByDataSets( Collection<DataSet> dataSets )
     {
         String hql = "select distinct de from DataElement de join de.dataSets ds where ds.id in (:ids)";
@@ -207,7 +213,7 @@ public class HibernateDataElementStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<DataElement> getDataElementsByAggregationLevel( int aggregationLevel )
     {
         String hql = "from DataElement de join de.aggregationLevels al where al = :aggregationLevel";
@@ -227,17 +233,11 @@ public class HibernateDataElementStore
 
         try
         {
-            jdbcTemplate.query( sql, new RowCallbackHandler()
-            {
-                @Override
-                public void processRow( ResultSet rs )
-                    throws SQLException
-                {
-                    String de = rs.getString( 1 );
-                    String coc = rs.getString( 2 );
+            jdbcTemplate.query( sql, rs -> {
+                String de = rs.getString( 1 );
+                String coc = rs.getString( 2 );
 
-                    map.putValue( de, coc );
-                }
+                map.putValue( de, coc );
             } );
         }
         catch ( BadSqlGrammarException ex )
@@ -250,7 +250,7 @@ public class HibernateDataElementStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<DataElement> get( DataSet dataSet, String key, Integer max )
     {
         String hql = "select dataElement from DataSet dataSet inner join dataSet.dataElements as dataElement where dataSet.id = :dataSetId ";
@@ -262,7 +262,7 @@ public class HibernateDataElementStore
 
         Query query = getQuery( hql );
         query.setInteger( "dataSetId", dataSet.getId() );
-        
+
         if ( max != null )
         {
             query.setMaxResults( max );

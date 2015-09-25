@@ -29,8 +29,13 @@ package org.hisp.dhis.dxf2.datavalueset;
  */
 
 import static org.apache.commons.lang3.StringUtils.trimToNull;
-import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
 import static org.hisp.dhis.common.IdentifiableProperty.UUID;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_DATA_IMPORT_REQUIRE_ATTRIBUTE_OPTION_COMBO;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_DATA_IMPORT_REQUIRE_CATEGORY_OPTION_COMBO;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_DATA_IMPORT_STRICT_ATTRIBUTE_OPTION_COMBOS;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_DATA_IMPORT_STRICT_CATEGORY_OPTION_COMBOS;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_DATA_IMPORT_STRICT_ORGANISATION_UNITS;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_DATA_IMPORT_STRICT_PERIODS;
 import static org.hisp.dhis.system.notification.NotificationLevel.ERROR;
 import static org.hisp.dhis.system.notification.NotificationLevel.INFO;
 import static org.hisp.dhis.system.util.DateUtils.getDefaultDate;
@@ -42,21 +47,23 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 
 import org.amplecode.quick.BatchHandler;
 import org.amplecode.quick.BatchHandlerFactory;
 import org.amplecode.staxwax.factory.XMLFactory;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.IdentifiableProperty;
 import org.hisp.dhis.common.IllegalQueryException;
+import org.hisp.dhis.commons.collection.CachingMap;
+import org.hisp.dhis.commons.util.Clock;
+import org.hisp.dhis.commons.util.DebugUtils;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
@@ -85,7 +92,9 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.scheduling.TaskId;
+import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.callable.CategoryOptionComboAclCallable;
 import org.hisp.dhis.system.callable.IdentifiableObjectCallable;
 import org.hisp.dhis.system.callable.PeriodCallable;
@@ -93,9 +102,6 @@ import org.hisp.dhis.system.notification.Notifier;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.ValidationUtils;
 import org.hisp.dhis.user.CurrentUserService;
-import org.hisp.dhis.commons.collection.CachingMap;
-import org.hisp.dhis.commons.util.Clock;
-import org.hisp.dhis.commons.util.DebugUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.csvreader.CsvReader;
@@ -136,7 +142,10 @@ public class DefaultDataValueSetService
 
     @Autowired
     private DataValueSetStore dataValueSetStore;
-
+    
+    @Autowired
+    private SystemSettingManager systemSettingManager;
+    
     @Autowired
     private I18nManager i18nManager;
 
@@ -172,7 +181,7 @@ public class DefaultDataValueSetService
         
         if ( periods != null && !periods.isEmpty() )
         {
-            params.getPeriods().addAll( periodService.reloadIsoPeriods( new ArrayList<String>( periods ) ) );
+            params.getPeriods().addAll( periodService.reloadIsoPeriods( new ArrayList<>( periods ) ) );
         }
         else if ( startDate != null && endDate != null )
         {
@@ -183,13 +192,6 @@ public class DefaultDataValueSetService
         if ( organisationUnits != null )
         {
             params.getOrganisationUnits().addAll( identifiableObjectManager.getByUid( OrganisationUnit.class, organisationUnits ) );
-            params.setRequestOrganisationUnits();
-            
-            if ( includeChildren )
-            {
-                params.getOrganisationUnits().addAll( new HashSet<OrganisationUnit>( 
-                    organisationUnitService.getOrganisationUnitsWithChildren( getUids( params.getOrganisationUnits() ) ) ) );
-            }
         }
 
         params.setIncludeChildren( includeChildren );
@@ -225,7 +227,7 @@ public class DefaultDataValueSetService
             violation = "Start date must be before end date";
         }
         
-        if ( params.getRequestOrganisationUnits().isEmpty() )
+        if ( params.getOrganisationUnits().isEmpty() )
         {
             violation = "At least one valid organisation unit must be specified";
         }
@@ -246,7 +248,7 @@ public class DefaultDataValueSetService
     @Override
     public void decideAccess( DataExportParams params )
     {
-        for ( OrganisationUnit unit : params.getRequestOrganisationUnits() )
+        for ( OrganisationUnit unit : params.getOrganisationUnits() )
         {
             if ( !organisationUnitService.isInUserHierarchy( unit ) )
             {
@@ -564,13 +566,18 @@ public class DefaultDataValueSetService
 
         log.info( "Scheme: " + idScheme + ", data element scheme: " + dataElementIdScheme + ", org unit scheme: " + orgUnitIdScheme );
 
-        boolean dryRun = dataValueSet.getDryRun() != null ? dataValueSet.getDryRun() : importOptions.isDryRun();
-
         ImportStrategy strategy = dataValueSet.getStrategy() != null ?
             ImportStrategy.valueOf( dataValueSet.getStrategy() ) : importOptions.getImportStrategy();
 
-        boolean skipExistingCheck = importOptions.isSkipExistingCheck();
-
+        boolean dryRun = dataValueSet.getDryRun() != null ? dataValueSet.getDryRun() : importOptions.isDryRun();
+        boolean skipExistingCheck = importOptions.isSkipExistingCheck();        
+        boolean strictPeriods = importOptions.isStrictPeriods() || (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_STRICT_PERIODS, false );
+        boolean strictCategoryOptionCombos = importOptions.isStrictCategoryOptionCombos() || (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_STRICT_CATEGORY_OPTION_COMBOS, false );
+        boolean strictAttrOptionCombos = importOptions.isStrictAttributeOptionCombos() || (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_STRICT_ATTRIBUTE_OPTION_COMBOS, false );
+        boolean strictOrgUnits = importOptions.isStrictOrganisationUnits() || (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_STRICT_ORGANISATION_UNITS, false );
+        boolean requireCategoryOptionCombo = importOptions.isRequireCategoryOptionCombo() || (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_REQUIRE_CATEGORY_OPTION_COMBO, false );
+        boolean requireAttrOptionCombo = importOptions.isRequireAttributeOptionCombo() || (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_REQUIRE_ATTRIBUTE_OPTION_COMBO, false );
+        
         //----------------------------------------------------------------------
         // Create meta-data maps
         //----------------------------------------------------------------------
@@ -579,6 +586,11 @@ public class DefaultDataValueSetService
         CachingMap<String, OrganisationUnit> orgUnitMap = new CachingMap<>();
         CachingMap<String, DataElementCategoryOptionCombo> optionComboMap = new CachingMap<>();
         CachingMap<String, Period> periodMap = new CachingMap<>();
+        CachingMap<String, Set<PeriodType>> dataElementPeriodTypesMap = new CachingMap<>();
+        CachingMap<String, Set<DataElementCategoryOptionCombo>> dataElementCategoryOptionComboMap = new CachingMap<>();
+        CachingMap<String, Set<DataElementCategoryOptionCombo>> dataElementAttrOptionComboMap = new CachingMap<>();
+        CachingMap<String, Boolean> dataElementOrgUnitMap = new CachingMap<>();
+        CachingMap<String, Integer> dataElementOpenFuturePeriodsMap = new CachingMap<>();
         CachingMap<String, Boolean> orgUnitInHierarchyMap = new CachingMap<>();
 
         //----------------------------------------------------------------------
@@ -681,11 +693,10 @@ public class DefaultDataValueSetService
         {
             org.hisp.dhis.dxf2.datavalue.DataValue dataValue = dataValueSet.getNextDataValue();
 
-            DataValue internalValue = new DataValue();
-
             totalCount++;
 
-            final DataElement dataElement = dataElementMap.get( trimToNull( dataValue.getDataElement() ), dataElementCallable.setId( trimToNull( dataValue.getDataElement() ) ) );
+            final DataElement dataElement = 
+                dataElementMap.get( trimToNull( dataValue.getDataElement() ), dataElementCallable.setId( trimToNull( dataValue.getDataElement() ) ) );
             final Period period = outerPeriod != null ? outerPeriod : 
                 periodMap.get( trimToNull( dataValue.getPeriod() ), periodCallable.setId( trimToNull( dataValue.getPeriod() ) ) );
             final OrganisationUnit orgUnit = outerOrgUnit != null ? outerOrgUnit : 
@@ -710,7 +721,7 @@ public class DefaultDataValueSetService
                 summary.getConflicts().add( new ImportConflict( dataValue.getPeriod(), "Period not valid" ) );
                 continue;
             }
-
+            
             if ( orgUnit == null )
             {
                 summary.getConflicts().add( new ImportConflict( dataValue.getOrgUnit(), "Organisation unit not found or not acccessible" ) );
@@ -729,28 +740,21 @@ public class DefaultDataValueSetService
                 continue;
             }
 
-            if ( categoryOptionCombo == null )
-            {
-                categoryOptionCombo = fallbackCategoryOptionCombo;
-            }
-
-            if ( attrOptionCombo == null )
-            {
-                attrOptionCombo = fallbackCategoryOptionCombo;
-            }
-            
-            boolean inUserHierarchy = orgUnitInHierarchyMap.get( orgUnit.getUid(), new Callable<Boolean>()
-            {
-                @Override
-                public Boolean call() throws Exception
-                {
-                    return organisationUnitService.isInUserHierarchy( orgUnit.getUid(), currentOrgUnits );
-                }
-            } );
+            boolean inUserHierarchy = orgUnitInHierarchyMap.get( orgUnit.getUid(), 
+                () -> organisationUnitService.isInUserHierarchy( orgUnit.getUid(), currentOrgUnits ) );
             
             if ( !inUserHierarchy )
             {
-                summary.getConflicts().add( new ImportConflict( dataValue.getOrgUnit(), "Organisation unit not in hierarchy of current user: " + currentUser ) );
+                summary.getConflicts().add( new ImportConflict( orgUnit.getUid(), "Organisation unit not in hierarchy of current user: " + currentUser ) );
+                continue;
+            }
+            
+            boolean invalidFuturePeriod = period.isFuture() && dataElementOpenFuturePeriodsMap.get( dataElement.getUid(),
+                () -> dataElement.getOpenFuturePeriods()  ) <= 0;
+            
+            if ( invalidFuturePeriod )
+            {
+                summary.getConflicts().add( new ImportConflict( period.getIsoDate(), "Data element does not allow for future periods through data sets: " + dataElement.getUid() ) );
                 continue;
             }
 
@@ -775,41 +779,103 @@ public class DefaultDataValueSetService
                 continue;
             }
 
+            // -----------------------------------------------------------------
+            // Constraints
+            // -----------------------------------------------------------------
+
+            if ( categoryOptionCombo == null )
+            {
+                if ( requireCategoryOptionCombo )
+                {
+                    summary.getConflicts().add( new ImportConflict( dataValue.getValue(), "Category option combo is required but is not specified" ) );
+                    continue;
+                }
+                else
+                {
+                    categoryOptionCombo = fallbackCategoryOptionCombo;
+                }
+            }
+
+            if ( attrOptionCombo == null )
+            {
+                if ( requireAttrOptionCombo )
+                {
+                    summary.getConflicts().add( new ImportConflict( dataValue.getValue(), "Attribute option combo is required but is not specified" ) );
+                    continue;
+                }
+                else
+                {
+                    attrOptionCombo = fallbackCategoryOptionCombo;
+                }
+            }
+            
+            if ( strictPeriods && !dataElementPeriodTypesMap.get( dataElement.getUid(), 
+                () -> dataElement.getPeriodTypes() ).contains( period.getPeriodType() ) )
+            {
+                summary.getConflicts().add( new ImportConflict( dataValue.getPeriod(), 
+                    "Period type of period: " + period.getIsoDate() + " not valid for data element: " + dataElement.getUid() ) );
+                continue;
+            }
+            
+            if ( strictCategoryOptionCombos && !dataElementCategoryOptionComboMap.get( dataElement.getUid(),
+                () -> dataElement.getCategoryCombo().getOptionCombos() ).contains( categoryOptionCombo ) )
+            {
+                summary.getConflicts().add( new ImportConflict( categoryOptionCombo.getUid(), 
+                    "Category option combo: " + categoryOptionCombo.getUid() + " must be part of category combo of data element: " + dataElement.getUid() ) );
+                continue;
+            }
+            
+            if ( strictAttrOptionCombos && !dataElementAttrOptionComboMap.get( dataElement.getUid(),
+                () -> dataElement.getDataSetCategoryOptionCombos() ).contains( attrOptionCombo ) )
+            {
+                summary.getConflicts().add( new ImportConflict( attrOptionCombo.getUid(),
+                    "Attribute option combo: " + attrOptionCombo.getUid() + " must be part of category combo of data sets of data element: " + dataElement.getUid() ) );
+                continue;
+            }
+            
+            if ( strictOrgUnits && BooleanUtils.isFalse( dataElementOrgUnitMap.get( dataElement.getUid() + orgUnit.getUid(),
+                () -> dataElement.hasDataSetOrganisationUnit( orgUnit ) ) ) )
+            {
+                summary.getConflicts().add( new ImportConflict( orgUnit.getUid(),
+                    "Data element: " + dataElement.getUid() + " must be assigned through data sets to organisation unit: " + orgUnit.getUid() ) );
+                continue;
+            }
+
+            boolean zeroInsignificant = ValidationUtils.dataValueIsZeroAndInsignificant( dataValue.getValue(), dataElement );
+
+            if ( zeroInsignificant )
+            {
+                summary.getConflicts().add( new ImportConflict( dataValue.getValue(), "Value is zero and not significant, must match data element: " + dataElement.getUid() ) );
+                continue;
+            }
+
+            String storedByValid = ValidationUtils.storedByIsValid( dataValue.getStoredBy() );
+
+            if ( storedByValid != null )
+            {
+                summary.getConflicts().add( new ImportConflict( dataValue.getStoredBy(), i18n.getString( storedByValid ) ) );
+                continue;
+            }
+            
+            String storedBy = dataValue.getStoredBy() == null || dataValue.getStoredBy().trim().isEmpty() ? currentUser : dataValue.getStoredBy();
+
+            // -----------------------------------------------------------------
+            // Create data value
+            // -----------------------------------------------------------------
+
+            DataValue internalValue = new DataValue();
+
             internalValue.setDataElement( dataElement );
             internalValue.setPeriod( period );
             internalValue.setSource( orgUnit );
             internalValue.setCategoryOptionCombo( categoryOptionCombo );
             internalValue.setAttributeOptionCombo( attrOptionCombo );
             internalValue.setValue( trimToNull( dataValue.getValue() ) );
-
-            String storedByValid = ValidationUtils.storedByIsValid( dataValue.getStoredBy() );
-
-            if ( dataValue.getStoredBy() == null || dataValue.getStoredBy().trim().isEmpty() )
-            {
-                internalValue.setStoredBy( currentUser );
-            }
-            else if ( storedByValid == null )
-            {
-                internalValue.setStoredBy( dataValue.getStoredBy() );
-            }
-            else
-            {
-                summary.getConflicts().add( new ImportConflict( dataValue.getStoredBy(), i18n.getString( storedByValid ) ) );
-                continue;
-            }
-
+            internalValue.setStoredBy( storedBy );
             internalValue.setCreated( dataValue.hasCreated() ? parseDate( dataValue.getCreated() ) : now );
             internalValue.setLastUpdated( dataValue.hasLastUpdated() ? parseDate( dataValue.getLastUpdated() ) : now );
             internalValue.setComment( trimToNull( dataValue.getComment() ) );
             internalValue.setFollowup( dataValue.getFollowup() );
-
-            boolean zeroInsignificant = ValidationUtils.dataValueIsZeroAndInsignificant( internalValue.getValue(), dataElement );
-
-            if ( zeroInsignificant )
-            {
-                summary.getConflicts().add( new ImportConflict( internalValue.getValue(), "Value is zero and not significant, must match data element: " + dataElement.getUid() ) );
-                continue;
-            }
 
             // -----------------------------------------------------------------
             // Save, update or delete data value

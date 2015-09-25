@@ -14,7 +14,7 @@ trackerCapture.controller('DashboardController',
                 SessionStorageService,
                 TEIService, 
                 TEService,
-                OptionSetService,
+                MetaDataFactory,
                 EnrollmentService,
                 ProgramFactory,
                 DHIS2EventFactory,
@@ -22,6 +22,7 @@ trackerCapture.controller('DashboardController',
                 DialogService,
                 AttributesFactory,
                 CurrentSelection,
+                ModalService,
                 AuthorityService) {
     //selections
     $scope.selectedTeiId = ($location.search()).tei; 
@@ -29,6 +30,16 @@ trackerCapture.controller('DashboardController',
     $scope.selectedOrgUnit = SessionStorageService.get('SELECTED_OU');
     $scope.userAuthority = AuthorityService.getUserAuthorities(SessionStorageService.get('USER_ROLES'));
     $scope.sortedTeiIds = CurrentSelection.getSortedTeiIds();    
+    
+    //Labels
+    $scope.removeLabel = $translate.instant('remove');
+    $scope.expandLabel = $translate.instant('expand');
+    $scope.collapseLabel = $translate.instant('collapse');
+    $scope.noDataReportLabel = $translate.instant('no_data_report');
+    $scope.noRelationshipLabel = $translate.instant('no_relationship');
+    $scope.settingsLabel = $translate.instant('settings');
+    $scope.showHideWidgetsLabel = $translate.instant('show_hide_widgets');
+    $scope.notEnrolledLabel = $translate.instant('not_yet_enrolled_data_entry');
     
     $scope.previousTeiExists = false;
     $scope.nextTeiExists = false;
@@ -76,52 +87,16 @@ trackerCapture.controller('DashboardController',
             selectedLayout = !selectedLayout ?  defaultLayout : selectedLayout;
 
             angular.forEach(selectedLayout.widgets, function(widget){
-                switch(widget.title){
-                    case 'enrollment':
-                        $rootScope.enrollmentWidget = widget;
-                        $rootScope.dashboardWidgets.push($rootScope.enrollmentWidget);
-                        $scope.dashboardStatus[widget.title] = angular.copy(widget);
-                        break;
-                    case 'indicators':
-                        $rootScope.indicatorWidget = widget;
-                        $rootScope.dashboardWidgets.push($rootScope.indicatorWidget);
-                        $scope.dashboardStatus[widget.title] = angular.copy(widget);
-                        break;
-                    case 'feedback':
-                        $rootScope.feedbackWidget = widget;
-                        $rootScope.dashboardWidgets.push($rootScope.feedbackWidget);
-                        $scope.dashboardStatus[widget.title] = angular.copy(widget);
-                        break;
-                    case 'dataentry':
-                        $rootScope.dataentryWidget = widget;
-                        $rootScope.dashboardWidgets.push($rootScope.dataentryWidget);
-                        $scope.dashboardStatus[widget.title] = angular.copy(widget);
-                        break;
-                    case 'report':
-                        $rootScope.reportWidget = widget;
-                        $rootScope.dashboardWidgets.push($rootScope.reportWidget);
-                        $scope.dashboardStatus[widget.title] = angular.copy(widget);
-                        break;
-                    case 'current_selections':
-                        $rootScope.selectedWidget = widget;
-                        $rootScope.dashboardWidgets.push($rootScope.selectedWidget);
-                        $scope.dashboardStatus[widget.title] = angular.copy(widget);
-                        break;
-                    case 'profile':
-                        $rootScope.profileWidget = widget;
-                        $rootScope.dashboardWidgets.push($rootScope.profileWidget);
-                        $scope.dashboardStatus[widget.title] = angular.copy(widget);
-                        break;
-                    case 'relationships':
-                        $rootScope.relationshipWidget = widget;
-                        $rootScope.dashboardWidgets.push($rootScope.relationshipWidget);
-                        $scope.dashboardStatus[widget.title] = angular.copy(widget);
-                        break;    
-                    case 'notes':
-                        $rootScope.notesWidget = widget;
-                        $rootScope.dashboardWidgets.push($rootScope.notesWidget);
-                        $scope.dashboardStatus[widget.title] = angular.copy(widget);
-                        break;    
+                $rootScope[widget.title +'Widget'] = widget;
+                $rootScope.dashboardWidgets.push( $rootScope[widget.title +'Widget'] );
+                $scope.dashboardStatus[widget.title] = angular.copy(widget);
+            });
+            
+            angular.forEach(defaultLayout.widgets, function(w){
+                if(!$scope.dashboardStatus[w.title]){
+                    $rootScope[w.title +'Widget'] = w;
+                    $rootScope.dashboardWidgets.push( $rootScope[w.title +'Widget'] );
+                    $scope.dashboardStatus[w.title] = angular.copy(w);
                 }
             });
 
@@ -159,11 +134,17 @@ trackerCapture.controller('DashboardController',
         }
     };
     
+    var setInactiveMessage = function(){
+        if($scope.selectedTei.inactive){
+            setHeaderDelayMessage($translate.instant('tei_inactive_only_read'));
+        }
+    };
+    
     if($scope.selectedTeiId){
         
         //get option sets
-        $scope.optionSets = [];
-        OptionSetService.getAll().then(function(optionSets){            
+        $scope.optionSets = [];     
+        MetaDataFactory.getAll('optionSets').then(function(optionSets){            
             angular.forEach(optionSets, function(optionSet){
                 $scope.optionSets[optionSet.id] = optionSet;
             });
@@ -180,6 +161,8 @@ trackerCapture.controller('DashboardController',
                 //Fetch the selected entity
                 TEIService.get($scope.selectedTeiId, $scope.optionSets, $scope.attributesById).then(function(response){
                     $scope.selectedTei = response;
+                    
+                    setInactiveMessage();                   
 
                     //get the entity type
                     TEService.get($scope.selectedTei.trackedEntity).then(function(te){                    
@@ -188,14 +171,28 @@ trackerCapture.controller('DashboardController',
                         //get enrollments for the selected tei
                         EnrollmentService.getByEntity($scope.selectedTeiId).then(function(response){                    
                             var enrollments = angular.isObject(response) && response.enrollments ? response.enrollments : [];
-                            var selectedEnrollment = null;
-                            if(enrollments.length === 1 && enrollments[0].status === 'ACTIVE'){
-                                selectedEnrollment = enrollments[0];
+                            var selectedEnrollment = null, backupSelectedEnrollment = null;                            
+                            if(enrollments.length === 1 ){
+                                selectedEnrollment = enrollments[0];                               
                             }
-
+                            else{
+                                if( $scope.selectedProgramId ){
+                                    angular.forEach(enrollments, function(en){
+                                        if( en.program === $scope.selectedProgramId ){
+                                            if( en.status === 'ACTIVE'){
+                                                selectedEnrollment = en;
+                                            }
+                                            else{
+                                                backupSelectedEnrollment = en;
+                                            }
+                                        }
+                                    });
+                                }                                
+                            }                            
+                            selectedEnrollment = selectedEnrollment ? selectedEnrollment : backupSelectedEnrollment;
+                            
                             ProgramFactory.getAll().then(function(programs){
                                 $scope.programs = [];
-
                                 $scope.programNames = [];  
                                 $scope.programStageNames = [];        
 
@@ -204,9 +201,9 @@ trackerCapture.controller('DashboardController',
                                     if( program.trackedEntity.id === $scope.selectedTei.trackedEntity ){
                                         $scope.programs.push(program);
                                         $scope.programNames[program.id] = {id: program.id, name: program.name};
-										angular.forEach(program.programStages, function(stage){                
-											$scope.programStageNames[stage.id] = {id: stage.id, name: stage.name};
-										});
+                                        angular.forEach(program.programStages, function(stage){                
+                                                $scope.programStageNames[stage.id] = {id: stage.id, name: stage.name};
+                                        });
 
                                         if($scope.selectedProgramId && program.id === $scope.selectedProgramId || selectedEnrollment && selectedEnrollment.program === program.id){
                                             $scope.selectedProgram = program;
@@ -226,7 +223,8 @@ trackerCapture.controller('DashboardController',
                 });  
             });
         });
-    }    
+    }
+    
     
     //listen for any change to program selection
     //it is possible that such could happen during enrollment.
@@ -318,19 +316,45 @@ trackerCapture.controller('DashboardController',
         getDashboardLayout();
     };
     
-    $scope.broadCastSelections = function(){
+    $scope.broadCastSelections = function(tei){
         
         var selections = CurrentSelection.get();
-        $scope.selectedTei = selections.tei;
+        if(tei){
+            $scope.selectedTei = tei;
+        }
+        else{
+            $scope.selectedTei = selections.tei;
+        }
+        
         $scope.trackedEntity = selections.te;
         $scope.optionSets = selections.optionSets;
         
         CurrentSelection.set({tei: $scope.selectedTei, te: $scope.trackedEntity, prs: $scope.programs, pr: $scope.selectedProgram, prNames: $scope.programNames, prStNames: $scope.programStageNames, enrollments: selections.enrollments, selectedEnrollment: null, optionSets: $scope.optionSets});        
         $timeout(function() { 
             $rootScope.$broadcast('selectedItems', {programExists: $scope.programs.length > 0});            
-        }, 100);
+        }, 200);
     };     
     
+    $scope.activiateTEI = function(){
+        var st = !$scope.selectedTei.inactive || $scope.selectedTei.inactive === '' ? true : false;
+        
+        var modalOptions = {
+            closeButtonText: 'no',
+            actionButtonText: 'yes',
+            headerText: st ? 'deactivate_tei' : 'activate_tei',
+            bodyText: 'are_you_sure_to_proceed'
+        };
+
+        ModalService.showModal({}, modalOptions).then(function (result) {
+
+            $scope.selectedTei.inactive = st;
+            TEIService.update($scope.selectedTei, $scope.optionSets, $scope.attributesById).then(function (data) {
+                setInactiveMessage();
+                $scope.broadCastSelections($scope.selectedTei);                
+            });
+        }, function(){            
+        });
+    };
     $scope.back = function(){
         $location.path('/').search({program: $scope.selectedProgramId});                   
     };
@@ -371,6 +395,7 @@ trackerCapture.controller('DashboardController',
             return;
         });
     };
+    
     $scope.showHideWidgets = function(){
         var modalInstance = $modal.open({
             templateUrl: "components/dashboard/dashboard-widgets.html",

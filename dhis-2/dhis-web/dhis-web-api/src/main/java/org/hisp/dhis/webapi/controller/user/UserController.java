@@ -49,7 +49,6 @@ import org.hisp.dhis.schema.descriptors.UserSchemaDescriptor;
 import org.hisp.dhis.security.RestoreOptions;
 import org.hisp.dhis.security.SecurityService;
 import org.hisp.dhis.system.util.ValidationUtils;
-import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserCredentials;
@@ -98,9 +97,6 @@ public class UserController
 
     @Autowired
     private UserGroupService userGroupService;
-
-    @Autowired
-    private CurrentUserService currentUserService;
 
     @Autowired
     private SecurityService securityService;
@@ -364,7 +360,7 @@ public class UserController
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = { "application/xml", "text/xml" } )
     public void putXmlObject( ImportOptions importOptions, @PathVariable( "uid" ) String pvUid, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
-        List<User> users = getEntity( pvUid );
+        List<User> users = getEntity( pvUid, NO_WEB_OPTIONS );
 
         if ( users.isEmpty() )
         {
@@ -384,24 +380,24 @@ public class UserController
             throw new WebMessageException( WebMessageUtils.conflict( "You must have permissions to create user, or ability to manage at least one user group for the user." ) );
         }
 
-        ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed,
-            ImportStrategy.UPDATE, importOptions.getMergeStrategy() );
+        importOptions.setStrategy( ImportStrategy.UPDATE );
+        ImportTypeSummary importTypeSummary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, importOptions );
 
-        if ( summary.isStatus( ImportStatus.SUCCESS ) && summary.getImportCount().getUpdated() == 1 )
+        if ( importTypeSummary.isStatus( ImportStatus.SUCCESS ) && importTypeSummary.getImportCount().getUpdated() == 1 )
         {
             User user = userService.getUser( pvUid );
 
             userGroupService.updateUserGroups( user, IdentifiableObjectUtils.getUids( parsed.getGroups() ) );
         }
 
-        renderService.toXml( response.getOutputStream(), summary );
+        renderService.toXml( response.getOutputStream(), importTypeSummary );
     }
 
     @Override
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = "application/json" )
     public void putJsonObject( ImportOptions importOptions, @PathVariable( "uid" ) String pvUid, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
-        List<User> users = getEntity( pvUid );
+        List<User> users = getEntity( pvUid, NO_WEB_OPTIONS );
 
         if ( users.isEmpty() )
         {
@@ -421,17 +417,17 @@ public class UserController
             throw new WebMessageException( WebMessageUtils.conflict( "You must have permissions to create user, or ability to manage at least one user group for the user." ) );
         }
 
-        ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed,
-            ImportStrategy.UPDATE, importOptions.getMergeStrategy() );
+        importOptions.setStrategy( ImportStrategy.UPDATE );
+        ImportTypeSummary importTypeSummary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, importOptions );
 
-        if ( summary.isStatus( ImportStatus.SUCCESS ) && summary.getImportCount().getUpdated() == 1 )
+        if ( importTypeSummary.isStatus( ImportStatus.SUCCESS ) && importTypeSummary.getImportCount().getUpdated() == 1 )
         {
             User user = userService.getUser( pvUid );
 
             userGroupService.updateUserGroups( user, IdentifiableObjectUtils.getUids( parsed.getGroups() ) );
         }
 
-        renderService.toJson( response.getOutputStream(), summary );
+        renderService.toJson( response.getOutputStream(), importTypeSummary );
     }
 
     // -------------------------------------------------------------------------
@@ -483,15 +479,17 @@ public class UserController
         user.getUserCredentials().getCatDimensionConstraints().addAll(
             currentUserService.getCurrentUser().getUserCredentials().getCatDimensionConstraints() );
 
-        ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), user,
-            ImportStrategy.CREATE, MergeStrategy.MERGE_IF_NOT_NULL );
+        ImportOptions importOptions = new ImportOptions();
+        importOptions.setStrategy( ImportStrategy.CREATE );
+        importOptions.setMergeStrategy( MergeStrategy.MERGE );
+        ImportTypeSummary importTypeSummary = importService.importObject( currentUserService.getCurrentUser().getUid(), user, importOptions );
 
-        if ( summary.isStatus( ImportStatus.SUCCESS ) && summary.getImportCount().getImported() == 1 )
+        if ( importTypeSummary.isStatus( ImportStatus.SUCCESS ) && importTypeSummary.getImportCount().getImported() == 1 )
         {
             userGroupService.addUserToGroups( user, IdentifiableObjectUtils.getUids( user.getGroups() ) );
         }
 
-        return summary;
+        return importTypeSummary;
     }
 
     /**

@@ -29,6 +29,7 @@ package org.hisp.dhis.program;
  */
 
 import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.message.MessageConversation;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -61,6 +62,8 @@ public class ProgramStageInstance
 
     private OrganisationUnit organisationUnit;
 
+    private DataElementCategoryOptionCombo attributeOptionCombo;
+
     private List<OutboundSms> outboundSms = new ArrayList<>();
 
     private List<MessageConversation> messageConversations = new ArrayList<>();
@@ -76,7 +79,7 @@ public class ProgramStageInstance
     private String completedUser;
 
     private Date completedDate;
-
+    
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -186,6 +189,16 @@ public class ProgramStageInstance
     public void setOrganisationUnit( OrganisationUnit organisationUnit )
     {
         this.organisationUnit = organisationUnit;
+    }
+    
+    public DataElementCategoryOptionCombo getAttributeOptionCombo()
+    {
+        return attributeOptionCombo;
+    }
+
+    public void setAttributeOptionCombo( DataElementCategoryOptionCombo attributeOptionCombo )
+    {
+        this.attributeOptionCombo = attributeOptionCombo;
     }
 
     public List<OutboundSms> getOutboundSms()

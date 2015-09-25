@@ -30,6 +30,8 @@ package org.hisp.dhis.webapi.utils;
 
 import com.lowagie.text.pdf.AcroFields;
 import com.lowagie.text.pdf.PdfReader;
+
+import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dxf2.pdfform.PdfDataEntryFormUtil;
@@ -87,7 +89,7 @@ public class PdfDataEntryFormImportUtil
     // -------------------------------------------------------------------------
 
     @SuppressWarnings( "unchecked" )
-    public void ImportProgramStage( InputStream in, I18nFormat format )
+    public void importProgramStage( InputStream in, I18nFormat format )
         throws Exception
     {
         int programStageInstanceId;
@@ -115,9 +117,8 @@ public class PdfDataEntryFormImportUtil
         // Create Organized data
         for ( String fldName : fldNames )
         {
-            // If the value in the textfield is not empty, proceed to add
-            // it.
-            if ( !form.getField( fldName ).trim().equals( "" ) )
+            // If the value in the text field is not empty, proceed to add it.
+            if ( !form.getField( fldName ).trim().isEmpty() )
             {
                 if ( fldName.startsWith( PdfDataEntryFormUtil.LABELCODE_DATADATETEXTFIELD ) )
                 {
@@ -142,8 +143,7 @@ public class PdfDataEntryFormImportUtil
             }
         }
 
-        // For each row, add new programStageInstance and add data elements
-        // to it.
+        // For each row, add new programStageInstance and add data elements to it.
         for ( Map.Entry<Integer, ProgramStageInstanceStorage> entry : programStageInstanceDataManager
             .getProgramStageInstanceData().entrySet() )
         {
@@ -159,16 +159,14 @@ public class PdfDataEntryFormImportUtil
 
             programStageInstance = programStageInstanceService.getProgramStageInstance( programStageInstanceId );
 
-            for ( Map.Entry<Integer, String> dataElementsEntry : programStageInstanceStorage.getDataElementsValue()
-                .entrySet() )
+            for ( Map.Entry<Integer, String> dataElementsEntry : programStageInstanceStorage.getDataElementsValue().entrySet() )
             {
                 Integer dataElementId = dataElementsEntry.getKey();
                 String value = dataElementsEntry.getValue();
 
                 // Step 3. Insert Data
-                insertValue_ProgramStageDataElement( programStageInstance, dataElementId, value );
+                insertValueProgramStageDataElement( programStageInstance, dataElementId, value );
             }
-
         }
 
         reader.close();
@@ -199,8 +197,7 @@ public class PdfDataEntryFormImportUtil
         return programStageInstanceService.addProgramStageInstance( programStageInstance );
     }
 
-    private void insertValue_ProgramStageDataElement( ProgramStageInstance programStageInstance, int dataElementId,
-        String value )
+    private void insertValueProgramStageDataElement( ProgramStageInstance programStageInstance, int dataElementId, String value )
         throws Exception
     {
 
@@ -209,10 +206,7 @@ public class PdfDataEntryFormImportUtil
         TrackedEntityDataValue dataValue = dataValueService.getTrackedEntityDataValue( programStageInstance,
             dataElement );
 
-        if ( value != null && value.trim().length() == 0 )
-        {
-            value = null;
-        }
+        value = StringUtils.trimToNull( value );
 
         // ---------------------------------------------------------------------
         // Save value
@@ -245,31 +239,24 @@ public class PdfDataEntryFormImportUtil
         }
         else if ( dataValue != null )
         {
-            // LOG.debug( "Updating TrackedEntityDataValue, value added/changed" );
-
             dataValue.setValue( value );
             dataValue.setTimestamp( new Date() );
-            // dataValue.setProvidedElsewhere( providedElsewhere );
             dataValue.setStoredBy( storedBy );
 
             dataValueService.updateTrackedEntityDataValue( dataValue );
         }
-
     }
 
-    // -----------------------------------------------------------------------------
-    // ------------ Helper Classes [START] ------------
-
-    class ProgramStageInstanceDataManager
+    private class ProgramStageInstanceDataManager
     {
-        Map<Integer, ProgramStageInstanceStorage> programStageInstanceData;
+        private Map<Integer, ProgramStageInstanceStorage> programStageInstanceData;
 
-        public Map<Integer, ProgramStageInstanceStorage> getProgramStageInstanceData()
+        private Map<Integer, ProgramStageInstanceStorage> getProgramStageInstanceData()
         {
             return programStageInstanceData;
         }
 
-        public ProgramStageInstanceDataManager()
+        private ProgramStageInstanceDataManager()
         {
             programStageInstanceData = new HashMap<>();
         }
@@ -313,15 +300,14 @@ public class PdfDataEntryFormImportUtil
 
                 programStageInstanceData.put( rowNumber, programStageInstanceStorage );
             }
-
         }
     }
 
-    class ProgramStageInstanceStorage
+    private class ProgramStageInstanceStorage
     {
-        int date;
+        private int date;
 
-        Map<Integer, String> dataElementsValue;
+        private Map<Integer, String> dataElementsValue;
 
         // -------------------------------------------------------------------------
         // GET/SET

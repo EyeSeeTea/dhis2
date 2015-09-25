@@ -35,48 +35,19 @@ jQuery( document ).ready( function()
 	<tr>
 		<td style="width:140px"><label for="name">$i18n.getString( "name" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 		<td><input type="text" id="name" name="name" value='$encoder.htmlEncode($programIndicator.name)'></td>
-		<td></td>
 	</tr>	
 	<tr>
 		<td><label for="shortName">$i18n.getString( "short_name" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 		<td><input type="text" id="shortName" name="shortName" value='$encoder.htmlEncode($programIndicator.shortName)'></td>
-		<td></td>
 	</tr>	
 	<tr>
 		<td><label for="code">$i18n.getString( "code" )</label></td>
 		<td><input type="text" id="code" name="code" value='$!encoder.htmlEncode($programIndicator.code)'></td>
-		<td></td>
 	</tr>	
 	<tr>
 		<td><label for="description">$i18n.getString( "description" ) </label></td>
 		<td><textarea type="text" id="description" name="description">$!encoder.htmlEncode($programIndicator.description)</textarea></td>
-		<td></td>
 	</tr>
-	<tr>
-		<td><label for="valueType">$i18n.getString( "value_type" )</label></td>
-		<td>
-			<select id="valueType" name="valueType" onchange='programIndicatorOnChange();' >
-				<option value='int' #if( $programIndicator.valueType=='int' ) selected #end>$i18n.getString('int')</option>
-				<option value='date' #if( $programIndicator.valueType=='date' ) fasdfasdf selected #end>$i18n.getString('date')</option>
-			</select>
-		</td>
-		<td></td>
-	</tr>
-	<tr>
-        <td><label for="aggregationType">$i18n.getString( "aggregation_type" )</label></td>
-        <td>
-            <select id="aggregationType" name="aggregationType">
-                <option value="AVERAGE"#if( $programIndicator.aggregationType == 'AVERAGE' ) selected="selected"#end>$i18n.getString( "average" )</option>
-                <option value="SUM"#if( $programIndicator.aggregationType == 'SUM' ) selected="selected"#end>$i18n.getString( "sum" )</option>
-                <option value="COUNT"#if( $programIndicator.aggregationType == 'COUNT' ) selected="selected"#end>$i18n.getString( "count" )</option>
-                <option value="STDDEV"#if( $programIndicator.aggregationType == 'STDDEV' ) selected="selected"#end>$i18n.getString( "stddev" )</option>
-                <option value="VARIANCE"#if( $programIndicator.aggregationType == 'VARIANCE' ) selected="selected"#end>$i18n.getString( "variance" )</option>
-                <option value="MIN"#if( $programIndicator.aggregationType == 'MIN' ) selected="selected"#end>$i18n.getString( "min" )</option>
-                <option value="MAX"#if( $programIndicator.aggregationType == 'MAX' ) selected="selected"#end>$i18n.getString( "max" )</option>
-	            <option value="CUSTOM"#if( $programIndicator.aggregationType == 'CUSTOM' ) selected="selected"#end>$i18n.getString( "custom" )</option>
-            </select>
-        </td>
-    </tr>
 	<tr>
 		<td><label for="decimals">$i18n.getString( "decimals_in_data_output" )</label></td>
 		<td>
@@ -90,23 +61,25 @@ jQuery( document ).ready( function()
 				<option value="5"#if( $programIndicator.decimals == 5 ) selected="selected"#end>5</option>
 			</select>
 		</td>
-		<td></td>
 	</tr>
+	<tr>
+        <td><label for="aggregationType">$i18n.getString( "aggregation_type" )</label></td>
+        <td>
+          <select id="aggregationType" name="aggregationType">
+            <option value="AVERAGE"#if( $programIndicator.aggregationType == 'AVERAGE' ) selected="selected"#end>$i18n.getString( "average" )</option>
+            <option value="SUM"#if( $programIndicator.aggregationType == 'SUM' ) selected="selected"#end>$i18n.getString( "sum" )</option>
+            <option value="COUNT"#if( $programIndicator.aggregationType == 'COUNT' ) selected="selected"#end>$i18n.getString( "count" )</option>
+            <option value="STDDEV"#if( $programIndicator.aggregationType == 'STDDEV' ) selected="selected"#end>$i18n.getString( "stddev" )</option>
+            <option value="VARIANCE"#if( $programIndicator.aggregationType == 'VARIANCE' ) selected="selected"#end>$i18n.getString( "variance" )</option>
+            <option value="MIN"#if( $programIndicator.aggregationType == 'MIN' ) selected="selected"#end>$i18n.getString( "min" )</option>
+            <option value="MAX"#if( $programIndicator.aggregationType == 'MAX' ) selected="selected"#end>$i18n.getString( "max" )</option>
+            <option value="CUSTOM"#if( $programIndicator.aggregationType == 'CUSTOM' ) selected="selected"#end>$i18n.getString( "custom" )</option>
+          </select>
+		</td>
+    </tr>
 	<tr>
 		<td><label for="displayInForm">$i18n.getString( "display_in_form" )</label></td>
 		<td><input type="checkbox" id="displayInForm" name="displayInForm" value="true"#if( $programIndicator.displayInForm ) checked="checked"#end></td>
-		<td></td>
-	</tr>
-	<tr id='rootDateTR' #if($programIndicator.valueType!='date') style='display:none' #end >
-		<td><label for="rootDate">$i18n.getString( "date_for_calculating" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
-		<td>
-			<select id="rootDate" name="rootDate" >
-				<option value='incident_date'>$i18n.getString('incident_date')</option>
-				<option value='execution_date'>$i18n.getString('report_date')</option>
-				<option value='current_date'>$i18n.getString('current_date')</option>
-			</select>
-		</td>
-		<td></td>
 	</tr>
 </table>
 <br>

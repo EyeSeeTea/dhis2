@@ -46,10 +46,10 @@ public class InitTableAlteror
 
     @Autowired
     private StatementManager statementManager;
-    
+
     @Autowired
     private StatementBuilder statementBuilder;
-
+    
     // -------------------------------------------------------------------------
     // Execute
     // -------------------------------------------------------------------------
@@ -58,8 +58,6 @@ public class InitTableAlteror
     @Transactional
     public void execute()
     {
-        // domain type
-
         executeSql( "update dataelement set domaintype='AGGREGATE' where domaintype='aggregate' or domaintype is null;" );
         executeSql( "update dataelement set domaintype='TRACKER' where domaintype='patient';" );
         executeSql( "update users set invitation = false where invitation is null" );
@@ -68,40 +66,139 @@ public class InitTableAlteror
         executeSql( "UPDATE programstageinstance SET status='ACTIVE' WHERE status='0';" );
         executeSql( "UPDATE programstageinstance SET status='COMPLETED' WHERE status='1';" );
         executeSql( "UPDATE programstageinstance SET status='SKIPPED' WHERE status='5';" );
+
         executeSql( "ALTER TABLE program DROP COLUMN displayonallorgunit" );
-        
+
         upgradeProgramStageDataElements();
-        
-        executeSql( "ALTER TABLE program ALTER COLUMN \"type\" TYPE varchar(255);");
-        executeSql( "update program set \"type\"='WITH_REGISTRATION' where type='1' or type='2'");
-        executeSql( "update program set \"type\"='WITHOUT_REGISTRATION' where type='3'");
+        updateValueTypes();
+        updateAggregationTypes();
+        updateFeatureTypes();
+        updateValidationRuleEnums();
+        updateProgramStatus();
+
+        executeSql( "ALTER TABLE program ALTER COLUMN \"type\" TYPE varchar(255);" );
+        executeSql( "update program set \"type\"='WITH_REGISTRATION' where type='1' or type='2'" );
+        executeSql( "update program set \"type\"='WITHOUT_REGISTRATION' where type='3'" );
     }
 
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
 
+    private void updateProgramStatus()
+    {
+        executeSql( "alter table programinstance alter column status type varchar(50)" );
+
+        executeSql( "update programinstance set status='ACTIVE' where status='0'" );
+        executeSql( "update programinstance set status='COMPLETED' where status='1'" );
+        executeSql( "update programinstance set status='CANCELLED' where status='2'" );
+    }
+
+    private void updateValidationRuleEnums()
+    {
+        executeSql( "alter table validationrule alter column ruletype type varchar(50)" );
+        executeSql( "alter table validationrule alter column importance type varchar(50)" );
+
+        executeSql( "update validationrule set ruletype='VALIDATION' where ruletype='validation'" );
+        executeSql( "update validationrule set ruletype='SURVEILLANCE' where ruletype='surveillance'" );
+        executeSql( "update validationrule set ruletype='VALIDATION' where ruletype='' or ruletype is null" );
+
+        executeSql( "update validationrule set importance='HIGH' where importance='high'" );
+        executeSql( "update validationrule set importance='MEDIUM' where importance='medium'" );
+        executeSql( "update validationrule set importance='LOW' where importance='low'" );
+        executeSql( "update validationrule set importance='MEDIUM' where importance='' or importance is null" );
+    }
+
+    private void updateFeatureTypes()
+    {
+        executeSql( "update organisationunit set featuretype='NONE' where featuretype='None'" );
+        executeSql( "update organisationunit set featuretype='MULTI_POLYGON' where featuretype='MultiPolygon'" );
+        executeSql( "update organisationunit set featuretype='POLYGON' where featuretype='Polygon'" );
+        executeSql( "update organisationunit set featuretype='POINT' where featuretype='Point'" );
+        executeSql( "update organisationunit set featuretype='SYMBOL' where featuretype='Symbol'" );
+        executeSql( "update organisationunit set featuretype='NONE' where featuretype is null" );
+    }
+
+    private void updateAggregationTypes()
+    {
+        executeSql( "alter table dataelement alter column aggregationtype type varchar(50)" );
+
+        executeSql( "update dataelement set aggregationtype='SUM' where aggregationtype='sum'" );
+        executeSql( "update dataelement set aggregationtype='AVERAGE' where aggregationtype='avg'" );
+        executeSql( "update dataelement set aggregationtype='AVERAGE_SUM_ORG_UNIT' where aggregationtype='avg_sum_org_unit'" );
+        executeSql( "update dataelement set aggregationtype='COUNT' where aggregationtype='count'" );
+        executeSql( "update dataelement set aggregationtype='STDDEV' where aggregationtype='stddev'" );
+        executeSql( "update dataelement set aggregationtype='VARIANCE' where aggregationtype='variance'" );
+        executeSql( "update dataelement set aggregationtype='MIN' where aggregationtype='min'" );
+        executeSql( "update dataelement set aggregationtype='MAX' where aggregationtype='max'" );
+        executeSql( "update dataelement set aggregationtype='NONE' where aggregationtype='none'" );
+        executeSql( "update dataelement set aggregationtype='DEFAULT' where aggregationtype='default'" );
+        executeSql( "update dataelement set aggregationtype='CUSTOM' where aggregationtype='custom'" );
+    }
+
+    private void updateValueTypes()
+    {
+        executeSql( "alter table dataelement alter column valuetype type varchar(50)" );
+
+        executeSql( "update dataelement set valuetype='NUMBER' where valuetype='int' and numbertype='number'" );
+        executeSql( "update dataelement set valuetype='INTEGER' where valuetype='int' and numbertype='int'" );
+        executeSql( "update dataelement set valuetype='INTEGER_POSITIVE' where valuetype='int' and numbertype='posInt'" );
+        executeSql( "update dataelement set valuetype='INTEGER_NEGATIVE' where valuetype='int' and numbertype='negInt'" );
+        executeSql( "update dataelement set valuetype='INTEGER_ZERO_OR_POSITIVE' where valuetype='int' and numbertype='zeroPositiveInt'" );
+        executeSql( "update dataelement set valuetype='PERCENTAGE' where valuetype='int' and numbertype='percentage'" );
+        executeSql( "update dataelement set valuetype='UNIT_INTERVAL' where valuetype='int' and numbertype='unitInterval'" );
+        executeSql( "update dataelement set valuetype='NUMBER' where valuetype='int' and numbertype is null" );
+
+        executeSql( "alter table dataelement drop column numbertype" );
+
+        executeSql( "update dataelement set valuetype='TEXT' where valuetype='string' and texttype='text'" );
+        executeSql( "update dataelement set valuetype='LONG_TEXT' where valuetype='string' and texttype='longText'" );
+        executeSql( "update dataelement set valuetype='TEXT' where valuetype='string' and texttype is null" );
+
+        executeSql( "alter table dataelement drop column texttype" );
+
+        executeSql( "update dataelement set valuetype='DATE' where valuetype='date'" );
+        executeSql( "update dataelement set valuetype='DATETIME' where valuetype='datetime'" );
+        executeSql( "update dataelement set valuetype='BOOLEAN' where valuetype='bool'" );
+        executeSql( "update dataelement set valuetype='TRUE_ONLY' where valuetype='trueOnly'" );
+        executeSql( "update dataelement set valuetype='USERNAME' where valuetype='username'" );
+
+        executeSql( "update trackedentityattribute set valuetype='TEXT' where valuetype='string'" );
+        executeSql( "update trackedentityattribute set valuetype='PHONE_NUMBER' where valuetype='phoneNumber'" );
+        executeSql( "update trackedentityattribute set valuetype='EMAIL' where valuetype='email'" );
+        executeSql( "update trackedentityattribute set valuetype='NUMBER' where valuetype='number'" );
+        executeSql( "update trackedentityattribute set valuetype='NUMBER' where valuetype='int'" );
+        executeSql( "update trackedentityattribute set valuetype='LETTER' where valuetype='letter'" );
+        executeSql( "update trackedentityattribute set valuetype='BOOLEAN' where valuetype='bool'" );
+        executeSql( "update trackedentityattribute set valuetype='TRUE_ONLY' where valuetype='trueOnly'" );
+        executeSql( "update trackedentityattribute set valuetype='DATE' where valuetype='date'" );
+        executeSql( "update trackedentityattribute set valuetype='OPTION_SET' where valuetype='optionSet'" );
+        executeSql( "update trackedentityattribute set valuetype='TRACKER_ASSOCIATE' where valuetype='trackerAssociate'" );
+        executeSql( "update trackedentityattribute set valuetype='USERNAME' where valuetype='users'" );
+    }
+
     private void upgradeProgramStageDataElements()
     {
         if ( tableExists( "programstage_dataelements" ) )
         {
             String autoIncr = statementBuilder.getAutoIncrementValue();
-            
-            String insertSql = 
-                "insert into programstagedataelement(programstagedataelementid,programstageid,dataelementid,compulsory,allowprovidedelsewhere,sort_order,displayinreports,programstagesectionid,allowfuturedate,section_sort_order) " +
-                "select " + autoIncr + ",programstageid,dataelementid,compulsory,allowprovidedelsewhere,sort_order,displayinreports,programstagesectionid,allowfuturedate,section_sort_order " +
-                "from programstage_dataelements";
-            
+
+            String insertSql = "insert into programstagedataelement(programstagedataelementid,programstageid,dataelementid,compulsory,allowprovidedelsewhere,sort_order,displayinreports,programstagesectionid,allowfuturedate,section_sort_order) "
+                + "select "
+                + autoIncr
+                + ",programstageid,dataelementid,compulsory,allowprovidedelsewhere,sort_order,displayinreports,programstagesectionid,allowfuturedate,section_sort_order "
+                + "from programstage_dataelements";
+
             executeSql( insertSql );
-            
+
             String dropSql = "drop table programstage_dataelements";
-            
+
             executeSql( dropSql );
-            
+
             log.info( "Upgraded program stage data elements" );
         }
     }
-    
+
     private int executeSql( String sql )
     {
         try
@@ -115,7 +212,7 @@ public class InitTableAlteror
             return -1;
         }
     }
-    
+
     private boolean tableExists( String table )
     {
         try

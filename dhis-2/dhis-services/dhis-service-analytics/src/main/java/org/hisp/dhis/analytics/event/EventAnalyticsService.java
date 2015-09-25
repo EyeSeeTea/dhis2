@@ -64,6 +64,7 @@ public interface EventAnalyticsService
      * @param skipMeta whether to skip meta-data in the response.
      * @param skipData whether to skip data in the response.
      * @param skipRounding whether to skip rounding of values in response.
+     * @param completedOnly whether to only include completed events.
      * @param hierarchyMeta whether to include hierarchy meta-data in the response.
      * @param showHierarchy whether to include hierarchy meta-data names in the response.
      * @param sortOrder the sort order of the aggregate values.
@@ -72,12 +73,13 @@ public interface EventAnalyticsService
      * @param collapseDataDimensions collapse data dimensions into a single dimension.
      * @param aggregateData return aggregated data values for data dimensions instead of items.
      * @param displayProperty the display property to use for meta-data.
+     * @param userOrgUnit the user organisation unit to use, overrides current user.
      * @param format the i18n format.
      */
     EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate, 
         Set<String> dimension, Set<String> filter, String value, AggregationType aggregationType, 
-        boolean skipMeta, boolean skipData, boolean skipRounding, boolean hierarchyMeta, boolean showHierarchy, SortOrder sortOrder, Integer limit, 
-        EventOutputType outputType, boolean collapseDataDimensions, boolean aggregateData, DisplayProperty displayProperty, I18nFormat format );
+        boolean skipMeta, boolean skipData, boolean skipRounding, boolean completedOnly, boolean hierarchyMeta, boolean showHierarchy, SortOrder sortOrder, Integer limit, 
+        EventOutputType outputType, boolean collapseDataDimensions, boolean aggregateData, DisplayProperty displayProperty, String userOrgUnit, I18nFormat format );
 
     /**
      * Used for event query.
@@ -93,16 +95,18 @@ public interface EventAnalyticsService
      * @param desc the dimensions to be sorted descending.
      * @param skipMeta whether to skip meta-data in the response.
      * @param skipData whether to skip data in the response.
+     * @param completedOnly whether to only include completed events.
      * @param hierarchyMeta whether to include hierarchy meta-data in the response.
      * @param coordinatesOnly whether to only return events which have coordinates.
      * @param displayProperty the display property to use for meta-data.
+     * @param userOrgUnit the user organisation unit to use, overrides current user.
      * @param page the page number.
      * @param pageSize the page size.
      * @param format the i18n format.
      */
     EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate, Set<String> dimension, Set<String> filter, 
-        String ouMode, Set<String> asc, Set<String> desc, boolean skipMeta, boolean skipData, boolean hierarchyMeta, boolean coordinatesOnly, 
-        DisplayProperty displayProperty, Integer page, Integer pageSize, I18nFormat format );
+        String ouMode, Set<String> asc, Set<String> desc, boolean skipMeta, boolean skipData, boolean completedOnly, boolean hierarchyMeta, boolean coordinatesOnly, 
+        DisplayProperty displayProperty, String userOrgUnit, Integer page, Integer pageSize, I18nFormat format );
     
     EventQueryParams getFromAnalyticalObject( EventAnalyticalObject object, I18nFormat format );
 }

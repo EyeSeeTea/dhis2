@@ -29,6 +29,7 @@ package org.hisp.dhis.analytics.table;
  */
 
 import static org.hisp.dhis.commons.util.TextUtils.removeLast;
+import static org.hisp.dhis.system.util.MathUtils.NUMERIC_LENIENT_REGEXP;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,6 +43,7 @@ import org.hisp.dhis.analytics.AnalyticsTable;
 import org.hisp.dhis.calendar.Calendar;
 import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.commons.collection.ListUtils;
+import org.hisp.dhis.commons.collection.UniqueArrayList;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
@@ -49,7 +51,6 @@ import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.system.util.DateUtils;
-import org.hisp.dhis.system.util.MathUtils;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,7 +85,7 @@ public class JdbcEventAnalyticsTableManager
     
     private List<AnalyticsTable> getTables( List<Integer> dataYears )
     {
-        List<AnalyticsTable> tables = new ArrayList<>();
+        List<AnalyticsTable> tables = new UniqueArrayList<>();
         Calendar calendar = PeriodType.getCalendar();
 
         Collections.sort( dataYears );
@@ -223,8 +224,10 @@ public class JdbcEventAnalyticsTableManager
     public List<String[]> getDimensionColumns( AnalyticsTable table )
     {
         final String dbl = statementBuilder.getDoubleColumnType();
-        final String numericClause = " and value " + statementBuilder.getRegexpMatch() + " '"
-            + MathUtils.NUMERIC_LENIENT_REGEXP + "'";
+        final String numericClause = " and value " + statementBuilder.getRegexpMatch() + " '" + NUMERIC_LENIENT_REGEXP + "'";
+        final String dateClause = " and value " + statementBuilder.getRegexpMatch() + " '" + DATE_REGEXP + "'";
+        
+        //TODO dateClause regexp
 
         List<String[]> columns = new ArrayList<>();
 
@@ -232,7 +235,7 @@ public class JdbcEventAnalyticsTableManager
             idObjectManager.getDataDimensionsNoAcl( OrganisationUnitGroupSet.class );
         
         Collection<OrganisationUnitLevel> levels = 
-            organisationUnitService.getOrganisationUnitLevels();
+            organisationUnitService.getFilledOrganisationUnitLevels();
 
         List<PeriodType> periodTypes = PeriodType.getAvailablePeriodTypes();
 
@@ -258,9 +261,9 @@ public class JdbcEventAnalyticsTableManager
 
         for ( DataElement dataElement : table.getProgram().getAllDataElements() )
         {
-            ValueType valueType = ValueType.getFromDataElement( dataElement );
+            ValueType valueType = dataElement.getValueType();
             String dataType = getColumnType( valueType );
-            String dataClause = dataElement.isNumericType() ? numericClause : "";
+            String dataClause = dataElement.isNumericType() ? numericClause : dataElement.getValueType().isDate() ? dateClause : "";
             String select = getSelectClause( valueType );
 
             String sql = "(select " + select + " from trackedentitydatavalue where programstageinstanceid=psi.programstageinstanceid " + 
@@ -273,7 +276,7 @@ public class JdbcEventAnalyticsTableManager
         for ( DataElement dataElement : table.getProgram().getDataElementsWithLegendSet() )
         {
             String column = quote( dataElement.getUid() + PartitionUtils.SEP + dataElement.getLegendSet().getUid() );
-            String select = getSelectClause( ValueType.getFromDataElement( dataElement ) );
+            String select = getSelectClause( dataElement.getValueType() );
             
             String sql = "(select l.uid from maplegend l inner join maplegendsetmaplegend lsl on l.maplegendid=lsl.maplegendid " +
                 "inner join trackedentitydatavalue dv on l.startvalue <= " + select + " and l.endvalue > " + select + " " +
@@ -286,10 +289,9 @@ public class JdbcEventAnalyticsTableManager
 
         for ( TrackedEntityAttribute attribute : table.getProgram().getTrackedEntityAttributes() )
         {
-            ValueType valueType = ValueType.getFromAttribute( attribute );
-            String dataType = getColumnType( valueType );
-            String dataClause = attribute.isNumericType() ? numericClause : "";
-            String select = getSelectClause( valueType );
+            String dataType = getColumnType( attribute.getValueType() );
+            String dataClause = attribute.isNumericType() ? numericClause : attribute.isDateType() ? dateClause : "";
+            String select = getSelectClause( attribute.getValueType() );
 
             String sql = "(select " + select + " from trackedentityattributevalue where trackedentityinstanceid=pi.trackedentityinstanceid " + 
                 "and trackedentityattributeid=" + attribute.getId() + dataClause + ") as " + quote( attribute.getUid() );
@@ -301,7 +303,7 @@ public class JdbcEventAnalyticsTableManager
         for ( TrackedEntityAttribute attribute : table.getProgram().getTrackedEntityAttributesWithLegendSet() )
         {
             String column = quote( attribute.getUid() + PartitionUtils.SEP + attribute.getLegendSet().getUid() );
-            String select = getSelectClause( ValueType.getFromAttribute( attribute ) );
+            String select = getSelectClause( attribute.getValueType() );
             
             String sql = "(select l.uid from maplegend l inner join maplegendsetmaplegend lsl on l.maplegendid=lsl.maplegendid " +
                 "inner join trackedentityattributevalue av on l.startvalue <= " + select + " and l.endvalue > " + select + " " +
@@ -315,14 +317,18 @@ public class JdbcEventAnalyticsTableManager
         String[] psi = { quote( "psi" ), "character(11) not null", "psi.uid" };
         String[] pi = { quote( "pi" ), "character(11) not null", "pi.uid" };
         String[] ps = { quote( "ps" ), "character(11) not null", "ps.uid" };
+        String[] erd = { quote( "enrollmentdate" ), "timestamp", "pi.enrollmentdate" };
+        String[] id = { quote( "incidentdate" ), "timestamp", "pi.incidentdate" };
         String[] ed = { quote( "executiondate" ), "timestamp", "psi.executiondate" };
+        String[] dd = { quote( "duedate" ), "timestamp", "psi.duedate" };
+        String[] cd = { quote( "completeddate" ), "timestamp", "psi.completeddate" };
         String[] longitude = { quote( "longitude" ), dbl, "psi.longitude" };
         String[] latitude = { quote( "latitude" ), dbl, "psi.latitude" };
         String[] ou = { quote( "ou" ), "character(11) not null", "ou.uid" };
         String[] oun = { quote( "ouname" ), "character varying(230) not null", "ou.name" };
         String[] ouc = { quote( "oucode" ), "character varying(50)", "ou.code" };
 
-        columns.addAll( Lists.newArrayList( psi, pi, ps, ed, longitude, latitude, ou, oun, ouc ) );
+        columns.addAll( Lists.newArrayList( psi, pi, ps, erd, id, ed, dd, cd, longitude, latitude, ou, oun, ouc ) );
 
         if ( table.hasProgram() && table.getProgram().isRegistration() )
         {
@@ -399,6 +405,10 @@ public class JdbcEventAnalyticsTableManager
         {
             return "integer";
         }
+        else if ( Date.class.equals( valueType.getJavaClass() ) )
+        {
+            return "timestamp";
+        }
         else
         {
             return "character varying(255)";
@@ -422,6 +432,10 @@ public class JdbcEventAnalyticsTableManager
         else if ( Boolean.class.equals( valueType.getJavaClass() ) )
         {
             return "case when value = 'true' then 1 when value = 'false' then 0 else null end";
+        }
+        else if ( Date.class.equals( valueType.getJavaClass() ) )
+        {
+            return "cast(value as timestamp)";
         }
         else
         {

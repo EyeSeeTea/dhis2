@@ -157,13 +157,15 @@ public abstract class BaseAnalyticalObject
     @Scanned
     protected List<OrganisationUnitGroup> itemOrganisationUnitGroups = new ArrayList<>();
 
-    protected String digitGroupSeparator;
+    protected DigitGroupSeparator digitGroupSeparator;
 
     protected int sortOrder;
 
     protected int topLimit;
 
     protected AggregationType aggregationType;
+    
+    protected boolean completedOnly;
     
     // -------------------------------------------------------------------------
     // Analytical properties
@@ -605,11 +607,11 @@ public abstract class BaseAnalyticalObject
         }
         else if ( DATA_COLLAPSED_DIM_ID.contains( dimension ) )
         {
-            return new BaseDimensionalObject( dimension, DimensionType.DATA_COLLAPSED, new ArrayList<NameableObject>() );
+            return new BaseDimensionalObject( dimension, DimensionType.DATA_COLLAPSED, new ArrayList<>() );
         }
         else if ( STATIC_DIMS.contains( dimension ) )
         {
-            return new BaseDimensionalObject( dimension, DimensionType.STATIC, new ArrayList<NameableObject>() );
+            return new BaseDimensionalObject( dimension, DimensionType.STATIC, new ArrayList<>() );
         }
         else
         {
@@ -773,15 +775,14 @@ public abstract class BaseAnalyticalObject
         List<String> ids = new ArrayList<>();
 
         List<NameableObject> dimensions = new ArrayList<>();
-        dimensions.addAll( column != null ? column : new ArrayList<NameableObject>() );
-        dimensions.addAll( row != null ? row : new ArrayList<NameableObject>() );
+        dimensions.addAll( column != null ? column : new ArrayList<>() );
+        dimensions.addAll( row != null ? row : new ArrayList<>() );
 
         for ( NameableObject item : dimensions )
         {
             if ( item.getClass().equals( DataElementOperand.class ) )
             {
-                ids.add( ((DataElementOperand) item).getDataElement().getUid() );
-                ids.add( ((DataElementOperand) item).getCategoryOptionCombo().getUid() );
+                ids.add( ((DataElementOperand) item).getAnalyticsId() );
             }
             else
             {
@@ -883,6 +884,7 @@ public abstract class BaseAnalyticalObject
             userOrganisationUnit = object.isUserOrganisationUnit();
             sortOrder = object.getSortOrder();
             topLimit = object.getTopLimit();
+            completedOnly = object.isCompletedOnly();
         }
     }
 
@@ -1116,12 +1118,12 @@ public abstract class BaseAnalyticalObject
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String getDigitGroupSeparator()
+    public DigitGroupSeparator getDigitGroupSeparator()
     {
         return digitGroupSeparator;
     }
 
-    public void setDigitGroupSeparator( String digitGroupSeparator )
+    public void setDigitGroupSeparator( DigitGroupSeparator digitGroupSeparator )
     {
         this.digitGroupSeparator = digitGroupSeparator;
     }
@@ -1163,6 +1165,19 @@ public abstract class BaseAnalyticalObject
     public void setAggregationType( AggregationType aggregationType )
     {
         this.aggregationType = aggregationType;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isCompletedOnly()
+    {
+        return completedOnly;
+    }
+
+    public void setCompletedOnly( boolean completedOnly )
+    {
+        this.completedOnly = completedOnly;
     }
 
     // -------------------------------------------------------------------------

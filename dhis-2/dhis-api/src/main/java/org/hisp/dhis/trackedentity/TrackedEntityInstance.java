@@ -52,12 +52,7 @@ import java.util.Set;
 public class TrackedEntityInstance
     extends BaseIdentifiableObject
 {
-    public static String SEARCH_SAPERATE = "_";
     public static String PREFIX_TRACKED_ENTITY_ATTRIBUTE = "attr";
-    public static String PREFIX_PROGRAM = "prg";
-    public static String PREFIX_PROGRAM_INSTANCE = "pi";
-    public static String PREFIX_PROGRAM_EVENT_BY_STATUS = "stat";
-    public static String PREFIX_PROGRAM_STAGE = "prgst";
 
     private Set<TrackedEntityAttributeValue> attributeValues = new HashSet<>();
 
@@ -68,6 +63,8 @@ public class TrackedEntityInstance
     private TrackedEntityInstance representative;
 
     private TrackedEntity trackedEntity;
+    
+    private Boolean inactive = false;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -166,4 +163,16 @@ public class TrackedEntityInstance
     {
         this.trackedEntity = trackedEntity;
     }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlElementWrapper( localName = "inactive", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "inactive", namespace = DxfNamespaces.DXF_2_0 )
+	public Boolean isInactive() {
+		return inactive;
+	}
+
+	public void setInactive(Boolean inactive) {
+		this.inactive = inactive;
+	}
 }

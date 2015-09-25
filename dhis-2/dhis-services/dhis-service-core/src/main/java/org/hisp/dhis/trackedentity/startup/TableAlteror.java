@@ -63,10 +63,6 @@ public class TableAlteror
 {
     private static final Log log = LogFactory.getLog( TableAlteror.class );
 
-    final Pattern INPUT_PATTERN = Pattern.compile( "(<input.*?)[/]?>", Pattern.DOTALL );
-
-    final Pattern IDENTIFIER_PATTERN_FIELD = Pattern.compile( "id=\"(\\d+)-(\\d+)-val\"" );
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -304,8 +300,13 @@ public class TableAlteror
         executeSql( "update eventreport set collapsedatadimensions = false where collapsedatadimensions is null" );
         executeSql( "update eventchart set collapsedatadimensions = false where collapsedatadimensions is null" );
 
+        executeSql( "update programindicator set aggregationtype='AVERAGE' where aggregationtype is null" );
         executeSql( "ALTER TABLE programindicator ALTER description TYPE text" );
         executeSql( "ALTER TABLE programindicator ALTER expression TYPE text" );
+        executeSql( "alter table programindicator drop column valuetype" );
+        executeSql( "alter table programindicator drop column rootdate" );
+        executeSql( "alter table programindicator drop column eventoutputtype" );
+        
         executeSql( "ALTER TABLE programstage ALTER description TYPE text" );
         
         executeSql( "update programindicator set displayinform = false where displayinform is null" );
@@ -314,6 +315,9 @@ public class TableAlteror
         
         executeSql( "update program p set dataentryformid = (select dataentryformid from trackedentityform tf where tf.programid=p.programid limit 1)" );
         executeSql( "drop table trackedentityform" );
+
+        executeSql( "alter table trackedentitydatavalue alter column storedby TYPE character varying(255)" );
+        executeSql( "alter table datavalue alter column storedby TYPE character varying(255)" );
         
         updateProgramStageList();
         updateProgramAttributeList();

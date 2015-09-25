@@ -36,26 +36,26 @@ import static org.hisp.dhis.i18n.I18nUtils.i18n;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.hisp.dhis.commons.filter.Filter;
+import org.hisp.dhis.commons.filter.FilterUtils;
 import org.hisp.dhis.dataapproval.DataApprovalService;
 import org.hisp.dhis.dataapproval.DataApprovalStatus;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.dataentryform.DataEntryForm;
 import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitQueryParams;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.commons.filter.Filter;
-import org.hisp.dhis.commons.filter.FilterUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.joda.time.DateTime;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.collect.Sets;
 
 /**
  * @author Lars Helge Overland
@@ -226,22 +226,6 @@ public class DefaultDataSetService
     }
 
     @Override
-    public int getSourcesAssociatedWithDataSet( DataSet dataSet, Collection<OrganisationUnit> sources )
-    {
-        int count = 0;
-
-        for ( OrganisationUnit source : sources )
-        {
-            if ( dataSet.getSources().contains( source ) )
-            {
-                count++;
-            }
-        }
-
-        return count;
-    }
-
-    @Override
     public List<DataSet> getAllDataSets()
     {
         return i18n( i18nService, dataSetStore.getAll() );
@@ -266,93 +250,6 @@ public class DefaultDataSetService
                 return identifiers.contains( object.getId() );
             }
         } );
-    }
-
-    @Override
-    public List<DataSet> getAvailableDataSets()
-    {
-        List<DataSet> availableDataSetList = new ArrayList<>();
-        List<DataSet> dataSetList = new ArrayList<>( getAllDataSets() );
-
-        for ( DataSet dataSet : dataSetList )
-        {
-            DataEntryForm dataEntryForm = dataSet.getDataEntryForm();
-
-            if ( dataEntryForm == null )
-            {
-                availableDataSetList.add( dataSet );
-            }
-        }
-
-        return availableDataSetList;
-    }
-
-    @Override
-    public List<DataSet> getAssignedDataSets()
-    {
-        List<DataSet> assignedDataSetList = new ArrayList<>();
-        List<DataSet> dataSetList = new ArrayList<>( getAllDataSets() );
-
-        for ( DataSet dataSet : dataSetList )
-        {
-            DataEntryForm dataEntryForm = dataSet.getDataEntryForm();
-
-            if ( dataEntryForm != null )
-            {
-                assignedDataSetList.add( dataSet );
-            }
-        }
-
-        return assignedDataSetList;
-    }
-
-    @Override
-    public PeriodType getPeriodType( DataElement dataElement, Collection<Integer> dataSetIdentifiers )
-    {
-        List<DataSet> dataSets = getDataSets( dataSetIdentifiers );
-
-        for ( DataSet dataSet : dataSets )
-        {
-            if ( dataSet.getDataElements().contains( dataElement ) )
-            {
-                return dataSet.getPeriodType();
-            }
-        }
-
-        return null;
-    }
-
-    @Override
-    public List<DataSet> getAssignedDataSetsByPeriodType( PeriodType periodType )
-    {
-        List<DataSet> dataSetListByPeriodType = new ArrayList<>( getDataSetsByPeriodType( periodType ) );
-
-        Iterator<DataSet> dataSetIterator = dataSetListByPeriodType.iterator();
-        while ( dataSetIterator.hasNext() )
-        {
-            DataSet dataSet = dataSetIterator.next();
-            if ( dataSet.getSources() == null || dataSet.getSources().size() == 0 )
-            {
-                dataSetIterator.remove();
-            }
-        }
-
-        return dataSetListByPeriodType;
-    }
-
-    @Override
-    public Set<DataElement> getDistinctDataElements( Collection<Integer> dataSetIdentifiers )
-    {
-        List<DataSet> dataSets = getDataSets( dataSetIdentifiers );
-
-        Set<DataElement> dataElements = new HashSet<>();
-
-        for ( DataSet dataSet : dataSets )
-        {
-            dataElements.addAll( dataSet.getDataElements() );
-        }
-
-        return dataElements;
     }
 
     @Override
@@ -474,7 +371,7 @@ public class DefaultDataSetService
 
         boolean expired = dataSet.getExpiryDays() != DataSet.NO_EXPIRY && new DateTime( period.getEndDate() ).plusDays( dataSet.getExpiryDays() ).isBefore( new DateTime( now ) );
 
-        boolean exception = lockExceptionStore.getCount( dataSet, period, organisationUnit ) > 0l;
+        boolean exception = lockExceptionStore.getCount( dataSet, period, organisationUnit ) > 0L;
         
         if ( expired && !exception )
         {
@@ -520,25 +417,23 @@ public class DefaultDataSetService
 
         boolean expired = expiryDays != DataSet.NO_EXPIRY && new DateTime( period.getEndDate() ).plusDays( expiryDays ).isBefore( new DateTime( now ) );
 
-        return expired && lockExceptionStore.getCount( dataElement, period, organisationUnit ) == 0l;
+        return expired && lockExceptionStore.getCount( dataElement, period, organisationUnit ) == 0L;
     }
 
     @Override
     public void mergeWithCurrentUserOrganisationUnits( DataSet dataSet, Collection<OrganisationUnit> mergeOrganisationUnits )
     {
-        Set<OrganisationUnit> organisationUnits = new HashSet<>( dataSet.getSources() );
+        Set<OrganisationUnit> selectedOrgUnits = Sets.newHashSet( dataSet.getSources() );
+        
+        OrganisationUnitQueryParams params = new OrganisationUnitQueryParams();
+        params.setParents( currentUserService.getCurrentUser().getOrganisationUnits() );
 
-        Set<OrganisationUnit> userOrganisationUnits = new HashSet<>();
+        Set<OrganisationUnit> userOrganisationUnits = Sets.newHashSet( organisationUnitService.getOrganisationUnitsByQuery( params ) );
 
-        for ( OrganisationUnit organisationUnit : currentUserService.getCurrentUser().getOrganisationUnits() )
-        {
-            userOrganisationUnits.addAll( organisationUnitService.getOrganisationUnitWithChildren( organisationUnit.getUid() ) );
-        }
+        selectedOrgUnits.removeAll( userOrganisationUnits );
+        selectedOrgUnits.addAll( mergeOrganisationUnits );
 
-        organisationUnits.removeAll( userOrganisationUnits );
-        organisationUnits.addAll( mergeOrganisationUnits );
-
-        dataSet.updateOrganisationUnits( organisationUnits );
+        dataSet.updateOrganisationUnits( selectedOrgUnits );
 
         updateDataSet( dataSet );
     }

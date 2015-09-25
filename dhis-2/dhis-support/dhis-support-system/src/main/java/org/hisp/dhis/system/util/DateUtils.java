@@ -53,7 +53,6 @@ import static org.hisp.dhis.period.Period.DEFAULT_DATE_FORMAT;
 
 /**
  * @author Lars Helge Overland
- * @version $Id$
  */
 public class DateUtils
 {
@@ -581,14 +580,7 @@ public class DateUtils
             return false; // The user hasn't specified any dates
         }
 
-        if ( !date1.before( date2 ) )
-        {
-            return true; // Return true if date2 is earlier than date1
-        }
-        else
-        {
-            return false;
-        }
+        return !date1.before( date2 );
     }
 
     /**
@@ -642,6 +634,18 @@ public class DateUtils
         long diff = end.getTime() - start.getTime();
 
         return DAY_SECOND_FORMAT.print( new org.joda.time.Period( diff ) );
+    }
+
+    /**
+     * Returns a pretty string representing the interval between the given
+     * start and end dates using a day, month, second format.
+     *
+     * @param ms the number of milliseconds in the interval.
+     * @return a string, or null if the given start or end date is null.
+     */
+    public static String getPrettyInterval( long ms )
+    {
+        return DAY_SECOND_FORMAT.print( new org.joda.time.Period( ms ) );
     }
 
     /**

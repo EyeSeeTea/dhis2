@@ -28,6 +28,13 @@ package org.hisp.dhis.commons.util;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+/**
+ * @author Lars Helge Overland
+ */
 public class ExpressionFunctions
 {
     public static final String NAMESPACE = "d2";
@@ -63,5 +70,65 @@ public class ExpressionFunctions
         }
         
         return ( value.doubleValue() >= 0d ) ? 1d : 0d;
+    }
+    
+    /**
+     * Function which will return the count of zero or positive values among the
+     * given argument values.
+     * 
+     * @param values the arguments.
+     * @return an Integer.
+     */
+    public static Integer zpvc( Number... values )
+    {
+        if ( values == null || values.length == 0 )
+        {
+            throw new IllegalArgumentException( "Argument is null or empty: " + values );
+        }
+        
+        int count = 0;
+        
+        for ( Number value : values )
+        {
+            if ( value != null && value.doubleValue() >= 0d )
+            {
+                count++;
+            }
+        }
+        
+        return count;        
+    }
+
+    /**
+     * Functions which will return the true value if the condition is true, false
+     * value if not.
+     * 
+     * @param condititon the condition.
+     * @param trueValue the true value.
+     * @param falseValue the false value.
+     * @return a String.
+     */
+    public static Object condition( String condititon, Object trueValue, Object falseValue )
+    {
+        return ExpressionUtils.isTrue( condititon, null ) ? trueValue : falseValue;        
+    }
+    
+    /**
+     * Function which will return the number of days between the two given dates.
+     * 
+     * @param start the start date. 
+     * @param end the end date.
+     * @return number of days between dates.
+     */
+    public static Integer daysBetween( String start, String end )
+        throws ParseException
+    {
+        SimpleDateFormat format = new SimpleDateFormat();
+        format.applyPattern( "yyyy-MM-dd" );
+        
+        Date startDate = format.parse( start );
+        Date endDate = format.parse( end );
+        
+        return new Long( ( endDate.getTime() - startDate.getTime() ) / 86400000 ).intValue();
     }
 }

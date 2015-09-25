@@ -33,9 +33,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.hisp.dhis.DhisSpringTest;
 import org.junit.Test;
@@ -69,7 +67,6 @@ public class IndicatorServiceTest
 
     @Test
     public void testAddIndicatorType()
-        throws Exception
     {
         IndicatorType typeA = new IndicatorType( "IndicatorTypeA", 100, false );
         IndicatorType typeB = new IndicatorType( "IndicatorTypeB", 1, false );
@@ -104,7 +101,6 @@ public class IndicatorServiceTest
 
     @Test
     public void testGetAndDeleteIndicatorType()
-        throws Exception
     {
         IndicatorType typeA = new IndicatorType( "IndicatorTypeA", 100, false );
         IndicatorType typeB = new IndicatorType( "IndicatorTypeB", 1, false );
@@ -128,7 +124,6 @@ public class IndicatorServiceTest
 
     @Test
     public void testGetAllIndicatorTypes()
-        throws Exception
     {
         IndicatorType typeA = new IndicatorType( "IndicatorTypeA", 100, false );
         IndicatorType typeB = new IndicatorType( "IndicatorTypeB", 1, false );
@@ -145,7 +140,6 @@ public class IndicatorServiceTest
 
     @Test
     public void testGetIndicatorTypeByName()
-        throws Exception
     {
         IndicatorType typeA = new IndicatorType( "IndicatorTypeA", 100, false );
         IndicatorType typeB = new IndicatorType( "IndicatorTypeB", 1, false );
@@ -170,7 +164,6 @@ public class IndicatorServiceTest
 
     @Test
     public void testAddIndicatorGroup()
-        throws Exception
     {
         IndicatorGroup groupA = new IndicatorGroup( "IndicatorGroupA" );
         IndicatorGroup groupB = new IndicatorGroup( "IndicatorGroupB" );
@@ -189,7 +182,6 @@ public class IndicatorServiceTest
 
     @Test
     public void testUpdateIndicatorGroup()
-        throws Exception
     {
         IndicatorGroup groupA = new IndicatorGroup( "IndicatorGroupA" );
         int idA = indicatorService.addIndicatorGroup( groupA );
@@ -205,7 +197,6 @@ public class IndicatorServiceTest
 
     @Test
     public void testGetAndDeleteIndicatorGroup()
-        throws Exception
     {
         IndicatorGroup groupA = new IndicatorGroup( "IndicatorGroupA" );
         IndicatorGroup groupB = new IndicatorGroup( "IndicatorGroupB" );
@@ -229,7 +220,6 @@ public class IndicatorServiceTest
 
     @Test
     public void testGetAllIndicatorGroups()
-        throws Exception
     {
         IndicatorGroup groupA = new IndicatorGroup( "IndicatorGroupA" );
         IndicatorGroup groupB = new IndicatorGroup( "IndicatorGroupB" );
@@ -246,7 +236,6 @@ public class IndicatorServiceTest
 
     @Test
     public void testGetIndicatorGroupByName()
-        throws Exception
     {
         IndicatorGroup groupA = new IndicatorGroup( "IndicatorGroupA" );
         IndicatorGroup groupB = new IndicatorGroup( "IndicatorGroupB" );
@@ -264,64 +253,12 @@ public class IndicatorServiceTest
         assertTrue( indicatorService.getIndicatorGroupByName( "IndicatorGroupC" ).isEmpty() );
     }
 
-    @Test
-    public void testGetGroupsContainingIndicator() throws Exception
-    {
-        IndicatorType indicatorType = new IndicatorType( "indicatorTypeName", 100, false );
-        indicatorService.addIndicatorType( indicatorType );
-
-        Indicator indicator1 = createIndicator( 'A', indicatorType );
-        Indicator indicator2 = createIndicator( 'B', indicatorType );
-        Indicator indicator3 = createIndicator( 'C', indicatorType );
-        Indicator indicator4 = createIndicator( 'D', indicatorType );
-
-        indicatorService.addIndicator( indicator1 );
-        indicatorService.addIndicator( indicator2 );
-        indicatorService.addIndicator( indicator3 );
-        indicatorService.addIndicator( indicator4 );
-
-        IndicatorGroup indicatorGroup1 = new IndicatorGroup( "indicatorGroupName1" );
-        IndicatorGroup indicatorGroup2 = new IndicatorGroup( "indicatorGroupName2" );
-        IndicatorGroup indicatorGroup3 = new IndicatorGroup( "indicatorGroupName3" );
-        IndicatorGroup indicatorGroup4 = new IndicatorGroup( "indicatorGroupName4" );
-
-        Set<Indicator> members1 = new HashSet<>();
-        Set<Indicator> members2 = new HashSet<>();
-
-        members1.add( indicator1 );
-        members1.add( indicator2 );
-        members2.add( indicator1 );
-        members2.add( indicator3 );
-        members2.add( indicator4 );
-
-        indicatorGroup1.setMembers( members1 );
-        indicatorGroup2.setMembers( members2 );
-        indicatorGroup3.setMembers( members1 );
-        indicatorGroup4.setMembers( members2 );
-
-        indicatorService.addIndicatorGroup( indicatorGroup1 );
-        indicatorService.addIndicatorGroup( indicatorGroup2 );
-        indicatorService.addIndicatorGroup( indicatorGroup3 );
-        indicatorService.addIndicatorGroup( indicatorGroup4 );
-
-        List<IndicatorGroup> groups1 = indicatorService.getGroupsContainingIndicator( indicator1 );
-
-        assertTrue( groups1.size() == 4 );
-
-        List<IndicatorGroup> groups2 = indicatorService.getGroupsContainingIndicator( indicator2 );
-
-        assertTrue( groups2.size() == 2 );
-        assertTrue( groups2.contains( indicatorGroup1 ) );
-        assertTrue( groups2.contains( indicatorGroup3 ) );
-    }
-
     // -------------------------------------------------------------------------
     // Indicator
     // -------------------------------------------------------------------------
 
     @Test
     public void testAddIndicator()
-        throws Exception
     {
         IndicatorType type = new IndicatorType( "IndicatorType", 100, false );
 
@@ -344,7 +281,6 @@ public class IndicatorServiceTest
 
     @Test
     public void testUpdateIndicator()
-        throws Exception
     {
         IndicatorType type = new IndicatorType( "IndicatorType", 100, false );
 
@@ -364,7 +300,6 @@ public class IndicatorServiceTest
 
     @Test
     public void testGetAndDeleteIndicator()
-        throws Exception
     {
         IndicatorType type = new IndicatorType( "IndicatorType", 100, false );
 
@@ -392,7 +327,6 @@ public class IndicatorServiceTest
 
     @Test
     public void testGetAllIndicators()
-        throws Exception
     {
         IndicatorType type = new IndicatorType( "IndicatorType", 100, false );
 
@@ -413,7 +347,6 @@ public class IndicatorServiceTest
 
     @Test
     public void testGetIndicatorByName()
-        throws Exception
     {
         IndicatorType type = new IndicatorType( "IndicatorType", 100, false );
 
@@ -437,7 +370,6 @@ public class IndicatorServiceTest
 
     @Test
     public void testGetIndicatorByShortName()
-        throws Exception
     {
         IndicatorType type = new IndicatorType( "IndicatorType", 100, false );
 

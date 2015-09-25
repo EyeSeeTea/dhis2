@@ -46,6 +46,7 @@ import org.hisp.dhis.calendar.Calendar;
 import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.commons.collection.ListUtils;
+import org.hisp.dhis.commons.collection.UniqueArrayList;
 import org.hisp.dhis.commons.timer.SystemTimer;
 import org.hisp.dhis.commons.timer.Timer;
 import org.hisp.dhis.dataapproval.DataApprovalLevelService;
@@ -69,6 +70,8 @@ public abstract class AbstractJdbcTableManager
     implements AnalyticsTableManager
 {
     protected static final Log log = LogFactory.getLog( JdbcAnalyticsTableManager.class );
+    
+    protected static final String DATE_REGEXP = "^\\d{4}-\\d{2}-\\d{2}(\\s|T)?(\\d{2}:\\d{2}:\\d{2})?$";
 
     public static final String PREFIX_ORGUNITGROUPSET = "ougs_";
     public static final String PREFIX_ORGUNITLEVEL = "uidlevel";
@@ -145,7 +148,8 @@ public abstract class AbstractJdbcTableManager
     
     private List<AnalyticsTable> getTables( List<Integer> dataYears )
     {
-        List<AnalyticsTable> tables = new ArrayList<>();
+        List<AnalyticsTable> tables = new UniqueArrayList<>();
+        
         Calendar calendar = PeriodType.getCalendar();
 
         Collections.sort( dataYears );
@@ -158,7 +162,7 @@ public abstract class AbstractJdbcTableManager
             
             tables.add( new AnalyticsTable( baseName, getDimensionColumns( null ), period ) );
         }
-        
+
         return tables;
     }
     
@@ -327,10 +331,10 @@ public abstract class AbstractJdbcTableManager
     {
         log.debug( "Populate table: " + tableName + " SQL: " + sql );
 
-        Timer t = new SystemTimer().start();
+        Timer timer = new SystemTimer().start();
         
         jdbcTemplate.execute( sql );
         
-        log.info( "Populated " + tableName + ": " + t.stop().toString() );
+        log.info( "Populated " + tableName + ": " + timer.stop().toString() );
     }
 }

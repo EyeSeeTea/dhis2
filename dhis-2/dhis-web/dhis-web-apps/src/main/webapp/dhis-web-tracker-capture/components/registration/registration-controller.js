@@ -12,20 +12,26 @@ trackerCapture.controller('RegistrationController',
                 CustomFormService,
                 EnrollmentService,
                 DialogService,
-                ModalService,
                 CurrentSelection,
-                OptionSetService,
+                MetaDataFactory,
                 EventUtils,
                 RegistrationService,
                 DateUtils,
-                SessionStorageService) {
+                SessionStorageService,
+                TrackerRulesFactory,
+                TrackerRulesExecutionService) {
+    
+    $scope.maxOptionSize = 30;
     
     $scope.today = DateUtils.getToday();
     $scope.trackedEntityForm = null;
     $scope.customForm = null;    
     $scope.selectedTei = {};
     $scope.tei = {};
-    $scope.registrationMode = null;
+    $scope.registrationMode = 'REGISTRATION';    
+    $scope.hiddenFields = {};
+    
+    //$scope.editingDisabled = angular.isUndefined($scope.editingDisabled) ? false : $scope.editingDisabled;
     
     $scope.attributesById = CurrentSelection.getAttributesById();
     if(!$scope.attributesById){
@@ -42,7 +48,7 @@ trackerCapture.controller('RegistrationController',
     $scope.optionSets = CurrentSelection.getOptionSets();        
     if(!$scope.optionSets){
         $scope.optionSets = [];
-        OptionSetService.getAll().then(function(optionSets){
+        MetaDataFactory.getAll('optionSets').then(function(optionSets){
             angular.forEach(optionSets, function(optionSet){                        
                 $scope.optionSets[optionSet.id] = optionSet;
             });
@@ -52,18 +58,25 @@ trackerCapture.controller('RegistrationController',
     }
     
     $scope.selectedOrgUnit = SessionStorageService.get('SELECTED_OU');
-    $scope.selectedEnrollment = {dateOfEnrollment: $scope.today, dateOfIncident: $scope.today, orgUnitName: $scope.selectedOrgUnit.name};   
+    $scope.selectedEnrollment = {enrollmentDate: $scope.today, incidentDate: $scope.today, orgUnitName: $scope.selectedOrgUnit.name};   
             
     $scope.trackedEntities = {available: []};
     TEService.getAll().then(function(entities){
         $scope.trackedEntities.available = entities;   
         $scope.trackedEntities.selected = $scope.trackedEntities.available[0];
     });
-    
+
     //watch for selection of program
     $scope.$watch('selectedProgram', function() {        
         $scope.trackedEntityForm = null;
-        $scope.customForm = null;
+        $scope.customForm = null;        
+        $scope.allProgramRules = {constants: [], programIndicators: {}, programValidations: [], programVariables: [], programRules: []};
+        if( angular.isObject($scope.selectedProgram) && $scope.selectedProgram.id ){
+            TrackerRulesFactory.getRules($scope.selectedProgram.id).then(function(rules){                    
+                $scope.allProgramRules = rules;
+            });
+        }
+        
         if($scope.registrationMode === 'REGISTRATION'){
             $scope.getAttributes($scope.registrationMode);
         }        
@@ -74,16 +87,18 @@ trackerCapture.controller('RegistrationController',
         $scope.selectedTei = {};
         $scope.tei = {};
         $scope.registrationMode = args.registrationMode;
-        $scope.getAttributes($scope.registrationMode);
         
         if($scope.registrationMode !== 'REGISTRATION'){
             $scope.selectedTei = args.selectedTei;            
-            $scope.tei = angular.copy(args.selectedTei);            
+            $scope.tei = angular.copy(args.selectedTei);  
+            //$scope.teiOriginal = angular.copy(args.selectedTei);  
         }
         
         if($scope.registrationMode === 'PROFILE'){
             $scope.selectedEnrollment = args.enrollment;
         }
+        
+        $scope.getAttributes($scope.registrationMode);
     });
         
     $scope.getAttributes = function(_mode){        
@@ -107,16 +122,12 @@ trackerCapture.controller('RegistrationController',
         //reset form
         $scope.selectedTei = {};
         $scope.selectedEnrollment = {};
-        $scope.outerForm.submitted = false;
+        $scope.outerForm.submitted = false;         
 
         if(destination === 'DASHBOARD') {
             $location.path('/dashboard').search({tei: teiId,                                            
                                     program: $scope.selectedProgram ? $scope.selectedProgram.id: null});
-        }            
-        else if(destination === 'RELATIONSHIP' ){
-            $scope.tei.trackedEntityInstance = teiId;
-            $scope.broadCastSelections();
-        }
+        }        
     };
     
     var reloadProfileWidget = function(){
@@ -124,7 +135,7 @@ trackerCapture.controller('RegistrationController',
         CurrentSelection.set({tei: $scope.selectedTei, te: $scope.selectedTei.trackedEntity, prs: selections.prs, pr: $scope.selectedProgram, prNames: selections.prNames, prStNames: selections.prStNames, enrollments: selections.enrollments, selectedEnrollment: $scope.selectedEnrollment, optionSets: selections.optionSets});        
         $timeout(function() { 
             $rootScope.$broadcast('profileWidget', {});            
-        }, 100);
+        }, 200);
     };
     
     var notifyRegistrtaionCompletion = function(destination, teiId){
@@ -149,8 +160,8 @@ trackerCapture.controller('RegistrationController',
                         enrollment.program = $scope.selectedProgram.id;
                         enrollment.status = 'ACTIVE';
                         enrollment.orgUnit = $scope.selectedOrgUnit.id;
-                        enrollment.dateOfEnrollment = $scope.selectedEnrollment.dateOfEnrollment;
-                        enrollment.dateOfIncident = $scope.selectedEnrollment.dateOfIncident === '' ? $scope.selectedEnrollment.dateOfEnrollment : $scope.selectedEnrollment.dateOfIncident;
+                        enrollment.enrollmentDate = $scope.selectedEnrollment.enrollmentDate;
+                        enrollment.incidentDate = $scope.selectedEnrollment.incidentDate === '' ? $scope.selectedEnrollment.enrollmentDate : $scope.selectedEnrollment.incidentDate;
 
                         EnrollmentService.enroll(enrollment).then(function(enrollmentResponse){
                             var en = enrollmentResponse.response && enrollmentResponse.response.importSummaries && enrollmentResponse.response.importSummaries[0] ? enrollmentResponse.response.importSummaries[0] : {};
@@ -214,57 +225,113 @@ trackerCapture.controller('RegistrationController',
         //but there could be a case where attributes are non-mandatory and
         //registration form comes empty, in this case enforce at least one value        
         
-        var result = RegistrationService.processForm($scope.tei, $scope.selectedTei, $scope.attributesById, $scope.selectedProgram);
+        var result = RegistrationService.processForm($scope.tei, $scope.selectedTei, $scope.attributesById);
         $scope.formEmpty = result.formEmpty;
         $scope.tei = result.tei;
         
         if($scope.formEmpty){//registration form is empty
             return false;
-        }
-        
-        if(!result.validation.valid){//validation exists           
-            var modalInstance = $modal.open({
-                templateUrl: 'components/registration/validation-message.html',
-                controller: 'ValidationMessageController',
-                resolve: {
-                    validation: function () {
-                        return result.validation;
+        }        
+        performRegistration(destination);
+    }; 
+   
+    
+    var processRuleEffect = function(){        
+        $scope.warningMessages = [];        
+        angular.forEach($rootScope.ruleeffects['registration'], function (effect) {
+            if (effect.trackedEntityAttribute) {
+                //in the data entry controller we only care about the "hidefield", showerror and showwarning actions
+                if (effect.action === "HIDEFIELD") {
+                    if (effect.trackedEntityAttribute) {
+                        if (effect.ineffect && $scope.selectedTei[effect.trackedEntityAttribute.id]) {
+                            //If a field is going to be hidden, but contains a value, we need to take action;
+                            if (effect.content) {
+                                //TODO: Alerts is going to be replaced with a proper display mecanism.
+                                alert(effect.content);
+                            }
+                            else {
+                                //TODO: Alerts is going to be replaced with a proper display mecanism.
+                                alert($scope.attributesById[effect.trackedEntityAttribute.id].name + "Was blanked out and hidden by your last action");
+                            }
+
+                            //Blank out the value:
+                            $scope.selectedTei[effect.trackedEntityAttribute.id] = "";
+                        }
+
+                        $scope.hiddenFields[effect.trackedEntityAttribute.id] = effect.ineffect;
+                    }
+                    else {
+                        $log.warn("ProgramRuleAction " + effect.id + " is of type HIDEFIELD, bot does not have an attribute defined");
+                    }
+                } else if (effect.action === "SHOWERROR") {
+                    if (effect.trackedEntityAttribute) {                        
+                        if(effect.ineffect) {
+                            var dialogOptions = {
+                                headerText: 'validation_error',
+                                bodyText: effect.content
+                            };
+                            DialogService.showDialog({}, dialogOptions);
+                            $scope.selectedTei[effect.trackedEntityAttribute.id] = $scope.tei[effect.trackedEntityAttribute.id];
+                        }
+                    }
+                    else {
+                        $log.warn("ProgramRuleAction " + effect.id + " is of type HIDEFIELD, bot does not have an attribute defined");
+                    }
+                } else if (effect.action === "SHOWWARNING") {
+                    if (effect.trackedEntityAttribute) {
+                        if(effect.ineffect) {
+                            $scope.warningMessages.push(effect.content);
+                        }
+                    }
+                    else {
+                        $log.warn("ProgramRuleAction " + effect.id + " is of type HIDEFIELD, bot does not have an attribute defined");
                     }
                 }
-            });
-
-            modalInstance.result.then(function (res) {
-                if(!res) {//strict validation
-                    return false;
-                }
-                else{//not-strict validation
-                    performRegistration(destination);
-                }
-            }, function () {
-            });        
-        }
-        else{//no validation
-            performRegistration(destination);
+            }
+        });
+    };
+    
+    $scope.executeRules = function () {   
+        var flag = {debug: true, verbose: false};
+        
+        //repopulate attributes with updated values
+        $scope.selectedTei.attributes = [];
+        
+        angular.forEach($scope.attributes, function(metaAttribute){
+            var newAttributeInArray = {attribute:metaAttribute.id,
+                code:metaAttribute.code,
+                displayName:metaAttribute.displayName,
+                type:metaAttribute.valueType
+            };
+            if($scope.selectedTei[newAttributeInArray.attribute]){
+                newAttributeInArray.value = $scope.selectedTei[newAttributeInArray.attribute];
+            }
+            
+           $scope.selectedTei.attributes.push(newAttributeInArray);
+        });
+        
+        if($scope.selectedProgram && $scope.selectedProgram.id){
+            TrackerRulesExecutionService.executeRules($scope.allProgramRules, 'registration', null, null, $scope.selectedTei, $scope.selectedEnrollment, flag);
         }        
     };
     
-    
-    $scope.broadCastSelections = function(){
-        angular.forEach($scope.tei.attributes, function(att){
-            $scope.tei[att.attribute] = att.value;
-        });
-        
-        $scope.tei.orgUnitName = $scope.selectedOrgUnit.name;
-        $scope.tei.created = DateUtils.formatFromApiToUser(new Date());
-        CurrentSelection.setRelationshipInfo({tei: $scope.tei, src: $scope.selectedRelationshipSource});
-        $timeout(function() { 
-            $rootScope.$broadcast('relationship', {});
-        }, 100);
+    //check if field is hidden
+    $scope.isHidden = function (id) {
+        //In case the field contains a value, we cant hide it. 
+        //If we hid a field with a value, it would falsely seem the user was aware that the value was entered in the UI.        
+        return $scope.selectedTei[id] ? false : $scope.hiddenFields[id];
     };
     
-    /*$scope.validationAndSkipLogic = function(tei, field){
-    };*/
+    $scope.teiValueUpdated = function(tei, field){
+        $scope.executeRules();
+    };
     
+    //listen for rule effect changes
+    $scope.$on('ruleeffectsupdated', function (event, args) {
+        processRuleEffect(args.event);
+    });
+
+
     $scope.interacted = function(field) {
         var status = false;
         if(field){            
@@ -272,20 +339,43 @@ trackerCapture.controller('RegistrationController',
         }
         return status;        
     };
-})
+    
+    $scope.getTrackerAssociate = function(selectedAttribute){
+        
+        
+        var modalInstance = $modal.open({
+            templateUrl: 'components/teiadd/tei-add.html',
+            controller: 'TEIAddController',
+            windowClass: 'modal-full-window',
+            resolve: {
+                relationshipTypes: function () {
+                    return $scope.relationshipTypes;
+                },
+                addingRelationship: function(){
+                    return false;
+                },
+                selections: function () {
+                    return CurrentSelection.get();
+                },
+                selectedTei: function(){
+                    return $scope.selectedTei;
+                },
+                selectedAttribute: function(){
+                    return selectedAttribute;
+                },
+                selectedProgram: function(){
+                    return $scope.selectedProgram;
+                },
+                relatedProgramRelationship: function(){
+                    return $scope.relatedProgramRelationship;
+                }
+            }
+        });
 
-.controller('ValidationMessageController',
-        function ($scope,
-                $modalInstance,                
-                validation) {
-                    
-    $scope.validationResult = validation;
-
-    $scope.proceed = function () {
-        $modalInstance.close(true);
-    };
-
-    $scope.cancel = function () {
-        $modalInstance.close(false);
-    };
+        modalInstance.result.then(function (res) {
+            if(res && res.id){
+                $scope.selectedTei[selectedAttribute.id] = res.id;
+            }
+        });
+    };    
 });

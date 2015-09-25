@@ -56,8 +56,8 @@ public class MathUtils
     
     private static final double TOLERANCE = 0.01;
     
-    public static final String NUMERIC_REGEXP = "^(-?0|-?[1-9]\\d*)(\\.\\d+)?(E(-)?\\d+)?$";
-    public static final String NUMERIC_LENIENT_REGEXP = "^(-?[0-9]+)(\\.[0-9]+)?(E(-)?\\d+)?$";
+    public static final String NUMERIC_REGEXP = "^(-?0|-?[1-9]\\d*)(\\.\\d+)?$";
+    public static final String NUMERIC_LENIENT_REGEXP = "^(-?[0-9]+)(\\.[0-9]+)?$";
     
     private static final Pattern NUMERIC_PATTERN = Pattern.compile( NUMERIC_REGEXP );
     private static final Pattern NUMERIC_LENIENT_PATTERN = Pattern.compile( NUMERIC_LENIENT_REGEXP );
@@ -93,7 +93,7 @@ public class MathUtils
         final JEP parser = getJep();
         parser.parseExpression( expression );
         
-        return ( parser.getValue() == 1.0 );
+        return isEqual( parser.getValue(), 1.0 );
     }
     
     /** 
@@ -258,7 +258,7 @@ public class MathUtils
      */
     public static double roundToSignificantDigits( double value, int n )
     {
-        if( value == 0.0 )
+        if ( isEqual( value, 0.0 ) )
         {
             return 0.0;
         }

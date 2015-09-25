@@ -28,10 +28,11 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.program.ProgramExpression.OBJECT_PROGRAM_STAGE;
-import static org.hisp.dhis.program.ProgramExpression.OBJECT_PROGRAM_STAGE_DATAELEMENT;
-import static org.hisp.dhis.program.ProgramExpression.SEPARATOR_ID;
-import static org.hisp.dhis.program.ProgramExpression.SEPARATOR_OBJECT;
+import org.apache.commons.math3.util.MathUtils;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValue;
+import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValueService;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,10 +43,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValue;
-import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValueService;
-import org.springframework.transaction.annotation.Transactional;
+import static org.hisp.dhis.program.ProgramExpression.*;
 
 /**
  * @author Chau Thu Tran
@@ -140,7 +138,7 @@ public class DefaultProgramValidationService
                 + entityInstanceDataValue.getDataElement().getUid();
             entityInstanceDataValueMap.put( key, entityInstanceDataValue.getValue() );
         }
-        
+
         // ---------------------------------------------------------------------
         // Validate rules
         // ---------------------------------------------------------------------
@@ -160,11 +158,11 @@ public class DefaultProgramValidationService
                 {
                     double leftSide = Double.parseDouble( leftSideValue );
                     double rightSide = Double.parseDouble( rightSideValue );
-                    if ( !((operator.equals( "==" ) && leftSide == rightSide)
+                    if ( !((operator.equals( "==" ) && MathUtils.equals( leftSide, rightSide ) )
                         || (operator.equals( "<" ) && leftSide < rightSide)
                         || (operator.equals( "<=" ) && leftSide <= rightSide)
                         || (operator.equals( ">" ) && leftSide > rightSide)
-                        || (operator.equals( ">=" ) && leftSide >= rightSide) || (operator.equals( "!=" ) && leftSide != rightSide)) )
+                        || (operator.equals( ">=" ) && leftSide >= rightSide) || (operator.equals( "!=" ) && !MathUtils.equals( leftSide, rightSide ) )) )
                     {
                         ProgramValidationResult validationResult = new ProgramValidationResult( programStageInstance,
                             validate, leftSideValue, rightSideValue );
@@ -236,8 +234,8 @@ public class DefaultProgramValidationService
         }
 
         return programValidation;
-    }  
-    
+    }
+
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
@@ -245,15 +243,15 @@ public class DefaultProgramValidationService
     private boolean isNumberDataExpression( String programExpression )
     {
         Collection<DataElement> dataElements = expressionService.getDataElements( programExpression );
-        
+
         for ( DataElement dataElement : dataElements )
         {
-            if ( dataElement.getType().equals( DataElement.VALUE_TYPE_INT ) )
+            if ( dataElement.getValueType().isNumeric() )
             {
                 return true;
             }
         }
-        
+
         return false;
     }
 }

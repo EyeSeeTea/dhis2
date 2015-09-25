@@ -2104,9 +2104,10 @@ Ext.onReady( function() {
 
     AggregateOptionsWindow = function() {
 		var showValues,
+            showTrendLine,
             hideEmptyRows,
             hideNaData,
-            showTrendLine,
+            completedOnly,
 			targetLineValue,
 			targetLineTitle,
 			baseLineValue,
@@ -2144,6 +2145,11 @@ Ext.onReady( function() {
 			checked: true
 		});
 
+		showTrendLine = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: NS.i18n.trend_line,
+			style: 'margin-bottom:' + checkboxBottomMargin + 'px'
+		});
+
 		hideEmptyRows = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: NS.i18n.hide_empty_category_items,
 			style: 'margin-bottom:' + checkboxBottomMargin + 'px'
@@ -2154,9 +2160,9 @@ Ext.onReady( function() {
 			style: 'margin-bottom:' + checkboxBottomMargin + 'px',
 		});
 
-		showTrendLine = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: NS.i18n.trend_line,
-			style: 'margin-bottom:' + checkboxBottomMargin + 'px'
+		completedOnly = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: NS.i18n.include_only_completed_events_only,
+			style: 'margin-bottom:' + checkboxBottomMargin + 'px',
 		});
 
 		targetLineValue = Ext.create('Ext.form.field.Number', {
@@ -2335,9 +2341,10 @@ Ext.onReady( function() {
 			style: 'margin-left:14px',
 			items: [
 				showValues,
+				showTrendLine,
 				hideEmptyRows,
                 hideNaData,
-				showTrendLine,
+                completedOnly,
 				{
 					xtype: 'container',
 					layout: 'column',
@@ -2417,9 +2424,10 @@ Ext.onReady( function() {
 			getOptions: function() {
 				return {
 					showValues: showValues.getValue(),
+					showTrendLine: showTrendLine.getValue(),
                     hideEmptyRows: hideEmptyRows.getValue(),
                     hideNaData: hideNaData.getValue(),
-					showTrendLine: showTrendLine.getValue(),
+					completedOnly: completedOnly.getValue(),
 					targetLineValue: targetLineValue.getValue(),
 					targetLineTitle: targetLineTitle.getValue(),
 					baseLineValue: baseLineValue.getValue(),
@@ -2439,8 +2447,10 @@ Ext.onReady( function() {
 			},
 			setOptions: function(layout) {
 				showValues.setValue(Ext.isBoolean(layout.showValues) ? layout.showValues : false);
-				hideEmptyRows.setValue(Ext.isBoolean(layout.hideEmptyRows) ? layout.hideEmptyRows : false);
 				showTrendLine.setValue(Ext.isBoolean(layout.showTrendLine) ? layout.showTrendLine : false);
+				hideEmptyRows.setValue(Ext.isBoolean(layout.hideEmptyRows) ? layout.hideEmptyRows : false);
+				hideNaData.setValue(Ext.isBoolean(layout.hideNaData) ? layout.hideNaData : false);
+                completedOnly.setValue(Ext.isBoolean(layout.completedOnly) ? layout.completedOnly : false);
 
 				// target line
 				if (Ext.isNumber(layout.targetLineValue)) {
@@ -2589,9 +2599,10 @@ Ext.onReady( function() {
 
 					// cmp
 					w.showValues = showValues;
+					w.showTrendLine = showTrendLine;
                     w.hideEmptyRows = hideEmptyRows;
                     w.hideNaData = hideNaData;
-					w.showTrendLine = showTrendLine;
+                    w.completedOnly = completedOnly;
 					w.targetLineValue = targetLineValue;
 					w.targetLineTitle = targetLineTitle;
 					w.baseLineValue = baseLineValue;
@@ -3795,7 +3806,7 @@ Ext.onReady( function() {
                 var layoutWindow = ns.app.aggregateLayoutWindow;
 
                 this.each( function(record) {
-                    if (Ext.Array.contains(['int', 'number'], (record.data.valueType || record.data.type))) {
+                    if (Ext.Array.contains(ns.core.conf.valueType.numericTypes, record.data.valueType)) {
                         layoutWindow.valueStore.add(record.data);
                     }
                 });
@@ -4140,7 +4151,7 @@ Ext.onReady( function() {
             }
             else {
                 Ext.Ajax.request({
-                    url: ns.core.init.contextPath + '/api/programStages.json?filter=id:eq:' + stageId + '&fields=programStageDataElements[dataElement[id,' + ns.core.init.namePropertyUrl + ',type,optionSet[id,name]]]',
+                    url: ns.core.init.contextPath + '/api/programStages.json?filter=id:eq:' + stageId + '&fields=programStageDataElements[dataElement[id,' + ns.core.init.namePropertyUrl + ',valueType,optionSet[id,name]]]',
                     success: function(r) {
                         var objects = Ext.decode(r.responseText).programStages,
                             dataElements;
@@ -4356,7 +4367,6 @@ Ext.onReady( function() {
 			var getUxType,
 				ux;
 
-            element.type = element.type || element.valueType;
 			index = index || dataElementSelected.items.items.length;
 
 			getUxType = function(element) {
@@ -4365,19 +4375,19 @@ Ext.onReady( function() {
 					return 'Ext.ux.panel.OrganisationUnitGroupSetContainer';
 				}
 
-				if (element.type === 'int' || element.type === 'number') {
+				if (Ext.Array.contains(ns.core.conf.valueType.numericTypes, element.valueType)) {
 					return 'Ext.ux.panel.DataElementIntegerContainer';
 				}
 
-				if (element.type === 'string') {
+				if (Ext.Array.contains(ns.core.conf.valueType.textTypes, element.valueType)) {
 					return 'Ext.ux.panel.DataElementStringContainer';
 				}
 
-				if (element.type === 'date') {
+				if (Ext.Array.contains(ns.core.conf.valueType.dateTypes, element.valueType)) {
 					return 'Ext.ux.panel.DataElementDateContainer';
 				}
 
-				if (element.type === 'bool' || element.type === 'trueOnly') {
+				if (Ext.Array.contains(ns.core.conf.valueType.booleanTypes, element.valueType)) {
 					return 'Ext.ux.panel.DataElementBooleanContainer';
 				}
 
@@ -4418,7 +4428,7 @@ Ext.onReady( function() {
 				allElements = [],
                 aggWindow = ns.app.aggregateLayoutWindow,
                 //queryWindow = ns.app.queryLayoutWindow,
-                includeKeys = ['int', 'number', 'bool', 'boolean', 'trueOnly'],
+                includeKeys = ns.core.conf.valueType.aggregateTypes,
                 ignoreKeys = ['pe', 'ou'],
                 recordMap = {
 					'pe': {id: 'pe', name: 'Periods'},
@@ -4456,7 +4466,7 @@ Ext.onReady( function() {
 				element = dataElements[i];
 				allElements.push(element);
 
-				if (element.type === 'int' && element.filter) {
+				if (Ext.Array.contains(ns.core.conf.valueType.numericTypes, element.valueType) && element.filter) {
 					a = element.filter.split(':');
 					numberOfElements = a.length / 2;
 
@@ -4478,7 +4488,6 @@ Ext.onReady( function() {
 			// panel, store
             for (var i = 0, element, ux, store; i < allElements.length; i++) {
 				element = allElements[i];
-                element.type = element.type || element.valueType;
                 element.name = element.name || element.displayName;
                 recordMap[element.id] = element;
 
@@ -4491,7 +4500,7 @@ Ext.onReady( function() {
                     }
                 }
 
-                store = Ext.Array.contains(includeKeys, element.type) || element.optionSet ? aggWindow.colStore : aggWindow.fixedFilterStore;
+                store = Ext.Array.contains(includeKeys, element.valueType) || element.optionSet ? aggWindow.colStore : aggWindow.fixedFilterStore;
 
                 aggWindow.addDimension(element, store, valueStore);
                 //queryWindow.colStore.add(element);
@@ -4534,7 +4543,7 @@ Ext.onReady( function() {
 					for (var i = 0, store, record, dim; i < layout.filters.length; i++) {
                         dim = layout.filters[i];
 						record = recordMap[dim.dimension];
-						store = Ext.Array.contains(includeKeys, element.type) || element.optionSet ? aggWindow.filterStore : aggWindow.fixedFilterStore;
+						store = Ext.Array.contains(includeKeys, element.valueType) || element.optionSet ? aggWindow.filterStore : aggWindow.fixedFilterStore;
 
                         //aggWindow.addDimension(record || extendDim(Ext.clone(dim)), store, null, true);
                         store.add(record || extendDim(Ext.clone(dim)));
@@ -6378,13 +6387,13 @@ Ext.onReady( function() {
 	};
 
 	// core
-	extendCore = function(ns) {
-        var conf = ns.core.conf,
-			api = ns.core.api,
-			support = ns.core.support,
-			service = ns.core.service,
-			web = ns.core.web,
-			init = ns.core.init;
+	extendCore = function(core) {
+        var init = core.init,
+            conf = core.conf,
+			api = core.api,
+			support = core.support,
+			service = core.service,
+			web = core.web;
 
         // init
         (function() {
@@ -7440,7 +7449,7 @@ Ext.onReady( function() {
 						iconCls: 'ns-menu-item-datasource',
 						handler: function() {
 							if (ns.core.init.contextPath && ns.app.paramString) {
-								window.open(ns.core.init.contextPath + ns.core.web.analytics.getParamString(ns.app.layout, 'html'), '_blank');
+								window.open(ns.core.init.contextPath + ns.core.web.analytics.getParamString(ns.app.layout, 'html+css'), '_blank');
 							}
 						}
 					},
@@ -7988,19 +7997,25 @@ Ext.onReady( function() {
 		var requests = [],
 			callbacks = 0,
 			init = {},
+            appConfig,
             fn;
 
 		fn = function() {
 			if (++callbacks === requests.length) {
 
-				NS.instances.push(ns);
-
-                ns.core.init = init;
-				NS.getCore(ns);
-				extendCore(ns);
+				ns.core = NS.getCore(init);
+                ns.alert = ns.core.webAlert;
+				extendCore(ns.core);
 
 				dimConf = ns.core.conf.finals.dimension;
 				ns.app.viewport = createViewport();
+
+                ns.core.app.getViewportWidth = function() { return ns.app.viewport.getWidth(); };
+                ns.core.app.getViewportHeight = function() { return ns.app.viewport.getHeight(); };
+                ns.core.app.getCenterRegionWidth = function() { return ns.app.viewport.centerRegion.getWidth(); };
+                ns.core.app.getCenterRegionHeight = function() { return ns.app.viewport.centerRegion.getHeight(); };
+
+                NS.instances.push(ns);
 			}
 		};
 

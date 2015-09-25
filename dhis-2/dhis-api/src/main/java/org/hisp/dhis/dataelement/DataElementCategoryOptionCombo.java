@@ -28,13 +28,15 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.DxfNamespaces;
@@ -44,12 +46,13 @@ import org.hisp.dhis.common.annotation.Scanned;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
  * @author Abyot Aselefew
@@ -82,12 +85,6 @@ public class DataElementCategoryOptionCombo
      * Indicates whether to ignore data approval.
      */
     private boolean ignoreApproval;
-
-    // -------------------------------------------------------------------------
-    // Transient properties
-    // -------------------------------------------------------------------------
-
-    private transient String name;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -256,26 +253,6 @@ public class DataElementCategoryOptionCombo
         return names1.equals( names2 );
     }
 
-    /**
-     * Tests if this object equals to an object in the given Collection on a
-     * name basis.
-     *
-     * @param categoryOptionCombos the Collection.
-     * @return true if the Collection contains this object, false otherwise.
-     */
-    public DataElementCategoryOptionCombo get( Collection<DataElementCategoryOptionCombo> categoryOptionCombos )
-    {
-        for ( DataElementCategoryOptionCombo combo : categoryOptionCombos )
-        {
-            if ( combo.equalsOnName( this ) )
-            {
-                return combo;
-            }
-        }
-
-        return null;
-    }
-
     public boolean isDefault()
     {
         return categoryCombo != null && categoryCombo.getName().equals( DEFAULT_NAME );
@@ -285,6 +262,7 @@ public class DataElementCategoryOptionCombo
      * Creates a mapping between the category option combo identifier and name
      * for the given collection of elements.
      */
+    @Deprecated
     public static Map<Integer, String> getCategoryOptionComboMap( Collection<DataElementCategoryOptionCombo> categoryOptionCombos )
     {
         Map<Integer, String> map = new HashMap<>();
@@ -320,34 +298,29 @@ public class DataElementCategoryOptionCombo
         {
             return name;
         }
-
-        StringBuilder name = new StringBuilder();
-
-        if ( categoryOptions != null && categoryOptions.size() > 0 )
+        
+        StringBuilder builder = new StringBuilder();
+        
+        List<DataElementCategory> categories = this.categoryCombo.getCategories();
+            
+        for ( DataElementCategory category : categories )
         {
-            name.append( "(" );
-
-            Iterator<DataElementCategoryOption> iterator = categoryOptions.iterator();
-
-            if ( iterator.hasNext() )
+            List<DataElementCategoryOption> options = category.getCategoryOptions();
+            
+            optionLoop: for ( DataElementCategoryOption option : this.categoryOptions )
             {
-                name.append( iterator.next().getDisplayName() );
-            }
-
-            while ( iterator.hasNext() )
-            {
-                DataElementCategoryOption categoryOption = iterator.next();
-
-                if ( categoryOption != null )
+                if ( options.contains( option ) )
                 {
-                    name.append( ", " ).append( categoryOption.getDisplayName() );
+                    builder.append( option.getDisplayName() ).append( ", " );
+                    
+                    continue optionLoop;
                 }
             }
-
-            name.append( ")" );
         }
-
-        return name.toString();
+        
+        builder.delete( Math.max( builder.length() - 2, 0 ), builder.length() );
+        
+        return StringUtils.substring( builder.toString(), 0, 255 );
     }
 
     @Override

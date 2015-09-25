@@ -28,19 +28,18 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import org.hisp.dhis.DhisSpringTest;
+import org.hisp.dhis.analytics.AggregationType;
+import org.hisp.dhis.common.ValueType;
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.hisp.dhis.DhisSpringTest;
-import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import static org.junit.Assert.*;
 
 /**
  * @author Kristian Nordal
@@ -57,7 +56,6 @@ public class DataElementServiceTest
 
     @Test
     public void testAddDataElement()
-        throws Exception
     {
         DataElement dataElementA = createDataElement( 'A' );
         DataElement dataElementB = createDataElement( 'B' );
@@ -70,11 +68,11 @@ public class DataElementServiceTest
         assertNotNull( dataElementA.getUid() );
         assertNotNull( dataElementB.getUid() );
         assertNotNull( dataElementC.getUid() );
-        
+
         assertNotNull( dataElementA.getLastUpdated() );
         assertNotNull( dataElementB.getLastUpdated() );
         assertNotNull( dataElementC.getLastUpdated() );
-        
+
         dataElementA = dataElementService.getDataElement( idA );
         assertNotNull( dataElementA );
         assertEquals( idA, dataElementA.getId() );
@@ -93,27 +91,25 @@ public class DataElementServiceTest
 
     @Test
     public void testUpdateDataElement()
-        throws Exception
     {
         DataElement dataElementA = createDataElement( 'A' );
-        
+
         int idA = dataElementService.addDataElement( dataElementA );
         assertNotNull( dataElementA.getUid() );
         assertNotNull( dataElementA.getLastUpdated() );
-        
-        dataElementA = dataElementService.getDataElement( idA );
-        assertEquals( DataElement.VALUE_TYPE_INT, dataElementA.getType() );
 
-        dataElementA.setType( DataElement.VALUE_TYPE_BOOL );
+        dataElementA = dataElementService.getDataElement( idA );
+        assertEquals( ValueType.INTEGER, dataElementA.getValueType() );
+
+        dataElementA.setValueType( ValueType.BOOLEAN );
         dataElementService.updateDataElement( dataElementA );
         dataElementA = dataElementService.getDataElement( idA );
-        assertNotNull( dataElementA.getType() );
-        assertEquals( DataElement.VALUE_TYPE_BOOL, dataElementA.getType() );
+        assertNotNull( dataElementA.getValueType() );
+        assertEquals( ValueType.BOOLEAN, dataElementA.getValueType() );
     }
 
     @Test
     public void testDeleteAndGetDataElement()
-        throws Exception
     {
         DataElement dataElementA = createDataElement( 'A' );
         DataElement dataElementB = createDataElement( 'B' );
@@ -131,21 +127,21 @@ public class DataElementServiceTest
         assertNotNull( dataElementService.getDataElement( idD ) );
 
         dataElementService.deleteDataElement( dataElementB );
-        
+
         assertNotNull( dataElementService.getDataElement( idA ) );
         assertNull( dataElementService.getDataElement( idB ) );
         assertNotNull( dataElementService.getDataElement( idC ) );
         assertNotNull( dataElementService.getDataElement( idD ) );
 
         dataElementService.deleteDataElement( dataElementC );
-        
+
         assertNotNull( dataElementService.getDataElement( idA ) );
         assertNull( dataElementService.getDataElement( idB ) );
         assertNull( dataElementService.getDataElement( idC ) );
         assertNotNull( dataElementService.getDataElement( idD ) );
 
         dataElementService.deleteDataElement( dataElementD );
-        
+
         assertNotNull( dataElementService.getDataElement( idA ) );
         assertNull( dataElementService.getDataElement( idB ) );
         assertNull( dataElementService.getDataElement( idC ) );
@@ -154,15 +150,14 @@ public class DataElementServiceTest
 
     @Test
     public void testGetDataElementByCode()
-        throws Exception
     {
         DataElement dataElementA = createDataElement( 'A' );
         DataElement dataElementB = createDataElement( 'B' );
         DataElement dataElementC = createDataElement( 'C' );
 
-        dataElementA.setCode( "codeA");
-        dataElementB.setCode( "codeB");
-        dataElementC.setCode( "codeC");
+        dataElementA.setCode( "codeA" );
+        dataElementB.setCode( "codeB" );
+        dataElementC.setCode( "codeC" );
 
         int idA = dataElementService.addDataElement( dataElementA );
         int idB = dataElementService.addDataElement( dataElementB );
@@ -177,14 +172,13 @@ public class DataElementServiceTest
         assertNotNull( dataElementB );
         assertEquals( idB, dataElementB.getId() );
         assertEquals( "DataElementB", dataElementB.getName() );
-        
+
         DataElement dataElementE = dataElementService.getDataElementByCode( "codeE" );
         assertNull( dataElementE );
     }
 
     @Test
     public void testGetDataElementByName()
-        throws Exception
     {
         DataElement dataElementA = createDataElement( 'A' );
         DataElement dataElementB = createDataElement( 'B' );
@@ -207,7 +201,6 @@ public class DataElementServiceTest
 
     @Test
     public void testGetDataElementByShortName()
-        throws Exception
     {
         DataElement dataElementA = createDataElement( 'A' );
         DataElement dataElementB = createDataElement( 'B' );
@@ -230,7 +223,6 @@ public class DataElementServiceTest
 
     @Test
     public void testGetAllDataElements()
-        throws Exception
     {
         assertEquals( 0, dataElementService.getAllDataElements().size() );
 
@@ -265,11 +257,11 @@ public class DataElementServiceTest
         DataElement dataElementB = createDataElement( 'B' );
         DataElement dataElementC = createDataElement( 'C' );
         DataElement dataElementD = createDataElement( 'D' );
-        
-        dataElementA.setType( DataElement.VALUE_TYPE_INT );
-        dataElementB.setType( DataElement.VALUE_TYPE_BOOL );
-        dataElementC.setType( DataElement.VALUE_TYPE_STRING );
-        dataElementD.setType( DataElement.VALUE_TYPE_INT );
+
+        dataElementA.setValueType( ValueType.INTEGER );
+        dataElementB.setValueType( ValueType.BOOLEAN );
+        dataElementC.setValueType( ValueType.TEXT );
+        dataElementD.setValueType( ValueType.INTEGER );
 
         dataElementService.addDataElement( dataElementA );
         dataElementService.addDataElement( dataElementB );
@@ -288,80 +280,71 @@ public class DataElementServiceTest
     }
 
     @Test
-    public void testGetDataElementsByAggregationOperator()
-        throws Exception
+    public void testGetDataElementsByAggregationType()
     {
-        assertEquals( 0, dataElementService.getDataElementsByAggregationOperator(
-            DataElement.AGGREGATION_OPERATOR_AVERAGE_SUM ).size() );
-        assertEquals( 0, dataElementService.getDataElementsByAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM )
-            .size() );
+        assertEquals( 0, dataElementService.getDataElementsByAggregationType( AggregationType.AVERAGE_SUM_ORG_UNIT ).size() );
+        assertEquals( 0, dataElementService.getDataElementsByAggregationType( AggregationType.SUM ).size() );
 
         DataElement dataElementA = createDataElement( 'A' );
-        dataElementA.setAggregationOperator( DataElement.AGGREGATION_OPERATOR_AVERAGE_SUM );
+        dataElementA.setAggregationType( AggregationType.AVERAGE_SUM_ORG_UNIT );
         DataElement dataElementB = createDataElement( 'B' );
-        dataElementB.setAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM );
+        dataElementB.setAggregationType( AggregationType.SUM );
         DataElement dataElementC = createDataElement( 'C' );
-        dataElementC.setAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM );
+        dataElementC.setAggregationType( AggregationType.SUM );
         DataElement dataElementD = createDataElement( 'D' );
-        dataElementD.setAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM );
+        dataElementD.setAggregationType( AggregationType.SUM );
 
         dataElementService.addDataElement( dataElementA );
         dataElementService.addDataElement( dataElementB );
         dataElementService.addDataElement( dataElementC );
         dataElementService.addDataElement( dataElementD );
 
-        assertEquals( 1, dataElementService.getDataElementsByAggregationOperator(
-            DataElement.AGGREGATION_OPERATOR_AVERAGE_SUM ).size() );
-        assertEquals( 3, dataElementService.getDataElementsByAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM )
-            .size() );
-    }
-    
-    @Test
-    public void testGetDataElementsByDomainType()
-    {
-        assertEquals( 0, dataElementService.getDataElementsByType( DataElement.VALUE_TYPE_INT ).size() );
-        assertEquals( 0, dataElementService.getDataElementsByType( DataElement.VALUE_TYPE_BOOL ).size() );
-
-        DataElement dataElementA = createDataElement( 'A' );
-        dataElementA.setType( DataElement.VALUE_TYPE_INT );
-        DataElement dataElementB = createDataElement( 'B' );
-        dataElementB.setType( DataElement.VALUE_TYPE_BOOL );
-        DataElement dataElementC = createDataElement( 'C' );
-        dataElementC.setType( DataElement.VALUE_TYPE_BOOL );
-        DataElement dataElementD = createDataElement( 'D' );
-        dataElementD.setType( DataElement.VALUE_TYPE_BOOL );
-
-        dataElementService.addDataElement( dataElementA );
-        dataElementService.addDataElement( dataElementB );
-        dataElementService.addDataElement( dataElementC );
-        dataElementService.addDataElement( dataElementD );
-
-        assertEquals( 1, dataElementService.getDataElementsByType( DataElement.VALUE_TYPE_INT ).size() );
-        assertEquals( 3, dataElementService.getDataElementsByType( DataElement.VALUE_TYPE_BOOL ).size() );
+        assertEquals( 1, dataElementService.getDataElementsByAggregationType( AggregationType.AVERAGE_SUM_ORG_UNIT ).size() );
+        assertEquals( 3, dataElementService.getDataElementsByAggregationType( AggregationType.SUM ).size() );
     }
 
     @Test
-    public void testGetDataElementsByType()
+    public void testGetDataElementsByValueType()
     {
-        assertEquals( 0, dataElementService.getDataElementsByType( DataElement.VALUE_TYPE_INT ).size() );
-        assertEquals( 0, dataElementService.getDataElementsByType( DataElement.VALUE_TYPE_BOOL ).size() );
-
-        DataElement dataElementA = createDataElement( 'A' );
-        dataElementA.setType( DataElement.VALUE_TYPE_INT );
-        DataElement dataElementB = createDataElement( 'B' );
-        dataElementB.setType( DataElement.VALUE_TYPE_BOOL );
-        DataElement dataElementC = createDataElement( 'C' );
-        dataElementC.setType( DataElement.VALUE_TYPE_BOOL );
-        DataElement dataElementD = createDataElement( 'D' );
-        dataElementD.setType( DataElement.VALUE_TYPE_BOOL );
+        DataElement dataElementA = createDataElement( 'A', ValueType.NUMBER );
+        DataElement dataElementB = createDataElement( 'B', ValueType.NUMBER );
+        DataElement dataElementC = createDataElement( 'C', ValueType.BOOLEAN );
+        DataElement dataElementD = createDataElement( 'D', ValueType.TEXT );
 
         dataElementService.addDataElement( dataElementA );
         dataElementService.addDataElement( dataElementB );
         dataElementService.addDataElement( dataElementC );
         dataElementService.addDataElement( dataElementD );
 
-        assertEquals( 1, dataElementService.getDataElementsByType( DataElement.VALUE_TYPE_INT ).size() );
-        assertEquals( 3, dataElementService.getDataElementsByType( DataElement.VALUE_TYPE_BOOL ).size() );
+        assertEquals( 2, dataElementService.getDataElementsByValueType( ValueType.NUMBER ).size() );
+        assertEquals( 1, dataElementService.getDataElementsByValueType( ValueType.BOOLEAN ).size() );
+        assertEquals( 1, dataElementService.getDataElementsByValueType( ValueType.TEXT ).size() );
+        assertEquals( 0, dataElementService.getDataElementsByValueType( ValueType.LONG_TEXT ).size() );
+        assertEquals( 0, dataElementService.getDataElementsByValueType( ValueType.INTEGER ).size() );
+        assertEquals( 0, dataElementService.getDataElementsByValueType( ValueType.INTEGER_POSITIVE ).size() );
+        assertEquals( 0, dataElementService.getDataElementsByValueType( ValueType.INTEGER_NEGATIVE ).size() );
+    }
+
+    @Test
+    public void testGetDataElementsByValueTypes()
+    {
+        DataElement dataElementA = createDataElement( 'A', ValueType.INTEGER );
+        DataElement dataElementB = createDataElement( 'B', ValueType.INTEGER_POSITIVE );
+        DataElement dataElementC = createDataElement( 'C', ValueType.INTEGER_ZERO_OR_POSITIVE );
+        DataElement dataElementD = createDataElement( 'D', ValueType.NUMBER );
+        DataElement dataElementE = createDataElement( 'E', ValueType.TEXT );
+        DataElement dataElementF = createDataElement( 'F', ValueType.LONG_TEXT );
+
+        dataElementService.addDataElement( dataElementA );
+        dataElementService.addDataElement( dataElementB );
+        dataElementService.addDataElement( dataElementC );
+        dataElementService.addDataElement( dataElementD );
+        dataElementService.addDataElement( dataElementE );
+        dataElementService.addDataElement( dataElementF );
+
+        assertEquals( 3, dataElementService.getDataElementsByValueTypes( ValueType.INTEGER_TYPES ).size() );
+        assertEquals( 4, dataElementService.getDataElementsByValueTypes( ValueType.NUMERIC_TYPES ).size() );
+        assertEquals( 2, dataElementService.getDataElementsByValueTypes( ValueType.TEXT_TYPES ).size() );
     }
 
     // -------------------------------------------------------------------------
@@ -370,7 +353,6 @@ public class DataElementServiceTest
 
     @Test
     public void testAddDataElementGroup()
-        throws Exception
     {
         DataElementGroup dataElementGroupA = new DataElementGroup( "DataElementGroupA" );
         DataElementGroup dataElementGroupB = new DataElementGroup( "DataElementGroupB" );
@@ -398,7 +380,6 @@ public class DataElementServiceTest
 
     @Test
     public void testUpdateDataElementGroup()
-        throws Exception
     {
         DataElementGroup dataElementGroupA = new DataElementGroup( "DataElementGroupA" );
         DataElementGroup dataElementGroupB = new DataElementGroup( "DataElementGroupB" );
@@ -434,7 +415,6 @@ public class DataElementServiceTest
 
     @Test
     public void testDeleteAndGetDataElementGroup()
-        throws Exception
     {
         DataElementGroup dataElementGroupA = new DataElementGroup( "DataElementGroupA" );
         DataElementGroup dataElementGroupB = new DataElementGroup( "DataElementGroupB" );
@@ -478,7 +458,6 @@ public class DataElementServiceTest
 
     @Test
     public void testGetDataElementGroupByName()
-        throws Exception
     {
         DataElementGroup dataElementGroupA = new DataElementGroup( "DataElementGroupA" );
         DataElementGroup dataElementGroupB = new DataElementGroup( "DataElementGroupB" );
@@ -503,49 +482,35 @@ public class DataElementServiceTest
     }
 
     @Test
-    public void testGetGroupsContainingDataElement() throws Exception
+    public void testGetDataElementsByZeroIsSignificantAndGroup()
     {
+        DataElementGroup dataElementGroupA = new DataElementGroup( "DataElementGroupA" );
+
         DataElement dataElementA = createDataElement( 'A' );
+        dataElementA.setZeroIsSignificant( true );
         DataElement dataElementB = createDataElement( 'B' );
+        dataElementB.setZeroIsSignificant( false );
         DataElement dataElementC = createDataElement( 'C' );
+        dataElementC.setZeroIsSignificant( true );
         DataElement dataElementD = createDataElement( 'D' );
+        dataElementD.setZeroIsSignificant( false );
+
+        dataElementGroupA.addDataElement( dataElementA );
+        dataElementGroupA.addDataElement( dataElementB );
+        dataElementGroupA.addDataElement( dataElementC );
+        dataElementGroupA.addDataElement( dataElementD );
+
         dataElementService.addDataElement( dataElementA );
         dataElementService.addDataElement( dataElementB );
         dataElementService.addDataElement( dataElementC );
         dataElementService.addDataElement( dataElementD );
-        
-        DataElementGroup dataElementGroupA = new DataElementGroup( "DataElementGroupA" );
-        DataElementGroup dataElementGroupB = new DataElementGroup( "DataElementGroupB" );
-        DataElementGroup dataElementGroupC = new DataElementGroup( "DataElementGroupC" );
-        DataElementGroup dataElementGroupD = new DataElementGroup( "DataElementGroupD" );
-        
-        Set<DataElement> membersA = new HashSet<>();
-        membersA.add( dataElementA );
-        membersA.add( dataElementB );
-        membersA.add( dataElementC );
-        
-        Set<DataElement> membersB = new HashSet<>();
-        membersB.add( dataElementC );
-        membersB.add( dataElementD );
 
-        dataElementGroupA.setMembers( membersA );
-        dataElementGroupB.setMembers( membersB );
-        dataElementGroupC.setMembers( membersA );
-        dataElementGroupD.setMembers( membersB );
-        
         dataElementService.addDataElementGroup( dataElementGroupA );
-        dataElementService.addDataElementGroup( dataElementGroupB );
-        dataElementService.addDataElementGroup( dataElementGroupC );
-        dataElementService.addDataElementGroup( dataElementGroupD );
-        
-        List<DataElementGroup> groupsA = dataElementService.getGroupsContainingDataElement( dataElementA );
-        
-        assertTrue( groupsA.size() == 2 );
-        assertTrue( groupsA.contains( dataElementGroupA ) );
-        assertTrue( groupsA.contains( dataElementGroupC ) );        
 
-        List<DataElementGroup> groupsB = dataElementService.getGroupsContainingDataElement( dataElementC );
-        
-        assertTrue( groupsB.size() == 4 );
+        Set<DataElement> expected = new HashSet<>();
+        expected.add( dataElementA );
+        expected.add( dataElementC );
+
+        assertEquals( expected, dataElementService.getDataElementsByZeroIsSignificantAndGroup( true, dataElementGroupA ) );
     }
 }

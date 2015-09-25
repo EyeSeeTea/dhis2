@@ -28,19 +28,28 @@ package org.hisp.dhis.webapi.controller.organisationunit;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.google.common.collect.Lists;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.dxf2.common.TranslateParams;
+import org.hisp.dhis.organisationunit.FeatureType;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitQueryParams;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitByLevelComparator;
 import org.hisp.dhis.query.Order;
 import org.hisp.dhis.query.Query;
 import org.hisp.dhis.schema.descriptors.OrganisationUnitSchemaDescriptor;
-import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
+import org.hisp.dhis.util.ObjectUtils;
 import org.hisp.dhis.version.VersionService;
 import org.hisp.dhis.webapi.controller.AbstractCrudController;
 import org.hisp.dhis.webapi.webdomain.WebMetaData;
@@ -53,14 +62,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.google.common.collect.Lists;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -76,34 +80,18 @@ public class OrganisationUnitController
     @Autowired
     private VersionService versionService;
 
-    @Autowired
-    private CurrentUserService currentUserService;
-
     @Override
     @SuppressWarnings( "unchecked" )
     protected List<OrganisationUnit> getEntityList( WebMetaData metaData, WebOptions options, List<String> filters, List<Order> orders )
     {
         List<OrganisationUnit> entityList;
-        boolean haveFilters = !filters.isEmpty();
+        boolean hasFilters = !filters.isEmpty();
         Query query = queryService.getQueryFromUrl( getEntityClass(), filters, orders );
         query.setDefaultOrder();
 
         Integer level = options.getInt( "level" );
         Integer maxLevel = options.getInt( "maxLevel" );
         boolean levelSorted = options.isTrue( "levelSorted" );
-
-        if ( maxLevel != null )
-        {
-            if ( organisationUnitService.getOrganisationUnitLevelByLevel( maxLevel ) == null )
-            {
-                maxLevel = null;
-            }
-
-            if ( level == null )
-            {
-                level = 1;
-            }
-        }
 
         if ( options.isTrue( "userOnly" ) )
         {
@@ -126,39 +114,20 @@ public class OrganisationUnitController
                 entityList = new ArrayList<>( organisationUnitService.getOrganisationUnitsAtLevel( 1 ) );
             }
         }
-        else if ( options.contains( "query" ) )
+        else if ( ObjectUtils.firstNonNull( level, maxLevel ) != null )
         {
-            entityList = new ArrayList<>( manager.filter( getEntityClass(), options.get( "query" ) ) );
-
-            if ( levelSorted )
-            {
-                Collections.sort( entityList, OrganisationUnitByLevelComparator.INSTANCE );
-            }
-        }
-        else if ( maxLevel != null || level != null )
-        {
-            entityList = new ArrayList<>();
-
-            if ( maxLevel == null )
-            {
-                entityList.addAll( organisationUnitService.getOrganisationUnitsAtLevel( level ) );
-            }
-            else
-            {
-                entityList.addAll( organisationUnitService.getOrganisationUnitsAtLevel( level ) );
-
-                while ( !level.equals( maxLevel ) )
-                {
-                    entityList.addAll( organisationUnitService.getOrganisationUnitsAtLevel( ++level ) );
-                }
-            }
+            OrganisationUnitQueryParams params = new OrganisationUnitQueryParams();
+            params.setLevel( level );
+            params.setMaxLevels( maxLevel );
+                        
+            entityList = organisationUnitService.getOrganisationUnitsByQuery( params );
         }
         else if ( levelSorted )
         {
             entityList = new ArrayList<>( manager.getAll( getEntityClass() ) );
             Collections.sort( entityList, OrganisationUnitByLevelComparator.INSTANCE );
         }
-        else if ( options.hasPaging() && !haveFilters )
+        else if ( options.hasPaging() && !hasFilters )
         {
             int count = queryService.count( query );
 
@@ -212,7 +181,7 @@ public class OrganisationUnitController
         {
             options.getOptions().put( "useWrapper", "true" );
             int level = options.getInt( "level" );
-            int ouLevel = organisationUnitService.getLevelOfOrganisationUnit( organisationUnit.getId() );
+            int ouLevel = organisationUnit.getLevel();
             int targetLevel = ouLevel + level;
             organisationUnits.addAll( organisationUnitService.getOrganisationUnitsAtLevel( targetLevel, organisationUnit ) );
         }
@@ -261,8 +230,8 @@ public class OrganisationUnitController
         @RequestParam( value = "properties", required = false, defaultValue = "true" ) boolean rpProperties,
         HttpServletResponse response ) throws IOException
     {
-        rpLevels = rpLevels != null ? rpLevels : new ArrayList<Integer>();
-        rpParents = rpParents != null ? rpParents : new ArrayList<String>();
+        rpLevels = rpLevels != null ? rpLevels : new ArrayList<>();
+        rpParents = rpParents != null ? rpParents : new ArrayList<>();
 
         List<OrganisationUnit> parents = new ArrayList<>( manager.getByUid( OrganisationUnit.class, rpParents ) );
 
@@ -305,12 +274,12 @@ public class OrganisationUnitController
             return;
         }
 
-        String featureType = organisationUnit.getFeatureType();
+        FeatureType featureType = organisationUnit.getFeatureType();
 
         // if featureType is anything other than Point, just assume MultiPolygon
-        if ( !OrganisationUnit.FEATURETYPE_POINT.equals( featureType ) )
+        if ( !(featureType == FeatureType.POINT) )
         {
-            featureType = OrganisationUnit.FEATURETYPE_MULTIPOLYGON;
+            featureType = FeatureType.MULTI_POLYGON;
         }
 
         generator.writeStartObject();
@@ -319,7 +288,7 @@ public class OrganisationUnitController
         generator.writeStringField( "id", organisationUnit.getUid() );
 
         generator.writeObjectFieldStart( "geometry" );
-        generator.writeStringField( "type", featureType );
+        generator.writeObjectField( "featureType", featureType );
 
         generator.writeFieldName( "coordinates" );
         generator.writeRawValue( organisationUnit.getCoordinates() );

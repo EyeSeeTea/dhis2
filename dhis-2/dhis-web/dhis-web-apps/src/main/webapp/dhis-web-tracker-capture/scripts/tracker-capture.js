@@ -6,18 +6,15 @@ dhis2.util.namespace('dhis2.tc');
 dhis2.tc.emptyOrganisationUnits = false;
 
 var i18n_no_orgunits = 'No organisation unit attached to current user, no data entry possible';
-var i18n_offline_notification = 'You are offline, data will be stored locally';
+var i18n_offline_notification = 'You are offline';
 var i18n_online_notification = 'You are online';
-var i18n_need_to_sync_notification = 'There is data stored locally, please upload to server';
-var i18n_sync_now = 'Upload';
-var i18n_sync_success = 'Upload to server was successful';
-var i18n_sync_failed = 'Upload to server failed, please try again later';
-var i18n_uploading_data_notification = 'Uploading locally stored data to the server';
+var i18n_ajax_login_failed = 'Login failed, check your username and password and try again';
 
 var optionSetsInPromise = [];
 var attributesInPromise = [];
 
 dhis2.tc.store = null;
+dhis2.tc.metaDataCached = false;
 dhis2.tc.memoryOnly = $('html').hasClass('ie7') || $('html').hasClass('ie8');
 var adapters = [];    
 if( dhis2.tc.memoryOnly ) {
@@ -154,7 +151,9 @@ function downloadMetaData()
     promise = promise.then( getTrackedEntityAttributeGroups );
     promise.done(function() {        
         //Enable ou selection after meta-data has downloaded
-        $( "#orgUnitTree" ).removeClass( "disable-clicks" );        
+        $( "#orgUnitTree" ).removeClass( "disable-clicks" );
+        dhis2.tc.metaDataCached = true;
+        dhis2.availability.startAvailabilityCheck();
         console.log( 'Finished loading meta-data' );        
         selection.responseReceived(); 
     });
@@ -177,11 +176,7 @@ function getUserRoles()
 }
 
 function getCalendarSetting()
-{
-    if(localStorage['CALENDAR_SETTING']){
-       return; 
-    }
-    
+{   
     var def = $.Deferred();
     var promise = def.promise();
     promise = promise.then( getD2Object(null, 'CALENDAR_SETTING', '../api/systemSettings', 'key=keyCalendar&key=keyDateFormat', 'localStorage') );
@@ -276,7 +271,7 @@ function getProgram( id )
         return $.ajax( {
             url: '../api/programs/' + id + '.json',
             type: 'GET',
-            data: 'fields=id,name,type,version,dataEntryMethod,dateOfEnrollmentDescription,dateOfIncidentDescription,displayIncidentDate,ignoreOverdueEvents,selectEnrollmentDatesInFuture,selectIncidentDatesInFuture,onlyEnrollOnce,externalAccess,displayOnAllOrgunit,registration,relationshipText,relationshipFromA,relatedProgram[id,name],relationshipType[id,name],trackedEntity[id,name,description],userRoles[id,name],organisationUnits[id,name],userRoles[id,name],programStages[id,name,version,minDaysFromStart,standardInterval,periodType,generatedByEnrollmentDate,reportDateDescription,repeatable,autoGenerateEvent,openAfterEnrollment,reportDateToUse],dataEntryForm[name,style,htmlCode,format],programTrackedEntityAttributes[displayInList,mandatory,allowFutureDate,trackedEntityAttribute[id,unique]],validationCriterias[id,name,operator,value,property]'
+            data: 'fields=id,name,type,version,dataEntryMethod,enrollmentDateLabel,incidentDateLabel,displayIncidentDate,ignoreOverdueEvents,selectEnrollmentDatesInFuture,selectIncidentDatesInFuture,onlyEnrollOnce,externalAccess,displayOnAllOrgunit,registration,relationshipText,relationshipFromA,relatedProgram[id,name],relationshipType[id,name],trackedEntity[id,name,description],userRoles[id,name],organisationUnits[id,name],userRoles[id,name],programStages[id,name,version,minDaysFromStart,standardInterval,periodType,generatedByEnrollmentDate,reportDateDescription,repeatable,autoGenerateEvent,openAfterEnrollment,reportDateToUse],dataEntryForm[name,style,htmlCode,format],programTrackedEntityAttributes[displayInList,mandatory,allowFutureDate,trackedEntityAttribute[id,unique]]'
         }).done( function( program ){            
             var ou = {};
             if(program.organisationUnits){
@@ -292,22 +287,7 @@ function getProgram( id )
                     ur[u.id] = u.name;
                 });
             }
-            program.userRoles = ur;
-            
-            var vc = {};
-            if(program.validationCriterias){
-                _.each(_.values( program.validationCriterias), function(c){
-                    if(vc[c.property]){
-                        vc[c.property].push(c);
-                    }
-                    else{
-                        vc[c.property] = [];
-                        vc[c.property].push(c);
-                    }
-                });
-            }            
-            program.validationCriterias = vc;
-            
+            program.userRoles = ur;            
             dhis2.tc.store.set( 'programs', program );  
         });
     };
@@ -337,7 +317,7 @@ function getProgramStages( programs )
                     var p = d.promise();
                     dhis2.tc.store.get('programStages', programStage.id).done(function(obj) {
                         if(!obj || obj.version !== programStage.version) {
-                            promise = promise.then( getD2Object( programStage.id, 'programStages', '../api/programStages', 'fields=id,name,sortOrder,version,dataEntryForm,captureCoordinates,blockEntryForm,autoGenerateEvent,allowGenerateNextVisit,generatedByEnrollmentDate,remindCompleted,reportDateDescription,minDaysFromStart,repeatable,openAfterEnrollment,standardInterval,periodType,reportDateToUse,programStageSections[id,name,programStageDataElements[dataElement[id]]],programStageDataElements[displayInReports,allowProvidedElsewhere,allowFutureDate,compulsory,dataElement[id,code,name,description,formName,type,numberType,textType,optionSetValue,optionSet[id]]]', 'idb' ) );
+                            promise = promise.then( getD2Object( programStage.id, 'programStages', '../api/programStages', 'fields=id,name,sortOrder,version,dataEntryForm,captureCoordinates,blockEntryForm,autoGenerateEvent,allowGenerateNextVisit,generatedByEnrollmentDate,remindCompleted,reportDateDescription,minDaysFromStart,repeatable,openAfterEnrollment,standardInterval,periodType,reportDateToUse,programStageSections[id,name,programStageDataElements[dataElement[id]]],programStageDataElements[displayInReports,allowProvidedElsewhere,allowFutureDate,compulsory,dataElement[id,code,name,description,formName,valueType,optionSetValue,optionSet[id]]]', 'idb' ) );
                         }
                         d.resolve();
                     });
@@ -593,7 +573,7 @@ function getMetaProgramRules( programs )
 
 function getProgramRules( programRules )
 {
-    return checkAndGetD2Objects( programRules, 'programRules', '../api/programRules', 'fields=id,name,condition,description,program[id],programStage[id],priority,programRuleActions[id,content,location,data,programRuleActionType,programStageSection[id],dataElement[id]]');
+    return checkAndGetD2Objects( programRules, 'programRules', '../api/programRules', 'fields=id,name,condition,description,program[id],programStage[id],priority,programRuleActions[id,content,location,data,programRuleActionType,programStageSection[id],dataElement[id],trackedEntityAttribute[id]]');
 }
 
 function getMetaProgramRuleVariables( programs )

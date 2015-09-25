@@ -28,18 +28,7 @@ package org.hisp.dhis.webapi.controller.mapping;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.google.common.collect.ImmutableMap;
 import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.analytics.AnalyticsService;
 import org.hisp.dhis.analytics.DataQueryParams;
@@ -48,6 +37,7 @@ import org.hisp.dhis.common.DisplayProperty;
 import org.hisp.dhis.common.NameableObjectUtils;
 import org.hisp.dhis.commons.filter.FilterUtils;
 import org.hisp.dhis.dxf2.render.RenderService;
+import org.hisp.dhis.organisationunit.FeatureType;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
@@ -64,7 +54,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.google.common.collect.ImmutableMap;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Lars Helge Overland
@@ -75,11 +75,11 @@ public class GeoFeatureController
 {
     public static final String RESOURCE_PATH = "/geoFeatures";
 
-    private static final Map<String, Integer> FEATURE_TYPE_MAP = ImmutableMap.<String, Integer>builder().
-        put( OrganisationUnit.FEATURETYPE_POINT, GeoFeature.TYPE_POINT ).
-        put( OrganisationUnit.FEATURETYPE_MULTIPOLYGON, GeoFeature.TYPE_POLYGON ).
-        put( OrganisationUnit.FEATURETYPE_POLYGON, GeoFeature.TYPE_POLYGON ).build();
-    
+    private static final Map<FeatureType, Integer> FEATURE_TYPE_MAP = ImmutableMap.<FeatureType, Integer>builder().
+        put( FeatureType.POINT, GeoFeature.TYPE_POINT ).
+        put( FeatureType.MULTI_POLYGON, GeoFeature.TYPE_POLYGON ).
+        put( FeatureType.POLYGON, GeoFeature.TYPE_POLYGON ).build();
+
     @Autowired
     private AnalyticsService analyticsService;
 
@@ -100,6 +100,7 @@ public class GeoFeatureController
     public void getGeoFeaturesJson(
         @RequestParam String ou,
         @RequestParam( required = false ) DisplayProperty displayProperty,
+        @RequestParam( required = false ) Date relativePeriodDate,
         @RequestParam( required = false ) String userOrgUnit,
         @RequestParam( defaultValue = "false", value = "includeGroupSets" ) boolean rpIncludeGroupSets,
         @RequestParam Map<String, String> parameters,
@@ -108,8 +109,8 @@ public class GeoFeatureController
         WebOptions options = new WebOptions( parameters );
         boolean includeGroupSets = "detailed".equals( options.getViewClass() ) || rpIncludeGroupSets;
 
-        List<GeoFeature> features = getGeoFeatures( ou, displayProperty, userOrgUnit, request, response, includeGroupSets );
-        
+        List<GeoFeature> features = getGeoFeatures( ou, displayProperty, relativePeriodDate, userOrgUnit, request, response, includeGroupSets );
+
         if ( features == null )
         {
             return;
@@ -123,6 +124,7 @@ public class GeoFeatureController
     public void getGeoFeaturesJsonP(
         @RequestParam String ou,
         @RequestParam( required = false ) DisplayProperty displayProperty,
+        @RequestParam( required = false ) Date relativePeriodDate,
         @RequestParam( required = false ) String userOrgUnit,
         @RequestParam( defaultValue = "callback" ) String callback,
         @RequestParam( defaultValue = "false", value = "includeGroupSets" ) boolean rpIncludeGroupSets,
@@ -132,7 +134,7 @@ public class GeoFeatureController
         WebOptions options = new WebOptions( parameters );
         boolean includeGroupSets = "detailed".equals( options.getViewClass() ) || rpIncludeGroupSets;
 
-        List<GeoFeature> features = getGeoFeatures( ou, displayProperty, userOrgUnit, request, response, includeGroupSets );
+        List<GeoFeature> features = getGeoFeatures( ou, displayProperty, relativePeriodDate, userOrgUnit, request, response, includeGroupSets );
 
         if ( features == null )
         {
@@ -150,23 +152,24 @@ public class GeoFeatureController
     /**
      * Returns list of geo features. Returns null if not modified based on the
      * request.
-     * 
-     * @param ou the organisation unit parameter.
-     * @param displayProperty the display property.
-     * @param userOrgUnit the user organisation unit parameter.
-     * @param request the HTTP request.
-     * @param response the HTTP response.
-     * @param includeGroupSets whether to include organisation unit group sets.
+     *
+     * @param ou                 the organisation unit parameter.
+     * @param displayProperty    the display property.
+     * @param relativePeriodDate the date to use as basis for relative periods.
+     * @param userOrgUnit        the user organisation unit parameter.
+     * @param request            the HTTP request.
+     * @param response           the HTTP response.
+     * @param includeGroupSets   whether to include organisation unit group sets.
      * @return a list of geo features or null.
      */
-    private List<GeoFeature> getGeoFeatures( String ou, DisplayProperty displayProperty, 
+    private List<GeoFeature> getGeoFeatures( String ou, DisplayProperty displayProperty, Date relativePeriodDate,
         String userOrgUnit, HttpServletRequest request, HttpServletResponse response, boolean includeGroupSets )
     {
         Set<String> set = new HashSet<>();
         set.add( ou );
 
         DataQueryParams params = analyticsService.getFromUrl( set, null, AggregationType.SUM, null,
-            false, false, false, false, false, false, false, displayProperty, null, null, userOrgUnit, null, null, null );
+            false, false, false, false, false, false, false, false, displayProperty, null, null, relativePeriodDate, userOrgUnit, null, null, null );
 
         DimensionalObject dim = params.getDimension( DimensionalObject.ORGUNIT_DIM_ID );
 
@@ -227,7 +230,7 @@ public class GeoFeatureController
         }
 
         Collections.sort( features, GeoFeatureTypeComparator.INSTANCE );
-        
+
         return features;
     }
 

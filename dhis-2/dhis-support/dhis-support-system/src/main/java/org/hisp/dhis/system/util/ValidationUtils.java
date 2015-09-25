@@ -28,19 +28,16 @@ package org.hisp.dhis.system.util;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.dataelement.DataElement.AGGREGATION_OPERATOR_AVERAGE;
-import static org.hisp.dhis.dataelement.DataElement.AGGREGATION_OPERATOR_AVERAGE_SUM;
-import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_BOOL;
-import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_DATE;
-import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_DATETIME;
-import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_INT;
-import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_NEGATIVE_INT;
-import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_NUMBER;
-import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_PERCENTAGE;
-import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_POSITIVE_INT;
-import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_TRUE_ONLY;
-import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_UNIT_INTERVAL;
-import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_ZERO_OR_POSITIVE_INT;
+import com.google.common.collect.Sets;
+import org.apache.commons.validator.routines.DateValidator;
+import org.apache.commons.validator.routines.EmailValidator;
+import org.apache.commons.validator.routines.UrlValidator;
+import org.hisp.dhis.common.CodeGenerator;
+import org.hisp.dhis.analytics.AggregationType;
+import org.hisp.dhis.common.ValueType;
+import org.hisp.dhis.commons.util.TextUtils;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.datavalue.DataValue;
 
 import java.awt.geom.Point2D;
 import java.util.Locale;
@@ -48,42 +45,33 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.validator.routines.DateValidator;
-import org.apache.commons.validator.routines.EmailValidator;
-import org.apache.commons.validator.routines.UrlValidator;
-import org.hisp.dhis.commons.util.TextUtils;
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.datavalue.DataValue;
-
-import com.google.common.collect.Sets;
-
 /**
  * @author Lars Helge Overland
  */
 public class ValidationUtils
 {
-    private static Pattern POINT_PATTERN = Pattern.compile( "\\[(.+),\\s?(.+)\\]" );
-    private static Pattern DIGIT_PATTERN = Pattern.compile( ".*\\d.*" );
-    private static Pattern UPPERCASE_PATTERN = Pattern.compile( ".*[A-Z].*" );
-    private static Pattern HEX_COLOR_PATTERN = Pattern.compile( "^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$" );
+    private static final Pattern POINT_PATTERN = Pattern.compile( "\\[(.+),\\s?(.+)\\]" );
+    private static final Pattern DIGIT_PATTERN = Pattern.compile( ".*\\d.*" );
+    private static final Pattern UPPERCASE_PATTERN = Pattern.compile( ".*[A-Z].*" );
+    private static final Pattern HEX_COLOR_PATTERN = Pattern.compile( "^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$" );
 
-    private static int VALUE_MAX_LENGTH = 50000;
-    private static int LONG_MAX = 180;
-    private static int LONG_MIN = -180;
-    private static int LAT_MAX = 90;
-    private static int LAT_MIN = -90;
+    private static final int VALUE_MAX_LENGTH = 50000;
+    private static final int LONG_MAX = 180;
+    private static final int LONG_MIN = -180;
+    private static final int LAT_MAX = 90;
+    private static final int LAT_MIN = -90;
 
-    private static final Set<Character> SQL_VALID_CHARS = Sets.newHashSet( 
+    private static final Set<Character> SQL_VALID_CHARS = Sets.newHashSet(
         '&', '|', '=', '!', '<', '>', '/', '%', '"', '\'', '*', '+', '-', '^', ',', '.' );
 
-    public static final Set<String> ILLEGAL_SQL_KEYWORDS = Sets.newHashSet( "alter", "before", "case", 
-        "commit", "copy", "create", "createdb", "createrole", "createuser", "close", "delete", "destroy", "drop", 
+    public static final Set<String> ILLEGAL_SQL_KEYWORDS = Sets.newHashSet( "alter", "before", "case",
+        "commit", "copy", "create", "createdb", "createrole", "createuser", "close", "delete", "destroy", "drop",
         "escape", "insert", "select", "rename", "replace", "restore", "return", "update", "when", "write" );
-    
+
     /**
-     * Validates whether a filter expression contains malicious code such as SQL 
+     * Validates whether a filter expression contains malicious code such as SQL
      * injection attempts.
-     * 
+     *
      * @param filter the filter string.
      * @return true if the filter string is valid, false otherwise.
      */
@@ -98,20 +86,20 @@ public class ValidationUtils
         {
             return false;
         }
-        
-        for ( int i = 0; i < filter.length(); i++ ) 
+
+        for ( int i = 0; i < filter.length(); i++ )
         {
             char ch = filter.charAt( i );
-            
-            if ( !( Character.isWhitespace( ch ) || Character.isLetterOrDigit( ch ) || SQL_VALID_CHARS.contains( ch ) ) )
+
+            if ( !(Character.isWhitespace( ch ) || Character.isLetterOrDigit( ch ) || SQL_VALID_CHARS.contains( ch )) )
             {
                 return false;
             }
         }
-        
+
         return true;
     }
-    
+
     /**
      * Validates whether an email string is valid.
      *
@@ -159,7 +147,7 @@ public class ValidationUtils
 
     /**
      * Validates whether a password is valid. A password must:
-     * <p/>
+     * <p>
      * <ul>
      * <li>Be between 8 and 80 characters long</li>
      * <li>Include at least one digit</li>
@@ -295,7 +283,7 @@ public class ValidationUtils
      * given data element. Considers the value to be valid if null or empty.
      * Returns a string if the valid is invalid, possible
      * values are:
-     * <p/>
+     * <p>
      * <ul>
      * <li>data_element_or_type_null_or_empty</li>
      * <li>value_length_greater_than_max_length</li>
@@ -321,71 +309,76 @@ public class ValidationUtils
             return null;
         }
 
-        if ( dataElement == null || dataElement.getType() == null || dataElement.getType().isEmpty() )
+        if ( dataElement == null || dataElement.getValueType() == null )
         {
             return "data_element_or_type_null_or_empty";
         }
 
-        String type = dataElement.getDetailedNumberType();
+        ValueType valueType = dataElement.getValueType();
 
         if ( value.length() > VALUE_MAX_LENGTH )
         {
             return "value_length_greater_than_max_length";
         }
 
-        if ( VALUE_TYPE_NUMBER.equals( type ) && !MathUtils.isNumeric( value ) )
+        if ( ValueType.NUMBER == valueType && !MathUtils.isNumeric( value ) )
         {
             return "value_not_numeric";
         }
 
-        if ( VALUE_TYPE_UNIT_INTERVAL.equals( type ) && !MathUtils.isUnitInterval( value ) )
+        if ( ValueType.UNIT_INTERVAL == valueType && !MathUtils.isUnitInterval( value ) )
         {
             return "value_not_unit_interval";
         }
 
-        if ( VALUE_TYPE_PERCENTAGE.equals( type ) && !MathUtils.isPercentage( value ) )
+        if ( ValueType.PERCENTAGE == valueType && !MathUtils.isPercentage( value ) )
         {
             return "value_not_percentage";
         }
 
-        if ( VALUE_TYPE_INT.equals( type ) && !MathUtils.isInteger( value ) )
+        if ( ValueType.INTEGER == valueType && !MathUtils.isInteger( value ) )
         {
             return "value_not_integer";
         }
 
-        if ( VALUE_TYPE_POSITIVE_INT.equals( type ) && !MathUtils.isPositiveInteger( value ) )
+        if ( ValueType.INTEGER_POSITIVE == valueType && !MathUtils.isPositiveInteger( value ) )
         {
             return "value_not_positive_integer";
         }
 
-        if ( VALUE_TYPE_NEGATIVE_INT.equals( type ) && !MathUtils.isNegativeInteger( value ) )
+        if ( ValueType.INTEGER_NEGATIVE == valueType && !MathUtils.isNegativeInteger( value ) )
         {
             return "value_not_negative_integer";
         }
 
-        if ( VALUE_TYPE_ZERO_OR_POSITIVE_INT.equals( type ) && !MathUtils.isZeroOrPositiveInteger( value ) )
+        if ( ValueType.INTEGER_ZERO_OR_POSITIVE == valueType && !MathUtils.isZeroOrPositiveInteger( value ) )
         {
             return "value_not_zero_or_positive_integer";
         }
 
-        if ( VALUE_TYPE_BOOL.equals( type ) && !MathUtils.isBool( value ) )
+        if ( ValueType.BOOLEAN == valueType && !MathUtils.isBool( value ) )
         {
             return "value_not_bool";
         }
 
-        if ( VALUE_TYPE_TRUE_ONLY.equals( type ) && !DataValue.TRUE.equals( value ) )
+        if ( ValueType.TRUE_ONLY == valueType && !DataValue.TRUE.equals( value ) )
         {
             return "value_not_true_only";
         }
 
-        if ( VALUE_TYPE_DATE.equals( type ) && !DateUtils.dateIsValid( value ) )
+        if ( ValueType.DATE == valueType && !DateUtils.dateIsValid( value ) )
         {
             return "value_not_valid_date";
         }
 
-        if ( VALUE_TYPE_DATETIME.equals( type ) && !DateUtils.dateTimeIsValid( value ) )
+        if ( ValueType.DATETIME == valueType && !DateUtils.dateTimeIsValid( value ) )
         {
             return "value_not_valid_datetime";
+        }
+
+        if ( ValueType.FILE_RESOURCE == valueType && !CodeGenerator.isValidCode( value ) )
+        {
+            return "value_not_valid_file_resource_uid";
         }
 
         return null;
@@ -400,10 +393,10 @@ public class ValidationUtils
      */
     public static boolean dataValueIsZeroAndInsignificant( String value, DataElement dataElement )
     {
-        String aggOperator = dataElement.getAggregationOperator();
+        AggregationType aggregationType = dataElement.getAggregationType();
 
-        return VALUE_TYPE_INT.equals( dataElement.getType() ) && MathUtils.isZero( value ) && !dataElement.isZeroIsSignificant() &&
-            !(AGGREGATION_OPERATOR_AVERAGE_SUM.equals( aggOperator ) || AGGREGATION_OPERATOR_AVERAGE.equals( aggOperator ));
+        return dataElement.getValueType().isNumeric() && MathUtils.isZero( value ) && !dataElement.isZeroIsSignificant() &&
+            !(aggregationType == AggregationType.AVERAGE_SUM_ORG_UNIT || aggregationType == AggregationType.AVERAGE);
     }
 
     /**
@@ -449,12 +442,12 @@ public class ValidationUtils
         {
             return null;
         }
-        
+
         if ( storedBy.length() > 31 )
         {
             return "stored_by_length_greater_than_max_length";
         }
-        
+
         return null;
     }
 

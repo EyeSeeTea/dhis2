@@ -10,7 +10,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     var store = new dhis2.storage.Store({
         name: "dhis2tc",
         adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
-        objectStores: ['programs', 'programStages', 'trackedEntities', 'attributes', 'relationshipTypes', 'optionSets', 'programValidations', 'ouLevels', 'programRuleVariables', 'programRules','constants']
+        objectStores: ['programs', 'programStages', 'trackedEntities', 'attributes', 'relationshipTypes', 'optionSets', 'programValidations', 'ouLevels', 'programRuleVariables', 'programRules', 'programIndicators', 'constants']
     });
     return{
         currentStore: store
@@ -29,9 +29,11 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     w.selectedWidget = {title: 'current_selections', view: "components/selected/selected.html", show: false, expand: true, parent: 'smallerWidget', order: 0};
     w.feedbackWidget = {title: 'feedback', view: "components/rulebound/rulebound.html", show: true, expand: true, parent: 'smallerWidget', order: 1};
     w.profileWidget = {title: 'profile', view: "components/profile/profile.html", show: true, expand: true, parent: 'smallerWidget', order: 2};
-    w.relationshipWidget = {title: 'relationships', view: "components/relationship/relationship.html", show: true, expand: true, parent: 'smallerWidget', order: 3};
-    w.notesWidget = {title: 'notes', view: "components/notes/notes.html", show: true, expand: true, parent: 'smallerWidget', order: 4};            
+    w.activeProgramsWidget = {title: 'activePrograms', view: "components/activeprograms/active-programs.html", show: false, expand: true, parent: 'smallerWidget', order: 3};
+    w.relationshipWidget = {title: 'relationships', view: "components/relationship/relationship.html", show: true, expand: true, parent: 'smallerWidget', order: 4};
+    w.notesWidget = {title: 'notes', view: "components/notes/notes.html", show: true, expand: true, parent: 'smallerWidget', order: 5};            
     var defaultLayout = new Object();
+    
     defaultLayout['DEFAULT'] = {widgets: w, program: 'DEFAULT'};
     
     var getDefaultLayout = function(customLayout){
@@ -107,11 +109,11 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             return;
         }
         
-        var referenceDate = enrollment.dateOfIncident ? enrollment.dateOfIncident : enrollment.dateOfEnrollment;
+        var referenceDate = enrollment.incidentDate ? enrollment.incidentDate : enrollment.enrollmentDate;
         var offset = stage.minDaysFromStart;
         
         if(stage.generatedByEnrollmentDate){
-            referenceDate = enrollment.dateOfEnrollment;
+            referenceDate = enrollment.enrollmentDate;
         }        
                
         var occupiedPeriods = [];
@@ -253,6 +255,10 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 
         for(var i=0; i < userRoles.length && !hasRole; i++){
             if( program.userRoles.hasOwnProperty( userRoles[i].id ) ){
+                hasRole = true;
+            }
+            
+            if(!hasRole && userRoles[i].authorities && userRoles[i].authorities.indexOf('ALL') !== -1){
                 hasRole = true;
             }
         }        
@@ -421,64 +427,6 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     };        
 })
 
-/*Orgunit service for local db */
-.service('OrgUnitService', function($window, $q){
-    
-    var indexedDB = $window.indexedDB;
-    var db = null;
-    
-    var open = function(){
-        var deferred = $q.defer();
-        
-        var request = indexedDB.open("dhis2ou");
-        
-        request.onsuccess = function(e) {
-          db = e.target.result;
-          deferred.resolve();
-        };
-
-        request.onerror = function(){
-          deferred.reject();
-        };
-
-        return deferred.promise;
-    };
-    
-    var get = function(uid){
-        
-        var deferred = $q.defer();
-        
-        if( db === null){
-            deferred.reject("DB not opened");
-        }
-        else{
-            var tx = db.transaction(["ou"]);
-            var store = tx.objectStore("ou");
-            var query = store.get(uid);
-                
-            query.onsuccess = function(e){
-                if(e.target.result){
-                    deferred.resolve(e.target.result);
-                }
-                else{
-                    var t = db.transaction(["ouPartial"]);
-                    var s = t.objectStore("ouPartial");
-                    var q = s.get(uid);
-                    q.onsuccess = function(e){
-                        deferred.resolve(e.target.result);
-                    };
-                }            
-            };
-        }
-        return deferred.promise;
-    };
-    
-    return {
-        open: open,
-        get: get
-    };    
-})
-
 /* Factory for fetching OrgUnit */
 .factory('OrgUnitFactory', function($http, SessionStorageService) {    
     var orgUnit, orgUnitPromise, rootOrgUnitPromise;
@@ -532,50 +480,19 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 return def.promise;
             }            
         },
-        processForm: function(existingTei, formTei, attributesById, program){
-            var tei = angular.copy(existingTei);
-            var enrollmentValidation = {valid: true, messages: [], attributes: []};
-            if(program && program.validationCriterias){
-                for(var key in program.validationCriterias){
-                    angular.forEach(program.validationCriterias[key], function(vc){
-                        var att = attributesById[key];
-                        var operator = '';
-                        if(vc.property && vc.value && att && att.valueType){
-                            if(att.valueType === 'number' && dhis2.validation.isNumber(vc.value)){
-                                vc.value = parseInt(vc.value);
-                            }
-                            if(vc.operator === 0){
-                                enrollmentValidation.valid = formTei[key] === vc.value;
-                                operator = $translate.instant('equals_to');
-                            }
-                            else if(vc.operator === 1){                                
-                                enrollmentValidation.valid = formTei[key] > vc.value;
-                                operator = $translate.instant('greater_than');
-                            }
-                            else{
-                                enrollmentValidation.valid = formTei[key] < vc.value;
-                                operator = $translate.instant('less_than');
-                            }
-
-                            if(!enrollmentValidation.valid){
-                                enrollmentValidation.messages.push({name: attributesById[key].name, operator: operator, expected: vc.value, found: formTei[key] ? formTei[key] : $translate.instant('empty')});
-                            }                                
-                        }
-                    });                    
-                }
-            }            
-            
+        processForm: function(existingTei, formTei, attributesById){
+            var tei = angular.copy(existingTei);            
             tei.attributes = [];
             var formEmpty = true;            
             for(var k in attributesById){
                 if( formTei[k] ){
                     var att = attributesById[k];
-                    tei.attributes.push({attribute: att.id, value: formTei[k], displayName: att.name, type: att.valueType});
+                    tei.attributes.push({attribute: att.id, value: formTei[k], displayName: att.name, valueType: att.valueType});
                     formEmpty = false;              
                 }
                 delete tei[k];
             }
-            return {tei: tei, formEmpty: formEmpty, validation: enrollmentValidation};
+            return {tei: tei, formEmpty: formEmpty};
         }
     };
 })
@@ -586,20 +503,20 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     var convertFromApiToUser = function(enrollment){
         if(enrollment.enrollments){
             angular.forEach(enrollment.enrollments, function(enrollment){
-                enrollment.dateOfIncident = DateUtils.formatFromApiToUser(enrollment.dateOfIncident);
-                enrollment.dateOfEnrollment = DateUtils.formatFromApiToUser(enrollment.dateOfEnrollment);                
+                enrollment.incidentDate = DateUtils.formatFromApiToUser(enrollment.incidentDate);
+                enrollment.enrollmentDate = DateUtils.formatFromApiToUser(enrollment.enrollmentDate);                
             });
         }
         else{
-            enrollment.dateOfIncident = DateUtils.formatFromApiToUser(enrollment.dateOfIncident);
-            enrollment.dateOfEnrollment = DateUtils.formatFromApiToUser(enrollment.dateOfEnrollment);
+            enrollment.incidentDate = DateUtils.formatFromApiToUser(enrollment.incidentDate);
+            enrollment.enrollmentDate = DateUtils.formatFromApiToUser(enrollment.enrollmentDate);
         }
         
         return enrollment;
     };
     var convertFromUserToApi = function(enrollment){
-        enrollment.dateOfIncident = DateUtils.formatFromUserToApi(enrollment.dateOfIncident);
-        enrollment.dateOfEnrollment = DateUtils.formatFromUserToApi(enrollment.dateOfEnrollment);
+        enrollment.incidentDate = DateUtils.formatFromUserToApi(enrollment.incidentDate);
+        enrollment.enrollmentDate = DateUtils.formatFromUserToApi(enrollment.enrollmentDate);
         return enrollment;
     };
     return {        
@@ -921,7 +838,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             if(att.valueType){
                 type = att.valueType;
             }
-            if(type === 'trueOnly'){
+            if(type === 'TRUE_ONLY'){
                 if(destination === 'USER'){
                     val = val === 'true' ? true : '';
                 }
@@ -931,7 +848,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             }
             else{
                 if(val){                    
-                    if( type === 'number' ){
+                    if( type === 'NUMBER' ){
                         if(dhis2.validation.isNumber(val)){                            
                             //val = new Number(val);
                             val = parseInt(val);                            
@@ -941,7 +858,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                             val = parseInt('0');      
                         }
                     }
-                    if(type === 'date'){
+                    if(type === 'DATE'){
                         if(destination === 'USER'){
                             val = DateUtils.formatFromApiToUser(val);
                         }
@@ -1144,7 +1061,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 })
 
 /* Returns a function for getting rules for a specific program */
-.factory('TrackerRulesFactory', function($q,MetaDataFactory){
+.factory('TrackerRulesFactory', function($q,MetaDataFactory,$filter){
     return{                
         getRules : function(programUid){            
             var def = $q.defer();            
@@ -1174,46 +1091,101 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 
                             programRules.push(newRule);
 
-                            var variablesInCondition = newRule.condition.match(/#{\w+.?\w*}/g);
-                            var variablesInData = newAction.data.match(/#{\w+.?\w*}/g);
-
+                            var variablesInCondition = newRule.condition.match(/[A#]{\w+.?\w*}/g);
+                            var variablesInData = newAction.data.match(/[A#]{\w+.?\w*}/g);
+                            var valueCountPresent = newRule.condition.indexOf("V{value_count}") >= 0 
+                                                            || newAction.data.indexOf("V{value_count}") >= 0;
+                            var positiveValueCountPresent = newRule.condition.indexOf("V{zero_pos_value_count}") >= 0
+                                                            || newAction.data.indexOf("V{zero_pos_value_count}") >= 0;
+                            var variableObjectsCurrentExpression = [];
+                            
                             var pushDirectAddressedVariable = function(variableWithCurls) {
-                                var variableName = variableWithCurls.replace("#{","").replace("}","");
+                                var variableName = $filter('trimvariablequalifiers')(variableWithCurls);
                                 var variableNameParts = variableName.split('.');
 
+                                var newVariableObject;
 
                                 if(variableNameParts.length === 2) {
                                     //this is a programstage and dataelement specification. translate to program variable:
-                                    variables.push({
+                                    newVariableObject = {
                                         name:variableName,
                                         programRuleVariableSourceType:'DATAELEMENT_NEWEST_EVENT_PROGRAM_STAGE',
                                         dataElement:variableNameParts[1],
                                         programStage:variableNameParts[0],
                                         program:programUid
-                                    });
+                                    };
                                 }
                                 else if(variableNameParts.length === 1)
                                 {
                                     //This is an attribute - let us translate to program variable:
-                                    variables.push({
+                                    newVariableObject = {
                                         name:variableName,
                                         programRuleVariableSourceType:'TEI_ATTRIBUTE',
                                         trackedEntityAttribute:variableNameParts[0],
                                         program:programUid
-                                    });
+                                    };
                                 }
-
+                                variables.push(newVariableObject);
+                                
+                                return newVariableObject;
+                                
                             };
-
+                            
                             angular.forEach(variablesInCondition, function(variableInCondition) {
-                                pushDirectAddressedVariable(variableInCondition);
+                                var pushed = pushDirectAddressedVariable(variableInCondition);
                             });
 
                             angular.forEach(variablesInData, function(variableInData) {
-                                pushDirectAddressedVariable(variableInData);
+                                var pushed = pushDirectAddressedVariable(variableInData);
+                                
+                                //We only count the number of values in the data part of the rule
+                                //(Called expression in program indicators)
+                                variableObjectsCurrentExpression.push(pushed);
                             });
+                            
+                            //Change expression or data part of the rule to match the program rules execution model
+                            
+                            if(valueCountPresent) {
+                                var valueCountText;
+                                angular.forEach(variableObjectsCurrentExpression, function(variableCurrentRule) {
+                                   if(valueCountText) {
+                                       //This is not the first value in the value count part of the expression. 
+                                       valueCountText +=  ' + d2:count(\'' + variableCurrentRule.name + '\')';
+                                   }
+                                   else
+                                   {
+                                       //This is the first part value in the value count expression:
+                                       valueCountText = '(d2:count(\'' + variableCurrentRule.name + '\')';
+                                   }
+                                });
+                                //To finish the value count expression we need to close the paranthesis:
+                                valueCountText += ')';
+
+                                //Replace all occurrences of value counts in both the data and expression:
+                                newRule.condition = newRule.condition.replace(new RegExp("V{value_count}", 'g'),valueCountText);
+                                newAction.data = newAction.data.replace(new RegExp("V{value_count}", 'g'),valueCountText);
+                            }
+                            if(positiveValueCountPresent) {
+                                var zeroPosValueCountText;
+                                angular.forEach(variableObjectsCurrentExpression, function(variableCurrentRule) {
+                                   if(zeroPosValueCountText) {
+                                       //This is not the first value in the value count part of the expression. 
+                                       zeroPosValueCountText +=  '+ d2:countifzeropos(\'' + variableCurrentRule.name + '\')';
+                                   }
+                                   else
+                                   {
+                                       //This is the first part value in the value count expression:
+                                       zeroPosValueCountText = '(d2:countifzeropos(\'' + variableCurrentRule.name + '\')';
+                                   }
+                                });
+                                //To finish the value count expression we need to close the paranthesis:
+                                zeroPosValueCountText += ')';
+
+                                //Replace all occurrences of value counts in both the data and expression:
+                                newRule.condition = newRule.condition.replace(new RegExp("V{zero_pos_value_count}", 'g'),zeroPosValueCountText);
+                                newAction.data = newAction.data.replace(new RegExp("V{zero_pos_value_count}", 'g'),zeroPosValueCountText);
+                            }
                         }
-                        
                     });
 
                     var programIndicators = {rules:programRules, variables:variables};
@@ -1246,13 +1218,13 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         
         angular.forEach(attributes, function(attribute){           
 
-            if(attribute.valueType === 'date' || attribute.valueType === 'number'){
+            if(attribute.valueType === 'DATE' || attribute.valueType === 'NUMBER'){
                 var q = '';
                 
                 if(attribute.operator === OperatorFactory.defaultOperators[0]){
                     if(attribute.exactValue && attribute.exactValue !== ''){
                         query.hasValue = true;
-                        if(attribute.valueType === 'date'){
+                        if(attribute.valueType === 'DATE'){
                             attribute.exactValue = DateUtils.formatFromUserToApi(attribute.exactValue);
                         }
                         q += 'EQ:' + attribute.exactValue + ':';
@@ -1261,14 +1233,14 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 if(attribute.operator === OperatorFactory.defaultOperators[1]){
                     if(attribute.startValue && attribute.startValue !== ''){
                         query.hasValue = true;
-                        if(attribute.valueType === 'date'){
+                        if(attribute.valueType === 'DATE'){
                             attribute.startValue = DateUtils.formatFromUserToApi(attribute.startValue);
                         }
                         q += 'GT:' + attribute.startValue + ':';
                     }
                     if(attribute.endValue && attribute.endValue !== ''){
                         query.hasValue = true;
-                        if(attribute.valueType === 'date'){
+                        if(attribute.valueType === 'DATE'){
                             attribute.endValue = DateUtils.formatFromUserToApi(attribute.endValue);
                         }
                         q += 'LT:' + attribute.endValue + ':';
@@ -1372,13 +1344,14 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 
 /* current selections */
 .service('CurrentSelection', function(){
-    this.currentSelection = '';
-    this.relationshipInfo = '';
+    this.currentSelection = {};
+    this.relationshipInfo = {};
     this.optionSets = null;
     this.attributesById = null;
     this.ouLevels = null;
     this.sortedTeiIds = [];
     this.selectedTeiEvents = null;
+    this.relationshipOwner = {};
     
     this.set = function(currentSelection){  
         this.currentSelection = currentSelection;        
@@ -1428,81 +1401,86 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     this.getSelectedTeiEvents = function(){
         return this.selectedTeiEvents;
     };
+    
+    this.setRelationshipOwner = function(relationshipOwner){
+        this.relationshipOwner = relationshipOwner;
+    };
+    this.getRelationshipOwner = function(){
+        return this.relationshipOwner;
+    };
 })
 
-.service('TEIGridService', function(OrgUnitService, OptionSetService, DateUtils, $translate, AttributesFactory){
+.service('TEIGridService', function(OrgUnitService, OptionSetService, CurrentSelection, DateUtils, $translate){
     
     return {
-        format: function(grid, map, optionSets){
+        format: function(grid, map, optionSets, invalidTeis){
+            
+            invalidTeis = !invalidTeis ? [] : invalidTeis;
             if(!grid || !grid.rows){
                 return;
             }
             
-            //grid.headers[0-4] = Instance, Created, Last updated, Org unit, Tracked entity
-            //grid.headers[5..] = Attribute, Attribute,.... 
+            //grid.headers[0-5] = Instance, Created, Last updated, Org unit, Tracked entity, Inactive
+            //grid.headers[6..] = Attribute, Attribute,.... 
             var attributes = [];
-            for(var i=5; i<grid.headers.length; i++){
+            for(var i=6; i<grid.headers.length; i++){
                 attributes.push({id: grid.headers[i].name, name: grid.headers[i].column, type: grid.headers[i].type});
             }
 
             var entityList = [];
             
-            AttributesFactory.getAll().then(function(atts){
-                
-                var attributes = [];
-                angular.forEach(atts, function(att){
-                    attributes[att.id] = att;
-                });
+            var attributes = CurrentSelection.getAttributesById();
+
+            angular.forEach(grid.rows, function(row){
+                if(invalidTeis.indexOf(row[0]) === -1 ){
+                    var entity = {};
+                    var isEmpty = true;
+
+                    entity.id = row[0];
+                    entity.created = DateUtils.formatFromApiToUser( row[1] );
+                    entity.orgUnit = row[3];                              
+                    entity.type = row[4];
+                    entity.inactive = row[5] !== "" ? row[5] : false;
+
+                    OrgUnitService.get(row[3]).then(function(ou){
+                        if(ou && ou.name){
+                            entity.orgUnitName = ou.name;
+                        }                                                       
+                    });
+
+                    for(var i=6; i<row.length; i++){
+                        if(row[i] && row[i] !== ''){
+                            isEmpty = false;
+                            var val = row[i];
+
+                            if(attributes[grid.headers[i].name] && 
+                                    attributes[grid.headers[i].name].optionSetValue && 
+                                    optionSets &&    
+                                    attributes[grid.headers[i].name].optionSet &&
+                                    optionSets[attributes[grid.headers[i].name].optionSet.id] ){
+                                val = OptionSetService.getName(optionSets[attributes[grid.headers[i].name].optionSet.id].options, val);
+                            }
+                            if(attributes[grid.headers[i].name] && attributes[grid.headers[i].name].valueType === 'date'){                                    
+                                val = DateUtils.formatFromApiToUser( val );
+                            }
+
+                            entity[grid.headers[i].name] = val;
+                        }
+                    }
+
+                    if(!isEmpty){
+                        if(map){
+                            entityList[entity.id] = entity;
+                        }
+                        else{
+                            entityList.push(entity);
+                        }
+                    }
+                }
+            });
+
+            return {headers: attributes, rows: entityList, pager: grid.metaData.pager};
             
-                OrgUnitService.open().then(function(){
-
-                    angular.forEach(grid.rows, function(row){
-                        var entity = {};
-                        var isEmpty = true;
-
-                        entity.id = row[0];
-                        entity.created = DateUtils.formatFromApiToUser( row[1] );
-                        entity.orgUnit = row[3];                              
-                        entity.type = row[4];
-
-                        OrgUnitService.get(row[3]).then(function(ou){
-                            if(ou){
-                                entity.orgUnitName = ou.n;
-                            }                                                       
-                        });
-
-                        for(var i=5; i<row.length; i++){
-                            if(row[i] && row[i] !== ''){
-                                isEmpty = false;
-                                var val = row[i];
-                                
-                                if(attributes[grid.headers[i].name] && 
-                                        attributes[grid.headers[i].name].optionSetValue && 
-                                        optionSets &&    
-                                        attributes[grid.headers[i].name].optionSet &&
-                                        optionSets[attributes[grid.headers[i].name].optionSet.id] ){
-                                    val = OptionSetService.getName(optionSets[attributes[grid.headers[i].name].optionSet.id].options, val);
-                                }
-                                if(attributes[grid.headers[i].name] && attributes[grid.headers[i].name].valueType === 'date'){                                    
-                                    val = DateUtils.formatFromApiToUser( val );
-                                }
-                                
-                                entity[grid.headers[i].name] = val;
-                            }
-                        }
-
-                        if(!isEmpty){
-                            if(map){
-                                entityList[entity.id] = entity;
-                            }
-                            else{
-                                entityList.push(entity);
-                            }
-                        }
-                    });                
-                });
-            }); 
-            return {headers: attributes, rows: entityList, pager: grid.metaData.pager};                                    
         },
         generateGridColumns: function(attributes, ouMode){
             
@@ -1510,8 +1488,9 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             var columns = attributes ? angular.copy(attributes) : [];
        
             //also add extra columns which are not part of attributes (orgunit for example)
-            columns.push({id: 'orgUnitName', name: $translate.instant('registering_unit'), valueType: 'string', displayInListNoProgram: false});
-            columns.push({id: 'created', name: $translate.instant('registration_date'), valueType: 'date', displayInListNoProgram: false});
+            columns.push({id: 'orgUnitName', name: $translate.instant('registering_unit'), valueType: 'TEXT', displayInListNoProgram: false});
+            columns.push({id: 'created', name: $translate.instant('registration_date'), valueType: 'DATE', displayInListNoProgram: false});
+            columns.push({id: 'inactive', name: $translate.instant('inactive'), valueType: 'BOOLEAN', displayInListNoProgram: false});
 
             //generate grid column for the selected program/attributes
             angular.forEach(columns, function(column){
@@ -1523,7 +1502,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 }                
                 column.showFilter = false;                
                 filterTypes[column.id] = column.valueType;
-                if(column.valueType === 'date' || column.valueType === 'number' ){
+                if(column.valueType === 'DATE' || column.valueType === 'NUMBER' ){
                     filterText[column.id]= {};
                 }
             });
@@ -1554,17 +1533,17 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     };
 })
 
-.service('EventUtils', function(DateUtils, PeriodService, CalendarService, OptionSetService, $filter, orderByFilter){
+.service('EventUtils', function(DateUtils, CommonUtils, PeriodService, CalendarService, $filter, orderByFilter){
     
     var getEventDueDate = function(eventsByStage, programStage, enrollment){       
         
-        var referenceDate = enrollment.dateOfIncident ? enrollment.dateOfIncident : enrollment.dateOfEnrollment,
+        var referenceDate = enrollment.incidentDate ? enrollment.incidentDate : enrollment.enrollmentDate,
             offset = programStage.minDaysFromStart,
             calendarSetting = CalendarService.getSetting(),
             dueDate;
 
         if(programStage.generatedByEnrollmentDate){
-            referenceDate = enrollment.dateOfEnrollment;
+            referenceDate = enrollment.enrollmentDate;
         }
 
         if(programStage.repeatable){
@@ -1589,45 +1568,6 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         dueDate = moment(referenceDate, calendarSetting.momentFormat).add('d', offset)._d;
         dueDate = $filter('date')(dueDate, calendarSetting.keyDateFormat);        
         return dueDate;
-    };
-    
-    function formatDataElementValue(val, dataElement, optionSets, destination){
-                               
-        if(val && dataElement.type === 'int' ){
-            if( dhis2.validation.isNumber(val)  ){                            
-                val = parseInt(val);
-                //val = new Number(val);
-            }
-        }
-        if(val && dataElement.optionSetValue && optionSets[dataElement.optionSet.id].options  ){
-            if(destination === 'USER'){
-                val = OptionSetService.getName(optionSets[dataElement.optionSet.id].options, val);
-            }
-            else{
-                val = OptionSetService.getCode(optionSets[dataElement.optionSet.id].options, val);
-            }
-            
-        }
-        if(val && dataElement.type === 'date'){
-            if(destination === 'USER'){
-                val = DateUtils.formatFromApiToUser(val);
-            }
-            else{
-                val = DateUtils.formatFromUserToApi(val);
-            }            
-        }
-        if(dataElement.type === 'trueOnly'){
-            
-            if(destination === 'USER'){
-                val = val === 'true' ? true : '';
-            }
-            else{
-                val = val === true ? 'true' : '';
-            }            
-        }
-         
-        return val;
-        
     };
     
     var getEventDuePeriod = function(eventsByStage, programStage, enrollment){ 
@@ -1739,11 +1679,11 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                         }
                         
                         if(stage.openAfterEnrollment){
-                            if(stage.reportDateToUse === 'dateOfIncident'){
-                                newEvent.eventDate = DateUtils.formatFromUserToApi(enrollment.dateOfIncident);
+                            if(stage.reportDateToUse === 'incidentDate'){
+                                newEvent.eventDate = DateUtils.formatFromUserToApi(enrollment.incidentDate);
                             }
                             else{
-                                newEvent.eventDate = DateUtils.formatFromUserToApi(enrollment.dateOfEnrollment);
+                                newEvent.eventDate = DateUtils.formatFromUserToApi(enrollment.enrollmentDate);
                             }
                         }
 
@@ -1770,7 +1710,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 
             angular.forEach(programStage.programStageDataElements, function(prStDe){
                 if(dhis2Event[prStDe.dataElement.id]){                    
-                    var value = formatDataElementValue(dhis2Event[prStDe.dataElement.id], prStDe.dataElement, optionSets, 'API');                    
+                    var value = CommonUtils.formatDataValue(dhis2Event[prStDe.dataElement.id], prStDe.dataElement, optionSets, 'API');                    
                     var val = {value: value, dataElement: prStDe.dataElement.id};
                     if(dhis2Event.providedElsewhere[prStDe.dataElement.id]){
                         val.providedElsewhere = dhis2Event.providedElsewhere[prStDe.dataElement.id];
@@ -1799,7 +1739,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 if( prStDe ){                
                     var val = dataValue.value;
                     if(prStDe.dataElement){
-                        val = formatDataElementValue(val, prStDe.dataElement, optionSets, 'USER');                        
+                        val = CommonUtils.formatDataValue(val, prStDe.dataElement, optionSets, 'USER');                        
                     }    
                     event[dataValue.dataElement] = val;
                     if(dataValue.providedElsewhere){

@@ -34,12 +34,14 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeStrategy;
+import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.common.annotation.Scanned;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
@@ -130,18 +132,18 @@ public class DataElementGroup
      * Returns the value type of the data elements in this group. Uses an arbitrary
      * member to determine the value type.
      */
-    public String getValueType()
+    public ValueType getValueType()
     {
-        return members != null && !members.isEmpty() ? members.iterator().next().getType() : null;
+        return members != null && !members.isEmpty() ? members.iterator().next().getValueType() : null;
     }
 
     /**
-     * Returns the aggregation operator of the data elements in this group. Uses
+     * Returns the aggregation type of the data elements in this group. Uses
      * an arbitrary member to determine the aggregation operator.
      */
-    public String getAggregationOperator()
+    public AggregationType getAggregationType()
     {
-        return members != null && !members.isEmpty() ? members.iterator().next().getAggregationOperator() : null;
+        return members != null && !members.isEmpty() ? members.iterator().next().getAggregationType() : null;
     }
 
     /**

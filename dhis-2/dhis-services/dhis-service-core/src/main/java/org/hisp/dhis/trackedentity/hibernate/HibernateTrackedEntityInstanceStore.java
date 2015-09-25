@@ -46,8 +46,6 @@ import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramInstance;
-import org.hisp.dhis.program.ProgramStatus;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams;
@@ -80,15 +78,6 @@ public class HibernateTrackedEntityInstanceStore
     implements TrackedEntityInstanceStore
 {
     private static final Log log = LogFactory.getLog( HibernateTrackedEntityInstanceStore.class );
-
-    private static final Map<ProgramStatus, Integer> PROGRAM_STATUS_MAP = new HashMap<ProgramStatus, Integer>()
-    {
-        {
-            put( ProgramStatus.ACTIVE, ProgramInstance.STATUS_ACTIVE );
-            put( ProgramStatus.COMPLETED, ProgramInstance.STATUS_COMPLETED );
-            put( ProgramStatus.CANCELLED, ProgramInstance.STATUS_CANCELLED );
-        }
-    };
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -170,16 +159,16 @@ public class HibernateTrackedEntityInstanceStore
                 {
                     String filter = queryFilter.getSqlFilter( StringUtils.lowerCase( queryFilter.getFilter() ) );
 
-                    hql += " and exists (from TrackedEntityAttributeValue teav where teav.entityInstance=tei";
+                    hql += hlp.whereAnd() + " exists (from TrackedEntityAttributeValue teav where teav.entityInstance=tei";
                     hql += " and teav.attribute.uid='" + queryItem.getItemId() + "'";
 
                     if ( queryItem.isNumeric() )
                     {
-                        hql += " and teav.value " + queryFilter.getSqlOperator() + filter + ")";
+                        hql += " and teav.value" + queryFilter.getSqlOperator() + filter + ")";
                     }
                     else
                     {
-                        hql += " and lower(teav.value) " + queryFilter.getSqlOperator() + filter + ")";
+                        hql += " and lower(teav.value)" + queryFilter.getSqlOperator() + filter + ")";
                     }
 
                 }
@@ -189,11 +178,11 @@ public class HibernateTrackedEntityInstanceStore
         if ( params.hasProgram() )
         {
             hql += hlp.whereAnd() + "exists (from ProgramInstance pi where pi.entityInstance=tei";
-            hql += hlp.whereAnd() + "pi.program.uid = '" + params.getProgram().getUid() + "'";
+            hql += " and pi.program.uid = '" + params.getProgram().getUid() + "'";
 
             if ( params.hasProgramStatus() )
             {
-                hql += hlp.whereAnd() + "pi.status = " + PROGRAM_STATUS_MAP.get( params.getProgramStatus() );
+                hql += hlp.whereAnd() + "pi.status = " + params.getProgramStatus();
             }
 
             if ( params.hasFollowUp() )
@@ -228,7 +217,7 @@ public class HibernateTrackedEntityInstanceStore
 
         String sql = "select tei.uid as " + TRACKED_ENTITY_INSTANCE_ID + ", " + "tei.created as " + CREATED_ID + ", "
             + "tei.lastupdated as " + LAST_UPDATED_ID + ", " + "ou.uid as " + ORG_UNIT_ID + ", " + "te.uid as "
-            + TRACKED_ENTITY_ID + ", ";
+            + TRACKED_ENTITY_ID + ", " + "tei.inactive as " + INACTIVE_ID + ", ";
 
         for ( QueryItem item : params.getAttributes() )
         {
@@ -273,6 +262,7 @@ public class HibernateTrackedEntityInstanceStore
             map.put( LAST_UPDATED_ID, rowSet.getString( LAST_UPDATED_ID ) );
             map.put( ORG_UNIT_ID, rowSet.getString( ORG_UNIT_ID ) );
             map.put( TRACKED_ENTITY_ID, rowSet.getString( TRACKED_ENTITY_ID ) );
+            map.put( INACTIVE_ID, rowSet.getString( INACTIVE_ID ) );
 
             for ( QueryItem item : params.getAttributes() )
             {
@@ -411,7 +401,7 @@ public class HibernateTrackedEntityInstanceStore
 
             if ( params.hasProgramStatus() )
             {
-                sql += "and pi.status = " + PROGRAM_STATUS_MAP.get( params.getProgramStatus() ) + " ";
+                sql += "and pi.status = " + params.getProgramStatus() + " ";
             }
 
             if ( params.hasFollowUp() )
@@ -464,8 +454,6 @@ public class HibernateTrackedEntityInstanceStore
 
             sql = removeLastAnd( sql ) + ") ";
         }
-
-        System.err.println( "sql: " + sql );
 
         return sql;
     }

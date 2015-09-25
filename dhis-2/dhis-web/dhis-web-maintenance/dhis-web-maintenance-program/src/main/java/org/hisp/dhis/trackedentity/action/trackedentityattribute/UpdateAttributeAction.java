@@ -29,13 +29,12 @@ package org.hisp.dhis.trackedentity.action.trackedentityattribute;
  */
 
 import com.opensymphony.xwork2.Action;
-
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.attribute.AttributeService;
+import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.legend.LegendService;
 import org.hisp.dhis.option.OptionService;
-import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.system.util.AttributeUtils;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
@@ -73,9 +72,6 @@ public class UpdateAttributeAction
 
     @Autowired
     private OptionService optionService;
-
-    @Autowired
-    private PeriodService periodService;
 
     @Autowired
     private LegendService legendService;
@@ -122,15 +118,15 @@ public class UpdateAttributeAction
         this.description = description;
     }
 
-    private String valueType;
+    private ValueType valueType;
 
-    public void setValueType( String valueType )
+    public void setValueType( ValueType valueType )
     {
         this.valueType = valueType;
     }
 
     private String aggregationType;
-    
+
     public void setAggregationType( String aggregationType )
     {
         this.aggregationType = aggregationType;
@@ -219,13 +215,13 @@ public class UpdateAttributeAction
         trackedEntityAttribute.setDisplayOnVisitSchedule( false );
         trackedEntityAttribute.setOptionSet( null );
 
-        unique = (unique != null);
+        unique = unique != null;
         trackedEntityAttribute.setUnique( unique );
 
-        inherit = (inherit != null);
+        inherit = inherit != null;
         trackedEntityAttribute.setInherit( inherit );
 
-        confidential = (confidential != null);
+        confidential = confidential != null;
         trackedEntityAttribute.setConfidential( confidential );
 
         if ( unique )

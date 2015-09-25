@@ -204,13 +204,6 @@ public class UpdateDataSetAction
         this.dataApprovalWorkflowId = dataApprovalWorkflowId;
     }
 
-    private boolean skipAggregation;
-
-    public void setSkipAggregation( boolean skipAggregation )
-    {
-        this.skipAggregation = skipAggregation;
-    }
-
     private String frequencySelect;
 
     public void setFrequencySelect( String frequencySelect )
@@ -353,7 +346,6 @@ public class UpdateDataSetAction
 
         dataSet.setExpiryDays( expiryDays );
         dataSet.setTimelyDays( timelyDays );
-        dataSet.setSkipAggregation( skipAggregation );
 
         if ( !( equalsNullSafe( name, dataSet.getName() ) &&
             periodType.equals( dataSet.getPeriodType() ) &&

@@ -87,13 +87,13 @@ public class AppController
     @Autowired
     private LocationManager locationManager;
 
-    private ResourceLoader resourceLoader = new DefaultResourceLoader();
+    private final ResourceLoader resourceLoader = new DefaultResourceLoader();
 
     @RequestMapping( method = RequestMethod.GET, produces = ContextUtils.CONTENT_TYPE_JSON )
     public void getApps( @RequestParam(required=false) String key, HttpServletResponse response )
         throws IOException
     {
-        List<App> apps = new ArrayList<App>();
+        List<App> apps = new ArrayList<>();
         
         if ( key != null )
         {

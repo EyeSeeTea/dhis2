@@ -76,6 +76,8 @@ public class EventRow
     private List<DataValue> dataValues = new ArrayList<>();
     
     private List<Note> notes = new ArrayList<>();
+    
+    private String attributeCategoryOptions;
 
     public EventRow()
     {
@@ -238,38 +240,84 @@ public class EventRow
     {
         this.followup = followup;
     }
+    
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getAttributeCategoryOptions()
+    {
+        return attributeCategoryOptions;
+    }
+
+    public void setAttributeCategoryOptions( String attributeCategoryOptions )
+    {
+        this.attributeCategoryOptions = attributeCategoryOptions;
+    } 
 
     @Override
     public boolean equals( Object o )
     {
         if ( this == o )
+        {
             return true;
+        }
+        
         if ( o == null || getClass() != o.getClass() )
+        {
             return false;
+        }
 
         EventRow eventRow1 = (EventRow) o;
 
         if ( event != null ? !event.equals( eventRow1.event ) : eventRow1.event != null )
+        {
             return false;
-        if ( attributes != null ? !attributes.equals( eventRow1.attributes ) : eventRow1.attributes != null ) 
+        }
+        
+        if ( attributes != null ? !attributes.equals( eventRow1.attributes ) : eventRow1.attributes != null )
+        {
             return false;
-        if ( dataValues != null ? !dataValues.equals( eventRow1.dataValues ) : eventRow1.dataValues != null ) 
-            return false;        
+        }
+        
+        if ( dataValues != null ? !dataValues.equals( eventRow1.dataValues ) : eventRow1.dataValues != null )
+        {
+            return false;
+        }
+        
         if ( eventDate != null ? !eventDate.equals( eventRow1.eventDate ) : eventRow1.eventDate != null )
+        {
             return false;
+        }
+        
         if ( dueDate != null ? !dueDate.equals( eventRow1.dueDate ) : eventRow1.dueDate != null )
+        {
             return false;
+        }
+        
         if ( orgUnitName != null ? !orgUnitName.equals( eventRow1.orgUnitName ) : eventRow1.orgUnitName != null )
-            return false;        
-        if ( orgUnit != null ? !orgUnit.equals( eventRow1.orgUnit ) : eventRow1.orgUnit != null )
+        {
             return false;
+        }
+        
+        if ( orgUnit != null ? !orgUnit.equals( eventRow1.orgUnit ) : eventRow1.orgUnit != null )
+        {
+            return false;
+        }
+        
         if ( trackedEntityInstance != null ? !trackedEntityInstance.equals( eventRow1.trackedEntityInstance )
             : eventRow1.trackedEntityInstance != null )
+        {
             return false;
+        }
+        
         if ( program != null ? !program.equals( eventRow1.program ) : eventRow1.program != null )
+        {
             return false;
+        }
+        
         if ( programStage != null ? !programStage.equals( eventRow1.programStage ) : eventRow1.programStage != null )
+        {
             return false;
+        }
 
         return true;
     }
@@ -303,7 +351,8 @@ public class EventRow
             ", registrationOrgUnit='" + orgUnit + '\'' +
             ", trackedEntityInstance='" + trackedEntityInstance + '\'' + 
             ", eventDate='" + eventDate + '\'' + 
-            ", dueDate='" + dueDate + '\'' +            
+            ", dueDate='" + dueDate + '\'' +        
+            ", attributeCategoryOptions=" + attributeCategoryOptions +
             '}';
     }
 }

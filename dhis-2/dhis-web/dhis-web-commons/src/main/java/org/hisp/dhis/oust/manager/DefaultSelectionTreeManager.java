@@ -37,6 +37,7 @@ import java.util.Set;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 
+import com.google.common.collect.Sets;
 import com.opensymphony.xwork2.ActionContext;
 
 /**
@@ -47,8 +48,8 @@ public class DefaultSelectionTreeManager
 {
     private static final String SESSION_KEY_SELECTED_ORG_UNITS = "dhis-oust-selected-org-units";
     private static final String SESSION_KEY_ROOT_ORG_UNITS = "dhis-oust-root-org-units";
-
-    private static final double PERCENTAGE_OF_MULTIPLE_RELOADING_ORG_UNITS = 0.2;
+    
+    private static final int LIMIT_SELECT_ALL_ORG_UNITS = 200;
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -244,26 +245,19 @@ public class DefaultSelectionTreeManager
 
     private Collection<OrganisationUnit> reloadOrganisationUnits( Collection<OrganisationUnit> units )
     {
-        Set<OrganisationUnit> reloadedUnits = new HashSet<>();
-
-        int noTotal = organisationUnitService.getNumberOfOrganisationUnits();
-
         int noSelected = units.size();
 
-        if ( (double) noSelected / noTotal > PERCENTAGE_OF_MULTIPLE_RELOADING_ORG_UNITS ) // Select all at once
+        if ( noSelected > LIMIT_SELECT_ALL_ORG_UNITS ) // Select all at once
         {
-            Collection<OrganisationUnit> allOrgUnits = organisationUnitService.getAllOrganisationUnits();
-
-            for ( OrganisationUnit unit : allOrgUnits )
-            {
-                if ( units.contains( unit ) )
-                {
-                    reloadedUnits.add( unit );
-                }
-            }
+            Set<OrganisationUnit> orgUnits = Sets.newHashSet( organisationUnitService.getAllOrganisationUnits() );
+            orgUnits.retainAll( Sets.newHashSet( units ) );
+            
+            return orgUnits;
         }
         else // Select one by one
         {
+            Set<OrganisationUnit> reloadedUnits = new HashSet<>();
+            
             for ( OrganisationUnit unit : units )
             {
                 OrganisationUnit reloadedUnit = reloadOrganisationUnit( unit );
@@ -273,8 +267,9 @@ public class DefaultSelectionTreeManager
                     reloadedUnits.add( reloadedUnit );
                 }
             }
-        }
-        return reloadedUnits;
+            
+            return reloadedUnits;
+        }        
     }
 
     // -------------------------------------------------------------------------

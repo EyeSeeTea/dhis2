@@ -221,7 +221,7 @@ public class FacilityController
         if ( fields.indexOf( ':' ) >= 0 )
         {
             Map<String, Object> properties = facility.getProperties();
-            facility.setProperties( new HashMap<String, Object>() );
+            facility.setProperties( new HashMap<>() );
 
             for ( String s : strings )
             {
@@ -361,7 +361,7 @@ public class FacilityController
                 {
                     int l = Integer.parseInt( level );
 
-                    if ( organisationUnit.getOrganisationUnitLevel() == l )
+                    if ( organisationUnit.getLevel() == l )
                     {
                         shouldRemove = false;
                         break;

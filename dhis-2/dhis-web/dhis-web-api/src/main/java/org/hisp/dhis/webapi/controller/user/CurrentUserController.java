@@ -41,7 +41,7 @@ import org.hisp.dhis.dataapproval.DataApprovalLevelService;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
-import org.hisp.dhis.dxf2.fieldfilter.FieldFilterService;
+import org.hisp.dhis.fieldfilter.FieldFilterService;
 import org.hisp.dhis.dxf2.render.RenderService;
 import org.hisp.dhis.dxf2.common.JacksonUtils;
 import org.hisp.dhis.i18n.I18nService;
@@ -112,7 +112,7 @@ public class CurrentUserController
 
     private static final int MAX_OBJECTS = 50;
 
-    private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat( "yyyy-MM-dd" );
+    private static SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat( "yyyy-MM-dd" );
 
     @Autowired
     private CurrentUserService currentUserService;
@@ -349,7 +349,7 @@ public class CurrentUserController
 
         if ( currentUser.getBirthday() != null )
         {
-            userAccount.setBirthday( simpleDateFormat.format( currentUser.getBirthday() ) );
+            userAccount.setBirthday( SIMPLE_DATE_FORMAT.format( currentUser.getBirthday() ) );
         }
 
         userAccount.setNationality( currentUser.getNationality() );
@@ -390,7 +390,7 @@ public class CurrentUserController
 
         if ( userAccount.getBirthday() != null && !userAccount.getBirthday().isEmpty() )
         {
-            currentUser.setBirthday( simpleDateFormat.parse( userAccount.getBirthday() ) );
+            currentUser.setBirthday( SIMPLE_DATE_FORMAT.parse( userAccount.getBirthday() ) );
         }
 
         currentUser.setNationality( userAccount.getNationality() );
@@ -573,7 +573,7 @@ public class CurrentUserController
 
                         if ( programAssociations.get( organisationUnit.getUid() ) == null )
                         {
-                            programAssociations.put( organisationUnit.getUid(), new ArrayList<Program>() );
+                            programAssociations.put( organisationUnit.getUid(), new ArrayList<>() );
                         }
 
                         programAssociations.get( organisationUnit.getUid() ).add( program );
@@ -591,7 +591,7 @@ public class CurrentUserController
             FormOrganisationUnit formOrganisationUnit = new FormOrganisationUnit();
             formOrganisationUnit.setId( organisationUnit.getUid() );
             formOrganisationUnit.setLabel( organisationUnit.getDisplayName() );
-            formOrganisationUnit.setLevel( organisationUnit.getOrganisationUnitLevel() );
+            formOrganisationUnit.setLevel( organisationUnit.getLevel() );
 
             if ( organisationUnit.getParent() != null )
             {
@@ -690,7 +690,7 @@ public class CurrentUserController
             FormOrganisationUnit formOrganisationUnit = new FormOrganisationUnit();
             formOrganisationUnit.setId( organisationUnit.getUid() );
             formOrganisationUnit.setLabel( organisationUnit.getDisplayName() );
-            formOrganisationUnit.setLevel( organisationUnit.getOrganisationUnitLevel() );
+            formOrganisationUnit.setLevel( organisationUnit.getLevel() );
 
             if ( organisationUnit.getParent() != null )
             {

@@ -21,9 +21,9 @@
 
     <property name="version" />
 
-    <property name="dateOfEnrollmentDescription" type="text" />
+    <property name="enrollmentDateLabel" column="enrollmentdatelabel" type="text" />
 
-    <property name="dateOfIncidentDescription" type="text" />
+    <property name="incidentDateLabel" column="incidentdatelabel" type="text" />
 
     <set name="programStages" order-by="sortOrder" cascade="all">
       <key column="programid" />
@@ -56,7 +56,7 @@
 
     <property name="ignoreOverdueEvents" />
 
-    <set name="userRoles" table="program_userroles">
+    <set name="userRoles" table="program_userroles" inverse="true">
       <key column="programid" />
       <many-to-many class="org.hisp.dhis.user.UserAuthorityGroup"
         column="userroleid" foreign-key="fk_program_userroles" />
@@ -88,6 +88,9 @@
 
     <property name="dataEntryMethod" />
 
+	<many-to-one name="categoryCombo" class="org.hisp.dhis.dataelement.DataElementCategoryCombo"
+      column="categorycomboid" foreign-key="fk_program_categorycomboid" />
+      
     <many-to-one name="trackedEntity" class="org.hisp.dhis.trackedentity.TrackedEntity"
       column="trackedentityid" foreign-key="fk_program_trackedentityid" />
 

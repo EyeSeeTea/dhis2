@@ -28,14 +28,15 @@ package org.hisp.dhis.analytics.event;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.DATA_X_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.analytics.DataQueryParams;
@@ -62,41 +63,41 @@ public class EventQueryParams
     extends DataQueryParams
 {
     private Date startDate;
-    
+
     private Date endDate;
-    
+
     private List<QueryItem> items = new ArrayList<>();
-    
+
     private List<QueryItem> itemFilters = new ArrayList<>();
-        
+
     private DimensionalObject value;
-        
+
     private List<ProgramIndicator> itemProgramIndicators = new ArrayList<>();
 
     private ProgramIndicator programIndicator;
-    
+
     private List<String> asc = new ArrayList<>();
-    
+
     private List<String> desc = new ArrayList<>();
     
     private String organisationUnitMode;
-    
+
     private Integer page;
-    
+
     private Integer pageSize;
 
     private SortOrder sortOrder;
-    
+
     private Integer limit;
-    
+
     private EventOutputType outputType;
-    
+
     private boolean collapseDataDimensions;
-    
+
     private boolean coordinatesOnly;
 
     private boolean aggregateData;
-    
+
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -109,7 +110,7 @@ public class EventQueryParams
     public EventQueryParams instance()
     {
         EventQueryParams params = new EventQueryParams();
-        
+
         params.dimensions = new ArrayList<>( this.dimensions );
         params.filters = new ArrayList<>( this.filters );
         params.displayProperty = this.displayProperty;
@@ -118,7 +119,7 @@ public class EventQueryParams
 
         params.partitions = new Partitions( this.partitions );
         params.periodType = this.periodType;
-        
+
         params.program = this.program;
         params.programStage = this.programStage;
         params.startDate = this.startDate;
@@ -130,6 +131,7 @@ public class EventQueryParams
         params.programIndicator = this.programIndicator;
         params.asc = new ArrayList<>( this.asc );
         params.desc = new ArrayList<>( this.desc );
+        params.completedOnly = this.completedOnly;
         params.organisationUnitMode = this.organisationUnitMode;
         params.page = this.page;
         params.pageSize = this.pageSize;
@@ -139,45 +141,43 @@ public class EventQueryParams
         params.collapseDataDimensions = this.collapseDataDimensions;
         params.coordinatesOnly = this.coordinatesOnly;
         params.aggregateData = this.aggregateData;
-        
+
         params.periodType = this.periodType;
-        
+
         return params;
     }
-    
+
     public static EventQueryParams fromDataQueryParams( DataQueryParams dataQueryParams )
     {
-        //TODO indicator filter
-        
         EventQueryParams params = new EventQueryParams();
-        
+
         dataQueryParams.copyTo( params );
-        
+
         for ( NameableObject object : dataQueryParams.getProgramDataElements() )
         {
-            DataElement element = (DataElement) object;            
-            QueryItem item = new QueryItem( element, element.getLegendSet(), element.getType(), element.getAggregationType(), element.getOptionSet() );
+            DataElement element = (DataElement) object;
+            QueryItem item = new QueryItem( element, element.getLegendSet(), element.getValueType(), element.getAggregationType(), element.getOptionSet() );
             params.getItems().add( item );
         }
 
         for ( NameableObject object : dataQueryParams.getProgramAttributes() )
         {
-            TrackedEntityAttribute element = (TrackedEntityAttribute) object;            
+            TrackedEntityAttribute element = (TrackedEntityAttribute) object;
             QueryItem item = new QueryItem( element, element.getLegendSet(), element.getValueType(), element.getAggregationType(), element.getOptionSet() );
             params.getItems().add( item );
-        }        
+        }
 
         for ( NameableObject object : dataQueryParams.getFilterProgramDataElements() )
         {
-            DataElement element = (DataElement) object;            
-            QueryItem item = new QueryItem( element, element.getLegendSet(), element.getType(), element.getAggregationType(), element.getOptionSet() );            
+            DataElement element = (DataElement) object;
+            QueryItem item = new QueryItem( element, element.getLegendSet(), element.getValueType(), element.getAggregationType(), element.getOptionSet() );
             params.getItemFilters().add( item );
         }
 
         for ( NameableObject object : dataQueryParams.getFilterProgramAttributes() )
         {
-            TrackedEntityAttribute element = (TrackedEntityAttribute) object;            
-            QueryItem item = new QueryItem( element, element.getLegendSet(), element.getValueType(), element.getAggregationType(), element.getOptionSet() );            
+            TrackedEntityAttribute element = (TrackedEntityAttribute) object;
+            QueryItem item = new QueryItem( element, element.getLegendSet(), element.getValueType(), element.getAggregationType(), element.getOptionSet() );
             params.getItemFilters().add( item );
         }
 
@@ -186,17 +186,17 @@ public class EventQueryParams
             ProgramIndicator programIndicator = (ProgramIndicator) object;
             params.getItemProgramIndicators().add( programIndicator );
         }
-        
+
         params.setAggregateData( true );
         params.removeDimension( DATA_X_DIM_ID );
-        
+
         return params;
     }
 
     // -------------------------------------------------------------------------
     // Logic
     // -------------------------------------------------------------------------
-    
+
     /**
      * Replaces periods with start and end dates, using the earliest start date
      * from the periods as start date and the latest end date from the periods
@@ -205,23 +205,23 @@ public class EventQueryParams
     public void replacePeriodsWithStartEndDates()
     {
         List<Period> periods = NameableObjectUtils.asTypedList( getDimensionOrFilterItems( PERIOD_DIM_ID ), Period.class );
-        
+
         for ( Period period : periods )
         {
             Date start = period.getStartDate();
             Date end = period.getEndDate();
-            
-            if ( startDate == null || ( start != null && start.before( startDate ) ) )
+
+            if ( startDate == null || (start != null && start.before( startDate )) )
             {
                 startDate = start;
             }
-            
-            if ( endDate == null || ( end != null && end.after( endDate ) ) )
+
+            if ( endDate == null || (end != null && end.after( endDate )) )
             {
                 endDate = end;
             }
         }
-        
+
         removeDimensionOrFilter( PERIOD_DIM_ID );
     }
 
@@ -233,7 +233,7 @@ public class EventQueryParams
     {
         Set<QueryItem> dims = new HashSet<>();
         List<QueryItem> duplicates = new ArrayList<>();
-        
+
         for ( QueryItem dim : items )
         {
             if ( !dims.add( dim ) )
@@ -241,32 +241,40 @@ public class EventQueryParams
                 duplicates.add( dim );
             }
         }
-        
+
         return duplicates;
     }
     
+    /**
+     * Returns a list of items and item filters.
+     */
+    public List<QueryItem> getItemsAndItemFilters()
+    {
+        return ListUtils.union( items, itemFilters );
+    }
+
     /**
      * Get nameable objects part of items and item filters.
      */
     public Set<NameableObject> getNameableObjectItems()
     {
         Set<NameableObject> objects = new HashSet<NameableObject>();
-        
+
         for ( QueryItem item : ListUtils.union( items, itemFilters ) )
         {
             objects.add( item.getItem() );
         }
-                
+
         return objects;
     }
-    
+
     /**
      * Get legend sets part of items and item filters.
      */
     public Set<Legend> getLegends()
     {
         Set<Legend> legends = new HashSet<>();
-        
+
         for ( QueryItem item : ListUtils.union( items, itemFilters ) )
         {
             if ( item.hasLegendSet() )
@@ -274,17 +282,17 @@ public class EventQueryParams
                 legends.addAll( item.getLegendSet().getLegends() );
             }
         }
-        
+
         return legends;
     }
-    
+
     /**
      * Get option sets part of items.
      */
     public Set<OptionSet> getItemOptionSets()
     {
         Set<OptionSet> optionSets = new HashSet<>();
-        
+
         for ( QueryItem item : items )
         {
             if ( item.hasOptionSet() )
@@ -292,8 +300,18 @@ public class EventQueryParams
                 optionSets.add( item.getOptionSet() );
             }
         }
-        
+
         return optionSets;
+    }
+
+    /**
+     * Removes items and item filters of type program indicators.
+     */
+    public EventQueryParams removeProgramIndicatorItems()
+    {
+        items = items.stream().filter( item -> !item.isProgramIndicator() ).collect( Collectors.toList() );
+        itemFilters = itemFilters.stream().filter( item -> !item.isProgramIndicator() ).collect( Collectors.toList() );
+        return this;
     }
 
     /**
@@ -307,11 +325,11 @@ public class EventQueryParams
         {
             return aggregationType;
         }
-        else if ( hasValueDimension() )
+        else if ( hasValueDimension() && value.getAggregationType() != null )
         {
             return value.getAggregationType();
         }
-        
+
         return AggregationType.AVERAGE;
     }
 
@@ -323,10 +341,10 @@ public class EventQueryParams
     public boolean isAggregationType( AggregationType aggregationType )
     {
         AggregationType type = getAggregationTypeFallback();
-        
+
         return type != null && type.equals( aggregationType );
-    }    
-    
+    }
+
     /**
      * Indicates whether this query is of the given organisation unit mode.
      */
@@ -350,25 +368,25 @@ public class EventQueryParams
     {
         return startDate != null && endDate != null;
     }
-        
+
     public Set<OrganisationUnit> getOrganisationUnitChildren()
     {
         Set<OrganisationUnit> children = new HashSet<>();
-        
+
         for ( NameableObject object : getDimensionOrFilterItems( DimensionalObject.ORGUNIT_DIM_ID ) )
         {
-            OrganisationUnit unit = (OrganisationUnit) object;            
+            OrganisationUnit unit = (OrganisationUnit) object;
             children.addAll( unit.getChildren() );
         }
-        
+
         return children;
     }
-    
+
     public boolean isSorting()
     {
-        return ( asc != null && !asc.isEmpty() ) || ( desc != null && !desc.isEmpty() );
+        return (asc != null && !asc.isEmpty()) || (desc != null && !desc.isEmpty());
     }
-    
+
     public boolean isPaging()
     {
         return page != null || pageSize != null;
@@ -378,7 +396,7 @@ public class EventQueryParams
     {
         return page != null && page > 0 ? page : 1;
     }
-    
+
     public int getPageSizeWithDefault()
     {
         return pageSize != null && pageSize >= 0 ? pageSize : 50;
@@ -386,29 +404,29 @@ public class EventQueryParams
 
     public int getOffset()
     {
-        return ( getPageWithDefault() - 1 ) * getPageSizeWithDefault();
+        return (getPageWithDefault() - 1) * getPageSizeWithDefault();
     }
-    
+
     public boolean hasSortOrder()
     {
         return sortOrder != null;
     }
-    
+
     public boolean hasLimit()
     {
         return limit != null && limit > 0;
     }
-    
+
     public boolean hasValueDimension()
     {
         return value != null;
     }
-    
+
     public boolean hasProgramIndicatorDimension()
     {
         return programIndicator != null;
     }
-    
+
     /**
      * Indicates whether the program of this query requires registration of
      * tracked entity instances.
@@ -417,7 +435,7 @@ public class EventQueryParams
     {
         return program != null && program.isRegistration();
     }
-    
+
     /**
      * Returns a negative integer in case of ascending sort order, a positive in
      * case of descending sort order and 0 in case of no sort order.
@@ -426,7 +444,7 @@ public class EventQueryParams
     {
         return SortOrder.ASC.equals( sortOrder ) ? -1 : SortOrder.DESC.equals( sortOrder ) ? 1 : 0;
     }
-    
+
     public String toString()
     {
         return "[" +
@@ -443,7 +461,7 @@ public class EventQueryParams
             "Dimensions: " + dimensions + ", " +
             "Filters: " + filters + "]";
     }
-    
+
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
@@ -599,7 +617,7 @@ public class EventQueryParams
     {
         this.limit = limit;
     }
-    
+
     public EventOutputType getOutputType()
     {
         return outputType;

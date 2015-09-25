@@ -191,13 +191,6 @@ public class AddDataSetAction
         this.dataApprovalWorkflowId = dataApprovalWorkflowId;
     }
 
-    private boolean skipAggregation;
-
-    public void setSkipAggregation( boolean skipAggregation )
-    {
-        this.skipAggregation = skipAggregation;
-    }
-
     private String frequencySelect;
 
     public void setFrequencySelect( String frequencySelect )
@@ -324,7 +317,6 @@ public class AddDataSetAction
 
         dataSet.setExpiryDays( expiryDays );
         dataSet.setTimelyDays( timelyDays );
-        dataSet.setSkipAggregation( skipAggregation );
 
         for ( String id : deSelected )
         {

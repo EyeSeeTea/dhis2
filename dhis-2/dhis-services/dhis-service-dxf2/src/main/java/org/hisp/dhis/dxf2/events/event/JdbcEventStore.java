@@ -28,24 +28,19 @@ package org.hisp.dhis.dxf2.events.event;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.common.IdentifiableObjectUtils.getIdList;
-import static org.hisp.dhis.commons.util.TextUtils.getCommaDelimitedString;
-import static org.hisp.dhis.system.util.DateUtils.getMediumDateString;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.commons.util.SqlHelper;
 import org.hisp.dhis.dxf2.common.IdSchemes;
+import org.hisp.dhis.dxf2.events.enrollment.EnrollmentStatus;
 import org.hisp.dhis.dxf2.events.report.EventRow;
 import org.hisp.dhis.dxf2.events.trackedentity.Attribute;
 import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.program.ProgramStatus;
 import org.hisp.dhis.program.ProgramType;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.util.ObjectUtils;
@@ -53,8 +48,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static org.hisp.dhis.common.IdentifiableObjectUtils.getIdList;
+import static org.hisp.dhis.commons.util.TextUtils.getCommaDelimitedString;
+import static org.hisp.dhis.system.util.DateUtils.getMediumDateString;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -67,7 +69,7 @@ public class JdbcEventStore
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Override
     public List<Event> getEvents( EventSearchParams params, List<OrganisationUnit> organisationUnits )
@@ -106,12 +108,12 @@ public class JdbcEventStore
                 event.setProgram( IdSchemes.getValue( rowSet.getString( "p_uid" ), rowSet.getString( "p_code" ), idSchemes.getProgramIdScheme() ) );
                 event.setProgramStage( IdSchemes.getValue( rowSet.getString( "ps_uid" ), rowSet.getString( "ps_code" ), idSchemes.getProgramStageIdScheme() ) );
                 event.setOrgUnit( IdSchemes.getValue( rowSet.getString( "ou_uid" ), rowSet.getString( "ou_code" ), idSchemes.getOrgUnitIdScheme() ) );
-                ProgramType programTye =  ProgramType.fromValue(rowSet.getString( "p_type" ) );
-                
+                ProgramType programTye = ProgramType.fromValue( rowSet.getString( "p_type" ) );
+
                 if ( programTye != ProgramType.WITHOUT_REGISTRATION )
                 {
                     event.setEnrollment( rowSet.getString( "pi_uid" ) );
-                    event.setEnrollmentStatus( EventStatus.fromInt( rowSet.getInt( "pi_status" ) ) );
+                    event.setEnrollmentStatus( EnrollmentStatus.fromProgramStatus( ProgramStatus.valueOf( rowSet.getString( "pi_status" ) ) ) );
                     event.setFollowup( rowSet.getBoolean( "pi_followup" ) );
                 }
 
@@ -135,7 +137,7 @@ public class JdbcEventStore
 
                         try
                         {
-                            List<Double> list = objectMapper.readValue( coordinate.getCoordinateString(),
+                            List<Double> list = OBJECT_MAPPER.readValue( coordinate.getCoordinateString(),
                                 new TypeReference<List<Double>>()
                                 {
                                 } );
@@ -241,10 +243,12 @@ public class JdbcEventStore
 
             if ( rowSet.getString( "pav_value" ) != null && rowSet.getString( "ta_uid" ) != null )
             {
+                String valueType = rowSet.getString( "ta_valuetype" );
+
                 Attribute attribute = new Attribute();
                 attribute.setValue( rowSet.getString( "pav_value" ) );
                 attribute.setDisplayName( rowSet.getString( "ta_name" ) );
-                attribute.setType( rowSet.getString( "ta_valuetype" ) );
+                attribute.setValueType( valueType != null ? ValueType.valueOf( valueType.toUpperCase() ) : null );
                 attribute.setAttribute( rowSet.getString( "ta_uid" ) );
 
                 eventRow.getAttributes().add( attribute );
@@ -369,7 +373,7 @@ public class JdbcEventStore
 
         if ( params.getProgramStatus() != null )
         {
-            sql += hlp.whereAnd() + " pi.status = " + params.getProgramStatus().getValue() + " ";
+            sql += hlp.whereAnd() + " pi.status = '" + params.getProgramStatus() + "' ";
         }
 
         if ( params.getFollowUp() != null )

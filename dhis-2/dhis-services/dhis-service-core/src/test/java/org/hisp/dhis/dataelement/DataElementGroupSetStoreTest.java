@@ -44,7 +44,7 @@ public class DataElementGroupSetStoreTest
     
     @Override
     protected DataElementGroupSet[] getObjects()
-    {
+    {        
         return objects;
     }    
 

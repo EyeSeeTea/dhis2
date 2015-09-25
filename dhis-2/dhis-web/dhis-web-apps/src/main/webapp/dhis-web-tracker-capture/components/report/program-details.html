@@ -35,10 +35,10 @@
         <div class="row" ng-repeat="enrollment in enrollments">
             <h2 class='col-sm-12'>{{'enrollment'| translate}} {{'_details'| translate}}</h2>
             <div class="col-sm-4">
-                <span class="bold">{{selectedProgram.dateOfEnrollmentDescription}}:</span>  {{enrollment.dateOfEnrollment}}            
+                <span class="bold">{{selectedProgram.enrollmentDateLabel}}:</span>  {{enrollment.enrollmentDate}}            
             </div>
             <div class="col-sm-4">
-                <span class="bold">{{selectedProgram.dateOfIncidentDescription}}:</span>    {{enrollment.dateOfIncident}}            
+                <span class="bold">{{selectedProgram.incidentDateLabel}}:</span>    {{enrollment.incidentDate}}            
             </div>
             <div class="col-sm-4">
                 <span class="bold">{{'status'| translate}}:</span>  {{enrollment.status}}
@@ -66,7 +66,7 @@
                         <span class="bold">{{'name'| translate}}:</span>    {{dhis2Event.name}}                
                     </div>
                     <div class="col-sm-3">
-                        <span class="bold">{{'org_unit'| translate}}:</span> {{dhis2Event.orgUnitName}}                
+                        <span class="bold">{{orgUnitLabel}}:</span> {{dhis2Event.orgUnitName}}                
                     </div>
                     <div class="col-sm-3">
                         <span class="bold">{{dhis2Event.eventDate ? 'event_date' : 'due_date'| translate}}:</span>    {{dhis2Event.eventDate ? dhis2Event.eventDate : dhis2Event.dueDate}}
@@ -93,7 +93,7 @@
                                     {{prStDe.dataElement.formName ? prStDe.dataElement.formName : prStDe.dataElement.name}}
                                 </td>
                                 <td>
-                                    {{dhis2Event[prStDe.dataElement.id].value}}          
+                                    {{dhis2Event[prStDe.dataElement.id]}}
                                 </td>
                                 <td ng-if="allowProvidedElsewhereExists[dhis2Event.programStage]">
                                     <span ng-if="dhis2Event[prStDe.dataElement.id].providedElsewhere"><i class="fa fa-check"></i></span>

@@ -48,17 +48,26 @@ Ext.onReady( function() {
 	ER.isSessionStorage = ('sessionStorage' in window && window['sessionStorage'] !== null);
 
     // core
-	ER.getCore = function(ns) {
-        var init = ns.core.init,
-            conf = {},
+	ER.getCore = function(init, appConfig) {
+        var conf = {},
             api = {},
             support = {},
             service = {},
             web = {},
+            app = {},
+            webAlert,
             dimConf;
 
-        // tmp
-        ns.alert = function() {};
+        appConfig = appConfig || {};
+
+        // alert
+        webAlert = function() {};
+
+        // app
+        app.getViewportWidth = function() {};
+        app.getViewportHeight = function() {};
+        app.getCenterRegionWidth = function() {};
+        app.getCenterRegionHeight = function() {};
 
 		// conf
 		(function() {
@@ -209,6 +218,14 @@ Ext.onReady( function() {
                 ],
                 idNameMap: {}
             };
+            
+            conf.valueType = {
+            	numericTypes: ['NUMBER','UNIT_INTERVAL','PERCENTAGE','INTEGER','INTEGER_POSITIVE','INTEGER_NEGATIVE','INTEGER_ZERO_OR_POSITIVE'],
+            	textTypes: ['TEXT','LONG_TEXT','LETTER','PHONE_NUMBER','EMAIL'],
+            	booleanTypes: ['BOOLEAN','TRUE_ONLY'],
+            	dateTypes: ['DATE','DATETIME'],
+            	aggregateTypes: ['NUMBER','UNIT_INTERVAL','PERCENTAGE','INTEGER','INTEGER_POSITIVE','INTEGER_NEGATIVE','INTEGER_ZERO_OR_POSITIVE','BOOLEAN','TRUE_ONLY']
+            };
 
             for (var i = 0, obj; i < conf.aggregationType.data.length; i++) {
                 obj = conf.aggregationType.data[i];
@@ -222,7 +239,7 @@ Ext.onReady( function() {
                 west_fill_accordion_indicator: 56,
                 west_fill_accordion_dataelement: 59,
                 west_fill_accordion_dataset: 31,
-                west_fill_accordion_period: 330,
+                west_fill_accordion_period: 335,
                 west_fill_accordion_organisationunit: 58,
                 west_maxheight_accordion_indicator: 450,
                 west_maxheight_accordion_dataset: 350,
@@ -399,9 +416,13 @@ Ext.onReady( function() {
 
 				// hideEmptyRows: boolean (false)
 
+				// hideNaData: boolean (false)
+
+				// completedOnly: boolean (false)
+
                 // collapseDataDimensions: boolean (false)
 
-                // outputType: string ('EVENT') - 'EVENT', 'TRACKED_ENTITY_INSTANCE', 'ENROLLMENT'
+                // outputType: string ('EVENT') - 'EVENT', 'TRACKED_ENTITY_IERTANCE', 'ENROLLMENT'
 
                 // aggregationType: string ('default') - 'default', 'count', 'sum'
 
@@ -584,8 +605,9 @@ Ext.onReady( function() {
                     layout.hideEmptyRows = Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : false;
                     layout.hideNaData = Ext.isBoolean(config.hideNaData) ? config.hideNaData : false;
                     layout.collapseDataDimensions = Ext.isBoolean(config.collapseDataDimensions) ? config.collapseDataDimensions : false;
-
 					layout.outputType = Ext.isString(config.outputType) && !Ext.isEmpty(config.outputType) ? config.outputType : 'EVENT';
+                    layout.completedOnly = Ext.isBoolean(config.completedOnly) ? config.completedOnly : false;
+
 					layout.showHierarchy = Ext.isBoolean(config.showHierarchy) ? config.showHierarchy : false;
 					layout.displayDensity = Ext.isString(config.displayDensity) && !Ext.isEmpty(config.displayDensity) ? config.displayDensity : 'normal';
 					layout.fontSize = Ext.isString(config.fontSize) && !Ext.isEmpty(config.fontSize) ? config.fontSize : 'normal';
@@ -613,6 +635,11 @@ Ext.onReady( function() {
 					//layout.cumulative = Ext.isBoolean(config.cumulative) ? config.cumulative : false;
 					//layout.sortOrder = Ext.isNumber(config.sortOrder) ? config.sortOrder : 0;
 					//layout.topLimit = Ext.isNumber(config.topLimit) ? config.topLimit : 0;
+
+                    // relative period date
+                    if (support.prototype.date.getYYYYMMDD(config.relativePeriodDate)) {
+                        layout.relativePeriodDate = support.prototype.date.getYYYYMMDD(config.relativePeriodDate);
+                    }
 
 					if (!validateSpecialCases()) {
 						return;
@@ -680,7 +707,7 @@ Ext.onReady( function() {
 
 					if (!(Ext.isArray(config.rows) && config.rows.length > 0)) {
 						//alert('No values found');
-						//return;
+						//return; // for ER, not for ER
 					}
 
 					if (config.rows.length > 0 && config.headers.length !== config.rows[0].length) {
@@ -990,6 +1017,26 @@ Ext.onReady( function() {
 				return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, conf.report.digitGroupSeparator[separator]);
 			};
 
+                // date
+            support.prototype.date = {};
+
+            support.prototype.date.getYYYYMMDD = function(param) {
+                if (!Ext.isString(param)) {
+                    if (!(Object.prototype.toString.call(param) === '[object Date]' && param.toString() !== 'Invalid date')) {
+                        return null;
+                    }
+                }
+
+                var date = new Date(param),
+                    month = '' + (1 + date.getMonth()),
+                    day = '' + date.getDate();
+
+                month = month.length === 1 ? '0' + month : month;
+                day = day.length === 1 ? '0' + day : day;
+
+                return date.getFullYear() + '-' + month + '-' + day;
+            };
+
 			// color
 			support.color = {};
 
@@ -1010,6 +1057,17 @@ Ext.onReady( function() {
 				} : null;
 			};
 
+            // connection
+            support.connection = {};
+
+            support.connection.ajax = function(requestConfig, authConfig) {
+                if (authConfig.crossDomain && Ext.isString(authConfig.username) && Ext.isString(authConfig.password)) {
+                    requestConfig.headers = Ext.isObject(authConfig.headers) ? authConfig.headers : {};
+                    requestConfig.headers['Authorization'] = 'Basic ' + btoa(authConfig.username + ':' + authConfig.password);
+                }
+
+                Ext.Ajax.request(requestConfig);
+            };
 		}());
 
 		// service
@@ -1968,8 +2026,8 @@ Ext.onReady( function() {
                     names,
 					headers,
                     booleanNameMap = {
-                        'true': ER.i18n.yes || 'Yes',
-                        'false': ER.i18n.no || 'No'
+                        '1': ER.i18n.yes || 'Yes',
+                        '0': ER.i18n.no || 'No'
                     };
 
 				response = Ext.clone(response);
@@ -2026,6 +2084,60 @@ Ext.onReady( function() {
                             support.prototype.array.sort(objects, 'ASC', 'sortingId');
                             header.ids = Ext.Array.pluck(objects, 'id');
                         }
+                        else if (header.type === 'java.lang.Boolean') {
+							var objects = [];
+
+                            for (var k = 0, id, fullId, name, isHierarchy; k < response.rows.length; k++) {
+                                id = response.rows[k][i] || emptyId;
+
+                                // hide NA data
+                                if (xLayout.hideNaData && id === emptyId) {
+                                    continue;
+                                }
+
+                                fullId = header.name + id;
+                                isHierarchy = service.layout.isHierarchy(xLayout, response, id);
+
+                                // add dimension name prefix if not pe/ou
+                                name = isMeta ? '' : header.column + ' ';
+
+                                // add hierarchy if ou and showHierarchy
+                                name = isHierarchy ? service.layout.getHierarchyName(ouHierarchy, names, id) : (names[id] || id);
+
+                                names[fullId] = name;
+
+                                // update rows
+                                response.rows[k][i] = fullId;
+
+                                // update ou hierarchy
+                                if (isHierarchy) {
+									ouHierarchy[fullId] = ouHierarchy[id];
+								}
+
+                                // update boolean metadata
+                                response.metaData.booleanNames[id] = booleanNameMap[id];
+                                response.metaData.booleanNames[fullId] = booleanNameMap[id];
+
+								objects.push({
+									id: fullId,
+									sortingId: id
+								});
+                            }
+
+                            // sort
+                            objects.sort(function(a, b) {
+                                if (a.sortingId === emptyId) {
+                                    return 1;
+                                }
+                                else if (b.sortingId === emptyId) {
+                                    return -1;
+                                }
+
+                                return a.sortingId - b.sortingId;
+                            });
+
+                            header.ids = Ext.Array.pluck(objects, 'id');
+                        }
                         else if (header.name === 'pe') {
                             var selectedItems = xLayout.dimensionNameIdsMap['pe'],
                                 isRelative = false;
@@ -2073,15 +2185,9 @@ Ext.onReady( function() {
 									ouHierarchy[fullId] = ouHierarchy[id];
 								}
 
-                                // update boolean metadata
-                                if (header.type === 'java.lang.Boolean') {
-                                    response.metaData.booleanNames[id] = booleanNameMap[id];
-                                    response.metaData.booleanNames[fullId] = booleanNameMap[id];
-                                }
-
 								objects.push({
 									id: fullId,
-									sortingId: header.name === 'pe' ? fullId : name
+									sortingId: name
 								});
                             }
 
@@ -2262,26 +2368,37 @@ Ext.onReady( function() {
 			};
 
 			web.window.addHideOnBlurHandler = function(w) {
-				var el = Ext.get(Ext.query('.x-mask')[0]);
+				var masks = Ext.query('.x-mask');
 
-				el.on('click', function() {
-					if (w.hideOnBlur) {
-						w.hide();
-					}
-				});
+                for (var i = 0, el; i < masks.length; i++) {
+                    el = Ext.get(masks[i]);
+
+                    if (el.getWidth() == Ext.getBody().getWidth()) {
+                        el.on('click', function() {
+                            if (w.hideOnBlur) {
+                                w.hide();
+                            }
+                        });
+                    }
+                }
 
 				w.hasHideOnBlurHandler = true;
 			};
 
 			web.window.addDestroyOnBlurHandler = function(w) {
-				var maskElements = Ext.query('.x-mask'),
-                    el = Ext.get(maskElements[0]);
+				var masks = Ext.query('.x-mask');
 
-				el.on('click', function() {
-					if (w.destroyOnBlur) {
-						w.destroy();
-					}
-				});
+                for (var i = 0, el; i < masks.length; i++) {
+                    el = Ext.get(masks[i]);
+
+                    if (el.getWidth() == Ext.getBody().getWidth()) {
+                        el.on('click', function() {
+                            if (w.destroyOnBlur) {
+                                w.destroy();
+                            }
+                        });
+                    }
+                }
 
 				w.hasDestroyOnBlurHandler = true;
 			};
@@ -2289,24 +2406,42 @@ Ext.onReady( function() {
 			// message
 			web.message = {};
 
-			web.message.alert = function(msg, type) {
+			web.message.alert = function(obj) {
                 var config = {},
+                    type,
                     window;
 
-                if (!msg) {
+                if (!obj || (Ext.isObject(obj) && !obj.message && !obj.responseText)) {
                     return;
                 }
 
-                type = type || 'error';
+                // if response object
+                if (Ext.isObject(obj) && obj.responseText && !obj.message) {
+                    obj = Ext.decode(obj.responseText);
+                }
 
-				config.title = type === 'error' ? ER.i18n.error : (type === 'warning' ? ER.i18n.warning : ER.i18n.info);
+                // if string
+                if (Ext.isString(obj)) {
+                    obj = {
+                        status: 'ERROR',
+                        message: obj
+                    };
+                }
+
+                // web message
+                type = (obj.status || 'INFO').toLowerCase();
+
+				config.title = obj.status;
 				config.iconCls = 'ns-window-title-messagebox ' + type;
 
                 // html
-                config.html = msg + (msg.substr(msg.length - 1) === '.' ? '' : '.');
+                config.html = '';
+                config.html += obj.httpStatusCode ? 'Code: ' + obj.httpStatusCode + '<br>' : '';
+                config.html += obj.httpStatus ? 'Status: ' + obj.httpStatus + '<br><br>' : '';
+                config.html += obj.message + (obj.message.substr(obj.message.length - 1) === '.' ? '' : '.');
 
                 // bodyStyle
-                config.bodyStyle = 'padding: 10px; background: #fff; max-width: 350px; max-height: ' + ns.app.centerRegion.getHeight() / 2 + 'px';
+                config.bodyStyle = 'padding: 12px; background: #fff; max-width: 600px; max-height: ' + ns.app.centerRegion.getHeight() / 2 + 'px';
 
                 // destroy handler
                 config.modal = true;
@@ -2335,11 +2470,14 @@ Ext.onReady( function() {
                 var paramString,
                     dimensions = Ext.Array.clean([].concat(view.columns || [], view.rows || [])),
                     ignoreKeys = ['dy', 'longitude', 'latitude'],
-                    dataTypeMap = {
+                    dataTypeMap = {},
                         'aggregated_values': 'aggregate',
                         'individual_cases': 'query'
                     },
                     nameItemsMap;
+
+                dataTypeMap[conf.finals.dataType.aggregated_values] = 'aggregate';
+                dataTypeMap[conf.finals.dataType.individual_cases] = 'query';
 
                 format = format || 'json';
 
@@ -2440,6 +2578,11 @@ Ext.onReady( function() {
                     paramString += '&outputType=' + view.outputType;
                 }
 
+                // completed only
+				if (view.completedOnly) {
+					paramString += '&completedOnly=true';
+				}
+                
                 // sorting
                 if (view.dataType === 'individual_cases' && view.sorting) {
                     if (view.sorting.id && view.sorting.direction) {
@@ -2460,6 +2603,11 @@ Ext.onReady( function() {
                 if (view.collapseDataDimensions) {
                     paramString += '&collapseDataDimensions=true';
                 }
+                
+                // relative period date
+                if (view.relativePeriodDate) {
+                    paramString += '&relativePeriodDate=' + view.relativePeriodDate;
+                }
 
                 return paramString;
             };
@@ -2477,7 +2625,10 @@ Ext.onReady( function() {
 
                 msg += '\n\n' + 'Hint: A good way to reduce the number of items is to use relative periods and level/group organisation unit selection modes.';
 
-                ns.alert(msg, 'warning');
+                ns.alert({
+                    status: 'INFO',
+                    message: msg
+                });
 			};
 
 			// report
@@ -3381,6 +3532,10 @@ Ext.onReady( function() {
 					rows = xResponse.rows,
                     names = xResponse.metaData.names,
                     optionNames = xResponse.metaData.optionNames,
+                    booleanNames = {
+                        '1': ER.i18n.yes,
+                        '0': ER.i18n.no
+                    },
                     pager = xResponse.metaData.pager,
                     count = pager.page * pager.pageSize - pager.pageSize
 					cls = 'pivot',
@@ -3418,8 +3573,7 @@ Ext.onReady( function() {
 					for (var j = 0, str, header, name; j < dimensionHeaders.length; j++) {
 						header = dimensionHeaders[j];
 						str = row[header.index];
-                        //str = names.hasOwnProperty(str) ? names[str] : str;
-                        str = optionNames[header.name + str] || optionNames[str] || names[str] || str;
+                        str = optionNames[header.name + str] || optionNames[str] || booleanNames[str] || names[str] || str;
 						name = web.report.query.format(str);
 
 						//if (header.name === 'ouname' && layout.showHierarchy) {
@@ -3478,15 +3632,18 @@ Ext.onReady( function() {
 		}());
 
 		// alert
-		ns.alert = web.message.alert;
+		webAlert = web.message.alert;
 
-		ns.core.conf = conf;
-		ns.core.api = api;
-		ns.core.support = support;
-		ns.core.service = service;
-		ns.core.web = web;
-
-		return ns;
+		return {
+            init: init,
+            conf: conf,
+            api: api,
+            support: support,
+            service: service,
+            web: web,
+            app: app,
+            webAlert: webAlert
+        };
 	};
 
 	// PLUGIN
@@ -3508,7 +3665,8 @@ Ext.onReady( function() {
 		var isInit = false,
 			requests = [],
 			callbackCount = 0,
-            type = config.plugin && config.crossDomain ? 'jsonp' : 'json',
+            type = 'json',
+            ajax,
 			fn;
 
         init.contextPath = config.url;
@@ -3524,6 +3682,17 @@ Ext.onReady( function() {
 				configs = [];
 			}
 		};
+
+        ajax = function(requestConfig, authConfig) {
+            authConfig = authConfig || config;
+            
+            if (authConfig.crossDomain && Ext.isString(authConfig.username) && Ext.isString(authConfig.password)) {
+                requestConfig.headers = Ext.isObject(authConfig.headers) ? authConfig.headers : {};
+                requestConfig.headers['Authorization'] = 'Basic ' + btoa(authConfig.username + ':' + authConfig.password);
+            }
+
+            Ext.Ajax.request(requestConfig);
+        };
 
         // dhis2
         requests.push({
@@ -3606,12 +3775,7 @@ Ext.onReady( function() {
                                                 url += '&filter=id:eq:' + ids[i];
                                             }
 
-                                            if (type === 'jsonp') {
-                                                Ext.data.JsonP.request(optionSetConfig);
-                                            }
-                                            else {
-                                                Ext.Ajax.request(optionSetConfig);
-                                            }
+                                            ajax(optionSetConfig);
                                         }
                                     };
 
@@ -3634,12 +3798,7 @@ Ext.onReady( function() {
                             };
 
                             // option sets
-                            if (type === 'jsonp') {
-                                Ext.data.JsonP.request(optionSetVersionConfig);
-                            }
-                            else {
-                                Ext.Ajax.request(optionSetVersionConfig);
-                            }
+                            ajax(optionSetVersionConfig);
                         };
 
                         // init
@@ -3664,12 +3823,7 @@ Ext.onReady( function() {
                     }
                 };
 
-                if (type === 'jsonp') {
-                    Ext.data.JsonP.request(userAccountConfig);
-                }
-                else {
-                    Ext.Ajax.request(userAccountConfig);
-                }
+                ajax(userAccountConfig);
             }
         });
 
@@ -3727,12 +3881,7 @@ Ext.onReady( function() {
         //init.legendSets = [];
 
 		for (var i = 0; i < requests.length; i++) {
-            if (type === 'jsonp') {
-                Ext.data.JsonP.request(requests[i]);
-            }
-            else {
-                Ext.Ajax.request(requests[i]);
-            }
+            ajax(requests[i]);
 		}
 	};
 
@@ -3813,27 +3962,36 @@ Ext.onReady( function() {
 			return true;
 		};
 
-        extendInstance = function(ns) {
+        extendInstance = function(ns, appConfig) {
             var init = ns.core.init,
-                conf = ns.core.conf,
 				api = ns.core.api,
+                conf = ns.core.conf,
 				support = ns.core.support,
 				service = ns.core.service,
 				web = ns.core.web,
-                dimConf = conf.finals.dimension,
-                type = ns.plugin && ns.crossDomain ? 'jsonp' : 'json',
+                type = 'json',
                 headerMap = {
-                    json: 'application/json',
-                    jsonp: 'application/javascript'
+                    json: 'application/json'
                 },
                 headers = {
                     'Content-Type': headerMap[type],
                     'Accepts': headerMap[type]
                 },
-                el = Ext.get(config.el);
+                el = Ext.get(init.el),
+                dimConf = conf.finals.dimension;
 
-            // init
 			init.el = config.el;
+
+			// ns
+            ns.plugin = appConfig.plugin;
+            ns.dashboard = appConfig.dashboard;
+            ns.crossDomain = appConfig.crossDomain;
+            ns.skipMask = appConfig.skipMask;
+            ns.skipFade = appConfig.skipFade;
+            ns.el = appConfig.el;
+            ns.username = appConfig.username;
+            ns.password = appConfig.password;
+            ns.ajax = support.connection.ajax;
 
 			// message
 			web.message = web.message || {};
@@ -3943,12 +4101,8 @@ Ext.onReady( function() {
                 config.success = success;
                 config.failure = failure;
 
-                if (type === 'jsonp') {
-                    Ext.data.JsonP.request(config);
-                }
-                else {
-                    Ext.Ajax.request(config);
-                }
+                ns.ajax(config, ns);
+                
 			};
 
 			web.report.getData = function(layout, isUpdateGui) {
@@ -4012,12 +4166,7 @@ Ext.onReady( function() {
                 config.success = success;
                 config.failure = failure;
 
-                if (type === 'jsonp') {
-                    Ext.data.JsonP.request(config);
-                }
-                else {
-                    Ext.Ajax.request(config);
-                }
+                ns.ajax(config, ns);
 			};
 
 			web.report.createReport = function(layout, response, isUpdateGui) {
@@ -4261,17 +4410,6 @@ Ext.onReady( function() {
 				// re-create table
 				web.report.createReport(layout, null, response, false);
 			};
-
-            // instance
-            ns.plugin = init.plugin;
-            ns.dashboard = init.dashboard;
-            ns.crossDomain = init.crossDomain;
-            ns.skipMask = init.skipMask;
-            ns.skipFade = init.skipFade;
-
-            ns.alert = web.message.alert;
-
-			init.el = config.el;
         };
 
 		createViewport = function() {
@@ -4281,30 +4419,35 @@ Ext.onReady( function() {
 		};
 
 		initialize = function() {
-            var el = Ext.get(config.el);
+            var el = Ext.get(config.el),
+                appConfig;
 
 			if (!validateConfig(config)) {
 				return;
 			}
 
+            appConfig = {
+                plugin: true,
+                dashboard: Ext.isBoolean(config.dashboard) ? config.dashboard : false,
+                crossDomain: Ext.isBoolean(config.crossDomain) ? config.crossDomain : true,
+                skipMask: Ext.isBoolean(config.skipMask) ? config.skipMask : false,
+                skipFade: Ext.isBoolean(config.skipFade) ? config.skipFade : false,
+                el: Ext.isString(config.el) ? config.el : null,
+                username: Ext.isString(config.username) ? config.username : null,
+                password: Ext.isString(config.password) ? config.password : null
+            };
+
             // css
             applyCss(config);
 
-            // config
-            init.plugin = true;
-            init.dashboard = Ext.isBoolean(config.dashboard) ? config.dashboard : false;
-            init.crossDomain = Ext.isBoolean(config.crossDomain) ? config.crossDomain : true;
-            init.skipMask = Ext.isBoolean(config.skipMask) ? config.skipMask : false;
-            init.skipFade = Ext.isBoolean(config.skipFade) ? config.skipFade : false;
-
-            // init
-            ER.instances.push(ns);
-            ns.core.init = init;
-			ER.getCore(ns);
-			extendInstance(ns);
+			// core
+			ns.core = ER.getCore(init, appConfig);
+			extendInstance(ns, appConfig);
 
 			ns.app.viewport = createViewport();
 			ns.app.centerRegion = ns.app.viewport.centerRegion;
+
+            ER.instances.push(ns);
 
             if (el) {
                 el.setViewportWidth = function(width) {
