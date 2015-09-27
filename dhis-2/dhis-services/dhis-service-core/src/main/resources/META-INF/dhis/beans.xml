@@ -580,6 +580,15 @@
     <property name="locationManager" ref="locationManager" />
   </bean>
 
+  <bean id="org.hisp.dhis.jsonkeyvalue.JsonKeyValueStore" class="org.hisp.dhis.keyjsonvalue.hibernate.HibernateKeyJsonValueStore" >
+    <property name="sessionFactory" ref="sessionFactory" />
+    <property name="clazz" value="org.hisp.dhis.keyjsonvalue.KeyJsonValue"/>
+  </bean>
+
+  <bean id="org.hisp.dhis.jsonkeyvalue.JsonKeyValueService" class="org.hisp.dhis.keyjsonvalue.DefaultKeyJsonValueService">
+    <property name="KeyJsonValueStore" ref="org.hisp.dhis.jsonkeyvalue.JsonKeyValueStore" />
+  </bean>
+
   <!-- Service definitions -->
 
   <bean id="org.hisp.dhis.fileresource.FileResourceService" class="org.hisp.dhis.fileresource.DefaultFileResourceService">
