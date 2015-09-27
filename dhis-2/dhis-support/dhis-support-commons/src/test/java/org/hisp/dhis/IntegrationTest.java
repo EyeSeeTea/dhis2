@@ -1,4 +1,4 @@
-package org.hisp.dhis.commons.sqlfunc;
+package org.hisp.dhis;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -29,26 +29,8 @@ package org.hisp.dhis.commons.sqlfunc;
  */
 
 /**
- * Function which evaluates numerical values to one if zero or positive, zero
- * if negative or null.
- * 
- * @author Lars Helge Overland
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class OneIfZeroOrPositiveSqlFunction
-    implements SqlFunction
+public interface IntegrationTest
 {
-    public static final String KEY = "oizp";
-    
-    @Override
-    public String evaluate( String... args )
-    {
-        if ( args == null || args.length != 1 )
-        {
-            throw new IllegalArgumentException( "Illegal arguments, expected 1 argument: value" );
-        }
-        
-        String value = args[0];
-        
-        return "coalesce(case when " + value + " >= 0 then 1 else 0 end, 0)";
-    }
 }

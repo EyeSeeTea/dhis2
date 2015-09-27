@@ -1,4 +1,4 @@
-package org.hisp.dhis.system.util;
+package org.hisp.dhis.commons.util;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -61,8 +61,12 @@ public class ExpressionUtilsTest
         assertEquals( 1d, ExpressionUtils.evaluateToDouble( "d2:oizp(0)", null ), DELTA );
         assertEquals( 2d, ExpressionUtils.evaluateToDouble( "d2:oizp(-4) + d2:oizp(0) + d2:oizp(3.0)", null ), DELTA );
         assertEquals( 3d, ExpressionUtils.evaluateToDouble( "d2:daysBetween('2015-03-01','2015-03-04')", null ), DELTA );
+        assertEquals( 1d, ExpressionUtils.evaluateToDouble( "d2:oizp(d2:zing(3))", null ), DELTA );
+        assertEquals( 1d, ExpressionUtils.evaluateToDouble( "d2:zing(d2:oizp(3))", null ), DELTA );
+        assertEquals( 2d, ExpressionUtils.evaluateToDouble( "d2:zpvc(1,3)", null ), DELTA );
+        assertEquals( 3d, ExpressionUtils.evaluateToDouble( "d2:zpvc(1,-1,2,-3,0)", null ), DELTA );
     }
-
+    
     @Test
     public void testEvaluateToDoubleWithVars()
     {
@@ -75,6 +79,24 @@ public class ExpressionUtilsTest
         assertEquals( 4d, ExpressionUtils.evaluateToDouble( "d2:zing(v1)", vars ), DELTA );
         assertEquals( 0d, ExpressionUtils.evaluateToDouble( "d2:zing(v2)", vars ), DELTA );
         assertEquals( 4d, ExpressionUtils.evaluateToDouble( "d2:zing(v1) + d2:zing(v2)", vars ), DELTA );
+    }
+    
+    @Test
+    public void testEvaluateToDoubleZeroPositiveValueCount()
+    {
+        String expression = "d2:zpvc(2,3,-1,0)";
+        
+        assertEquals( 3d, ExpressionUtils.evaluateToDouble( expression, null ), DELTA );
+        
+        expression = "(d2:zing(4) + d2:zing(0) + d2:zing(-1)) / d2:zpvc(2,0,-1)";
+
+        assertEquals( 2d, ExpressionUtils.evaluateToDouble( expression, null ), DELTA );
+
+        expression = 
+            "((d2:zing(4) + d2:zing(0) + d2:zing(-1)) / d2:zpvc(2,0,-1) * 0.25) + " +
+            "((d2:zing(8) + d2:zing(0) + d2:zing(-1)) / d2:zpvc(2,0,-1) * 0.75)";
+
+        assertEquals( 3.5, ExpressionUtils.evaluateToDouble( expression, null ), DELTA );        
     }
 
     @Test
@@ -168,6 +190,8 @@ public class ExpressionUtilsTest
         assertTrue( ExpressionUtils.isValid( "2 + 8", null ) );
         assertTrue( ExpressionUtils.isValid( "3 - v1", vars ) );
         assertTrue( ExpressionUtils.isValid( "d2:zing(1)", null ) );
+        assertTrue( ExpressionUtils.isValid( "d2:oizp(1)", null ) );
+        assertTrue( ExpressionUtils.isValid( "d2:oizp(d2:zing(1))", null ) );
         assertTrue( ExpressionUtils.isValid( "d2:daysBetween('2015-02-01','2015-04-02')", null ) );
         assertTrue( ExpressionUtils.isValid( "(d2:zing(1)+d2:zing(1))*50/1", null ) );
         assertTrue( ExpressionUtils.isValid( "d2:condition('1 > 100',5,100)", null ) );

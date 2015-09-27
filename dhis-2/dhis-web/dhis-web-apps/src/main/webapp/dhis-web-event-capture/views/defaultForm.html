@@ -28,8 +28,7 @@
                            placeholder="{{dhis2CalendarFormat.keyDateFormat}}"
                            d2-date
                            max-date='0'
-                           ng-model="currentEvent.eventDate"
-                           ng-disabled="editingEventInFull"    
+                           ng-model="currentEvent.eventDate"  
                            ng-required="true"                            
                            d2-date-validator
                            name="eventDate" 
@@ -69,7 +68,7 @@
                     </div>
                 </td>                                                            
             </tr>            
-            <tr ng-repeat="eventGridColumn in eventGridColumns" ng-if="eventGridColumn.id !== 'comment' && eventGridColumn.id !== 'uid' && eventGridColumn.id !== 'event_date' && !hiddenFields[eventGridColumn.id]">
+            <tr ng-repeat="eventGridColumn in eventGridColumns" ng-if="eventGridColumn.id !== 'comment' && eventGridColumn.id !== 'uid' && eventGridColumn.id !== 'eventDate' && !hiddenFields[eventGridColumn.id]">
                 <td >
                     {{eventGridColumn.name}}<span ng-if="eventGridColumn.compulsory" class="required">*</span>
                 </td>
@@ -85,7 +84,7 @@
                                            on-select="saveDatavalue()"
                                            style="width:100%;">
                                     <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{'select_or_search' | translate}}">{{$select.selected.name  || $select.selected}}</ui-select-match>
-                                    <ui-select-choices  repeat="option.name as option in optionSets[prStDes[eventGridColumn.id].dataElement.optionSet.id].options | filter: $select.search | limitTo:30">
+                                    <ui-select-choices  repeat="option.name as option in optionSets[prStDes[eventGridColumn.id].dataElement.optionSet.id].options | filter: $select.search | limitTo:maxOptionSize">
                                       <span ng-bind-html="option.name | highlight: $select.search"></span>
                                     </ui-select-choices>
                                 </ui-select>
@@ -269,8 +268,7 @@
                            placeholder="{{dhis2CalendarFormat.keyDateFormat}}"
                            d2-date
                            max-date='0'
-                           ng-model="currentEvent.eventDate"
-                           ng-disabled="editingEventInFull"    
+                           ng-model="currentEvent.eventDate" 
                            ng-required="true"                            
                            d2-date-validator
                            name="eventDate" 
@@ -338,7 +336,7 @@
                     <td >
                         <ng-form name="innerForm">
                             <div ng-if="prStDes[de.dataElement.id].dataElement.optionSetValue">
-                                <span ng-if="!selectedProgram.dataEntryMethod || optionSets[prStDes[de.dataElement.id].dataElement.optionSet.id].options.length > 8">
+                                <span ng-if="!selectedProgram.dataEntryMethod || optionSets[prStDes[de.dataElement.id].dataElement.optionSet.id].options.length >= 7">
                                     <ui-select ng-model="currentEvent[de.dataElement.id]" 
                                                theme="select2" 
                                                ng-required={{prStDes[de.dataElement.id].compulsory}}
@@ -347,30 +345,32 @@
                                                on-select="saveDatavalue()"
                                                style="width:100%;">
                                         <ui-select-match allow-clear="true" class="form-control-ui-select" placeholder="{{'select_or_search' | translate}}">{{$select.selected.name || $select.selected}}</ui-select-match>
-                                        <ui-select-choices  repeat="option.name as option in optionSets[prStDes[de.dataElement.id].dataElement.optionSet.id].options | filter: $select.search | limitTo:30">
+                                        <ui-select-choices  repeat="option.name as option in optionSets[prStDes[de.dataElement.id].dataElement.optionSet.id].options | filter: $select.search | limitTo:maxOptionSize">
                                           <span ng-bind-html="option.name | highlight: $select.search"></span>
                                         </ui-select-choices>
                                     </ui-select>
                                 </span>
-                                <span ng-if="selectedProgram.dataEntryMethod && prStDes[de.dataElement.id].dataElement.optionSet.options.length < 7">                                    
+                                <span ng-if="selectedProgram.dataEntryMethod && optionSets[prStDes[de.dataElement.id].dataElement.optionSet.id].options.length < 7">                                    
                                     <label>
                                         <input type="radio" 
-                                               name="foo"  
+                                               name={{de.dataElement.id}}
                                                input-field-id={{de.dataElement.id}} 
                                                ng-change="saveDatavalue()" 
                                                ng-required={{prStDes[de.dataElement.id].compulsory}}
                                                ng-model="currentEvent[de.dataElement.id]"
                                                value="">{{'no_value' | translate}}<br>
-                                    </label>                                    
-                                    <label ng-repeat="option in optionSets[prStDes[de.dataElement.id].dataElement.optionSet.id].options">
-                                        <input type="radio" 
-                                               name={{de.dataElement.id}}   
-                                               input-field-id={{de.dataElement.id}} 
-                                               ng-change="saveDatavalue()" 
-                                               ng-required={{prStDes[de.dataElement.id].compulsory}}
-                                               ng-model="currentEvent[de.dataElement.id]"
-                                               value={{option.name}}> {{option.name}}<br>                                        
-                                    </label>
+                                    </label><br>
+                                    <span ng-repeat="option in optionSets[prStDes[de.dataElement.id].dataElement.optionSet.id].options">
+                                        <label>
+                                            <input type="radio" 
+                                                   name={{de.dataElement.id}}   
+                                                   input-field-id={{de.dataElement.id}} 
+                                                   ng-change="saveDatavalue()" 
+                                                   ng-required={{prStDes[de.dataElement.id].compulsory}}
+                                                   ng-model="currentEvent[de.dataElement.id]"
+                                                   value={{option.name}}> {{option.name}}<br>                                        
+                                        </label><br>
+                                    </span>                                    
                                 </span>
                             </div>
                             <div ng-if="!prStDes[de.dataElement.id].dataElement.optionSetValue" ng-switch="prStDes[de.dataElement.id].dataElement.valueType">                                

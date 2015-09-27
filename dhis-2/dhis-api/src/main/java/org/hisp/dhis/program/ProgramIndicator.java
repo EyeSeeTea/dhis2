@@ -76,7 +76,8 @@ public class ProgramIndicator
 
     public static final String EXPRESSION_PREFIX_REGEXP = KEY_DATAELEMENT + "|" + KEY_ATTRIBUTE + "|" + KEY_PROGRAM_VARIABLE + "|" + KEY_CONSTANT;
     public static final String EXPRESSION_REGEXP = "(" + EXPRESSION_PREFIX_REGEXP + ")\\{([\\w\\_]+)" + SEPARATOR_ID + "?(\\w*)\\}";
-    public static final String SQL_FUNC_REGEXP = "d2:(.+?)\\(([^\\),]+),?([^,\\)]+)?,?([^,\\)]+)?\\)";
+    public static final String SQL_FUNC_REGEXP = "d2:(.+?)\\((.*?)\\)";
+    public static final String ARGS_SPLIT = ",";
 
     public static final Pattern EXPRESSION_PATTERN = Pattern.compile( EXPRESSION_REGEXP );
     public static final Pattern SQL_FUNC_PATTERN = Pattern.compile( SQL_FUNC_REGEXP );
@@ -101,6 +102,12 @@ public class ProgramIndicator
      */
     private Integer decimals;
 
+    /**
+     * Value to use in expression when data element and attribute values are not
+     * present.
+     */
+    private Integer missingValueReplacement;
+    
     private Boolean displayInForm;
 
     // -------------------------------------------------------------------------
@@ -217,6 +224,19 @@ public class ProgramIndicator
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Integer getMissingValueReplacement()
+    {
+        return missingValueReplacement;
+    }
+
+    public void setMissingValueReplacement( Integer missingValueReplacement )
+    {
+        this.missingValueReplacement = missingValueReplacement;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Boolean getDisplayInForm()
     {
         return displayInForm;
@@ -242,6 +262,7 @@ public class ProgramIndicator
                 expression = programIndicator.getExpression();
                 filter = programIndicator.getFilter();
                 decimals = programIndicator.getDecimals();
+                missingValueReplacement = programIndicator.getMissingValueReplacement();
                 displayInForm = programIndicator.getDisplayInForm();
             }
             else if ( strategy.isMerge() )
@@ -250,6 +271,7 @@ public class ProgramIndicator
                 expression = programIndicator.getExpression() == null ? expression : programIndicator.getExpression();
                 filter = programIndicator.getFilter() == null ? filter : programIndicator.getFilter();
                 decimals = programIndicator.getDecimals() == null ? decimals : programIndicator.getDecimals();
+                missingValueReplacement = programIndicator.getMissingValueReplacement() == null ? missingValueReplacement : programIndicator.getMissingValueReplacement();
                 displayInForm = programIndicator.getDisplayInForm() == null ? displayInForm : programIndicator.getDisplayInForm();
             }
         }

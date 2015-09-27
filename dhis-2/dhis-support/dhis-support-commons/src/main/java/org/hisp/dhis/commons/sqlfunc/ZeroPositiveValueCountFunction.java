@@ -28,27 +28,34 @@ package org.hisp.dhis.commons.sqlfunc;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.commons.util.TextUtils;
+
 /**
- * Function which evaluates numerical values to one if zero or positive, zero
- * if negative or null.
+ * Function which returns the number of zero or positive values among the given
+ * arguments, or null if there are zero occurrences.
  * 
  * @author Lars Helge Overland
  */
-public class OneIfZeroOrPositiveSqlFunction
+public class ZeroPositiveValueCountFunction
     implements SqlFunction
 {
-    public static final String KEY = "oizp";
+    public static final String KEY = "zpvc";
     
     @Override
     public String evaluate( String... args )
     {
-        if ( args == null || args.length != 1 )
+        if ( args == null || args.length == 0 )
         {
-            throw new IllegalArgumentException( "Illegal arguments, expected 1 argument: value" );
+            throw new IllegalArgumentException( "Illegal arguments, expected at least one argument" );
         }
         
-        String value = args[0];
+        String sql = "nullif((";
         
-        return "coalesce(case when " + value + " >= 0 then 1 else 0 end, 0)";
+        for ( String value : args )
+        {
+            sql += "case when " + value + " >= 0 then 1 else 0 end + ";
+        }
+        
+        return TextUtils.removeLast( sql, "+" ).trim() + "),0)";
     }
 }
