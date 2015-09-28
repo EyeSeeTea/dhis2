@@ -35,6 +35,7 @@ import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.mock.MockCurrentUserService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.user.CurrentUserService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,6 +79,8 @@ public class DataApprovalWorkflowServiceTest
     private DataApprovalLevel level2;
     private DataApprovalLevel level3;
 
+    PeriodType periodType;
+
     // -------------------------------------------------------------------------
     // Set up/tear down
     // -------------------------------------------------------------------------
@@ -97,9 +100,11 @@ public class DataApprovalWorkflowServiceTest
         dataApprovalLevelService.addDataApprovalLevel( level2 );
         dataApprovalLevelService.addDataApprovalLevel( level3 );
 
-        workflowA = new DataApprovalWorkflow("A", newHashSet( level1, level2 ) );
-        workflowB = new DataApprovalWorkflow("B", newHashSet( level2, level3 ) );
-        workflowC = new DataApprovalWorkflow("C", newHashSet( level1, level3 ) );
+        periodType = PeriodType.getPeriodTypeByName( "Monthly" );
+
+        workflowA = new DataApprovalWorkflow("A", periodType, newHashSet( level1, level2 ) );
+        workflowB = new DataApprovalWorkflow("B", periodType, newHashSet( level2, level3 ) );
+        workflowC = new DataApprovalWorkflow("C", periodType, newHashSet( level1, level3 ) );
     }
     
     // -------------------------------------------------------------------------
@@ -117,7 +122,7 @@ public class DataApprovalWorkflowServiceTest
 
         assertEquals( "A", workflow.getName() );
 
-        Set<DataApprovalLevel> members = workflow.getMembers();
+        Set<DataApprovalLevel> members = workflow.getLevels();
 
         assertEquals(2, members.size() );
 
@@ -133,7 +138,8 @@ public class DataApprovalWorkflowServiceTest
         DataApprovalWorkflow workflow = dataApprovalWorkflowService.getDataApprovalWorkflow( id );
 
         workflow.setName( "workflowB" );
-        workflow.setMembers( newHashSet( level2, level3 ) );
+        workflow.setPeriodType( periodType );
+        workflow.setLevels( newHashSet( level2, level3 ) );
 
         dataApprovalWorkflowService.updateDataApprovalWorkflow( workflow );
 
@@ -141,7 +147,9 @@ public class DataApprovalWorkflowServiceTest
 
         assertEquals( "workflowB", workflow.getName() );
 
-        Set<DataApprovalLevel> members = workflow.getMembers();
+        assertEquals( "Monthly", workflow.getPeriodType().getName() );
+
+        Set<DataApprovalLevel> members = workflow.getLevels();
 
         assertEquals(2, members.size() );
 
