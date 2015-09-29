@@ -580,13 +580,9 @@
     <property name="locationManager" ref="locationManager" />
   </bean>
 
-  <bean id="org.hisp.dhis.jsonkeyvalue.JsonKeyValueStore" class="org.hisp.dhis.keyjsonvalue.hibernate.HibernateKeyJsonValueStore" >
-    <property name="sessionFactory" ref="sessionFactory" />
-    <property name="clazz" value="org.hisp.dhis.keyjsonvalue.KeyJsonValue"/>
-  </bean>
-
-  <bean id="org.hisp.dhis.jsonkeyvalue.JsonKeyValueService" class="org.hisp.dhis.keyjsonvalue.DefaultKeyJsonValueService">
-    <property name="KeyJsonValueStore" ref="org.hisp.dhis.jsonkeyvalue.JsonKeyValueStore" />
+  <bean id="org.hisp.dhis.keyjsonvalue.KeyJsonValueStore" class="org.hisp.dhis.keyjsonvalue.hibernate.HibernateKeyJsonValueStore">
+      <property name="clazz" value="org.hisp.dhis.keyjsonvalue.KeyJsonValue" />
+      <property name="sessionFactory" ref="sessionFactory" />
   </bean>
 
   <!-- Service definitions -->
@@ -1251,6 +1247,9 @@
     <property name="eventChartStore" ref="org.hisp.dhis.eventchart.EventChartStore" />
   </bean>
 
+  <bean id="org.hisp.dhis.keyjsonvalue.KeyJsonValueService" class="org.hisp.dhis.keyjsonvalue.DefaultKeyJsonValueService">
+      <property name="keyJsonValueStore" ref="org.hisp.dhis.keyjsonvalue.KeyJsonValueStore" />
+  </bean>
   <!-- SMS services -->
 
   <bean id="org.hisp.dhis.sms.command.SMSCommandService" class="org.hisp.dhis.sms.command.DefaultSMSCommandService">
