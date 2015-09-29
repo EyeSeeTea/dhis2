@@ -55,13 +55,7 @@ import com.google.common.collect.ImmutableSet;
 */
 @JacksonXmlRootElement( localName = "dataDimensionItem", namespace = DxfNamespaces.DXF_2_0 )
 public class DataDimensionItem
-{
-    public enum DataDimensionItemType
-    {
-        INDICATOR, AGGREGATE_DATA_ELEMENT, DATA_ELEMENT_OPERAND, DATA_SET, 
-        PROGRAM_INDICATOR, PROGRAM_DATA_ELEMENT, PROGRAM_ATTRIBUTE;
-    }
-    
+{    
     public static final Set<Class<? extends IdentifiableObject>> DATA_DIMENSION_CLASSES = ImmutableSet.<Class<? extends IdentifiableObject>>builder().
         add( Indicator.class ).add( DataElement.class ).add( DataElementOperand.class ).
         add( DataSet.class ).add( ProgramIndicator.class ).add( TrackedEntityAttribute.class ).build();
@@ -162,6 +156,46 @@ public class DataDimensionItem
         else if ( trackedEntityAttribute != null )
         {
             return trackedEntityAttribute;
+        }
+        
+        return null;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public DataDimensionItemType getDataDimensionItemType()
+    {
+        if ( indicator != null )
+        {
+            return DataDimensionItemType.INDICATOR;
+        }
+        else if ( dataElement != null )
+        {
+            if ( DataElementDomain.TRACKER.equals( dataElement.getDomainType() ) )
+            {
+                return DataDimensionItemType.PROGRAM_DATA_ELEMENT;
+            }
+            else
+            {
+                return DataDimensionItemType.AGGREGATE_DATA_ELEMENT;
+            }
+        }
+        else if ( dataElementOperand != null )
+        {
+            return DataDimensionItemType.DATA_ELEMENT_OPERAND;
+        }
+        else if ( dataSet != null )
+        {
+            return DataDimensionItemType.DATA_SET;
+        }
+        else if ( programIndicator != null )
+        {
+            return DataDimensionItemType.PROGRAM_INDICATOR;
+        }
+        else if ( trackedEntityAttribute != null )
+        {
+            return DataDimensionItemType.PROGRAM_ATTRIBUTE;
         }
         
         return null;

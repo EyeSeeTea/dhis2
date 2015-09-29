@@ -1,4 +1,4 @@
-package org.hisp.dhis.commons.sqlfunc;
+package org.hisp.dhis.preheat;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,34 +28,26 @@ package org.hisp.dhis.commons.sqlfunc;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.commons.util.TextUtils;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * Function which returns the number of zero or positive values among the given
- * arguments, or null if there are zero occurrences.
- * 
- * @author Lars Helge Overland
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class ZeroPositiveValueCountFunction
-    implements SqlFunction
+public interface PreheatService
 {
-    public static final String KEY = "zpvc";
-    
-    @Override
-    public String evaluate( String... args )
-    {
-        if ( args == null || args.length == 0 )
-        {
-            throw new IllegalArgumentException( "Illegal arguments, expected at least one argument" );
-        }
-        
-        String sql = "nullif(cast((";
-        
-        for ( String value : args )
-        {
-            sql += "case when " + value + " >= 0 then 1 else 0 end + ";
-        }
-        
-        return TextUtils.removeLast( sql, "+" ).trim() + ") as double precision),0)";
-    }
+    /**
+     * Preheat a set of pre-defined classes. If size == 0, then preheat all metadata classes automatically.
+     *
+     * @param classes Classes to preheat
+     */
+    void preheat( Set<Class> classes );
+
+    /**
+     * Preheat a specified set of UIDs for a set of classes.
+     *
+     * @param classes Class => UID Collection map
+     */
+    void preheat( Map<Class, Collection<String>> classes );
 }

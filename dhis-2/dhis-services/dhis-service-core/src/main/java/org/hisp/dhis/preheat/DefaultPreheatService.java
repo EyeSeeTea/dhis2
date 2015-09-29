@@ -1,4 +1,4 @@
-package org.hisp.dhis.commons.sqlfunc;
+package org.hisp.dhis.preheat;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,34 +28,41 @@ package org.hisp.dhis.commons.sqlfunc;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.commons.util.TextUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * Function which returns the number of zero or positive values among the given
- * arguments, or null if there are zero occurrences.
- * 
- * @author Lars Helge Overland
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class ZeroPositiveValueCountFunction
-    implements SqlFunction
+@Transactional
+public class DefaultPreheatService implements PreheatService
 {
-    public static final String KEY = "zpvc";
-    
+    private static final Log log = LogFactory.getLog( DefaultPreheatService.class );
+
+    @Autowired
+    private IdentifiableObjectManager identifiableObjectManager;
+
     @Override
-    public String evaluate( String... args )
+    public void preheat( Set<Class> classes )
     {
-        if ( args == null || args.length == 0 )
-        {
-            throw new IllegalArgumentException( "Illegal arguments, expected at least one argument" );
-        }
-        
-        String sql = "nullif(cast((";
-        
-        for ( String value : args )
-        {
-            sql += "case when " + value + " >= 0 then 1 else 0 end + ";
-        }
-        
-        return TextUtils.removeLast( sql, "+" ).trim() + ") as double precision),0)";
+        reset();
+    }
+
+    @Override
+    public void preheat( Map<Class, Collection<String>> classes )
+    {
+        reset();
+    }
+
+    private void reset()
+    {
+
     }
 }
