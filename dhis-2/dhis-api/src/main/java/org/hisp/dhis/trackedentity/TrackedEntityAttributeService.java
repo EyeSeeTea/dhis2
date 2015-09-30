@@ -28,6 +28,9 @@ package org.hisp.dhis.trackedentity;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.program.Program;
+
 import java.util.List;
 
 /**
@@ -40,103 +43,96 @@ public interface TrackedEntityAttributeService
 
     /**
      * Adds an {@link TrackedEntityAttribute}
-     * 
+     *
      * @param attribute The to TrackedEntityAttribute add.
-     * 
      * @return A generated unique id of the added {@link TrackedEntityAttribute}
-     *         .
+     * .
      */
     int addTrackedEntityAttribute( TrackedEntityAttribute attribute );
 
     /**
      * Deletes a {@link TrackedEntityAttribute}.
-     * 
+     *
      * @param attribute the TrackedEntityAttribute to delete.
      */
     void deleteTrackedEntityAttribute( TrackedEntityAttribute attribute );
 
     /**
      * Updates an {@link TrackedEntityAttribute}.
-     * 
+     *
      * @param attribute the TrackedEntityAttribute to update.
      */
     void updateTrackedEntityAttribute( TrackedEntityAttribute attribute );
 
     /**
      * Returns a {@link TrackedEntityAttribute}.
-     * 
+     *
      * @param id the id of the TrackedEntityAttribute to return.
-     * 
      * @return the TrackedEntityAttribute with the given id
      */
     TrackedEntityAttribute getTrackedEntityAttribute( int id );
 
     /**
      * Returns the {@link TrackedEntityAttribute} with the given UID.
-     * 
+     *
      * @param uid the UID.
      * @return the TrackedEntityAttribute with the given UID, or null if no
-     *         match.
+     * match.
      */
     TrackedEntityAttribute getTrackedEntityAttribute( String uid );
 
     /**
      * Returns a {@link TrackedEntityAttribute} with a given name.
-     * 
+     *
      * @param name the name of the TrackedEntityAttribute to return.
-     * 
      * @return the TrackedEntityAttribute with the given name, or null if no
-     *         match.
+     * match.
      */
     TrackedEntityAttribute getTrackedEntityAttributeByName( String name );
 
     /**
      * Returns a {@link TrackedEntityAttribute} with a given short name.
-     * 
+     *
      * @param name the short name of the TrackedEntityAttribute to return.
-     * 
      * @return the TrackedEntityAttribute with the given short name, or null if no
-     *         match.
+     * match.
      */
     TrackedEntityAttribute getTrackedEntityAttributeByShortName( String name );
 
     /**
      * Returns a {@link TrackedEntityAttribute} with a given code.
-     * 
-     * @param name the code of the TrackedEntityAttribute to return.
-     * 
-     * @return the TrackedEntityAttribute with the given code, or null if no
-     *         match.
+     *
+     * @param code The code of the TrackedEntityAttribute to return.
+     * @return the TrackedEntityAttribute with the given code, or null if no match.
      */
     TrackedEntityAttribute getTrackedEntityAttributeByCode( String code );
 
     /**
      * Returns all {@link TrackedEntityAttribute}
-     * 
+     *
      * @return a List of all TrackedEntityAttribute, or an empty
-     *         List if there are no TrackedEntityAttributes.
+     * List if there are no TrackedEntityAttributes.
      */
     List<TrackedEntityAttribute> getAllTrackedEntityAttributes();
 
     /**
      * Get attributes without groups
-     * 
+     *
      * @return List of attributes
      */
     List<TrackedEntityAttribute> getOptionalAttributesWithoutGroup();
 
     /**
      * Get attributes without groups
-     * 
+     *
      * @return List of attributes without group
      */
     List<TrackedEntityAttribute> getTrackedEntityAttributesWithoutGroup();
 
     /**
      * Get attributes which are displayed in visit schedule
-     * 
+     *
      * @param displayOnVisitSchedule True/False value
-     * 
      * @return List of attributes
      */
     List<TrackedEntityAttribute> getTrackedEntityAttributesByDisplayOnVisitSchedule(
@@ -144,57 +140,71 @@ public interface TrackedEntityAttributeService
 
     /**
      * Get attributes which are displayed in visit schedule
-     * 
-     * @param displayInListNoProgram True/False value
-     * 
+     *
      * @return List of attributes
      */
     List<TrackedEntityAttribute> getTrackedEntityAttributesWithoutProgram();
 
     /**
      * Get attributes which are displayed in visit schedule
-     * 
-     * @param displayInListNoProgram True/False value
-     * 
+     *
      * @return List of attributes
      */
     List<TrackedEntityAttribute> getTrackedEntityAttributesDisplayInList();
 
     /**
      * Returns {@link TrackedEntityAttribute} list with paging
-     * 
-     * @param name Keyword for searching by name
-     * @param min
-     * @param max
+     *
+     * @param name   Keyword for searching by name
+     * @param offset Offset to start results collection from
+     * @param max    Maximum number of results
      * @return a collection of all TrackedEntityAttribute, or an empty
-     *         collection if there are no TrackedEntityAttributes.
+     * collection if there are no TrackedEntityAttributes.
      */
-    List<TrackedEntityAttribute> getTrackedEntityAttributesBetweenByName( String name, int min, int max );
+    List<TrackedEntityAttribute> getTrackedEntityAttributesBetweenByName( String name, int offset, int max );
 
     /**
      * Returns The number of all TrackedEntityAttribute available
-     * 
      */
     int getTrackedEntityAttributeCount();
 
     /**
      * Returns {@link TrackedEntityAttribute} list with paging
-     * 
-     * @param min
-     * @param max
+     *
+     * @param offset Offset to start results collection from
+     * @param max    Maximum number of results
      * @return a collection of all TrackedEntityAttribute, or an empty
-     *         collection if there are no TrackedEntityAttributes.
+     * collection if there are no TrackedEntityAttributes.
      */
-    List<TrackedEntityAttribute> getTrackedEntityAttributesBetween( int min, int max );
+    List<TrackedEntityAttribute> getTrackedEntityAttributesBetween( int offset, int max );
 
     /**
      * Returns The number of TrackedEntityAttributes with the key searched
-     * 
+     *
      * @param name Keyword for searching by name
-     * 
      * @return A number
-     * 
      */
     int getTrackedEntityAttributeCountByName( String name );
 
+    /**
+     * Validate scope of tracked entity attribute. Will return true if attribute is non-unique.
+     *
+     * @param trackedEntityInstance  TrackedEntityInstance
+     * @param trackedEntityAttribute TrackedEntityAttribute
+     * @param value                  Value
+     * @param organisationUnit       OrganisationUnit - only required if org unit scoped
+     * @param program                Program - only required if program scoped
+     * @return null if valid, a message if not
+     */
+    String validateScope( TrackedEntityInstance trackedEntityInstance, TrackedEntityAttribute trackedEntityAttribute,
+        String value, OrganisationUnit organisationUnit, Program program );
+
+    /**
+     * Validate value against tracked entity attribute value type.
+     *
+     * @param trackedEntityAttribute TrackedEntityAttribute
+     * @param value                  Value
+     * @return null if valid, a message if not
+     */
+    String validateValueType( TrackedEntityAttribute trackedEntityAttribute, String value );
 }

@@ -126,6 +126,7 @@ public class InitTableAlteror
         executeSql( "update dataelement set aggregationtype='SUM' where aggregationtype='sum'" );
         executeSql( "update dataelement set aggregationtype='AVERAGE' where aggregationtype='avg'" );
         executeSql( "update dataelement set aggregationtype='AVERAGE_SUM_ORG_UNIT' where aggregationtype='avg_sum_org_unit'" );
+        executeSql( "update dataelement set aggregationtype='AVERAGE_SUM_ORG_UNIT' where aggregationtype='average'" );
         executeSql( "update dataelement set aggregationtype='COUNT' where aggregationtype='count'" );
         executeSql( "update dataelement set aggregationtype='STDDEV' where aggregationtype='stddev'" );
         executeSql( "update dataelement set aggregationtype='VARIANCE' where aggregationtype='variance'" );
@@ -143,7 +144,9 @@ public class InitTableAlteror
         executeSql( "update dataelement set valuetype='NUMBER' where valuetype='int' and numbertype='number'" );
         executeSql( "update dataelement set valuetype='INTEGER' where valuetype='int' and numbertype='int'" );
         executeSql( "update dataelement set valuetype='INTEGER_POSITIVE' where valuetype='int' and numbertype='posInt'" );
+        executeSql( "update dataelement set valuetype='INTEGER_POSITIVE' where valuetype='int' and numbertype='positiveNumber'" );
         executeSql( "update dataelement set valuetype='INTEGER_NEGATIVE' where valuetype='int' and numbertype='negInt'" );
+        executeSql( "update dataelement set valuetype='INTEGER_NEGATIVE' where valuetype='int' and numbertype='negativeNumber'" );
         executeSql( "update dataelement set valuetype='INTEGER_ZERO_OR_POSITIVE' where valuetype='int' and numbertype='zeroPositiveInt'" );
         executeSql( "update dataelement set valuetype='PERCENTAGE' where valuetype='int' and numbertype='percentage'" );
         executeSql( "update dataelement set valuetype='UNIT_INTERVAL' where valuetype='int' and numbertype='unitInterval'" );

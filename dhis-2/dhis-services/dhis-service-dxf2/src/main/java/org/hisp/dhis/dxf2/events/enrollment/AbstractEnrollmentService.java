@@ -30,12 +30,8 @@ package org.hisp.dhis.dxf2.events.enrollment;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
-import org.hisp.dhis.common.QueryItem;
-import org.hisp.dhis.common.QueryOperator;
-import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.commons.collection.CachingMap;
 import org.hisp.dhis.dbms.DbmsManager;
 import org.hisp.dhis.dxf2.events.event.Note;
@@ -56,10 +52,8 @@ import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStatus;
 import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.system.callable.IdentifiableObjectSearchCallable;
-import org.hisp.dhis.system.util.DateUtils;
-import org.hisp.dhis.system.util.MathUtils;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
-import org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams;
+import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueService;
 import org.hisp.dhis.trackedentitycomment.TrackedEntityComment;
@@ -93,6 +87,9 @@ public abstract class AbstractEnrollmentService
 
     @Autowired
     protected org.hisp.dhis.trackedentity.TrackedEntityInstanceService teiService;
+
+    @Autowired
+    protected TrackedEntityAttributeService trackedEntityAttributeService;
 
     @Autowired
     protected TrackedEntityAttributeValueService trackedEntityAttributeValueService;
@@ -507,45 +504,23 @@ public abstract class AbstractEnrollmentService
         return importConflicts;
     }
 
-    private List<ImportConflict> checkScope( org.hisp.dhis.trackedentity.TrackedEntityInstance tei,
-        TrackedEntityAttribute attribute, String value, OrganisationUnit organisationUnit, Program program )
+    private List<ImportConflict> checkScope( org.hisp.dhis.trackedentity.TrackedEntityInstance trackedEntityInstance,
+        TrackedEntityAttribute trackedEntityAttribute, String value, OrganisationUnit organisationUnit, Program program )
     {
         List<ImportConflict> importConflicts = new ArrayList<>();
 
-        TrackedEntityInstanceQueryParams params = new TrackedEntityInstanceQueryParams();
-
-        QueryItem queryItem = new QueryItem( attribute, QueryOperator.EQ, value, attribute.getValueType(), attribute.getAggregationType(), null );
-        params.addAttribute( queryItem );
-
-        if ( attribute.getOrgunitScope() && attribute.getProgramScope() )
-        {
-            params.setProgram( program );
-            params.addOrganisationUnit( organisationUnit );
-        }
-        else if ( attribute.getOrgunitScope() )
-        {
-            params.addOrganisationUnit( organisationUnit );
-        }
-        else if ( attribute.getProgramScope() )
-        {
-            params.setOrganisationUnitMode( OrganisationUnitSelectionMode.ALL );
-            params.setProgram( program );
-        }
-        else
-        {
-            params.setOrganisationUnitMode( OrganisationUnitSelectionMode.ALL );
-        }
-
-        Grid instances = teiService.getTrackedEntityInstancesGrid( params );
-
-        if ( instances.getHeight() == 0
-            || (instances.getHeight() == 1 && instances.getRow( 0 ).contains( tei.getUid() )) )
+        if ( trackedEntityAttribute == null || value == null )
         {
             return importConflicts;
         }
 
-        importConflicts.add( new ImportConflict( "Attribute.value", "Non-unique attribute value '" + value
-            + "' for attribute " + attribute.getUid() ) );
+        String errorMessage = trackedEntityAttributeService.validateScope( trackedEntityInstance, trackedEntityAttribute,
+            value, organisationUnit, program );
+
+        if ( errorMessage != null )
+        {
+            importConflicts.add( new ImportConflict( "Attribute.value", errorMessage ) );
+        }
 
         return importConflicts;
     }
@@ -614,38 +589,11 @@ public abstract class AbstractEnrollmentService
             return importConflicts;
         }
 
-        if ( attribute.getValue().length() > 255 )
-        {
-            importConflicts.add( new ImportConflict( "Attribute.value", "Value length is greater than 256 chars." ) );
-        }
+        String errorMessage = trackedEntityAttributeService.validateValueType( teAttribute, attribute.getValue() );
 
-        if ( ValueType.NUMBER == teAttribute.getValueType() && !MathUtils.isNumeric( attribute.getValue() ) )
+        if ( errorMessage != null )
         {
-            importConflicts.add( new ImportConflict( "Attribute.value", "Value is not numeric." ) );
-        }
-        else if ( ValueType.BOOLEAN == teAttribute.getValueType() && !MathUtils.isBool( attribute.getValue() ) )
-        {
-            importConflicts.add( new ImportConflict( "Attribute.value", "Value is not boolean." ) );
-        }
-        else if ( ValueType.DATE == teAttribute.getValueType() && !DateUtils.dateIsValid( attribute.getValue() ) )
-        {
-            importConflicts.add( new ImportConflict( "Attribute.value", "Value is not date." ) );
-        }
-        else if ( ValueType.TRUE_ONLY == teAttribute.getValueType() && "true".equals( attribute.getValue() ) )
-        {
-            importConflicts.add( new ImportConflict( "Attribute.value", "Value is not true (true-only value type)." ) );
-        }
-        else if ( ValueType.USERNAME == teAttribute.getValueType() )
-        {
-            if ( userService.getUserCredentialsByUsername( attribute.getValue() ) == null )
-            {
-                importConflicts.add( new ImportConflict( "Attribute.value", "Value is not pointing to a valid username." ) );
-            }
-        }
-        else if ( ValueType.OPTION_SET == teAttribute.getValueType()
-            && !teAttribute.getOptionSet().getOptionCodes().contains( attribute.getValue() ) )
-        {
-            importConflicts.add( new ImportConflict( "Attribute.value", "Value is not pointing to a valid option code." ) );
+            importConflicts.add( new ImportConflict( "Attribute.value", errorMessage ) );
         }
 
         return importConflicts;
