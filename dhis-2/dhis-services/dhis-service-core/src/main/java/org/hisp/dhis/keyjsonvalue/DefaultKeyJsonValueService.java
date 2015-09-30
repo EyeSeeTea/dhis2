@@ -1,5 +1,6 @@
 package org.hisp.dhis.keyjsonvalue;
 
+import org.hisp.dhis.user.User;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -20,6 +21,30 @@ public class DefaultKeyJsonValueService
     }
 
     @Override
+    public List<String> getNamespaces()
+    {
+        return keyJsonValueStore.getNamespaces();
+    }
+
+    @Override
+    public List<String> getKeysInNamespace( String namespace )
+    {
+        return keyJsonValueStore.getKeysInNamespace( namespace );
+    }
+
+    @Override
+    public void deleteNamespace( String namespace )
+    {
+        keyJsonValueStore.deleteKeysInNamespace( namespace );
+    }
+
+    @Override
+    public KeyJsonValue getKeyJsonValue( String namespace, String key )
+    {
+        return keyJsonValueStore.getKeyJsonValue( namespace, key );
+    }
+
+    @Override
     public int addKeyJsonValue( KeyJsonValue keyJsonValue )
     {
         return keyJsonValueStore.save( keyJsonValue );
@@ -28,20 +53,7 @@ public class DefaultKeyJsonValueService
     @Override
     public void updateKeyJsonValue( KeyJsonValue keyJsonValue )
     {
-        keyJsonValueStore.update( keyJsonValue );
-    }
-
-    @Override
-    public KeyJsonValue getKeyJsonValue( String namespace, String key )
-    {
-
-        return keyJsonValueStore.getKeyJsonValue( namespace, key );
-    }
-
-    @Override
-    public List<KeyJsonValue> getKeysInNamespace( String namespace )
-    {
-        return keyJsonValueStore.getKeyJsonValueByNamespace( namespace );
+        keyJsonValueStore.save( keyJsonValue );
     }
 
     @Override

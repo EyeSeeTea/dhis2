@@ -22,7 +22,6 @@ import java.io.IOException;
 @Controller
 @RequestMapping( "/dataStore" )
 public class KeyJsonValueController
-    extends AbstractCrudController<KeyJsonValue>
 {
     @Autowired
     private KeyJsonValueService keyJsonValueService;
@@ -30,8 +29,53 @@ public class KeyJsonValueController
     @Autowired
     private RenderService renderService;
 
+    @RequestMapping( value = "/", method = RequestMethod.GET, produces = "application/json" )
+    public void getNamespaces(
+        HttpServletResponse response
+    )
+        throws IOException
+    {
+        renderService.toJson( response.getOutputStream(), keyJsonValueService.getNamespaces() );
+    }
+
+    @RequestMapping( value = "/{namespace}", method = RequestMethod.GET, produces = "application/json" )
+    public void getKeysInNamespace(
+        @PathVariable String namespace,
+        HttpServletResponse response
+    )
+        throws IOException, WebMessageException
+    {
+
+        if ( !keyJsonValueService.getNamespaces().contains( namespace ) )
+        {
+            throw new WebMessageException(
+                WebMessageUtils.notFound( "The namespace '" + namespace + "' was not found." ) );
+        }
+
+        renderService.toJson( response.getOutputStream(), keyJsonValueService.getKeysInNamespace( namespace ) );
+    }
+
+    @RequestMapping( value = "/{namespace}", method = RequestMethod.DELETE )
+    public void deleteNamespace(
+        @PathVariable String namespace,
+        HttpServletResponse response
+    )
+        throws WebMessageException
+    {
+
+        if ( !keyJsonValueService.getNamespaces().contains( namespace ) )
+        {
+            throw new WebMessageException(
+                WebMessageUtils.notFound( "The namespace '" + namespace + "' was not found." ) );
+        }
+
+        keyJsonValueService.deleteNamespace( namespace );
+
+        throw new WebMessageException( WebMessageUtils.ok( "Namespace '" + namespace + "' deleted." ) );
+    }
+
     @RequestMapping( value = "/{namespace}/{key}", method = RequestMethod.GET, produces = "application/json" )
-    public void getNamespace(
+    public void getKeyJsonValue(
         @PathVariable String namespace,
         @PathVariable String key,
         HttpServletResponse response )
@@ -77,6 +121,7 @@ public class KeyJsonValueController
 
         keyJsonValueService.addKeyJsonValue( keyJsonValue );
 
+        response.setStatus( 201 );
         renderService.toJson( response.getOutputStream(), keyJsonValue );
     }
 

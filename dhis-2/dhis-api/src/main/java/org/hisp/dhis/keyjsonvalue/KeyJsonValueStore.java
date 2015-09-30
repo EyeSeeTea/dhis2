@@ -11,10 +11,12 @@ public interface KeyJsonValueStore
     extends GenericIdentifiableObjectStore<KeyJsonValue>
 {
 
-    public KeyJsonValue getKeyJsonValue( String namespace, String key );
+    List<String> getNamespaces();
 
-    public List<KeyJsonValue> getKeyJsonValueByNamespace( String namespace );
+    List<String> getKeysInNamespace( String namespace );
 
-    public List<KeyJsonValue> getNamespaces();
+    void deleteKeysInNamespace( String namespace );
+
+    KeyJsonValue getKeyJsonValue( String namespace, String key );
 
 }

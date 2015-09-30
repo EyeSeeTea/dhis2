@@ -7,13 +7,17 @@ import java.util.List;
  */
 public interface KeyJsonValueService
 {
-    int addKeyJsonValue( KeyJsonValue keyJsonValue );
+    List<String> getNamespaces();
 
-    void updateKeyJsonValue( KeyJsonValue keyJsonValue );
+    List<String> getKeysInNamespace( String namespace );
+
+    void deleteNamespace( String namespace );
 
     KeyJsonValue getKeyJsonValue( String namespace, String key );
 
-    List<KeyJsonValue> getKeysInNamespace( String namespace );
+    int addKeyJsonValue( KeyJsonValue keyJsonValue );
+
+    void updateKeyJsonValue( KeyJsonValue keyJsonValue );
 
     void deleteKeyJsonValue( KeyJsonValue keyJsonValue );
 }

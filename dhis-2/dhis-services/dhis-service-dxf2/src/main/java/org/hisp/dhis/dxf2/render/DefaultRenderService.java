@@ -199,8 +199,7 @@ public class DefaultRenderService
             return false;
         }
 
-        System.out.println( "Json is valid" );
-
         return true;
     }
+
 }
