@@ -1,4 +1,4 @@
-package org.hisp.dhis.webapi.utils;
+package org.hisp.dhis.dxf2.utils;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -29,11 +29,12 @@ package org.hisp.dhis.webapi.utils;
  */
 
 import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.common.IllegalQueryException;
+import org.hisp.dhis.commons.util.TextUtils;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
-import org.hisp.dhis.dxf2.webmessage.WebMessageException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashSet;
@@ -55,29 +56,56 @@ public class InputUtils
      * code along with a textual message will be set on the response in case of
      * invalid input.
      *
-     * @param cc       the category combo identifier.
-     * @param cp       the category and option query string.
+     * @param cc the category combo identifier.
+     * @param cp the category and option query string.
      * @return the attribute option combo identified from the given input, or null
      * if the input was invalid.
      */
-    public DataElementCategoryOptionCombo getAttributeOptionCombo( String cc, String cp ) throws WebMessageException
+    public DataElementCategoryOptionCombo getAttributeOptionCombo( String cc, String cp )
     {
-        Set<String> opts = ContextUtils.getQueryParamValues( cp );
+        Set<String> opts = TextUtils.splitToArray( cp, TextUtils.SEMICOLON );
 
         // ---------------------------------------------------------------------
         // Attribute category combo validation
         // ---------------------------------------------------------------------
 
-        if ( (cc == null && opts != null || (cc != null && opts == null)) )
-        {
-            throw new WebMessageException( WebMessageUtils.conflict( "Both or none of category combination and category options must be present" ) );
+        if ( ( cc == null && opts != null || ( cc != null && opts == null ) ) )
+        {            
+            throw new IllegalQueryException( "Both or none of category combination and category options must be present" ) ;
         }
 
         DataElementCategoryCombo categoryCombo = null;
 
-        if ( cc != null && (categoryCombo = idObjectManager.get( DataElementCategoryCombo.class, cc )) == null )
+        if ( cc != null && ( categoryCombo = idObjectManager.get( DataElementCategoryCombo.class, cc ) ) == null )
         {
-            throw new WebMessageException( WebMessageUtils.conflict( "Illegal category combo identifier: " + cc ) );
+            throw new IllegalQueryException( "Illegal category combo identifier: " + cc );
+        }
+        
+        if ( categoryCombo == null && opts == null )
+        {
+            categoryCombo = categoryService.getDefaultDataElementCategoryCombo();
+        }
+
+        return getAttributeOptionCombo( categoryCombo, cp );
+    }
+    
+    /**
+     * Validates and retrieves the attribute option combo. 409 conflict as status
+     * code along with a textual message will be set on the response in case of
+     * invalid input.
+     *
+     * @param categoryCombo the category combo.
+     * @param cp the category option query string.
+     * @return the attribute option combo identified from the given input, or null
+     * if the input was invalid.
+     */
+    public DataElementCategoryOptionCombo getAttributeOptionCombo( DataElementCategoryCombo categoryCombo, String cp )
+    {
+        Set<String> opts = TextUtils.splitToArray( cp, TextUtils.SEMICOLON );
+
+        if ( categoryCombo == null )
+        {            
+            throw new IllegalQueryException( "Illegal category combo");
         }
 
         // ---------------------------------------------------------------------
@@ -96,7 +124,7 @@ public class InputUtils
 
                 if ( categoryOption == null )
                 {
-                    throw new WebMessageException( WebMessageUtils.conflict( "Illegal category option identifier: " + uid ) );
+                    throw new IllegalQueryException( "Illegal category option identifier: " + uid ) ;
                 }
 
                 categoryOptions.add( categoryOption );
@@ -106,7 +134,7 @@ public class InputUtils
 
             if ( attributeOptionCombo == null )
             {
-                throw new WebMessageException( WebMessageUtils.conflict( "Attribute option combo does not exist for given category combo and category options" ) );
+                throw new IllegalQueryException( "Attribute option combo does not exist for given category combo and category options" );
             }
         }
 
@@ -117,9 +145,9 @@ public class InputUtils
 
         if ( attributeOptionCombo == null )
         {
-            throw new WebMessageException( WebMessageUtils.conflict( "Default attribute option combo does not exist" ) );
+            throw new IllegalQueryException( "Default attribute option combo does not exist" );
         }
 
         return attributeOptionCombo;
-    }
+    }    
 }

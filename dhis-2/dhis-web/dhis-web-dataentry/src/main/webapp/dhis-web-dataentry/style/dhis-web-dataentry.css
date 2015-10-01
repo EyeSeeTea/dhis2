@@ -316,7 +316,6 @@
 
 .upload-fileinfo-size
 {
-    /*width: 80px;*/
     float: right;
     text-align: right;
     padding-left: 3px;
@@ -357,4 +356,23 @@
 
 .ui-icon.icon-large {
     margin-top: -0.75em;
+}
+
+#fileDeleteConfirmationDialog
+{
+    display: none;
+    font-weight: bold;
+    vertical-align: middle;
+}
+
+#fileDeleteConfirmationDialog .fa
+{
+    margin-right: 5px;
+}
+
+.confirm-dialog-content
+{
+    display: inline-block;
+    position: absolute;
+    top: 16px;
 }
