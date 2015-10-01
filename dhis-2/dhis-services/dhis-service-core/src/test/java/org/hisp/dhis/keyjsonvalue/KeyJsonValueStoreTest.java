@@ -78,4 +78,30 @@ public class KeyJsonValueStoreTest extends DhisSpringTest
 
         assertEquals( keyJsonValueStore.getKeyJsonValue( "A", "1" ), keyJsonValueA );
     }
+
+    @Test
+    public void testGetKeyJsonValuesByNamespace()
+    {
+        KeyJsonValue keyJsonValueA = new KeyJsonValue();
+        keyJsonValueA.setNamespace( "A" );
+        keyJsonValueA.setKey( "1" );
+        keyJsonValueStore.save( keyJsonValueA );
+
+        KeyJsonValue keyJsonValueB = new KeyJsonValue();
+        keyJsonValueB.setNamespace( "A" );
+        keyJsonValueB.setKey( "2" );
+        keyJsonValueStore.save( keyJsonValueB );
+
+        KeyJsonValue keyJsonValueC = new KeyJsonValue();
+        keyJsonValueC.setNamespace( "A" );
+        keyJsonValueC.setKey( "3" );
+        keyJsonValueStore.save( keyJsonValueC );
+
+
+        List<KeyJsonValue> list = keyJsonValueStore.getKeyJsonValueByNamespace( "A" );
+
+        assertTrue(list.contains( keyJsonValueA ));
+        assertTrue(list.contains( keyJsonValueB ));
+        assertTrue(list.contains( keyJsonValueC ));
+    }
 }
