@@ -57,6 +57,14 @@ public class KeyJsonValueController
     @Autowired
     private RenderService renderService;
 
+    /**
+     * Returns a json-array of strings representing the different namespaces used.
+     * If no namespace exists, an empty array is returned.
+     *
+     * @param response
+     * @return the list of namespaces
+     * @throws IOException
+     */
     @RequestMapping( value = "", method = RequestMethod.GET, produces = "application/json" )
     public
     @ResponseBody
@@ -66,6 +74,15 @@ public class KeyJsonValueController
         return keyJsonValueService.getNamespaces();
     }
 
+    /**
+     * Returns a list of strings representing keys in the given namespace.
+     *
+     * @param namespace the namespace requested
+     * @param response
+     * @return a list of keys
+     * @throws IOException
+     * @throws WebMessageException
+     */
     @RequestMapping( value = "/{namespace}", method = RequestMethod.GET, produces = "application/json" )
     public
     @ResponseBody
@@ -83,6 +100,14 @@ public class KeyJsonValueController
         return keyJsonValueService.getKeysInNamespace( namespace );
     }
 
+    /**
+     * Deletes all keys with the given namespace.
+     *
+     * @param namespace the namespace to be deleted.
+     * @param response
+     * @return
+     * @throws WebMessageException
+     */
     @RequestMapping( value = "/{namespace}", method = RequestMethod.DELETE )
     public
     @ResponseBody
@@ -103,6 +128,16 @@ public class KeyJsonValueController
         return WebMessageUtils.ok( "Namespace '" + namespace + "' deleted." );
     }
 
+    /**
+     * Retrieves the KeyJsonValue represented by the given key from the given namespace.
+     *
+     * @param namespace where the key is associated
+     * @param key representing the json stored
+     * @param response
+     * @return a KeyJsonValue object
+     * @throws IOException
+     * @throws WebMessageException
+     */
     @RequestMapping( value = "/{namespace}/{key}", method = RequestMethod.GET, produces = "application/json" )
     public
     @ResponseBody
@@ -123,6 +158,17 @@ public class KeyJsonValueController
         return keyJsonValue;
     }
 
+    /**
+     * Creates a new KeyJsonValue Object on the given namespace with the key and value supplied.
+     *
+     * @param namespace where the key is associated
+     * @param key representing the value
+     * @param body the value to be stored (json format)
+     * @param response
+     * @return the object created
+     * @throws IOException
+     * @throws WebMessageException
+     */
     @RequestMapping( value = "/{namespace}/{key}", method = RequestMethod.POST, produces = "application/json", consumes = "application/json" )
     public
     @ResponseBody
