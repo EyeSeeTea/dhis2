@@ -28,27 +28,24 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dxf2.render.RenderService;
-import org.hisp.dhis.dxf2.webmessage.WebMessageException;
-import org.hisp.dhis.keyjsonvalue.KeyJsonValue;
-import org.hisp.dhis.keyjsonvalue.KeyJsonValueService;
-import org.hisp.dhis.user.CurrentUserService;
-import org.hisp.dhis.webapi.utils.WebMessageUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Set;
-import java.util.function.Consumer;
+
+import org.hisp.dhis.dxf2.render.RenderService;
+import org.hisp.dhis.dxf2.webmessage.WebMessage;
+import org.hisp.dhis.dxf2.webmessage.WebMessageException;
+import org.hisp.dhis.keyjsonvalue.KeyJsonValue;
+import org.hisp.dhis.keyjsonvalue.KeyJsonValueService;
+import org.hisp.dhis.webapi.utils.WebMessageUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
 
 /**
- * Created by Stian Sandvold on 27.09.2015.
+ * @author Stian Sandvold
  */
 @Controller
 @RequestMapping( "/dataStore" )
@@ -60,47 +57,40 @@ public class KeyJsonValueController
     @Autowired
     private RenderService renderService;
 
-    @Autowired
-    private CurrentUserService currentUserService;
-
     @RequestMapping( value = "", method = RequestMethod.GET, produces = "application/json" )
-    public void getNamespaces(
-        HttpServletResponse response
-    )
+    public
+    @ResponseBody
+    List<String> getNamespaces( HttpServletResponse response )
         throws IOException
     {
-        renderService.toJson( response.getOutputStream(), keyJsonValueService.getNamespaces() );
+        return keyJsonValueService.getNamespaces();
     }
 
     @RequestMapping( value = "/{namespace}", method = RequestMethod.GET, produces = "application/json" )
-    public void getKeysInNamespace(
+    public
+    @ResponseBody
+    List<String> getKeysInNamespace(
         @PathVariable String namespace,
-        HttpServletResponse response
-    )
+        HttpServletResponse response )
         throws IOException, WebMessageException
     {
-
         if ( !keyJsonValueService.getNamespaces().contains( namespace ) )
         {
             throw new WebMessageException(
                 WebMessageUtils.notFound( "The namespace '" + namespace + "' was not found." ) );
         }
 
-        renderService.toJson( response.getOutputStream(), keyJsonValueService.getKeysInNamespace( namespace ) );
+        return keyJsonValueService.getKeysInNamespace( namespace );
     }
 
     @RequestMapping( value = "/{namespace}", method = RequestMethod.DELETE )
-    public void deleteNamespace(
+    public
+    @ResponseBody
+    WebMessage deleteNamespace(
         @PathVariable String namespace,
-        HttpServletResponse response
-    )
+        HttpServletResponse response )
         throws WebMessageException
     {
-        if ( !isAccessible( namespace ) )
-        {
-            throw new WebMessageException(
-                WebMessageUtils.forbidden( "You don't have access to the '" + namespace + "' namespace." ) );
-        }
 
         if ( !keyJsonValueService.getNamespaces().contains( namespace ) )
         {
@@ -110,22 +100,18 @@ public class KeyJsonValueController
 
         keyJsonValueService.deleteNamespace( namespace );
 
-        throw new WebMessageException( WebMessageUtils.ok( "Namespace '" + namespace + "' deleted." ) );
+        return WebMessageUtils.ok( "Namespace '" + namespace + "' deleted." );
     }
 
     @RequestMapping( value = "/{namespace}/{key}", method = RequestMethod.GET, produces = "application/json" )
-    public void getKeyJsonValue(
+    public
+    @ResponseBody
+    KeyJsonValue getKeyJsonValue(
         @PathVariable String namespace,
         @PathVariable String key,
         HttpServletResponse response )
         throws IOException, WebMessageException
     {
-        if ( !isAccessible( namespace ) )
-        {
-            throw new WebMessageException(
-                WebMessageUtils.forbidden( "You don't have access to the '" + namespace + "' namespace." ) );
-        }
-
         KeyJsonValue keyJsonValue = keyJsonValueService.getKeyJsonValue( namespace, key );
 
         if ( keyJsonValue == null )
@@ -134,31 +120,25 @@ public class KeyJsonValueController
                 .notFound( "The key '" + key + "' was not found in the namespace '" + namespace + "'." ) );
         }
 
-        renderService.toJson( response.getOutputStream(), keyJsonValue );
+        return keyJsonValue;
     }
 
     @RequestMapping( value = "/{namespace}/{key}", method = RequestMethod.POST, produces = "application/json", consumes = "application/json" )
-    public void addKey(
+    public
+    @ResponseBody
+    KeyJsonValue addKey(
         @PathVariable String namespace,
         @PathVariable String key,
         @RequestBody String body,
         HttpServletResponse response )
         throws IOException, WebMessageException
     {
-        if ( !isAccessible( namespace ) )
-        {
-            throw new WebMessageException(
-                WebMessageUtils.forbidden( "You don't have access to the '" + namespace + "' namespace." ) );
-        }
-
-        // Check uniqueness of the key
         if ( keyJsonValueService.getKeyJsonValue( namespace, key ) != null )
         {
             throw new WebMessageException( WebMessageUtils
                 .conflict( "The key '" + key + "' already exists on the namespace '" + namespace + "'." ) );
         }
 
-        // Check json validity
         if ( !renderService.isValidJson( body ) )
         {
             throw new WebMessageException( WebMessageUtils.badRequest( "The data is not valid JSON." ) );
@@ -172,26 +152,21 @@ public class KeyJsonValueController
 
         keyJsonValueService.addKeyJsonValue( keyJsonValue );
 
-        response.setStatus( 201 );
-        renderService.toJson( response.getOutputStream(), keyJsonValue );
+        response.setStatus( HttpServletResponse.SC_CREATED );
+        return keyJsonValue;
     }
 
     @RequestMapping( value = "/{namespace}/{key}", method = RequestMethod.PUT, produces = "application/json", consumes = "application/json" )
-    public void updateKeyJsonValue(
+    public
+    @ResponseBody
+    KeyJsonValue updateKeyJsonValue(
         @PathVariable String namespace,
         @PathVariable String key,
         @RequestBody String body,
         HttpServletRequest request,
-        HttpServletResponse response
-    )
+        HttpServletResponse response )
         throws WebMessageException, IOException
     {
-        if ( !isAccessible( namespace ) )
-        {
-            throw new WebMessageException(
-                WebMessageUtils.forbidden( "You don't have access to the '" + namespace + "' namespace." ) );
-        }
-
         KeyJsonValue keyJsonValue = keyJsonValueService.getKeyJsonValue( namespace, key );
 
         if ( keyJsonValue == null )
@@ -200,7 +175,6 @@ public class KeyJsonValueController
                 .notFound( "The key '" + key + "' was not found in the namespace '" + namespace + "'." ) );
         }
 
-        // Check json validity
         if ( !renderService.isValidJson( body ) )
         {
             throw new WebMessageException( WebMessageUtils.badRequest( "The data is not valid JSON." ) );
@@ -210,23 +184,18 @@ public class KeyJsonValueController
 
         keyJsonValueService.updateKeyJsonValue( keyJsonValue );
 
-        renderService.toJson( response.getOutputStream(), keyJsonValue );
+        return keyJsonValue;
     }
 
     @RequestMapping( value = "/{namespace}/{key}", method = RequestMethod.DELETE, produces = "application/json" )
-    public void deleteKeyJsonValue(
+    public
+    @ResponseBody
+    WebMessage deleteKeyJsonValue(
         @PathVariable String namespace,
         @PathVariable String key,
-        HttpServletResponse response
-    )
+        HttpServletResponse response )
         throws WebMessageException
     {
-        if ( !isAccessible( namespace ) )
-        {
-            throw new WebMessageException(
-                WebMessageUtils.forbidden( "You don't have access to the '" + namespace + "' namespace." ) );
-        }
-
         KeyJsonValue keyJsonValue = keyJsonValueService.getKeyJsonValue( namespace, key );
 
         if ( keyJsonValue == null )
@@ -237,14 +206,6 @@ public class KeyJsonValueController
 
         keyJsonValueService.deleteKeyJsonValue( keyJsonValue );
 
-        throw new WebMessageException(
-            WebMessageUtils.ok( "Key '" + key + "' deleted from namespace '" + namespace + "'." ) );
-    }
-
-    private boolean isAccessible( String namespace )
-    {
-        currentUserService.getCurrentUser().getUserCredentials().getAllAuthorities().forEach(
-            s -> System.out.println( s ) );
-        return currentUserService.getCurrentUser().getUserCredentials().isAuthorized( "See " + namespace );
+        return WebMessageUtils.ok( "Key '" + key + "' deleted from namespace '" + namespace + "'." );
     }
 }
