@@ -32,6 +32,7 @@ import org.hisp.dhis.dxf2.render.RenderService;
 import org.hisp.dhis.dxf2.webmessage.WebMessageException;
 import org.hisp.dhis.keyjsonvalue.KeyJsonValue;
 import org.hisp.dhis.keyjsonvalue.KeyJsonValueService;
+import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.webapi.utils.WebMessageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -43,6 +44,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * Created by Stian Sandvold on 27.09.2015.
@@ -56,6 +59,9 @@ public class KeyJsonValueController
 
     @Autowired
     private RenderService renderService;
+
+    @Autowired
+    private CurrentUserService currentUserService;
 
     @RequestMapping( value = "", method = RequestMethod.GET, produces = "application/json" )
     public void getNamespaces(
@@ -90,6 +96,11 @@ public class KeyJsonValueController
     )
         throws WebMessageException
     {
+        if ( !isAccessible( namespace ) )
+        {
+            throw new WebMessageException(
+                WebMessageUtils.forbidden( "You don't have access to the '" + namespace + "' namespace." ) );
+        }
 
         if ( !keyJsonValueService.getNamespaces().contains( namespace ) )
         {
@@ -109,6 +120,12 @@ public class KeyJsonValueController
         HttpServletResponse response )
         throws IOException, WebMessageException
     {
+        if ( !isAccessible( namespace ) )
+        {
+            throw new WebMessageException(
+                WebMessageUtils.forbidden( "You don't have access to the '" + namespace + "' namespace." ) );
+        }
+
         KeyJsonValue keyJsonValue = keyJsonValueService.getKeyJsonValue( namespace, key );
 
         if ( keyJsonValue == null )
@@ -128,6 +145,12 @@ public class KeyJsonValueController
         HttpServletResponse response )
         throws IOException, WebMessageException
     {
+        if ( !isAccessible( namespace ) )
+        {
+            throw new WebMessageException(
+                WebMessageUtils.forbidden( "You don't have access to the '" + namespace + "' namespace." ) );
+        }
+
         // Check uniqueness of the key
         if ( keyJsonValueService.getKeyJsonValue( namespace, key ) != null )
         {
@@ -163,6 +186,12 @@ public class KeyJsonValueController
     )
         throws WebMessageException, IOException
     {
+        if ( !isAccessible( namespace ) )
+        {
+            throw new WebMessageException(
+                WebMessageUtils.forbidden( "You don't have access to the '" + namespace + "' namespace." ) );
+        }
+
         KeyJsonValue keyJsonValue = keyJsonValueService.getKeyJsonValue( namespace, key );
 
         if ( keyJsonValue == null )
@@ -192,6 +221,12 @@ public class KeyJsonValueController
     )
         throws WebMessageException
     {
+        if ( !isAccessible( namespace ) )
+        {
+            throw new WebMessageException(
+                WebMessageUtils.forbidden( "You don't have access to the '" + namespace + "' namespace." ) );
+        }
+
         KeyJsonValue keyJsonValue = keyJsonValueService.getKeyJsonValue( namespace, key );
 
         if ( keyJsonValue == null )
@@ -204,5 +239,12 @@ public class KeyJsonValueController
 
         throw new WebMessageException(
             WebMessageUtils.ok( "Key '" + key + "' deleted from namespace '" + namespace + "'." ) );
+    }
+
+    private boolean isAccessible( String namespace )
+    {
+        currentUserService.getCurrentUser().getUserCredentials().getAllAuthorities().forEach(
+            s -> System.out.println( s ) );
+        return currentUserService.getCurrentUser().getUserCredentials().isAuthorized( "See " + namespace );
     }
 }
