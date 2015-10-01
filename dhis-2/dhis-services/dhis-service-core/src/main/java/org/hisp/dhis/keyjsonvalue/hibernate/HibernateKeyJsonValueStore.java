@@ -44,7 +44,7 @@ public class HibernateKeyJsonValueStore
     implements KeyJsonValueStore
 {
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<String> getNamespaces()
     {
         String hql = "SELECT distinct namespace FROM KeyJsonValue";
@@ -52,7 +52,7 @@ public class HibernateKeyJsonValueStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public List<String> getKeysInNamespace( String namespace )
     {
         String hql = "SELECT key FROM KeyJsonValue WHERE namespace = :namespace";
@@ -60,17 +60,17 @@ public class HibernateKeyJsonValueStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public void deleteKeysInNamespace( String namespace )
+    @SuppressWarnings( "unchecked" )
+    public List<KeyJsonValue> getKeyJsonValueByNamespace( String namespace )
     {
-        getCriteria( Restrictions.eq( "namespace", namespace ) ).list().forEach( o -> delete( (KeyJsonValue) o ) );
+        return getCriteria( Restrictions.eq( "namespace", namespace ) ).list();
     }
 
     @Override
     public KeyJsonValue getKeyJsonValue( String namespace, String key )
     {
-        return (KeyJsonValue) getCriteria( 
-            Restrictions.eq( "namespace", namespace ), 
+        return (KeyJsonValue) getCriteria(
+            Restrictions.eq( "namespace", namespace ),
             Restrictions.eq( "key", key ) ).uniqueResult();
     }
 }
