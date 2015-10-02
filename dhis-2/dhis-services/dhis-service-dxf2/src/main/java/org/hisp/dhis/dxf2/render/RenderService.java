@@ -56,4 +56,6 @@ public interface RenderService
     <T> T fromXml( InputStream input, Class<T> klass ) throws IOException;
 
     <T> T fromXml( String input, Class<T> klass ) throws IOException;
+
+    boolean isValidJson(String json) throws IOException;
 }

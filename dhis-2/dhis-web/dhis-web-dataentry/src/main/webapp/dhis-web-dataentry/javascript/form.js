@@ -492,7 +492,7 @@ dhis2.de.addEventListeners = function()
         var id = $( this ).attr( 'id' );
 
         // If entry field is a date picker, remove old target field, and change id
-        if ( /-dp$/.test( id ) )
+        if( /-dp$/.test( id ) )
         {
             var dpTargetId = id.substring( 0, id.length - 3 );
             $( '#' + dpTargetId ).remove();
@@ -546,17 +546,17 @@ dhis2.de.addEventListeners = function()
                     saveVal( dataElementId, optionComboId, id, fakeEvent.target.id );
                 },
                 onClose: function() {
-                    valueBlur(fakeEvent);
+                    valueBlur( fakeEvent );
                 },
                 onShow: function() {
-                    valueFocus(fakeEvent);
+                    valueFocus( fakeEvent );
                 },
                 minDate: null,
                 maxDate: null
             } );
-        }		
+        }
     } );
-    
+
     $( '.entryselect' ).each( function( i )
     {
         var id = $( this ).attr( 'id' );
@@ -611,7 +611,7 @@ dhis2.de.addEventListeners = function()
 
         $( this ).focus( valueFocus );
         $( this ).blur( valueBlur );
-        
+
         $( this ).change( function()
         {
             saveVal( dataElementId, optionComboId, id );
@@ -627,16 +627,21 @@ dhis2.de.addEventListeners = function()
         var optionComboId = split.optionComboId;
 
         $( this ).unbind( 'click' );
-        
+
         $( this ).attr( "src", "../images/comment.png" );
         $( this ).attr( "title", i18n_view_comment );
-        
+
         $( this ).css( "cursor", "pointer" );
-        
-        $( this ).click ( function() 
+
+        $( this ).click( function()
         {
-        	viewHist( dataElementId, optionComboId );
+            viewHist( dataElementId, optionComboId );
         } );
+    } );
+
+    $( '.entryfileresource-container' ).each( function()
+    {
+        $( this ).fileEntryField();
     } );
 }
 
@@ -1531,6 +1536,15 @@ function loadDataValues()
     displayEntryFormCompleted();
 }
 
+function clearFileEntryFields() {
+    var $container = $( '.entryfileresource-container' );
+    $container.find( '.upload-fileinfo-name' ).text( '' );
+    $container.find( '.upload-fileinfo-size' ).text( '' );
+
+    $container.find( '.entryfileresource' ).css( 'background-color', dhis2.de.cst.colorWhite );
+    $container.find( '.entryfileresource' ).data( 'value', '' );
+}
+
 function getAndInsertDataValues()
 {
     var periodId = $( '#selectedPeriodId').val();
@@ -1548,6 +1562,9 @@ function getAndInsertDataValues()
     $( '.indicator' ).css( 'background-color', dhis2.de.cst.colorWhite ).css( 'border', '1px solid ' + dhis2.de.cst.colorBorder );
     $( '.entrytrueonly' ).css( 'background-color', dhis2.de.cst.colorWhite );
     $( '.entryoptionset' ).css( 'background-color', dhis2.de.cst.colorWhite );
+
+    clearFileEntryFields();
+
 
     $( '[name="min"]' ).html( '' );
     $( '[name="max"]' ).html( '' );
@@ -1657,6 +1674,25 @@ function insertDataValues( json )
             else if ( $( fieldId ).attr( 'name' ) == 'entryoptionset' )
             {
             	dhis2.de.setOptionNameInField( fieldId, value );            	
+            }
+            else if ( $( fieldId ).attr( 'class' ) == 'entryfileresource' )
+            {
+                // TODO Consider pre-fetching with dataset
+                $( fieldId ).data( 'value', value.val );
+
+                $.ajax( {
+                    url: '../api/fileResources/' + value.val,
+                    success: function( data ) {
+                        var name = data.name, size = '(' + filesize( data.contentLength ) + ')';
+
+                        $( fieldId ).find( '.upload-fileinfo-name' ).text( name );
+                        $( fieldId ).find( '.upload-fileinfo-size' ).text( size );
+                    },
+                    error: function( data ) {
+                        $( fieldId ).find( '.upload-fileinfo-name' ).text( 'Failed loading file meta-data' );
+                        $( fieldId ).find( '.upload-fileinfo-size' ).text( + '' );
+                    }
+                } );
             }
             else 
             {

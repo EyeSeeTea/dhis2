@@ -1,6 +1,6 @@
 <div class="container-1-1">
     <!-- dashboard top menu begins-->
-    <div class="col-sm-12 vertical-spacing  hideInPrint">
+    <div class="col-sm-12 small-vertical-spacing  hideInPrint">
         
         <!-- dashboard buttons begin -->
         <button type="button" class="btn btn-default" ng-click="back()">{{'back'| translate}}</button>
@@ -20,6 +20,13 @@
         
         <!-- dashboard setting begins -->
         <div class="pull-right">
+            <button type="button" 
+                    title="{{stickyDisabled ? stickLabel : unstickLabel}}" 
+                    class="btn btn-default" 
+                    ng-class="{true: 'stick', false: 'unstick'} [!stickyDisabled]" 
+                    ng-click="stickUnstick()">                    
+                <i class="fa fa-thumb-tack"></i>
+            </button>
             <div class="btn-group trim" dropdown is-open="status.isopen">
                 <button type="button" title="{{settingsLabel}}" class="btn btn-default dropdown-toggle" dropdown-toggle>                    
                     <i class="fa fa-cog"></i>
@@ -54,7 +61,7 @@
             <!-- dashboard bigger widgets end -->
 
             <!-- dashboard smaller widgets begin -->
-            <div ng-class="widgetSize.smaller">
+            <div ng-class="widgetSize.smaller" sticky disabled-sticky="stickyDisabled">
                 <div id="smallerWidget" 
                     d2-sortable 
                     bigger-widgets={{ dashboardWidgets  | filter: {parent: 'biggerWidget'} }} 

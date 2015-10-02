@@ -29,13 +29,16 @@ package org.hisp.dhis.resourcetable.jdbc;
  */
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.commons.util.TextUtils;
 import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementGroupSet;
+import org.hisp.dhis.dbms.DbmsManager;
 import org.hisp.dhis.indicator.IndicatorGroupSet;
 import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
@@ -47,7 +50,7 @@ import org.hisp.dhis.resourcetable.statement.CreateCategoryTableStatement;
 import org.hisp.dhis.resourcetable.statement.CreateDataElementGroupSetTableStatement;
 import org.hisp.dhis.resourcetable.statement.CreateIndicatorGroupSetTableStatement;
 import org.hisp.dhis.resourcetable.statement.CreateOrganisationUnitGroupSetTableStatement;
-import org.hisp.dhis.commons.util.TextUtils;
+import org.hisp.dhis.resourcetable.ResourceTable;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -77,10 +80,81 @@ public class JdbcResourceTableStore
         this.statementBuilder = statementBuilder;
     }
 
+    private DbmsManager dbmsManager;
+
+    public void setDbmsManager( DbmsManager dbmsManager )
+    {
+        this.dbmsManager = dbmsManager;
+    }
+
     // -------------------------------------------------------------------------
     // ResourceTableStore implementation
     // -------------------------------------------------------------------------
 
+    public void generateResourceTable( ResourceTable<?> resourceTable )
+    {
+        final String createTableSql = resourceTable.getCreateTempTableStatement();
+        final Optional<String> populateTableSql = resourceTable.getPopulateTempTableStatement();
+        final Optional<List<Object[]>> populateTableContent = resourceTable.getPopulateTempTableContent();
+        final Optional<String> createIndexSql = resourceTable.getCreateIndexStatement();
+
+        // ---------------------------------------------------------------------
+        // Create table
+        // ---------------------------------------------------------------------
+
+        log.info( "Create table SQL: " + createTableSql );
+        
+        jdbcTemplate.execute( createTableSql );
+
+        // ---------------------------------------------------------------------
+        // Populate table
+        // ---------------------------------------------------------------------
+
+        if ( populateTableSql.isPresent() )
+        {
+            log.info( "Populate table SQL: " + populateTableSql.get() );
+            
+            jdbcTemplate.execute( populateTableSql.get() );
+        }
+        else if ( populateTableContent.isPresent() )
+        {
+            List<Object[]> content = populateTableContent.get();
+            
+            log.info( "Populate table content rows: " + content.size() );
+            
+            if ( content.size() > 0 )
+            {
+                int columns = content.get( 0 ).length;
+                
+                batchUpdate( columns, resourceTable.getTempTableName(), content );
+            }
+        }
+
+        // ---------------------------------------------------------------------
+        // Create index
+        // ---------------------------------------------------------------------
+
+        if ( createIndexSql.isPresent() )
+        {
+            log.info( "Create index SQL: " + createIndexSql.get() );
+            
+            jdbcTemplate.execute( createIndexSql.get() );
+        }
+        
+        // ---------------------------------------------------------------------
+        // Swap tables
+        // ---------------------------------------------------------------------
+
+        if ( dbmsManager.tableExists( resourceTable.getTableName() ) )
+        {
+            jdbcTemplate.execute( resourceTable.getDropTableStatement() );
+        }
+        
+        jdbcTemplate.execute( resourceTable.getRenameTempTableStatement() );
+        
+        log.info( "Swapped resource table, done: " + resourceTable.getTableName() );
+    }
+    
     @Override
     public void batchUpdate( int columns, String tableName, List<Object[]> batchArgs )
     {

@@ -40,7 +40,10 @@ trackerCapture.controller('DashboardController',
     $scope.settingsLabel = $translate.instant('settings');
     $scope.showHideWidgetsLabel = $translate.instant('show_hide_widgets');
     $scope.notEnrolledLabel = $translate.instant('not_yet_enrolled_data_entry');
+    $scope.stickLabel = $translate.instant('stick_right_widgets');
+    $scope.unstickLabel = $translate.instant('unstick_right_widgets');
     
+    $scope.stickyDisabled = true;
     $scope.previousTeiExists = false;
     $scope.nextTeiExists = false;
     
@@ -85,6 +88,8 @@ trackerCapture.controller('DashboardController',
                 selectedLayout = $scope.dashboardLayouts.customLayout && $scope.dashboardLayouts.customLayout[$scope.selectedProgram.id] ? $scope.dashboardLayouts.customLayout[$scope.selectedProgram.id] : $scope.dashboardLayouts.defaultLayout[$scope.selectedProgram.id];
             }            
             selectedLayout = !selectedLayout ?  defaultLayout : selectedLayout;
+            
+            $scope.stickyDisabled = selectedLayout.stickRightSide ? !selectedLayout.stickRightSide : true;
 
             angular.forEach(selectedLayout.widgets, function(widget){
                 $rootScope[widget.title +'Widget'] = widget;
@@ -394,6 +399,17 @@ trackerCapture.controller('DashboardController',
             DialogService.showDialog({}, dialogOptions);
             return;
         });
+    };
+    
+    $scope.stickUnstick = function(){        
+        $scope.stickyDisabled = !$scope.stickyDisabled;
+        
+        var layout = getCurrentDashboardLayout();        
+        var layoutKey = $scope.selectedProgram && $scope.selectedProgram.id ? $scope.selectedProgram.id : 'DEFAULT';        
+        layout[layoutKey].stickRightSide = !$scope.stickyDisabled;        
+        DashboardLayoutService.saveLayout(layout, false).then(function(){
+        });
+        
     };
     
     $scope.showHideWidgets = function(){

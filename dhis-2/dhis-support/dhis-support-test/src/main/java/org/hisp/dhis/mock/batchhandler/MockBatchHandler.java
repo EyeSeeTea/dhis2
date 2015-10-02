@@ -29,8 +29,6 @@ package org.hisp.dhis.mock.batchhandler;
  */
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 
 import org.amplecode.quick.BatchHandler;
@@ -71,13 +69,6 @@ public class MockBatchHandler<T>
     }
 
     @Override
-    public int insertObject( T object, boolean returnGeneratedIdentifier )
-    {
-        inserts.add( object );
-        return 0;
-    }
-
-    @Override
     public void updateObject( T object )
     {
         updates.add( object );        
@@ -102,9 +93,8 @@ public class MockBatchHandler<T>
     }
 
     @Override
-    public Collection<Integer> flush()
+    public void flush()
     {
-        return new HashSet<>();
     }
 
     public List<T> getInserts()

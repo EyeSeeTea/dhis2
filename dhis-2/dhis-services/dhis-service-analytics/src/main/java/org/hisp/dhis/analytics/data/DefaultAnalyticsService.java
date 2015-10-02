@@ -100,7 +100,7 @@ import org.hisp.dhis.common.BaseDimensionalObject;
 import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.common.CombinationGenerator;
 import org.hisp.dhis.common.DataDimensionItem;
-import org.hisp.dhis.common.DataDimensionItem.DataDimensionItemType;
+import org.hisp.dhis.common.DataDimensionItemType;
 import org.hisp.dhis.common.DimensionType;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.DimensionalObjectUtils;
@@ -914,7 +914,6 @@ public class DefaultAnalyticsService
     {
         DataQueryParams params = new DataQueryParams();
         
-        params.setAggregationType( aggregationType );
         params.setIgnoreLimit( ignoreLimit );
 
         if ( dimensionParams != null && !dimensionParams.isEmpty() )
@@ -961,10 +960,12 @@ public class DefaultAnalyticsService
     {
         DataQueryParams params = new DataQueryParams();
         
-        List<OrganisationUnit> userOrgUnits = getUserOrgUnits( null );
-        
         if ( object != null )
         {
+            params.setProgram( object.getProgram() );
+            
+            List<OrganisationUnit> userOrgUnits = getUserOrgUnits( null );
+            
             Date date = object.getRelativePeriodDate();
 
             object.populateAnalyticalProperties();
