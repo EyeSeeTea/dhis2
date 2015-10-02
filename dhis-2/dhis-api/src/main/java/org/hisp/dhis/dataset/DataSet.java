@@ -165,7 +165,7 @@ public class DataSet
     /**
      * Identifying the approval workflow (if any) for this data set.
      */
-    private DataApprovalWorkflow dataApprovalWorkflow;
+    private DataApprovalWorkflow workflow;
 
     /**
      * Set of the dynamic attributes values that belong to this data element.
@@ -643,14 +643,14 @@ public class DataSet
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public DataApprovalWorkflow getDataApprovalWorkflow()
+    public DataApprovalWorkflow getWorkflow()
     {
-        return dataApprovalWorkflow;
+        return workflow;
     }
 
-    public void setDataApprovalWorkflow( DataApprovalWorkflow dataApprovalWorkflow )
+    public void setWorkflow( DataApprovalWorkflow workflow )
     {
-        this.dataApprovalWorkflow = dataApprovalWorkflow;
+        this.workflow = workflow;
     }
 
     @JsonProperty( "attributeValues" )

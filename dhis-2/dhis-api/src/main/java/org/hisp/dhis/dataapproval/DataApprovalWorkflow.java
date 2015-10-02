@@ -39,6 +39,7 @@ import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.annotation.Scanned;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
+import org.hisp.dhis.period.PeriodType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,8 +50,12 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Records the approval of DataSet values for a given OrganisationUnit and
- * Period.
+ * Identifies types of data to be approved, and the set of approval levels
+ * by which it is approved.
+ *
+ * The types of data to be approved are identified by data sets (for aggregate
+ * data) and or programs (for event/tracker data) that are related to a
+ * workflow.
  *
  * @author Jim Grace
  */
@@ -60,17 +65,16 @@ public class DataApprovalWorkflow
 {
     private static final long serialVersionUID = 7717119142689479930L;
 
-    private static final Comparator<DataApprovalLevel> levelComparator = new Comparator<DataApprovalLevel>()
-    {
-        @Override
-        public int compare( final DataApprovalLevel left, DataApprovalLevel right )
-        {
-            return left.getLevel() - right.getLevel();
-        }
-    };
+    /**
+     * The period type for approving data with this workflow
+     */
+    private PeriodType periodType;
 
+    /**
+     * The data approval levels used in this workflow
+     */
     @Scanned
-    private Set<DataApprovalLevel> members = new HashSet<>();
+    private Set<DataApprovalLevel> levels = new HashSet<>();
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -85,10 +89,11 @@ public class DataApprovalWorkflow
         this.name = name;
     }
 
-    public DataApprovalWorkflow(String name, Set<DataApprovalLevel> members)
+    public DataApprovalWorkflow(String name, PeriodType periodType, Set<DataApprovalLevel> levels)
     {
         this.name = name;
-        this.members = members;
+        this.periodType = periodType;
+        this.levels = levels;
     }
 
     // -------------------------------------------------------------------------
@@ -96,35 +101,51 @@ public class DataApprovalWorkflow
     // -------------------------------------------------------------------------
 
     /**
-     * Returns the member DataApprovalLevels sorted by level id.
+     * Returns the DataApprovalLevels for this workflow sorted by level.
      *
-     * @return member DataApprovalLevels sorted by level id
+     * @return DataApprovalLevels sorted by level
      */
-    public List<DataApprovalLevel> getMembersSortedByLevel()
+    public List<DataApprovalLevel> getSortedLevels()
     {
-        List<DataApprovalLevel> memb = new ArrayList<>( members );
+        Comparator<DataApprovalLevel> orderByLevelNumber =
+            ( DataApprovalLevel dal1, DataApprovalLevel dal2 ) -> dal1.getLevel() - dal2.getLevel();
 
-        Collections.sort(memb, levelComparator);
+        List<DataApprovalLevel> sortedLevels = new ArrayList<>( levels );
 
-        return memb;
+        Collections.sort( sortedLevels, orderByLevelNumber );
+
+        return sortedLevels;
     }
 
     // -------------------------------------------------------------------------
     // Getters and Setters
     // -------------------------------------------------------------------------
 
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public PeriodType getPeriodType()
+    {
+        return periodType;
+    }
+
+    public void setPeriodType( PeriodType periodType )
+    {
+        this.periodType = periodType;
+    }
+
     @JsonProperty( "dataApprovalLevels" )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlElementWrapper( localName = "dataApprovalLevels", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "dataApprovalLevel", namespace = DxfNamespaces.DXF_2_0 )
-    public Set<DataApprovalLevel> getMembers()
+    public Set<DataApprovalLevel> getLevels()
     {
-        return members;
+        return levels;
     }
 
-    public void setMembers( Set<DataApprovalLevel> members )
+    public void setLevels( Set<DataApprovalLevel> levels )
     {
-        this.members = members;
+        this.levels = levels;
     }
 }

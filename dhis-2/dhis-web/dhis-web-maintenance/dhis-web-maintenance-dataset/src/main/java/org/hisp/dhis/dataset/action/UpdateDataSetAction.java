@@ -385,7 +385,7 @@ public class UpdateDataSetAction
 
         if ( dataApprovalWorkflowId != null )
         {
-            dataSet.setDataApprovalWorkflow( dataApprovalWorkflowService.getDataApprovalWorkflow( dataApprovalWorkflowId ) );
+            dataSet.setWorkflow( dataApprovalWorkflowService.getDataApprovalWorkflow( dataApprovalWorkflowId ) );
         }
 
         if ( jsonAttributeValues != null )

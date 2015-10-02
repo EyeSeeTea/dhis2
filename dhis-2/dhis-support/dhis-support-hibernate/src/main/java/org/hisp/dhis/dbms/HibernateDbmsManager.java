@@ -151,7 +151,7 @@ public class HibernateDbmsManager
         emptyTable( "datasetoperands" );
         emptyTable( "dataset" );
 
-        emptyTable( "dataapprovalworkflowmembers" );
+        emptyTable( "dataapprovalworkflowlevels" );
         emptyTable( "dataapprovalworkflow" );
         emptyTable( "dataapprovallevel" );
 

@@ -32,6 +32,7 @@ import static com.google.common.collect.Sets.newHashSet;
 
 import static org.junit.Assert.assertArrayEquals;
 
+import org.hisp.dhis.period.PeriodType;
 import org.junit.Test;
 
 import java.util.List;
@@ -55,10 +56,12 @@ public class DataApprovalWorkflowTest
         DataApprovalLevel level8 = new DataApprovalLevel( "alphabetical", 8, 8, null, null, null );
         DataApprovalLevel level9 = new DataApprovalLevel( "order", 9, 9, null, null, null );
 
-        DataApprovalWorkflow workflow = new DataApprovalWorkflow( "Test",
+        PeriodType periodType = PeriodType.getPeriodTypeByName( "Monthly" );
+
+        DataApprovalWorkflow workflow = new DataApprovalWorkflow( "Test", periodType,
             newHashSet(level9, level8, level7, level6, level5, level4, level3, level2, level1 ) );
 
-        List<DataApprovalLevel> membersSortedByLevel = workflow.getMembersSortedByLevel();
+        List<DataApprovalLevel> membersSortedByLevel = workflow.getSortedLevels();
 
         DataApprovalLevel[] arrayMembersSortedByLevel = membersSortedByLevel.toArray( new DataApprovalLevel[ membersSortedByLevel.size() ] );
 

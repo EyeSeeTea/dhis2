@@ -17,11 +17,13 @@
 
     <property name="name" column="name" not-null="true" unique="true" length="230" />
 
-    <set name="members" table="dataapprovalworkflowmembers">
+    <many-to-one name="periodType" class="org.hisp.dhis.period.PeriodType" column="periodtypeid" not-null="true" foreign-key="fk_dataapprovalworkflow_periodtype" />
+
+    <set name="levels" table="dataapprovalworkflowlevels">
       <cache usage="read-write" />
-      <key column="dataapprovalworkflowid" foreign-key="fk_dataapprovalworkflowmembers_dataapprovalworkflowid" />
+      <key column="dataapprovalworkflowid" foreign-key="fk_dataapprovalworkflowlevels_dataapprovalworkflowid" />
       <many-to-many class="org.hisp.dhis.dataapproval.DataApprovalLevel" column="dataapprovallevelid"
-                    foreign-key="fk_dataapprovalworkflow_dataapprovallevelid" />
+                    foreign-key="fk_dataapprovalworkflowlevels_dataapprovallevelid" />
     </set>
 
     <!-- Access properties -->

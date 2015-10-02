@@ -331,7 +331,7 @@ public class DataElement
     {
         for ( DataSet dataSet : dataSets )
         {
-            if ( dataSet != null && dataSet.getDataApprovalWorkflow() != null )
+            if ( dataSet != null && dataSet.getWorkflow() != null )
             {
                 return true;
             }

@@ -337,7 +337,7 @@ public class AddDataSetAction
 
         if ( dataApprovalWorkflowId != null )
         {
-            dataSet.setDataApprovalWorkflow( dataApprovalWorkflowService.getDataApprovalWorkflow( dataApprovalWorkflowId ) );
+            dataSet.setWorkflow( dataApprovalWorkflowService.getDataApprovalWorkflow( dataApprovalWorkflowId ) );
         }
 
         dataSet.setDescription( StringUtils.trimToNull( description ) );
