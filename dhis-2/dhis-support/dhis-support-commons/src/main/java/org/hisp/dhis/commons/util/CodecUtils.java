@@ -1,5 +1,7 @@
 package org.hisp.dhis.commons.util;
 
+import java.util.Base64;
+
 /*
  * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
@@ -28,11 +30,6 @@ package org.hisp.dhis.commons.util;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.commons.codec.binary.Base64;
-
 /**
  * Utility class for encoding and decoding operations.
  * 
@@ -40,67 +37,7 @@ import org.apache.commons.codec.binary.Base64;
  */
 public class CodecUtils
 {
-    private static final String EMPTY_REPLACEMENT = "_";
-    private static final String REGEX_NUMERIC = "([0-9]*)";
-    private static final String SEPARATOR = "_";
-    
     private static final String ILLEGAL_FILENAME_CHARS_REGEX = "[/\\?%*:|\"'<>.]";
-
-    /**
-     * Database encodes the argument string. Remove non-character data from the
-     * string, prefixes the string if it starts with a numeric character and
-     * truncates the string if it is longer than 255 characters.
-     * 
-     * @param string the string to encode.
-     * @return encoded string.
-     */
-    public static String databaseEncode( String string )
-    {
-        if ( string != null )
-        {
-            string = string.toLowerCase();
-            
-            string = string.replaceAll( " ", EMPTY_REPLACEMENT );
-            string = string.replaceAll( "<", EMPTY_REPLACEMENT + "lt" + EMPTY_REPLACEMENT );
-            string = string.replaceAll( ">", EMPTY_REPLACEMENT + "gt" + EMPTY_REPLACEMENT );
-            string = string.replaceAll( "default", "_default" );
-            
-            StringBuffer buffer = new StringBuffer();
-            
-            Pattern pattern = Pattern.compile( "[a-zA-Z0-9_]" );
-            
-            Matcher matcher = pattern.matcher( string );
-            
-            while ( matcher.find() )
-            {
-                buffer.append( matcher.group() );
-            }
-            
-            string = buffer.toString();
-            
-            string = string.replaceAll( EMPTY_REPLACEMENT + "+", EMPTY_REPLACEMENT );
-
-            // -----------------------------------------------------------------
-            // Cannot start with numeric character
-            // -----------------------------------------------------------------
-
-            if ( string.length() > 0 && string.substring( 0, 1 ).matches( REGEX_NUMERIC ) )
-            {
-                string = SEPARATOR + string;
-            }
-
-            // -----------------------------------------------------------------
-            // Cannot be longer than 255 characters
-            // -----------------------------------------------------------------
-
-            if ( string.length() > 255 )
-            {
-                string = string.substring( 0, 255 );
-            }
-        }
-        
-        return string;
-    }
     
     /**
      * Encodes the given string by removing chars which are illegal on most file 
@@ -134,10 +71,8 @@ public class CodecUtils
      */
     public static String getBasicAuthString( String username, String password )
     {
-        //TODO replace with Java 8 Base64
-        
         String string = username + ":" + password;
         
-        return "Basic " + Base64.encodeBase64String( string.getBytes() );
+        return "Basic " + Base64.getEncoder().encodeToString( string.getBytes() );
     }    
 }
