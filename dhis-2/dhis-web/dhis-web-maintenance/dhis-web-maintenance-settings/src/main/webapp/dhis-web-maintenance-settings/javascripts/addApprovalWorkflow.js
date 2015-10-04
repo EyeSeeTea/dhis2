@@ -5,14 +5,21 @@ function addApprovalWorkflow() {
 			approvalLevels.push( { id: $("#approvalLevel" + i).val() } );
 		}
 	}
-	$.post("../api/dataApprovalWorkflows",
-		{
-			name: $("#name").val(),
-			dataApprovalLevels: approvalLevels
+	$.ajax({
+		url: '../api/dataApprovalWorkflows',
+		type: 'POST',
+		contentType: "application/json; charset=utf-8",
+		dataType: "json",
+		data: JSON.stringify({
+				name: $("#name").val(),
+				periodType: $("#frequency").val(),
+				dataApprovalLevels: approvalLevels
+			}),
+		success: function (json) {
+			location.href = 'systemApprovalWorkflows.action';
 		},
-		function(json) {
-			showSuccessMessage(i18n_create_data_approval_workflow_success);
-			$("#addApprovalWorkflowForm").submit();
-		},
-	"json");
+		error: function( xhr, status, error) {
+			setHeaderDelayMessage( error );
+		}
+	});
 }

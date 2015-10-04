@@ -33,6 +33,8 @@ import org.hisp.dhis.dataapproval.DataApprovalLevel;
 import org.hisp.dhis.dataapproval.DataApprovalLevelService;
 import org.hisp.dhis.dataapproval.DataApprovalWorkflow;
 import org.hisp.dhis.dataapproval.DataApprovalWorkflowService;
+import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.period.PeriodType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,6 +59,13 @@ public class GetEditApprovalWorkflowParameters
         this.dataApprovalWorkflowService = dataApprovalWorkflowService;
     }
 
+    private PeriodService periodService;
+
+    public void setPeriodService( PeriodService periodService )
+    {
+        this.periodService = periodService;
+    }
+
     private DataApprovalLevelService dataApprovalLevelService;
 
     public void setDataApprovalLevelService( DataApprovalLevelService dataApprovalLevelService )
@@ -78,6 +87,13 @@ public class GetEditApprovalWorkflowParameters
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
+
+    private List<PeriodType> periodTypes = new ArrayList<>();
+
+    public List<PeriodType> getPeriodTypes()
+    {
+        return periodTypes;
+    }
 
     private List<DataApprovalLevel> dataApprovalLevels = new ArrayList<>();
 
@@ -101,6 +117,8 @@ public class GetEditApprovalWorkflowParameters
     public String execute()
         throws Exception
     {
+        periodTypes = periodService.getAllPeriodTypes();
+
         dataApprovalLevels = dataApprovalLevelService.getAllDataApprovalLevels();
 
         if ( dataApprovalWorkflowId != null )

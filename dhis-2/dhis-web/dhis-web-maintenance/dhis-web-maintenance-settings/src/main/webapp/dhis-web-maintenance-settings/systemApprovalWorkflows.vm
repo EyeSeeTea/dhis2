@@ -20,8 +20,8 @@
 
 <div id="contextMenu" class="contextMenu">
     <ul id="contextMenuItems" class="contextMenuItems">
-        <li><a data-target-fn="editDataApprovalWorkflowForm"><i class="fa fa-edit"></i>&nbsp;&nbsp;$i18n.getString( "edit" )</a></li>
-        <li><a data-target-fn="removeApprovalLevel"><i class="fa fa-trash-o"></i>&nbsp;&nbsp;$i18n.getString( "remove" )</a></li>
+        <li><a data-target-fn="editDataApprovalWorkflow"><i class="fa fa-edit"></i>&nbsp;&nbsp;$i18n.getString( "edit" )</a></li>
+        <li><a data-target-fn="removeDataApprovalWorkflow"><i class="fa fa-trash-o"></i>&nbsp;&nbsp;$i18n.getString( "remove" )</a></li>
     </ul>
 </div>
 
@@ -44,6 +44,7 @@
                 <thead>
                 <tr>
                     <th class="{sorter: true}">$i18n.getString( "name" )</th>
+                    <th class="{sorter: true}">$i18n.getString( "frequency" )</th>
                     <th class="{sorter: false}">$i18n.getString( "approval_levels" )</th>
                 </tr>
                 </thead>
@@ -51,7 +52,8 @@
                     #foreach( $workflow in $dataApprovalWorkflows )
                     <tr id="tr${workflow.id}" data-id="$!workflow.id" data-uid="$!workflow.uid" data-type="DataApprovalWorkflow" data-name="$encoder.htmlEncode( $!workflow.displayName )">
                         <td>$encoder.htmlEncode( $!workflow.displayName )</td>
-                        <td>#foreach ( $level in $workflow.membersSortedByLevel ) $level.level #end</td>
+                        <td>$encoder.htmlEncode( $!workflow.periodType.name )</td>
+                        <td>#foreach ( $level in $workflow.sortedLevels ) $level.level #end</td>
                     </tr>
                     #end
                 </tbody>
