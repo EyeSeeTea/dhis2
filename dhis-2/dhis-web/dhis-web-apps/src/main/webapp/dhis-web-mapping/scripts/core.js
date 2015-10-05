@@ -269,7 +269,7 @@ Ext.onReady( function() {
             var cr = gis.viewport.centerRegion,
                 crp = cr.getPosition(),
                 x = crp[0] + (cr.getWidth() / 2) - (defaultHoverWindow.getWidth() / 2),
-                y = crp[1] + (GIS.app ? 32 : 0);
+                y = crp[1] + (GIS.app ? 36 : 0);
 
 			defaultHoverWindow.setPosition(x, y);
 
@@ -1037,7 +1037,7 @@ Ext.onReady( function() {
 			listeners: {
 				show: function() {
 					var x = gis.viewport.eastRegion.getPosition()[0] - this.getWidth() - 3,
-						y = gis.viewport.centerRegion.getPosition()[1] + 26;
+						y = gis.viewport.centerRegion.getPosition()[1] + 64;
 					this.setPosition(x, y);
 				},
 				destroy: function() {
@@ -1105,7 +1105,7 @@ Ext.onReady( function() {
 
                 gis.alert(r);
             };
-console.log(gis.util.connection);
+            
             if (isPlugin) {
                 Ext.data.JsonP.request({
                     url: url,
@@ -2331,6 +2331,11 @@ console.log(gis.util.connection);
 				paramString += i < dxItems.length - 1 ? ';' : '';
 			}
 
+            // program
+            if (view.program) {
+                paramString += '&program=' + view.program.id;
+            }
+
 			paramString += isOperand ? '&dimension=co' : '';
 
 			// pe
@@ -2558,6 +2563,7 @@ console.log(gis.util.connection);
 
                 if (!elementUrl) {
                     fn();
+                    return;
                 }
 
                 Ext.Ajax.request({
@@ -2746,26 +2752,53 @@ console.log(gis.util.connection);
 						value: 'indicators',
 						param: 'in',
 						dimensionName: 'dx',
-						objectName: 'in'
+						objectName: 'in',
+                        itemType: 'INDICATOR'
 					},
 					dataElement: {
 						id: 'dataElement',
 						value: 'dataElement',
 						param: 'de',
 						dimensionName: 'dx',
-						objectName: 'de'
+						objectName: 'de',
+                        itemType: 'AGGREGATE_DATA_ELEMENT'
 					},
 					operand: {
 						id: 'operand',
 						value: 'operand',
 						param: 'dc',
 						dimensionName: 'dx',
-						objectName: 'dc'
+						objectName: 'dc',
+                        itemType: 'DATA_ELEMENT_OPERAND'
 					},
 					dataSet: {
 						value: 'dataSets',
 						dimensionName: 'dx',
-						objectName: 'ds'
+						objectName: 'ds',
+                        itemType: 'DATA_SET'
+					},
+					eventDataItem: {
+						value: 'eventDataItem',
+						dimensionName: 'dx',
+						objectName: 'di'
+					},
+                    programDataElement: {
+						value: 'programDataElement',
+						dimensionName: 'dx',
+						objectName: 'di',
+                        itemType: 'PROGRAM_DATA_ELEMENT'
+					},
+                    programAttribute: {
+						value: 'programAttribute',
+						dimensionName: 'dx',
+						objectName: 'di',
+                        itemType: 'PROGRAM_ATTRIBUTE'
+					},
+					programIndicator: {
+						value: 'programIndicator',
+						dimensionName: 'dx',
+						objectName: 'pi',
+                        itemType: 'PROGRAM_INDICATOR'
 					},
 					period: {
 						id: 'period',
@@ -2811,6 +2844,34 @@ console.log(gis.util.connection);
 					id: 'root'
 				}
 			};
+
+            // dimension objectNameMap
+            (function() {
+                dimConf = conf.finals.dimension;
+
+                dimConf.objectNameMap = {};
+                dimConf.objectNameMap[dimConf.indicator.objectName] = dimConf.indicator;
+                dimConf.objectNameMap[dimConf.dataElement.objectName] = dimConf.dataElement;
+                dimConf.objectNameMap[dimConf.operand.objectName] = dimConf.operand;
+                dimConf.objectNameMap[dimConf.dataSet.objectName] = dimConf.dataSet;
+                dimConf.objectNameMap[dimConf.programDataElement.objectName] = dimConf.programDataElement;
+                dimConf.objectNameMap[dimConf.programAttribute.objectName] = dimConf.programAttribute;
+                dimConf.objectNameMap[dimConf.programIndicator.objectName] = dimConf.programIndicator;
+            })();
+
+            // dimension itemTypeMap
+            (function() {
+                dimConf = conf.finals.dimension;
+
+                dimConf.itemTypeMap = {};
+                dimConf.itemTypeMap[dimConf.indicator.itemType] = dimConf.indicator;
+                dimConf.itemTypeMap[dimConf.dataElement.itemType] = dimConf.dataElement;
+                dimConf.itemTypeMap[dimConf.operand.itemType] = dimConf.operand;
+                dimConf.itemTypeMap[dimConf.dataSet.itemType] = dimConf.dataSet;
+                dimConf.itemTypeMap[dimConf.programDataElement.itemType] = dimConf.programDataElement;
+                dimConf.itemTypeMap[dimConf.programAttribute.itemType] = dimConf.programAttribute;
+                dimConf.itemTypeMap[dimConf.programIndicator.itemType] = dimConf.programIndicator;
+            })();
 
 			conf.layout = {
 				widget: {
@@ -2900,6 +2961,14 @@ console.log(gis.util.connection);
                     name: obj.name
                 };
             }
+
+            conf.valueType = {
+            	numericTypes: ['NUMBER','UNIT_INTERVAL','PERCENTAGE','INTEGER','INTEGER_POSITIVE','INTEGER_NEGATIVE','INTEGER_ZERO_OR_POSITIVE'],
+            	textTypes: ['TEXT','LONG_TEXT','LETTER','PHONE_NUMBER','EMAIL'],
+            	booleanTypes: ['BOOLEAN','TRUE_ONLY'],
+            	dateTypes: ['DATE','DATETIME'],
+            	aggregateTypes: ['NUMBER','UNIT_INTERVAL','PERCENTAGE','INTEGER','INTEGER_POSITIVE','INTEGER_NEGATIVE','INTEGER_ZERO_OR_POSITIVE','BOOLEAN','TRUE_ONLY']
+            };            
 
             conf.url = {};
 
@@ -3376,6 +3445,22 @@ console.log(gis.util.connection);
                 window.show();
             };
 
+            util.dhis = {};
+
+            util.dhis.getDataDimensionItemTypes = function(dataDimensionItems) {
+                var types = [];
+
+                if (Ext.isArray(dataDimensionItems) && dataDimensionItems.length) {
+                    for (var i = 0, obj; i < dataDimensionItems.length; i++) {
+                        if (Ext.isObject(dataDimensionItems[i])) {
+                            types.push(dataDimensionItems[i].dataDimensionItemType);
+                        }
+                    }
+                }
+
+                return types;
+            };
+        
             util.connection = {};
 
             util.connection.ajax = function(requestConfig, authConfig) {
@@ -3489,6 +3574,8 @@ console.log(gis.util.connection);
 
                 // filters: [Dimension]
 
+                // program: object
+
                 // classes: integer (5) - 1-7
 
                 // method: integer (2) - 2, 3 // 2=equal intervals, 3=equal counts
@@ -3508,6 +3595,8 @@ console.log(gis.util.connection);
                 // areaRadius: integer
 
                 // hidden: boolean (false)
+
+                // dataDimensionItems: array
 
                 getValidatedDimensionArray = function(dimensionArray) {
                     var dimensions = [];
@@ -3639,6 +3728,11 @@ console.log(gis.util.connection);
                     layout.rows = config.rows;
                     layout.filters = config.filters;
 
+                    // program
+                    if (Ext.isObject(config.program) && config.program.id) {
+                        layout.program = config.program;
+                    }
+
                     // Properties
                     layout.layer = Ext.isString(config.layer) && !Ext.isEmpty(config.layer) ? config.layer : 'thematic1';
                     layout.classes = Ext.isNumber(config.classes) && !Ext.isEmpty(config.classes) ? config.classes : 5;
@@ -3676,6 +3770,8 @@ console.log(gis.util.connection);
                     layout.legendSet = config.legendSet;
 
                     layout.organisationUnitGroupSet = config.organisationUnitGroupSet;
+                    
+                    layout.dataDimensionItems = config.dataDimensionItems;                    
 
                     if (Ext.Array.from(config.userOrgUnit).length) {
                         layout.userOrgUnit = Ext.Array.from(config.userOrgUnit);

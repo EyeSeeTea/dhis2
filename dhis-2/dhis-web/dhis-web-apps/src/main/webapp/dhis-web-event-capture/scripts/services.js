@@ -249,9 +249,13 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
 .factory('DHIS2EventFactory', function($http, $q, ECStorageService, $rootScope) {   
     
     return {
-        getByStage: function(orgUnit, programStage, pager, paging){
+        getByStage: function(orgUnit, programStage, attributeCategoryUrl, pager, paging){
             
             var url = '../api/events.json?' + 'orgUnit=' + orgUnit + '&programStage=' + programStage;
+            
+            if(attributeCategoryUrl && !attributeCategoryUrl.default){
+                url = url + '&attributeCc=' + attributeCategoryUrl.cc + '&attributeCos=' + attributeCategoryUrl.cp;
+            }
             
             if(paging){
                 var pgSize = pager ? pager.pageSize : 50;
@@ -335,6 +339,16 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
                 dhis2.ec.store.remove('events', fullValue.event);
                 fullValue.id = fullValue.event;
                 dhis2.ec.store.set('events', fullValue);
+            });
+            return promise;
+        },
+        updateForEventDate: function(dhis2Event, fullEvent){
+            var promise = $http.put('../api/events/' + dhis2Event.event + '/updateEventDate', dhis2Event).then(function(response){
+                return response.data;         
+            }, function(){
+                dhis2.ec.store.remove('events', fullEvent.event);
+                fullEvent.id = fullEvent.event;
+                dhis2.ec.store.set('events', fullEvent);
             });
             return promise;
         }

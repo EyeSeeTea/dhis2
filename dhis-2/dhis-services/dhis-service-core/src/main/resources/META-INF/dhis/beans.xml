@@ -11,11 +11,9 @@
 
   <context:component-scan base-package="org.hisp.dhis.node" />
 
-  <!--
   <bean id="org.hisp.dhis.preheat.PreheatService" class="org.hisp.dhis.preheat.DefaultPreheatService" scope="prototype">
     <aop:scoped-proxy proxy-target-class="false" />
   </bean>
-  -->
 
   <bean id="org.hisp.dhis.calendar.CalendarService" class="org.hisp.dhis.calendar.DefaultCalendarService" />
 
@@ -574,10 +572,15 @@
     <property name="sessionFactory" ref="sessionFactory" />
   </bean>
 
-  <bean id="org.hisp.dhis.fileresource.FileResourceContentStore" class="org.hisp.dhis.fileresource.DefaultFileResourceContentStore"
+  <bean id="org.hisp.dhis.fileresource.FileResourceContentStore" class="org.hisp.dhis.fileresource.JCloudsFileResourceContentStore"
     init-method="init" destroy-method="cleanUp">
     <property name="configurationProvider" ref="hibernateConfigurationProvider" />
     <property name="locationManager" ref="locationManager" />
+  </bean>
+
+  <bean id="org.hisp.dhis.keyjsonvalue.KeyJsonValueStore" class="org.hisp.dhis.keyjsonvalue.hibernate.HibernateKeyJsonValueStore">
+      <property name="clazz" value="org.hisp.dhis.keyjsonvalue.KeyJsonValue" />
+      <property name="sessionFactory" ref="sessionFactory" />
   </bean>
 
   <!-- Service definitions -->
@@ -1242,6 +1245,10 @@
     <property name="eventChartStore" ref="org.hisp.dhis.eventchart.EventChartStore" />
   </bean>
 
+  <bean id="org.hisp.dhis.keyjsonvalue.KeyJsonValueService" class="org.hisp.dhis.keyjsonvalue.DefaultKeyJsonValueService">
+      <property name="keyJsonValueStore" ref="org.hisp.dhis.keyjsonvalue.KeyJsonValueStore" />
+  </bean>
+
   <!-- SMS services -->
 
   <bean id="org.hisp.dhis.sms.command.SMSCommandService" class="org.hisp.dhis.sms.command.DefaultSMSCommandService">
@@ -1418,14 +1425,6 @@
     <property name="skipInTests" value="true" />
   </bean>
 
-  <bean id="org.hisp.dhis.startup.MapViewUpgrader" class="org.hisp.dhis.startup.MapViewUpgrader">
-    <property name="statementManager" ref="statementManager" />
-    <property name="batchHandlerFactory" ref="batchHandlerFactory" />
-    <property name="name" value="MapViewUpgrader" />
-    <property name="runlevel" value="8" />
-    <property name="skipInTests" value="true" />
-  </bean>
-
   <bean id="org.hisp.dhis.startup.FavoriteDataItemUpgrader" class="org.hisp.dhis.startup.FavoriteDataItemUpgrader">
     <property name="name" value="FavoriteDataItemUpgrader" />
     <property name="runlevel" value="9" />
@@ -1470,7 +1469,6 @@
           <ref bean="org.hisp.dhis.startup.TableCreator" />
           <ref bean="org.hisp.dhis.startup.TableAlteror" />
           <ref bean="org.hisp.dhis.trackedentity.startup.TableAlteror" />
-          <ref bean="org.hisp.dhis.startup.MapViewUpgrader" />
           <ref bean="org.hisp.dhis.startup.FavoriteDataItemUpgrader" />
           <ref bean="org.hisp.dhis.dataentryform.DataEntryFormUpgrader" />
           <ref bean="org.hisp.dhis.startup.ExpressionUpgrader" />

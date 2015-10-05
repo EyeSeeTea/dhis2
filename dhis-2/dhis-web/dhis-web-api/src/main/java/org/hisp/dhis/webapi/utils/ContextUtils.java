@@ -34,11 +34,9 @@ import static org.hisp.dhis.setting.SystemSettingManager.KEY_CACHE_STRATEGY;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -50,7 +48,7 @@ import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.common.cache.CacheStrategy;
-import org.hisp.dhis.commons.util.CodecUtils;
+import org.hisp.dhis.system.util.CodecUtils;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.util.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -230,25 +228,6 @@ public class ContextUtils
         builder.append( request.getServletPath() );
 
         return builder.toString();
-    }
-
-    /**
-     * Splits the given query param value into independent values using ; as
-     * separator.
-     *
-     * @param value the query param value.
-     * @return the list of independent values.
-     */
-    public static Set<String> getQueryParamValues( String value )
-    {
-        if ( value == null || value.isEmpty() )
-        {
-            return null;
-        }
-
-        String[] values = value.split( QUERY_PARAM_SEP );
-
-        return new HashSet<>( Arrays.asList( values ) );
     }
 
     /**

@@ -140,7 +140,7 @@ public class AddProgramIndicatorAction
     {
         this.displayInForm = displayInForm;
     }
-
+    
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------

@@ -36,12 +36,14 @@ import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.commons.util.SqlHelper;
+import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceQueryParams;
 import org.hisp.dhis.program.ProgramInstanceStore;
 import org.hisp.dhis.program.ProgramStatus;
+import org.hisp.dhis.program.ProgramType;
 import org.hisp.dhis.program.SchedulingProgramObject;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceReminder;
@@ -428,7 +430,7 @@ public class HibernateProgramInstanceStore
 
             String organisationunitName = rs.getString( "orgunitName" );
             String programName = rs.getString( "programName" );
-            String incidentDate = rs.getString( "dateofincident" ).split( " " )[0];
+            String incidentDate = rs.getString( "incidentdate" ).split( " " )[0];
             String daysSinceIncidentDate = rs.getString( "days_since_incident_date" );
             String erollmentDate = rs.getString( "enrollmentdate" ).split( " " )[0];
             String daysSinceEnrollementDate = rs.getString( "days_since_erollment_date" );
@@ -458,19 +460,19 @@ public class HibernateProgramInstanceStore
     private String sendMessageToTrackedEntityInstanceSql( String dateToCompare )
     {
         return "SELECT pi.programinstanceid, pav.value as phonenumber, prm.templatemessage, "
-            + "         org.name as orgunitName, " + "         pg.name as programName, pi.dateofincident , "
+            + "         org.name as orgunitName, " + "         pg.name as programName, pi.incidentDate, "
             + "         pi.enrollmentdate,(DATE(now()) - DATE(pi.enrollmentdate) ) as days_since_erollment_date, "
-            + "         (DATE(now()) - DATE(pi.dateofincident) ) as days_since_incident_date "
+            + "         (DATE(now()) - DATE(pi.incidentDate) ) as days_since_incident_date "
             + "       FROM trackedentityinstance p INNER JOIN programinstance pi "
             + "              ON p.trackedentityinstanceid=pi.trackedentityinstanceid INNER JOIN program pg "
             + "              ON pg.programid=pi.programid INNER JOIN organisationunit org "
             + "              ON org.organisationunitid = p.organisationunitid INNER JOIN trackedentityinstancereminder prm "
             + "              ON prm.programid = pi.programid INNER JOIN trackedentityattributevalue pav "
             + "              ON pav.trackedentityinstanceid=p.trackedentityinstanceid INNER JOIN trackedentityattribute pa "
-            + "              ON pa.trackedentityattributeid=pav.trackedentityattributeid "
-            + "       WHERE pi.status= '" + ProgramStatus.ACTIVE + "'"
-            + "         and prm.templatemessage is not NULL and prm.templatemessage != ''   "
-            + "         and pg.type=1 and prm.daysallowedsendmessage is not null and pa.valuetype='phoneNumber' "
+            + "              ON pa.trackedentityattributeid=pav.trackedentityattributeid " + "       WHERE pi.status= '"
+            + EventStatus.ACTIVE.name()
+            + "'         and prm.templatemessage is not NULL and prm.templatemessage != ''   "
+            + "         and pg.type='" + ProgramType.WITH_REGISTRATION.name() + "' and prm.daysallowedsendmessage is not null and pa.valuetype='phoneNumber' "
             + "         and ( DATE(now()) - DATE(pi." + dateToCompare + ") ) = prm.daysallowedsendmessage "
             + "         and prm.whenToSend is null and prm.dateToCompare='" + dateToCompare + "' and prm.sendto = "
             + TrackedEntityInstanceReminder.SEND_TO_TRACKED_ENTITY_INSTANCE;
@@ -479,25 +481,25 @@ public class HibernateProgramInstanceStore
     private String sendMessageToOrgunitRegisteredSql( String dateToCompare )
     {
         return "SELECT pi.programinstanceid, org.phonenumber, prm.templatemessage, org.name as orgunitName, "
-            + "   pg.name as programName, pi.dateofincident, pi.enrollmentdate,(DATE(now()) - DATE(pi.enrollmentdate) ) as days_since_erollment_date, "
-            + "       (DATE(now()) - DATE(pi.dateofincident) ) as days_since_incident_date "
+            + "   pg.name as programName, pi.incidentDate, pi.enrollmentdate,(DATE(now()) - DATE(pi.enrollmentdate) ) as days_since_erollment_date, "
+            + "       (DATE(now()) - DATE(pi.incidentDate) ) as days_since_incident_date "
             + "    FROM trackedentityinstance p INNER JOIN programinstance pi "
             + "           ON p.trackedentityinstanceid=pi.trackedentityinstanceid INNER JOIN program pg "
             + "           ON pg.programid=pi.programid INNER JOIN organisationunit org "
             + "           ON org.organisationunitid = p.organisationunitid INNER JOIN trackedentityinstancereminder prm "
-            + "           ON prm.programid = pi.programid " + "    WHERE pi.status = '" + ProgramStatus.ACTIVE + "'"
-            + "      and org.phonenumber is not NULL and org.phonenumber != '' "
+            + "           ON prm.programid = pi.programid " + "    WHERE pi.status = '" + EventStatus.ACTIVE.name()
+            + "'      and org.phonenumber is not NULL and org.phonenumber != '' "
             + "      and prm.templatemessage is not NULL and prm.templatemessage != '' "
-            + "      and pg.type=1 and prm.daysallowedsendmessage is not null " + "      and ( DATE(now()) - DATE( pi."
+            + "      and pg.type='" + ProgramType.WITH_REGISTRATION.name() + "' and prm.daysallowedsendmessage is not null " + "      and ( DATE(now()) - DATE( pi."
             + dateToCompare + " ) ) = prm.daysallowedsendmessage " + "      and prm.dateToCompare='" + dateToCompare
             + "'     and prm.whenToSend is null and prm.sendto =  " + TrackedEntityInstanceReminder.SEND_TO_ORGUGNIT_REGISTERED;
     }
 
     private String sendMessageToUsersSql( String dateToCompare )
     {
-        return "SELECT pi.programinstanceid, uif.phonenumber, prm.templatemessage, org.name as orgunitName, pg.name as programName, pi.dateofincident ,"
+        return "SELECT pi.programinstanceid, uif.phonenumber, prm.templatemessage, org.name as orgunitName, pg.name as programName, pi.incidentDate ,"
             + "pi.enrollmentdate,(DATE(now()) - DATE(pi.enrollmentdate) ) as days_since_erollment_date, "
-            + "(DATE(now()) - DATE(pi.dateofincident) ) as days_since_incident_date "
+            + "(DATE(now()) - DATE(pi.incidentDate) ) as days_since_incident_date "
             + "FROM trackedentityinstance p INNER JOIN programinstance pi "
             + "    ON p.trackedentityinstanceid=pi.trackedentityinstanceid INNER JOIN program pg "
             + "    ON pg.programid=pi.programid INNER JOIN organisationunit org "
@@ -505,10 +507,11 @@ public class HibernateProgramInstanceStore
             + "    ON prm.programid = pi.programid INNER JOIN usermembership ums "
             + "    ON ums.organisationunitid = p.organisationunitid INNER JOIN userinfo uif "
             + "    ON uif.userinfoid = ums.userinfoid "
-            + "WHERE pi.status= '" + ProgramStatus.ACTIVE + "'"
-            + "         and uif.phonenumber is not NULL and uif.phonenumber != '' "
+            + "WHERE pi.status= '"
+            + EventStatus.ACTIVE.name()
+            + "'         and uif.phonenumber is not NULL and uif.phonenumber != '' "
             + "         and prm.templatemessage is not NULL and prm.templatemessage != '' "
-            + "         and pg.type=1 and prm.daysallowedsendmessage is not null "
+            + "         and pg.type='" + ProgramType.WITH_REGISTRATION.name() + "' and prm.daysallowedsendmessage is not null "
             + "         and ( DATE(now()) - DATE( "
             + dateToCompare
             + " ) ) = prm.daysallowedsendmessage "
@@ -521,18 +524,17 @@ public class HibernateProgramInstanceStore
     private String sendMessageToUserGroupsSql( String dateToCompare )
     {
         return "select pi.programinstanceid, uif.phonenumber,prm.templatemessage, org.name as orgunitName ,"
-            + " pg.name as programName, pi.dateofincident, pi.enrollmentdate, (DATE(now()) - DATE(pi.enrollmentdate) ) as days_since_erollment_date, "
-            + "(DATE(now()) - DATE(pi.dateofincident) ) as days_since_incident_date "
+            + " pg.name as programName, pi.incidentDate, pi.enrollmentdate, (DATE(now()) - DATE(pi.enrollmentdate) ) as days_since_erollment_date, "
+            + "(DATE(now()) - DATE(pi.incidentDate) ) as days_since_incident_date "
             + "  from trackedentityinstance p INNER JOIN programinstance pi " + "       ON p.trackedentityinstanceid=pi.trackedentityinstanceid "
             + "   INNER JOIN program pg " + "       ON pg.programid=pi.programid "
             + "   INNER JOIN organisationunit org " + "       ON org.organisationunitid = p.organisationunitid "
             + "   INNER JOIN trackedentityinstancereminder prm " + "       ON prm.programid = pg.programid "
             + "   INNER JOIN usergroupmembers ugm " + "       ON ugm.usergroupid = prm.usergroupid "
-            + "   INNER JOIN userinfo uif " + "       ON uif.userinfoid = ugm.userid "
-            + "  WHERE pi.status= '" + ProgramStatus.ACTIVE + "'"
-            + "       and uif.phonenumber is not NULL and uif.phonenumber != '' "
+            + "   INNER JOIN userinfo uif " + "       ON uif.userinfoid = ugm.userid " + "  WHERE pi.status= '"
+            + EventStatus.ACTIVE.name() + "'       and uif.phonenumber is not NULL and uif.phonenumber != '' "
             + "       and prm.templatemessage is not NULL and prm.templatemessage != '' "
-            + "       and pg.type=1 and prm.daysallowedsendmessage is not null " + "       and (  DATE(now()) - DATE("
+            + "       and pg.type='" + ProgramType.WITH_REGISTRATION.name() + "' and prm.daysallowedsendmessage is not null " + "       and (  DATE(now()) - DATE("
             + dateToCompare + ") ) = prm.daysallowedsendmessage " + "       and prm.whentosend is null "
             + "       and prm.sendto = " + TrackedEntityInstanceReminder.SEND_TO_USER_GROUP;
     }

@@ -73,7 +73,7 @@ public class DefaultProgramService
 
     private static final String TAG_CLOSE = "/>";
 
-    private static final String PROGRAM_INCIDENT_DATE = "dateOfIncident";
+    private static final String PROGRAM_INCIDENT_DATE = "incidentDate";
 
     private static final String PROGRAM_ENROLLMENT_DATE = "enrollmentDate";
 
@@ -240,7 +240,7 @@ public class DefaultProgramService
     @Override
     public Integer getProgramCountByName( String name )
     {
-        return i18n( i18nService, programStore.getCountLikeName( name ) );
+        return programStore.getCountLikeName( name );
     }
 
     @Override

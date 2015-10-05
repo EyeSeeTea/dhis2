@@ -54,8 +54,9 @@ html * {
 
 #init {
     display: table;
-    margin: 200px auto;
-    font-size: 15px;
+    margin: 300px auto;
+    font-size: 13px;
+    color: #444;
 }
 
 	/* Scrollbar Webkit */
@@ -150,6 +151,48 @@ table.padding1 td {
     font-size: 11px;
 }
 
+.text-medium {
+    font-weight: 600;
+}
+
+
+/*----------------------------------------------------------------------------
+ * Spinner
+ *--------------------------------------------------------------------------*/
+
+.spinner {
+    width: 20px;
+    height: 20px;
+    margin: 50px auto;
+    background-color: #aaa;
+
+    border-radius: 100%;
+    -webkit-animation: sk-scaleout 0.8s infinite ease-in-out;
+    animation: sk-scaleout 0.8s infinite ease-in-out;
+}
+
+@-webkit-keyframes sk-scaleout {
+    0% {
+        -webkit-transform: scale(0)
+    }
+    100% {
+        -webkit-transform: scale(1.0);
+        opacity: 0;
+    }
+}
+
+@keyframes sk-scaleout {
+    0% {
+        -webkit-transform: scale(0);
+        transform: scale(0);
+    }
+    100% {
+        -webkit-transform: scale(1.0);
+        transform: scale(1.0);
+        opacity: 0;
+    }
+}
+
 
 /*----------------------------------------------------------------------------
  * Openlayers
@@ -176,6 +219,7 @@ table.padding1 td {
     text-shadow: 0 0 1px #ddd;
 }
 
+/*
 .olControlPanel.zoomIn {
 	right: 72px;
 }
@@ -190,6 +234,36 @@ table.padding1 td {
 .olControlPanel.zoomVisible {
 	right: 24px;
 }
+*/
+
+.olControlPanel.zoomIn {
+	right: 75px;
+    top: 4px;
+}
+.olControlPanel.zoomIn .olControlButtonItemActive {
+	border-top-left-radius: 3px;
+	border-bottom-left-radius: 3px;
+}
+
+.olControlPanel.zoomOut {
+	right: 51px;
+    top: 4px;
+}
+
+.olControlPanel.zoomVisible {
+	right: 27px;
+    top: 4px;
+}
+
+.olControlPanel.measure {
+	right: 3px;
+    top: 4px;
+}
+.olControlPanel.measure .olControlButtonItemActive {
+	border-top-right-radius: 3px;
+	border-bottom-right-radius: 3px;
+}
+
 
 .olControlPermalink { /* Perma link */
 	display: none !important;
@@ -861,8 +935,7 @@ gis-combo .x-form-item-label {
 	filter: alpha(opacity=92);
 	-ms-filter: "alpha(opacity=92)";
 	padding: 6px 8px 6px 8px;
-	border-bottom-left-radius: 2px;
-	border-bottom-right-radius: 2px;
+	border-radius: 3px;
 	color: #fff;
 	font-weight: bold;
 	letter-spacing: 1px;

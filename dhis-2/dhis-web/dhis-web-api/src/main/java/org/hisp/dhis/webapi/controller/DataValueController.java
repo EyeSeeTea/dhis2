@@ -56,7 +56,7 @@ import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.util.ValidationUtils;
 import org.hisp.dhis.user.CurrentUserService;
-import org.hisp.dhis.webapi.utils.InputUtils;
+import org.hisp.dhis.dxf2.utils.InputUtils;
 import org.hisp.dhis.webapi.utils.WebMessageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -206,29 +206,6 @@ public class DataValueController
         validateDataSetNotLocked( dataElement, period, organisationUnit );
 
         // ---------------------------------------------------------------------
-        // Deal with file resource
-        // ---------------------------------------------------------------------
-
-        FileResource fileResource = null;
-
-        if ( dataElement.getValueType() == ValueType.FILE_RESOURCE )
-        {
-            fileResource = fileResourceService.getFileResource( value );
-
-            if ( fileResource == null || fileResource.getDomain() != FileResourceDomain.DATA_VALUE )
-            {
-                throw new WebMessageException( WebMessageUtils.notFound( FileResource.class, value ) );
-            }
-
-            if ( fileResource.isAssigned() )
-            {
-                throw new WebMessageException( WebMessageUtils.conflict( "File resource is already assigned or is linked to another data value" ) );
-            }
-
-            fileResource.setAssigned( true );
-        }
-
-        // ---------------------------------------------------------------------
         // Assemble and save data value
         // ---------------------------------------------------------------------
 
@@ -238,8 +215,38 @@ public class DataValueController
 
         DataValue dataValue = dataValueService.getDataValue( dataElement, period, organisationUnit, categoryOptionCombo, attributeOptionCombo );
 
+        FileResource fileResource = null;
+
         if ( dataValue == null )
         {
+            // ---------------------------------------------------------------------
+            // Deal with file resource
+            // ---------------------------------------------------------------------
+
+            if ( dataElement.getValueType() == ValueType.FILE_RESOURCE )
+            {
+                if ( value != null )
+                {
+                    fileResource = fileResourceService.getFileResource( value );
+
+                    if ( fileResource == null || fileResource.getDomain() != FileResourceDomain.DATA_VALUE )
+                    {
+                        throw new WebMessageException( WebMessageUtils.notFound( FileResource.class, value ) );
+                    }
+
+                    if ( fileResource.isAssigned() )
+                    {
+                        throw new WebMessageException( WebMessageUtils.conflict( "File resource already assigned or linked to another data value" ) );
+                    }
+
+                    fileResource.setAssigned( true );
+                }
+                else
+                {
+                    throw new WebMessageException( WebMessageUtils.conflict( "Missing parameter 'value'" ) );
+                }
+            }
+
             dataValue = new DataValue( dataElement, period, organisationUnit, categoryOptionCombo, attributeOptionCombo,
                 StringUtils.trimToNull( value ), storedBy, now, StringUtils.trimToNull( comment ) );
 
@@ -260,15 +267,12 @@ public class DataValueController
                 }
             }
 
-            if ( value != null )
+            if ( dataElement.isFileType() )
             {
-                if ( dataElement.isFileType() )
-                {
-                    fileResourceService.deleteFileResource( dataValue.getValue() );
-                }
-
-                dataValue.setValue( StringUtils.trimToNull( value ) );
+                fileResourceService.deleteFileResource( dataValue.getValue() );
             }
+
+            dataValue.setValue( StringUtils.trimToNull( value ) );
 
             if ( comment != null )
             {

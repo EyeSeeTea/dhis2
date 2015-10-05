@@ -28,6 +28,7 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.apache.commons.lang3.StringUtils.trim;
 import static org.hisp.dhis.i18n.I18nUtils.i18n;
 
 import java.util.Date;
@@ -37,13 +38,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 
-import org.apache.commons.lang3.StringUtils;
-import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.commons.sqlfunc.ConditionalSqlFunction;
 import org.hisp.dhis.commons.sqlfunc.DaysBetweenSqlFunction;
 import org.hisp.dhis.commons.sqlfunc.OneIfZeroOrPositiveSqlFunction;
 import org.hisp.dhis.commons.sqlfunc.SqlFunction;
 import org.hisp.dhis.commons.sqlfunc.ZeroIfNegativeSqlFunction;
+import org.hisp.dhis.commons.sqlfunc.ZeroPositiveValueCountFunction;
 import org.hisp.dhis.commons.util.ExpressionUtils;
 import org.hisp.dhis.commons.util.TextUtils;
 import org.hisp.dhis.constant.Constant;
@@ -67,8 +67,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.ImmutableMap;
 
-import static org.apache.commons.lang3.StringUtils.trim;
-
 /**
  * @author Chau Thu Tran
  */
@@ -78,9 +76,12 @@ public class DefaultProgramIndicatorService
     private static final Map<String, SqlFunction> SQL_FUNC_MAP = ImmutableMap.<String, SqlFunction>builder().
         put( ZeroIfNegativeSqlFunction.KEY, new ZeroIfNegativeSqlFunction() ).
         put( OneIfZeroOrPositiveSqlFunction.KEY, new OneIfZeroOrPositiveSqlFunction() ).
+        put( ZeroPositiveValueCountFunction.KEY, new ZeroPositiveValueCountFunction() ).
         put( DaysBetweenSqlFunction.KEY, new DaysBetweenSqlFunction() ).
         put( ConditionalSqlFunction.KEY, new ConditionalSqlFunction() ).build();
 
+    private static final String NULL_REPLACEMENT = "null";
+    
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -248,18 +249,17 @@ public class DefaultProgramIndicatorService
 
                     TrackedEntityDataValue dataValue = dataValueService.getTrackedEntityDataValue( psi, dataElement );
 
+                    String value = null;
+                    
                     if ( dataValue == null )
                     {
-                        return null;
+                        value = NULL_REPLACEMENT;
                     }
-
-                    String value = dataValue.getValue();
-
-                    if ( ValueType.DATE == dataElement.getValueType() )
+                    else
                     {
-                        value = DateUtils.daysBetween( new Date(), DateUtils.getDefaultDate( value ) ) + " ";
+                        value = dataValue.getValue();
                     }
-
+                    
                     matcher.appendReplacement( buffer, value );
 
                     valueCount++;
@@ -279,24 +279,21 @@ public class DefaultProgramIndicatorService
                     TrackedEntityAttributeValue attributeValue = attributeValueService.getTrackedEntityAttributeValue(
                         programInstance.getEntityInstance(), attribute );
 
-                    if ( attributeValue != null )
+                    String value = null;
+                    
+                    if ( attributeValue == null )
                     {
-                        String value = attributeValue.getValue();
-
-                        if ( ValueType.DATE == attribute.getValueType() )
-                        {
-                            value = DateUtils.daysBetween( new Date(), DateUtils.getDefaultDate( value ) ) + " ";
-                        }
-
-                        matcher.appendReplacement( buffer, value );
-
-                        valueCount++;
-                        zeroPosValueCount = isZeroOrPositive( value ) ? (zeroPosValueCount + 1) : zeroPosValueCount;
+                        value = NULL_REPLACEMENT;
                     }
                     else
                     {
-                        return null;
+                        value = attributeValue.getValue();
                     }
+                    
+                    matcher.appendReplacement( buffer, value );
+
+                    valueCount++;
+                    zeroPosValueCount = isZeroOrPositive( value ) ? (zeroPosValueCount + 1) : zeroPosValueCount;
                 }
                 else
                 {
@@ -367,7 +364,7 @@ public class DefaultProgramIndicatorService
         }
 
         expression = TextUtils.appendTail( matcher, buffer );
-
+        
         return MathUtils.calculateExpression( expression );
     }
 
@@ -475,6 +472,8 @@ public class DefaultProgramIndicatorService
             return null;
         }
 
+        expression = TextUtils.removeNewlines( expression );
+        
         expression = getSubstitutedVariablesForAnalyticsSql( expression );
         
         expression = getSubstitutedFunctionsAnalyticsSql( expression, false );
@@ -497,21 +496,30 @@ public class DefaultProgramIndicatorService
 
         while ( matcher.find() )
         {
-            String func = StringUtils.trim( matcher.group( 1 ) );
-            String arg1 = getSubstitutedElementsAnalyticsSql( trim( matcher.group( 2 ) ), false );
-            String arg2 = getSubstitutedElementsAnalyticsSql( trim( matcher.group( 3 ) ), false );
-            String arg3 = getSubstitutedElementsAnalyticsSql( trim( matcher.group( 4 ) ), false );
-
-            SqlFunction function = SQL_FUNC_MAP.get( func );
-
-            if ( function == null )
+            String func = trim( matcher.group( 1 ) );
+            String arguments = trim( matcher.group( 2 ) );
+            
+            if ( func != null && arguments != null )
             {
-                throw new IllegalStateException( "Function not recognized: " + func );
+                String[] args = arguments.split( ProgramIndicator.ARGS_SPLIT );
+                
+                for ( int i = 0; i < args.length; i++ )
+                {
+                    String arg = getSubstitutedElementsAnalyticsSql( trim( args[i] ), false );
+                    args[i] = arg;
+                }
+                
+                SqlFunction function = SQL_FUNC_MAP.get( func );
+                
+                if ( function == null )
+                {
+                    throw new IllegalStateException( "Function not recognized: " + func );
+                }
+                
+                String result = function.evaluate( args );
+    
+                matcher.appendReplacement( buffer, result );
             }
-
-            String result = function.evaluate( arg1, arg2, arg3 );
-
-            matcher.appendReplacement( buffer, result );
         }
 
         return TextUtils.appendTail( matcher, buffer );

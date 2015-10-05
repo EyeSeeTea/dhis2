@@ -34,7 +34,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,6 +52,7 @@ public class TextUtils
     public static final String SPACE = " ";
     public static final String SEP = "-";
     public static final String LN = System.getProperty( "line.separator" );
+    public static final String SEMICOLON = ";";
     
     private static final Pattern LINK_PATTERN = Pattern.compile( "((http://|https://|www\\.).+?)($|\\n|\\r|\\r\\n| )" );
     private static final String DELIMITER = ", ";
@@ -104,7 +107,7 @@ public class TextUtils
 
     /**
      * Replaces common newline characters like \n, \r, \r\n to the HTML line
-     * break tag <br>.
+     * break tag br.
      * 
      * @param text the text to substitute.
      * @return the substituted text.
@@ -239,6 +242,7 @@ public class TextUtils
      * trailing spaces.
      * 
      * @param string the string.
+     * @param remove the text to remove.
      * @return the chopped string.
      */
     public static String removeLast( String string, String remove )
@@ -246,6 +250,17 @@ public class TextUtils
         string = StringUtils.stripEnd( string, " " );
         
         return StringUtils.removeEndIgnoreCase( string,  remove );
+    }
+    
+    /**
+     * Removes line breaks form the given string.
+     * 
+     * @param string the string.
+     * @return the chopped string.
+     */
+    public static String removeNewlines( String string )
+    {
+        return string.replaceAll( "\r", EMPTY ).replaceAll( "\n", EMPTY );
     }
     
     /**
@@ -283,6 +298,7 @@ public class TextUtils
      * Joins the elements of the provided array into a single String containing 
      * the provided list of elements.
      * 
+     * @param <T> type.
      * @param list the list of objects to join.
      * @param separator the separator string.
      * @param nullReplacement the value to replace nulls in list with.
@@ -548,5 +564,25 @@ public class TextUtils
         }
         
         return false;
+    }
+    
+    /**
+     * Splits the given string value into independent values using a given
+     * separator.
+     *
+     * @param value the string to be splitted.
+     * @param separator for splitting value 
+     * @return the list of independent values.
+     */
+    public static Set<String> splitToArray( String value, String separator )
+    {
+        if ( value == null || value.isEmpty() )
+        {
+            return null;
+        }
+
+        String[] values = value.split( separator );
+
+        return new HashSet<>( Arrays.asList( values ) );
     }
 }

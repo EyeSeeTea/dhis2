@@ -33,6 +33,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
+ * Class for functions to be used in JEXL expression evaluation.
+ * 
  * @author Lars Helge Overland
  */
 public class ExpressionFunctions
@@ -49,7 +51,7 @@ public class ExpressionFunctions
     {
         if ( value == null )
         {
-            throw new IllegalArgumentException( "Argument is null: " + value );
+            return null;
         }
         
         return Math.max( 0d, value.doubleValue() );
@@ -66,10 +68,37 @@ public class ExpressionFunctions
     {
         if ( value == null )
         {
-            throw new IllegalArgumentException( "Argument is null: " + value );
+            return null;
         }
         
         return ( value.doubleValue() >= 0d ) ? 1d : 0d;
+    }
+    
+    /**
+     * Function which will return the count of zero or positive values among the
+     * given argument values.
+     * 
+     * @param values the arguments.
+     * @return an Integer.
+     */
+    public static Integer zpvc( Number... values )
+    {
+        if ( values == null || values.length == 0 )
+        {
+            throw new IllegalArgumentException( "Argument is null or empty: " + values );
+        }
+        
+        int count = 0;
+        
+        for ( Number value : values )
+        {
+            if ( value != null && value.doubleValue() >= 0d )
+            {
+                count++;
+            }
+        }
+        
+        return count;        
     }
 
     /**
@@ -92,6 +121,7 @@ public class ExpressionFunctions
      * @param start the start date. 
      * @param end the end date.
      * @return number of days between dates.
+     * @throws ParseException if start or end could not be parsed.
      */
     public static Integer daysBetween( String start, String end )
         throws ParseException

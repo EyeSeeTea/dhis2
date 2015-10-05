@@ -176,7 +176,7 @@ function saveVal( dataElementId, optionComboId, fieldId, feedbackId )
     if ( value )
     {
         if ( type == 'TEXT' || type == 'NUMBER' || type == 'INTEGER' || type == 'INTEGER_POSITIVE' || type == 'INTEGER_NEGATIVE'
-          || type == 'INTEGER_ZERO_OR_POSITIVE' || type == 'UNIT_INTERVAL' || type == 'PERCENTAGE' )
+          || type == 'INTEGER_ZERO_OR_POSITIVE' || type == 'UNIT_INTERVAL' || type == 'PERCENTAGE' || type == 'COORDINATE')
         {
             if ( value.length > dhis2.de.cst.valueMaxLength )
             {
@@ -201,6 +201,10 @@ function saveVal( dataElementId, optionComboId, fieldId, feedbackId )
             if ( type == 'INTEGER_ZERO_OR_POSITIVE' && !dhis2.validation.isZeroOrPositiveInt( value ) )
             {
                 return dhis2.de.alertField( fieldId, i18n_value_must_zero_or_positive_integer + '\n\n' + dataElementName );
+            }
+            if ( type == 'COORDINATE' && !dhis2.validation.isCoordinate( value ) )
+            {
+                return dhis2.de.alertField( fieldId, i18n_value_must_coordinate + '\n\n' + dataElementName );
             }
             if ( type == 'UNIT_INTERVAL' && !dhis2.validation.isUnitInterval( value ) )
             {
@@ -288,6 +292,16 @@ function saveTrueOnly( dataElementId, optionComboId, fieldId )
     valueSaver.save();
 }
 
+function saveFileResource( dataElementId, optionComboId, fieldId, fileResource, onSuccessCallback )
+{
+    fieldId = '#' + fieldId;
+
+    var periodId = $( '#selectedPeriodId' ).val();
+
+    var valueSaver = new FileResourceValueSaver( dataElementId, periodId, optionComboId, fileResource, fieldId, dhis2.de.cst.colorGreen, onSuccessCallback );
+    valueSaver.save();
+}
+
 /**
  * Supportive method.
  */
@@ -352,12 +366,19 @@ function ValueSaver( de, pe, co, value, fieldId, resultColor )
             error: handleError
         } );
     };
-    
+
+    var afterHandleSuccess = function() {};
+
+    this.setAfterHandleSuccess = function( callback ) {
+        afterHandleSuccess = callback;
+    };
+
     function handleSuccess()
     {
-    	dhis2.de.storageManager.clearDataValueJSON( dataValue );
+        dhis2.de.storageManager.clearDataValueJSON( dataValue );
         markValue( fieldId, resultColor );
         $( document ).trigger( dhis2.de.event.dataValueSaved, [ dhis2.de.currentDataSetId, dataValue ] );
+        afterHandleSuccess();
     }
 
     function handleError( xhr, textStatus, errorThrown )
@@ -379,4 +400,13 @@ function ValueSaver( de, pe, co, value, fieldId, resultColor )
     {
         $( fieldId ).css( 'background-color', color );
     }
+}
+
+function FileResourceValueSaver( de, pe, co, fileResource, fieldId, resultColor, onSuccessCallback )
+{
+    var valueSaver = new ValueSaver( de, pe, co, fileResource.id, fieldId, resultColor );
+
+    valueSaver.setAfterHandleSuccess( onSuccessCallback );
+
+    return valueSaver;
 }
