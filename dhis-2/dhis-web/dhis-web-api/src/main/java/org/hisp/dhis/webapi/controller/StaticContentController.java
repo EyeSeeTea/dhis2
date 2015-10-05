@@ -100,7 +100,7 @@ public class StaticContentController
             throw new WebMessageException( WebMessageUtils.notFound( "Key does not exist" ) );
         }
 
-        Boolean useCustomFile = (Boolean) systemSettingManager.getSystemSetting( KEY_WHITELIST_MAP.get( key ), false );
+        Boolean useCustomFile = Boolean.parseBoolean( (String) systemSettingManager.getSystemSetting( KEY_WHITELIST_MAP.get( key ) ) );
 
         if ( !useCustomFile ) // Serve the default
         {
