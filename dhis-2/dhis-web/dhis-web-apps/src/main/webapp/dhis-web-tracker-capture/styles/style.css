@@ -4,7 +4,6 @@ html, body {
     padding: 0;
     background-color: white;
     font-size: 10pt;
-    overflow: auto;
 }
 
 .not-for-screen {
@@ -184,7 +183,6 @@ div.paging a.active
 
 .input-success {
     background-color: #b9ffb9 !important;
-    color: red;
 }
 
 .alert-default {
@@ -193,8 +191,15 @@ div.paging a.active
     border-color: #aaa29a;
 }
 
-.red {
-    color: red;
+.stick {
+    font-weight: bolder;
+    color: #000000;
+    background-color: #6E6E6E; 
+}
+
+.unstick {
+    color: #000000;
+    background-color: #FFFFFF;
 }
 
 .right {

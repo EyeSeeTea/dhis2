@@ -641,7 +641,7 @@ dhis2.de.addEventListeners = function()
 
     $( '.entryfileresource-container' ).each( function()
     {
-        $( this ).fileResourceEntryField();
+        $( this ).fileEntryField();
     } );
 }
 
@@ -1536,6 +1536,15 @@ function loadDataValues()
     displayEntryFormCompleted();
 }
 
+function clearFileEntryFields() {
+    var $containers = $( '.entryfileresource-container' );
+    $containers.find( '.upload-fileinfo-name' ).text( '' );
+    $containers.find( '.upload-fileinfo-size' ).text( '' );
+
+    $containers.find( '.upload-field' ).css( 'background-color', dhis2.de.cst.colorWhite );
+    $containers.find( '.entryfileresource' ).val( '' );
+}
+
 function getAndInsertDataValues()
 {
     var periodId = $( '#selectedPeriodId').val();
@@ -1554,7 +1563,8 @@ function getAndInsertDataValues()
     $( '.entrytrueonly' ).css( 'background-color', dhis2.de.cst.colorWhite );
     $( '.entryoptionset' ).css( 'background-color', dhis2.de.cst.colorWhite );
 
-    $( '.entryfileresource' ).css( 'background-color', dhis2.de.cst.colorWhite );
+    clearFileEntryFields();
+
 
     $( '[name="min"]' ).html( '' );
     $( '[name="max"]' ).html( '' );
@@ -1663,25 +1673,18 @@ function insertDataValues( json )
             }
             else if ( $( fieldId ).attr( 'name' ) == 'entryoptionset' )
             {
-            	dhis2.de.setOptionNameInField( fieldId, value );            	
+                dhis2.de.setOptionNameInField( fieldId, value );
             }
             else if ( $( fieldId ).attr( 'class' ) == 'entryfileresource' )
             {
-                $( fieldId ).data( 'value', value.val );
-                // TODO Consider pre-fetching with dataset
-                $.ajax( {
-                    url: '../api/fileResources/' + value.val,
-                    success: function( data ) {
-                        var name = data.name, size = '(' + filesize( data.contentLength ) + ')';
+                $( fieldId ).val( value.val );
 
-                        $( fieldId ).find( '.upload-fileinfo-name' ).text( name );
-                        $( fieldId ).find( '.upload-fileinfo-size' ).text( size );
-                    },
-                    error: function( data ) {
-                        $( fieldId ).find( '.upload-fileinfo-name' ).text( 'Failed loading file meta-data' );
-                        $( fieldId ).find( '.upload-fileinfo-size' ).text( + '' );
-                    }
-                } );
+                if ( value.fileMeta )
+                {
+                    var $container = $( '.entryfileresource-container[name=' + value.id + '-val]' );
+                    $container.find( '.upload-fileinfo-name' ).text( value.fileMeta.name );
+                    $container.find( '.upload-fileinfo-size' ).text( '(' + filesize( value.fileMeta.size ) + ')' );
+                }
             }
             else 
             {
@@ -1698,7 +1701,7 @@ function insertDataValues( json )
             else if ( $( fieldId ).length > 0 )
             {
                 $( fieldId ).css( 'border-color', dhis2.de.cst.colorBorderActive )
-            }	            		
+            }
         }
         
         dataValueMap[value.id] = value.val;

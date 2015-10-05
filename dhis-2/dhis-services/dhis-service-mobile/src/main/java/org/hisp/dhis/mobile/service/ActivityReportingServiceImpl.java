@@ -955,13 +955,13 @@ public class ActivityReportingServiceImpl
                     mobileProgramStage.setReportDate( "" );
                 }
 
-                if ( programStage.getReportDateDescription() == null )
+                if ( programStage.getExcecutionDateLabel() == null )
                 {
                     mobileProgramStage.setReportDateDescription( "Report Date" );
                 }
                 else
                 {
-                    mobileProgramStage.setReportDateDescription( programStage.getReportDateDescription() );
+                    mobileProgramStage.setReportDateDescription( programStage.getExcecutionDateLabel() );
                 }
 
                 // get due date
@@ -1287,13 +1287,13 @@ public class ActivityReportingServiceImpl
             // get report date
             mobileProgramStage.setReportDate( PeriodUtil.dateToString( new Date() ) );
 
-            if ( programStage.getReportDateDescription() == null )
+            if ( programStage.getExcecutionDateLabel() == null )
             {
                 mobileProgramStage.setReportDateDescription( "Report Date" );
             }
             else
             {
-                mobileProgramStage.setReportDateDescription( programStage.getReportDateDescription() );
+                mobileProgramStage.setReportDateDescription( programStage.getExcecutionDateLabel() );
             }
 
             for ( ProgramStageDataElement programStageDataElement : programStageDataElements )
@@ -1455,13 +1455,6 @@ public class ActivityReportingServiceImpl
     public void setProgramStageService( ProgramStageService programStageService )
     {
         this.programStageService = programStageService;
-    }
-
-    private I18nFormat format;
-
-    public void setFormat( I18nFormat format )
-    {
-        this.format = format;
     }
 
     @Override
@@ -2598,7 +2591,5 @@ public class ActivityReportingServiceImpl
         }
 
         return getPatientModel( newTrackedEntityInstance );
-
     }
-
 }

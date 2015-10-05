@@ -33,6 +33,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
+ * Class for functions to be used in JEXL expression evaluation.
+ * 
  * @author Lars Helge Overland
  */
 public class ExpressionFunctions
@@ -49,7 +51,7 @@ public class ExpressionFunctions
     {
         if ( value == null )
         {
-            throw new IllegalArgumentException( "Argument is null: " + value );
+            return null;
         }
         
         return Math.max( 0d, value.doubleValue() );
@@ -66,7 +68,7 @@ public class ExpressionFunctions
     {
         if ( value == null )
         {
-            throw new IllegalArgumentException( "Argument is null: " + value );
+            return null;
         }
         
         return ( value.doubleValue() >= 0d ) ? 1d : 0d;

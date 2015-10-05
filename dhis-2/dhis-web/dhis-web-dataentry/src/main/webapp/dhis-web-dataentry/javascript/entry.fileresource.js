@@ -1,13 +1,10 @@
 ( function ( $ ) {
-    $.fn.fileResourceEntryField = function() {
-
-        // TODO Use i18n
-        // TODO Disable field when offline
-        // TODO Re-init on period change
-
+    $.fn.fileEntryField = function() {
         var $container = $( this );
 
         var $field = $container.find( '.entryfileresource' );
+        var $displayField = $container.find( '.upload-field' );
+
         var $button = $container.find( '.upload-button' );
 
         var $fileInput = $container.find( 'input[type=file]' );
@@ -36,7 +33,6 @@
             'pe': periodId
         };
 
-        // Logic
         var deleteFileDataValue = function() {
             var postData = formData;
             postData.value = '';
@@ -51,7 +47,8 @@
                     $fileinfoName.text( '' );
                     $fileinfoSize.text( '' );
                     $fileinfo.hide();
-                    $field.css( 'background-color', '' );
+                    $displayField.css( 'background-color', '' );
+                    $field.val( '' );
                     setButtonUpload();
                 },
                 error: function( data )
@@ -71,7 +68,7 @@
             $button.unbind( 'click' );
             $button.on( 'click', function() {
                 $( '#fileDeleteConfirmationDialog' ).dialog( {
-                    title: 'Confirm deletion',
+                    title: i18n_confirm_deletion,
                     resizable: false,
                     height: 140,
                     modal: true,
@@ -104,6 +101,16 @@
             $button.button( 'enable' );
         };
 
+        var setButtonBlocked = function() {
+            $button.button( {
+                text: false,
+                icons: {
+                    primary: 'fa fa-ban'
+                }
+            } );
+            $button.button( 'disable' );
+        };
+
         var resetAndHideProgress = function() {
             $progressBar.toggleClass( 'upload-progress-bar-complete', true );
             $progressBar.css( 'width', 0 );
@@ -115,27 +122,41 @@
 
             $fileinfoName.text( name );
             $fileinfoSize.text( size );
-            $progressBar.toggleClass( 'upload-progress-bar-complete' );
             $fileinfo.show();
+            $progressBar.toggleClass( 'upload-progress-bar-complete' );
+            $displayField.css( 'background-color', dhis2.de.cst.colorGreen );
+
             resetAndHideProgress();
             setButtonDelete();
             $button.button( 'enable' );
         };
 
-        // Button setup
-        $button.button( {
-            text: false,
-            icons: {
-                primary: 'fa fa-ban'
-            }
-        } );
-        $button.button( 'disable' );
+        var updateProgress = function( loaded, total ) {
+            var percent = parseInt( loaded / total * 100, 10 );
+            $progressBar.css( 'width', percent + '%' );
+            $progressInfo.text( percent + '%' );
+        };
+
+        var disableField = function() {
+            $button.button( 'disable' );
+            $displayField.toggleClass( 'upload-field-disabled', true );
+        };
+
+        var enableField = function() {
+            $button.button( 'enable' );
+            $displayField.toggleClass( 'upload-field-disabled', false );
+        };
 
         $( document ).on( dhis2.de.event.dataValuesLoaded, function() {
-            ( typeof( $field.data( 'value' ) ) == 'undefined' ) ? setButtonUpload() : setButtonDelete();
+            ( !$field.val() ) ? setButtonUpload() : setButtonDelete();
         } );
 
-        // Initialize file uploader
+        $( document ).on( "dhis2.offline", disableField );
+        $( document ).on( "dhis2.online",  enableField );
+
+        // Init
+        setButtonBlocked();
+
         $fileInput.fileupload( {
             url: '../api/dataValues/files',
             paramName: 'file',
@@ -152,19 +173,18 @@
             },
             progress: function( e, data )
             {
-                var percent = parseInt( data.loaded / data.total * 100, 10 );
-                $progressBar.css( 'width', percent + '%' );
-                $progressInfo.text( percent + '%' );
+                updateProgress( data.loaded, data.total );
             },
             fail: function( e, data )
             {
-                setHeaderDelayMessage( "File upload failed!" );
-                console.log( data.errorThrown );
+                setHeaderDelayMessage( i18n_file_upload_failed );
+                console.error( data.errorThrown );
                 setButtonUpload();
             },
             done: function( e, data )
             {
                 var fileResource = data.result.response.fileResource;
+                $field.val( fileResource.id );
 
                 saveFileResource( dataElementId, optionComboId, id, fileResource, function() {
                     onFileDataValueSavedSuccess( fileResource );

@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.adx;
+package org.hisp.dhis.system.util;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,41 +28,25 @@ package org.hisp.dhis.dxf2.adx;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
 /**
- *
- * @author bobj
+ * @author Lars Helge Overland
  */
-public interface ADXConstants
+public class CodeUtilsTest
 {
-    //--------------------------------------------------------------------------
-    // These are defined in the ADX standard
-    //--------------------------------------------------------------------------
+    @Test
+    public void testFilenameEncode()
+    {
+        assertEquals( "nicechart", CodecUtils.filenameEncode( "nicechart" ) );
+    }
 
-    String NAMESPACE = "urn:ihe:qrph:adx:2015";
-    
-    String ROOT = "adx";
-
-    String GROUP = "group";
-
-    String DATASET = "dataSet";
-    
-    String PERIOD = "period";
-    
-    String ORGUNIT = "orgUnit";
-    
-    String DATAELEMENT = "dataElement";
-
-    String DATAVALUE = "dataValue";
-
-    String VALUE = "value";
-
-    String ANNOTATION = "annotation";
-    
-    //--------------------------------------------------------------------------
-    // DHIS 2 specific
-    //--------------------------------------------------------------------------
-
-    String CATOPTCOMBO = "categoryOptionCombo";
-    
-    String ATTOPTCOMBO = "attributeOptionCombo";
+    @Test
+    public void test()
+    {
+        assertEquals( "Basic am9objpkb2UxMjM=", CodecUtils.getBasicAuthString( "john", "doe123" ) );
+        assertEquals( "Basic YWRtaW46ZGlzdHJpY3Q=", CodecUtils.getBasicAuthString( "admin", "district" ) );
+    }
 }
