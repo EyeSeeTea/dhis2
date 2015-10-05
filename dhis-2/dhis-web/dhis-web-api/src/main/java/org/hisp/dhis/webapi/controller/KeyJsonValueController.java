@@ -202,6 +202,17 @@ public class KeyJsonValueController
         return keyJsonValue;
     }
 
+    /**
+     * Update a key in the given namespace
+     * @param namespace namespace where the key is associated
+     * @param key key to be updated
+     * @param body the new value to be stored
+     * @param request
+     * @param response
+     * @return The updated object
+     * @throws WebMessageException
+     * @throws IOException
+     */
     @RequestMapping( value = "/{namespace}/{key}", method = RequestMethod.PUT, produces = "application/json", consumes = "application/json" )
     public
     @ResponseBody
@@ -233,6 +244,14 @@ public class KeyJsonValueController
         return keyJsonValue;
     }
 
+    /**
+     * Delete a key from the given namespace
+     * @param namespace namespace where the key is associated
+     * @param key key to be deleted
+     * @param response
+     * @return the success of the deletion
+     * @throws WebMessageException
+     */
     @RequestMapping( value = "/{namespace}/{key}", method = RequestMethod.DELETE, produces = "application/json" )
     public
     @ResponseBody
