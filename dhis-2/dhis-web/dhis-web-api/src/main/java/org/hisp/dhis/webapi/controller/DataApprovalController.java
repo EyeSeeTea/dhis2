@@ -277,7 +277,7 @@ public class DataApprovalController
             statusList.addAll( dataApprovalService.getUserDataApprovalsAndPermissions( pair.getKey(), period, orgUnit, pair.getValue() ) );
         }
 
-        List<Map<String, Object>> list = new ArrayList<>();
+        Set<Map<String, Object>> results = new HashSet<>(); // Avoid duplicate results.
 
         for ( DataApprovalStatus status : statusList )
         {
@@ -301,9 +301,11 @@ public class DataApprovalController
                 item.put( "accepted", approval.isAccepted() );
                 item.put( "permissions", status.getPermissions() );
 
-                list.add( item );
+                results.add( item );
             }
         }
+
+        List<Map<String, Object>> list = new ArrayList<>( results );
 
         JacksonUtils.toJson( response.getOutputStream(), list );
     }

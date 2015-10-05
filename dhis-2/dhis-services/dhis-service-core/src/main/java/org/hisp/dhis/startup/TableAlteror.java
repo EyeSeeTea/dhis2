@@ -1159,7 +1159,7 @@ public class TableAlteror
         executeSql( "update dataset set workflowid = ( select w.dataapprovalworkflowid from dataapprovalworkflow w where w.name = dataset.name)" );
         executeSql( "alter table dataset drop column approvedata cascade" ); // Cascade to SQL Views, if any.
 
-        executeSql( "alter table dataapproval add column workflowid" );
+        executeSql( "alter table dataapproval add column workflowid integer" );
         executeSql( "update dataapproval set workflowid = ( select workflowid from dataset ds where ds.datasetid = dataapproval.datasetid)" );
         executeSql( "alter table dataapproval alter column workflowid set not null" );
         executeSql( "alter table dataapproval drop constraint dataapproval_unique_key" );
@@ -1293,7 +1293,6 @@ public class TableAlteror
     {
         try
         {
-            log.error ("Trying: " + sql);
             // TODO use jdbcTemplate
 
             return statementManager.getHolder().executeUpdate( sql );

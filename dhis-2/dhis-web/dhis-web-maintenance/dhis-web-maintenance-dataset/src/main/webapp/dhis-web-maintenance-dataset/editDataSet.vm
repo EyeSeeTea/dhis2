@@ -122,7 +122,7 @@
           <td>
               <select id="dataApprovalWorkflowId" name="dataApprovalWorkflowId">
                 #foreach( $dataApprovalWorkflow in $dataApprovalWorkflows )
-                    <option value="$dataApprovalWorkflow.id#if( $dataSet.dataApprovalWorkflow.id == $dataApprovalWorkflow.id ) selected="selected"#end">$encoder.htmlEncode( $dataApprovalWorkflow.name )</option>
+                    <option value="$dataApprovalWorkflow.id"#if( $dataSet.dataApprovalWorkflow.id == $dataApprovalWorkflow.id ) selected="selected"#end>$encoder.htmlEncode( $dataApprovalWorkflow.name )</option>
                 #end
               </select>
           </td>
