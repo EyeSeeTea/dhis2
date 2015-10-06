@@ -267,7 +267,7 @@ public class DataApprovalController
 
         for ( DataSet dataSet : dataSets )
         {
-            pairs.add( new Pair<>(dataSet.getWorkflow(), dataSet.getCategoryCombo() ) );
+            pairs.add( new Pair<>( dataSet.getWorkflow(), dataSet.getCategoryCombo() ) );
         }
 
         List<DataApprovalStatus> statusList = new ArrayList<>();
@@ -277,7 +277,7 @@ public class DataApprovalController
             statusList.addAll( dataApprovalService.getUserDataApprovalsAndPermissions( pair.getKey(), period, orgUnit, pair.getValue() ) );
         }
 
-        Set<Map<String, Object>> results = new HashSet<>(); // Avoid duplicate results.
+        List<Map<String, Object>> list = new ArrayList<>();
 
         for ( DataApprovalStatus status : statusList )
         {
@@ -301,11 +301,9 @@ public class DataApprovalController
                 item.put( "accepted", approval.isAccepted() );
                 item.put( "permissions", status.getPermissions() );
 
-                results.add( item );
+                list.add( item );
             }
         }
-
-        List<Map<String, Object>> list = new ArrayList<>( results );
 
         JacksonUtils.toJson( response.getOutputStream(), list );
     }
@@ -704,7 +702,7 @@ public class DataApprovalController
         User user = currentUserService.getCurrentUser();
         Date date = new Date();
 
-        List<DataApproval> list = new ArrayList<>();
+        Set<DataApproval> set = new HashSet<>(); // Avoid duplicates when different datasets have the same workflow
 
         for ( DataSet dataSet : dataSets )
         {
@@ -720,12 +718,12 @@ public class DataApprovalController
                     if ( dataSetOptionCombos != null && dataSetOptionCombos.contains( optionCombo ) )
                     {
                         DataApproval dataApproval = new DataApproval( null, dataSet.getWorkflow(), period, unit, optionCombo, false, date, user );
-                        list.add( dataApproval );
+                        set.add( dataApproval );
                     }
                 }
             }
         }
 
-        return list;
+        return new ArrayList<>( set );
     }
 }
