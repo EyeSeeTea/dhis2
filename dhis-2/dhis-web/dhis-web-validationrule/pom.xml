@@ -20,7 +20,10 @@
   <dependencies>
     
     <!-- DHIS dependencies -->
-    
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-api</artifactId>
@@ -43,11 +46,6 @@
     <dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-service-core</artifactId>
-    </dependency>
-    
-    <dependency>
-      <groupId>org.hisp.dhis</groupId>
-      <artifactId>dhis-service-importexport</artifactId>
     </dependency>
     <dependency>
       <groupId>org.hisp.dhis</groupId>

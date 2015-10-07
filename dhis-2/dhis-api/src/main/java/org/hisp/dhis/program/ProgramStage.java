@@ -64,11 +64,6 @@ import java.util.Set;
 public class ProgramStage
     extends BaseIdentifiableObject
 {
-    /**
-     * Determines if a de-serialized file is compatible with this class.
-     */
-    private static final long serialVersionUID = 6876401001559656214L;
-
     private String description;
 
     private int minDaysFromStart;
@@ -89,6 +84,7 @@ public class ProgramStage
 
     private String excecutionDateLabel;
 
+    @Scanned
     private Set<TrackedEntityInstanceReminder> reminders = new HashSet<>();
 
     private Boolean autoGenerateEvent = true;
@@ -223,6 +219,7 @@ public class ProgramStage
 
     @JsonProperty( "trackedEntityInstanceReminders" )
     @JsonView( { DetailedView.class } )
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     @JacksonXmlElementWrapper( localName = "trackedEntityInstanceReminders", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "trackedEntityInstanceReminder", namespace = DxfNamespaces.DXF_2_0 )
     public Set<TrackedEntityInstanceReminder> getReminders()
@@ -264,6 +261,7 @@ public class ProgramStage
 
     @JsonProperty( "programStageSections" )
     @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     @JacksonXmlElementWrapper( localName = "programStageSections", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "programStageSection", namespace = DxfNamespaces.DXF_2_0 )
     public Set<ProgramStageSection> getProgramStageSections()
@@ -577,10 +575,20 @@ public class ProgramStage
             }
 
             programStageDataElements.clear();
-            programStageDataElements.addAll( programStage.getProgramStageDataElements() );
+
+            for ( ProgramStageDataElement programStageDataElement : programStage.getProgramStageDataElements() )
+            {
+                programStageDataElements.add( programStageDataElement );
+                programStageDataElement.setProgramStage( this );
+            }
 
             programStageSections.clear();
-            programStageSections.addAll( programStage.getProgramStageSections() );
+
+            for ( ProgramStageSection programStageSection : programStage.getProgramStageSections() )
+            {
+                programStageSections.add( programStageSection );
+                programStageSection.setProgramStage( this );
+            }
 
             reminders.clear();
             reminders.addAll( programStage.getReminders() );

@@ -29,13 +29,11 @@ package org.hisp.dhis.setting;
  */
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.hisp.dhis.calendar.CalendarService;
 import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.QuarterlyPeriodType;
 import org.hisp.dhis.period.YearlyPeriodType;
@@ -47,6 +45,8 @@ public interface SystemSettingManager
 {
     String ID = SystemSettingManager.class.getName();
 
+    //TODO migrate from strings to Setting enum throughout system
+    
     String KEY_APPLICATION_TITLE = "applicationTitle";
     String KEY_APPLICATION_INTRO = "keyApplicationIntro";
     String KEY_APPLICATION_NOTIFICATION = "keyApplicationNotification";
@@ -55,14 +55,7 @@ public interface SystemSettingManager
     String KEY_FLAG = "keyFlag";
     String KEY_FLAG_IMAGE = "keyFlagImage";
     String KEY_START_MODULE = "startModule";
-    String KEY_FORUM_INTEGRATION = "forumIntegration";
-    String KEY_OMIT_INDICATORS_ZERO_NUMERATOR_DATAMART = "omitIndicatorsZeroNumeratorDataMart";
-    String KEY_REPORT_TEMPLATE_DIRECTORY = "reportTemplateDirectory";
-    String KEY_GOOGLE_MAPS_API_KEY = "googleMapsAPIKey";
     String KEY_FACTOR_OF_DEVIATION = "factorDeviation";
-    String KEY_TRACKED_ENTITY_EXCEL_TEMPLATE_FILE_NAME = "trackedEntityExcelTemplateFileName";
-    String KEY_DATAMART_TASK = "keyDataMartTask";
-    String KEY_DATASETCOMPLETENESS_TASK = "keyDataSetCompletenessTask";
     String KEY_EMAIL_HOST_NAME = "keyEmailHostName";
     String KEY_EMAIL_PORT = "keyEmailPort";
     String KEY_EMAIL_USERNAME = "keyEmailUsername";
@@ -70,10 +63,8 @@ public interface SystemSettingManager
     String KEY_EMAIL_TLS = "keyEmailTls";
     String KEY_EMAIL_SENDER = "keyEmailSender";
     String KEY_INSTANCE_BASE_URL = "keyInstanceBaseUrl";
-    String KEY_SCHEDULED_PERIOD_TYPES = "keyScheduledPeriodTypes";
     String KEY_SCHEDULED_TASKS = "keySchedTasks";
-    String KEY_ORGUNITGROUPSET_AGG_LEVEL = "orgUnitGroupSetAggregationLevel";
-    String KEY_SMS_CONFIG = "SMS_CONFIG";
+    String KEY_SMS_CONFIG = "keySmsConfig";
     String KEY_CACHE_STRATEGY = "keyCacheStrategy";
     String KEY_TIME_FOR_SENDING_MESSAGE = "timeSendingMessage";
     String KEY_SEND_MESSAGE_SCHEDULED_TASKS = "sendMessageScheduled";
@@ -111,52 +102,14 @@ public interface SystemSettingManager
     String KEY_ALLOW_OBJECT_ASSIGNMENT = "keyAllowObjectAssignment";
     String KEY_USE_CUSTOM_LOGO_FRONT = "keyUseCustomLogoFront";
     String KEY_USE_CUSTOM_LOGO_BANNER = "keyUseCustomLogoBanner";
-    
+    String KEY_METADATA_REPO_URL = "keyMetaDataRepoUrl";
     String KEY_DATA_IMPORT_STRICT_PERIODS = "keyDataImportStrictPeriods";
     String KEY_DATA_IMPORT_STRICT_CATEGORY_OPTION_COMBOS = "keyDataImportStrictCategoryOptionCombos";
     String KEY_DATA_IMPORT_STRICT_ORGANISATION_UNITS = "keyDataImportStrictOrganisationUnits";
     String KEY_DATA_IMPORT_STRICT_ATTRIBUTE_OPTION_COMBOS = "keyDataImportStrictAttributeOptionCombos";
     String KEY_DATA_IMPORT_REQUIRE_CATEGORY_OPTION_COMBO = "keyDataImportRequireCategoryOptionCombo";
     String KEY_DATA_IMPORT_REQUIRE_ATTRIBUTE_OPTION_COMBO = "keyDataImportRequireAttributeOptionCombo";
-
-    String DEFAULT_SCHEDULE_AGGREGATE_QUERY_BUILDER_TASK_STRATEGY = "lastMonth";
-    String DEFAULT_FLAG = "dhis2";
-    int DEFAULT_MAX_NUMBER_OF_ATTEMPTS = 20;
-    int DEFAULT_TIMEFRAME_MINUTES = 1;
-    double DEFAULT_FACTOR_OF_DEVIATION = 2.0;
-    int DEFAULT_ORGUNITGROUPSET_AGG_LEVEL = 3;
-    String DEFAULT_GOOGLE_MAPS_API_KEY = "ABQIAAAAut6AhySExnYIXm5s2OFIkxRKNzJ-_9njnryRTbvC6CtrS4sRvRREWnxwlZUa630pLuPf3nD9i4fq9w";
-    String DEFAULT_START_MODULE = "dhis-web-dashboard-integration";
-    String DEFAULT_APPLICATION_TITLE = "District Health Information Software 2";
-    int DEFAULT_EMAIL_PORT = 587;
-    int DEFAULT_COMPLETENESS_OFFSET = 15;
-    String DEFAULT_TIME_FOR_SENDING_MESSAGE = "08:00";
-    String DEFAULT_CACHE_STRATEGY = "CACHE_6AM_TOMORROW";
-    int DEFAULT_ANALYTICS_MAX_LIMIT = 50000;
-    int DEFAULT_DATABASE_SERVER_CPUS = 0; // Detect automatically
-    String DEFAULT_HELP_PAGE_LINK = "../dhis-web-commons-about/help.action";
-    String DEFAULT_ANALYSIS_RELATIVE_PERIOD = "LAST_12_MONTHS";
-    String DEFAULT_METADATA_REPO_URL = "http://metadata.dhis2.org";
-	
-    Map<String, Serializable> DEFAULT_SETTINGS_VALUES = new HashMap<String, Serializable>()
-    {
-        {
-            put( KEY_SCHEDULE_AGGREGATE_QUERY_BUILDER_TASK_STRATEGY, DEFAULT_SCHEDULE_AGGREGATE_QUERY_BUILDER_TASK_STRATEGY );
-            put( KEY_FLAG, DEFAULT_FLAG );
-            put( CalendarService.KEY_CALENDAR, CalendarService.DEFAULT_CALENDAR );
-            put( CalendarService.KEY_DATE_FORMAT, CalendarService.DEFAULT_DATE_FORMAT );
-            put( KEY_FACTOR_OF_DEVIATION, DEFAULT_FACTOR_OF_DEVIATION );
-            put( KEY_ORGUNITGROUPSET_AGG_LEVEL, DEFAULT_ORGUNITGROUPSET_AGG_LEVEL );
-            put( KEY_START_MODULE, DEFAULT_START_MODULE );
-            put( KEY_APPLICATION_TITLE, DEFAULT_APPLICATION_TITLE );
-            put( KEY_EMAIL_PORT, DEFAULT_EMAIL_PORT );
-            put( KEY_TIME_FOR_SENDING_MESSAGE, DEFAULT_TIME_FOR_SENDING_MESSAGE );
-            put( KEY_CACHE_STRATEGY, DEFAULT_CACHE_STRATEGY );
-            put( KEY_ANALYTICS_MAX_LIMIT, DEFAULT_ANALYTICS_MAX_LIMIT );
-            put( KEY_ANALYSIS_RELATIVE_PERIOD, DEFAULT_ANALYSIS_RELATIVE_PERIOD );
-        }
-    };
-
+    
     String SYSPROP_PORTAL = "runningAsPortal";
 
     HashSet<String> DEFAULT_SCHEDULED_PERIOD_TYPES = new HashSet<String>()
@@ -169,14 +122,30 @@ public interface SystemSettingManager
     };
 
     void saveSystemSetting( String name, Serializable value );
+    
+    void saveSystemSetting( Setting setting, Serializable value );
 
     Serializable getSystemSetting( String name );
 
     Serializable getSystemSetting( String name, Serializable defaultValue );
 
+    Serializable getSystemSetting( Setting setting );
+    
+    Serializable getSystemSetting( Setting setting, Serializable defaultValue );
+    
     List<SystemSetting> getAllSystemSettings();
 
     void deleteSystemSetting( String name );
+    
+    void deleteSystemSetting( Setting setting );
+
+    Map<String, Serializable> getSystemSettingsAsMap();
+    
+    Map<String, Serializable> getSystemSettingsAsMap( Set<String> names );
+    
+    // -------------------------------------------------------------------------
+    // Specific methods
+    // -------------------------------------------------------------------------
 
     List<String> getFlags();
 
@@ -209,8 +178,4 @@ public interface SystemSettingManager
     Integer credentialsExpires();
 
     List<String> getCorsWhitelist();
-
-    Map<String, Serializable> getSystemSettingsAsMap();
-    
-    Map<String, Serializable> getSystemSettings( Set<String> names );
 }
