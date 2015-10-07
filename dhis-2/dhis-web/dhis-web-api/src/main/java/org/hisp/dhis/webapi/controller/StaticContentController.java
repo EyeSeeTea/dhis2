@@ -41,6 +41,7 @@ import org.hisp.dhis.dxf2.webmessage.WebMessageException;
 import org.hisp.dhis.dxf2.webmessage.WebMessageStatus;
 import org.hisp.dhis.external.location.LocationManager;
 import org.hisp.dhis.external.location.LocationManagerException;
+import org.hisp.dhis.setting.Setting;
 import org.hisp.dhis.setting.StyleManager;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.webapi.utils.WebMessageUtils;
@@ -49,10 +50,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.google.common.collect.ImmutableMap;
@@ -80,8 +78,8 @@ public class StaticContentController
     private static final String LOGO_FRONT = "logo_front";
 
     private static final Map<String, String> KEY_WHITELIST_MAP = ImmutableMap.<String, String>builder().
-        put( LOGO_BANNER, SystemSettingManager.KEY_USE_CUSTOM_LOGO_BANNER ).
-        put( LOGO_FRONT, SystemSettingManager.KEY_USE_CUSTOM_LOGO_FRONT ).build();
+        put( LOGO_BANNER, Setting.USE_CUSTOM_LOGO_BANNER.getDefaultValue().toString() ).
+        put( LOGO_FRONT, Setting.USE_CUSTOM_LOGO_FRONT.getDefaultValue().toString() ).build();
 
     /**
      * Serves the PNG associated with the key. If custom logo is not used the
@@ -149,10 +147,11 @@ public class StaticContentController
      * @throws WebMessageException
      * @throws IOException
      */
+    @ResponseStatus( HttpStatus.NO_CONTENT )
     @RequestMapping( value = "/{key}", method = RequestMethod.POST )
     public void updateStaticContent(
         @PathVariable( "key" ) String key,
-        @RequestParam( value = "file", required = false ) MultipartFile file )
+        @RequestParam( value = "file", required = true ) MultipartFile file )
         throws WebMessageException, IOException
     {
         if ( file == null || file.isEmpty() )

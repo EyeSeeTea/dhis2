@@ -28,11 +28,15 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Iterator;
-
+import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementDomain;
 import org.hisp.dhis.system.deletion.DeletionHandler;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author Chau Thu Tran
@@ -44,12 +48,8 @@ public class ProgramStageDataElementDeletionHandler
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private ProgramStageDataElementService programStageDEService;
-
-    public void setProgramStageDEService( ProgramStageDataElementService programStageDEService )
-    {
-        this.programStageDEService = programStageDEService;
-    }
+    @Autowired
+    private ProgramStageDataElementService programStageDataElementService;
 
     // -------------------------------------------------------------------------
     // Implementation methods
@@ -64,21 +64,21 @@ public class ProgramStageDataElementDeletionHandler
     @Override
     public void deleteProgramStage( ProgramStage programStage )
     {
-        Iterator<ProgramStageDataElement> iterator = programStage.getProgramStageDataElements().iterator();
+        List<ProgramStageDataElement> programStageDataElements = new ArrayList<>( programStage.getProgramStageDataElements() );
 
-        while ( iterator.hasNext() )
+        for ( ProgramStageDataElement programStageDataElement : programStageDataElements )
         {
-            ProgramStageDataElement de = iterator.next();
-            programStageDEService.deleteProgramStageDataElement( de );
+            programStage.getProgramStageDataElements().remove( programStageDataElement );
+            programStageDataElementService.deleteProgramStageDataElement( programStageDataElement );
         }
     }
 
     @Override
     public void deleteDataElement( DataElement dataElement )
     {
-        if ( DataElementDomain.TRACKER.equals( dataElement.getDomainType() ) )
+        if ( DataElementDomain.TRACKER == dataElement.getDomainType() )
         {
-            Iterator<ProgramStageDataElement> iterator = programStageDEService.getAllProgramStageDataElements().iterator();
+            Iterator<ProgramStageDataElement> iterator = programStageDataElementService.getAllProgramStageDataElements().iterator();
 
             while ( iterator.hasNext() )
             {
@@ -86,7 +86,7 @@ public class ProgramStageDataElementDeletionHandler
 
                 if ( element.getDataElement() != null && element.getDataElement().equals( dataElement ) )
                 {
-                    programStageDEService.deleteProgramStageDataElement( element );
+                    programStageDataElementService.deleteProgramStageDataElement( element );
                 }
             }
         }

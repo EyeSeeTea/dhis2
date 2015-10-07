@@ -13,22 +13,20 @@
     <id name="id" column="programstageid">
       <generator class="native" />
     </id>
-
     &identifiableProperties;
 
     <property name="name" column="name" length="230" />
 
     <property name="description" type="text" />
 
-    <property name="minDaysFromStart" column="mindaysfromstart"
-      not-null="true" />
+    <property name="minDaysFromStart" column="mindaysfromstart" not-null="true" />
 
-    <many-to-one name="program" class="org.hisp.dhis.program.Program"
-      column="programid" foreign-key="fk_programstage_program" />
+    <many-to-one name="program" class="org.hisp.dhis.program.Program" column="programid"
+      foreign-key="fk_programstage_program" />
 
     <property name="irregular" column="irregular" />
 
-    <set name="programStageDataElements" order-by="sort_order">
+    <set name="programStageDataElements" order-by="sort_order" cascade="save-update">
       <key column="programstageid" />
       <one-to-many class="org.hisp.dhis.program.ProgramStageDataElement" />
     </set>
@@ -38,15 +36,14 @@
 
     <property name="standardInterval" />
 
-    <set name="programStageSections" order-by="sortOrder" cascade="all,delete-orphan">
+    <set name="programStageSections" order-by="sortOrder" cascade="save-update">
       <key column="programstageid" />
       <one-to-many class="org.hisp.dhis.program.ProgramStageSection" />
     </set>
 
     <property name="excecutionDateLabel" />
 
-    <set name="reminders" order-by="daysAllowedSendMessage"
-      cascade="all">
+    <set name="reminders" order-by="daysAllowedSendMessage" cascade="all">
       <key column="programStageid" />
       <one-to-many class="org.hisp.dhis.trackedentity.TrackedEntityInstanceReminder" />
     </set>
