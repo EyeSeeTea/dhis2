@@ -95,6 +95,7 @@ trackerCapture.controller('TEIAddController',
     $scope.searchFilterExists = false;   
     $scope.defaultOperators = OperatorFactory.defaultOperators;
     $scope.boolOperators = OperatorFactory.boolOperators;
+    $scope.selectedTrackedEntity = null;
     
     $scope.trackedEntityList = null; 
     $scope.enrollment = {programStartDate: '', programEndDate: '', operator: $scope.defaultOperators[0]};
@@ -125,7 +126,10 @@ trackerCapture.controller('TEIAddController',
         }
         
         CurrentSelection.setRelationshipOwner({});
-        //$scope.selectedTei = {};
+        
+        if($scope.selectedAttribute && $scope.selectedAttribute.trackedEntity && $scope.selectedAttribute.trackedEntity.id){
+            $scope.selectedTrackedEntity = $scope.selectedAttribute.trackedEntity;
+        }
     }
     
     if(angular.isObject($scope.programs) && $scope.programs.length === 1){
@@ -246,6 +250,20 @@ trackerCapture.controller('TEIAddController',
             }
         }
         
+        if( $scope.addingTeiAssociate ){            
+            if(!$scope.selectedTrackedEntity){
+                var dialogOptions = {
+                    headerText: 'searching_error',
+                    bodyText: $translate.instant('no_enity_for_tracker_associate_attribute')
+                };
+                DialogService.showDialog({}, dialogOptions);
+                return;
+            }
+            else{
+                $scope.programUrl = $scope.programUrl ? $scope.programUrl + '&trackedEntity=' + $scope.selectedTrackedEntity.id : 'trackedEntity=' + $scope.selectedTrackedEntity.id;
+            }
+        }
+        
         $scope.fetchTei();
     };
     
@@ -292,7 +310,7 @@ trackerCapture.controller('TEIAddController',
         $scope.selectedProgramForRelative = program;
         AttributesFactory.getByProgram($scope.selectedProgramForRelative).then(function(atts){
             $scope.attributes = atts;
-            $scope.attributes = $scope.generateAttributeFilters($scope.attributes);
+            $scope.attributes = AttributesFactory.generateAttributeFilters(atts);
             $scope.gridColumns = $scope.generateGridColumns($scope.attributes);
         });
         
@@ -318,17 +336,6 @@ trackerCapture.controller('TEIAddController',
     $scope.getPage = function(page){
         $scope.pager.page = page;
         $scope.search($scope.selectedSearchMode);
-    };
-    
-    $scope.generateAttributeFilters = function(attributes){
-
-        angular.forEach(attributes, function(attribute){
-            if(attribute.valueType === 'number' || attribute.valueType === 'date'){
-                attribute.operator = $scope.defaultOperators[0];
-            }
-        });
-                    
-        return attributes;
     };
 
     //generate grid columns from teilist attributes
@@ -584,23 +591,22 @@ trackerCapture.controller('TEIAddController',
         $scope.customForm = null;
         $scope.customFormExists = false;
         
-        if(angular.isObject($scope.selectedProgramForRelative)){
-            AttributesFactory.getByProgram($scope.selectedProgramForRelative).then(function(atts){
-                $scope.attributes = atts;                        
-                if($scope.selectedProgramForRelative && $scope.selectedProgramForRelative.id && $scope.selectedProgramForRelative.dataEntryForm && $scope.selectedProgramForRelative.dataEntryForm.htmlCode){
-                    $scope.customFormExists = true;
-                    $scope.trackedEntityForm = $scope.selectedProgramForRelative.dataEntryForm;  
-                    $scope.trackedEntityForm.attributes = $scope.attributes;
-                    $scope.trackedEntityForm.selectIncidentDatesInFuture = $scope.selectedProgramForRelative.selectIncidentDatesInFuture;
-                    $scope.trackedEntityForm.selectEnrollmentDatesInFuture = $scope.selectedProgramForRelative.selectEnrollmentDatesInFuture;
-                    $scope.trackedEntityForm.displayIncidentDate = $scope.selectedProgramForRelative.displayIncidentDate;
-                    $scope.customForm = CustomFormService.getForTrackedEntity($scope.trackedEntityForm, 'RELATIONSHIP');
-                }
+        AttributesFactory.getByProgram($scope.selectedProgramForRelative).then(function(atts){
+            $scope.attributes = atts;                        
+            if($scope.selectedProgramForRelative && $scope.selectedProgramForRelative.id && $scope.selectedProgramForRelative.dataEntryForm && $scope.selectedProgramForRelative.dataEntryForm.htmlCode){
+                $scope.customFormExists = true;
+                $scope.trackedEntityForm = $scope.selectedProgramForRelative.dataEntryForm;  
+                $scope.trackedEntityForm.attributes = $scope.attributes;
+                $scope.trackedEntityForm.selectIncidentDatesInFuture = $scope.selectedProgramForRelative.selectIncidentDatesInFuture;
+                $scope.trackedEntityForm.selectEnrollmentDatesInFuture = $scope.selectedProgramForRelative.selectEnrollmentDatesInFuture;
+                $scope.trackedEntityForm.displayIncidentDate = $scope.selectedProgramForRelative.displayIncidentDate;
+                $scope.customForm = CustomFormService.getForTrackedEntity($scope.trackedEntityForm, 'RELATIONSHIP');
+            }
 
-                assignInheritance();
-                getRules();                
-            });
-        }
+            assignInheritance();
+            getRules();                
+        });
+        
     }); 
             
     $scope.trackedEntities = {available: []};

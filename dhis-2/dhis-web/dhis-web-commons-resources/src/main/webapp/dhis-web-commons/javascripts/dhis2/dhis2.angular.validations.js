@@ -135,4 +135,65 @@ d2Directives.directive('d2NumberValidator', function() {
             };
         }
     };
+})
+
+.directive("d2AttributeValidator", function($q, TEIService, AttributesFactory, EntityQueryFactory, SessionStorageService) {
+    return {
+        restrict: "A",         
+        require: "ngModel",
+        link: function(scope, element, attrs, ngModel) {            
+            
+            function uniqunessValidatior(attributeData){
+                
+                ngModel.$asyncValidators.uniqunessValidator = function (modelValue, viewValue) {
+                    var pager = {pageSize: 1, page: 1, toolBarDisplay: 5};
+                    var deferred = $q.defer(), currentValue = modelValue || viewValue, programUrl = null, ouMode = 'ALL';
+                    
+                    if (currentValue) {
+                        
+                        attributeData.value = currentValue;
+                        var atts = AttributesFactory.generateAttributeFilters([attributeData]);
+                        var attUrl = EntityQueryFactory.getAttributesQuery(atts, null);                        
+                        var ouId = SessionStorageService.get('ouSelected');
+                        
+                        if(attrs.selectedProgram && attributeData.programScope){
+                            programUrl = 'program=' + attrs.selectedProgram;
+                        }
+                        
+                        if(attributeData.orgUnitScope){
+                            ouMode = 'SELECTED';
+                        }                        
+
+                        TEIService.search(ouId, ouMode, null, programUrl, attUrl.url, pager, true).then(function(data) {
+                            if(attrs.selectedTeiId){
+                                if(data.rows[0][0] !== attrs.selectedTeiId){
+                                    deferred.reject();
+                                }
+                            }
+                            else{
+                                if (data.rows.length > 0) {    
+                                    deferred.reject();
+                                }
+                            }                            
+                            deferred.resolve();
+                        });
+                    }
+                    else {
+                        deferred.resolve();
+                    }
+
+                    return deferred.promise;
+                };
+            }                      
+            
+            scope.$watch(attrs.ngDisabled, function(value){
+                var attributeData = scope.$eval(attrs.attributeData);
+                if(!value){
+                    if( attributeData && attributeData.unique && !value ){
+                        uniqunessValidatior(attributeData);
+                    }
+                }              
+            });     
+        }
+    };
 });

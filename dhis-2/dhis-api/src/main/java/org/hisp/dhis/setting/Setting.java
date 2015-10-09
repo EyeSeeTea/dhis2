@@ -30,7 +30,6 @@ package org.hisp.dhis.setting;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -55,7 +54,6 @@ public enum Setting
     EMAIL_HOST_NAME( "keyEmailHostName" ),
     EMAIL_PORT( "keyEmailPort", 587, Integer.class ),
     EMAIL_USERNAME( "keyEmailUsername" ),
-    EMAIL_PASSWORD( "keyEmailPassword" ),
     EMAIL_TLS( "keyEmailTls", Boolean.TRUE, Boolean.class ),
     EMAIL_SENDER( "keyEmailSender" ),
     INSTANCE_BASE_URL( "keyInstanceBaseUrl" ),
@@ -93,7 +91,6 @@ public enum Setting
     ACCEPTANCE_REQUIRED_FOR_APPROVAL( "keyAcceptanceRequiredForApproval", Boolean.FALSE, Boolean.class ),
     SYSTEM_NOTIFICATIONS_EMAIL( "keySystemNotificationsEmail" ),
     ANALYSIS_RELATIVE_PERIOD( "keyAnalysisRelativePeriod", "LAST_12_MONTHS", String.class ),
-    CORS_WHITELIST( "keyCorsWhitelist", List.class ),
     REQUIRE_ADD_TO_VIEW( "keyRequireAddToView", Boolean.FALSE, Boolean.class ),
     ALLOW_OBJECT_ASSIGNMENT( "keyAllowObjectAssignment", Boolean.FALSE, Boolean.class ),
     USE_CUSTOM_LOGO_FRONT( "keyUseCustomLogoFront", Boolean.FALSE, Boolean.class ),

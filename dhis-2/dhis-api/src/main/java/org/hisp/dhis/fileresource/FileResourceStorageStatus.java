@@ -1,4 +1,4 @@
-package org.hisp.dhis.sms.config;
+package org.hisp.dhis.fileresource;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,56 +28,13 @@ package org.hisp.dhis.sms.config;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class ClickatellGatewayConfig
-    extends SmsGatewayConfig
+/**
+ * @author Halvdan Hoem Grelland
+ */
+public enum FileResourceStorageStatus
 {
-    private static final long serialVersionUID = -4286107769356591957L;
-
-    private String username;
-
-    private String password;
-
-    private String apiId;
-
-    public String getUsername()
-    {
-        return username;
-    }
-
-    public void setUsername( String username )
-    {
-        this.username = username;
-    }
-
-    public String getPassword()
-    {
-        return password;
-    }
-
-    public void setPassword( String password )
-    {
-        this.password = password;
-    }
-
-    public String getApiId()
-    {
-        return apiId;
-    }
-
-    public void setApiId( String apiId )
-    {
-        this.apiId = apiId;
-    }
-
-    @Override
-    public boolean isInbound()
-    {
-        return false;
-    }
-
-    @Override
-    public boolean isOutbound()
-    {
-        return true;
-    }
+    NONE,       // No content stored
+    PENDING,    // In transit to store, not available
+    FAILED,     // Storing the resource failed
+    STORED      // Is available from store
 }

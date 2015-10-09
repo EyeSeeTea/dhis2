@@ -40,6 +40,7 @@ import org.hibernate.persister.collection.CollectionPersister;
 import org.hibernate.persister.entity.Joinable;
 import org.hibernate.type.AssociationType;
 import org.hibernate.type.CollectionType;
+import org.hibernate.type.CustomType;
 import org.hibernate.type.DoubleType;
 import org.hibernate.type.IntegerType;
 import org.hibernate.type.LongType;
@@ -274,7 +275,8 @@ public abstract class AbstractPropertyIntrospectorService
                 property.setOneToOne( true );
             }
 
-            if ( SingleColumnType.class.isInstance( type ) )
+            if ( SingleColumnType.class.isInstance( type ) || CustomType.class.isInstance( type )
+                || ManyToOneType.class.isInstance( type ) )
             {
                 Column column = (Column) hibernateProperty.getColumnIterator().next();
 

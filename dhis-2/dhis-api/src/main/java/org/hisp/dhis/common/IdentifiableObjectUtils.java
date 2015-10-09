@@ -38,6 +38,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.calendar.Calendar;
@@ -49,6 +50,8 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 
+import com.google.common.collect.ImmutableMap;
+
 /**
  * @author Lars Helge Overland
  */
@@ -58,14 +61,10 @@ public class IdentifiableObjectUtils
     private static final String SEPARATOR_JOIN = ", ";
     private static final SimpleDateFormat LONG_DATE_FORMAT = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss" );
 
-    public static final Map<String, String> CLASS_ALIAS = new HashMap<String, String>()
-    {
-        {
-            put( "CategoryOption", DataElementCategoryOption.class.getSimpleName() );
-            put( "Category", DataElementCategory.class.getSimpleName() );
-            put( "CategoryCombo", DataElementCategoryCombo.class.getSimpleName() );
-        }
-    };
+    public static final Map<String, String> CLASS_ALIAS = ImmutableMap.<String, String>builder().
+    	put( "CategoryOption", DataElementCategoryOption.class.getSimpleName() ).
+    	put( "Category", DataElementCategory.class.getSimpleName() ).
+    	put( "CategoryCombo", DataElementCategoryCombo.class.getSimpleName()).build();
 
     /**
      * Joins the names of the IdentifiableObjects in the given list and separates
@@ -102,17 +101,18 @@ public class IdentifiableObjectUtils
      */
     public static <T extends IdentifiableObject> List<String> getUids( Collection<T> objects )
     {
-        List<String> uids = new ArrayList<>();
+        return objects != null ? objects.stream().map( o -> o.getUid() ).collect( Collectors.toList() ) : null;
+    }
 
-        if ( objects != null )
-        {
-            for ( T object : objects )
-            {
-                uids.add( object.getUid() );
-            }
-        }
-
-        return uids;
+    /**
+     * Returns a list of internal identifiers for the given collection of IdentifiableObjects.
+     *
+     * @param objects the list of IdentifiableObjects.
+     * @return a list of uids.
+     */
+    public static <T extends IdentifiableObject> List<Integer> getIdentifiers( Collection<T> objects )
+    {
+        return objects != null ? objects.stream().map( o -> o.getId() ).collect( Collectors.toList() ) : null;
     }
 
     /**
@@ -165,27 +165,6 @@ public class IdentifiableObjectUtils
         }
 
         return period.getPeriodType().getIsoDate( calendar.fromIso( period.getStartDate() ) );
-    }
-
-    /**
-     * Returns a list of internal identifiers for the given collection of IdentifiableObjects.
-     *
-     * @param objects the list of IdentifiableObjects.
-     * @return a list of uids.
-     */
-    public static <T extends IdentifiableObject> List<Integer> getIdentifiers( Collection<T> objects )
-    {
-        List<Integer> uids = new ArrayList<>();
-
-        if ( objects != null )
-        {
-            for ( T object : objects )
-            {
-                uids.add( object.getId() );
-            }
-        }
-
-        return uids;
     }
 
     /**
@@ -334,49 +313,15 @@ public class IdentifiableObjectUtils
     }
 
     /**
-     * Returns a list of database identifiers from a list of idObjects
-     *
-     * @param identifiableObjects Collection of idObjects
-     * @return List of database identifiers for idObjects
-     */
-    public static List<Integer> getIdList( Collection<? extends IdentifiableObject> identifiableObjects )
-    {
-        List<Integer> integers = new ArrayList<>();
-
-        if ( identifiableObjects != null )
-        {
-            for ( IdentifiableObject identifiableObject : identifiableObjects )
-            {
-                if ( identifiableObject != null )
-                {
-                    integers.add( identifiableObject.getId() );
-                }
-            }
-        }
-
-        return integers;
-    }
-
-    /**
-     * Returns a mapping between the uid and the name of the given identifiable
-     * objects.
+     * Returns a mapping between the uid and the display name of the given 
+     * identifiable objects.
      *
      * @param objects the identifiable objects.
-     * @return mapping between the uid and the name of the given objects.
+     * @return mapping between the uid and the display name of the given objects.
      */
     public static Map<String, String> getUidNameMap( Collection<? extends IdentifiableObject> objects )
-    {
-        Map<String, String> map = new HashMap<>();
-
-        if ( objects != null )
-        {
-            for ( IdentifiableObject object : objects )
-            {
-                map.put( object.getUid(), object.getDisplayName() );
-            }
-        }
-
-        return map;
+    {        
+        return objects.stream().collect( Collectors.toMap( IdentifiableObject::getUid, IdentifiableObject::getDisplayName ) );
     }
 
     /**

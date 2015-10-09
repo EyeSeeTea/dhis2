@@ -121,7 +121,7 @@ public class HibernateTrackedEntityInstanceStore
 
     private String buildTrackedEntityInstanceHql( TrackedEntityInstanceQueryParams params )
     {
-        String hql = "from TrackedEntityInstance tei";
+        String hql = "select distinct tei from TrackedEntityInstance tei left join fetch tei.attributeValues";
         SqlHelper hlp = new SqlHelper( true );
 
         if ( params.hasTrackedEntity() )

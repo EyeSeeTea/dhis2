@@ -30,6 +30,7 @@ package org.hisp.dhis.fileresource;
 
 import com.google.common.io.ByteSource;
 
+import java.io.File;
 import java.net.URI;
 import java.util.List;
 
@@ -43,7 +44,9 @@ public interface FileResourceService
     List<FileResource> getFileResources( List<String> uids );
     
     String saveFileResource( FileResource fileResource, ByteSource content );
-    
+
+    String saveFileResourceAsync( FileResource fileResource, File file );
+
     void deleteFileResource( String uid );
     
     ByteSource getFileResourceContent( FileResource fileResource );
