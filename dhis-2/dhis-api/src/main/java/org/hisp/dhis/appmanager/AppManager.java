@@ -84,11 +84,12 @@ public interface AppManager
      * Deletes the app with the given name.
      *
      * @param name the app name.
+     * @param deleteAppData decide if associated data in dataStore should be deleted or not.
      * @return true if the delete was successful, false if there is no app with
      * the given name or if the app could not be removed from the file
      * system.
      */
-    boolean deleteApp( String name );
+    boolean deleteApp( String name, boolean deleteAppData );
 
     /**
      * Reload list of apps.

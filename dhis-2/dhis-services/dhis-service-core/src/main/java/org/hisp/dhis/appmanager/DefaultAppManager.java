@@ -37,6 +37,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.datavalue.DefaultDataValueService;
+import org.hisp.dhis.keyjsonvalue.KeyJsonValueService;
 import org.hisp.dhis.setting.Setting;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.user.CurrentUserService;
@@ -52,6 +53,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -85,6 +87,9 @@ public class DefaultAppManager
 
     @Autowired
     private CurrentUserService currentUserService;
+
+    @Autowired
+    private KeyJsonValueService keyJsonValueService;
 
     // -------------------------------------------------------------------------
     // AppManagerService implementation
@@ -203,7 +208,7 @@ public class DefaultAppManager
     }
 
     @Override
-    public boolean deleteApp( String name )
+    public boolean deleteApp( String name, boolean deleteAppData )
     {
         for ( App app : getApps() )
         {
@@ -213,6 +218,17 @@ public class DefaultAppManager
                 {
                     String folderPath = getAppFolderPath() + File.separator + app.getFolderName();
                     FileUtils.forceDelete( new File( folderPath ) );
+
+                    // If deleteAppData is true and a namespace associated with the app exists, delete it.
+                    if(deleteAppData && appNamespaces.containsValue( app ))
+                    {
+                        appNamespaces.forEach( ( namespace, app1 ) -> {
+                            if( app1 == app)
+                            {
+                                keyJsonValueService.deleteNamespace( namespace );
+                            }
+                        } );
+                    }
 
                     return true;
                 }
