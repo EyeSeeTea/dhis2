@@ -41,6 +41,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.appmanager.App;
 import org.hisp.dhis.appmanager.AppManager;
+import org.hisp.dhis.appmanager.AppStatus;
 import org.hisp.dhis.dxf2.render.DefaultRenderService;
 import org.hisp.dhis.dxf2.render.RenderService;
 import org.hisp.dhis.dxf2.webmessage.WebMessageException;
@@ -128,7 +129,13 @@ public class AppController
 
         try
         {
-            appManager.installApp( tempFile, file.getOriginalFilename(), contextPath );
+            AppStatus appStatus = appManager.installApp( tempFile, file.getOriginalFilename(), contextPath );
+
+            if(appStatus.equals( AppStatus.NAMESPACE_TAKEN ))
+            {
+                throw new WebMessageException( WebMessageUtils.conflict( "The namespace defined in manifest.webapp is already protected." ) );
+            }
+
         }
         catch ( JsonParseException ex )
         {

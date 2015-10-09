@@ -50,6 +50,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -67,6 +68,11 @@ public class DefaultAppManager
      * In-memory singleton list holding state for apps.
      */
     private List<App> apps = new ArrayList<>();
+
+    /**
+     * Mapping dataStore-namespaces and apps
+     */
+    private HashMap<String, App> appNamespaces = new HashMap<>();
 
     @PostConstruct
     private void init()
@@ -120,7 +126,7 @@ public class DefaultAppManager
     }
 
     @Override
-    public void installApp( File file, String fileName, String rootPath )
+    public AppStatus installApp( File file, String fileName, String rootPath )
         throws IOException
     {
         ZipFile zip = new ZipFile( file );
@@ -133,14 +139,25 @@ public class DefaultAppManager
         App app = mapper.readValue( inputStream, App.class );
 
         // ---------------------------------------------------------------------
+        // Check for namespace and if it's already taken by another app
+        // ---------------------------------------------------------------------
+        String appNamespace = app.getActivities().getDhis().getNamespace();
+        if ( appNamespace != null &&
+            ( this.appNamespaces.containsKey( appNamespace ) && !app.equals( appNamespaces.get( appNamespace ) ) ) )
+        {
+            return AppStatus.NAMESPACE_TAKEN;
+        }
+
+
+        // ---------------------------------------------------------------------
         // Delete if app is already installed
         // ---------------------------------------------------------------------
-
         if ( getApps().contains( app ) )
         {
             String folderPath = getAppFolderPath() + File.separator + app.getFolderName();
             FileUtils.forceDelete( new File( folderPath ) );
         }
+
 
         String dest = getAppFolderPath() + File.separator + fileName.substring( 0, fileName.lastIndexOf( '.' ) );
         Unzip unzip = new Unzip();
@@ -167,6 +184,8 @@ public class DefaultAppManager
         zip.close();
 
         reloadApps(); // Reload app state
+
+        return AppStatus.OK;
     }
 
     @Override
@@ -275,6 +294,7 @@ public class DefaultAppManager
     public void reloadApps()
     {
         List<App> appList = new ArrayList<>();
+        HashMap<String, App> appNamespaces = new HashMap<>(  );
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure( DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false );
 
@@ -299,6 +319,13 @@ public class DefaultAppManager
                                 App app = mapper.readValue( appManifest, App.class );
                                 app.setFolderName( folder.getName() );
                                 appList.add( app );
+
+                                // Add namespace
+                                String appNamespace = app.getActivities().getDhis().getNamespace();
+                                if ( appNamespace != null )
+                                {
+                                    appNamespaces.put(appNamespace, app);
+                                }
                             }
                             catch ( IOException ex )
                             {
@@ -311,6 +338,7 @@ public class DefaultAppManager
         }
 
         this.apps = appList;
+        this.appNamespaces = appNamespaces;
 
         log.info( "Detected apps: " + apps );
     }
@@ -334,5 +362,11 @@ public class DefaultAppManager
         return userCredentials.getAllAuthorities().contains( "ALL" ) ||
             userCredentials.getAllAuthorities().contains( "M_dhis-web-maintenance-appmanager" ) ||
             userCredentials.getAllAuthorities().contains( "See " + app.getName().trim() );
+    }
+
+    @Override
+    public App getAppByNamespace( String namespace )
+    {
+        return appNamespaces.get( namespace );
     }
 }

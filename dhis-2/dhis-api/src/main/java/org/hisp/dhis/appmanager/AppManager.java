@@ -69,7 +69,7 @@ public interface AppManager
      * @param rootPath the root path of the instance.
      * @throws IOException if the app manifest file could not be read.
      */
-    void installApp( File file, String fileName, String rootPath )
+    AppStatus installApp( File file, String fileName, String rootPath )
         throws IOException;
 
     /**
@@ -140,4 +140,12 @@ public interface AppManager
     boolean isAccessible( App app );
 
     boolean isAccessible( App app, User user );
+
+    /**
+     * Returns the app associated with the namespace, or null if no app is associated.
+     * @param namespace the namespace to check
+     * @return App or null
+     */
+    App getAppByNamespace( String namespace);
+
 }

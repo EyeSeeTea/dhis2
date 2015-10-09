@@ -34,6 +34,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.hisp.dhis.appmanager.App;
+import org.hisp.dhis.appmanager.AppManager;
 import org.hisp.dhis.dxf2.render.RenderService;
 import org.hisp.dhis.dxf2.webmessage.WebMessage;
 import org.hisp.dhis.dxf2.webmessage.WebMessageException;
@@ -56,6 +58,9 @@ public class KeyJsonValueController
 
     @Autowired
     private RenderService renderService;
+
+    @Autowired
+    private AppManager appManager;
 
     /**
      * Returns a json-array of strings representing the different namespaces used.
@@ -116,6 +121,11 @@ public class KeyJsonValueController
         HttpServletResponse response )
         throws WebMessageException
     {
+        if ( !hasAccess( namespace ) )
+        {
+            throw new WebMessageException( WebMessageUtils.forbidden( "The namespace '" + namespace +
+                "' is protected, and you don't have the right authority to access it." ) );
+        }
 
         if ( !keyJsonValueService.getNamespaces().contains( namespace ) )
         {
@@ -132,7 +142,7 @@ public class KeyJsonValueController
      * Retrieves the KeyJsonValue represented by the given key from the given namespace.
      *
      * @param namespace where the key is associated
-     * @param key representing the json stored
+     * @param key       representing the json stored
      * @param response
      * @return a KeyJsonValue object
      * @throws IOException
@@ -147,6 +157,12 @@ public class KeyJsonValueController
         HttpServletResponse response )
         throws IOException, WebMessageException
     {
+        if ( !hasAccess( namespace ) )
+        {
+            throw new WebMessageException( WebMessageUtils.forbidden( "The namespace '" + namespace +
+                "' is protected, and you don't have the right authority to access it." ) );
+        }
+
         KeyJsonValue keyJsonValue = keyJsonValueService.getKeyJsonValue( namespace, key );
 
         if ( keyJsonValue == null )
@@ -162,8 +178,8 @@ public class KeyJsonValueController
      * Creates a new KeyJsonValue Object on the given namespace with the key and value supplied.
      *
      * @param namespace where the key is associated
-     * @param key representing the value
-     * @param body the value to be stored (json format)
+     * @param key       representing the value
+     * @param body      the value to be stored (json format)
      * @param response
      * @return the object created
      * @throws IOException
@@ -179,6 +195,12 @@ public class KeyJsonValueController
         HttpServletResponse response )
         throws IOException, WebMessageException
     {
+        if ( !hasAccess( namespace ) )
+        {
+            throw new WebMessageException( WebMessageUtils.forbidden( "The namespace '" + namespace +
+                "' is protected, and you don't have the right authority to access it." ) );
+        }
+
         if ( keyJsonValueService.getKeyJsonValue( namespace, key ) != null )
         {
             throw new WebMessageException( WebMessageUtils
@@ -204,9 +226,10 @@ public class KeyJsonValueController
 
     /**
      * Update a key in the given namespace
+     *
      * @param namespace namespace where the key is associated
-     * @param key key to be updated
-     * @param body the new value to be stored
+     * @param key       key to be updated
+     * @param body      the new value to be stored
      * @param request
      * @param response
      * @return The updated object
@@ -224,6 +247,13 @@ public class KeyJsonValueController
         HttpServletResponse response )
         throws WebMessageException, IOException
     {
+
+        if ( !hasAccess( namespace ) )
+        {
+            throw new WebMessageException( WebMessageUtils.forbidden( "The namespace '" + namespace +
+                "' is protected, and you don't have the right authority to access it." ) );
+        }
+
         KeyJsonValue keyJsonValue = keyJsonValueService.getKeyJsonValue( namespace, key );
 
         if ( keyJsonValue == null )
@@ -246,8 +276,9 @@ public class KeyJsonValueController
 
     /**
      * Delete a key from the given namespace
+     *
      * @param namespace namespace where the key is associated
-     * @param key key to be deleted
+     * @param key       key to be deleted
      * @param response
      * @return the success of the deletion
      * @throws WebMessageException
@@ -261,6 +292,12 @@ public class KeyJsonValueController
         HttpServletResponse response )
         throws WebMessageException
     {
+        if ( !hasAccess( namespace ) )
+        {
+            throw new WebMessageException( WebMessageUtils.forbidden( "The namespace '" + namespace +
+                "' is protected, and you don't have the right authority to access it." ) );
+        }
+
         KeyJsonValue keyJsonValue = keyJsonValueService.getKeyJsonValue( namespace, key );
 
         if ( keyJsonValue == null )
@@ -272,5 +309,11 @@ public class KeyJsonValueController
         keyJsonValueService.deleteKeyJsonValue( keyJsonValue );
 
         return WebMessageUtils.ok( "Key '" + key + "' deleted from namespace '" + namespace + "'." );
+    }
+
+    private boolean hasAccess( String namespace )
+    {
+        App app = appManager.getAppByNamespace( namespace );
+        return app == null || appManager.isAccessible( app );
     }
 }
