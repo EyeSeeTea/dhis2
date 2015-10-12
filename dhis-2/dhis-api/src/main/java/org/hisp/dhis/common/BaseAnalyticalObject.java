@@ -49,6 +49,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.analytics.AggregationType;
@@ -76,6 +77,7 @@ import org.hisp.dhis.period.comparator.AscendingPeriodComparator;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeDimension;
 import org.hisp.dhis.trackedentity.TrackedEntityDataElementDimension;
+import org.hisp.dhis.trackedentity.TrackedEntityProgramIndicatorDimension;
 import org.hisp.dhis.user.User;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -87,6 +89,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 
 /**
  * This class contains associations to dimensional meta-data. Should typically
@@ -146,6 +149,9 @@ public abstract class BaseAnalyticalObject
     @Scanned
     protected List<TrackedEntityDataElementDimension> dataElementDimensions = new ArrayList<>();
     
+    @Scanned
+    protected List<TrackedEntityProgramIndicatorDimension> programIndicatorDimensions = new ArrayList<>();
+ 
     private Program program;
 
     protected boolean userOrganisationUnit;
@@ -247,14 +253,7 @@ public abstract class BaseAnalyticalObject
      */
     public List<NameableObject> getDataDimensionNameableObjects()
     {
-        List<NameableObject> items = new ArrayList<>();
-        
-        for ( DataDimensionItem item : dataDimensionItems )
-        {
-            items.add( item.getNameableObject() );
-        }
-        
-        return items;
+        return dataDimensionItems.stream().map( DataDimensionItem::getNameableObject ).collect( Collectors.toList() );
     }
     
     /**
@@ -290,36 +289,21 @@ public abstract class BaseAnalyticalObject
     @JsonIgnore
     public List<DataElement> getDataElements()
     {
-        List<DataElement> objects = new ArrayList<>();
-        
-        for ( DataDimensionItem item : dataDimensionItems )
-        {
-            if ( item.getDataElement() != null )
-            {
-                objects.add( item.getDataElement() );
-            }
-        }
-        
-        return ImmutableList.copyOf( objects );
+        return ImmutableList.copyOf( dataDimensionItems.stream().
+            filter( i -> i.getDataElement() != null ).
+            map( DataDimensionItem::getDataElement ).collect( Collectors.toList() ) );
     }
 
     /**
-     * Returns all data elements in the data dimensions.
+     * Returns all indicators in the data dimensions. The returned list is
+     * immutable.
      */
     @JsonIgnore
     public List<Indicator> getIndicators()
     {
-        List<Indicator> objects = new ArrayList<>();
-        
-        for ( DataDimensionItem items : dataDimensionItems )
-        {
-            if ( items.getIndicator() != null )
-            {
-                objects.add( items.getIndicator() );
-            }
-        }
-        
-        return ImmutableList.copyOf( objects );
+        return ImmutableList.copyOf( dataDimensionItems.stream().
+            filter( i -> i.getIndicator() != null ).
+            map( DataDimensionItem::getIndicator ).collect( Collectors.toList() ) );
     }
 
     /**
@@ -476,12 +460,7 @@ public abstract class BaseAnalyticalObject
 
             // Tracked entity attribute
 
-            Map<String, TrackedEntityAttributeDimension> attributes = new HashMap<>();
-
-            for ( TrackedEntityAttributeDimension attribute : attributeDimensions )
-            {
-                attributes.put( attribute.getUid(), attribute );
-            }
+            Map<String, TrackedEntityAttributeDimension> attributes = Maps.uniqueIndex( attributeDimensions, TrackedEntityAttributeDimension::getUid );
 
             if ( attributes.containsKey( dimension ) )
             {
@@ -492,12 +471,7 @@ public abstract class BaseAnalyticalObject
 
             // Tracked entity data element
 
-            Map<String, TrackedEntityDataElementDimension> dataElements = new HashMap<>();
-
-            for ( TrackedEntityDataElementDimension dataElement : dataElementDimensions )
-            {
-                dataElements.put( dataElement.getUid(), dataElement );
-            }
+            Map<String, TrackedEntityDataElementDimension> dataElements = Maps.uniqueIndex( dataElementDimensions, TrackedEntityDataElementDimension::getUid );
 
             if ( dataElements.containsKey( dimension ) )
             {
@@ -505,6 +479,17 @@ public abstract class BaseAnalyticalObject
 
                 return new BaseDimensionalObject( dimension, DimensionType.PROGRAM_DATAELEMENT, null, tedd.getDisplayName(), tedd.getLegendSet(), tedd.getFilter() );
             }
+
+            // Tracked entity program indicator
+            
+            Map<String, TrackedEntityProgramIndicatorDimension> programIndicators = Maps.uniqueIndex( programIndicatorDimensions, TrackedEntityProgramIndicatorDimension::getUid );
+                        
+            if ( programIndicators.containsKey( dimension ) )
+            {
+                TrackedEntityProgramIndicatorDimension teid = programIndicators.get( dimension );
+                
+                return new BaseDimensionalObject( dimension, DimensionType.PROGRAM_INDICATOR, null, teid.getDisplayName(), teid.getLegendSet(), teid.getFilter() );
+            }            
         }
 
         IdentifiableObjectUtils.removeDuplicates( items );
@@ -668,12 +653,7 @@ public abstract class BaseAnalyticalObject
 
             // Tracked entity attribute
 
-            Map<String, TrackedEntityAttributeDimension> attributes = new HashMap<>();
-
-            for ( TrackedEntityAttributeDimension attribute : attributeDimensions )
-            {
-                attributes.put( attribute.getUid(), attribute );
-            }
+            Map<String, TrackedEntityAttributeDimension> attributes = Maps.uniqueIndex( attributeDimensions, TrackedEntityAttributeDimension::getUid );
 
             if ( attributes.containsKey( dimension ) )
             {
@@ -684,18 +664,24 @@ public abstract class BaseAnalyticalObject
 
             // Tracked entity data element
 
-            Map<String, TrackedEntityDataElementDimension> dataElements = new HashMap<>();
-
-            for ( TrackedEntityDataElementDimension dataElement : dataElementDimensions )
-            {
-                dataElements.put( dataElement.getUid(), dataElement );
-            }
+            Map<String, TrackedEntityDataElementDimension> dataElements = Maps.uniqueIndex( dataElementDimensions, TrackedEntityDataElementDimension::getUid );
 
             if ( dataElements.containsKey( dimension ) )
             {
                 TrackedEntityDataElementDimension tedd = dataElements.get( dimension );
 
                 return new BaseDimensionalObject( dimension, DimensionType.PROGRAM_DATAELEMENT, null, tedd.getDisplayName(), tedd.getLegendSet(), tedd.getFilter() );
+            }
+
+            // Tracked entity program indicator
+            
+            Map<String, TrackedEntityProgramIndicatorDimension> programIndicators = Maps.uniqueIndex( programIndicatorDimensions, TrackedEntityProgramIndicatorDimension::getUid );
+                        
+            if ( programIndicators.containsKey( dimension ) )
+            {
+                TrackedEntityProgramIndicatorDimension teid = programIndicators.get( dimension );
+                
+                return new BaseDimensionalObject( dimension, DimensionType.PROGRAM_INDICATOR, null, teid.getDisplayName(), teid.getLegendSet(), teid.getFilter() );
             }
         }
 
@@ -837,6 +823,7 @@ public abstract class BaseAnalyticalObject
         categoryOptionGroups.clear();
         attributeDimensions.clear();
         dataElementDimensions.clear();
+        programIndicatorDimensions.clear();
         userOrganisationUnit = false;
         userOrganisationUnitChildren = false;
         userOrganisationUnitGrandChildren = false;
@@ -877,6 +864,7 @@ public abstract class BaseAnalyticalObject
             categoryOptionGroups.addAll( object.getCategoryOptionGroups() );
             attributeDimensions.addAll( object.getAttributeDimensions() );
             dataElementDimensions.addAll( object.getDataElementDimensions() );
+            programIndicatorDimensions.addAll( object.getProgramIndicatorDimensions() );
             userOrganisationUnitChildren = object.isUserOrganisationUnitChildren();
             userOrganisationUnitGrandChildren = object.isUserOrganisationUnitGrandChildren();
             itemOrganisationUnitGroups = object.getItemOrganisationUnitGroups();
@@ -1046,6 +1034,20 @@ public abstract class BaseAnalyticalObject
     public void setDataElementDimensions( List<TrackedEntityDataElementDimension> dataElementDimensions )
     {
         this.dataElementDimensions = dataElementDimensions;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlElementWrapper( localName = "programIndicatorDimensions", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "programIndicatorDimension", namespace = DxfNamespaces.DXF_2_0 )
+    public List<TrackedEntityProgramIndicatorDimension> getProgramIndicatorDimensions()
+    {
+        return programIndicatorDimensions;
+    }
+
+    public void setProgramIndicatorDimensions( List<TrackedEntityProgramIndicatorDimension> programIndicatorDimensions )
+    {
+        this.programIndicatorDimensions = programIndicatorDimensions;
     }
 
     @JsonProperty

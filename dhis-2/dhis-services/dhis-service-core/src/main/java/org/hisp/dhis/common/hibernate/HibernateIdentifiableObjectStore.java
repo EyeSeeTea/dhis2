@@ -425,6 +425,18 @@ public class HibernateIdentifiableObjectStore<T extends BaseIdentifiableObject>
 
     @Override
     @SuppressWarnings( "unchecked" )
+    public List<T> getById( Collection<Integer> ids )
+    {
+        if ( ids == null || ids.isEmpty() )
+        {
+            return new ArrayList<>();
+        }
+
+        return getSharingCriteria().add( Restrictions.in( "id", ids ) ).list();
+    }
+
+    @Override
+    @SuppressWarnings( "unchecked" )
     public List<T> getByUid( Collection<String> uids )
     {
         if ( uids == null || uids.isEmpty() )
@@ -433,6 +445,30 @@ public class HibernateIdentifiableObjectStore<T extends BaseIdentifiableObject>
         }
 
         return getSharingCriteria().add( Restrictions.in( "uid", uids ) ).list();
+    }
+
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public List<T> getByCode( Collection<String> codes )
+    {
+        if ( codes == null || codes.isEmpty() )
+        {
+            return new ArrayList<>();
+        }
+
+        return getSharingCriteria().add( Restrictions.in( "code", codes ) ).list();
+    }
+
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public List<T> getByName( Collection<String> names )
+    {
+        if ( names == null || names.isEmpty() )
+        {
+            return new ArrayList<>();
+        }
+
+        return getSharingCriteria().add( Restrictions.in( "name", names ) ).list();
     }
 
     @Override

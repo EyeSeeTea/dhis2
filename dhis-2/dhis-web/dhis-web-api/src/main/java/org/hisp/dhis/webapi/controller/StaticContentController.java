@@ -47,6 +47,7 @@ import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.webapi.utils.WebMessageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
@@ -77,9 +78,9 @@ public class StaticContentController
     private static final String LOGO_BANNER = "logo_banner";
     private static final String LOGO_FRONT = "logo_front";
 
-    private static final Map<String, String> KEY_WHITELIST_MAP = ImmutableMap.<String, String>builder().
-        put( LOGO_BANNER, Setting.USE_CUSTOM_LOGO_BANNER.getDefaultValue().toString() ).
-        put( LOGO_FRONT, Setting.USE_CUSTOM_LOGO_FRONT.getDefaultValue().toString() ).build();
+    private static final Map<String, Setting> KEY_WHITELIST_MAP = ImmutableMap.<String, Setting>builder().
+        put( LOGO_BANNER, Setting.USE_CUSTOM_LOGO_BANNER ).
+        put( LOGO_FRONT, Setting.USE_CUSTOM_LOGO_FRONT ).build();
 
     /**
      * Serves the PNG associated with the key. If custom logo is not used the
@@ -93,25 +94,26 @@ public class StaticContentController
         @PathVariable( "key" ) String key, HttpServletResponse response )
         throws WebMessageException
     {
+
         if ( !KEY_WHITELIST_MAP.containsKey( key ) )
         {
             throw new WebMessageException( WebMessageUtils.notFound( "Key does not exist" ) );
         }
 
-        Boolean useCustomFile = Boolean.parseBoolean( (String) systemSettingManager.getSystemSetting( KEY_WHITELIST_MAP.get( key ) ) );
+        boolean useCustomFile = (boolean) systemSettingManager.getSystemSetting( KEY_WHITELIST_MAP.get( key ) );
 
-        if ( !useCustomFile ) // Serve the default
+        if ( !useCustomFile ) // Serve default
         {
             try
             {
-                response.sendRedirect( this.getDefaultLogoUrl( key ) );
+                response.sendRedirect( getDefaultLogoUrl( key ) );
             }
             catch ( IOException e )
             {
                 throw new WebMessageException( WebMessageUtils.error( "Can't read the file." ) );
             }
         }
-        else // Serve the custom
+        else // Serve custom
         {
             InputStream in = null;
 
@@ -147,6 +149,7 @@ public class StaticContentController
      * @throws WebMessageException
      * @throws IOException
      */
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_SYSTEM_SETTING')" )
     @ResponseStatus( HttpStatus.NO_CONTENT )
     @RequestMapping( value = "/{key}", method = RequestMethod.POST )
     public void updateStaticContent(
@@ -159,7 +162,8 @@ public class StaticContentController
             throw new WebMessageException( WebMessageUtils.badRequest( "Missing parameter 'file'" ) );
         }
 
-        // Only PNG is accepted at the current time. Ensure file is a PNG image.
+        // Only PNG is accepted at the current time
+        
         MimeType mimeType = MimeTypeUtils.parseMimeType( file.getContentType() );
 
         if( !mimeType.isCompatibleWith( MimeTypeUtils.IMAGE_PNG ))
@@ -168,13 +172,14 @@ public class StaticContentController
         }
 
         // Only keys in the white list are accepted at the current time
+        
         if ( !KEY_WHITELIST_MAP.containsKey( key ) )
         {
             throw new WebMessageException(
                 WebMessageUtils.badRequest( "This key is not supported." ) );
         }
 
-        File out;
+        File out = null;
 
         try
         {
@@ -212,7 +217,7 @@ public class StaticContentController
 
         if ( key.equals( LOGO_FRONT ) )
         {
-            relativeUrlToImage = "/dhis-web-commons/flags/" + systemSettingManager.getFlagImage();
+            relativeUrlToImage = "/dhis-web-commons/security/logo_front.png";
         }
 
         return relativeUrlToImage;

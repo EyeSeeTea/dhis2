@@ -142,7 +142,7 @@ public class TrackedEntityInstanceController
             program, programStatus, followUp, programStartDate, programEndDate, trackedEntity,
             eventStatus, eventStartDate, eventEndDate, skipMeta, page, pageSize, totalPages, skipPaging );
 
-        List<TrackedEntityInstance> trackedEntityInstances = trackedEntityInstanceService.getTrackedEntityInstances( instanceService.getTrackedEntityInstances( params ) );
+        List<TrackedEntityInstance> trackedEntityInstances = trackedEntityInstanceService.getTrackedEntityInstances( params );
 
         RootNode rootNode = NodeUtils.createMetadata();
         rootNode.addChild( fieldFilterService.filter( TrackedEntityInstance.class, trackedEntityInstances, fields ) );

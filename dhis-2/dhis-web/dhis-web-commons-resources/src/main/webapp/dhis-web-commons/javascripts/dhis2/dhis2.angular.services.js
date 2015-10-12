@@ -497,7 +497,10 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                     ' element-id="' + i + '"' +
                                     this.getAttributesAsString(attributes) +
                                     ' d2-focus-next-on-enter' +
-                                    ' ng-model="selectedTei.' + attId + '" ' +                                    
+                                    ' ng-model="selectedTei.' + attId + '" ' + 
+                                    ' attribute-data="attributesById.' + attId + '" ' + 
+                                    ' selected-program-id="selectedProgram.id" ' +
+                                    ' selected-tei-id="selectedTei.trackedEntityInstance" ' +
                                     ' ng-disabled="editingDisabled || isHidden(attributesById.' + attId + '.id) || ' + isTrackerAssociate + '"' +                                    
                                     ' d2-validation ' +
                                     ' ng-required=" ' + (att.mandatory || att.unique) + '" ';
@@ -1560,9 +1563,10 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                             if($rootScope.ruleeffects[ruleEffectKey][action.id].action === "ASSIGNVARIABLE" && $rootScope.ruleeffects[ruleEffectKey][action.id].ineffect){
                                 //from earlier evaluation, the data portion of the ruleeffect now contains the value of the variable to be assign.
                                 //the content portion of the ruleeffect defines the name for the variable, when dollar is removed:
-                                var variabletoassign = $rootScope.ruleeffects[ruleEffectKey][action.id].content.replace("#{","").replace("}","");
+                                var variabletoassign = $rootScope.ruleeffects[ruleEffectKey][action.id].content ?
+                                    $rootScope.ruleeffects[ruleEffectKey][action.id].content.replace("#{","").replace("}","") : null;
 
-                                if(!angular.isDefined(variablesHash[variabletoassign])){
+                                if((!variabletoassign || !angular.isDefined(variablesHash[variabletoassign])) && !$rootScope.ruleeffects[ruleEffectKey][action.id].dataElement){
                                     $log.warn("Variable " + variabletoassign + " was not defined.");
                                 }
 

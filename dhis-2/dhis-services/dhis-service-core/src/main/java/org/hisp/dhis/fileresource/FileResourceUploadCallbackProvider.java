@@ -1,4 +1,4 @@
-package org.hisp.dhis.help;
+package org.hisp.dhis.fileresource;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -30,41 +30,53 @@ package org.hisp.dhis.help;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.DhisSpringTest;
-import org.junit.Test;
+import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.io.ByteArrayOutputStream;
-import java.util.Locale;
+import org.springframework.util.concurrent.ListenableFutureCallback;
 
 /**
- * @author Lars Helge Overland
+ * @author Halvdan Hoem Grelland
  */
-public class HelpManagerTest
-    extends DhisSpringTest
+public class FileResourceUploadCallbackProvider
 {
-    private static final Log log = LogFactory.getLog( HelpManagerTest.class );
+    Log log = LogFactory.getLog( FileResourceUploadCallbackProvider.class );
 
     @Autowired
-    private HelpManager helpManager;
+    private IdentifiableObjectManager idObjectManager;
 
-    @Test
-    public void testGetEmbeddedHelpContent()
+    public ListenableFutureCallback<String> getCallback( String fileResourceUid )
     {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        return new ListenableFutureCallback<String>()
+        {
+            @Override
+            public void onFailure( Throwable ex )
+            {
+                log.error( "Saving file content failed", ex );
 
-        helpManager.getHelpContent( out, "overview", Locale.ENGLISH );
+                FileResource fetchedFileResource = idObjectManager.get( FileResource.class, fileResourceUid );
+                fetchedFileResource.setStorageStatus( FileResourceStorageStatus.FAILED );
+                idObjectManager.update( fetchedFileResource );
+            }
 
-        log.debug( out.toString() );
-    }
+            @Override
+            public void onSuccess( String result )
+            {
+                log.info( "File content uploaded: " + result );
 
-    @Test
-    public void testGetHelpCenterContent()
-    {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
+                FileResource fetchedFileResource = idObjectManager.get( FileResource.class, fileResourceUid );
 
-        helpManager.getHelpItems( out, Locale.ENGLISH );
+                if ( result != null && fetchedFileResource != null )
+                {
+                    fetchedFileResource.setStorageStatus( FileResourceStorageStatus.STORED );
+                }
+                else
+                {
+                    log.error( "Conflict: content was stored but FileResource with uid: " + fileResourceUid + " could not be found." );
+                    return;
+                }
 
-        log.debug( out.toString() );
+                idObjectManager.update( fetchedFileResource );
+            }
+        };
     }
 }
