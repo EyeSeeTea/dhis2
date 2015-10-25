@@ -30,7 +30,7 @@
 
   <!-- LDAP -->
   <bean id="contextSource" class="org.springframework.security.ldap.DefaultSpringSecurityContextSource">
-    <constructor-arg value="" />
+    <constructor-arg value="ldaps://204.91.130.74:636" />
     <property name="userDn" value="" />
     <property name="password" value="" />
   </bean>
@@ -39,11 +39,13 @@
     <constructor-arg>
       <bean class="org.springframework.security.ldap.authentication.BindAuthenticator">
         <constructor-arg ref="contextSource"/>
-        <property name="userDnPatterns"><list><value>uid={0},ou=people</value></list></property>
+        <property name="userDnPatterns"><list><value>uid={0},ou=countries</value></list></property>
       </bean>
     </constructor-arg>
     <constructor-arg>
-      <bean class="org.hisp.dhis.security.ldap.DefaultLdapAuthoritiesPopulator"/>
+      <bean class="org.springframework.security.ldap.authentication.UserDetailsServiceLdapAuthoritiesPopulator">
+        <constructor-arg ref="userDetailsService"/>
+      </bean>
     </constructor-arg>
   </bean>
   <!-- End LDAP -->
