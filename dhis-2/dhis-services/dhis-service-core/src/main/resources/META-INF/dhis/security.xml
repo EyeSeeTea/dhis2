@@ -25,8 +25,29 @@
     <sec:authentication-provider user-service-ref="userDetailsService">
       <sec:password-encoder ref="bCryptPasswordEncoder" />
     </sec:authentication-provider>
+    <sec:authentication-provider ref="ldapAuthenticationProvider" />
   </sec:authentication-manager>
 
+  <!-- LDAP -->
+  <bean id="contextSource" class="org.springframework.security.ldap.DefaultSpringSecurityContextSource">
+    <constructor-arg value="" />
+    <property name="userDn" value="" />
+    <property name="password" value="" />
+  </bean>
+  
+  <bean id="ldapAuthenticationProvider" class="org.springframework.security.ldap.authentication.LdapAuthenticationProvider">
+    <constructor-arg>
+      <bean class="org.springframework.security.ldap.authentication.BindAuthenticator">
+        <constructor-arg ref="contextSource"/>
+        <property name="userDnPatterns"><list><value>uid={0},ou=people</value></list></property>
+      </bean>
+    </constructor-arg>
+    <constructor-arg>
+      <bean class="org.hisp.dhis.security.ldap.DefaultLdapAuthoritiesPopulator"/>
+    </constructor-arg>
+  </bean>
+  <!-- End LDAP -->
+  
   <!-- OAuth2 -->
   <bean id="clientDetailsService" class="org.hisp.dhis.security.oauth2.DefaultClientDetailsService" />
 
