@@ -33,7 +33,6 @@ import org.springframework.beans.factory.FactoryBean;
 
 /**
  * @author Lars Helge Overland
- * @version $Id$
  */
 public class ConnectionPropertyFactoryBean
     implements FactoryBean<String>
