@@ -33,7 +33,7 @@
   
   <bean id="contextSource" class="org.springframework.security.ldap.DefaultSpringSecurityContextSource">
     <constructor-arg ref="ldapUrl" />
-    <property name="userDn" ref="ldapManagerUserDn" />
+    <property name="userDn" ref="ldapManagerDn" />
     <property name="password" ref="ldapManagerPassword" />
   </bean>
   
@@ -41,7 +41,7 @@
     <constructor-arg>
       <bean class="org.springframework.security.ldap.authentication.BindAuthenticator">
         <constructor-arg ref="contextSource"/>
-        <property name="userDnPatterns" ref="ldapUserDbPatterns" />
+        <property name="userDnPatterns" ref="ldapDnPatterns" />
       </bean>
     </constructor-arg>
     <constructor-arg>
@@ -53,12 +53,12 @@
   
   <bean id="ldapUrl" class="org.hisp.dhis.external.conf.ConfigurationPropertyFactoryBean"><constructor-arg value="KEY_LDAP_URL" /></bean>
   
-  <bean id="ldapManagerUserDn" class="org.hisp.dhis.external.conf.ConfigurationPropertyFactoryBean"><constructor-arg value="KEY_LDAP_MANAGER_USERDN" /></bean>
+  <bean id="ldapManagerDn" class="org.hisp.dhis.external.conf.ConfigurationPropertyFactoryBean"><constructor-arg value="KEY_LDAP_MANAGER_DN" /></bean>
   
   <bean id="ldapManagerPassword" class="org.hisp.dhis.external.conf.ConfigurationPropertyFactoryBean"><constructor-arg value="KEY_LDAP_MANAGER_PASSWORD" /></bean>
     
-  <bean id="ldapUserDbPatterns" class="org.hisp.dhis.external.conf.ConfigurationPropertyFactoryBean">
-    <constructor-arg value="KEY_LDAP_USERDN_PATTERNS" />
+  <bean id="ldapDnPatterns" class="org.hisp.dhis.external.conf.ConfigurationPropertyFactoryBean">
+    <constructor-arg value="KEY_LDAP_DN_PATTERNS" />
     <property name="list" value="true" />
   </bean>  
     

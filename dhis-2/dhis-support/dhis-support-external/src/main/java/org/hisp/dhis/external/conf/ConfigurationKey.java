@@ -34,9 +34,9 @@ package org.hisp.dhis.external.conf;
 public enum ConfigurationKey
 {
     KEY_LDAP_URL( "ldap.url" ),
-    KEY_LDAP_MANAGER_USERDN( "ldap.manager.userdn" ),
+    KEY_LDAP_MANAGER_DN( "ldap.manager.dn" ),
     KEY_LDAP_MANAGER_PASSWORD( "ldap.manager.password" ),
-    KEY_LDAP_USERDN_PATTERNS( "ldap.userdn.patterns" ),    
+    KEY_LDAP_DN_PATTERNS( "ldap.dn.patterns" ),    
     KEY_FILESTORE_PROVIDER( "filestore.provider", "filesystem" ),
     KEY_FILE_STORE_CONTAINER( "filestore.container" ),
     KEY_FILE_STORE_LOCATION( "filestore.location" ),

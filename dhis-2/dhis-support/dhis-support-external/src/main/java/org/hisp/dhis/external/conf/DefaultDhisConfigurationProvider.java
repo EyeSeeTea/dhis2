@@ -106,17 +106,26 @@ public class DefaultDhisConfigurationProvider
     // DhisConfigurationProvider implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public Properties getProperties()
     {
         return properties;
     }
-    
+
+    @Override
     public String getProperty( ConfigurationKey key  )
+    {
+        return properties.getProperty( key.getKey() );
+    }
+
+    @Override
+    public String getPropertyOrDefault( ConfigurationKey key  )
     {
         return properties.getProperty( key.getKey(), key.getDefaultValue() );
     }
-    
-    public String getProperty( ConfigurationKey key, String defaultValue )
+
+    @Override
+    public String getPropertyOrDefault( ConfigurationKey key, String defaultValue )
     {
         return properties.getProperty( key.getKey(), defaultValue );
     }
