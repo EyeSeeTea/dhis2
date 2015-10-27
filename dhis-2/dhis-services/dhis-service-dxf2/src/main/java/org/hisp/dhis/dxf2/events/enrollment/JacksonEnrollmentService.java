@@ -31,9 +31,9 @@ package org.hisp.dhis.dxf2.events.enrollment;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import org.hisp.dhis.dxf2.common.ImportOptions;
 import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
-import org.hisp.dhis.importexport.ImportStrategy;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
@@ -43,6 +43,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -97,7 +98,7 @@ public class JacksonEnrollmentService extends AbstractEnrollmentService
     // -------------------------------------------------------------------------
 
     @Override
-    public ImportSummaries addEnrollmentsJson( InputStream inputStream, ImportStrategy strategy ) throws IOException
+    public ImportSummaries addEnrollmentsJson( InputStream inputStream, ImportOptions importOptions ) throws IOException
     {
         String input = StreamUtils.copyToString( inputStream, Charset.forName( "UTF-8" ) );
         List<Enrollment> enrollments = new ArrayList<>();
@@ -113,11 +114,11 @@ public class JacksonEnrollmentService extends AbstractEnrollmentService
             enrollments.add( fromJson );
         }
 
-        return addEnrollments( enrollments, strategy );
+        return addEnrollments( enrollments, importOptions );
     }
 
     @Override
-    public ImportSummaries addEnrollmentsXml( InputStream inputStream, ImportStrategy strategy ) throws IOException
+    public ImportSummaries addEnrollmentsXml( InputStream inputStream, ImportOptions importOptions ) throws IOException
     {
         String input = StreamUtils.copyToString( inputStream, Charset.forName( "UTF-8" ) );
         List<Enrollment> enrollments = new ArrayList<>();
@@ -133,21 +134,22 @@ public class JacksonEnrollmentService extends AbstractEnrollmentService
             enrollments.add( fromXml );
         }
 
-        return addEnrollments( enrollments, strategy );
+        return addEnrollments( enrollments, importOptions );
     }
 
-    private ImportSummaries addEnrollments( List<Enrollment> enrollments, ImportStrategy strategy )
+    private ImportSummaries addEnrollments( List<Enrollment> enrollments, ImportOptions importOptions )
     {
         ImportSummaries importSummaries = new ImportSummaries();
 
         List<Enrollment> create = new ArrayList<>();
         List<Enrollment> update = new ArrayList<>();
+        List<String> delete = new ArrayList<>();
 
-        if ( strategy.isCreate() )
+        if ( importOptions.getImportStrategy().isCreate() )
         {
             create.addAll( enrollments );
         }
-        else if ( strategy.isCreateAndUpdate() )
+        else if ( importOptions.getImportStrategy().isCreateAndUpdate() )
         {
             for ( Enrollment enrollment : enrollments )
             {
@@ -168,9 +170,18 @@ public class JacksonEnrollmentService extends AbstractEnrollmentService
                 }
             }
         }
+        else if ( importOptions.getImportStrategy().isUpdate() )
+        {
+            update.addAll( enrollments );
+        }
+        else if ( importOptions.getImportStrategy().isDelete() )
+        {
+            delete.addAll( enrollments.stream().map( Enrollment::getEnrollment ).collect( Collectors.toList() ) );
+        }
 
         importSummaries.addImportSummaries( addEnrollments( create ) );
         importSummaries.addImportSummaries( updateEnrollments( update ) );
+        importSummaries.addImportSummaries( deleteEnrollments( delete ) );
 
         return importSummaries;
     }
