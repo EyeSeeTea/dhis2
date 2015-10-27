@@ -46,21 +46,13 @@ public interface DhisConfigurationProvider
     Properties getProperties();
     
     /**
-     * Get the property value for the given key.
-     * 
-     * @param key the configuration key.
-     * @return the property value.
-     */
-    String getProperty( ConfigurationKey key );
-
-    /**
      * Get the property value for the given key, or the default value for the
      * configuration key if not exists.
      * 
      * @param key the configuration key.
      * @return the property value.
      */
-    String getPropertyOrDefault( ConfigurationKey key );
+    String getProperty( ConfigurationKey key );
 
     /**
      * Get the property value for the given key, or the default value if not

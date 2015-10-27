@@ -115,12 +115,6 @@ public class DefaultDhisConfigurationProvider
     @Override
     public String getProperty( ConfigurationKey key  )
     {
-        return properties.getProperty( key.getKey() );
-    }
-
-    @Override
-    public String getPropertyOrDefault( ConfigurationKey key  )
-    {
         return properties.getProperty( key.getKey(), key.getDefaultValue() );
     }
 
