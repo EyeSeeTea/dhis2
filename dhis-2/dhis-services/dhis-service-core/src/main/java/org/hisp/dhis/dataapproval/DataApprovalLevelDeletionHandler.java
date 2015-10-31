@@ -69,9 +69,9 @@ public class DataApprovalLevelDeletionHandler
     }
 
     @Override
-    public String allowDeleteDataApprovalWorkflow( DataApprovalWorkflow dataApprovalWorkflow )
+    public String allowDeleteDataApprovalWorkflow( DataApprovalWorkflow workflow )
     {
-        String sql = "select count(*) from dataapprovalworkflowmembers where dataapprovalworkflowid=" + dataApprovalWorkflow.getId();
+        String sql = "select count(*) from dataapprovalworkflowmembers where workflowid=" + workflow.getId();
         
         return jdbcTemplate.queryForObject( sql, Integer.class ) == 0 ? null : ERROR;
     }

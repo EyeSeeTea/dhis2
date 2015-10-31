@@ -163,7 +163,7 @@ public class DataSet
     private boolean notifyCompletingUser;
 
     /**
-     * Identifying the approval workflow (if any) for this data set.
+     * The approval workflow (if any) for this data set.
      */
     private DataApprovalWorkflow workflow;
 
@@ -641,6 +641,7 @@ public class DataSet
     }
 
     @JsonProperty
+    @JsonSerialize( as = BaseIdentifiableObject.class )
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public DataApprovalWorkflow getWorkflow()

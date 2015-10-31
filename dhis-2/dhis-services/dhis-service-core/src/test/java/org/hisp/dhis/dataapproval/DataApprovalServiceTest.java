@@ -274,14 +274,14 @@ public class DataApprovalServiceTest
         workflow3 = new DataApprovalWorkflow( "workflow3", periodType, newHashSet( level3 ) );
         workflow1234 = new DataApprovalWorkflow( "workflow1234", periodType, newHashSet( level1, level2, level3, level4 ) );
 
-        dataApprovalWorkflowService.addDataApprovalWorkflow( workflow0 );
-        dataApprovalWorkflowService.addDataApprovalWorkflow( workflow1 );
-        dataApprovalWorkflowService.addDataApprovalWorkflow( workflow12 );
-        dataApprovalWorkflowService.addDataApprovalWorkflow( workflow12A );
-        dataApprovalWorkflowService.addDataApprovalWorkflow( workflow12B );
-        dataApprovalWorkflowService.addDataApprovalWorkflow( workflow12C );
-        dataApprovalWorkflowService.addDataApprovalWorkflow( workflow3 );
-        dataApprovalWorkflowService.addDataApprovalWorkflow( workflow1234 );
+        dataApprovalWorkflowService.addWorkflow( workflow0 );
+        dataApprovalWorkflowService.addWorkflow( workflow1 );
+        dataApprovalWorkflowService.addWorkflow( workflow12 );
+        dataApprovalWorkflowService.addWorkflow( workflow12A );
+        dataApprovalWorkflowService.addWorkflow( workflow12B );
+        dataApprovalWorkflowService.addWorkflow( workflow12C );
+        dataApprovalWorkflowService.addWorkflow( workflow3 );
+        dataApprovalWorkflowService.addWorkflow( workflow1234 );
 
         userA = createUser( 'A' );
         userB = createUser( 'B' );
@@ -1394,7 +1394,7 @@ public class DataApprovalServiceTest
         dataApprovalLevelService.addDataApprovalLevel( level1EFGH );
 
         DataApprovalWorkflow workflowA = new DataApprovalWorkflow( "workflowA", periodType, newHashSet( level1EFGH ) );
-        dataApprovalWorkflowService.addDataApprovalWorkflow( workflowA );
+        dataApprovalWorkflowService.addWorkflow( workflowA );
 
         DataApproval dab = new DataApproval( level1EFGH, workflowA, periodA, organisationUnitA, null, NOT_ACCEPTED, date, userA );
 
@@ -1431,7 +1431,7 @@ public class DataApprovalServiceTest
         dataApprovalLevelService.addDataApprovalLevel( level1ABCD );
 
         DataApprovalWorkflow workflowB = new DataApprovalWorkflow( "workflowB", periodType, newHashSet( level1ABCD, level1EFGH ) );
-        dataApprovalWorkflowService.addDataApprovalWorkflow( workflowB );
+        dataApprovalWorkflowService.addWorkflow( workflowB );
 
         dataApprovalService.approveData( newArrayList( new DataApproval( level1ABCD, workflowB, periodA, organisationUnitA, null, NOT_ACCEPTED, date, userA ) ) );
 
@@ -1496,7 +1496,7 @@ public class DataApprovalServiceTest
         dataApprovalLevelService.addDataApprovalLevel( level1 );
 
         DataApprovalWorkflow workflowC = new DataApprovalWorkflow( "workflowB", periodType, newHashSet( level1, level1ABCD, level1EFGH ) );
-        dataApprovalWorkflowService.addDataApprovalWorkflow( workflowC );
+        dataApprovalWorkflowService.addWorkflow( workflowC );
 
         dataApprovalService.approveData( newArrayList( new DataApproval( level1, workflowC, periodA, organisationUnitA, defaultCombo, NOT_ACCEPTED, date, userA ) ) );
 
@@ -1536,7 +1536,7 @@ public class DataApprovalServiceTest
         setUpCategories();
 
         DataApprovalWorkflow workflowA = new DataApprovalWorkflow( "workflowA", periodType, newHashSet( level2, level3ABCD ) );
-        dataApprovalWorkflowService.addDataApprovalWorkflow( workflowA );
+        dataApprovalWorkflowService.addWorkflow( workflowA );
 
         Date date = new Date();
 

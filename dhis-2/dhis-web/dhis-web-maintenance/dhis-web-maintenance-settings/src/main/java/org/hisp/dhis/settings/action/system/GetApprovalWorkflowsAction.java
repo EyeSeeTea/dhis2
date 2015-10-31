@@ -46,22 +46,22 @@ public class GetApprovalWorkflowsAction
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private DataApprovalWorkflowService dataApprovalWorkflowService;
+    private DataApprovalWorkflowService workflowService;
 
-    public void setDataApprovalWorkflowService( DataApprovalWorkflowService dataApprovalWorkflowService )
+    public void setWorkflowService( DataApprovalWorkflowService workflowService )
     {
-        this.dataApprovalWorkflowService = dataApprovalWorkflowService;
+        this.workflowService = workflowService;
     }
 
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
 
-    private List<DataApprovalWorkflow> dataApprovalWorkflows;
+    private List<DataApprovalWorkflow> workflows;
 
-    public List<DataApprovalWorkflow> getDataApprovalWorkflows()
+    public List<DataApprovalWorkflow> getWorkflows()
     {
-        return dataApprovalWorkflows;
+        return workflows;
     }
 
     // -------------------------------------------------------------------------
@@ -71,9 +71,9 @@ public class GetApprovalWorkflowsAction
     @Override
     public String execute()
     {
-        dataApprovalWorkflows = new ArrayList<>( dataApprovalWorkflowService.getAllDataApprovalWorkflows() );
+        workflows = new ArrayList<>( workflowService.getAllWorkflows() );
 
-        Collections.sort( dataApprovalWorkflows, IdentifiableObjectNameComparator.INSTANCE );
+        Collections.sort( workflows, IdentifiableObjectNameComparator.INSTANCE );
 
         return SUCCESS;
     }

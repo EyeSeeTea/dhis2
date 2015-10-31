@@ -1147,16 +1147,16 @@ public class TableAlteror
             return; // Already converted because dataset.approvedata no longer exists.
         }
 
-        executeSql( "insert into dataapprovalworkflow ( dataapprovalworkflowid, uid, created, lastupdated, name, periodtypeid, userid, publicaccess ) "
+        executeSql( "insert into dataapprovalworkflow ( workflowid, uid, created, lastupdated, name, periodtypeid, userid, publicaccess ) "
             + "select nextval('hibernate_sequence'::regclass), " + statementBuilder.getUid() + ", now(), now(), ds.name, ds.periodtypeid, ds.userid, ds.publicaccess "
             + "from (select datasetid from dataset where approvedata = true union select distinct datasetid from dataapproval) as a "
             + "join dataset ds on ds.datasetid = a.datasetid" );
 
-        executeSql( "insert into dataapprovalworkflowlevels (dataapprovalworkflowid, dataapprovallevelid) "
-            + "select w.dataapprovalworkflowid, l.dataapprovallevelid from dataapprovalworkflow w "
+        executeSql( "insert into dataapprovalworkflowlevels (workflowid, dataapprovallevelid) "
+            + "select w.workflowid, l.dataapprovallevelid from dataapprovalworkflow w "
             + "cross join dataapprovallevel l" );
 
-        executeSql( "update dataset set workflowid = ( select w.dataapprovalworkflowid from dataapprovalworkflow w where w.name = dataset.name)" );
+        executeSql( "update dataset set workflowid = ( select w.workflowid from dataapprovalworkflow w where w.name = dataset.name)" );
         executeSql( "alter table dataset drop column approvedata cascade" ); // Cascade to SQL Views, if any.
 
         executeSql( "alter table dataapproval add column workflowid integer" );
@@ -1165,6 +1165,8 @@ public class TableAlteror
         executeSql( "alter table dataapproval drop constraint dataapproval_unique_key" );
         executeSql( "alter table dataapproval add constraint dataapproval_unique_key unique (dataapprovallevelid,workflowid,periodid,organisationunitid,attributeoptioncomboid)" );
         executeSql( "alter table dataapproval drop column datasetid cascade" ); // Cascade to SQL Views, if any.
+
+        log.info( "Added any workflows needed for approvble datasets and/or approved data." );
     }
 
     private List<Integer> getDistinctIdList( String table, String col1 )

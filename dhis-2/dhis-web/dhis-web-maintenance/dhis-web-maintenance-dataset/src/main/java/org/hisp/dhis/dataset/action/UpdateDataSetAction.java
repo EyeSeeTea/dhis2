@@ -36,7 +36,6 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.attribute.AttributeService;
-import org.hisp.dhis.dataapproval.DataApprovalWorkflow;
 import org.hisp.dhis.dataapproval.DataApprovalWorkflowService;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
@@ -102,11 +101,11 @@ public class UpdateDataSetAction
         this.categoryService = categoryService;
     }
 
-    private DataApprovalWorkflowService dataApprovalWorkflowService;
+    private DataApprovalWorkflowService workflowService;
 
-    public void setDataApprovalWorkflowService( DataApprovalWorkflowService dataApprovalWorkflowService )
+    public void setWorkflowService( DataApprovalWorkflowService workflowService )
     {
-        this.dataApprovalWorkflowService = dataApprovalWorkflowService;
+        this.workflowService = workflowService;
     }
 
     private SectionService sectionService;
@@ -197,11 +196,11 @@ public class UpdateDataSetAction
         this.notifyCompletingUser = notifyCompletingUser;
     }
 
-    private Integer dataApprovalWorkflowId;
+    private Integer workflowId;
 
-    public void setDataApprovalWorkflowId( Integer dataApprovalWorkflowId )
+    public void setDataApprovalWorkflowId( Integer workflowId )
     {
-        this.dataApprovalWorkflowId = dataApprovalWorkflowId;
+        this.workflowId = workflowId;
     }
 
     private String frequencySelect;
@@ -383,9 +382,13 @@ public class UpdateDataSetAction
             dataSet.setCategoryCombo( categoryService.getDataElementCategoryCombo( categoryComboId ) );
         }
 
-        if ( dataApprovalWorkflowId != null )
+        if ( workflowId != null && workflowId > 0 )
         {
-            dataSet.setWorkflow( dataApprovalWorkflowService.getDataApprovalWorkflow( dataApprovalWorkflowId ) );
+            dataSet.setWorkflow( workflowService.getWorkflow( workflowId ) );
+        }
+        else
+        {
+            dataSet.setWorkflow( null );
         }
 
         if ( jsonAttributeValues != null )

@@ -49,24 +49,24 @@ public interface DataApprovalWorkflowService
     /**
      * Adds a DataApprovalWorkflow.
      *
-     * @param dataApprovalWorkflow the DataApprovalWorkflow to add.
+     * @param workflow the DataApprovalWorkflow to add.
      * @return a generated unique id of the added Workflow.
      */
-    int addDataApprovalWorkflow( DataApprovalWorkflow dataApprovalWorkflow );
+    int addWorkflow( DataApprovalWorkflow workflow );
 
     /**
      * Updates a DataApprovalWorkflow.
      *
-     * @param dataApprovalWorkflow the DataApprovalWorkflow to update.
+     * @param workflow the DataApprovalWorkflow to update.
      */
-    void updateDataApprovalWorkflow( DataApprovalWorkflow dataApprovalWorkflow );
+    void updateWorkflow( DataApprovalWorkflow workflow );
 
     /**
      * Deletes a DataApprovalWorkflow.
      *
-     * @param dataApprovalWorkflow the DataApprovalWorkflow to delete.
+     * @param workflow the DataApprovalWorkflow to delete.
      */
-    void deleteDataApprovalWorkflow( DataApprovalWorkflow dataApprovalWorkflow );
+    void deleteWorkflow( DataApprovalWorkflow workflow );
 
     /**
      * Returns a DataApprovalWorkflow.
@@ -74,12 +74,12 @@ public interface DataApprovalWorkflowService
      * @param id the id of the DataApprovalWorkflow to return.
      * @return the DataApprovalWorkflow with the given id, or null if no match.
      */
-    DataApprovalWorkflow getDataApprovalWorkflow( int id );
+    DataApprovalWorkflow getWorkflow( int id );
 
     /**
      * Returns all DataApprovalWorkflows.
      *
      * @return a list of all DataApprovalWorkflows.
      */
-    List<DataApprovalWorkflow> getAllDataApprovalWorkflows();
+    List<DataApprovalWorkflow> getAllWorkflows();
 }

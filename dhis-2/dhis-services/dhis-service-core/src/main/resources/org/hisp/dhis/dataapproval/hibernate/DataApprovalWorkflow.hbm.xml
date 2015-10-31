@@ -10,20 +10,20 @@
 
     <cache usage="read-write" />
     
-    <id name="id" column="dataapprovalworkflowid">
+    <id name="id" column="workflowid">
       <generator class="native" />
     </id>
     &identifiableProperties;
 
     <property name="name" column="name" not-null="true" unique="true" length="230" />
 
-    <many-to-one name="periodType" class="org.hisp.dhis.period.PeriodType" column="periodtypeid" not-null="true" foreign-key="fk_dataapprovalworkflow_periodtype" />
+    <many-to-one name="periodType" class="org.hisp.dhis.period.PeriodType" column="periodtypeid" not-null="true" foreign-key="fk_dataapprovalworkflow_periodtypeid" />
 
     <set name="levels" table="dataapprovalworkflowlevels">
       <cache usage="read-write" />
-      <key column="dataapprovalworkflowid" foreign-key="fk_dataapprovalworkflowlevels_dataapprovalworkflowid" />
+      <key column="workflowid" foreign-key="fk_dataapprovalworkflowlevels_workflowid" />
       <many-to-many class="org.hisp.dhis.dataapproval.DataApprovalLevel" column="dataapprovallevelid"
-                    foreign-key="fk_dataapprovalworkflowlevels_dataapprovallevelid" />
+                    foreign-key="fk_dataapprovalworkflowlevels_levelid" />
     </set>
 
     <!-- Access properties -->
@@ -33,7 +33,7 @@
 
     <set name="userGroupAccesses" table="dataapprovalworkflowusergroupaccesses">
       <cache usage="read-write" />
-      <key column="dataapprovalworkflowid" />
+      <key column="workflowid" />
       <many-to-many class="org.hisp.dhis.user.UserGroupAccess" column="usergroupaccessid" unique="true" />
     </set>
 

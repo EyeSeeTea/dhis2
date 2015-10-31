@@ -124,9 +124,9 @@ public class DataApprovalStoreTest
         workflowA12 = new DataApprovalWorkflow( "workflowA12", periodType, newHashSet( level1, level2 ) );
         workflowB12 = new DataApprovalWorkflow( "workflowB12", periodType, newHashSet( level1, level2 ) );
 
-        workflowService.addDataApprovalWorkflow( workflowA1 );
-        workflowService.addDataApprovalWorkflow( workflowA12 );
-        workflowService.addDataApprovalWorkflow( workflowB12 );
+        workflowService.addWorkflow( workflowA1 );
+        workflowService.addWorkflow( workflowA12 );
+        workflowService.addWorkflow( workflowB12 );
 
         periodA = createPeriod( getDay( 5 ), getDay( 6 ) );
         periodB = createPeriod( getDay( 6 ), getDay( 7 ) );

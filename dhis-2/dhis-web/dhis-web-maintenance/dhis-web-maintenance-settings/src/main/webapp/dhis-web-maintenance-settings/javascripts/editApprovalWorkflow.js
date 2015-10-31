@@ -6,12 +6,12 @@ function editApprovalWorkflow() {
 		}
 	}
 	$.ajax({
-		url: '../api/dataApprovalWorkflows/' + dataApprovalWorkflowUid,
+		url: '../api/dataApprovalWorkflows/' + workflowUid,
 		type: 'PUT',
 		contentType: "application/json; charset=utf-8",
 		dataType: "json",
 		data: JSON.stringify({
-				id: dataApprovalWorkflowUid,
+				id: workflowUid,
 				name: $("#name").val(),
 				periodType: $("#frequency").val(),
 				dataApprovalLevels: approvalLevels

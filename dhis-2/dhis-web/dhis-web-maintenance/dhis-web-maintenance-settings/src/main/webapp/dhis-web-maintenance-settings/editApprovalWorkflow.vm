@@ -1,5 +1,5 @@
 <script>
-    var dataApprovalWorkflowUid = '$dataApprovalWorkflow.uid';
+    var workflowUid = '$workflow.uid';
 </script>
 
 <h3>$i18n.getString( "edit_approval_workflow" ) #openHelp( "systemApprovalSettings" )</h3>
@@ -12,14 +12,14 @@
         </tr>
         <tr>
             <td><label>$i18n.getString( "name" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
-            <td><input type="text" id="name" name="name" value="$!encoder.htmlEncode( $dataApprovalWorkflow.name )"/></td>
+            <td><input type="text" id="name" name="name" value="$!encoder.htmlEncode( $workflow.name )"/></td>
         </tr>
         <tr>
             <td><label>$i18n.getString( "frequency" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
             <td>
                 <select id="frequency" name="frequency">
                     #foreach ( $periodType in $periodTypes )
-                        <option value="$periodType.name" #if( $dataApprovalWorkflow.periodType.name.equals( $periodType.name ) ) selected="selected" #end>$i18n.getString( $periodType.name )</option>
+                        <option value="$periodType.name" #if( $workflow.periodType.name.equals( $periodType.name ) ) selected="selected" #end>$i18n.getString( $periodType.name )</option>
                     #end
                 </select>
             </td>
@@ -30,7 +30,7 @@
             <td>
                 <select id="approvalLevel$level.level" name="approvalLevel$level.level">
                     <option value="">$i18n.getString( "no" )</option>
-                    <option value="$level.uid" #if( $dataApprovalWorkflow.levels.contains( $level ) ) selected="selected" #end>$i18n.getString( "yes" )</option>
+                    <option value="$level.uid" #if( $workflow.levels.contains( $level ) ) selected="selected" #end>$i18n.getString( "yes" )</option>
                 </select>
             </td>
         </tr>

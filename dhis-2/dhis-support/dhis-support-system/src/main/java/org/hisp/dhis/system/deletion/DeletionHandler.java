@@ -168,11 +168,11 @@ public abstract class DeletionHandler
         return null;
     }
 
-    public void deleteDataApprovalWorkflow( DataApprovalWorkflow dataApprovalWorkflow )
+    public void deleteDataApprovalWorkflow( DataApprovalWorkflow workflow )
     {
     }
 
-    public String allowDeleteDataApprovalWorkflow( DataApprovalWorkflow dataApprovalWorkflow )
+    public String allowDeleteDataApprovalWorkflow( DataApprovalWorkflow workflow )
     {
         return null;
     }

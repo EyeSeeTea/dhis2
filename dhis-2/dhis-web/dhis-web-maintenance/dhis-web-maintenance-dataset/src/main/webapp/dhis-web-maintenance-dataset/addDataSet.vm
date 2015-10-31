@@ -76,7 +76,7 @@
       <tr>
         <td><label>$i18n.getString( "frequency" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
         <td>
-          <select id="frequencySelect" name="frequencySelect">
+          <select id="frequencySelect" name="frequencySelect" onchange="frequencyChanged()">
             #foreach( $periodType in $periodTypes )
               <option value="$periodType.name">$i18n.getString( $periodType.name )</option>
             #end
@@ -114,14 +114,15 @@
         </td>
       </tr>
       <tr>
-          <td><label>$i18n.getString( "data_approval_workflow" )</label></td>
-          <td>
-              <select id="dataApprovalWorkflowId" name="dataApprovalWorkflowId">
-                #foreach( $dataApprovalWorkflow in $dataApprovalWorkflows )
-                    <option value="$dataApprovalWorkflow.id">$encoder.htmlEncode( $dataApprovalWorkflow.name )</option>
-                #end
-              </select>
-          </td>
+        <td><label>$i18n.getString( "data_approval_workflow" )</label></td>
+        <td>
+          <select id="workflowId" name="workflowId">
+            <option value="-1">[ $i18n.getString( "none" ) ]</option>
+            #foreach( $workflow in $workflows )
+              <option value="$workflow.id">$encoder.htmlEncode( $workflow.name ) ($i18n.getString( $workflow.periodType.name ))</option>
+            #end
+          </select>
+        </td>
       </tr>
 	  <tr>
       	<td><label>$i18n.getString( "enable_for_java_mobile_client" )</label></td>

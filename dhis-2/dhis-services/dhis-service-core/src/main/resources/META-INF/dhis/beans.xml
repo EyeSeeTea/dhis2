@@ -633,7 +633,7 @@
   </bean>
 
   <bean id="org.hisp.dhis.dataapproval.DataApprovalWorkflowService" class="org.hisp.dhis.dataapproval.DefaultDataApprovalWorkflowService">
-    <property name="dataApprovalWorkflowStore" ref="org.hisp.dhis.dataapproval.DataApprovalWorkflowStore" />
+    <property name="workflowStore" ref="org.hisp.dhis.dataapproval.DataApprovalWorkflowStore" />
   </bean>
 
   <bean id="org.hisp.dhis.dataelement.DataElementService" class="org.hisp.dhis.dataelement.DefaultDataElementService">

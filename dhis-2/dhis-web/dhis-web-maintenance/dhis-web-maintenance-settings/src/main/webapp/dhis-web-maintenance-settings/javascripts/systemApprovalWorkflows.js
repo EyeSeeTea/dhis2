@@ -5,11 +5,11 @@ $(function() {
   });
 });
 
-function editDataApprovalWorkflow( context ) {
-    location.href = 'showEditApprovalWorkflowForm.action?dataApprovalWorkflowId=' + context.id;
+function editWorkflow( context ) {
+    location.href = 'showEditApprovalWorkflowForm.action?workflowId=' + context.id;
 }
 
-function removeDataApprovalWorkflow( context ) {
+function removeWorkflow( context ) {
     var result = window.confirm( i18n_confirm_delete_data_approval_workflow + "\n\n" + context.name );
 
     if ( result )

@@ -124,8 +124,6 @@ public class Program
 
     private TrackedEntity trackedEntity;
 
-    private DataApprovalWorkflow workflow;
-
     /**
      * Set of the dynamic attributes values that belong to this data element.
      */
@@ -137,7 +135,12 @@ public class Program
      * The CategoryCombo used for data attributes.
      */
     private DataElementCategoryCombo categoryCombo;
-    
+
+    /**
+     * The approval workflow (if any) for this program.
+     */
+    private DataApprovalWorkflow workflow;
+
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------

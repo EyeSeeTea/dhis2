@@ -52,11 +52,11 @@ public class GetEditApprovalWorkflowParameters
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private DataApprovalWorkflowService dataApprovalWorkflowService;
+    private DataApprovalWorkflowService workflowService;
 
-    public void setDataApprovalWorkflowService( DataApprovalWorkflowService dataApprovalWorkflowService )
+    public void setWorkflowService( DataApprovalWorkflowService workflowService )
     {
-        this.dataApprovalWorkflowService = dataApprovalWorkflowService;
+        this.workflowService = workflowService;
     }
 
     private PeriodService periodService;
@@ -77,11 +77,11 @@ public class GetEditApprovalWorkflowParameters
     // Input
     // -------------------------------------------------------------------------
 
-    private Integer dataApprovalWorkflowId;
+    private Integer workflowId;
 
-    public void setDataApprovalWorkflowId( Integer dataApprovalWorkflowId )
+    public void setDataApprovalWorkflowId( Integer workflowId )
     {
-        this.dataApprovalWorkflowId = dataApprovalWorkflowId;
+        this.workflowId = workflowId;
     }
 
     // -------------------------------------------------------------------------
@@ -102,11 +102,11 @@ public class GetEditApprovalWorkflowParameters
         return dataApprovalLevels;
     }
 
-    private DataApprovalWorkflow dataApprovalWorkflow;
+    private DataApprovalWorkflow workflow;
 
-    public DataApprovalWorkflow getDataApprovalWorkflow()
+    public DataApprovalWorkflow getWorkflow()
     {
-        return dataApprovalWorkflow;
+        return workflow;
     }
 
     // -------------------------------------------------------------------------
@@ -121,9 +121,9 @@ public class GetEditApprovalWorkflowParameters
 
         dataApprovalLevels = dataApprovalLevelService.getAllDataApprovalLevels();
 
-        if ( dataApprovalWorkflowId != null )
+        if ( workflowId != null )
         {
-            dataApprovalWorkflow = dataApprovalWorkflowService.getDataApprovalWorkflow( dataApprovalWorkflowId );
+            workflow = workflowService.getWorkflow( workflowId );
         }
 
         return SUCCESS;

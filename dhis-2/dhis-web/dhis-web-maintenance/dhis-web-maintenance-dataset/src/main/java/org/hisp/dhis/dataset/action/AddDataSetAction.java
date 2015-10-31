@@ -89,11 +89,11 @@ public class AddDataSetAction
         this.categoryService = categoryService;
     }
 
-    private DataApprovalWorkflowService dataApprovalWorkflowService;
+    private DataApprovalWorkflowService workflowService;
 
-    public void setDataApprovalWorkflowService( DataApprovalWorkflowService dataApprovalWorkflowService )
+    public void setDataApprovalWorkflowService( DataApprovalWorkflowService workflowService )
     {
-        this.dataApprovalWorkflowService = dataApprovalWorkflowService;
+        this.workflowService = workflowService;
     }
 
     private UserService userService;
@@ -184,11 +184,11 @@ public class AddDataSetAction
         this.notifyCompletingUser = notifyCompletingUser;
     }
 
-    private Integer dataApprovalWorkflowId;
+    private Integer workflowId;
 
-    public void setDataApprovalWorkflowId( Integer dataApprovalWorkflowId )
+    public void setWorkflowId( Integer workflowId )
     {
-        this.dataApprovalWorkflowId = dataApprovalWorkflowId;
+        this.workflowId = workflowId;
     }
 
     private String frequencySelect;
@@ -335,9 +335,9 @@ public class AddDataSetAction
             dataSet.setCategoryCombo( categoryService.getDataElementCategoryCombo( categoryComboId ) );
         }
 
-        if ( dataApprovalWorkflowId != null )
+        if ( workflowId != null && workflowId > 0 )
         {
-            dataSet.setWorkflow( dataApprovalWorkflowService.getDataApprovalWorkflow( dataApprovalWorkflowId ) );
+            dataSet.setWorkflow( workflowService.getWorkflow( workflowId ) );
         }
 
         dataSet.setDescription( StringUtils.trimToNull( description ) );

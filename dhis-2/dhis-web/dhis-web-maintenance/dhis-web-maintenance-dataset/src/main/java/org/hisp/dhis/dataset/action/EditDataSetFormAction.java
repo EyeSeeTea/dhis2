@@ -94,11 +94,11 @@ public class EditDataSetFormAction
         this.categoryService = categoryService;
     }
 
-    private DataApprovalWorkflowService dataApprovalWorkflowService;
+    private DataApprovalWorkflowService workflowService;
 
-    public void setDataApprovalWorkflowService( DataApprovalWorkflowService dataApprovalWorkflowService )
+    public void setWorkflowService( DataApprovalWorkflowService workflowService )
     {
-        this.dataApprovalWorkflowService = dataApprovalWorkflowService;
+        this.workflowService = workflowService;
     }
 
     private AttributeService attributeService;
@@ -168,11 +168,11 @@ public class EditDataSetFormAction
         return categoryCombos;
     }
 
-    private List<DataApprovalWorkflow> dataApprovalWorkflows = new ArrayList<>();
+    private List<DataApprovalWorkflow> workflows = new ArrayList<>();
 
-    public List<DataApprovalWorkflow> getDataApprovalWorkflows()
+    public List<DataApprovalWorkflow> getWorkflows()
     {
-        return dataApprovalWorkflows;
+        return workflows;
     }
 
     private List<LegendSet> legendSets;
@@ -207,7 +207,7 @@ public class EditDataSetFormAction
         periodTypes = periodService.getAllPeriodTypes();
         userGroups = new ArrayList<>( userGroupService.getAllUserGroups() );
         categoryCombos = new ArrayList<>( categoryService.getAttributeCategoryCombos() );
-        dataApprovalWorkflows = new ArrayList<>( dataApprovalWorkflowService.getAllDataApprovalWorkflows() );
+        workflows = new ArrayList<>( workflowService.getAllWorkflows() );
         legendSets = new ArrayList<>( legendService.getAllLegendSets() );
         
         if ( dataSetId != null )
@@ -223,7 +223,7 @@ public class EditDataSetFormAction
 
         Collections.sort( userGroups, IdentifiableObjectNameComparator.INSTANCE );
         Collections.sort( dataElements, IdentifiableObjectNameComparator.INSTANCE );
-        Collections.sort( dataApprovalWorkflows, IdentifiableObjectNameComparator.INSTANCE );
+        Collections.sort( workflows, IdentifiableObjectNameComparator.INSTANCE );
         Collections.sort( indicators, IdentifiableObjectNameComparator.INSTANCE );
         Collections.sort( legendSets, IdentifiableObjectNameComparator.INSTANCE );
         Collections.sort( attributes, AttributeSortOrderComparator.INSTANCE );

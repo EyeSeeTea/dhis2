@@ -28,33 +28,9 @@ package org.hisp.dhis.dataapproval;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
-import org.hisp.dhis.dataelement.DataElementCategoryOption;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryService;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.security.SecurityService;
-import org.hisp.dhis.user.CurrentUserService;
-import org.hisp.dhis.user.User;
-import org.hisp.dhis.user.UserCredentials;
-import org.hisp.dhis.user.UserService;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Jim Grace
@@ -67,11 +43,11 @@ public class DefaultDataApprovalWorkflowService
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private DataApprovalWorkflowStore dataApprovalWorkflowStore;
+    private DataApprovalWorkflowStore workflowStore;
 
-    public void setDataApprovalWorkflowStore( DataApprovalWorkflowStore dataApprovalWorkflowStore )
+    public void setWorkflowStore( DataApprovalWorkflowStore workflowStore )
     {
-        this.dataApprovalWorkflowStore = dataApprovalWorkflowStore;
+        this.workflowStore = workflowStore;
     }
 
     // -------------------------------------------------------------------------
@@ -79,32 +55,32 @@ public class DefaultDataApprovalWorkflowService
     // -------------------------------------------------------------------------
 
     @Override
-    public int addDataApprovalWorkflow( DataApprovalWorkflow dataApprovalWorkflow )
+    public int addWorkflow( DataApprovalWorkflow workflow )
     {
-        return dataApprovalWorkflowStore.save( dataApprovalWorkflow );
+        return workflowStore.save( workflow );
     }
 
     @Override
-    public void updateDataApprovalWorkflow( DataApprovalWorkflow dataApprovalWorkflow )
+    public void updateWorkflow( DataApprovalWorkflow dataApprovalWorkflow )
     {
-        dataApprovalWorkflowStore.update( dataApprovalWorkflow );
+        workflowStore.update( dataApprovalWorkflow );
     }
 
     @Override
-    public void deleteDataApprovalWorkflow( DataApprovalWorkflow dataApprovalWorkflow )
+    public void deleteWorkflow( DataApprovalWorkflow workflow )
     {
-        dataApprovalWorkflowStore.delete( dataApprovalWorkflow );
+        workflowStore.delete( workflow );
     }
 
     @Override
-    public DataApprovalWorkflow getDataApprovalWorkflow( int id )
+    public DataApprovalWorkflow getWorkflow( int id )
     {
-        return dataApprovalWorkflowStore.get( id );
+        return workflowStore.get( id );
     }
 
     @Override
-    public List<DataApprovalWorkflow> getAllDataApprovalWorkflows()
+    public List<DataApprovalWorkflow> getAllWorkflows()
     {
-        return dataApprovalWorkflowStore.getAll();
+        return workflowStore.getAll();
     }
 }
