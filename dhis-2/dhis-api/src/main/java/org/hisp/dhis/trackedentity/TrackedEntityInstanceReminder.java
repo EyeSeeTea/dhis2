@@ -50,8 +50,6 @@ import java.util.regex.Pattern;
 public class TrackedEntityInstanceReminder
     extends BaseIdentifiableObject
 {
-    private static final long serialVersionUID = 3101502417481903219L;
-
     public static final String ATTRIBUTE = "attributeid";
 
     public static final Pattern ATTRIBUTE_PATTERN = Pattern.compile( "\\{(" + ATTRIBUTE + ")=(\\w+)\\}" );
@@ -94,7 +92,7 @@ public class TrackedEntityInstanceReminder
 
     public static final int SEND_WHEN_TO_C0MPLETED_EVENT = 2;
 
-    public static final int SEND_WHEN_TO_C0MPLETED_PROGRAM = 3;
+    public static final int SEND_WHEN_TO_COMPLETED_PROGRAM = 3;
 
     public static final int MESSAGE_TYPE_DIRECT_SMS = 1;
 

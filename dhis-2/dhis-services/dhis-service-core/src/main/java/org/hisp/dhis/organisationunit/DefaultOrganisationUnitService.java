@@ -44,9 +44,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.ObjectUtils;
-import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
-import org.hisp.dhis.commons.filter.Filter;
 import org.hisp.dhis.commons.filter.FilterUtils;
 import org.hisp.dhis.configuration.ConfigurationService;
 import org.hisp.dhis.hierarchy.HierarchyViolationException;
@@ -197,18 +195,9 @@ public class DefaultOrganisationUnitService
     }
 
     @Override
-    public List<OrganisationUnit> getOrganisationUnits( final Collection<Integer> identifiers )
+    public List<OrganisationUnit> getOrganisationUnits( Collection<Integer> identifiers )
     {
-        List<OrganisationUnit> objects = getAllOrganisationUnits();
-
-        return identifiers == null ? objects : FilterUtils.filter( objects, new Filter<OrganisationUnit>()
-        {
-            @Override
-            public boolean retain( OrganisationUnit object )
-            {
-                return identifiers.contains( object.getId() );
-            }
-        } );
+        return i18n( i18nService, organisationUnitStore.getById( identifiers ) );
     }
 
     @Override
@@ -251,18 +240,6 @@ public class DefaultOrganisationUnitService
     public List<OrganisationUnit> getOrganisationUnitByNameIgnoreCase( String name )
     {
         return organisationUnitStore.getAllEqNameIgnoreCase( name );
-    }
-
-    @Override
-    public List<OrganisationUnit> getOrganisationUnitsByNames( Collection<String> names )
-    {
-        return i18n( i18nService, organisationUnitStore.getByNames( names ) );
-    }
-
-    @Override
-    public List<OrganisationUnit> getOrganisationUnitsByCodes( Collection<String> codes )
-    {
-        return i18n( i18nService, organisationUnitStore.getByCodes( codes ) );
     }
 
     @Override
@@ -469,7 +446,7 @@ public class DefaultOrganisationUnitService
 
         if ( currentUser != null && !currentUser.getUserCredentials().isSuper() )
         {
-            List<String> userDataSets = IdentifiableObjectUtils.getUids( currentUser.getUserCredentials().getAllDataSets() );
+            Set<String> userDataSets = Sets.newHashSet( getUids( currentUser.getUserCredentials().getAllDataSets() ) );
 
             for ( Set<String> dataSets : associationMap.values() )
             {
@@ -495,7 +472,7 @@ public class DefaultOrganisationUnitService
 
             List<OrganisationUnit> organisationUnitsWithChildren = getOrganisationUnitsWithChildren( parentIds, maxLevels );
 
-            List<String> children = getUids( organisationUnitsWithChildren );
+            Set<String> children = Sets.newHashSet( getUids( organisationUnitsWithChildren ) );
 
             associationMap.keySet().retainAll( children );
         }
@@ -627,21 +604,6 @@ public class DefaultOrganisationUnitService
     public OrganisationUnitLevel getOrganisationUnitLevel( String uid )
     {
         return organisationUnitLevelStore.getByUid( uid );
-    }
-
-    @Override
-    public List<OrganisationUnitLevel> getOrganisationUnitLevels( final Collection<Integer> identifiers )
-    {
-        List<OrganisationUnitLevel> objects = getOrganisationUnitLevels();
-
-        return identifiers == null ? objects : FilterUtils.filter( objects, new Filter<OrganisationUnitLevel>()
-        {
-            @Override
-            public boolean retain( OrganisationUnitLevel object )
-            {
-                return identifiers.contains( object.getId() );
-            }
-        } );
     }
 
     @Override

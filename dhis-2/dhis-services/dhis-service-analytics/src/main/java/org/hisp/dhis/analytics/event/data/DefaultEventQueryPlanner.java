@@ -38,7 +38,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.analytics.QueryPlanner;
-import org.hisp.dhis.analytics.event.EventAnalyticsManager;
 import org.hisp.dhis.analytics.event.EventQueryParams;
 import org.hisp.dhis.analytics.event.EventQueryPlanner;
 import org.hisp.dhis.analytics.partition.PartitionManager;
@@ -46,9 +45,9 @@ import org.hisp.dhis.analytics.table.PartitionUtils;
 import org.hisp.dhis.common.IllegalQueryException;
 import org.hisp.dhis.common.MaintenanceModeException;
 import org.hisp.dhis.common.QueryItem;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.program.ProgramIndicator;
+import org.hisp.dhis.setting.Setting;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -63,12 +62,6 @@ public class DefaultEventQueryPlanner
     @Autowired
     private QueryPlanner queryPlanner;
 
-    @Autowired
-    private EventAnalyticsManager analyticsManager;
-    
-    @Autowired
-    private OrganisationUnitService organisationUnitService;
-    
     @Autowired
     private SystemSettingManager systemSettingManager;
     
@@ -206,7 +199,7 @@ public class DefaultEventQueryPlanner
     @Override
     public int getMaxLimit()
     {
-        return (Integer) systemSettingManager.getSystemSetting( SystemSettingManager.KEY_ANALYTICS_MAX_LIMIT, SystemSettingManager.DEFAULT_ANALYTICS_MAX_LIMIT );
+        return (Integer) systemSettingManager.getSystemSetting( Setting.ANALYTICS_MAX_LIMIT );
     }
     
     // -------------------------------------------------------------------------

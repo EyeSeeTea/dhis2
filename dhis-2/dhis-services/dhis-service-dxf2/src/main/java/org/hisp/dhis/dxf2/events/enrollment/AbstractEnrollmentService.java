@@ -32,6 +32,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
+import org.hisp.dhis.common.exception.InvalidIdentifierReferenceException;
 import org.hisp.dhis.commons.collection.CachingMap;
 import org.hisp.dhis.dbms.DbmsManager;
 import org.hisp.dhis.dxf2.events.event.Note;
@@ -61,7 +62,6 @@ import org.hisp.dhis.trackedentitycomment.TrackedEntityCommentService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -241,7 +241,7 @@ public abstract class AbstractEnrollmentService
             importSummary.setStatus( ImportStatus.ERROR );
             importSummary.setDescription( "TrackedEntityInstance " + trackedEntityInstance.getTrackedEntityInstance()
                 + " already have an active enrollment in program " + program.getUid() );
-            importSummary.getImportCount().incrementIgnored();
+            importSummary.incrementIgnored();
 
             return importSummary;
         }
@@ -258,7 +258,7 @@ public abstract class AbstractEnrollmentService
                 importSummary.setDescription( "TrackedEntityInstance " + trackedEntityInstance.getTrackedEntityInstance()
                     + " already have a completed enrollment in program " + program.getUid() + ", and this program is" +
                     " configured to only allow enrolling one time." );
-                importSummary.getImportCount().incrementIgnored();
+                importSummary.incrementIgnored();
 
                 return importSummary;
             }
@@ -272,7 +272,7 @@ public abstract class AbstractEnrollmentService
         if ( !importConflicts.isEmpty() )
         {
             importSummary.setStatus( ImportStatus.ERROR );
-            importSummary.getImportCount().incrementIgnored();
+            importSummary.incrementIgnored();
 
             return importSummary;
         }
@@ -287,6 +287,7 @@ public abstract class AbstractEnrollmentService
             importSummary.setStatus( ImportStatus.ERROR );
             importSummary.setDescription( "Could not enroll TrackedEntityInstance "
                 + enrollment.getTrackedEntityInstance() + " into program " + enrollment.getProgram() );
+            importSummary.incrementIgnored();
 
             return importSummary;
         }
@@ -335,20 +336,14 @@ public abstract class AbstractEnrollmentService
 
         if ( enrollment == null || enrollment.getEnrollment() == null )
         {
-            importSummary = new ImportSummary( ImportStatus.ERROR, "No enrollment or enrollment ID was supplied" );
-            importSummary.getImportCount().incrementIgnored();
-
-            return importSummary;
+            return new ImportSummary( ImportStatus.ERROR, "No enrollment or enrollment ID was supplied" ).incrementIgnored();
         }
 
         ProgramInstance programInstance = programInstanceService.getProgramInstance( enrollment.getEnrollment() );
 
         if ( programInstance == null )
         {
-            importSummary = new ImportSummary( ImportStatus.ERROR, "Enrollment ID was not valid." );
-            importSummary.getImportCount().incrementIgnored();
-
-            return importSummary;
+            return new ImportSummary( ImportStatus.ERROR, "Enrollment ID was not valid." ).incrementIgnored();
         }
 
         Set<ImportConflict> importConflicts = new HashSet<>();
@@ -385,10 +380,7 @@ public abstract class AbstractEnrollmentService
             }
             else
             {
-                importSummary = new ImportSummary( ImportStatus.ERROR, "Re-enrollment is not allowed, please create a new enrollment." );
-                importSummary.getImportCount().incrementIgnored();
-
-                return importSummary;
+                return new ImportSummary( ImportStatus.ERROR, "Re-enrollment is not allowed, please create a new enrollment." ).incrementIgnored();
             }
         }
 
@@ -408,30 +400,51 @@ public abstract class AbstractEnrollmentService
     // -------------------------------------------------------------------------
 
     @Override
-    public void deleteEnrollment( Enrollment enrollment )
+    public ImportSummary deleteEnrollment( String uid )
     {
-        ProgramInstance programInstance = programInstanceService.getProgramInstance( enrollment.getEnrollment() );
-        Assert.notNull( programInstance );
+        ProgramInstance programInstance = programInstanceService.getProgramInstance( uid );
 
-        programInstanceService.deleteProgramInstance( programInstance );
+        if ( programInstance != null )
+        {
+            programInstanceService.deleteProgramInstance( programInstance );
+            return new ImportSummary( ImportStatus.SUCCESS, "Deletion of enrollment " + uid + " was successful." ).incrementDeleted();
+        }
+
+        return new ImportSummary( ImportStatus.ERROR, "ID " + uid + " does not point to a valid enrollment" ).incrementIgnored();
     }
 
     @Override
-    public void cancelEnrollment( Enrollment enrollment )
+    public ImportSummaries deleteEnrollments( List<String> uids )
     {
-        ProgramInstance programInstance = programInstanceService.getProgramInstance( enrollment.getEnrollment() );
-        Assert.notNull( programInstance );
+        ImportSummaries importSummaries = new ImportSummaries();
+        int counter = 0;
 
+        for ( String uid : uids )
+        {
+            importSummaries.addImportSummary( deleteEnrollment( uid ) );
+
+            if ( counter % FLUSH_FREQUENCY == 0 )
+            {
+                dbmsManager.clearSession();
+            }
+
+            counter++;
+        }
+
+        return importSummaries;
+    }
+
+    @Override
+    public void cancelEnrollment( String uid )
+    {
+        ProgramInstance programInstance = programInstanceService.getProgramInstance( uid );
         programInstanceService.cancelProgramInstanceStatus( programInstance );
     }
 
     @Override
-    public void completeEnrollment( Enrollment enrollment )
+    public void completeEnrollment( String uid )
     {
-
-        ProgramInstance programInstance = programInstanceService.getProgramInstance( enrollment.getEnrollment() );
-        Assert.notNull( programInstance );
-
+        ProgramInstance programInstance = programInstanceService.getProgramInstance( uid );
         programInstanceService.completeProgramInstanceStatus( programInstance );
     }
 
@@ -565,7 +578,7 @@ public abstract class AbstractEnrollmentService
 
         if ( entityInstance == null )
         {
-            throw new IllegalArgumentException( "TrackedEntityInstance does not exist." );
+            throw new InvalidIdentifierReferenceException( "TrackedEntityInstance does not exist." );
         }
 
         return entityInstance;

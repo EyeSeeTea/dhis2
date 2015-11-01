@@ -55,15 +55,44 @@ public class UnregisteredSMSListener
 {
     private SMSCommandService smsCommandService;
 
+    public void setSmsCommandService( SMSCommandService smsCommandService )
+    {
+        this.smsCommandService = smsCommandService;
+    }
+
     private UserService userService;
+
+    public void setUserService( UserService userService )
+    {
+        this.userService = userService;
+    }
 
     private MessageService messageService;
 
+    public void setMessageService( MessageService messageService )
+    {
+        this.messageService = messageService;
+    }
+
     private SmsMessageSender smsMessageSender;
+
+    public void setSmsMessageSender( SmsMessageSender smsMessageSender )
+    {
+        this.smsMessageSender = smsMessageSender;
+    }
 
     private IncomingSmsService incomingSmsService;
 
+    public void setIncomingSmsService( IncomingSmsService incomingSmsService )
+    {
+        this.incomingSmsService = incomingSmsService;
+    }
+
     public static final String USER_NAME = "anonymous";
+
+    // -------------------------------------------------------------------------
+    // IncomingSmsListener implementation
+    // -------------------------------------------------------------------------
 
     @Transactional
     @Override
@@ -122,11 +151,13 @@ public class UnregisteredSMSListener
                 {
                     User user = iterator.next();
                     messageError += user.getName();
+                    
                     if ( iterator.hasNext() )
                     {
                         messageError += ", ";
                     }
                 }
+                
                 throw new SMSParserException( messageError );
             }
             else
@@ -141,7 +172,7 @@ public class UnregisteredSMSListener
                     UserCredentials usercredential = new UserCredentials();
                     usercredential.setUsername( USER_NAME );
                     usercredential.setPassword( USER_NAME );
-                    usercredential.setUser( user );
+                    usercredential.setUserInfo( user );
                     user.setSurname( USER_NAME );
                     user.setFirstName( USER_NAME );
                     user.setUserCredentials( usercredential );
@@ -152,7 +183,7 @@ public class UnregisteredSMSListener
                 }
 
                 // forward to user group by SMS, E-mail, DHIS conversation
-                messageService.sendMessage( smsCommand.getName(), message, null, receivers, anonymousUser.getUser(),
+                messageService.sendMessage( smsCommand.getName(), message, null, receivers, anonymousUser.getUserInfo(),
                     false, false );
 
                 // confirm SMS was received and forwarded completely
@@ -168,30 +199,5 @@ public class UnregisteredSMSListener
                 incomingSmsService.update( sms );
             }
         }
-    }
-
-    public void setSmsCommandService( SMSCommandService smsCommandService )
-    {
-        this.smsCommandService = smsCommandService;
-    }
-
-    public void setUserService( UserService userService )
-    {
-        this.userService = userService;
-    }
-
-    public void setMessageService( MessageService messageService )
-    {
-        this.messageService = messageService;
-    }
-
-    public void setSmsMessageSender( SmsMessageSender smsMessageSender )
-    {
-        this.smsMessageSender = smsMessageSender;
-    }
-
-    public void setIncomingSmsService( IncomingSmsService incomingSmsService )
-    {
-        this.incomingSmsService = incomingSmsService;
     }
 }

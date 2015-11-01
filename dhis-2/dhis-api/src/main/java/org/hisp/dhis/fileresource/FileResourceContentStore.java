@@ -30,6 +30,9 @@ package org.hisp.dhis.fileresource;
 
 import com.google.common.io.ByteSource;
 
+import java.io.File;
+import java.net.URI;
+
 /**
  * @author Halvdan Hoem Grelland
  */
@@ -43,18 +46,31 @@ public interface FileResourceContentStore
     ByteSource getFileResourceContent( String key );
 
     /**
-     * Save the content bytes of a FileResource to the file store.
-     * @param key the key to use. Must be unique in the file store.
-     * @param content a ByteSource providing a stream of the content to save.
-     * @param size the byte length of the content.
-     * @param contentMd5 the MD5 digest of the content.
+     * Save the content of the file to the file store.
+     * @param fileResource the FileResource object. Must be complete and include the storageKey,
+     *                     contentLength, contentMd5 and name.
+     * @param file the file. The file will be consumed and deleted upon completion.
      * @return the key on success or null if saving failed.
      */
-    String saveFileResourceContent( String key, ByteSource content, long size, String contentMd5 );
+    String saveFileResourceContent( FileResource fileResource, File file );
 
     /**
      * Delete the content bytes of a file resource.
      * @param key the key.
      */
     void deleteFileResourceContent( String key );
+
+    /**
+     * Check existence of a file.
+     * @param key key of the file.
+     * @return true if the file exists in the file store, false otherwise.
+     */
+    boolean fileResourceContentExists( String key );
+
+    /**
+     * Create a signed GET request which gives access to the content.
+     * @param key the key.
+     * @return a URI containing the signed GET request or null if signed requests are not supported.
+     */
+    URI getSignedGetContentUri( String key );
 }

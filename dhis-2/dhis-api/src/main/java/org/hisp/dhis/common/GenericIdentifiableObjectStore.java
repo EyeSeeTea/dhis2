@@ -185,12 +185,36 @@ public interface GenericIdentifiableObjectStore<T>
     int getCountLikeName( String name );
 
     /**
-     * Retrieves a list of objects referenced by the given List of uids.
+     * Retrieves a list of objects referenced by the given collection of ids.
      *
-     * @param uids a List of uids.
+     * @param uids a collection of ids.
+     * @return a list of objects.
+     */
+    List<T> getById( Collection<Integer> ids );
+    
+    /**
+     * Retrieves a list of objects referenced by the given collection of uids.
+     *
+     * @param uids a collection of uids.
      * @return a list of objects.
      */
     List<T> getByUid( Collection<String> uids );
+
+    /**
+     * Retrieves a list of objects referenced by the given collection of codes.
+     *
+     * @param uids a collection of codes.
+     * @return a list of objects.
+     */
+    List<T> getByCode( Collection<String> codes );
+
+    /**
+     * Retrieves a list of objects referenced by the given collection of names.
+     *
+     * @param uids a collection of names.
+     * @return a list of objects.
+     */
+    List<T> getByName( Collection<String> names );
 
     /**
      * Retrieves a list of objects referenced by the given List of uids.
@@ -208,6 +232,14 @@ public interface GenericIdentifiableObjectStore<T>
      * @return All objects equal or newer than given date.
      */
     List<T> getAllGeCreated( Date created );
+
+    /**
+     * Returns all objects which are equal to or older than the given date.
+     *
+     * @param created Date to compare with.
+     * @return All objects equals to or older than the given date.
+     */
+    List<T> getAllLeCreated( Date created );
 
     /**
      * Returns all objects that are equal to or newer than given date.

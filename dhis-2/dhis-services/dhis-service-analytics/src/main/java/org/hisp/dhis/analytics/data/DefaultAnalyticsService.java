@@ -79,6 +79,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -87,6 +88,7 @@ import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.analytics.AnalyticsManager;
 import org.hisp.dhis.analytics.AnalyticsSecurityManager;
 import org.hisp.dhis.analytics.AnalyticsService;
+import org.hisp.dhis.analytics.AnalyticsUtils;
 import org.hisp.dhis.analytics.DataQueryGroups;
 import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.analytics.DimensionItem;
@@ -116,7 +118,6 @@ import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.NameableObjectUtils;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.commons.collection.ListUtils;
-import org.hisp.dhis.commons.collection.UniqueArrayList;
 import org.hisp.dhis.commons.util.DebugUtils;
 import org.hisp.dhis.constant.ConstantService;
 import org.hisp.dhis.dataelement.DataElement;
@@ -136,10 +137,10 @@ import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.period.RelativePeriodEnum;
 import org.hisp.dhis.period.RelativePeriods;
 import org.hisp.dhis.period.comparator.AscendingPeriodEndDateComparator;
-import org.hisp.dhis.program.ProgramIndicatorService;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStageService;
 import org.hisp.dhis.reporttable.ReportTable;
+import org.hisp.dhis.setting.Setting;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.grid.ListGrid;
 import org.hisp.dhis.system.util.MathUtils;
@@ -201,9 +202,6 @@ public class DefaultAnalyticsService
     
     @Autowired
     private ProgramStageService programStageService;
-    
-    @Autowired
-    private ProgramIndicatorService programIndicatorService;
     
     @Autowired
     private CurrentUserService currentUserService;
@@ -344,11 +342,9 @@ public class DefaultAnalyticsService
 
                         row.add( DX_INDEX, new DimensionItem( DATA_X_DIM_ID, indicator ) );
 
-                        Double roundedValue = indicator.hasDecimals() ? MathUtils.getRounded( value, indicator.getDecimals() ) : MathUtils.getRounded( value );
-                        
                         grid.addRow();
                         grid.addValues( DimensionItem.getItemIdentifiers( row ) );
-                        grid.addValue( dataSourceParams.isSkipRounding() ? value : roundedValue );
+                        grid.addValue( AnalyticsUtils.getRoundedValue( dataSourceParams, indicator.getDecimals(), value ) );
                     }
                 }
             }
@@ -1162,9 +1158,9 @@ public class DefaultAnalyticsService
 
         if ( ORGUNIT_DIM_ID.equals( dimension ) )
         {
-            List<NameableObject> ous = new UniqueArrayList<>();
-            List<Integer> levels = new UniqueArrayList<>();
-            List<OrganisationUnitGroup> groups = new UniqueArrayList<>();
+            List<NameableObject> ous = new ArrayList<>();
+            List<Integer> levels = new ArrayList<>();
+            List<OrganisationUnitGroup> groups = new ArrayList<>();
 
             for ( String ou : items )
             {
@@ -1211,7 +1207,9 @@ public class DefaultAnalyticsService
                 }
             }
 
-            List<NameableObject> orgUnits = new UniqueArrayList<>();
+            ous = ous.stream().distinct().collect( Collectors.toList() ); // Remove duplicates
+            
+            List<NameableObject> orgUnits = new ArrayList<>();
             List<OrganisationUnit> ousList = NameableObjectUtils.asTypedList( ous );
 
             if ( !levels.isEmpty() )
@@ -1238,6 +1236,8 @@ public class DefaultAnalyticsService
                 throw new IllegalQueryException( "Dimension ou is present in query without any valid dimension options" );
             }
 
+            orgUnits = orgUnits.stream().distinct().collect( Collectors.toList() ); // Remove duplicates
+            
             DimensionalObject object = new BaseDimensionalObject( dimension, DimensionType.ORGANISATIONUNIT, null, DISPLAY_NAME_ORGUNIT, orgUnits );
 
             return object;
@@ -1479,7 +1479,7 @@ public class DefaultAnalyticsService
      */
     private int getProcessNo()
     {
-        Integer cores = (Integer) systemSettingManager.getSystemSetting( SystemSettingManager.KEY_DATABASE_SERVER_CPUS );
+        Integer cores = (Integer) systemSettingManager.getSystemSetting( Setting.DATABASE_SERVER_CPUS );
 
         return ( cores == null || cores == 0 ) ? SystemUtils.getCpuCores() : cores;
     }
@@ -1525,6 +1525,6 @@ public class DefaultAnalyticsService
      */
     private int getMaxLimit()
     {
-        return (Integer) systemSettingManager.getSystemSetting( SystemSettingManager.KEY_ANALYTICS_MAX_LIMIT, SystemSettingManager.DEFAULT_ANALYTICS_MAX_LIMIT );
+        return (Integer) systemSettingManager.getSystemSetting( Setting.ANALYTICS_MAX_LIMIT );
     }
 }

@@ -30,14 +30,12 @@ package org.hisp.dhis.user;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 /**
  * The main interface for working with user settings. Implementation need to get
  * the current user from {@link CurrentUserService}.
  * 
  * @author Torgeir Lorange Ostby
- * @version $Id: UserSettingService.java 2869 2007-02-20 14:26:09Z andegje $
  */
 public interface UserSettingService
 {
@@ -51,11 +49,13 @@ public interface UserSettingService
     String KEY_MESSAGE_SMS_NOTIFICATION = "keyMessageSmsNotification";
     String KEY_UI_LOCALE = "keyUiLocale";
     String KEY_DB_LOCALE = "keyDbLocale";
-    String KEY_GENERATE_REPORT_INTERFACE = "keyGenerateReportInterface";
     String KEY_ANALYSIS_DISPLAY_PROPERTY = "keyAnalysisDisplayProperty";
     String AUTO_SAVE_CASE_ENTRY_FORM = "autoSaveCaseEntryForm";
     String AUTO_SAVE_TRACKED_ENTITY_REGISTRATION_ENTRY_FORM = "autoSavetTrackedEntityForm";
+    
     String DEFAULT_ANALYSIS_DISPLAY_PROPERTY = "name";
+    
+    //TODO use enum for names
     
     // -------------------------------------------------------------------------
     // UserSettings
@@ -67,84 +67,7 @@ public interface UserSettingService
      * @param userSetting the UserSetting to add.
      */
     void addUserSetting( UserSetting userSetting );
-
-    /**
-     * If a matching UserSetting exists, based on its user and name, it will be
-     * updated, if not, the given UserSetting will be added.
-     *
-     * @param userSetting the UserSetting.
-     */
-    void addOrUpdateUserSetting( UserSetting userSetting );
-
-    /**
-     * Updates a UserSetting.
-     *
-     * @param userSetting the UserSetting to update.
-     */
-    void updateUserSetting( UserSetting userSetting );
-
-    /**
-     * Retrieves the UserSetting associated with the given User for the given
-     * UserSetting name.
-     *
-     * @param user the User.
-     * @param name the name of the UserSetting.
-     * @return the UserSetting.
-     */
-    UserSetting getUserSetting( User user, String name );
-
-    /**
-     * Retrieves a user setting value for the given user and setting name. Returns
-     * the given default value if the setting does not exist or the setting value
-     * is null.
-     *
-     * @param user         the user.
-     * @param name         the setting name.
-     * @param defaultValue the default value.
-     * @return a setting value.
-     */
-    Serializable getUserSettingValue( User user, String name, Serializable defaultValue );
-
-    /**
-     * Retrieves all UserSettings for the given User.
-     *
-     * @param user the User.
-     * @return a List of UserSettings.
-     */
-    List<UserSetting> getAllUserSettings( User user );
-
-    /**
-     * Retrieves all UserSettings with the given name.
-     * 
-     * @param name the name.
-     * @return a List of UserSettings.
-     */
-    List<UserSetting> getUserSettings( String name );
-
-    /**
-     * Deletes a UserSetting.
-     *
-     * @param userSetting the UserSetting to delete.
-     */
-    void deleteUserSetting( UserSetting userSetting );
-
-    /**
-     * Returns a Map with an entry for all UserSettings with the given name where
-     * the key is the user and the value is the value of the user setting.
-     *
-     * @param name         the name of the UserSetting.
-     * @param defaultValue the value to return if the UserSetting value is null.
-     * @return a Map.
-     */
-    Map<User, Serializable> getUserSettings( String name, Serializable defaultValue );
-
-    /**
-     * Removes all user settings associated with the given user.
-     *
-     * @param user the user.
-     */
-    void removeUserSettings( User user );
-
+    
     /**
      * Saves the name/value pair as a user setting connected to the currently
      * logged in user.
@@ -156,7 +79,8 @@ public interface UserSettingService
     void saveUserSetting( String name, Serializable value );
 
     /**
-     * Saves the name/value pair as a user setting connected to user identified by username
+     * Saves the name/value pair as a user setting connected to user identified 
+     * by username.
      *
      * @param name the name/handle of the value.
      * @param value the value to store.
@@ -166,15 +90,38 @@ public interface UserSettingService
     void saveUserSetting( String name, Serializable value, String username );
 
     /**
-     * Returns the value of the user setting specified by the given name.
+     * Saves the name/value pair as a user setting connected to user.
+     *
+     * @param name the name/handle of the value.
+     * @param value the value to store.
+     * @param username the user.
+     * @throws NoCurrentUserException if there is no user.
+     */
+    void saveUserSetting( String name, Serializable value, User user );
+
+    /**
+     * Deletes a UserSetting.
+     *
+     * @param userSetting the UserSetting to delete.
+     */
+    void deleteUserSetting( UserSetting userSetting );
+
+    /**
+     * Deletes the user setting with the given name.
      * 
-     * @param name the name of the user setting.
-     * @return the value corresponding to the named user setting, or null if
-     *         there is no match.
+     * @param name the name of the user setting to delete.
      * @throws NoCurrentUserException if there is no current user.
      */
-    Serializable getUserSetting( String name );
+    void deleteUserSetting( String name );
 
+    /**
+     * Deletes the user setting with the given name for the given user.
+     * 
+     * @param name the name of the user setting to delete.
+     * @user the user.
+     */
+    void deleteUserSetting( String name, User user );
+    
     /**
      * Returns the value of the user setting specified by the given name.
      * 
@@ -183,7 +130,7 @@ public interface UserSettingService
      *         there is no match.
      * @throws NoCurrentUserException if there is no current user.
      */
-    Serializable getUserSetting( String name, String username );
+    Serializable getUserSetting( String name );
 
     /**
      * Returns the value of the user setting specified by the given name. If
@@ -199,18 +146,35 @@ public interface UserSettingService
     Serializable getUserSetting( String name, Serializable defaultValue );
 
     /**
+     * Retrieves a user setting value for the given user and setting name. Returns
+     * the given default value if the setting does not exist or the setting value
+     * is null.
+     *
+     * @param name         the setting name.
+     * @param defaultValue the default value.
+     * @param user         the user.
+     * @return a setting value.
+     */
+    Serializable getUserSetting( String name, Serializable defaultValue, User user );
+
+    /**
+     * Retrieves all UserSettings for the given User.
+     *
+     * @param user the User.
+     * @return a List of UserSettings.
+     */
+    List<UserSetting> getAllUserSettings( User user );
+
+    /**
      * Returns all user settings belonging to the current user.
      * 
      * @return all user settings belonging to the current user.
      * @throws NoCurrentUserException if there is no current user.
      */
     List<UserSetting> getAllUserSettings();
-
+    
     /**
-     * Deletes the user setting with the given name.
-     * 
-     * @param name the name of the user setting to delete.
-     * @throws NoCurrentUserException if there is no current user.
+     * Invalidates in-memory caches.
      */
-    void deleteUserSetting( String name );
+    void invalidateCache();
 }

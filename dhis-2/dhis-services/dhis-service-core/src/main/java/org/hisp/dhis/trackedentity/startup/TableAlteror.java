@@ -44,7 +44,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.caseaggregation.CaseAggregationCondition;
 import org.hisp.dhis.common.CodeGenerator;
-import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.program.ProgramExpression;
@@ -81,9 +80,6 @@ public class TableAlteror
     private StatementBuilder statementBuilder;
 
     @Autowired
-    private DataElementCategoryService categoryService;
-
-    @Autowired
     private ProgramStageService programStageService;
     
     @Autowired
@@ -109,8 +105,6 @@ public class TableAlteror
         executeSql( "ALTER TABLE program DROP COLUMN singleevent" );
         executeSql( "ALTER TABLE program DROP COLUMN anonymous" );
         executeSql( "UPDATE program SET type=1 where type is null" );
-
-        executeSql( "UPDATE programstage SET irregular=false WHERE irregular is null" );
 
         executeSql( "DROP TABLE programattributevalue" );
         executeSql( "DROP TABLE programinstance_attributes" );
@@ -275,8 +269,6 @@ public class TableAlteror
         executeSql( "UPDATE trackedentityattribute SET valuetype='optionSet' WHERE valuetype='combo'" );
 
         updateAggregateQueryBuilder();
-
-        executeSql( "UPDATE trackedentityaudit SET accessedmodule='tracked_entity_instance_dashboard' WHERE accessedmodule='instance_dashboard' or accessedmodule='patient_dashboard'" );
 
         executeSql( "UPDATE programstageinstance SET status=1 WHERE completed=true" );
         executeSql( "ALTER TABLE programstageinstance DROP COLUMN completed" );

@@ -32,6 +32,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import org.hisp.dhis.common.DeleteNotAllowedException;
 import org.hisp.dhis.common.IllegalQueryException;
 import org.hisp.dhis.common.MaintenanceModeException;
+import org.hisp.dhis.common.exception.InvalidIdentifierReferenceException;
 import org.hisp.dhis.dataapproval.exceptions.DataApprovalException;
 import org.hisp.dhis.dxf2.webmessage.WebMessageException;
 import org.hisp.dhis.dxf2.webmessage.WebMessageStatus;
@@ -52,7 +53,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolationException;
 import java.beans.PropertyEditorSupport;
-import java.io.IOException;
 import java.util.Date;
 
 /**
@@ -80,22 +80,22 @@ public class CrudControllerAdvice
     @ExceptionHandler( { NotAuthenticatedException.class } )
     public void notAuthenticatedExceptionHandler( NotAuthenticatedException ex, HttpServletResponse response, HttpServletRequest request )
     {
-        webMessageService.send( WebMessageUtils.unathorized( ex.getClass().getName() ), response, request );
+        webMessageService.send( WebMessageUtils.unathorized( ex.getMessage() ), response, request );
     }
 
     @ExceptionHandler( { NotFoundException.class } )
     public void notFoundExceptionHandler( NotFoundException ex, HttpServletResponse response, HttpServletRequest request )
     {
-        webMessageService.send( WebMessageUtils.notFound( ex.getClass().getName() ), response, request );
+        webMessageService.send( WebMessageUtils.notFound( ex.getMessage() ), response, request );
     }
 
     @ExceptionHandler( ConstraintViolationException.class )
     public void constraintViolationExceptionHandler( ConstraintViolationException ex, HttpServletResponse response, HttpServletRequest request )
     {
-        webMessageService.send( WebMessageUtils.unprocessableEntity( ex.getClass().getName() ), response, request );
+        webMessageService.send( WebMessageUtils.unprocessableEntity( ex.getMessage() ), response, request );
     }
 
-    @ExceptionHandler( { IllegalQueryException.class, IllegalArgumentException.class, DeleteNotAllowedException.class } )
+    @ExceptionHandler( { IllegalQueryException.class, DeleteNotAllowedException.class, InvalidIdentifierReferenceException.class } )
     public void conflictsExceptionHandler( Exception ex, HttpServletResponse response, HttpServletRequest request )
     {
         webMessageService.send( WebMessageUtils.conflict( ex.getMessage() ), response, request );
@@ -104,13 +104,13 @@ public class CrudControllerAdvice
     @ExceptionHandler( MaintenanceModeException.class )
     public void maintenanceModeExceptionHandler( MaintenanceModeException ex, HttpServletResponse response, HttpServletRequest request )
     {
-        webMessageService.send( WebMessageUtils.serviceUnavailable( ex.getClass().getName() ), response, request );
+        webMessageService.send( WebMessageUtils.serviceUnavailable( ex.getMessage() ), response, request );
     }
 
     @ExceptionHandler( DataApprovalException.class )
     public void dataApprovalExceptionHandler( DataApprovalException ex, HttpServletResponse response, HttpServletRequest request )
     {
-        webMessageService.send( WebMessageUtils.conflict( ex.getClass().getName() ), response, request ); //TODO fix message
+        webMessageService.send( WebMessageUtils.conflict( ex.getMessage() ), response, request ); //TODO fix message
     }
 
     @ExceptionHandler( AccessDeniedException.class )
@@ -127,12 +127,6 @@ public class CrudControllerAdvice
 
     @ExceptionHandler( JsonParseException.class )
     public void jsonParseExceptionHandler( JsonParseException ex, HttpServletResponse response, HttpServletRequest request )
-    {
-        webMessageService.send( WebMessageUtils.conflict( ex.getMessage() ), response, request );
-    }
-
-    @ExceptionHandler( IOException.class )
-    public void ioExceptionHandler( IOException ex, HttpServletResponse response, HttpServletRequest request )
     {
         webMessageService.send( WebMessageUtils.conflict( ex.getMessage() ), response, request );
     }

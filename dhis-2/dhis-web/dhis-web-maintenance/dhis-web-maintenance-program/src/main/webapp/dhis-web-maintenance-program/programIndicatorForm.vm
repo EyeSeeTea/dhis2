@@ -56,7 +56,7 @@
 		        <tr>
 					<td>
 						<select multiple id="expression-attributes" name="expression-attributes" size="7" style="width:100%" ondblclick="insertAttribute('expression');">
-							#foreach( $programAttribute in $attributes )
+							#foreach( $programAttribute in $expressionAttributes )
 								<option value='$programAttribute.uid'>$encoder.htmlEncode($programAttribute.displayName)</option>
 							#end
 						</select>
@@ -119,7 +119,7 @@
 		</td>
 	</tr>
 	<tr>
-        <th style="padding-top:15px">$i18n.getString( "expression" ) <span class="tipText">Tip: use d2:daysBetween(x,y) d2:condition(bool-expr,true-val,false-val) d2:zing(x) d2:oizp(x)</span></th>
+        <th style="padding-top:15px">$i18n.getString( "expression" ) <span class="tipText">Tip: use d2:condition('bool-expr',true-val,false-val) d2:daysBetween(date,date) d2:zing(x) d2:oizp(x)</span></th>
     </tr>
 	<tr>
 		<td>
@@ -269,7 +269,7 @@
 		</td>
 	</tr>
 	<tr>
-        <th style="padding-top:15px">$i18n.getString( "filter" ) <span class="tipText">Tip: use d2:daysBetween(x,y) d2:condition(bool-expr,true-val,false-val) d2:zing(x) d2:oizp(x)</span></th>
+        <th style="padding-top:15px">$i18n.getString( "filter" ) <span class="tipText">Tip: use d2:condition('bool-expr',true-val,false-val) d2:daysBetween(date,date) d2:zing(x) d2:oizp(x)</span></th>
     </tr>	
 	<tr>
 		<td>

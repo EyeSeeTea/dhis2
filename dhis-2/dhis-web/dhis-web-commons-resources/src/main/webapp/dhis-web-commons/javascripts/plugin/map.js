@@ -2518,9 +2518,14 @@ Ext.onReady(function() {
 			var views = gis.map.mapViews,
 				loader;
 
+            // title
+            if (gis.dashboard && gis.viewport.northRegion && gis.map && gis.map.name) {
+                gis.viewport.northRegion.update(gis.map.name);
+            }
+
 			if (!(Ext.isArray(views) && views.length)) {
 				gis.olmap.mask.hide();
-				alert(GIS.i18n.favorite_outdated_create_new);
+				gis.alert(GIS.i18n.favorite_outdated_create_new);
 				return;
 			}
 
@@ -2772,7 +2777,7 @@ Ext.onReady(function() {
                 }
 
                 if (!rows.length) {
-                    alert('No event coordinates found');
+                    gis.alert('No event coordinates found');
                     olmap.mask.hide();
                     return;
                 }
@@ -2781,16 +2786,28 @@ Ext.onReady(function() {
                 getOptionSets();
             };
 
-            gis.ajax({
-                url: gis.init.contextPath + '/api/analytics/events/query/' + view.program.id + '.json' + paramString,
-                disableCaching: false,
-                failure: function(r) {
-                    gis.alert(r);
-                },
-                success: function(r) {
-                    success(Ext.decode(r.responseText));
-                }
-            });
+			if (Ext.isObject(GIS.app)) {
+				Ext.Ajax.request({
+					url: gis.init.contextPath + '/api/analytics/events/query/' + view.program.id + '.json' + paramString,
+					disableCaching: false,
+					failure: function(r) {
+                        gis.alert(r);
+					},
+					success: function(r) {
+						success(Ext.decode(r.responseText));
+					}
+				});
+			}
+			else if (Ext.isObject(GIS.plugin)) {
+				Ext.data.JsonP.request({
+					url: gis.init.contextPath + '/api/analytics/events/query/' + view.program.id + '.jsonp' + paramString,
+					disableCaching: false,
+					scope: this,
+					success: function(r) {
+						success(r);
+					}
+				});
+			}
 		};
 
 		loadLegend = function(view) {
@@ -2955,7 +2972,7 @@ Ext.onReady(function() {
 
 		loadOrganisationUnits = function(view) {
             var items = view.rows[0].items,
-                type = 'json',
+                isPlugin = GIS.plugin && !GIS.app,
                 url = function() {
                     var params = '?ou=ou:';
 
@@ -2974,7 +2991,7 @@ Ext.onReady(function() {
                         }
                     }
 
-                    return gis.init.contextPath + '/api/geoFeatures.' + type + params + '&includeGroupSets=true';
+                    return gis.init.contextPath + '/api/geoFeatures.' + (isPlugin ? 'jsonp' : 'json') + params + '&includeGroupSets=true';
                 }(),
                 success,
                 failure;
@@ -2986,13 +3003,13 @@ Ext.onReady(function() {
 
                 if (!Ext.isArray(features)) {
                     olmap.mask.hide();
-                    alert(GIS.i18n.invalid_coordinates);
+                    gis.alert(GIS.i18n.invalid_coordinates);
                     return;
                 }
 
                 if (!features.length) {
                     olmap.mask.hide();
-                    alert(GIS.i18n.no_valid_coordinates_found);
+                    gis.alert(GIS.i18n.no_valid_coordinates_found);
                     return;
                 }
 
@@ -3003,16 +3020,27 @@ Ext.onReady(function() {
 
             failure = function() {
                 olmap.mask.hide();
-                alert(GIS.i18n.coordinates_could_not_be_loaded);
+                gis.alert(GIS.i18n.coordinates_could_not_be_loaded);
             };
 
-            gis.ajax({
-                url: url,
-                disableCaching: false,
-                success: function(r) {
-                    success(Ext.decode(r.responseText));
-                }
-            });
+            if (GIS.plugin && !GIS.app) {
+                Ext.data.JsonP.request({
+                    url: url,
+                    disableCaching: false,
+                    success: function(r) {
+                        success(r);
+                    }
+                });
+            }
+            else {
+                Ext.Ajax.request({
+                    url: url,
+                    disableCaching: false,
+                    success: function(r) {
+                        success(Ext.decode(r.responseText));
+                    }
+                });
+            }
         };
 
 		loadData = function(view, features) {
@@ -3030,7 +3058,8 @@ Ext.onReady(function() {
 		};
 
 		loadLegend = function(view) {
-            var type = 'json',
+            var isPlugin = GIS.plugin && !GIS.app,
+                type = isPlugin ? 'jsonp' : 'json',
                 url = gis.init.contextPath + '/api/organisationUnitGroupSets/' + view.organisationUnitGroupSet.id + '.' + type + '?fields=organisationUnitGroups[id,name,symbol]',
                 success;
 
@@ -3063,12 +3092,22 @@ Ext.onReady(function() {
                 afterLoad(view);
             };
 
-            gis.ajax({
-                url: url,
-                success: function(r) {
-                    success(Ext.decode(r.responseText));
-                }
-            });
+            if (isPlugin) {
+                Ext.data.JsonP.request({
+                    url: url,
+                    success: function(r) {
+                        success(r);
+                    }
+                });
+            }
+            else {
+                Ext.Ajax.request({
+                    url: url,
+                    success: function(r) {
+                        success(Ext.decode(r.responseText));
+                    }
+                });
+            }
 		};
 
 		addCircles = function(view) {
@@ -3218,7 +3257,7 @@ Ext.onReady(function() {
 
 		loadOrganisationUnits = function(view) {
 			var items = view.rows[0].items,
-                type = 'json',
+                isPlugin = GIS.plugin && !GIS.app,
                 url = function() {
                     var params = '?ou=ou:';
 
@@ -3237,7 +3276,7 @@ Ext.onReady(function() {
                         }
                     }
 
-                    return gis.init.contextPath + '/api/geoFeatures.' + type + params;
+                    return gis.init.contextPath + '/api/geoFeatures.' + (isPlugin ? 'jsonp' : 'json') + params;
                 }(),
                 success,
                 failure;
@@ -3252,13 +3291,13 @@ Ext.onReady(function() {
 
                 if (!Ext.isArray(features)) {
                     olmap.mask.hide();
-                    alert(GIS.i18n.invalid_coordinates);
+                    gis.alert(GIS.i18n.invalid_coordinates);
                     return;
                 }
 
                 if (!features.length) {
                     olmap.mask.hide();
-                    alert(GIS.i18n.no_valid_coordinates_found);
+                    gis.alert(GIS.i18n.no_valid_coordinates_found);
                     return;
                 }
 
@@ -3298,19 +3337,30 @@ Ext.onReady(function() {
 
             failure = function() {
                 olmap.mask.hide();
-                alert(GIS.i18n.coordinates_could_not_be_loaded);
+                gis.alert(GIS.i18n.coordinates_could_not_be_loaded);
             };
 
-            gis.ajax({
-                url: url,
-                disableCaching: false,
-                success: function(r) {
-                    success(Ext.decode(r.responseText));
-                },
-                failure: function() {
-                    failure();
-                }
-            });
+            if (isPlugin) {
+                Ext.data.JsonP.request({
+                    url: url,
+                    disableCaching: false,
+                    success: function(r) {
+                        success(r);
+                    }
+                });
+            }
+            else {
+                Ext.Ajax.request({
+                    url: url,
+                    disableCaching: false,
+                    success: function(r) {
+                        success(Ext.decode(r.responseText));
+                    },
+                    failure: function() {
+                        failure();
+                    }
+                });
+            }
 		};
 
 		loadData = function(view, features) {
@@ -3570,7 +3620,7 @@ Ext.onReady(function() {
 
 		loadOrganisationUnits = function(view) {
 			var items = view.rows[0].items,
-                type = 'json',
+                isPlugin = GIS.plugin && !GIS.app,
                 url = function() {
                     var params = '?ou=ou:';
 
@@ -3589,7 +3639,7 @@ Ext.onReady(function() {
                         }
                     }
 
-                    return gis.init.contextPath + '/api/geoFeatures.' + type + params;
+                    return gis.init.contextPath + '/api/geoFeatures.' + (isPlugin ? 'jsonp' : 'json') + params;
                 }(),
                 success,
                 failure;
@@ -3601,13 +3651,13 @@ Ext.onReady(function() {
 
                 if (!Ext.isArray(features)) {
                     olmap.mask.hide();
-                    alert(GIS.i18n.invalid_coordinates);
+                    gis.alert(GIS.i18n.invalid_coordinates);
                     return;
                 }
 
                 if (!features.length) {
                     olmap.mask.hide();
-                    alert(GIS.i18n.no_valid_coordinates_found);
+                    gis.alert(GIS.i18n.no_valid_coordinates_found);
                     return;
                 }
 
@@ -3618,19 +3668,30 @@ Ext.onReady(function() {
 
             failure = function() {
                 olmap.mask.hide();
-                alert(GIS.i18n.coordinates_could_not_be_loaded);
+                gis.alert(GIS.i18n.coordinates_could_not_be_loaded);
             };
 
-            gis.ajax({
-                url: url,
-                disableCaching: false,
-                success: function(r) {
-                    success(Ext.decode(r.responseText));
-                },
-                failure: function() {
-                    failure();
-                }
-            });
+            if (isPlugin) {
+                Ext.data.JsonP.request({
+                    url: url,
+                    disableCaching: false,
+                    success: function(r) {
+                        success(r);
+                    }
+                });
+            }
+            else {
+                Ext.Ajax.request({
+                    url: url,
+                    disableCaching: false,
+                    success: function(r) {
+                        success(Ext.decode(r.responseText));
+                    },
+                    failure: function() {
+                        failure();
+                    }
+                });
+            }
 		};
 
 		loadData = function(view, features) {
@@ -3644,8 +3705,7 @@ Ext.onReady(function() {
 				dxItems = view.columns[0].items,
 				isOperand = view.columns[0].dimension === dimConf.operand.objectName,
 				peItems = view.filters[0].items,
-				ouItems = view.rows[0].items,
-                type = 'json';
+				ouItems = view.rows[0].items;
 
 			// ou
 			paramString += 'dimension=ou:';
@@ -3662,6 +3722,11 @@ Ext.onReady(function() {
 				paramString += isOperand ? dxItems[i].id.split('.')[0] : dxItems[i].id;
 				paramString += i < dxItems.length - 1 ? ';' : '';
 			}
+
+            // program
+            if (view.program) {
+                paramString += '&program=' + view.program.id;
+            }
 
 			paramString += isOperand ? '&dimension=co' : '';
 
@@ -3749,16 +3814,28 @@ Ext.onReady(function() {
 				loadLegend(view);
 			};
 
-            gis.ajax({
-                url: gis.init.contextPath + '/api/analytics.json' + paramString,
-                disableCaching: false,
-                failure: function(r) {
-                    gis.alert(r);
-                },
-                success: function(r) {
-                    success(Ext.decode(r.responseText));
-                }
-            });
+			if (Ext.isObject(GIS.app)) {
+				Ext.Ajax.request({
+					url: gis.init.contextPath + '/api/analytics.json' + paramString,
+					disableCaching: false,
+					failure: function(r) {
+                        gis.alert(r);
+					},
+					success: function(r) {
+						success(Ext.decode(r.responseText));
+					}
+				});
+			}
+			else if (Ext.isObject(GIS.plugin)) {
+				Ext.data.JsonP.request({
+					url: gis.init.contextPath + '/api/analytics.jsonp' + paramString,
+					disableCaching: false,
+					scope: this,
+					success: function(r) {
+						success(r);
+					}
+				});
+			}
 		};
 
 		loadLegend = function(view) {
@@ -3829,7 +3906,7 @@ Ext.onReady(function() {
             };
 
             loadLegendSet = function(view) {
-                gis.ajax({
+                Ext.Ajax.request({
 					url: gis.init.contextPath + '/api/legendSets/' + view.legendSet.id + '.json?fields=' + gis.conf.url.legendSetFields.join(','),
 					scope: this,
                     disableCaching: false,
@@ -3881,7 +3958,7 @@ Ext.onReady(function() {
                     return;
                 }
 
-                gis.ajax({
+                Ext.Ajax.request({
                     url: gis.init.contextPath + '/api/' + elementUrl + '.json?fields=legendSet[id,name]&paging=false&filter=id:eq:' + id,
                     success: function(r) {
                         var elements = Ext.decode(r.responseText)[elementUrl],
@@ -4036,7 +4113,9 @@ Ext.onReady(function() {
 			gis = {};
 
         // tmp
-        gis.alert = function() {};
+        gis.alert = function() {
+            console.log(".");
+        };
 
 		// conf
 		(function() {
@@ -4661,6 +4740,12 @@ Ext.onReady(function() {
                         message: obj
                     };
                 }
+                
+                // dashboard
+                if (gis.dashboard) {
+                    gis.viewport.centerRegion.update('<div class="ns-plugin-alert">' + obj.message + '</div>');
+                    return;
+                }
 
                 // web message
                 type = (obj.status || 'INFO').toLowerCase();
@@ -4812,6 +4897,8 @@ Ext.onReady(function() {
 
                 // filters: [Dimension]
 
+                // program: object
+
                 // classes: integer (5) - 1-7
 
                 // method: integer (2) - 2, 3 // 2=equal intervals, 3=equal counts
@@ -4874,7 +4961,7 @@ Ext.onReady(function() {
                     }
 
                     if (!ouDim) {
-                        alert('No organisation units specified');
+                        gis.alert('No organisation units specified');
                         return;
                     }
 
@@ -4961,6 +5048,11 @@ Ext.onReady(function() {
                     layout.columns = config.columns;
                     layout.rows = config.rows;
                     layout.filters = config.filters;
+                    
+                    // program
+                    if (Ext.isObject(config.program) && config.program.id) {
+                        layout.program = config.program;
+                    }
 
                     // Properties
                     layout.layer = Ext.isString(config.layer) && !Ext.isEmpty(config.layer) ? config.layer : 'thematic1';
@@ -5052,12 +5144,12 @@ Ext.onReady(function() {
 					var headers = [];
 
 					if (!(config && Ext.isObject(config))) {
-						alert('Data response invalid', config);
+						gis.alert('Data response invalid', config);
 						return false;
 					}
 
 					if (!(config.headers && Ext.isArray(config.headers))) {
-						alert('Data response invalid', config);
+						gis.alert('Data response invalid', config);
 						return false;
 					}
 
@@ -5072,17 +5164,17 @@ Ext.onReady(function() {
 					config.headers = headers;
 
 					if (!config.headers.length) {
-						alert('No valid response headers', config);
+						gis.alert('No valid response headers', config);
 						return;
 					}
 
 					if (!(Ext.isArray(config.rows) && config.rows.length > 0)) {
-						alert('No values found', config);
+						gis.alert('No values found', config);
 						return false;
 					}
 
 					if (config.headers.length !== config.rows[0].length) {
-						alert('Data invalid', config);
+						gis.alert('Data invalid', config);
 						return false;
 					}
 
@@ -6652,7 +6744,10 @@ Ext.onReady(function() {
         boundary_layer: 'Boundary layer',
         facility_layer: 'Facility layer',
         thematic_layer: 'Thematic layer',
-        measure_distance: 'Measure distance'
+        measure_distance: 'Measure distance',
+        coordinates_could_not_be_loaded: 'Coordinates could not be loaded',
+        invalid_coordinates: 'Invalid coordinates',
+        no_valid_coordinates_found: 'No valid coordinates found'
     };
 
     GIS.plugin = {};
@@ -6853,7 +6948,7 @@ Ext.onReady(function() {
                     init.user.ou = ou;
                     init.user.ouc = ouc;
                 } else {
-                    alert('User is not assigned to any organisation units');
+                    gis.alert('User is not assigned to any organisation units');
                 }
 
                 fn();
@@ -7004,16 +7099,19 @@ Ext.onReady(function() {
         css += '.gis-container-default .x-window-body { padding: 5px; background: #fff; } \n';
         css += '.olControlPanel { position: absolute; top: 0; right: 0; border: 0 none; } \n';
         css += '.olControlButtonItemActive { background: #556; color: #fff; width: 24px; height: 24px; opacity: 0.75; filter: alpha(opacity=75); -ms-filter: "alpha(opacity=75)"; cursor: pointer; cursor: hand; text-align: center; font-size: 21px !important; text-shadow: 0 0 1px #ddd; } \n';
-        css += '.olControlPanel.zoomIn { right: 72px; } \n';
-        css += '.olControlPanel.zoomIn .olControlButtonItemActive { border-bottom-left-radius: 2px; } \n';
-        css += '.olControlPanel.zoomOut { right: 48px; } \n';
-        css += '.olControlPanel.zoomVisible { right: 24px; } \n';
-        css += '.olControlPanel.zoomIn-vertical { } \n';
-        css += '.olControlPanel.zoomOut-vertical { top: 24px; } \n';
-        css += '.olControlPanel.zoomVisible-vertical { top: 48px; } \n';
+        css += '.olControlPanel.zoomIn { right: 76px; top: 4px; } \n';
+        css += '.olControlPanel.zoomIn .olControlButtonItemActive { border-top-left-radius: 3px; border-bottom-left-radius: 3px; } \n';
+        css += '.olControlPanel.zoomOut { right: 52px; top: 4px; } \n';
+        css += '.olControlPanel.zoomVisible { right: 28px; top: 4px; } \n';
+        css += '.olControlPanel.legend { right: 4px; top: 4px; } \n';
+        css += '.olControlPanel.legend .olControlButtonItemActive { border-top-right-radius: 3px; border-bottom-right-radius: 3px; } \n';
+        css += '.olControlPanel.zoomIn-vertical { right: 4px; top: 4px; } \n';
+        css += '.olControlPanel.zoomIn-vertical .olControlButtonItemActive { border-top-left-radius: 3px; border-top-right-radius: 3px; } \n';
+        css += '.olControlPanel.zoomOut-vertical { right: 4px; top: 28px; } \n';
+        css += '.olControlPanel.zoomVisible-vertical { right: 4px; top: 52px; } \n';
         //css += '.olControlPanel.measure-vertical { top: 72px; right: 1px; } \n';
-        css += '.olControlPanel.legend-vertical { top: 72px; } \n';
-        css += '.olControlPanel.legend-vertical .olControlButtonItemActive { border-bottom-left-radius: 2px; } \n';
+        css += '.olControlPanel.legend-vertical { right: 4px; top: 76px; } \n';
+        css += '.olControlPanel.legend-vertical .olControlButtonItemActive { border-bottom-left-radius: 3px; border-bottom-right-radius: 3px; } \n';
         css += '.olControlPermalink { display: none !important; } \n';
         css += '.olControlMousePosition { background: #fff !important; line-height: 14px; opacity: 0.8 !important; filter: alpha(opacity=80) !important; -ms-filter: "alpha(opacity=80)" !important; right: 0 !important; bottom: 0 !important; border-top-left-radius: 2px !important; padding: 2px 2px 1px 5px !important; color: #000 !important; -webkit-text-stroke-width: 0.1px; -webkit-text-stroke-color: #555; } \n';
         css += '.olControlMousePosition * { font-size: 10px !important; } \n';
@@ -7265,13 +7363,30 @@ Ext.onReady(function() {
         afterRender = function(vp) {
 
             // map buttons
-            var clsArray = ['zoomIn-verticalButton', 'zoomOut-verticalButton', 'zoomVisible-verticalButton', 'measure-verticalButton', 'legend-verticalButton'],
+            //var clsArray = ['zoomIn-verticalButton', 'zoomOut-verticalButton', 'zoomVisible-verticalButton', 'measure-verticalButton', 'legend-verticalButton'],
+            var clsArray = [
+                    'zoomInButton',
+                    'zoomIn-verticalButton',
+                    'zoomOutButton',
+                    'zoomOut-verticalButton',
+                    'zoomVisibleButton',
+                    'zoomVisible-verticalButton',
+                    'measureButton',
+                    'measure-verticalButton',
+                    'legendButton',
+                    'legend-verticalButton'
+                ],
                 map = {
                     'zoomIn-verticalButton': 'zoomin_24.png',
                     'zoomOut-verticalButton': 'zoomout_24.png',
                     'zoomVisible-verticalButton': 'zoomvisible_24.png',
                     'measure-verticalButton': 'measure_24.png',
-                    'legend-verticalButton': 'legend_24.png'
+                    'legend-verticalButton': 'legend_24.png',
+                    'zoomInButton': 'zoomin_24.png',
+                    'zoomOutButton': 'zoomout_24.png',
+                    'zoomVisibleButton': 'zoomvisible_24.png',
+                    'measureButton': 'measure_24.png',
+                    'legendButton': 'legend_24.png'
                 };
 
             for (var i = 0, cls, elArray; i < clsArray.length; i++) {
@@ -7292,10 +7407,12 @@ Ext.onReady(function() {
                 var base = Ext.isString(gis.map.baseLayer) ? gis.map.baseLayer.split(' ').join('').toLowerCase() : gis.map.baseLayer;
 
                 if (!base || base === 'none' || base === 'off') {
-                    gis.layer.googleStreets.setVisibility(false);
-                } else if (base === 'gh' || base === 'googlehybrid') {
+                    gis.layer.openStreetMap.setVisibility(false);
+                }
+                else if (base === 'gh' || base === 'googlehybrid') {
                     gis.olmap.setBaseLayer(gis.layer.googleHybrid);
-                } else if (base === 'osm' || base === 'openstreetmap') {
+                }
+                else if (base === 'osm' || base === 'openstreetmap') {
                     gis.olmap.setBaseLayer(gis.layer.openStreetMap);
                 }
             }
@@ -7359,7 +7476,16 @@ Ext.onReady(function() {
                 googleHybrid.id = 'googleHybrid';
 
                 gis.olmap.addLayers([googleStreets, googleHybrid]);
-                gis.olmap.setBaseLayer(googleStreets);
+
+                if (config.baseLayer === 'osm') {
+                    gis.olmap.setBaseLayer(gis.layer.openStreetMap);
+                }
+                else if (config.baseLayer === 'gh') {
+                    gis.olmap.setBaseLayer(googleHybrid);
+                }
+                else {
+                    gis.olmap.setBaseLayer(googleStreets);
+                }
             };
 
             if (GIS_GM.ready) {
@@ -7445,15 +7571,17 @@ Ext.onReady(function() {
                     }
                 };
 
-                Ext.Loader.injectScriptElement('//maps.googleapis.com/maps/api/js?callback=GIS_GM_fn',
-                    function() {
-                        console.log("GM available (online)");
-                    },
-                    function() {
-                        console.log("GM not available (offline)");
-                        GIS_GM.offline = true;
-                    }
-                );
+                if (!Ext.Array.contains(['osm', 'none'], config.baseLayer)) {
+                    Ext.Loader.injectScriptElement('//maps.googleapis.com/maps/api/js?callback=GIS_GM_fn',
+                        function() {
+                            console.log("GM available (online)");
+                        },
+                        function() {
+                            console.log("GM not available (offline)");
+                            GIS_GM.offline = true;
+                        }
+                    );
+                }
 
                 // plugin
                 getInit(config);

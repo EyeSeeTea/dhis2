@@ -308,7 +308,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 })
 
 /* service for dealing with custom form */
-.service('CustomFormService', function ($translate) {
+.service('CustomFormService', function ($translate, DialogService) {
 
     return {
         getForProgramStage: function (programStage, programStageDataElements) {
@@ -367,15 +367,16 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                 attributes['name'] = fieldId;
                             }
 
-                            var prStDe = programStageDataElements[fieldId];
-
-                            var commonInputFieldProperty = this.getAttributesAsString(attributes) +
-                                    ' ng-model="currentEvent.' + fieldId + '" ' +
-                                    ' input-field-id="' + fieldId + '"' +                                   
-                                    ' ng-disabled="isHidden(prStDes.' + fieldId + '.dataElement.id) || selectedEnrollment.status===\'CANCELLED\' || selectedEnrollment.status===\'COMPLETED\' || currentEvent[uid]==\'uid\' || currentEvent.editingNotAllowed"' +
-                                    ' ng-required="{{prStDes.' + fieldId + '.compulsory}}" ';
+                            var prStDe = programStageDataElements[fieldId];                            
 
                             if (prStDe && prStDe.dataElement && prStDe.dataElement.valueType) {
+                            	
+                            	var commonInputFieldProperty = this.getAttributesAsString(attributes) +
+	                                ' ng-model="currentEvent.' + fieldId + '" ' +
+	                                ' input-field-id="' + fieldId + '"' +                                   
+	                                ' ng-disabled="isHidden(prStDes.' + fieldId + '.dataElement.id) || selectedEnrollment.status===\'CANCELLED\' || selectedEnrollment.status===\'COMPLETED\' || currentEvent[uid]==\'uid\' || currentEvent.editingNotAllowed"' +
+	                                ' ng-required="{{prStDes.' + fieldId + '.compulsory}}" ';
+                            	
                                 //check if dataelement has optionset								
                                 if (prStDe.dataElement.optionSetValue) {
                                     var optionSetId = prStDe.dataElement.optionSet.id;                 
@@ -432,7 +433,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                         newInputField = '<textarea row ="3" ' +
                                                 ' ng-class="{{getInputNotifcationClass(prStDes.' + fieldId + '.dataElement.id, true)}}" ' +
                                                 ' ng-blur="saveDatavalue(prStDes.' + fieldId + ', outerForm.' + fieldId + ')"' +
-                                                commonInputFieldProperty + ' >';
+                                                commonInputFieldProperty + '></textarea>';
                                     }
                                     else {
                                         newInputField = '<input type="text" ' +
@@ -441,6 +442,14 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                                 commonInputFieldProperty + ' >';
                                     }
                                 }
+                            }
+                            else{
+                            	var dialogOptions = {
+            		                headerText: 'error',
+            		                bodyText: 'custom_form_has_invalid_dataelement'
+            		            };		
+            		            DialogService.showDialog({}, dialogOptions);
+            		            return;
                             }
                         }
                         newInputField = newInputField + ' <span ng-messages="outerForm.' + fieldId + '.$error" class="required" ng-if="interacted(outerForm.' + fieldId + ')" ng-messages-include="../dhis-web-commons/angular-forms/error-messages.html"></span>';
@@ -481,23 +490,24 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                         attributes[this.nodeName] = this.value;
                     });
 
-                    var attId = '', newInputField, programId;
+                    var attId = '', fieldName = '', newInputField, programId;
                     if (attributes.hasOwnProperty('attributeid')) {
                         attId = attributes['attributeid'];
-
-                        var fieldName = attId;
-                        var attMaxDate = trackedEntityFormAttributes[attId].allowFutureDate ? '' : 0;
-
-                        var att = trackedEntityFormAttributes[attId];
+                        fieldName = attId;
+                        var att = trackedEntityFormAttributes[attId];                        
 
                         if (att) {
-
+                            var attMaxDate = att.allowFutureDate ? '' : 0;
+                            var isTrackerAssociate = att.valueType === 'TRACKER_ASSOCIATE';
                             var commonInputFieldProperty = ' name="' + fieldName + '"' +
                                     ' element-id="' + i + '"' +
                                     this.getAttributesAsString(attributes) +
                                     ' d2-focus-next-on-enter' +
-                                    ' ng-model="selectedTei.' + attId + '" ' +
-                                    ' ng-disabled="editingDisabled || isHidden(attributesById.' + attId + '.id)"' +
+                                    ' ng-model="selectedTei.' + attId + '" ' + 
+                                    ' attribute-data="attributesById.' + attId + '" ' + 
+                                    ' selected-program-id="selectedProgram.id" ' +
+                                    ' selected-tei-id="selectedTei.trackedEntityInstance" ' +
+                                    ' ng-disabled="editingDisabled || isHidden(attributesById.' + attId + '.id) || ' + isTrackerAssociate + '"' +                                    
                                     ' d2-validation ' +
                                     ' ng-required=" ' + (att.mandatory || att.unique) + '" ';
 
@@ -514,13 +524,14 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                             }
                             else {
                                 //check attribute type and generate corresponding angular input field
-                                if (att.valueType === "number") {
-                                    newInputField = '<input type="number" ' +
+                                if (att.valueType === "NUMBER" ) {
+                                    newInputField = '<input type="number" ' + 
                                             ' d2-number-validator ' +
+                                            ' number-type="' + att.valueType + '" ' +
                                             ' ng-blur="teiValueUpdated(selectedTei,\'' + attId + '\')" ' +
                                             commonInputFieldProperty + ' >';
                                 }
-                                else if (att.valueType === "bool") {
+                                else if (att.valueType === "BOOLEAN") {
                                     newInputField = '<select ' +
                                             ' ng-change="teiValueUpdated(selectedTei,\'' + attId + '\')" ' +
                                             commonInputFieldProperty + ' > ' +
@@ -529,7 +540,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                             ' <option value="true">{{\'yes\'| translate}}</option>' +
                                             '</select> ';
                                 }
-                                else if (att.valueType === "date") {
+                                else if (att.valueType === "DATE") {
                                     newInputField = '<input  type="text" ' +
                                             ' placeholder="{{dhis2CalendarFormat.keyDateFormat}}" ' +
                                             ' max-date="' + attMaxDate + '"' + '\'' +
@@ -537,15 +548,31 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                             ' blur-or-change="teiValueUpdated(selectedTei,\'' + attId + '\')" ' +
                                             commonInputFieldProperty + ' >';
                                 }
-                                else if (att.valueType === "trueOnly") {
+                                else if (att.valueType === "TRUE_ONLY") {
                                     newInputField = '<input type="checkbox" ' +
                                             ' ng-change="teiValueUpdated(selectedTei,\'' + attId + '\')" ' +
                                             commonInputFieldProperty + ' >';
                                 }
-                                else if (att.valueType === "email") {
+                                else if (att.valueType === "EMAIL") {
                                     newInputField = '<input type="email" ' +
                                             ' ng-blur="teiValueUpdated(selectedTei,\'' + attId + '\')" ' +
                                             commonInputFieldProperty + ' >';
+                                }
+                                else if (att.valueType === "TRACKER_ASSOCIATE") {
+                                    newInputField = '<input type="text" ' +
+                                            ' ng-blur="teiValueUpdated(selectedTei,\'' + attId + '\')" ' +
+                                            commonInputFieldProperty + ' >' + 
+                                            '<a href ng-class="{true: \'disable-clicks\', false: \'\'} [editingDisabled]" ng-click="getTrackerAssociate(attributesById.' + attId + ', selectedTei.' + attId + ')" title="{{\'add\' | translate}} {{attributesById.' + attId + '.name}}" ' + 
+                                            '<i class="fa fa-external-link fa-2x vertical-center"></i> ' + 
+                                            '</a> ' +
+                                            '<a href ng-if="selectedTei.' + attId + '" ng-class="{true: \'disable-clicks\', false: \'\'} [editingDisabled]" ng-click="selectedTei.' + attId + ' = null" title="{{\'remove\' | translate}} {{attributesById.' + attId + '.name}}" ' + 
+                                            '<i class="fa fa-trash-o fa-2x vertical-center"></i> ' + 
+                                            '</a>';
+                                }
+                                else if (att.valueType === "LONG_TEXT") {
+                                    newInputField = '<textarea row ="3" ' +
+                                        ' ng-blur="teiValueUpdated(selectedTei,\'' + attId + '\')" ' +
+                                        commonInputFieldProperty + ' >';
                                 }
                                 else {
                                     newInputField = '<input type="text" ' +
@@ -554,7 +581,14 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                 }
                             }
                         }
-
+                        else{
+                        	var dialogOptions = {
+        		                headerText: 'error',
+        		                bodyText: 'custom_form_has_invalid_attribute'
+        		            };		
+        		            DialogService.showDialog({}, dialogOptions);
+        		            return;
+                        }
                     }
 
                     if (attributes.hasOwnProperty('programid')) {
@@ -1159,7 +1193,8 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                 {name:"d2:countIfZeroPos",parameters:1},
                                 {name:"d2:countIfValue",parameters:2},
                                 {name:"d2:ceil",parameters:1},
-                                {name:"d2:round",parameters:1}];
+                                {name:"d2:round",parameters:1},
+                                {name:"d2:hasValue",parameters:1}];
             var continueLooping = true;
             //Safety harness on 10 loops, in case of unanticipated syntax causing unintencontinued looping
             for(var i = 0; i < 10 && continueLooping; i++ ) { 
@@ -1372,6 +1407,25 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                             expression = expression.replace(callToThisFunction, rounded);
                             successfulExecution = true;
                         }
+                        else if(dhisFunction.name === "d2:hasValue") {
+                            var variableName = parameters[0];
+                            var variableObject = variablesHash[variableName];
+                            var valueFound = false;
+                            if(variableObject)
+                            {
+                                if(variableObject.hasValue){
+                                    valueFound = true;
+                                }
+                            }
+                            else
+                            {
+                                $log.warn("could not find variable to check if has value: " + variableName);
+                            }
+
+                            //Replace the end evaluation of the dhis function:
+                            expression = expression.replace(callToThisFunction, valueFound);
+                            successfulExecution = true;
+                        }
                     });
                 });
                 
@@ -1488,6 +1542,8 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                     action:action.programRuleActionType,
                                     dataElement:action.dataElement,
                                     trackedEntityAttribute:action.trackedEntityAttribute,
+                                    programStage: action.programStage,
+                                    programIndicator: action.programIndicator,
                                     programStageSection: action.programStageSection && action.programStageSection.id ? action.programStageSection.id : null,
                                     content:action.content,
                                     data:action.data,
@@ -1542,9 +1598,10 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                             if($rootScope.ruleeffects[ruleEffectKey][action.id].action === "ASSIGNVARIABLE" && $rootScope.ruleeffects[ruleEffectKey][action.id].ineffect){
                                 //from earlier evaluation, the data portion of the ruleeffect now contains the value of the variable to be assign.
                                 //the content portion of the ruleeffect defines the name for the variable, when dollar is removed:
-                                var variabletoassign = $rootScope.ruleeffects[ruleEffectKey][action.id].content.replace("#{","").replace("}","");
+                                var variabletoassign = $rootScope.ruleeffects[ruleEffectKey][action.id].content ?
+                                    $rootScope.ruleeffects[ruleEffectKey][action.id].content.replace("#{","").replace("}","") : null;
 
-                                if(!angular.isDefined(variablesHash[variabletoassign])){
+                                if((!variabletoassign || !angular.isDefined(variablesHash[variabletoassign])) && !$rootScope.ruleeffects[ruleEffectKey][action.id].dataElement){
                                     $log.warn("Variable " + variabletoassign + " was not defined.");
                                 }
 

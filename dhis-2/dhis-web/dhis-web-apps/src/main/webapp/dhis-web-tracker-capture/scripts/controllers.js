@@ -167,7 +167,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
     $scope.processAttributes = function(){
         $scope.sortColumn = {};
         AttributesFactory.getByProgram($scope.selectedProgram).then(function(atts){
-            $scope.attributes = $scope.generateAttributeFilters(atts);
+            $scope.attributes = AttributesFactory.generateAttributeFilters(atts);
             var grid = TEIGridService.generateGridColumns($scope.attributes, $scope.selectedOuMode.name);
             $scope.gridColumns = grid.columns;
             
@@ -315,16 +315,6 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
         $scope.search();
     };
     
-    $scope.generateAttributeFilters = function(attributes){
-
-        angular.forEach(attributes, function(attribute){
-            if(attribute.type === 'number' || attribute.type === 'date'){
-                attribute.operator = $scope.defaultOperators[0];
-            }
-        });                    
-        return attributes;
-    };
-    
     $scope.clearEntities = function(){
         $scope.trackedEntityList = null;
     };
@@ -339,8 +329,13 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
                 $rootScope.$broadcast('registrationWidget', {registrationMode: 'REGISTRATION'});
             }, 200);
         }
-        else{
-            $scope.doSearch = true;            
+        else{            
+            $scope.doSearch = true;
+            if(!$scope.trackedEntityList){
+                if($scope.doSearch){
+                    $scope.search($scope.searchMode);
+                }
+            }                        
             $scope.showTrackedEntityDiv = true;
         }
     };    

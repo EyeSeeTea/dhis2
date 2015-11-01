@@ -29,17 +29,17 @@ package org.hisp.dhis.webapi.controller.event;
  */
 
 import com.google.common.collect.Lists;
-
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.commons.util.TextUtils;
-import org.hisp.dhis.dxf2.common.JacksonUtils;
+import org.hisp.dhis.dxf2.common.ImportOptions;
 import org.hisp.dhis.dxf2.events.enrollment.Enrollment;
 import org.hisp.dhis.dxf2.events.enrollment.EnrollmentService;
-import org.hisp.dhis.dxf2.events.enrollment.EnrollmentStatus;
-import org.hisp.dhis.fieldfilter.FieldFilterService;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
+import org.hisp.dhis.dxf2.render.RenderService;
+import org.hisp.dhis.dxf2.webmessage.WebMessageException;
+import org.hisp.dhis.fieldfilter.FieldFilterService;
 import org.hisp.dhis.importexport.ImportStrategy;
 import org.hisp.dhis.node.NodeUtils;
 import org.hisp.dhis.node.types.RootNode;
@@ -67,7 +67,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -99,6 +98,9 @@ public class EnrollmentController
     @Autowired
     private WebMessageService webMessageService;
 
+    @Autowired
+    private RenderService renderService;
+
     // -------------------------------------------------------------------------
     // READ
     // -------------------------------------------------------------------------
@@ -128,7 +130,7 @@ public class EnrollmentController
         }
 
         Set<String> orgUnits = TextUtils.splitToArray( ou, TextUtils.SEMICOLON );
-        
+
         ProgramInstanceQueryParams params = programInstanceService.getFromUrl( orgUnits, ouMode, lastUpdated, program, programStatus, programStartDate,
             programEndDate, trackedEntity, trackedEntityInstance, followUp, page, pageSize, totalPages, skipPaging );
 
@@ -159,15 +161,17 @@ public class EnrollmentController
 
     @RequestMapping( value = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_PROGRAM_ENROLLMENT')" )
-    public void postEnrollmentXml( @RequestParam( defaultValue = "CREATE" ) ImportStrategy strategy, HttpServletRequest request, HttpServletResponse response ) throws IOException
+    public void postEnrollmentXml( @RequestParam( defaultValue = "CREATE" ) ImportStrategy strategy,
+        ImportOptions importOptions, HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
-        ImportSummaries importSummaries = enrollmentService.addEnrollmentsXml( request.getInputStream(), strategy );
+        importOptions.setStrategy( strategy );
+        ImportSummaries importSummaries = enrollmentService.addEnrollmentsXml( request.getInputStream(), importOptions );
         response.setContentType( MediaType.APPLICATION_XML_VALUE );
 
         if ( importSummaries.getImportSummaries().size() > 1 )
         {
             response.setStatus( HttpServletResponse.SC_CREATED );
-            JacksonUtils.toXml( response.getOutputStream(), importSummaries );
+            renderService.toXml( response.getOutputStream(), importSummaries );
         }
         else
         {
@@ -185,15 +189,17 @@ public class EnrollmentController
 
     @RequestMapping( value = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_PROGRAM_ENROLLMENT')" )
-    public void postEnrollmentJson( @RequestParam( defaultValue = "CREATE" ) ImportStrategy strategy, HttpServletRequest request, HttpServletResponse response ) throws IOException
+    public void postEnrollmentJson( @RequestParam( defaultValue = "CREATE" ) ImportStrategy strategy,
+        ImportOptions importOptions, HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
-        ImportSummaries importSummaries = enrollmentService.addEnrollmentsJson( request.getInputStream(), strategy );
+        importOptions.setStrategy( strategy );
+        ImportSummaries importSummaries = enrollmentService.addEnrollmentsJson( request.getInputStream(), importOptions );
         response.setContentType( MediaType.APPLICATION_JSON_VALUE );
 
         if ( importSummaries.getImportSummaries().size() > 1 )
         {
             response.setStatus( HttpServletResponse.SC_CREATED );
-            JacksonUtils.toJson( response.getOutputStream(), importSummaries );
+            renderService.toJson( response.getOutputStream(), importSummaries );
         }
         else
         {
@@ -232,23 +238,27 @@ public class EnrollmentController
     @RequestMapping( value = "/{id}/cancelled", method = RequestMethod.PUT )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_PROGRAM_UNENROLLMENT')" )
     @ResponseStatus( HttpStatus.NO_CONTENT )
-    public void cancelEnrollment( @PathVariable String id ) throws NotFoundException
+    public void cancelEnrollment( @PathVariable String id ) throws NotFoundException, WebMessageException
     {
-        Enrollment enrollment = getEnrollment( id );
-        enrollment.setStatus( EnrollmentStatus.CANCELLED );
+        if ( !programInstanceService.programInstanceExists( id ) )
+        {
+            throw new WebMessageException( WebMessageUtils.notFound( "Enrollment not found for ID " + id ) );
+        }
 
-        enrollmentService.cancelEnrollment( enrollment );
+        enrollmentService.cancelEnrollment( id );
     }
 
     @RequestMapping( value = "/{id}/completed", method = RequestMethod.PUT )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_PROGRAM_UNENROLLMENT')" )
     @ResponseStatus( HttpStatus.NO_CONTENT )
-    public void completedEnrollment( @PathVariable String id ) throws NotFoundException
+    public void completedEnrollment( @PathVariable String id ) throws NotFoundException, WebMessageException
     {
-        Enrollment enrollment = getEnrollment( id );
-        enrollment.setStatus( EnrollmentStatus.COMPLETED );
+        if ( !programInstanceService.programInstanceExists( id ) )
+        {
+            throw new WebMessageException( WebMessageUtils.notFound( "Enrollment not found for ID " + id ) );
+        }
 
-        enrollmentService.completeEnrollment( enrollment );
+        enrollmentService.completeEnrollment( id );
     }
 
     // -------------------------------------------------------------------------
@@ -258,10 +268,16 @@ public class EnrollmentController
     @RequestMapping( value = "/{id}", method = RequestMethod.DELETE )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_PROGRAM_UNENROLLMENT')" )
     @ResponseStatus( HttpStatus.NO_CONTENT )
-    public void deleteEnrollment( @PathVariable String id ) throws NotFoundException
+    public void deleteEnrollment( @PathVariable String id, HttpServletRequest request, HttpServletResponse response ) throws WebMessageException
     {
-        Enrollment enrollment = getEnrollment( id );
-        enrollmentService.deleteEnrollment( enrollment );
+        if ( !programInstanceService.programInstanceExists( id ) )
+        {
+            throw new WebMessageException( WebMessageUtils.notFound( "Enrollment not found for ID " + id ) );
+        }
+
+        response.setStatus( HttpServletResponse.SC_OK );
+        ImportSummary importSummary = enrollmentService.deleteEnrollment( id );
+        webMessageService.send( WebMessageUtils.importSummary( importSummary ), response, request );
     }
 
     // -------------------------------------------------------------------------

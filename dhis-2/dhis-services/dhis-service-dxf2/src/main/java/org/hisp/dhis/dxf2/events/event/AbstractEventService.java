@@ -30,7 +30,6 @@ package org.hisp.dhis.dxf2.events.event;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -58,6 +57,7 @@ import org.hisp.dhis.dxf2.importsummary.ImportConflict;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
+import org.hisp.dhis.dxf2.utils.InputUtils;
 import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -85,7 +85,6 @@ import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValue;
 import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValueService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
-import org.hisp.dhis.dxf2.utils.InputUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -110,8 +109,6 @@ public abstract class AbstractEventService
     implements EventService
 {
     private static final Log log = LogFactory.getLog( AbstractEventService.class );
-    
-    public static final String OPTIONS_SEP = ";";
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -164,10 +161,10 @@ public abstract class AbstractEventService
 
     @Autowired
     protected IdentifiableObjectManager manager;
-    
+
     @Autowired
     protected DataElementCategoryService categoryService;
-    
+
     @Autowired
     protected InputUtils inputUtils;
 
@@ -238,12 +235,6 @@ public abstract class AbstractEventService
     }
 
     @Override
-    public ImportSummary addEvent( Event event )
-    {
-        return addEvent( event, null );
-    }
-
-    @Override
     public ImportSummary addEvent( Event event, ImportOptions importOptions )
     {
         return addEvent( event, currentUserService.getCurrentUser(), importOptions );
@@ -264,13 +255,13 @@ public abstract class AbstractEventService
 
         if ( program == null )
         {
-            return new ImportSummary( ImportStatus.ERROR, "Event.program does not point to a valid program" );
+            return new ImportSummary( ImportStatus.ERROR, "Event.program does not point to a valid program" ).incrementIgnored();
         }
 
         if ( programStage == null && program.isRegistration() )
         {
             return new ImportSummary( ImportStatus.ERROR,
-                "Event.programStage does not point to a valid programStage, and program is multi stage" );
+                "Event.programStage does not point to a valid programStage, and program is multi stage" ).incrementIgnored();
         }
         else if ( programStage == null )
         {
@@ -283,7 +274,7 @@ public abstract class AbstractEventService
         if ( verifyProgramAccess( program, user ) )
         {
             return new ImportSummary( ImportStatus.ERROR,
-                "Current user does not have permission to access this program" );
+                "Current user does not have permission to access this program" ).incrementIgnored();
         }
 
         if ( program.isRegistration() )
@@ -291,7 +282,7 @@ public abstract class AbstractEventService
             if ( event.getTrackedEntityInstance() == null )
             {
                 return new ImportSummary( ImportStatus.ERROR,
-                    "No Event.trackedEntityInstance was provided for registration based program" );
+                    "No Event.trackedEntityInstance was provided for registration based program" ).incrementIgnored();
             }
 
             org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance = entityInstanceService
@@ -300,7 +291,7 @@ public abstract class AbstractEventService
             if ( entityInstance == null )
             {
                 return new ImportSummary( ImportStatus.ERROR,
-                    "Event.trackedEntityInstance does not point to a valid tracked entity instance" );
+                    "Event.trackedEntityInstance does not point to a valid tracked entity instance" ).incrementIgnored();
             }
 
             List<ProgramInstance> programInstances = new ArrayList<>( programInstanceService.getProgramInstances(
@@ -309,12 +300,12 @@ public abstract class AbstractEventService
             if ( programInstances.isEmpty() )
             {
                 return new ImportSummary( ImportStatus.ERROR, "TrackedEntityInstance " + entityInstance.getUid()
-                    + " is not enrolled in program " + program.getUid() );
+                    + " is not enrolled in program " + program.getUid() ).incrementIgnored();
             }
             else if ( programInstances.size() > 1 )
             {
                 return new ImportSummary( ImportStatus.ERROR, "TrackedEntityInstance " + entityInstance.getUid()
-                    + " have multiple active enrollments in program " + program.getUid() );
+                    + " have multiple active enrollments in program " + program.getUid() ).incrementIgnored();
             }
 
             programInstance = programInstances.get( 0 );
@@ -327,19 +318,19 @@ public abstract class AbstractEventService
                 if ( programStageInstances.isEmpty() )
                 {
                     return new ImportSummary( ImportStatus.ERROR, "TrackedEntityInstance " + entityInstance.getUid()
-                        + " is not enrolled in program stage " + programStage.getUid() );
+                        + " is not enrolled in program stage " + programStage.getUid() ).incrementIgnored();
                 }
                 else if ( programStageInstances.size() > 1 )
                 {
                     return new ImportSummary( ImportStatus.ERROR, "TrackedEntityInstance " + entityInstance.getUid()
-                        + " have multiple active enrollments in program stage " + programStage.getUid() );
+                        + " have multiple active enrollments in program stage " + programStage.getUid() ).incrementIgnored();
                 }
 
                 programStageInstance = programStageInstances.get( 0 );
             }
             else
             {
-                if ( !programStage.getIrregular() )
+                if ( !programStage.getRepeatable() )
                 {
                     programStageInstance = programStageInstanceService.getProgramStageInstance( programInstance,
                         programStage );
@@ -354,7 +345,7 @@ public abstract class AbstractEventService
                         {
                             if ( !CodeGenerator.isValidCode( event.getEvent() ) )
                             {
-                                return new ImportSummary( ImportStatus.ERROR, "Event.event did not point to a valid event" );
+                                return new ImportSummary( ImportStatus.ERROR, "Event.event did not point to a valid event" ).incrementIgnored();
                             }
                         }
                     }
@@ -368,13 +359,21 @@ public abstract class AbstractEventService
 
             if ( programInstances.isEmpty() )
             {
-                return new ImportSummary( ImportStatus.ERROR,
-                    "There is no program instance for program " + program.getUid() );
+                // this is a WOR program, so just create the PI if it doesn't exist (should only be one)
+                ProgramInstance pi = new ProgramInstance();
+                pi.setEnrollmentDate( new Date() );
+                pi.setIncidentDate( new Date() );
+                pi.setProgram( program );
+                pi.setStatus( ProgramStatus.ACTIVE );
+
+                programInstanceService.addProgramInstance( pi );
+
+                programInstances.add( pi );
             }
             else if ( programInstances.size() > 1 )
             {
                 return new ImportSummary( ImportStatus.ERROR,
-                    "Multiple active program instances exists for program " + program.getUid() );
+                    "Multiple active program instances exists for program " + program.getUid() ).incrementIgnored();
             }
 
             programInstance = programInstances.get( 0 );
@@ -387,7 +386,7 @@ public abstract class AbstractEventService
                 {
                     if ( !CodeGenerator.isValidCode( event.getEvent() ) )
                     {
-                        return new ImportSummary( ImportStatus.ERROR, "Event.event did not point to a valid event" );
+                        return new ImportSummary( ImportStatus.ERROR, "Event.event did not point to a valid event" ).incrementIgnored();
                     }
                 }
             }
@@ -397,12 +396,12 @@ public abstract class AbstractEventService
 
         if ( organisationUnit == null )
         {
-            return new ImportSummary( ImportStatus.ERROR, "Event.orgUnit does not point to a valid organisation unit" );
+            return new ImportSummary( ImportStatus.ERROR, "Event.orgUnit does not point to a valid organisation unit" ).incrementIgnored();
         }
 
         if ( verifyProgramOrganisationUnitAssociation( program, organisationUnit ) )
         {
-            return new ImportSummary( ImportStatus.ERROR, "Program is not assigned to this organisation unit" );
+            return new ImportSummary( ImportStatus.ERROR, "Program is not assigned to this organisation unit" ).incrementIgnored();
         }
 
         return saveEvent( program, programInstance, programStage, programStageInstance, organisationUnit, event,
@@ -534,27 +533,27 @@ public abstract class AbstractEventService
         {
             throw new IllegalQueryException( "Tracked entity instance is specified but does not exist: " + trackedEntityInstance );
         }
-        
+
         if ( attributeCoc.isDefault() )
-        {            
+        {
             DataElementCategoryCombo cc = null;
-            
+
             if ( pr != null )
             {
-                cc = pr.getCategoryCombo();                
+                cc = pr.getCategoryCombo();
             }
-            
-            if( cc == null && ps != null)
-            {                
+
+            if ( cc == null && ps != null )
+            {
                 cc = ps.getProgram().getCategoryCombo();
             }
-            
-            if( cc != null && !cc.isDefault())
-            {                
+
+            if ( cc != null && !cc.isDefault() )
+            {
                 throw new IllegalQueryException( "Default attribute option combo is specified while program has non-default attribute category combo:  " + cc.getUid() );
             }
         }
-        
+
         params.setProgram( pr );
         params.setProgramStage( ps );
         params.setOrgUnit( ou );
@@ -599,10 +598,11 @@ public abstract class AbstractEventService
     public ImportSummaries updateEvents( List<Event> events, boolean singleValue )
     {
         ImportSummaries importSummaries = new ImportSummaries();
+        User user = currentUserService.getCurrentUser();
 
         for ( Event event : events )
         {
-            importSummaries.addImportSummary( updateEvent( event, singleValue ) );
+            importSummaries.addImportSummary( updateEvent( event, user, singleValue, null ) );
         }
 
         return importSummaries;
@@ -617,13 +617,18 @@ public abstract class AbstractEventService
     @Override
     public ImportSummary updateEvent( Event event, boolean singleValue, ImportOptions importOptions )
     {
+        return updateEvent( event, currentUserService.getCurrentUser(), singleValue, importOptions );
+    }
+
+    private ImportSummary updateEvent( Event event, User user, boolean singleValue, ImportOptions importOptions )
+    {
         ImportSummary importSummary = new ImportSummary();
         ProgramStageInstance programStageInstance = programStageInstanceService.getProgramStageInstance( event.getEvent() );
 
         if ( programStageInstance == null )
         {
             importSummary.getConflicts().add( new ImportConflict( "Invalid Event ID.", event.getEvent() ) );
-            return importSummary;
+            return importSummary.incrementIgnored();
         }
 
         if ( importOptions == null )
@@ -653,7 +658,7 @@ public abstract class AbstractEventService
             dueDate = DateUtils.parseDate( event.getDueDate() );
         }
 
-        String storedBy = getStoredBy( event, null, currentUserService.getCurrentUser() );
+        String storedBy = getStoredBy( event, null, user );
 
         if ( event.getStatus() == EventStatus.ACTIVE )
         {
@@ -736,10 +741,7 @@ public abstract class AbstractEventService
 
         if ( !singleValue )
         {
-            for ( TrackedEntityDataValue value : dataValues )
-            {
-                dataValueService.deleteTrackedEntityDataValue( value );
-            }
+            dataValues.forEach( dataValueService::deleteTrackedEntityDataValue );
         }
 
         return importSummary;
@@ -801,14 +803,38 @@ public abstract class AbstractEventService
     // -------------------------------------------------------------------------
 
     @Override
-    public void deleteEvent( Event event )
+    public ImportSummary deleteEvent( String uid )
     {
-        ProgramStageInstance programStageInstance = programStageInstanceService.getProgramStageInstance( event.getEvent() );
+        ProgramStageInstance programStageInstance = programStageInstanceService.getProgramStageInstance( uid );
 
         if ( programStageInstance != null )
         {
             programStageInstanceService.deleteProgramStageInstance( programStageInstance );
+            return new ImportSummary( ImportStatus.SUCCESS, "Deletion of event " + uid + " was successful." ).incrementDeleted();
         }
+
+        return new ImportSummary( ImportStatus.ERROR, "ID " + uid + " does not point to a valid event" ).incrementIgnored();
+    }
+
+    @Override
+    public ImportSummaries deleteEvents( List<String> uids )
+    {
+        ImportSummaries importSummaries = new ImportSummaries();
+        int counter = 0;
+
+        for ( String uid : uids )
+        {
+            importSummaries.addImportSummary( deleteEvent( uid ) );
+
+            if ( counter % FLUSH_FREQUENCY == 0 )
+            {
+                dbmsManager.clearSession();
+            }
+
+            counter++;
+        }
+
+        return importSummaries;
     }
 
     // -------------------------------------------------------------------------
@@ -856,7 +882,7 @@ public abstract class AbstractEventService
         {
             Coordinate coordinate = null;
 
-            if ( programStageInstance.getLongitude() != null && programStageInstance.getLongitude() != null )
+            if ( programStageInstance.getLongitude() != null && programStageInstance.getLatitude() != null )
             {
                 coordinate = new Coordinate( programStageInstance.getLongitude(), programStageInstance.getLatitude() );
 
@@ -1036,7 +1062,7 @@ public abstract class AbstractEventService
 
     private void updateProgramStageInstance( ProgramStage programStage, ProgramInstance programInstance,
         OrganisationUnit organisationUnit, Date dueDate, Date executionDate, int status, Coordinate coordinate,
-        String storedBy, ProgramStageInstance programStageInstance,  DataElementCategoryOptionCombo coc )
+        String storedBy, ProgramStageInstance programStageInstance, DataElementCategoryOptionCombo coc )
     {
         programStageInstance.setProgramInstance( programInstance );
         programStageInstance.setProgramStage( programStage );
@@ -1088,14 +1114,14 @@ public abstract class AbstractEventService
         Date dueDate = DateUtils.parseDate( event.getDueDate() );
 
         String storedBy = getStoredBy( event, importSummary, user );
-        
+
         DataElementCategoryOptionCombo coc = categoryService.getDefaultDataElementCategoryOptionCombo();
-        
+
         if ( event.getAttributeCategoryOptions() != null && program.getCategoryCombo() != null )
         {
             coc = inputUtils.getAttributeOptionCombo( program.getCategoryCombo(), event.getAttributeCategoryOptions() );
-            
-            if ( coc == null)
+
+            if ( coc == null )
             {
                 importSummary.getConflicts().add( new ImportConflict( "Invalid attribute option combo for option names.", event.getAttributeCategoryOptions() ) );
             }

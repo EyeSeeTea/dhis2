@@ -28,6 +28,7 @@ package org.hisp.dhis.user;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
@@ -54,6 +55,7 @@ public class UserGroupAccess
         return id;
     }
 
+    @JsonIgnore
     public void setId( int id )
     {
         this.id = id;
@@ -76,6 +78,20 @@ public class UserGroupAccess
     public String userGroupUid()
     {
         return userGroup != null ? userGroup.getUid() : null;
+    }
+
+    @JsonProperty( "id" )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getUid()
+    {
+        return userGroup != null ? userGroup.getUid() : null;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String displayName()
+    {
+        return userGroup != null ? userGroup.getDisplayName() : null;
     }
 
     public UserGroup getUserGroup()

@@ -28,20 +28,26 @@ package org.hisp.dhis.trackedentity;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import org.hisp.dhis.DhisSpringTest;
+import org.hisp.dhis.analytics.AggregationType;
+import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.common.OrganisationUnitSelectionMode;
+import org.hisp.dhis.common.QueryItem;
+import org.hisp.dhis.common.QueryOperator;
+import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstanceService;
-import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueService;
-import org.hisp.dhis.validation.ValidationCriteriaService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Date;
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Lars Helge Overland
@@ -50,95 +56,212 @@ public class TrackedEntityInstanceStoreTest
     extends DhisSpringTest
 {
     @Autowired
-    private TrackedEntityInstanceStore entityInstanceStore;
-
-    @Autowired
-    private ProgramService programService;
-
-    @Autowired
-    private ProgramInstanceService programInstanceService;
+    private TrackedEntityInstanceStore teiStore;
 
     @Autowired
     private OrganisationUnitService organisationUnitService;
 
     @Autowired
-    private TrackedEntityAttributeService attributeService;
+    private IdentifiableObjectManager idObjectManager;
 
     @Autowired
     private TrackedEntityAttributeValueService attributeValueService;
 
     @Autowired
-    private ValidationCriteriaService validationCriteriaService;
+    private ProgramInstanceService programInstanceService;
 
-    private TrackedEntityInstance entityInstanceA1;
+    private TrackedEntityInstance teiA;
+    private TrackedEntityInstance teiB;
+    private TrackedEntityInstance teiC;
+    private TrackedEntityInstance teiD;
+    private TrackedEntityInstance teiE;
+    private TrackedEntityInstance teiF;
 
-    private TrackedEntityInstance entityInstanceB1;
+    private TrackedEntityAttribute atA;
+    private TrackedEntityAttribute atB;
 
-    private OrganisationUnit organisationUnit;
-    
+    private OrganisationUnit ouA;
+    private OrganisationUnit ouB;
+    private OrganisationUnit ouC;
+
+    private Program prA;
+    private Program prB;
+
     @Override
     public void setUpTest()
     {
-        organisationUnit = createOrganisationUnit( 'A' );
-        organisationUnitService.addOrganisationUnit( organisationUnit );
+        atA = createTrackedEntityAttribute( 'A' );
+        atB = createTrackedEntityAttribute( 'B' );
+        atB.setUnique( true );
 
-        OrganisationUnit organisationUnitB = createOrganisationUnit( 'B' );
-        organisationUnitService.addOrganisationUnit( organisationUnitB );
+        idObjectManager.save( atA );
+        idObjectManager.save( atB );
 
-        TrackedEntityAttribute entityInstanceAttributeB = createTrackedEntityAttribute( 'B' );
-        entityInstanceAttributeB.setUnique( true );
-        attributeService.addTrackedEntityAttribute( entityInstanceAttributeB );
-      
-        entityInstanceA1 = createTrackedEntityInstance( 'A', organisationUnit );
-        entityInstanceB1 = createTrackedEntityInstance( 'B', organisationUnit );
+        ouA = createOrganisationUnit( 'A' );
+        ouB = createOrganisationUnit( 'B', ouA );
+        ouC = createOrganisationUnit( 'C', ouB );
+
+        organisationUnitService.addOrganisationUnit( ouA );
+        organisationUnitService.addOrganisationUnit( ouB );
+        organisationUnitService.addOrganisationUnit( ouC );
+
+        prA = createProgram( 'A', null, null );
+        prB = createProgram( 'B', null, null );
+
+        idObjectManager.save( prA );
+        idObjectManager.save( prB );
+
+        teiA = createTrackedEntityInstance( 'A', ouA );
+        teiB = createTrackedEntityInstance( 'B', ouB );
+        teiC = createTrackedEntityInstance( 'C', ouB );
+        teiD = createTrackedEntityInstance( 'D', ouC );
+        teiE = createTrackedEntityInstance( 'E', ouC );
+        teiF = createTrackedEntityInstance( 'F', ouC );
+    }
+
+    @Test
+    public void testTrackedEntityInstanceExists()
+    {
+        teiStore.save( teiA );
+        teiStore.save( teiB );
+
+        assertTrue( teiStore.exists( teiA.getUid() ) );
+        assertTrue( teiStore.exists( teiB.getUid() ) );
+        assertFalse( teiStore.exists( "aaaabbbbccc" ) );
+        assertFalse( teiStore.exists( null ) );
     }
 
     @Test
     public void testAddGet()
     {
-        int idA = entityInstanceStore.save( entityInstanceA1 );
-        int idB = entityInstanceStore.save( entityInstanceB1 );
+        int idA = teiStore.save( teiA );
+        int idB = teiStore.save( teiB );
 
-        assertNotNull( entityInstanceStore.get( idA ) );
-        assertNotNull( entityInstanceStore.get( idB ) );
+        assertNotNull( teiStore.get( idA ) );
+        assertNotNull( teiStore.get( idB ) );
     }
 
     @Test
     public void testAddGetbyOu()
     {
-        int idA = entityInstanceStore.save( entityInstanceA1 );
-        int idB = entityInstanceStore.save( entityInstanceB1 );
+        int idA = teiStore.save( teiA );
+        int idB = teiStore.save( teiB );
 
-        assertEquals( entityInstanceA1.getName(), entityInstanceStore.get( idA ).getName() );
-        assertEquals( entityInstanceB1.getName(), entityInstanceStore.get( idB ).getName() );
+        assertEquals( teiA.getName(), teiStore.get( idA ).getName() );
+        assertEquals( teiB.getName(), teiStore.get( idB ).getName() );
     }
 
     @Test
     public void testDelete()
     {
-        int idA = entityInstanceStore.save( entityInstanceA1 );
-        int idB = entityInstanceStore.save( entityInstanceB1 );
+        int idA = teiStore.save( teiA );
+        int idB = teiStore.save( teiB );
 
-        assertNotNull( entityInstanceStore.get( idA ) );
-        assertNotNull( entityInstanceStore.get( idB ) );
+        assertNotNull( teiStore.get( idA ) );
+        assertNotNull( teiStore.get( idB ) );
 
-        entityInstanceStore.delete( entityInstanceA1 );
+        teiStore.delete( teiA );
 
-        assertNull( entityInstanceStore.get( idA ) );
-        assertNotNull( entityInstanceStore.get( idB ) );
+        assertNull( teiStore.get( idA ) );
+        assertNotNull( teiStore.get( idB ) );
 
-        entityInstanceStore.delete( entityInstanceB1 );
+        teiStore.delete( teiB );
 
-        assertNull( entityInstanceStore.get( idA ) );
-        assertNull( entityInstanceStore.get( idB ) );
+        assertNull( teiStore.get( idA ) );
+        assertNull( teiStore.get( idB ) );
     }
 
     @Test
     public void testGetAll()
     {
-        entityInstanceStore.save( entityInstanceA1 );
-        entityInstanceStore.save( entityInstanceB1 );
+        teiStore.save( teiA );
+        teiStore.save( teiB );
 
-        assertTrue( equals( entityInstanceStore.getAll(), entityInstanceA1, entityInstanceB1 ) );
+        assertTrue( equals( teiStore.getAll(), teiA, teiB ) );
+    }
+
+    @Test
+    public void testQuery()
+    {
+        teiStore.save( teiA );
+        teiStore.save( teiB );
+        teiStore.save( teiC );
+        teiStore.save( teiD );
+        teiStore.save( teiE );
+        teiStore.save( teiF );
+
+        attributeValueService.addTrackedEntityAttributeValue( new TrackedEntityAttributeValue( atA, teiD, "Male" ) );
+        attributeValueService.addTrackedEntityAttributeValue( new TrackedEntityAttributeValue( atA, teiE, "Male" ) );
+        attributeValueService.addTrackedEntityAttributeValue( new TrackedEntityAttributeValue( atA, teiF, "Female" ) );
+
+        programInstanceService.enrollTrackedEntityInstance( teiB, prA, new Date(), new Date(), ouB );
+        programInstanceService.enrollTrackedEntityInstance( teiE, prA, new Date(), new Date(), ouB );
+
+        // Get all
+
+        TrackedEntityInstanceQueryParams params = new TrackedEntityInstanceQueryParams();
+
+        List<TrackedEntityInstance> teis = teiStore.getTrackedEntityInstances( params );
+
+        assertEquals( 6, teis.size() );
+
+        // Filter by attribute
+
+        params = new TrackedEntityInstanceQueryParams();
+        params.addFilter( new QueryItem( atA, QueryOperator.EQ, "Male", ValueType.TEXT, AggregationType.NONE, null ) );
+
+        teis = teiStore.getTrackedEntityInstances( params );
+
+        assertEquals( 2, teis.size() );
+        assertTrue( teis.contains( teiD ) );
+        assertTrue( teis.contains( teiE ) );
+
+        // Filter by attribute
+
+        params = new TrackedEntityInstanceQueryParams();
+        params.addFilter( new QueryItem( atA, QueryOperator.EQ, "Female", ValueType.TEXT, AggregationType.NONE, null ) );
+
+        teis = teiStore.getTrackedEntityInstances( params );
+
+        assertEquals( 1, teis.size() );
+        assertTrue( teis.contains( teiF ) );
+
+        // Filter by selected org units
+
+        params = new TrackedEntityInstanceQueryParams();
+        params.addOrganisationUnit( ouB );
+        params.setOrganisationUnitMode( OrganisationUnitSelectionMode.SELECTED );
+
+        teis = teiStore.getTrackedEntityInstances( params );
+
+        assertEquals( 2, teis.size() );
+        assertTrue( teis.contains( teiB ) );
+        assertTrue( teis.contains( teiC ) );
+
+        // Filter by descendants org units
+
+        params = new TrackedEntityInstanceQueryParams();
+        params.addOrganisationUnit( ouB );
+        params.setOrganisationUnitMode( OrganisationUnitSelectionMode.DESCENDANTS );
+
+        teis = teiStore.getTrackedEntityInstances( params );
+
+        assertEquals( 5, teis.size() );
+        assertTrue( teis.contains( teiB ) );
+        assertTrue( teis.contains( teiC ) );
+        assertTrue( teis.contains( teiD ) );
+        assertTrue( teis.contains( teiE ) );
+        assertTrue( teis.contains( teiF ) );
+
+        // Filter by program enrollment
+
+        params = new TrackedEntityInstanceQueryParams();
+        params.setProgram( prA );
+
+        teis = teiStore.getTrackedEntityInstances( params );
+
+        assertEquals( 2, teis.size() );
+        assertTrue( teis.contains( teiB ) );
+        assertTrue( teis.contains( teiE ) );
     }
 }

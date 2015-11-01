@@ -28,10 +28,7 @@ package org.hisp.dhis.calendar;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,6 +38,7 @@ import javax.annotation.PostConstruct;
 import org.hisp.dhis.calendar.impl.Iso8601Calendar;
 import org.hisp.dhis.period.Cal;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.setting.Setting;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -66,11 +64,6 @@ public class DefaultCalendarService
         new DateFormat( "yyyy-MM-dd", "yyyy-MM-dd", "yyyy-MM-dd", "yyyy-mm-dd" ),
         new DateFormat( "dd-MM-yyyy", "dd-MM-yyyy", "dd-MM-yyyy", "dd-mm-yyyy" )
     );
-
-    /**
-     * Memory cache for calendar and date format keys.
-     */
-    private final Map<String, String> keyCache = new HashMap<>();
 
     // -------------------------------------------------------------------------
     // CalendarService implementation
@@ -106,8 +99,8 @@ public class DefaultCalendarService
     @Override
     public Calendar getSystemCalendar()
     {
-        String calendarKey = getSystemCalendarKey();
-        String dateFormat = getSystemDateFormatKey();
+        String calendarKey = (String) settingManager.getSystemSetting( Setting.CALENDAR );
+        String dateFormat = (String) settingManager.getSystemSetting( Setting.DATE_FORMAT );
 
         Calendar calendar = null;
 
@@ -128,7 +121,7 @@ public class DefaultCalendarService
     @Override
     public DateFormat getSystemDateFormat()
     {
-        String dateFormatKey = getSystemDateFormatKey();
+        String dateFormatKey = (String) settingManager.getSystemSetting( Setting.DATE_FORMAT );
 
         for ( DateFormat dateFormat : dateFormats )
         {
@@ -139,41 +132,5 @@ public class DefaultCalendarService
         }
 
         return dateFormats.get( 0 );
-    }
-
-    // -------------------------------------------------------------------------
-    // Calendar key
-    // -------------------------------------------------------------------------
-
-    @Override
-    public String getSystemCalendarKey()
-    {
-        String key = keyCache.get( KEY_CALENDAR );        
-        key = !isEmpty( key ) ? key : (String) settingManager.getSystemSetting( KEY_CALENDAR, DEFAULT_CALENDAR );        
-        keyCache.put( KEY_CALENDAR, key );        
-        return key;
-    }
-    
-    @Override
-    public void setSystemCalendarKey( String calendarKey )
-    {
-        keyCache.put( KEY_CALENDAR, calendarKey );
-        settingManager.saveSystemSetting( KEY_CALENDAR, calendarKey );
-    }
-    
-    @Override
-    public String getSystemDateFormatKey()
-    {
-        String key = keyCache.get( KEY_DATE_FORMAT );
-        key = !isEmpty( key ) ? key : (String) settingManager.getSystemSetting( KEY_DATE_FORMAT, DEFAULT_DATE_FORMAT );
-        keyCache.put( KEY_DATE_FORMAT, key );
-        return key;
-    }
-
-    @Override
-    public void setSystemDateFormatKey( String dateFormatKey )
-    {
-        keyCache.put( KEY_DATE_FORMAT, dateFormatKey );
-        settingManager.saveSystemSetting( KEY_DATE_FORMAT, dateFormatKey );
     }
 }

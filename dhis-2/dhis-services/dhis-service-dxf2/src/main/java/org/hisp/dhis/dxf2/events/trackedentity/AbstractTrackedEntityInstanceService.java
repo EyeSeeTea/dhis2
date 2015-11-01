@@ -45,6 +45,7 @@ import org.hisp.dhis.system.callable.IdentifiableObjectSearchCallable;
 import org.hisp.dhis.trackedentity.TrackedEntity;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
+import org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueService;
 import org.hisp.dhis.user.UserService;
@@ -56,7 +57,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -103,9 +103,18 @@ public abstract class AbstractTrackedEntityInstanceService
     // -------------------------------------------------------------------------
 
     @Override
-    public List<TrackedEntityInstance> getTrackedEntityInstances( List<org.hisp.dhis.trackedentity.TrackedEntityInstance> trackedEntityInstances )
+    public List<TrackedEntityInstance> getTrackedEntityInstances( TrackedEntityInstanceQueryParams params )
     {
-        return trackedEntityInstances.stream().map( this::getTrackedEntityInstance ).collect( Collectors.toList() );
+        List<org.hisp.dhis.trackedentity.TrackedEntityInstance> teis = entityInstanceService.getTrackedEntityInstances( params );
+
+        List<TrackedEntityInstance> teiItems = new ArrayList<>();
+
+        for ( org.hisp.dhis.trackedentity.TrackedEntityInstance trackedEntityInstance : teis )
+        {
+            teiItems.add( getTrackedEntityInstance( trackedEntityInstance, false ) );
+        }
+
+        return teiItems;
     }
 
     @Override
@@ -121,7 +130,7 @@ public abstract class AbstractTrackedEntityInstanceService
     }
 
     @Override
-    public TrackedEntityInstance getTrackedEntityInstance( org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance, boolean expandRelative )
+    public TrackedEntityInstance getTrackedEntityInstance( org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance, boolean includeRelationships )
     {
         if ( entityInstance == null )
         {
@@ -136,19 +145,21 @@ public abstract class AbstractTrackedEntityInstanceService
         trackedEntityInstance.setLastUpdated( entityInstance.getLastUpdated().toString() );
         trackedEntityInstance.setInactive( entityInstance.isInactive() );
 
-        Collection<Relationship> relationships = relationshipService.getRelationshipsForTrackedEntityInstance( entityInstance );
-
-        for ( Relationship entityRelationship : relationships )
+        if ( includeRelationships )
         {
-            org.hisp.dhis.dxf2.events.trackedentity.Relationship relationship = new org.hisp.dhis.dxf2.events.trackedentity.Relationship();
-            relationship.setDisplayName( entityRelationship.getRelationshipType().getDisplayName() );
-            relationship.setTrackedEntityInstanceA( entityRelationship.getEntityInstanceA().getUid() );
-            relationship.setTrackedEntityInstanceB( entityRelationship.getEntityInstanceB().getUid() );
+            //TODO include relationships in data model and void transactional query in for-loop
 
-            relationship.setRelationship( entityRelationship.getRelationshipType().getUid() );
+            Collection<Relationship> relationships = relationshipService.getRelationshipsForTrackedEntityInstance( entityInstance );
 
-            if ( expandRelative )
+            for ( Relationship entityRelationship : relationships )
             {
+                org.hisp.dhis.dxf2.events.trackedentity.Relationship relationship = new org.hisp.dhis.dxf2.events.trackedentity.Relationship();
+                relationship.setDisplayName( entityRelationship.getRelationshipType().getDisplayName() );
+                relationship.setTrackedEntityInstanceA( entityRelationship.getEntityInstanceA().getUid() );
+                relationship.setTrackedEntityInstanceB( entityRelationship.getEntityInstanceB().getUid() );
+
+                relationship.setRelationship( entityRelationship.getRelationshipType().getUid() );
+
                 // we might have cases where A <=> A, so we only include the relative if the UIDs do not match
                 if ( !entityRelationship.getEntityInstanceA().getUid().equals( entityInstance.getUid() ) )
                 {
@@ -158,9 +169,9 @@ public abstract class AbstractTrackedEntityInstanceService
                 {
                     relationship.setRelative( getTrackedEntityInstance( entityRelationship.getEntityInstanceB(), false ) );
                 }
-            }
 
-            trackedEntityInstance.getRelationships().add( relationship );
+                trackedEntityInstance.getRelationships().add( relationship );
+            }
         }
 
         for ( TrackedEntityAttributeValue attributeValue : entityInstance.getAttributeValues() )
@@ -340,14 +351,38 @@ public abstract class AbstractTrackedEntityInstanceService
     // -------------------------------------------------------------------------
 
     @Override
-    public void deleteTrackedEntityInstance( TrackedEntityInstance trackedEntityInstance )
+    public ImportSummary deleteTrackedEntityInstance( String uid )
     {
-        org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance = teiService.getTrackedEntityInstance( trackedEntityInstance.getTrackedEntityInstance() );
+        org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance = teiService.getTrackedEntityInstance( uid );
 
         if ( entityInstance != null )
         {
             teiService.deleteTrackedEntityInstance( entityInstance );
+            return new ImportSummary( ImportStatus.SUCCESS, "Deletion of tracked entity instance " + uid + " was successful." ).incrementDeleted();
         }
+
+        return new ImportSummary( ImportStatus.ERROR, "ID " + uid + " does not point to a valid tracked entity instance" ).incrementIgnored();
+    }
+
+    @Override
+    public ImportSummaries deleteTrackedEntityInstances( List<String> uids )
+    {
+        ImportSummaries importSummaries = new ImportSummaries();
+        int counter = 0;
+
+        for ( String uid : uids )
+        {
+            importSummaries.addImportSummary( deleteTrackedEntityInstance( uid ) );
+
+            if ( counter % FLUSH_FREQUENCY == 0 )
+            {
+                dbmsManager.clearSession();
+            }
+
+            counter++;
+        }
+
+        return importSummaries;
     }
 
     // -------------------------------------------------------------------------

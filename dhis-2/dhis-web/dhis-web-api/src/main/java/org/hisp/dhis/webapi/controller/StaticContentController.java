@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
@@ -41,24 +42,25 @@ import org.hisp.dhis.dxf2.webmessage.WebMessageException;
 import org.hisp.dhis.dxf2.webmessage.WebMessageStatus;
 import org.hisp.dhis.external.location.LocationManager;
 import org.hisp.dhis.external.location.LocationManagerException;
+import org.hisp.dhis.setting.Setting;
 import org.hisp.dhis.setting.StyleManager;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.webapi.utils.WebMessageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.google.common.collect.ImmutableMap;
 
 /**
- * Serves and uploads custom images(PNG) for the logo on the frontpage (logo_front)
+ * Serves and uploads custom images for the logo on the front page (logo_front)
  * and for the logo on the top banner (logo_banner).
- * 
+ *
  * @author Stian Sandvold
  */
 @Controller
@@ -77,43 +79,40 @@ public class StaticContentController
     private static final String LOGO_BANNER = "logo_banner";
     private static final String LOGO_FRONT = "logo_front";
 
-    private static final Map<String, String> KEY_WHITELIST_MAP = ImmutableMap.<String, String>builder().
-        put( LOGO_BANNER, SystemSettingManager.KEY_USE_CUSTOM_LOGO_BANNER ).
-        put( LOGO_FRONT, SystemSettingManager.KEY_USE_CUSTOM_LOGO_FRONT ).build();
+    private static final Map<String, Setting> KEY_WHITELIST_MAP = ImmutableMap.<String, Setting>builder().
+        put( LOGO_BANNER, Setting.USE_CUSTOM_LOGO_BANNER ).
+        put( LOGO_FRONT, Setting.USE_CUSTOM_LOGO_FRONT ).build();
 
     /**
-     * Serves a PNG associated with the key. if custom logo is not used, the 
-     * request will redirect to the default logos.
+     * Serves the PNG associated with the key. If custom logo is not used the
+     * request will redirect to the default.
      *
-     * @param key key associated with the file\image.
-     * @param response the response associated with the request.
-     * @throws WebMessageException
+     * @param key key associated with the file.
      */
     @RequestMapping( value = "/{key}", method = RequestMethod.GET )
     public void getStaticContent(
-        @PathVariable( "key" ) String key,
-        HttpServletResponse response )
+        @PathVariable( "key" ) String key, HttpServletRequest request, HttpServletResponse response )
         throws WebMessageException
     {
         if ( !KEY_WHITELIST_MAP.containsKey( key ) )
         {
-            throw new WebMessageException( WebMessageUtils.notFound( "This key does not exist" ) );
+            throw new WebMessageException( WebMessageUtils.notFound( "Key does not exist." ) );
         }
 
-        Boolean useCustomFile = (Boolean) systemSettingManager.getSystemSetting( KEY_WHITELIST_MAP.get( key ), false );
+        boolean useCustomFile = (boolean) systemSettingManager.getSystemSetting( KEY_WHITELIST_MAP.get( key ) );
 
-        if ( useCustomFile == null || !useCustomFile ) // Serve the default logos
+        if ( !useCustomFile ) // Serve default
         {
             try
             {
-                response.sendRedirect( this.getDefaultLogoUrl( key ) );
+                response.sendRedirect( getDefaultLogoUrl( request, key ) );
             }
             catch ( IOException e )
             {
                 throw new WebMessageException( WebMessageUtils.error( "Can't read the file." ) );
             }
         }
-        else // Serve the custom logos
+        else // Serve custom
         {
             InputStream in = null;
 
@@ -131,7 +130,8 @@ public class StaticContentController
             catch ( IOException e )
             {
                 throw new WebMessageException(
-                    WebMessageUtils.error( "Error occured trying to serve file." ) );
+                    WebMessageUtils.error( "Error occurred trying to serve file.",
+                        "An IOException was thrown, indicating a file I/O or networking error." ) );
             }
             finally
             {
@@ -143,69 +143,78 @@ public class StaticContentController
     /**
      * Uploads PNG images based on a key. Only accepts PNG and white listed keys.
      *
-     * @param key  to associate with the image.
-     * @param file associated with the key.
-     * @throws WebMessageException
-     * @throws IOException
+     * @param key the key.
+     * @param file the image file.
      */
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_SYSTEM_SETTING')" )
+    @ResponseStatus( HttpStatus.NO_CONTENT )
     @RequestMapping( value = "/{key}", method = RequestMethod.POST )
     public void updateStaticContent(
         @PathVariable( "key" ) String key,
-        @RequestParam( value = "file", required = false ) MultipartFile file )
+        @RequestParam( value = "file", required = true ) MultipartFile file )
         throws WebMessageException, IOException
     {
         if ( file == null || file.isEmpty() )
         {
-            throw new WebMessageException( WebMessageUtils.badRequest( "Missing parameter \"file\"" ) );
+            throw new WebMessageException( WebMessageUtils.badRequest( "Missing parameter 'file'" ) );
         }
 
-        // Only PNG accepted currently
+        // Only PNG is accepted at the current time
         
-        if ( !file.getContentType().equalsIgnoreCase( "image/png" ) )
+        MimeType mimeType = MimeTypeUtils.parseMimeType( file.getContentType() );
+
+        if( !mimeType.isCompatibleWith( MimeTypeUtils.IMAGE_PNG ))
         {
-            throw new WebMessageException(
-                new WebMessage(WebMessageStatus.WARNING, HttpStatus.UNSUPPORTED_MEDIA_TYPE ) );
+            throw new WebMessageException( new WebMessage( WebMessageStatus.WARNING, HttpStatus.UNSUPPORTED_MEDIA_TYPE ) );
         }
 
-        // Only keys in the white list accepted currently
+        // Only keys in the white list are accepted at the current time
         
         if ( !KEY_WHITELIST_MAP.containsKey( key ) )
         {
             throw new WebMessageException(
-                WebMessageUtils.badRequest( "This key is not yet supported" ) );
+                WebMessageUtils.badRequest( "This key is not supported." ) );
         }
 
-        File out = locationManager.getFileForWriting( key + ".png", "static" );
+        File out = null;
+
+        try
+        {
+            out = locationManager.getFileForWriting( key + ".png", "static" );
+        }
+        catch( LocationManagerException e)
+        {
+            throw new WebMessageException( WebMessageUtils.error( e.getMessage() ) );
+        }
 
         try
         {
             file.transferTo( out );
         }
-        catch ( IOException e )
+        catch( IOException e)
         {
-            throw new WebMessageException( (WebMessageUtils
-                .error( "Error saving file, make sure dhis_home envoirement variable is set" )) );
+            throw new WebMessageException( WebMessageUtils.error( "Could not save file." ) );
         }
     }
 
     /**
      * Returns the relative url of the default logo for a given key.
      *
-     * @param key the key associated with the logo. 
+     * @param key the key associated with the logo or null if the key does not exist.
      * @return the relative url of the logo.
      */
-    private String getDefaultLogoUrl( String key )
+    private String getDefaultLogoUrl( HttpServletRequest request, String key )
     {
-        String relativeUrlToImage = null;
-        
+        String relativeUrlToImage = request.getContextPath();        
+
         if ( key.equals( LOGO_BANNER ) )
         {
-            relativeUrlToImage = "/dhis-web-commons/css/" + styleManager.getCurrentStyleDirectory() + "/logo_banner.png";
+            relativeUrlToImage += "/dhis-web-commons/css/" + styleManager.getCurrentStyleDirectory() + "/logo_banner.png";
         }
 
         if ( key.equals( LOGO_FRONT ) )
         {
-            relativeUrlToImage = "/dhis-web-commons/flags/" + systemSettingManager.getFlagImage();
+            relativeUrlToImage += "/dhis-web-commons/security/logo_front.png";
         }
 
         return relativeUrlToImage;

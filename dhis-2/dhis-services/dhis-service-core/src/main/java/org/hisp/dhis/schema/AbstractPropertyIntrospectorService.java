@@ -40,6 +40,7 @@ import org.hibernate.persister.collection.CollectionPersister;
 import org.hibernate.persister.entity.Joinable;
 import org.hibernate.type.AssociationType;
 import org.hibernate.type.CollectionType;
+import org.hibernate.type.CustomType;
 import org.hibernate.type.DoubleType;
 import org.hibernate.type.IntegerType;
 import org.hibernate.type.LongType;
@@ -149,7 +150,7 @@ public abstract class AbstractPropertyIntrospectorService
 
                 if ( !joinTableToRoles.containsKey( associatedJoinable.getTableName() ) )
                 {
-                    joinTableToRoles.put( associatedJoinable.getTableName(), new ArrayList<String>() );
+                    joinTableToRoles.put( associatedJoinable.getTableName(), new ArrayList<>() );
                 }
 
                 joinTableToRoles.get( associatedJoinable.getTableName() ).add( collection.getRole() );
@@ -274,7 +275,8 @@ public abstract class AbstractPropertyIntrospectorService
                 property.setOneToOne( true );
             }
 
-            if ( SingleColumnType.class.isInstance( type ) )
+            if ( SingleColumnType.class.isInstance( type ) || CustomType.class.isInstance( type )
+                || ManyToOneType.class.isInstance( type ) )
             {
                 Column column = (Column) hibernateProperty.getColumnIterator().next();
 

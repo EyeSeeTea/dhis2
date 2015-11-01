@@ -43,6 +43,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
 import org.hisp.dhis.common.NameableObject.NameableProperty;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
+import org.hisp.dhis.common.exception.InvalidIdentifierReferenceException;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.user.UserCredentials;
@@ -745,6 +746,47 @@ public class DefaultIdentifiableObjectManager
 
     @Override
     @SuppressWarnings( "unchecked" )
+    public <T extends IdentifiableObject> List<T> getObjects( Class<T> clazz, IdentifiableProperty property, Collection<String> identifiers )
+    {
+        GenericIdentifiableObjectStore<T> store = (GenericIdentifiableObjectStore<T>) getIdentifiableObjectStore( clazz );
+
+        if ( identifiers != null && !identifiers.isEmpty() )
+        {
+            if ( property == null || IdentifiableProperty.UID.equals( property ) )
+            {
+                return store.getByUid( identifiers );
+            }
+            else if ( IdentifiableProperty.CODE.equals( property ) )
+            {
+                return store.getByCode( identifiers );
+            }
+            else if ( IdentifiableProperty.NAME.equals( property ) )
+            {
+                return store.getByName( identifiers );
+            }
+            
+            throw new InvalidIdentifierReferenceException( "Invalid identifiable property / class combination: " + property );
+        }
+
+        return null;
+    }
+
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public <T extends IdentifiableObject> List<T> getObjects( Class<T> clazz, Collection<Integer> identifiers )
+    {
+        GenericIdentifiableObjectStore<T> store = (GenericIdentifiableObjectStore<T>) getIdentifiableObjectStore( clazz );
+
+        if ( store == null )
+        {
+            return null;
+        }
+
+        return store.getById( identifiers );
+    }
+    
+    @Override
+    @SuppressWarnings( "unchecked" )
     public <T extends IdentifiableObject> T getObject( Class<T> clazz, IdentifiableProperty property, String id )
     {
         GenericIdentifiableObjectStore<T> store = (GenericIdentifiableObjectStore<T>) getIdentifiableObjectStore( clazz );
@@ -775,7 +817,7 @@ public class DefaultIdentifiableObjectManager
                 return store.getByName( id );
             }
             
-            throw new IllegalArgumentException( "Invalid identifiable property / class combination: " + property );
+            throw new InvalidIdentifierReferenceException( "Invalid identifiable property / class combination: " + property );
         }
 
         return null;
@@ -813,6 +855,12 @@ public class DefaultIdentifiableObjectManager
     public void refresh( Object object )
     {
         sessionFactory.getCurrentSession().refresh( object );
+    }
+
+    @Override
+    public void evict( Object object )
+    {
+        sessionFactory.getCurrentSession().evict( object );
     }
 
     @Override

@@ -78,20 +78,13 @@ public class DefaultI18nService
     }
 
     // -------------------------------------------------------------------------
-    // Internationalise
+    // I18nService implementation
     // -------------------------------------------------------------------------
 
     @Override
     public void internationalise( Object object )
     {
-        if ( isCollection( object ) )
-        {
-            internationaliseCollection( (Collection<?>) object, getCurrentLocale() );
-        }
-        else
-        {
-            internationaliseObject( object, getCurrentLocale() );
-        }
+        internationalise( object, getCurrentLocale() );
     }
 
     @Override
@@ -189,7 +182,7 @@ public class DefaultI18nService
             return null;
         }
 
-        if ( !(object instanceof IdentifiableObject) )
+        if ( !( object instanceof IdentifiableObject ) )
         {
             throw new IllegalArgumentException( "I18n object must be identifiable: " + object );
         }
@@ -199,8 +192,8 @@ public class DefaultI18nService
             return Arrays.asList( DataElement.I18N_PROPERTIES );
         }
 
-        return (object instanceof NameableObject) ? Arrays.asList( NameableObject.I18N_PROPERTIES ) : Arrays
-            .asList( IdentifiableObject.I18N_PROPERTIES );
+        return (object instanceof NameableObject) ? Arrays.asList( NameableObject.I18N_PROPERTIES ) : 
+            Arrays.asList( IdentifiableObject.I18N_PROPERTIES );
     }
 
     // -------------------------------------------------------------------------

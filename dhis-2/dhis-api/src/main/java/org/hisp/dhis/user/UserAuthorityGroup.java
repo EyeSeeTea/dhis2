@@ -79,6 +79,7 @@ public class UserAuthorityGroup
     @Scanned
     private Set<DataSet> dataSets = new HashSet<>();
 
+    @Scanned
     private Set<Program> programs = new HashSet<>();
 
     // -------------------------------------------------------------------------
@@ -177,18 +178,19 @@ public class UserAuthorityGroup
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class } )
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlElementWrapper( localName = "users", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "user", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "userObject", namespace = DxfNamespaces.DXF_2_0 )
     public List<User> getUsers()
     {
         List<User> users = new ArrayList<>();
 
         for ( UserCredentials userCredentials : members )
         {
-            if ( userCredentials.getUser() != null )
+            if ( userCredentials.getUserInfo() != null )
             {
-                users.add( userCredentials.getUser() );
+                users.add( userCredentials.getUserInfo() );
             }
         }
 
@@ -255,8 +257,7 @@ public class UserAuthorityGroup
             }
             else if ( strategy.isMerge() )
             {
-                description = userAuthorityGroup.getDescription() == null ? description : userAuthorityGroup
-                    .getDescription();
+                description = userAuthorityGroup.getDescription() == null ? description : userAuthorityGroup.getDescription();
             }
 
             removeAllAuthorities();

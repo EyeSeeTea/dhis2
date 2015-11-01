@@ -613,17 +613,30 @@ Ext.onReady( function() {
 					}
 				},
                 chart: {
-                    series: 'series',
-                    category: 'category',
-                    filter: 'filter',
-                    column: 'column',
-                    stackedcolumn: 'stackedcolumn',
-                    bar: 'bar',
-                    stackedbar: 'stackedbar',
-                    line: 'line',
-                    area: 'area',
-                    pie: 'pie',
-                    radar: 'radar'
+                    client: {
+                        series: 'series',
+                        category: 'category',
+                        filter: 'filter',
+                        column: 'column',
+                        stackedcolumn: 'stackedcolumn',
+                        bar: 'bar',
+                        stackedbar: 'stackedbar',
+                        line: 'line',
+                        area: 'area',
+                        pie: 'pie',
+                        radar: 'radar'
+                    },
+                    server: {
+                        column: 'COLUMN',
+                        stackedcolumn: 'STACKED_COLUMN',
+                        bar: 'BAR',
+                        stackedbar: 'STACKED_BAR',
+                        line: 'LINE',
+                        area: 'AREA',
+                        pie: 'PIE',
+                        radar: 'RADAR',
+                        gauge: 'GAUGE'
+                    }
                 },
                 data: {
                     domain: 'domain_',
@@ -644,6 +657,36 @@ Ext.onReady( function() {
                     id: 'root'
                 }
 			};
+
+            conf.finals.chart.c2s = {};
+            conf.finals.chart.s2c = {};
+
+            (function() {
+                var client = conf.finals.chart.client,
+                    server = conf.finals.chart.server,
+                    c2s = conf.finals.chart.c2s,
+                    s2c = conf.finals.chart.s2c;
+
+                c2s[client.column] = server.column;
+                c2s[client.stackedcolumn] = server.stackedcolumn;
+                c2s[client.bar] = server.bar;
+                c2s[client.stackedbar] = server.stackedbar;
+                c2s[client.line] = server.line;
+                c2s[client.area] = server.area;
+                c2s[client.pie] = server.pie;
+                c2s[client.radar] = server.radar;
+                c2s[client.gauge] = server.gauge;
+
+                s2c[server.column] = client.column;
+                s2c[server.stackedcolumn] = client.stackedcolumn;
+                s2c[server.bar] = client.bar;
+                s2c[server.stackedbar] = client.stackedbar;
+                s2c[server.line] = client.line;
+                s2c[server.area] = client.area;
+                s2c[server.pie] = client.pie;
+                s2c[server.radar] = client.radar;
+                s2c[server.gauge] = client.gauge;
+            })();
 
 			dimConf = conf.finals.dimension;
 
@@ -672,7 +715,33 @@ Ext.onReady( function() {
 					{id: 'FinancialJuly', name: NS.i18n.financial_july},
 					{id: 'FinancialApril', name: NS.i18n.financial_april}
 				],
-                relativePeriods: []
+                relativePeriods: [
+                    'THIS_WEEK',
+                    'LAST_WEEK',
+                    'LAST_4_WEEKS',
+                    'LAST_12_WEEKS',
+                    'LAST_52_WEEKS',
+                    'THIS_MONTH',
+                    'LAST_MONTH',
+                    'LAST_3_MONTHS',
+                    'LAST_6_MONTHS',
+                    'LAST_12_MONTHS',
+                    'THIS_BIMONTH',
+                    'LAST_BIMONTH',
+                    'LAST_6_BIMONTHS',
+                    'THIS_QUARTER',
+                    'LAST_QUARTER',
+                    'LAST_4_QUARTERS',
+                    'THIS_SIX_MONTH',
+                    'LAST_SIX_MONTH',
+                    'LAST_2_SIXMONTHS',
+                    'THIS_FINANCIAL_YEAR',
+                    'LAST_FINANCIAL_YEAR',
+                    'LAST_5_FINANCIAL_YEARS',
+                    'THIS_YEAR',
+                    'LAST_YEAR',
+                    'LAST_5_YEARS'
+                ]
 			};
 
                 // aggregation type
@@ -1103,7 +1172,7 @@ Ext.onReady( function() {
 					layout.rows = config.rows;
 					layout.filters = config.filters;
 
-                    layout.type = Ext.isString(config.type) ? config.type : 'column';
+                    layout.type = conf.finals.chart.s2c[config.type] || conf.finals.chart.client[config.type] || 'column';
                     layout.program = config.program;
                     layout.programStage = config.programStage;
 
@@ -2872,7 +2941,7 @@ Ext.onReady( function() {
 			web.window = web.window || {};
 
 			web.window.setAnchorPosition = function(w, target) {
-				var vpw = ns.app.viewport.getWidth(),
+				var vpw = app.getViewportWidth(),
 					targetx = target ? target.getPosition()[0] : 4,
 					winw = w.getWidth(),
 					y = target ? target.getPosition()[1] + target.getHeight() + 4 : 33;
@@ -2959,7 +3028,7 @@ Ext.onReady( function() {
                 config.html += obj.message + (obj.message.substr(obj.message.length - 1) === '.' ? '' : '.');
 
                 // bodyStyle
-                config.bodyStyle = 'padding: 12px; background: #fff; max-width: 600px; max-height: ' + ns.app.centerRegion.getHeight() / 2 + 'px';
+                config.bodyStyle = 'padding: 12px; background: #fff; max-width: 600px; max-height: ' + app.getCenterRegionHeight() / 2 + 'px';
 
                 // destroy handler
                 config.modal = true;
@@ -3662,7 +3731,7 @@ Ext.onReady( function() {
                         //minLength = 5,
                         maxLength = support.prototype.array.getMaxLength(titles),
                         fallbackLength = 10,
-                        maxWidth = ns.app.centerRegion.getWidth(),
+                        maxWidth = app.getCenterRegionWidth(),
                         width,
                         validateTitles;
 
@@ -3942,7 +4011,7 @@ Ext.onReady( function() {
 
                     width = (numberOfItems * itemLength) + (numberOfChars * charLength);
 
-                    if (width > ns.app.centerRegion.getWidth() - 6) {
+                    if (width > app.getCenterRegionWidth() - 6) {
                         position = 'right';
                     }
 
@@ -4016,7 +4085,7 @@ Ext.onReady( function() {
                     else if (xLayout.title) {
                         text += (text.length ? ', ' : '') + xLayout.title;
                     }
-                    else if (xLayout.type === conf.finals.chart.pie) {
+                    else if (xLayout.type === conf.finals.chart.client.pie) {
                         var ids = Ext.Array.clean([].concat(columnIds || []));
 
                         if (Ext.isArray(ids) && ids.length) {
@@ -4136,8 +4205,8 @@ Ext.onReady( function() {
 
                 getDefaultChartSizeHandler = function() {
                     return function() {
-                        var width = ns.app.centerRegion.getWidth(),
-                            height = ns.app.centerRegion.getHeight();
+                        var width = app.getCenterRegionWidth(),
+                            height = app.getCenterRegionHeight();
                             
 						this.animate = false;
                         this.setWidth(appConfig.dashboard ? width : width - 15);
@@ -4175,8 +4244,8 @@ Ext.onReady( function() {
                 getDefaultChart = function(config) {
                     var chart,
                         store = config.store || {},
-                        width = ns.app.centerRegion.getWidth(),
-                        height = ns.app.centerRegion.getHeight(),
+                        width = app.getCenterRegionWidth(),
+                        height = app.getCenterRegionHeight(),
                         isLineBased = Ext.Array.contains(['line', 'area'], xLayout.type),
                         defaultConfig = {
                             //animate: true,
@@ -4270,7 +4339,7 @@ Ext.onReady( function() {
                     for (var i = 0, item; i < chart.series.items.length; i++) {
                         item = chart.series.items[i];
 
-                        if (item.type === conf.finals.chart.column) {
+                        if (item.type === conf.finals.chart.client.column) {
                             item.stacked = true;
                         }
                     }
@@ -4356,7 +4425,7 @@ Ext.onReady( function() {
                     for (var i = 0, item; i < chart.series.items.length; i++) {
                         item = chart.series.items[i];
 
-                        if (item.type === conf.finals.chart.bar) {
+                        if (item.type === conf.finals.chart.client.bar) {
                             item.stacked = true;
                         }
                     }

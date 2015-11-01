@@ -466,4 +466,26 @@ public class ValidationUtils
     {
         return value != null && HEX_COLOR_PATTERN.matcher( value ).matches();
     }
+    
+    /**
+     * Returns a string useful for substitution.
+     * 
+     * @param valueType the value type.
+     * @return the string.
+     */
+    public static String getSubstitutionValue( ValueType valueType )
+    {
+        if ( valueType.isNumeric() || valueType.isBoolean() )
+        {
+            return "1";
+        }
+        else if ( valueType.isDate() )
+        {
+            return "'2000-01-01'";
+        }
+        else
+        {
+            return "'A'";
+        }
+    }
 }

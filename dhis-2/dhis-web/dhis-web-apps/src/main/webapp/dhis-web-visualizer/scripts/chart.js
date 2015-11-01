@@ -673,18 +673,31 @@ Ext.onReady(function() {
 					}
                 },
                 chart: {
-                    series: 'series',
-                    category: 'category',
-                    filter: 'filter',
-                    column: 'column',
-                    stackedcolumn: 'stackedcolumn',
-                    bar: 'bar',
-                    stackedbar: 'stackedbar',
-                    line: 'line',
-                    area: 'area',
-                    pie: 'pie',
-                    radar: 'radar',
-                    gauge: 'gauge'
+                    client: {
+                        series: 'series',
+                        category: 'category',
+                        filter: 'filter',
+                        column: 'column',
+                        stackedcolumn: 'stackedcolumn',
+                        bar: 'bar',
+                        stackedbar: 'stackedbar',
+                        line: 'line',
+                        area: 'area',
+                        pie: 'pie',
+                        radar: 'radar',
+                        gauge: 'gauge'
+                    },
+                    server: {
+                        column: 'COLUMN',
+                        stackedcolumn: 'STACKED_COLUMN',
+                        bar: 'BAR',
+                        stackedbar: 'STACKED_BAR',
+                        line: 'LINE',
+                        area: 'AREA',
+                        pie: 'PIE',
+                        radar: 'RADAR',
+                        gauge: 'GAUGE'
+                    }
                 },
                 data: {
                     domain: 'domain_',
@@ -705,6 +718,36 @@ Ext.onReady(function() {
                     id: 'root'
                 }
             };
+
+            conf.finals.chart.c2s = {};
+            conf.finals.chart.s2c = {};
+
+            (function() {
+                var client = conf.finals.chart.client,
+                    server = conf.finals.chart.server,
+                    c2s = conf.finals.chart.c2s,
+                    s2c = conf.finals.chart.s2c;
+
+                c2s[client.column] = server.column;
+                c2s[client.stackedcolumn] = server.stackedcolumn;
+                c2s[client.bar] = server.bar;
+                c2s[client.stackedbar] = server.stackedbar;
+                c2s[client.line] = server.line;
+                c2s[client.area] = server.area;
+                c2s[client.pie] = server.pie;
+                c2s[client.radar] = server.radar;
+                c2s[client.gauge] = server.gauge;
+
+                s2c[server.column] = client.column;
+                s2c[server.stackedcolumn] = client.stackedcolumn;
+                s2c[server.bar] = client.bar;
+                s2c[server.stackedbar] = client.stackedbar;
+                s2c[server.line] = client.line;
+                s2c[server.area] = client.area;
+                s2c[server.pie] = client.pie;
+                s2c[server.radar] = client.radar;
+                s2c[server.gauge] = client.gauge;
+            })();
 
             dimConf = conf.finals.dimension;
 
@@ -923,7 +966,7 @@ Ext.onReady(function() {
 					getValidatedDimensionArray,
 					validateSpecialCases;
 
-                // type: string ('column') - 'column', 'stackedcolumn', 'bar', 'stackedbar', 'line', 'area', 'pie'
+                // type: string ('COLUMN') - 'COLUMN', 'STACKED_COLUMN', 'BAR', 'STACKED_BAR', 'LINE', 'AREA', 'PIE'
 
                 // columns: [Dimension]
 
@@ -1186,7 +1229,7 @@ Ext.onReady(function() {
 					//config = analytical2layout(config);
 
                     // layout
-                    layout.type = Ext.isString(config.type) ? config.type.toLowerCase() : conf.finals.chart.column;
+                    layout.type = conf.finals.chart.s2c[config.type] || conf.finals.chart.client[config.type] || 'column';
 
                     layout.columns = config.columns;
                     layout.rows = config.rows;
@@ -3318,8 +3361,8 @@ Ext.onReady(function() {
                         text = '',
                         titleFont,
                         titleColor,
-                        isPie = xLayout.type === conf.finals.chart.pie,
-                        isGauge = xLayout.type === conf.finals.chart.gauge;
+                        isPie = xLayout.type === conf.finals.chart.client.pie,
+                        isGauge = xLayout.type === conf.finals.chart.client.gauge;
 
                     if (isPie) {
                         ids.push(columnIds[0]);
@@ -3414,7 +3457,7 @@ Ext.onReady(function() {
                         store = config.store || {},
                         width = app.getCenterRegionWidth(),
                         height = app.getCenterRegionHeight(),
-                        isLineBased = Ext.Array.contains(['line', 'area'], xLayout.type),
+                        isLineBased = Ext.Array.contains(['LINE', 'AREA'], xLayout.type),
                         defaultConfig = {
                             //animate: true,
                             animate: false,
@@ -3507,7 +3550,7 @@ Ext.onReady(function() {
                     for (var i = 0, item; i < chart.series.items.length; i++) {
                         item = chart.series.items[i];
 
-                        if (item.type === conf.finals.chart.column) {
+                        if (item.type === conf.finals.chart.client.column) {
                             item.stacked = true;
                         }
                     }
@@ -3593,7 +3636,7 @@ Ext.onReady(function() {
                     for (var i = 0, item; i < chart.series.items.length; i++) {
                         item = chart.series.items[i];
 
-                        if (item.type === conf.finals.chart.bar) {
+                        if (item.type === conf.finals.chart.client.bar) {
                             item.stacked = true;
                         }
                     }
@@ -4490,7 +4533,7 @@ Ext.onReady(function() {
                     xResponse = service.response.getExtendedResponse(xLayout, response);
 
                     // legend set
-                    if (xLayout.type === 'gauge' && Ext.Array.contains(xLayout.axisObjectNames, ind) && xLayout.objectNameIdsMap[ind].length) {
+                    if (xLayout.type === 'GAUGE' && Ext.Array.contains(xLayout.axisObjectNames, ind) && xLayout.objectNameIdsMap[ind].length) {
                         Ext.Ajax.request({
                             url: ns.core.init.contextPath + '/api/indicators/' + xLayout.objectNameIdsMap[ind][0] + '.json?fields=legendSet[legends[id,name,startValue,endValue,color]]',
                             disableCaching: false,

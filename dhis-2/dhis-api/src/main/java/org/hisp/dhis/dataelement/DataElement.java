@@ -28,13 +28,15 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import com.google.common.collect.Sets;
+import static org.hisp.dhis.dataset.DataSet.NO_EXPIRY;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.common.BaseDimensionalObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
@@ -57,14 +59,13 @@ import org.hisp.dhis.schema.annotation.Property;
 import org.hisp.dhis.schema.annotation.PropertyRange;
 import org.hisp.dhis.util.ObjectUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static org.hisp.dhis.dataset.DataSet.NO_EXPIRY;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.google.common.collect.Sets;
 
 /**
  * A DataElement is a definition (meta-information about) of the entities that
@@ -86,11 +87,6 @@ public class DataElement
     extends BaseDimensionalObject
 {
     public static final String[] I18N_PROPERTIES = { "name", "shortName", "description", "formName" };
-
-    /**
-     * Determines if a de-serialized file is compatible with this class.
-     */
-    private static final long serialVersionUID = -7131541880444446669L;
 
     /**
      * Data element value type (int, boolean, etc)
@@ -223,15 +219,6 @@ public class DataElement
     }
 
     /**
-     * Indicates whether the value type of this data element is date.
-     */
-    public boolean isDateType()
-    {
-        // TODO optimize when using persisted valueType
-        return ValueType.DATE == getValueType() || ValueType.DATETIME == getValueType();
-    }
-
-    /**
      * Indicates whether the value type of this data element is a file (externally stored resource)
      */
     public boolean isFileType()
@@ -319,7 +306,7 @@ public class DataElement
      */
     public Set<PeriodType> getPeriodTypes()
     {
-        return Sets.newHashSet( dataSets ).stream().map( dataSet -> dataSet.getPeriodType() ).collect( Collectors.toSet() );
+        return Sets.newHashSet( dataSets ).stream().map( DataSet::getPeriodType ).collect( Collectors.toSet() );
     }
 
     /**
@@ -430,14 +417,6 @@ public class DataElement
     }
 
     /**
-     * Returns the domain type, or the default domain type if it does not exist.
-     */
-    public String getDomainTypeNullSafe()
-    {
-        return domainType != null ? domainType.getValue() : DataElementDomain.AGGREGATE.getValue();
-    }
-
-    /**
      * Returns the form name, or the name if it does not exist.
      */
     public String getFormNameFallback()
@@ -445,8 +424,8 @@ public class DataElement
         return formName != null && !formName.isEmpty() ? getDisplayFormName() : getDisplayName();
     }
 
-    @JsonView( { DetailedView.class, DimensionalView.class } )
     @JsonProperty
+    @JsonView( { DetailedView.class, DimensionalView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getDisplayFormName()
     {

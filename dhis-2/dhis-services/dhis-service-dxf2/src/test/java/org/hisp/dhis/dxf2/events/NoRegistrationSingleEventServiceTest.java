@@ -133,7 +133,7 @@ public class NoRegistrationSingleEventServiceTest
     {
         Event event = createEvent( programA.getUid(), organisationUnitA.getUid() );
 
-        ImportSummary importSummary = eventService.addEvent( event );
+        ImportSummary importSummary = eventService.addEvent( event, null );
         assertEquals( ImportStatus.SUCCESS, importSummary.getStatus() );
         assertNotNull( importSummary.getReference() );
 
@@ -148,7 +148,7 @@ public class NoRegistrationSingleEventServiceTest
     {
         Event event = createEvent( programA.getUid(), organisationUnitA.getUid() );
 
-        ImportSummary importSummary = eventService.addEvent( event );
+        ImportSummary importSummary = eventService.addEvent( event, null );
         assertEquals( ImportStatus.SUCCESS, importSummary.getStatus() );
         assertNotNull( importSummary.getReference() );
 
@@ -159,7 +159,7 @@ public class NoRegistrationSingleEventServiceTest
     public void testSaveEvent()
     {
         Event event = createEvent( programA.getUid(), organisationUnitA.getUid() );
-        ImportSummary importSummary = eventService.addEvent( event );
+        ImportSummary importSummary = eventService.addEvent( event, null );
         assertEquals( ImportStatus.SUCCESS, importSummary.getStatus() );
         assertEquals( 0, importSummary.getConflicts().size() );
         assertNotNull( importSummary.getReference() );
@@ -174,7 +174,7 @@ public class NoRegistrationSingleEventServiceTest
     {
         Event event = createEvent( programA.getUid(), organisationUnitA.getUid() );
 
-        ImportSummary importSummary = eventService.addEvent( event );
+        ImportSummary importSummary = eventService.addEvent( event, null );
 
         assertEquals( ImportStatus.SUCCESS, importSummary.getStatus() );
         assertNotNull( importSummary.getReference() );
@@ -193,13 +193,13 @@ public class NoRegistrationSingleEventServiceTest
     {
         Event event = createEvent( programA.getUid(), organisationUnitA.getUid() );
 
-        ImportSummary importSummary = eventService.addEvent( event );
+        ImportSummary importSummary = eventService.addEvent( event, null );
         assertEquals( ImportStatus.SUCCESS, importSummary.getStatus() );
         assertNotNull( importSummary.getReference() );
 
         event = eventService.getEvent( importSummary.getReference() );
         assertNotNull( event );
-        eventService.deleteEvent( event );
+        eventService.deleteEvent( event.getEvent() );
         event = eventService.getEvent( importSummary.getReference() );
         assertNull( event );
     }

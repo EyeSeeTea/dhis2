@@ -35,6 +35,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.security.acl.AccessStringHelper;
+import org.hisp.dhis.analytics.AnalyticsFavoriteType;
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
@@ -61,11 +62,6 @@ import java.util.List;
 public class Interpretation
     extends BaseIdentifiableObject
 {
-    public static final String TYPE_CHART = "chart";
-    public static final String TYPE_MAP = "map";
-    public static final String TYPE_REPORT_TABLE = "reportTable";
-    public static final String TYPE_DATASET_REPORT = "dataSetReport";
-
     private Chart chart;
 
     private Map map;
@@ -146,23 +142,23 @@ public class Interpretation
 
     @JsonProperty
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String getType()
+    public AnalyticsFavoriteType getType()
     {
         if ( chart != null )
         {
-            return TYPE_CHART;
+            return AnalyticsFavoriteType.CHART;
         }
         else if ( map != null )
         {
-            return TYPE_MAP;
+            return AnalyticsFavoriteType.MAP;
         }
         else if ( reportTable != null )
         {
-            return TYPE_REPORT_TABLE;
+            return AnalyticsFavoriteType.REPORT_TABLE;
         }
         else if ( dataSet != null )
         {
-            return TYPE_DATASET_REPORT;
+            return AnalyticsFavoriteType.DATASET_REPORT;
         }
 
         return null;

@@ -28,13 +28,18 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.io.IOException;
+import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.configuration.Configuration;
 import org.hisp.dhis.configuration.ConfigurationService;
 import org.hisp.dhis.dataelement.DataElementGroup;
+import org.hisp.dhis.dxf2.render.RenderService;
 import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
@@ -48,7 +53,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -69,10 +74,19 @@ public class ConfigurationController
     @Autowired
     private PeriodService periodService;
 
+    @Autowired
+    private RenderService renderService;
+
     // -------------------------------------------------------------------------
     // Resources
     // -------------------------------------------------------------------------
 
+    @RequestMapping( method = RequestMethod.GET )
+    public String getConfiguration( Model model, HttpServletRequest request )
+    {
+        return setModel( model, configurationService.getConfiguration() );
+    }
+    
     @PreAuthorize( "hasRole('ALL') or hasRole('F_SYSTEM_SETTING')" )
     @ResponseStatus( value = HttpStatus.OK )
     @RequestMapping( value = "/systemId", method = RequestMethod.GET )
@@ -89,8 +103,8 @@ public class ConfigurationController
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_SYSTEM_SETTING')" )
     @ResponseStatus( value = HttpStatus.OK )
-    @RequestMapping( value = "/feedbackRecipients/{uid}", method = RequestMethod.POST )
-    public void setFeedbackRecipients( @PathVariable( "uid" ) String uid )
+    @RequestMapping( value = "/feedbackRecipients", method = RequestMethod.POST )
+    public void setFeedbackRecipients( @RequestBody String uid )
         throws NotFoundException
     {
         UserGroup group = identifiableObjectManager.get( UserGroup.class, uid );
@@ -107,6 +121,18 @@ public class ConfigurationController
         configurationService.setConfiguration( config );
     }
 
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_SYSTEM_SETTING')" )
+    @ResponseStatus( value = HttpStatus.OK )
+    @RequestMapping( value = "/feedbackRecipients", method = RequestMethod.DELETE )
+    public void setFeedbackRecipients()
+    {
+        Configuration config = configurationService.getConfiguration();
+
+        config.setFeedbackRecipients( null );
+
+        configurationService.setConfiguration( config );
+    }
+
     @RequestMapping( value = "/offlineOrganisationUnitLevel", method = RequestMethod.GET )
     public String getOfflineOrganisationUnitLevel( Model model, HttpServletRequest request )
     {
@@ -115,8 +141,8 @@ public class ConfigurationController
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_SYSTEM_SETTING')" )
     @ResponseStatus( value = HttpStatus.OK )
-    @RequestMapping( value = "/offlineOrganisationUnitLevel/{uid}", method = RequestMethod.POST )
-    public void setOfflineOrganisationUnitLevels( @PathVariable( "uid" ) String uid )
+    @RequestMapping( value = "/offlineOrganisationUnitLevel", method = RequestMethod.POST )
+    public void setOfflineOrganisationUnitLevels( @RequestBody String uid )
         throws NotFoundException
     {
         OrganisationUnitLevel organisationUnitLevel = identifiableObjectManager.get( OrganisationUnitLevel.class, uid );
@@ -141,8 +167,8 @@ public class ConfigurationController
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_SYSTEM_SETTING')" )
     @ResponseStatus( value = HttpStatus.OK )
-    @RequestMapping( value = "/infrastructuralIndicators/{uid}", method = RequestMethod.POST )
-    public void setInfrastructuralIndicators( @PathVariable( "uid" ) String uid )
+    @RequestMapping( value = "/infrastructuralIndicators", method = RequestMethod.POST )
+    public void setInfrastructuralIndicators( @RequestBody String uid )
         throws NotFoundException
     {
         IndicatorGroup group = identifiableObjectManager.get( IndicatorGroup.class, uid );
@@ -167,8 +193,8 @@ public class ConfigurationController
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_SYSTEM_SETTING')" )
     @ResponseStatus( value = HttpStatus.OK )
-    @RequestMapping( value = "/infrastructuralDataElements/{uid}", method = RequestMethod.POST )
-    public void setInfrastructuralDataElements( @PathVariable("uid") String uid )
+    @RequestMapping( value = "/infrastructuralDataElements", method = RequestMethod.POST )
+    public void setInfrastructuralDataElements( @RequestBody String uid )
         throws NotFoundException
     {
         DataElementGroup group = identifiableObjectManager.get( DataElementGroup.class, uid );
@@ -196,8 +222,8 @@ public class ConfigurationController
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_SYSTEM_SETTING')" )
     @ResponseStatus( value = HttpStatus.OK )
-    @RequestMapping( value = "/infrastructuralPeriodType/{name}", method = RequestMethod.POST )
-    public void setInfrastructuralPeriodType( @PathVariable( "name" ) String name )
+    @RequestMapping( value = "/infrastructuralPeriodType", method = RequestMethod.POST )
+    public void setInfrastructuralPeriodType( @RequestBody String name )
         throws NotFoundException
     {
         PeriodType periodType = PeriodType.getPeriodTypeByName( name );
@@ -224,8 +250,8 @@ public class ConfigurationController
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_SYSTEM_SETTING')" )
     @ResponseStatus( value = HttpStatus.OK )
-    @RequestMapping( value = "/selfRegistrationRole/{uid}", method = RequestMethod.POST )
-    public void setSelfRegistrationRole( @PathVariable( "uid" ) String uid )
+    @RequestMapping( value = "/selfRegistrationRole", method = RequestMethod.POST )
+    public void setSelfRegistrationRole( @RequestBody String uid )
         throws NotFoundException
     {
         UserAuthorityGroup userGroup = identifiableObjectManager.get( UserAuthorityGroup.class, uid );
@@ -242,7 +268,6 @@ public class ConfigurationController
         configurationService.setConfiguration( config );
     }
 
-    @ResponseStatus( value = HttpStatus.OK )
     @RequestMapping( value = "/selfRegistrationOrgUnit", method = RequestMethod.GET )
     public String getSelfRegistrationOrgUnit( Model model, HttpServletRequest request )
     {
@@ -250,8 +275,8 @@ public class ConfigurationController
     }
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_SYSTEM_SETTING')" )
-    @RequestMapping( value = "/selfRegistrationOrgUnit/{uid}", method = RequestMethod.POST )
-    public void setSelfRegistrationOrgUnit( @PathVariable( "uid" ) String uid )
+    @RequestMapping( value = "/selfRegistrationOrgUnit", method = RequestMethod.POST )
+    public void setSelfRegistrationOrgUnit( @RequestBody String uid )
         throws NotFoundException
     {
         OrganisationUnit orgunit = identifiableObjectManager.get( OrganisationUnit.class, uid );
@@ -270,48 +295,82 @@ public class ConfigurationController
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_SYSTEM_SETTING')" )
     @ResponseStatus( value = HttpStatus.OK )
-    @RequestMapping( value = "/smtpPassword/{password}", method = RequestMethod.POST )
-    public void setSmtpPassword( @PathVariable String password  )
+    @RequestMapping( value = "/smtpPassword", method = RequestMethod.POST )
+    public void setSmtpPassword( @RequestBody String password  )
     {
         Configuration config = configurationService.getConfiguration();
         
-        config.setSmtpPassword( password );
+        config.setSmtpPassword( StringUtils.trimToNull( password ) );
         
         configurationService.setConfiguration( config );
     }    
 
+    @RequestMapping( value = "/remoteServerUrl", method = RequestMethod.GET )
+    public String getRemoteServerUrl( Model model, HttpServletRequest request )
+    {
+        return setModel( model, configurationService.getConfiguration().getRemoteServerUrl() );
+    }
+    
     @PreAuthorize( "hasRole('ALL') or hasRole('F_SYSTEM_SETTING')" )
     @ResponseStatus( value = HttpStatus.OK )
-    @RequestMapping( value = "/remoteServerUrl/{url}", method = RequestMethod.POST )
-    public void setRemoteServerUrl( @PathVariable String url )
+    @RequestMapping( value = "/remoteServerUrl", method = RequestMethod.POST )
+    public void setRemoteServerUrl( @RequestBody String url )
     {
         Configuration config = configurationService.getConfiguration();
         
-        config.setRemoteServerUrl( url );
+        config.setRemoteServerUrl( StringUtils.trimToNull( url ) );
         
         configurationService.setConfiguration( config );
     }
 
+    @RequestMapping( value = "/remoteServerUsername", method = RequestMethod.GET )
+    public String getRemoteServerUsername( Model model, HttpServletRequest request )
+    {
+        return setModel( model, configurationService.getConfiguration().getRemoteServerUsername() );
+    }
+    
     @PreAuthorize( "hasRole('ALL') or hasRole('F_SYSTEM_SETTING')" )
     @ResponseStatus( value = HttpStatus.OK )
-    @RequestMapping( value = "/remoteServerUsername/{username}", method = RequestMethod.POST )
-    public void setRemoteServerUsername( @PathVariable String username )
+    @RequestMapping( value = "/remoteServerUsername", method = RequestMethod.POST )
+    public void setRemoteServerUsername( @RequestBody String username )
     {
         Configuration config = configurationService.getConfiguration();
         
-        config.setRemoteServerUsername( username );
+        config.setRemoteServerUsername( StringUtils.trimToNull( username ) );
         
         configurationService.setConfiguration( config );
     }
     
     @PreAuthorize( "hasRole('ALL') or hasRole('F_SYSTEM_SETTING')" )
     @ResponseStatus( value = HttpStatus.OK )
-    @RequestMapping( value = "/remoteServerPassword/{password}", method = RequestMethod.POST )
-    public void setRemoteServerPassword( @PathVariable String password )
+    @RequestMapping( value = "/remoteServerPassword", method = RequestMethod.POST )
+    public void setRemoteServerPassword( @RequestBody String password )
     {
         Configuration config = configurationService.getConfiguration();
         
-        config.setRemoteServerPassword( password );
+        config.setRemoteServerPassword( StringUtils.trimToNull( password ) );
+        
+        configurationService.setConfiguration( config );
+    }
+
+    @RequestMapping( value = "/corsWhitelist", method = RequestMethod.GET, produces = "application/json" )
+    public String getCorsWhitelist( Model model, HttpServletRequest request )
+    {
+        return setModel( model, configurationService.getConfiguration().getCorsWhitelist() );
+    }
+    
+    @SuppressWarnings("unchecked")
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_SYSTEM_SETTING')" )
+    @ResponseStatus( value = HttpStatus.OK )
+    @RequestMapping( value = "/corsWhitelist", method = RequestMethod.POST, consumes = "application/json" )
+    public void setCorsWhitelist( @RequestBody String input )
+        throws IOException
+    {
+        Set<String> corsWhitelist = renderService.fromJson( input, Set.class );
+        
+        Configuration config = configurationService.getConfiguration();
+        
+        config.setCorsWhitelist( corsWhitelist );
         
         configurationService.setConfiguration( config );
     }
@@ -323,7 +382,6 @@ public class ConfigurationController
     private String setModel( Model model, Object entity )
     {
         model.addAttribute( "model", entity );
-        model.addAttribute( "viewClass", "detailed" );
         return "config";
     }
 }

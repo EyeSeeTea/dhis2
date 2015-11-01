@@ -49,7 +49,7 @@ public class InitTableAlteror
 
     @Autowired
     private StatementBuilder statementBuilder;
-    
+
     // -------------------------------------------------------------------------
     // Execute
     // -------------------------------------------------------------------------
@@ -79,6 +79,9 @@ public class InitTableAlteror
         executeSql( "ALTER TABLE program ALTER COLUMN \"type\" TYPE varchar(255);" );
         executeSql( "update program set \"type\"='WITH_REGISTRATION' where type='1' or type='2'" );
         executeSql( "update program set \"type\"='WITHOUT_REGISTRATION' where type='3'" );
+
+        executeSql( "alter table programstage rename column irregular to repeatable" );
+        executeSql( "update programstage set repeatable=false where repeatable is null" );
     }
 
     // -------------------------------------------------------------------------
@@ -92,6 +95,8 @@ public class InitTableAlteror
         executeSql( "update programinstance set status='ACTIVE' where status='0'" );
         executeSql( "update programinstance set status='COMPLETED' where status='1'" );
         executeSql( "update programinstance set status='CANCELLED' where status='2'" );
+
+        executeSql( "update programinstance set status='ACTIVE' where status is null" );
     }
 
     private void updateValidationRuleEnums()
@@ -135,6 +140,8 @@ public class InitTableAlteror
         executeSql( "update dataelement set aggregationtype='NONE' where aggregationtype='none'" );
         executeSql( "update dataelement set aggregationtype='DEFAULT' where aggregationtype='default'" );
         executeSql( "update dataelement set aggregationtype='CUSTOM' where aggregationtype='custom'" );
+
+        executeSql( "update dataelement set aggregationtype='SUM' where aggregationtype is null" );
     }
 
     private void updateValueTypes()
@@ -166,6 +173,8 @@ public class InitTableAlteror
         executeSql( "update dataelement set valuetype='TRUE_ONLY' where valuetype='trueOnly'" );
         executeSql( "update dataelement set valuetype='USERNAME' where valuetype='username'" );
 
+        executeSql( "update dataelement set valuetype='NUMBER' where valuetype is null" );
+
         executeSql( "update trackedentityattribute set valuetype='TEXT' where valuetype='string'" );
         executeSql( "update trackedentityattribute set valuetype='PHONE_NUMBER' where valuetype='phoneNumber'" );
         executeSql( "update trackedentityattribute set valuetype='EMAIL' where valuetype='email'" );
@@ -175,9 +184,13 @@ public class InitTableAlteror
         executeSql( "update trackedentityattribute set valuetype='BOOLEAN' where valuetype='bool'" );
         executeSql( "update trackedentityattribute set valuetype='TRUE_ONLY' where valuetype='trueOnly'" );
         executeSql( "update trackedentityattribute set valuetype='DATE' where valuetype='date'" );
-        executeSql( "update trackedentityattribute set valuetype='OPTION_SET' where valuetype='optionSet'" );
+        executeSql( "update trackedentityattribute set valuetype='TEXT' where valuetype='optionSet'" );
+        executeSql( "update trackedentityattribute set valuetype='TEXT' where valuetype='OPTION_SET'" );
         executeSql( "update trackedentityattribute set valuetype='TRACKER_ASSOCIATE' where valuetype='trackerAssociate'" );
         executeSql( "update trackedentityattribute set valuetype='USERNAME' where valuetype='users'" );
+        executeSql( "update trackedentityattribute set valuetype='TEXT' where valuetype is null" );
+
+        executeSql( "update optionset set valuetype='TEXT' where valuetype is null" );
     }
 
     private void upgradeProgramStageDataElements()

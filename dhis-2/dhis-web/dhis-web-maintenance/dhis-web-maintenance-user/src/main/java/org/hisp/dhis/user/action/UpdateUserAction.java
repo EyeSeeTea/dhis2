@@ -42,7 +42,6 @@ import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.oust.manager.SelectionTreeManager;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
-import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.util.AttributeUtils;
 import org.hisp.dhis.system.util.LocaleUtils;
 import org.hisp.dhis.user.CurrentUserService;
@@ -52,7 +51,6 @@ import org.hisp.dhis.user.UserCredentials;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupService;
 import org.hisp.dhis.user.UserService;
-import org.hisp.dhis.user.UserSetting;
 import org.hisp.dhis.user.UserSettingService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -115,9 +113,6 @@ public class UpdateUserAction
 
     @Autowired
     private DataElementCategoryService categoryService;
-
-    @Autowired
-    private SystemSettingManager systemSettingManager;
 
     // -------------------------------------------------------------------------
     // Input & Output
@@ -371,8 +366,8 @@ public class UpdateUserAction
         // User settings
         // ---------------------------------------------------------------------
 
-        userSettingService.addOrUpdateUserSetting( new UserSetting( user, UserSettingService.KEY_UI_LOCALE, LocaleUtils.getLocale( localeUi ) ) );
-        userSettingService.addOrUpdateUserSetting( new UserSetting( user, UserSettingService.KEY_DB_LOCALE, LocaleUtils.getLocale( localeDb ) ) );
+        userSettingService.saveUserSetting( UserSettingService.KEY_UI_LOCALE, LocaleUtils.getLocale( localeUi ), user );
+        userSettingService.saveUserSetting( UserSettingService.KEY_DB_LOCALE, LocaleUtils.getLocale( localeDb ), user );
 
         // ---------------------------------------------------------------------
         // User groups

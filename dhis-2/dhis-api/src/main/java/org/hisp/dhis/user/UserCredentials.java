@@ -65,15 +65,9 @@ public class UserCredentials
     extends BaseIdentifiableObject
 {
     /**
-     * Determines if a de-serialized file is compatible with this class.
-     */
-    private static final long serialVersionUID = -8919501679702302098L;
-
-    /**
      * Required and unique.
-     * TODO: This must be renamed before we start using idObjectStore for UserCredentials
      */
-    //private User user;
+    private User userInfo;
 
     /**
      * Required and unique.
@@ -365,7 +359,7 @@ public class UserCredentials
     {
         return username;
     }
-    
+
     /**
      * Sets the last login property to the current date.
      */
@@ -484,14 +478,18 @@ public class UserCredentials
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    @Override
     @JsonProperty
     @JsonView( DetailedView.class )
     @JsonSerialize( as = BaseIdentifiableObject.class )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public User getUser()
+    public User getUserInfo()
     {
-        return super.getUser();
+        return userInfo;
+    }
+
+    public void setUserInfo( User userInfo )
+    {
+        this.userInfo = userInfo;
     }
 
     public String getPassword()

@@ -148,6 +148,12 @@ public class DefaultProgramStageInstanceService
     }
 
     @Override
+    public boolean programStageInstanceExists( String uid )
+    {
+        return programStageInstanceStore.exists( uid );
+    }
+
+    @Override
     public List<ProgramStageInstance> getProgramStageInstances( Collection<ProgramInstance> programInstances,
         EventStatus status )
     {
@@ -170,7 +176,7 @@ public class DefaultProgramStageInstanceService
     }
 
     @Override
-    public Collection<SchedulingProgramObject> getSendMesssageEvents()
+    public Collection<SchedulingProgramObject> getSendMessageEvents()
     {
         return programStageInstanceStore.getSendMessageEvents();
     }

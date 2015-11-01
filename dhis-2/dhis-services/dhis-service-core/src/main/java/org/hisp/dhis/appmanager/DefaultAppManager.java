@@ -28,29 +28,37 @@ package org.hisp.dhis.appmanager;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
+
+import javax.annotation.PostConstruct;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import org.apache.ant.compress.taskdefs.Unzip;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.datavalue.DefaultDataValueService;
+import org.hisp.dhis.keyjsonvalue.KeyJsonValueService;
+import org.hisp.dhis.setting.Setting;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserCredentials;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.PostConstruct;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author Saptarshi Purkayastha
@@ -65,6 +73,11 @@ public class DefaultAppManager
      */
     private List<App> apps = new ArrayList<>();
 
+    /**
+     * Mapping dataStore-namespaces and apps
+     */
+    private HashMap<String, App> appNamespaces = new HashMap<>();
+
     @PostConstruct
     private void init()
     {
@@ -76,6 +89,9 @@ public class DefaultAppManager
 
     @Autowired
     private CurrentUserService currentUserService;
+
+    @Autowired
+    private KeyJsonValueService keyJsonValueService;
 
     // -------------------------------------------------------------------------
     // AppManagerService implementation
@@ -117,53 +133,96 @@ public class DefaultAppManager
     }
 
     @Override
-    public void installApp( File file, String fileName, String rootPath )
-        throws IOException
+    public AppStatus installApp( File file, String fileName, String rootPath )
     {
-        ZipFile zip = new ZipFile( file );
-        ZipEntry entry = zip.getEntry( "manifest.webapp" );
-
-        InputStream inputStream = zip.getInputStream( entry );
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure( DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false );
-
-        App app = mapper.readValue( inputStream, App.class );
-
-        // ---------------------------------------------------------------------
-        // Delete if app is already installed
-        // ---------------------------------------------------------------------
-
-        if ( getApps().contains( app ) )
+        try
         {
-            String folderPath = getAppFolderPath() + File.separator + app.getFolderName();
-            FileUtils.forceDelete( new File( folderPath ) );
-        }
 
-        String dest = getAppFolderPath() + File.separator + fileName.substring( 0, fileName.lastIndexOf( '.' ) );
-        Unzip unzip = new Unzip();
-        unzip.setSrc( file );
-        unzip.setDest( new File( dest ) );
-        unzip.execute();
+            // ---------------------------------------------------------------------
+            // Parse zip file and it's manifest.webapp file.
+            // ---------------------------------------------------------------------
 
-        // ---------------------------------------------------------------------
-        // Set dhis server location
-        // ---------------------------------------------------------------------
+            ZipFile zip = new ZipFile( file );
 
-        File updateManifest = new File( dest + File.separator + "manifest.webapp" );
-        App installedApp = mapper.readValue( updateManifest, App.class );
+            ZipEntry entry = zip.getEntry( "manifest.webapp" );
+            InputStream inputStream = zip.getInputStream( entry );
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.configure( DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false );
 
-        if ( installedApp.getActivities() != null && installedApp.getActivities().getDhis() != null )
-        {
-            if ( "*".equals( installedApp.getActivities().getDhis().getHref() ) )
+            App app = mapper.readValue( inputStream, App.class );
+
+            // ---------------------------------------------------------------------
+            // Check for namespace and if it's already taken by another app
+            // ---------------------------------------------------------------------
+
+            String appNamespace = app.getActivities().getDhis().getNamespace();
+            if ( appNamespace != null && (this.appNamespaces.containsKey( appNamespace ) &&
+                !app.equals( appNamespaces.get( appNamespace ) )) )
             {
-                installedApp.getActivities().getDhis().setHref( rootPath );
-                mapper.writeValue( updateManifest, installedApp );
+                zip.close();
+                return AppStatus.NAMESPACE_TAKEN;
             }
+
+            // ---------------------------------------------------------------------
+            // Delete if app is already installed.
+            // Assuming app-update, so no data is deleted.
+            // ---------------------------------------------------------------------
+
+            deleteApp( app.getName(), false );
+
+            // ---------------------------------------------------------------------
+            // Unzip the app
+            // ---------------------------------------------------------------------
+
+            String dest = getAppFolderPath() + File.separator + fileName.substring( 0, fileName.lastIndexOf( '.' ) );
+            Unzip unzip = new Unzip();
+            unzip.setSrc( file );
+            unzip.setDest( new File( dest ) );
+            unzip.execute();
+
+            // ---------------------------------------------------------------------
+            // Set dhis server location
+            // ---------------------------------------------------------------------
+
+            File updateManifest = new File( dest + File.separator + "manifest.webapp" );
+            App installedApp = mapper.readValue( updateManifest, App.class );
+
+            if ( installedApp.getActivities() != null && installedApp.getActivities().getDhis() != null )
+            {
+                if ( "*".equals( installedApp.getActivities().getDhis().getHref() ) )
+                {
+                    installedApp.getActivities().getDhis().setHref( rootPath );
+                    mapper.writeValue( updateManifest, installedApp );
+                }
+            }
+
+            // ---------------------------------------------------------------------
+            // Installation complete. Closing zip, reloading apps and return OK
+            // ---------------------------------------------------------------------
+
+            zip.close();
+
+            reloadApps();
+
+            return AppStatus.OK;
+
         }
-
-        zip.close();
-
-        reloadApps(); // Reload app state
+        catch ( ZipException e )
+        {
+            return AppStatus.INVALID_ZIP_FORMAT;
+        }
+        catch ( JsonParseException e )
+        {
+            return AppStatus.INVALID_MANIFEST_JSON;
+        }
+        catch ( JsonMappingException e )
+        {
+            return AppStatus.INVALID_MANIFEST_JSON;
+        }
+        catch ( IOException e )
+        {
+            return AppStatus.INSTALLATION_FAILED;
+        }
     }
 
     @Override
@@ -181,7 +240,7 @@ public class DefaultAppManager
     }
 
     @Override
-    public boolean deleteApp( String name )
+    public boolean deleteApp( String name, boolean deleteAppData )
     {
         for ( App app : getApps() )
         {
@@ -191,6 +250,17 @@ public class DefaultAppManager
                 {
                     String folderPath = getAppFolderPath() + File.separator + app.getFolderName();
                     FileUtils.forceDelete( new File( folderPath ) );
+
+                    // If deleteAppData is true and a namespace associated with the app exists, delete it.
+                    if ( deleteAppData && appNamespaces.containsValue( app ) )
+                    {
+                        appNamespaces.forEach( ( namespace, app1 ) -> {
+                            if ( app1 == app )
+                            {
+                                keyJsonValueService.deleteNamespace( namespace );
+                            }
+                        } );
+                    }
 
                     return true;
                 }
@@ -212,7 +282,7 @@ public class DefaultAppManager
     @Override
     public String getAppFolderPath()
     {
-        return StringUtils.trimToNull( (String) appSettingManager.getSystemSetting( KEY_APP_FOLDER_PATH ) );
+        return StringUtils.trimToNull( (String) appSettingManager.getSystemSetting( Setting.APP_FOLDER_PATH ) );
     }
 
     @Override
@@ -234,31 +304,31 @@ public class DefaultAppManager
             }
         }
 
-        appSettingManager.saveSystemSetting( KEY_APP_FOLDER_PATH, appFolderPath );
+        appSettingManager.saveSystemSetting( Setting.APP_FOLDER_PATH, appFolderPath );
     }
 
     @Override
     public String getAppBaseUrl()
     {
-        return StringUtils.trimToNull( (String) appSettingManager.getSystemSetting( KEY_APP_BASE_URL ) );
+        return StringUtils.trimToNull( (String) appSettingManager.getSystemSetting( Setting.APP_BASE_URL ) );
     }
 
     @Override
     public void setAppBaseUrl( String appBaseUrl )
     {
-        appSettingManager.saveSystemSetting( KEY_APP_BASE_URL, appBaseUrl );
+        appSettingManager.saveSystemSetting( Setting.APP_BASE_URL, appBaseUrl );
     }
 
     @Override
     public String getAppStoreUrl()
     {
-        return StringUtils.trimToNull( (String) appSettingManager.getSystemSetting( KEY_APP_STORE_URL, DEFAULT_APP_STORE_URL ) );
+        return StringUtils.trimToNull( (String) appSettingManager.getSystemSetting( Setting.APP_STORE_URL ) );
     }
 
     @Override
     public void setAppStoreUrl( String appStoreUrl )
     {
-        appSettingManager.saveSystemSetting( KEY_APP_STORE_URL, appStoreUrl );
+        appSettingManager.saveSystemSetting( Setting.APP_STORE_URL, appStoreUrl );
     }
 
     // -------------------------------------------------------------------------
@@ -272,6 +342,7 @@ public class DefaultAppManager
     public void reloadApps()
     {
         List<App> appList = new ArrayList<>();
+        HashMap<String, App> appNamespaces = new HashMap<>();
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure( DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false );
 
@@ -296,6 +367,13 @@ public class DefaultAppManager
                                 App app = mapper.readValue( appManifest, App.class );
                                 app.setFolderName( folder.getName() );
                                 appList.add( app );
+
+                                // Add namespace
+                                String appNamespace = app.getActivities().getDhis().getNamespace();
+                                if ( appNamespace != null )
+                                {
+                                    appNamespaces.put( appNamespace, app );
+                                }
                             }
                             catch ( IOException ex )
                             {
@@ -308,6 +386,7 @@ public class DefaultAppManager
         }
 
         this.apps = appList;
+        this.appNamespaces = appNamespaces;
 
         log.info( "Detected apps: " + apps );
     }
@@ -331,5 +410,11 @@ public class DefaultAppManager
         return userCredentials.getAllAuthorities().contains( "ALL" ) ||
             userCredentials.getAllAuthorities().contains( "M_dhis-web-maintenance-appmanager" ) ||
             userCredentials.getAllAuthorities().contains( "See " + app.getName().trim() );
+    }
+
+    @Override
+    public App getAppByNamespace( String namespace )
+    {
+        return appNamespaces.get( namespace );
     }
 }

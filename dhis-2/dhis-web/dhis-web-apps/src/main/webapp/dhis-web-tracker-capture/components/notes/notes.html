@@ -21,24 +21,25 @@
     <div ng-show="notesWidget.expand" class="panel-body dashboard-widget-container">
         <div ng-show="showNotesDiv">
             <div ng-show="!selectedEnrollment" class="alert alert-danger">{{'not_yet_enrolled_note'| translate}}</div>
-            <div ng-show='selectedEnrollment' class='remove-default-padding overflow-ellipsis'>
-                <textarea class="form-control" rows="3" ng-model="note" placeholder="{{'add_new_note_here'| translate}}"></textarea> 
-                <div class="vertical-spacing">
-                    <button type="button" 
-                            class="btn btn-primary small-horizonal-spacing"
-                            ng-click="addNote()">
-                        {{'add'| translate}}
-                    </button>        
-                    <button type="button" 
-                            class="btn btn-default small-horizonal-spacing" 
-                            ng-click="clearNote()">
-                        {{'clear'| translate}}
-                    </button>
+            <div ng-show='selectedEnrollment' class='remove-default-padding overflow-ellipsis'>                
+                <div class="add-default-padding">
+                    <textarea class="form-control" rows="3" ng-model="note" placeholder="{{'add_new_note_here'| translate}}"></textarea> 
+                    <div class="vertical-spacing">
+                        <button type="button" 
+                                class="btn btn-primary"
+                                ng-click="addNote()">
+                            {{'add'| translate}}
+                        </button>        
+                        <button type="button" 
+                                class="btn btn-default small-horizonal-spacing" 
+                                ng-click="clearNote()">
+                            {{'clear'| translate}}
+                        </button>
+                    </div>
                 </div>
-                <div ng-show="!selectedEnrollment.notes" class="alert alert-warning">{{'empty_notes'| translate}}</div> 
                 <table class="table table-striped dhis2-table-hover">
                     <tr ng-repeat="note in selectedEnrollment.notes| filter:noteSearchText">
-                        <td>
+                        <td class="add-default-left-padding">
                             <d2-pop-over content="note" template="popover.html" details="{{'details'| translate}}">
                                 <div>{{note.value}}</div>
                             </d2-pop-over>
@@ -52,6 +53,7 @@
                     </tr>
                 </table>
             </div>
+            <div ng-show="selectedEnrollment && !selectedEnrollment.notes" class="alert alert-warning">{{'no_notes_exist'| translate}}</div> 
         </div>
         <div ng-show="showMessagingDiv">
             <div class="alert alert-warning">{{'under_construction'| translate}}</div> 

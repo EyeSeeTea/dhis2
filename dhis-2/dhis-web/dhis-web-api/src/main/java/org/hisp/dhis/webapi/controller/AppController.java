@@ -28,16 +28,8 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.appmanager.App;
 import org.hisp.dhis.appmanager.AppManager;
@@ -46,6 +38,7 @@ import org.hisp.dhis.dxf2.render.RenderService;
 import org.hisp.dhis.dxf2.webmessage.WebMessageException;
 import org.hisp.dhis.external.location.LocationManager;
 import org.hisp.dhis.hibernate.exception.ReadAccessDeniedException;
+import org.hisp.dhis.setting.Setting;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.hisp.dhis.webapi.utils.WebMessageUtils;
@@ -57,17 +50,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StreamUtils;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Lars Helge Overland
@@ -90,52 +84,59 @@ public class AppController
     private final ResourceLoader resourceLoader = new DefaultResourceLoader();
 
     @RequestMapping( method = RequestMethod.GET, produces = ContextUtils.CONTENT_TYPE_JSON )
-    public void getApps( @RequestParam(required=false) String key, HttpServletResponse response )
+    public void getApps( @RequestParam( required = false ) String key, HttpServletResponse response )
         throws IOException
     {
         List<App> apps = new ArrayList<>();
-        
+
         if ( key != null )
         {
             App app = appManager.getApp( key );
-            
+
             if ( app == null )
             {
                 response.sendError( HttpServletResponse.SC_NOT_FOUND );
                 return;
             }
-            
+
             apps.add( app );
         }
         else
         {
             apps = appManager.getApps();
         }
-        
+
         renderService.toJson( response.getOutputStream(), apps );
     }
 
     @RequestMapping( method = RequestMethod.POST )
     @ResponseStatus( HttpStatus.NO_CONTENT )
     @PreAuthorize( "hasRole('ALL') or hasRole('M_dhis-web-maintenance-appmanager')" )
-    public void installApp( @RequestParam( "file" ) MultipartFile file, HttpServletRequest request, HttpServletResponse response ) throws IOException, WebMessageException
+    public void installApp( @RequestParam( "file" ) MultipartFile file, HttpServletRequest request,
+        HttpServletResponse response )
+        throws IOException, WebMessageException
     {
         File tempFile = File.createTempFile( "IMPORT_", "_ZIP" );
         file.transferTo( tempFile );
 
         String contextPath = ContextUtils.getContextPath( request );
 
-        try
+        switch ( appManager.installApp( tempFile, file.getOriginalFilename(), contextPath ) )
         {
-            appManager.installApp( tempFile, file.getOriginalFilename(), contextPath );
-        }
-        catch ( JsonParseException ex )
-        {
-            throw new WebMessageException( WebMessageUtils.conflict( "Invalid JSON in app manifest file." ) );
-        }
-        catch ( IOException ex )
-        {
-            throw new WebMessageException( WebMessageUtils.conflict( "App could not not be installed on file system, check permissions" ) );
+        case OK:
+            break;
+        case NAMESPACE_TAKEN:
+            throw new WebMessageException(
+                WebMessageUtils.conflict( "The namespace defined in manifest.webapp is already protected." ) );
+        case INVALID_ZIP_FORMAT:
+            throw new WebMessageException(
+                WebMessageUtils.unprocessableEntity( "Zip-file could not be read." ) );
+        case INVALID_MANIFEST_JSON:
+            throw new WebMessageException(
+                WebMessageUtils.conflict( "Invalid JSON in app manifest file." ) );
+        case INSTALLATION_FAILED:
+            throw new WebMessageException(
+                WebMessageUtils.conflict( "App could not be installed on file system, check permissions." ) );
         }
     }
 
@@ -148,7 +149,8 @@ public class AppController
     }
 
     @RequestMapping( value = "/{app}/**", method = RequestMethod.GET )
-    public void renderApp( @PathVariable( "app" ) String app, HttpServletRequest request, HttpServletResponse response ) throws IOException
+    public void renderApp( @PathVariable( "app" ) String app, HttpServletRequest request, HttpServletResponse response )
+        throws IOException
     {
         Iterable<Resource> locations = Lists.newArrayList(
             resourceLoader.getResource( "file:" + appManager.getAppFolderPath() + "/" + app + "/" ),
@@ -214,14 +216,17 @@ public class AppController
 
     @RequestMapping( value = "/{app}", method = RequestMethod.DELETE )
     @PreAuthorize( "hasRole('ALL') or hasRole('M_dhis-web-maintenance-appmanager')" )
-    public void deleteApp( @PathVariable( "app" ) String app, HttpServletRequest request, HttpServletResponse response ) throws WebMessageException
+    public void deleteApp( @PathVariable( "app" ) String app,
+        @RequestParam( value = "deleteappdata", required = false, defaultValue = "false" ) boolean deleteAppData,
+        HttpServletRequest request, HttpServletResponse response )
+        throws WebMessageException
     {
         if ( !appManager.exists( app ) )
         {
             throw new WebMessageException( WebMessageUtils.notFound( "App does not exist: " + app ) );
         }
 
-        if ( !appManager.deleteApp( app ) )
+        if ( !appManager.deleteApp( app, deleteAppData ) )
         {
             throw new WebMessageException( WebMessageUtils.conflict( "There was an error deleting app: " + app ) );
         }
@@ -230,7 +235,8 @@ public class AppController
     @SuppressWarnings( "unchecked" )
     @RequestMapping( value = "/config", method = RequestMethod.POST, consumes = ContextUtils.CONTENT_TYPE_JSON )
     @PreAuthorize( "hasRole('ALL') or hasRole('M_dhis-web-maintenance-appmanager')" )
-    public void setConfig( HttpServletRequest request, HttpServletResponse response ) throws IOException, WebMessageException
+    public void setConfig( HttpServletRequest request, HttpServletResponse response )
+        throws IOException, WebMessageException
     {
         Map<String, String> config = renderService.fromJson( request.getInputStream(), Map.class );
 
@@ -239,9 +245,9 @@ public class AppController
             throw new WebMessageException( WebMessageUtils.conflict( "No config specified" ) );
         }
 
-        String appBaseUrl = StringUtils.trimToNull( config.get( AppManager.KEY_APP_BASE_URL ) );
-        String appFolderPath = StringUtils.trimToNull( config.get( AppManager.KEY_APP_FOLDER_PATH ) );
-        String appStoreUrl = StringUtils.trimToNull( config.get( AppManager.KEY_APP_STORE_URL ) );
+        String appBaseUrl = StringUtils.trimToNull( config.get( Setting.APP_BASE_URL.getName() ) );
+        String appFolderPath = StringUtils.trimToNull( config.get( Setting.APP_FOLDER_PATH.getName() ) );
+        String appStoreUrl = StringUtils.trimToNull( config.get( Setting.APP_STORE_URL.getName() ) );
 
         if ( appBaseUrl != null )
         {
@@ -276,7 +282,8 @@ public class AppController
     // Helpers
     //--------------------------------------------------------------------------
 
-    private Resource findResource( Iterable<Resource> locations, String resourceName ) throws IOException
+    private Resource findResource( Iterable<Resource> locations, String resourceName )
+        throws IOException
     {
         for ( Resource location : locations )
         {

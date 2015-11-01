@@ -38,6 +38,7 @@ import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.i18n.locale.LocaleManager;
 import org.hisp.dhis.message.MessageSender;
 import org.hisp.dhis.period.Cal;
+import org.hisp.dhis.setting.Setting;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.util.ValidationUtils;
 import org.hisp.dhis.system.velocity.VelocityManager;
@@ -163,13 +164,13 @@ public class DefaultSecurityService
             return "email_not_configured_for_system";
         }
 
-        if ( credentials == null || credentials.getUser() == null )
+        if ( credentials == null || credentials.getUserInfo() == null )
         {
             log.warn( "Could not send restore/invite message as user is null: " + credentials );
             return "no_user_credentials";
         }
 
-        if ( credentials.getUser().getEmail() == null || !ValidationUtils.emailIsValid( credentials.getUser().getEmail() ) )
+        if ( credentials.getUserInfo().getEmail() == null || !ValidationUtils.emailIsValid( credentials.getUserInfo().getEmail() ) )
         {
             log.warn( "Could not send restore/invite message as user has no email or email is invalid" );
             return "user_does_not_have_valid_email";
@@ -217,7 +218,7 @@ public class DefaultSecurityService
 
         RestoreType restoreType = restoreOptions.getRestoreType();
 
-        String applicationTitle = (String) systemSettingManager.getSystemSetting( SystemSettingManager.KEY_APPLICATION_TITLE );
+        String applicationTitle = (String) systemSettingManager.getSystemSetting( Setting.APPLICATION_TITLE );
 
         if ( applicationTitle == null || applicationTitle.isEmpty() )
         {
@@ -227,7 +228,7 @@ public class DefaultSecurityService
         String[] result = initRestore( credentials, restoreOptions );
 
         Set<User> users = new HashSet<>();
-        users.add( credentials.getUser() );
+        users.add( credentials.getUserInfo() );
 
         Map<String, Object> vars = new HashMap<>();
         vars.put( "applicationTitle", applicationTitle );
@@ -236,8 +237,8 @@ public class DefaultSecurityService
         vars.put( "code", result[1] );
         vars.put( "username", credentials.getUsername() );
 
-        User user = credentials.getUser();
-        Locale locale = (Locale) userSettingService.getUserSettingValue( user, UserSettingService.KEY_UI_LOCALE, LocaleManager.DHIS_STANDARD_LOCALE );
+        User user = credentials.getUserInfo();
+        Locale locale = (Locale) userSettingService.getUserSetting( UserSettingService.KEY_UI_LOCALE, LocaleManager.DEFAULT_LOCALE, user );
 
         I18n i18n = i18nManager.getI18n( locale );
         vars.put( "i18n", i18n );
@@ -500,7 +501,7 @@ public class DefaultSecurityService
     @Override
     public boolean canView( String type )
     {
-        boolean requireAddToView = (Boolean) systemSettingManager.getSystemSetting( SystemSettingManager.KEY_REQUIRE_ADD_TO_VIEW, false );
+        boolean requireAddToView = (Boolean) systemSettingManager.getSystemSetting( Setting.REQUIRE_ADD_TO_VIEW );
 
         return !requireAddToView || (canCreatePrivate( type ) || canCreatePublic( type ));
     }
@@ -552,13 +553,18 @@ public class DefaultSecurityService
     @Override
     public boolean hasAnyAuthority( String... authorities )
     {
-        UserCredentials userCredentials = currentUserService.getCurrentUser().getUserCredentials();
-
-        for ( String authority : authorities )
+        User user = currentUserService.getCurrentUser();
+        
+        if ( user != null && user.getUserCredentials() != null )
         {
-            if ( userCredentials.isAuthorized( authority ) )
+            UserCredentials userCredentials = user.getUserCredentials();
+    
+            for ( String authority : authorities )
             {
-                return true;
+                if ( userCredentials.isAuthorized( authority ) )
+                {
+                    return true;
+                }
             }
         }
 

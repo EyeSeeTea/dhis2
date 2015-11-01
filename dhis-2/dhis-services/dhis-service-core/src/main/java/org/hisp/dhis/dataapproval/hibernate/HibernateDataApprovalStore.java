@@ -37,7 +37,6 @@ import static org.hisp.dhis.dataapproval.DataApprovalState.UNAPPROVABLE;
 import static org.hisp.dhis.dataapproval.DataApprovalState.UNAPPROVED_ABOVE;
 import static org.hisp.dhis.dataapproval.DataApprovalState.UNAPPROVED_READY;
 import static org.hisp.dhis.dataapproval.DataApprovalState.UNAPPROVED_WAITING;
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_ACCEPTANCE_REQUIRED_FOR_APPROVAL;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -71,6 +70,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.setting.Setting;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.user.CurrentUserService;
@@ -197,9 +197,35 @@ public class HibernateDataApprovalStore
         
         final User user = currentUserService.getCurrentUser();
 
+<<<<<<< TREE
         List<Period> periods;
 
         if ( period.getPeriodType().equals( workflow.getPeriodType() ) )
+=======
+        Set<DataSet> validDataSets = new HashSet<>();
+        
+        for ( DataSet set : dataSets )
+        {
+            if ( set.isApproveData() )
+            {
+                validDataSets.add( set );
+            }
+        }
+
+        if ( CollectionUtils.isEmpty( validDataSets ) )
+        {
+            log.debug( " No valid data sets specified for getting approvals, period " + period.getName()
+                + " user " + ( user == null ? "(null)" : user.getUsername() ) );
+
+            return new ArrayList<>();
+        }
+
+        PeriodType dataSetPeriodType = validDataSets.iterator().next().getPeriodType();
+
+        List<Period> periods = Lists.newArrayList();
+
+        if ( period.getPeriodType().equals( dataSetPeriodType ) )
+>>>>>>> MERGE-SOURCE
         {
             periods = Lists.newArrayList( period );
         }
@@ -223,6 +249,7 @@ public class HibernateDataApprovalStore
             ( CollectionUtils.isEmpty( user.getUserCredentials().getCogsDimensionConstraints() )
             && CollectionUtils.isEmpty( user.getUserCredentials().getCatDimensionConstraints() ) );
 
+<<<<<<< TREE
         boolean isDefaultCombo = attributeOptionCombos != null && attributeOptionCombos.size() == 1
             && categoryService.getDefaultDataElementCategoryOptionCombo().equals( attributeOptionCombos.toArray()[0] );
 
@@ -234,10 +261,51 @@ public class HibernateDataApprovalStore
         }
 
         List<DataApprovalLevel> approvalLevels = workflow.getSortedLevels();
+=======
+        DataElementCategoryCombo defaultCategoryCombo = categoryService.getDefaultDataElementCategoryCombo();
+
+        final String dataSetIds = getCommaDelimitedString( getIdentifiers( validDataSets ) );
+
+        boolean isDefaultCombo = categoryService.getDefaultDataElementCategoryOptionCombo().equals( attributeOptionCombo );
+
+        String categoryComboIds = null;
+
+        if ( isDefaultCombo )
+        {
+            categoryComboIds = Integer.toString( categoryService.getDefaultDataElementCategoryCombo().getId() );
+        }
+        else
+        {
+            Set<Integer> catComboIds = new HashSet<>();
+
+            for ( DataSet ds : validDataSets )
+            {
+                if ( ds.isApproveData() && ( maySeeDefaultCategoryCombo || ds.getCategoryCombo() != defaultCategoryCombo ) )
+                {
+                    catComboIds.add( ds.getCategoryCombo().getId() );
+                }
+            }
+
+            if ( catComboIds.isEmpty() )
+            {
+                log.info( "No dataset categorycombos to check for approval, user " + ( user == null ? "(null)" : user.getUsername() ) + " datasetIds " + dataSetIds );
+
+                return new ArrayList<>();
+            }
+
+            categoryComboIds = TextUtils.getCommaDelimitedString( catComboIds );
+        }
+
+        List<DataApprovalLevel> approvalLevels = dataApprovalLevelService.getAllDataApprovalLevels();
+>>>>>>> MERGE-SOURCE
 
         if ( CollectionUtils.isEmpty( approvalLevels ) )
         {
+<<<<<<< TREE
             log.warn( "No approval levels configured for workflow " + workflow.getName() );
+=======
+            log.info( "No approval levels configured" );
+>>>>>>> MERGE-SOURCE
 
             return new ArrayList<>(); // Unapprovable.
         }
@@ -325,7 +393,7 @@ public class HibernateDataApprovalStore
                     }
                 }
 
-                boolean acceptanceRequiredForApproval = (Boolean) systemSettingManager.getSystemSetting( KEY_ACCEPTANCE_REQUIRED_FOR_APPROVAL, false );
+                boolean acceptanceRequiredForApproval = (Boolean) systemSettingManager.getSystemSetting( Setting.ACCEPTANCE_REQUIRED_FOR_APPROVAL );
 
                 readyBelowSubquery = "not exists (select 1 from _orgunitstructure ous " +
                     "where not exists (select 1 from dataapproval da " +

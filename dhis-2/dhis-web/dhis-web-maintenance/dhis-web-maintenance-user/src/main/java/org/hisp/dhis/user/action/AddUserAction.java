@@ -45,7 +45,6 @@ import org.hisp.dhis.oust.manager.SelectionTreeManager;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.security.RestoreOptions;
 import org.hisp.dhis.security.SecurityService;
-import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.util.AttributeUtils;
 import org.hisp.dhis.system.util.LocaleUtils;
 import org.hisp.dhis.user.CurrentUserService;
@@ -124,9 +123,6 @@ public class AddUserAction
 
     @Autowired
     private DataElementCategoryService categoryService;
-
-    @Autowired
-    private SystemSettingManager systemSettingManager;
 
     // -------------------------------------------------------------------------
     // Input & Output
@@ -289,7 +285,7 @@ public class AddUserAction
         UserCredentials userCredentials = new UserCredentials();
         User user = new User();
 
-        userCredentials.setUser( user );
+        userCredentials.setUserInfo( user );
         user.setUserCredentials( userCredentials );
 
         userCredentials.setUsername( StringUtils.trimToNull( username ) );

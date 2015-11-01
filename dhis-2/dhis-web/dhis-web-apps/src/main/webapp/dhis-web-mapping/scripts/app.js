@@ -9920,6 +9920,11 @@ Ext.onReady( function() {
 				}
 			}
 
+            // remove params from url
+            if (id || session || base) {
+                history.pushState(null, null, '.')
+            }
+
             var initEl = document.getElementById('init');
             initEl.parentNode.removeChild(initEl);
 
@@ -10165,7 +10170,6 @@ Ext.onReady( function() {
                                                 GIS.i18n = dhis2.util.parseJavaProperties(r.responseText);
 
                                                 if (keyUiLocale === defaultKeyUiLocale) {
-                                                    Ext.get('init').update(GIS.i18n.initializing + '..');
                                                     fn();
                                                 }
                                                 else {
@@ -10178,7 +10182,6 @@ Ext.onReady( function() {
                                                             console.log('No translations found for system locale (' + keyUiLocale + ')');
                                                         },
                                                         callback: function() {
-                                                            Ext.get('init').update(GIS.i18n.initializing + '..');
                                                             fn();
                                                         }
                                                     });
@@ -10189,7 +10192,6 @@ Ext.onReady( function() {
                                                     url: 'i18n/i18n_app_' + keyUiLocale + '.properties',
                                                     success: function(r) {
                                                         GIS.i18n = dhis2.util.parseJavaProperties(r.responseText);
-                                                        Ext.get('init').update(GIS.i18n.initializing + '..');
                                                     },
                                                     failure: function() {
                                                         alert('No translations found for system locale (' + keyUiLocale + ') or default locale (' + defaultKeyUiLocale + ').');

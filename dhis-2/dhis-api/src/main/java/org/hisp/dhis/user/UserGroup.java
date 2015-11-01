@@ -61,11 +61,6 @@ public class UserGroup
     public static final String AUTH_ADD_MEMBERS_TO_READ_ONLY_USER_GROUPS = "F_USER_GROUPS_READ_ONLY_ADD_MEMBERS";
 
     /**
-     * Determines if a de-serialized file is compatible with this class.
-     */
-    private static final long serialVersionUID = 347909584755616508L;
-
-    /**
      * Set of related users
      */
     @Scanned
@@ -127,18 +122,11 @@ public class UserGroup
 
     public void updateUsers( Set<User> updates )
     {
-        for ( User user : new HashSet<>( members ) )
-        {
-            if ( !updates.contains( user ) )
-            {
-                removeUser( user );
-            }
-        }
+        new HashSet<>( members ).stream()
+            .filter( user -> !updates.contains( user ) )
+            .forEach( this::removeUser );
 
-        for ( User user : updates )
-        {
-            addUser( user );
-        }
+        updates.forEach( this::addUser );
     }
 
     public void addManagedGroup( UserGroup group )
@@ -155,18 +143,11 @@ public class UserGroup
 
     public void updateManagedGroups( Set<UserGroup> updates )
     {
-        for ( UserGroup group : new HashSet<>( managedGroups ) )
-        {
-            if ( !updates.contains( group ) )
-            {
-                removeManagedGroup( group );
-            }
-        }
+        new HashSet<>( managedGroups ).stream()
+            .filter( group -> !updates.contains( group ) )
+            .forEach( this::removeManagedGroup );
 
-        for ( UserGroup group : updates )
-        {
-            addManagedGroup( group );
-        }
+        updates.forEach( this::addManagedGroup );
     }
 
     // -------------------------------------------------------------------------

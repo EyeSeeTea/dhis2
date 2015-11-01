@@ -123,7 +123,7 @@ public class AddProgramAction
 
     private String incidentDateLabel;
 
-    public void setIncidentDateDescription( String incidentDateLabel )
+    public void setIncidentDateLabel( String incidentDateLabel )
     {
         this.incidentDateLabel = incidentDateLabel;
     }
@@ -342,8 +342,8 @@ public class AddProgramAction
 
             if ( ids[0].equals( TrackedEntityInstance.PREFIX_TRACKED_ENTITY_ATTRIBUTE ) )
             {
-                TrackedEntityAttribute attribute = trackedEntityAttributeService.getTrackedEntityAttribute( Integer
-                    .parseInt( ids[1] ) );
+                TrackedEntityAttribute attribute = trackedEntityAttributeService.getTrackedEntityAttribute(
+                    Integer.parseInt( ids[1] ) );
 
                 ProgramTrackedEntityAttribute programAttribute = new ProgramTrackedEntityAttribute( attribute,
                     personDisplayNames.get( index ), mandatory.get( index ), allowFutureDate.get( index ) );

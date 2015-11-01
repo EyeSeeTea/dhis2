@@ -34,7 +34,7 @@
                 <ul class="dropdown-menu pull-right" role="menu">
                     <li><a href ng-click="showHideWidgets()">{{showHideWidgetsLabel}}</a></li>
                     <li ng-if="userAuthority.canAdministerDashboard"><a href ng-click="saveDashboarLayoutAsDefault()">{{'save_layout_as_default'| translate}}</a></li>
-                    <li><a href ng-click="activiateTEI()">{{selectedTei.inactive ? 'activate_tei' : 'deactivate_tei' | translate}}</a></li>
+                    <li><a href ng-click="activiateTEI()">{{selectedTei.inactive ? 'activate_tei' : 'deactivate_tei' | translate}} {{trackedEntity.name}}</a></li>
                 </ul>
             </div>
         </div>
@@ -61,7 +61,7 @@
             <!-- dashboard bigger widgets end -->
 
             <!-- dashboard smaller widgets begin -->
-            <div ng-class="widgetSize.smaller" sticky disabled-sticky="stickyDisabled">
+            <div ng-class="widgetSize.smaller" sticky offset="50" disabled-sticky="stickyDisabled">
                 <div id="smallerWidget" 
                     d2-sortable 
                     bigger-widgets={{ dashboardWidgets  | filter: {parent: 'biggerWidget'} }} 

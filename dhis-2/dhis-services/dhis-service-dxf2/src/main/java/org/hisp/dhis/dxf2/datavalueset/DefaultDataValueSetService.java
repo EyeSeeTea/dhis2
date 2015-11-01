@@ -30,12 +30,6 @@ package org.hisp.dhis.dxf2.datavalueset;
 
 import static org.apache.commons.lang3.StringUtils.trimToNull;
 import static org.hisp.dhis.common.IdentifiableProperty.UUID;
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_DATA_IMPORT_REQUIRE_ATTRIBUTE_OPTION_COMBO;
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_DATA_IMPORT_REQUIRE_CATEGORY_OPTION_COMBO;
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_DATA_IMPORT_STRICT_ATTRIBUTE_OPTION_COMBOS;
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_DATA_IMPORT_STRICT_CATEGORY_OPTION_COMBOS;
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_DATA_IMPORT_STRICT_ORGANISATION_UNITS;
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_DATA_IMPORT_STRICT_PERIODS;
 import static org.hisp.dhis.system.notification.NotificationLevel.ERROR;
 import static org.hisp.dhis.system.notification.NotificationLevel.INFO;
 import static org.hisp.dhis.system.util.DateUtils.getDefaultDate;
@@ -62,7 +56,6 @@ import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.IdentifiableProperty;
 import org.hisp.dhis.common.IllegalQueryException;
 import org.hisp.dhis.commons.collection.CachingMap;
-import org.hisp.dhis.commons.util.Clock;
 import org.hisp.dhis.commons.util.DebugUtils;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
@@ -70,7 +63,6 @@ import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataset.CompleteDataSetRegistration;
 import org.hisp.dhis.dataset.CompleteDataSetRegistrationService;
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.dxf2.common.IdSchemes;
 import org.hisp.dhis.dxf2.common.ImportOptions;
@@ -94,11 +86,13 @@ import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.scheduling.TaskId;
+import org.hisp.dhis.setting.Setting;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.callable.CategoryOptionComboAclCallable;
 import org.hisp.dhis.system.callable.IdentifiableObjectCallable;
 import org.hisp.dhis.system.callable.PeriodCallable;
 import org.hisp.dhis.system.notification.Notifier;
+import org.hisp.dhis.system.util.Clock;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.ValidationUtils;
 import org.hisp.dhis.user.CurrentUserService;
@@ -121,9 +115,6 @@ public class DefaultDataValueSetService
 
     @Autowired
     private DataElementCategoryService categoryService;
-
-    @Autowired
-    private DataSetService dataSetService;
 
     @Autowired
     private OrganisationUnitService organisationUnitService;
@@ -571,12 +562,12 @@ public class DefaultDataValueSetService
 
         boolean dryRun = dataValueSet.getDryRun() != null ? dataValueSet.getDryRun() : importOptions.isDryRun();
         boolean skipExistingCheck = importOptions.isSkipExistingCheck();        
-        boolean strictPeriods = importOptions.isStrictPeriods() || (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_STRICT_PERIODS, false );
-        boolean strictCategoryOptionCombos = importOptions.isStrictCategoryOptionCombos() || (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_STRICT_CATEGORY_OPTION_COMBOS, false );
-        boolean strictAttrOptionCombos = importOptions.isStrictAttributeOptionCombos() || (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_STRICT_ATTRIBUTE_OPTION_COMBOS, false );
-        boolean strictOrgUnits = importOptions.isStrictOrganisationUnits() || (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_STRICT_ORGANISATION_UNITS, false );
-        boolean requireCategoryOptionCombo = importOptions.isRequireCategoryOptionCombo() || (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_REQUIRE_CATEGORY_OPTION_COMBO, false );
-        boolean requireAttrOptionCombo = importOptions.isRequireAttributeOptionCombo() || (Boolean) systemSettingManager.getSystemSetting( KEY_DATA_IMPORT_REQUIRE_ATTRIBUTE_OPTION_COMBO, false );
+        boolean strictPeriods = importOptions.isStrictPeriods() || (Boolean) systemSettingManager.getSystemSetting( Setting.DATA_IMPORT_STRICT_PERIODS );
+        boolean strictCategoryOptionCombos = importOptions.isStrictCategoryOptionCombos() || (Boolean) systemSettingManager.getSystemSetting( Setting.DATA_IMPORT_STRICT_CATEGORY_OPTION_COMBOS );
+        boolean strictAttrOptionCombos = importOptions.isStrictAttributeOptionCombos() || (Boolean) systemSettingManager.getSystemSetting( Setting.DATA_IMPORT_STRICT_ATTRIBUTE_OPTION_COMBOS );
+        boolean strictOrgUnits = importOptions.isStrictOrganisationUnits() || (Boolean) systemSettingManager.getSystemSetting( Setting.DATA_IMPORT_STRICT_ORGANISATION_UNITS );
+        boolean requireCategoryOptionCombo = importOptions.isRequireCategoryOptionCombo() || (Boolean) systemSettingManager.getSystemSetting( Setting.DATA_IMPORT_REQUIRE_CATEGORY_OPTION_COMBO );
+        boolean requireAttrOptionCombo = importOptions.isRequireAttributeOptionCombo() || (Boolean) systemSettingManager.getSystemSetting( Setting.DATA_IMPORT_REQUIRE_ATTRIBUTE_OPTION_COMBO );
         
         //----------------------------------------------------------------------
         // Create meta-data maps
@@ -712,7 +703,7 @@ public class DefaultDataValueSetService
 
             if ( dataElement == null )
             {
-                summary.getConflicts().add( new ImportConflict( dataValue.getDataElement(), "Data element not found or not acccessible" ) );
+                summary.getConflicts().add( new ImportConflict( dataValue.getDataElement(), "Data element not found or not accessible" ) );
                 continue;
             }
 
@@ -724,7 +715,7 @@ public class DefaultDataValueSetService
             
             if ( orgUnit == null )
             {
-                summary.getConflicts().add( new ImportConflict( dataValue.getOrgUnit(), "Organisation unit not found or not acccessible" ) );
+                summary.getConflicts().add( new ImportConflict( dataValue.getOrgUnit(), "Organisation unit not found or not accessible" ) );
                 continue;
             }
 

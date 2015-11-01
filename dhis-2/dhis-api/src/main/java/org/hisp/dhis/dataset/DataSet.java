@@ -80,11 +80,6 @@ public class DataSet
     public static final int NO_EXPIRY = 0;
 
     /**
-     * Determines if a de-serialized file is compatible with this class.
-     */
-    private static final long serialVersionUID = -2466830446144115499L;
-
-    /**
      * The PeriodType indicating the frequency that this DataSet should be used
      */
     private PeriodType periodType;
@@ -822,32 +817,16 @@ public class DataSet
             }
 
             dataElements.clear();
-
-            for ( DataElement dataElement : dataSet.getDataElements() )
-            {
-                addDataElement( dataElement );
-            }
+            dataSet.getDataElements().forEach( this::addDataElement );
 
             indicators.clear();
-
-            for ( Indicator indicator : dataSet.getIndicators() )
-            {
-                addIndicator( indicator );
-            }
+            dataSet.getIndicators().forEach( this::addIndicator );
 
             compulsoryDataElementOperands.clear();
-
-            for ( DataElementOperand dataElementOperand : dataSet.getCompulsoryDataElementOperands() )
-            {
-                addCompulsoryDataElementOperand( dataElementOperand );
-            }
+            dataSet.getCompulsoryDataElementOperands().forEach( this::addCompulsoryDataElementOperand );
 
             removeAllOrganisationUnits();
-
-            for ( OrganisationUnit organisationUnit : dataSet.getSources() )
-            {
-                addOrganisationUnit( organisationUnit );
-            }
+            dataSet.getSources().forEach( this::addOrganisationUnit );
 
             attributeValues.clear();
             attributeValues.addAll( dataSet.getAttributeValues() );

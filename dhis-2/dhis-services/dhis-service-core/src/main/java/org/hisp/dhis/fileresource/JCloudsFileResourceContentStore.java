@@ -37,15 +37,24 @@ import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.external.location.LocationManager;
 import org.hisp.dhis.hibernate.HibernateConfigurationProvider;
 import org.jclouds.ContextBuilder;
+import org.jclouds.blobstore.BlobRequestSigner;
 import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
+import org.jclouds.blobstore.LocalBlobRequestSigner;
 import org.jclouds.blobstore.domain.Blob;
+import org.jclouds.blobstore.internal.RequestSigningUnsupported;
 import org.jclouds.domain.Credentials;
 import org.jclouds.domain.Location;
 import org.jclouds.filesystem.reference.FilesystemConstants;
+import org.jclouds.http.HttpRequest;
+import org.joda.time.Minutes;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -64,6 +73,8 @@ public class JCloudsFileResourceContentStore
     private static final Log log = LogFactory.getLog( JCloudsFileResourceContentStore.class );
 
     private static final Pattern CONTAINER_NAME_PATTERN = Pattern.compile( "^((?!-)[a-zA-Z0-9-]{1,63}(?<!-))+$" );
+
+    private static final long FIVE_MINUTES_IN_SECONDS = Minutes.minutes( 5 ).toStandardDuration().getStandardSeconds();
 
     private BlobStore blobStore;
     private BlobStoreContext blobStoreContext;
@@ -100,7 +111,7 @@ public class JCloudsFileResourceContentStore
     // Defaults
     // -------------------------------------------------------------------------
 
-    private static final String DEFAULT_CONTAINER = "dhis2-file-store";
+    private static final String DEFAULT_CONTAINER = "files";
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -143,7 +154,7 @@ public class JCloudsFileResourceContentStore
             {
                 log.warn( "Container name '" + container + "' is illegal." +
                     "Standard domain name naming conventions apply (and underscores are not allowed). " +
-                    "Using default container name." );
+                    "Using default container name '" + DEFAULT_CONTAINER + "'." );
             }
 
             container = DEFAULT_CONTAINER;
@@ -170,7 +181,7 @@ public class JCloudsFileResourceContentStore
 
             if ( credentials.identity.isEmpty() || credentials.credential.isEmpty() )
             {
-                log.warn( "AWS S3 store configured with empty credentials, authentication not possible" );
+                log.warn( "AWS S3 store configured with empty credentials, authentication not possible." );
             }
         }
 
@@ -202,6 +213,7 @@ public class JCloudsFileResourceContentStore
     // FileResourceContentStore implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public ByteSource getFileResourceContent( String key )
     {
         final Blob blob = getBlob( key );
@@ -241,9 +253,10 @@ public class JCloudsFileResourceContentStore
         return isEmptyOrFailed ? null : byteSource;
     }
 
-    public String saveFileResourceContent( String key, ByteSource content, long size, String contentMd5 )
+    @Override
+    public String saveFileResourceContent( FileResource fileResource, File file )
     {
-        Blob blob = createBlob( key, content, size, contentMd5 );
+        Blob blob = createBlob( fileResource, file );
 
         if ( blob == null )
         {
@@ -252,12 +265,53 @@ public class JCloudsFileResourceContentStore
 
         putBlob( blob );
 
-        return key;
+        try
+        {
+            Files.deleteIfExists( file.toPath() );
+        }
+        catch ( IOException ioe )
+        {
+            // Intentionally ignored
+            log.warn( "Temporary file '" + file.toPath() + "' could not be deleted.", ioe );
+        }
+
+        return fileResource.getStorageKey();
     }
 
+    @Override
     public void deleteFileResourceContent( String key )
     {
         deleteBlob( key );
+    }
+
+    @Override
+    public boolean fileResourceContentExists( String key )
+    {
+        return blobExists( key );
+    }
+
+    @Override
+    public URI getSignedGetContentUri( String key )
+    {
+        BlobRequestSigner signer = blobStoreContext.getSigner();
+
+        if ( !requestSigningSupported( signer ) )
+        {
+            return null;
+        }
+
+        HttpRequest httpRequest;
+
+        try
+        {
+            httpRequest = signer.signGetBlob( container, key, FIVE_MINUTES_IN_SECONDS );
+        }
+        catch ( UnsupportedOperationException uoe )
+        {
+            return null;
+        }
+
+        return httpRequest.getEndpoint();
     }
 
     // -------------------------------------------------------------------------
@@ -269,6 +323,11 @@ public class JCloudsFileResourceContentStore
         return blobStore.getBlob( container, key );
     }
 
+    private boolean blobExists( String key )
+    {
+        return key != null && blobStore.blobExists( container, key );
+    }
+
     private void deleteBlob( String key )
     {
         blobStore.removeBlob( container, key );
@@ -276,15 +335,40 @@ public class JCloudsFileResourceContentStore
 
     private String putBlob( Blob blob )
     {
-        return blobStore.putBlob( container, blob );
+        String etag = null;
+
+        try
+        {
+            etag = blobStore.putBlob( container, blob );
+        }
+        catch ( RuntimeException rte )
+        {
+            Throwable cause = rte.getCause();
+
+            if ( cause != null && cause instanceof UserPrincipalNotFoundException )
+            {
+                // Intentionally ignored exception which occurs with JClouds on localized
+                // Windows systems while trying to resolve the "Everyone" group.
+                // See https://issues.apache.org/jira/browse/JCLOUDS-1015
+                log.debug( "Ignored UserPrincipalNotFoundException. Workaround for JClouds bug 'JCLOUDS-1015'." );
+            }
+            else
+            {
+                throw rte;
+            }
+        }
+
+        return etag;
     }
 
-    private Blob createBlob( String key, ByteSource content, long size, String contentMd5 )
+    private Blob createBlob( FileResource fileResource, File file )
     {
-        return blobStore.blobBuilder( key )
-            .payload( content )
-            .contentLength( size )
-            .contentMD5( HashCode.fromString( contentMd5 ) )
+        return blobStore.blobBuilder( fileResource.getStorageKey() )
+            .payload( file )
+            .contentLength( fileResource.getContentLength() )
+            .contentMD5( HashCode.fromString( fileResource.getContentMd5() ) )
+            .contentType( fileResource.getContentType() )
+            .contentDisposition( "filename=" + fileResource.getName() )
             .build();
     }
 
@@ -319,5 +403,10 @@ public class JCloudsFileResourceContentStore
     private boolean isValidContainerName( String containerName ) 
     {
         return containerName != null && CONTAINER_NAME_PATTERN.matcher( containerName ).matches();
+    }
+
+    private boolean requestSigningSupported( BlobRequestSigner signer )
+    {
+        return !( signer instanceof RequestSigningUnsupported ) && !( signer instanceof LocalBlobRequestSigner );
     }
 }

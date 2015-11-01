@@ -29,7 +29,6 @@ package org.hisp.dhis.program;
  */
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Chau Thu Tran
@@ -100,24 +99,6 @@ public interface ProgramIndicatorService
     List<ProgramIndicator> getAllProgramIndicators();
 
     /**
-     * Calculate a program indicator value based on program instance and an
-     * indicator.
-     *
-     * @param programIndicator ProgramIndicator
-     * @param programInstance  ProgramInstance
-     * @return Indicator value
-     */
-    Double getProgramIndicatorValue( ProgramIndicator programIndicator, ProgramInstance programInstance );
-
-    /**
-     * Get indicator values of all program indicators defined for a TrackedEntityInstance
-     *
-     * @param programInstance ProgramInstance
-     * @return a mapping of indicator display name and indicator value.
-     */
-    Map<String, Double> getProgramIndicatorValues( ProgramInstance programInstance );
-
-    /**
      * Get description of an indicator expression.
      *
      * @param expression An expression string
@@ -157,7 +138,7 @@ public interface ProgramIndicatorService
      * 
      * @param expression An expression string.
      * @return the string {@link ProgramIndicator.VALID} if valid, if not any of
-     *         {@link ProgramIndicator.EXPRESSION_NOT_WELL_FORMED},
+     *         {@link ProgramIndicator.EXPRESSION_NOT_VALID},
      *         {@link ProgramIndicator.INVALID_VARIABLES_IN_EXPRESSION}.
      */
     String expressionIsValid( String expression );

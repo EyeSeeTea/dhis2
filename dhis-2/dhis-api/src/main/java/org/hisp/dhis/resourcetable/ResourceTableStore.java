@@ -29,14 +29,6 @@ package org.hisp.dhis.resourcetable;
  */
 
 import java.util.List;
-import java.util.Set;
-
-import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
-import org.hisp.dhis.dataelement.DataElementCategory;
-import org.hisp.dhis.dataelement.DataElementGroupSet;
-import org.hisp.dhis.indicator.IndicatorGroupSet;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
-import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 
 /**
  * @author Lars Helge Overland
@@ -46,7 +38,6 @@ public interface ResourceTableStore
     String ID = ResourceTableStore.class.getName();
 
     String TABLE_NAME_CATEGORY_OPTION_COMBO_NAME = "_categoryoptioncomboname";
-    String TABLE_NAME_ORGANISATION_UNIT_STRUCTURE = "_orgunitstructure";
     String TABLE_NAME_DATA_ELEMENT_STRUCTURE = "_dataelementstructure";
     String TABLE_NAME_PERIOD_STRUCTURE = "_periodstructure";
     String TABLE_NAME_DATE_PERIOD_STRUCTURE = "_dateperiodstructure";
@@ -68,84 +59,4 @@ public interface ResourceTableStore
      * @param batchArgs the arguments to use for the update statement.
      */
     void batchUpdate( int columns, String tableName, List<Object[]> batchArgs );
-    
-    /**
-     * Creates a table.
-     */
-    void createOrganisationUnitStructure( int maxLevel );
-    
-    /**
-     * Creates a table.
-     */
-    void createDataElementCategoryOptionComboName();
-    
-    /**
-     * Creates a table.
-     * 
-     * @param groupSets the group sets.
-     */
-    void createCategoryOptionGroupSetStructure( List<CategoryOptionGroupSet> groupSets );
-    
-    /**
-     * Creates table.
-     * 
-     * @param groupSets the group sets.
-     */
-    void createDataElementGroupSetStructure( List<DataElementGroupSet> groupSets );
-    
-    void populateDataElementGroupSetStructure( List<DataElementGroupSet> groupSets );
-
-    /**
-     * Creates table.
-     * 
-     * @param groupSets the group sets.
-     */
-    void createIndicatorGroupSetStructure( List<IndicatorGroupSet> groupSets );
-    
-    void populateIndicatorGroupSetStructure( List<IndicatorGroupSet> groupSets );
-    
-    /**
-     * Creates table.
-     * 
-     * @param groupSets the group sets.
-     */
-    void createOrganisationUnitGroupSetStructure( List<OrganisationUnitGroupSet> groupSets );
-    
-    void populateOrganisationUnitGroupSetStructure( List<OrganisationUnitGroupSet> groupSets );
-    
-    /**
-     * Creates table.
-     * 
-     * @param categories the categories.
-     */
-    void createCategoryStructure( List<DataElementCategory> categories );
-    
-    void populateCategoryStructure( List<DataElementCategory> categories );
-    
-    /**
-     * Creates table.
-     */
-    void createDataElementStructure();
-
-    /**
-     * Creates table.
-     */
-    void createDatePeriodStructure();
-    
-    /**
-     * Creates table.
-     */
-    void createPeriodStructure();
-
-    /**
-     * Creates and generates table.
-     */
-    void createAndPopulateDataElementCategoryOptionCombo();
-    
-    /**
-     * Creates and populates data approval minimum level table.
-     * 
-     * @param levels the organisation unit levels part of approval levels.
-     */
-    void createAndPopulateDataApprovalMinLevel( Set<OrganisationUnitLevel> levels );
 }

@@ -134,7 +134,7 @@ public class DefaultObjectBridge
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings( { "rawtypes", "unchecked" } )
     public void init( Set<Class> preheatClasses )
     {
         if ( preheatClasses.isEmpty() )
@@ -469,9 +469,9 @@ public class DefaultObjectBridge
             User user = (User) object;
             UserCredentials userCredentials = usernameMap.get( user.getUsername() );
 
-            if ( userCredentials != null && userCredentials.getUser() != null )
+            if ( userCredentials != null && userCredentials.getUserInfo() != null )
             {
-                objects.add( (T) userCredentials.getUser() );
+                objects.add( (T) userCredentials.getUserInfo() );
             }
         }
 

@@ -50,8 +50,6 @@ import org.hisp.dhis.trackedentity.TrackedEntityInstanceReminder;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceReminderService;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
 import org.hisp.dhis.trackedentity.TrackedEntityService;
-import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueService;
-import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValueService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,12 +80,6 @@ public class DefaultProgramInstanceService
 
     @Autowired
     private ProgramInstanceStore programInstanceStore;
-
-    @Autowired
-    private TrackedEntityAttributeValueService attributeValueService;
-
-    @Autowired
-    private TrackedEntityDataValueService dataValueService;
 
     @Autowired
     private ProgramService programService;
@@ -145,6 +137,12 @@ public class DefaultProgramInstanceService
     public ProgramInstance getProgramInstance( String id )
     {
         return programInstanceStore.getByUid( id );
+    }
+
+    @Override
+    public boolean programInstanceExists( String uid )
+    {
+        return programInstanceStore.exists( uid );
     }
 
     @Override
@@ -518,18 +516,21 @@ public class DefaultProgramInstanceService
     @Override
     public boolean canAutoCompleteProgramInstanceStatus( ProgramInstance programInstance )
     {
-        Set<ProgramStageInstance> stageInstances = programInstance.getProgramStageInstances();
+        Set<ProgramStageInstance> programStageInstances = new HashSet<>( programInstance.getProgramStageInstances() );
+        Set<ProgramStage> programStages = new HashSet<>();
 
-        for ( ProgramStageInstance stageInstance : stageInstances )
+        for ( ProgramStageInstance programStageInstance : programStageInstances )
         {
-            if ( (!stageInstance.isCompleted() && stageInstance.getStatus() != EventStatus.SKIPPED)
-                || stageInstance.getProgramStage().getIrregular() )
+            if ( (!programStageInstance.isCompleted() && programStageInstance.getStatus() != EventStatus.SKIPPED)
+                || programStageInstance.getProgramStage().getRepeatable() )
             {
                 return false;
             }
+
+            programStages.add( programStageInstance.getProgramStage() );
         }
 
-        return true;
+        return programStages.size() != programInstance.getProgram().getProgramStages().size();
     }
 
     @Override
@@ -547,7 +548,7 @@ public class DefaultProgramInstanceService
         }
 
         outboundSms
-            .addAll( sendMessages( programInstance, TrackedEntityInstanceReminder.SEND_WHEN_TO_C0MPLETED_PROGRAM ) );
+            .addAll( sendMessages( programInstance, TrackedEntityInstanceReminder.SEND_WHEN_TO_COMPLETED_PROGRAM ) );
 
         // -----------------------------------------------------------------
         // Send DHIS message when to completed the program
@@ -561,7 +562,7 @@ public class DefaultProgramInstanceService
         }
 
         messageConversations.addAll( sendMessageConversations( programInstance,
-            TrackedEntityInstanceReminder.SEND_WHEN_TO_C0MPLETED_PROGRAM ) );
+            TrackedEntityInstanceReminder.SEND_WHEN_TO_COMPLETED_PROGRAM ) );
 
         // -----------------------------------------------------------------
         // Update program-instance

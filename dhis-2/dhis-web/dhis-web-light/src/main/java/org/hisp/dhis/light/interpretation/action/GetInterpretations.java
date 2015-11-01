@@ -34,6 +34,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import org.hisp.dhis.analytics.AnalyticsFavoriteType;
 import org.hisp.dhis.interpretation.Interpretation;
 import org.hisp.dhis.interpretation.InterpretationService;
 
@@ -85,12 +86,12 @@ public class GetInterpretations
         List<Interpretation> finalInterpretations = new ArrayList<>();
 
         Iterator<Interpretation> i = tempInterpretations.iterator();
-    
+
         while ( i.hasNext() )
         {
             Interpretation currentInterpretation = i.next();
 
-            if ( currentInterpretation.getType().equals( Interpretation.TYPE_CHART ) )
+            if ( currentInterpretation.getType() == AnalyticsFavoriteType.CHART )
             {
                 finalInterpretations.add( currentInterpretation );
             }

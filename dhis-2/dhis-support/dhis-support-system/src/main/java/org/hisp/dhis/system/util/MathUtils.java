@@ -33,20 +33,32 @@ import java.math.MathContext;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import org.apache.commons.validator.routines.DoubleValidator;
 import org.apache.commons.validator.routines.IntegerValidator;
 import org.hisp.dhis.expression.Operator;
-import org.hisp.dhis.system.math.OneIfZeroOrPositiveFunction;
-import org.hisp.dhis.system.math.ZeroIfNegativeFunction;
 import org.nfunk.jep.JEP;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 /**
  * @author Lars Helge Overland
  */
 public class MathUtils
 {
+    /**
+     * Cache for JEP expression evaluation.
+     */
+    private static Cache<String, Double> EXPR_EVAL_CACHE = CacheBuilder.newBuilder()
+        .expireAfterAccess( 1, TimeUnit.HOURS )
+        .initialCapacity( 200 )
+        .maximumSize( 5000 )
+        .build();
+    
     public static final Double ZERO = new Double( 0 );
     
     private static final Locale LOCALE = new Locale( "en" );
@@ -104,6 +116,18 @@ public class MathUtils
      */
     public static double calculateExpression( String expression )   
     {
+        try
+        {
+            return EXPR_EVAL_CACHE.get( expression, () -> calculateExpressionInternal( expression ) );
+        }
+        catch ( ExecutionException ex )
+        {
+            throw new RuntimeException( "Expression calculation error", ex );
+        }
+    }
+    
+    private static double calculateExpressionInternal( String expression )
+    {
         final JEP parser = getJep();
         parser.parseExpression( expression );
         
@@ -158,9 +182,6 @@ public class MathUtils
     {
         final JEP parser = new JEP();
         parser.addStandardFunctions();
-        parser.addStandardConstants();
-        parser.addFunction( OneIfZeroOrPositiveFunction.NAME, new OneIfZeroOrPositiveFunction() );
-        parser.addFunction( ZeroIfNegativeFunction.NAME, new ZeroIfNegativeFunction() );
         return parser;
     }
     
@@ -543,7 +564,7 @@ public class MathUtils
     {
         return new Random().nextInt( 999 );
     }
-    
+
     /**
      * Returns the minimum value from the given array.
      * 

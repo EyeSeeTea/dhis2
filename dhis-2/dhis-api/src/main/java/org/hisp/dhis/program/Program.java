@@ -28,11 +28,13 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.google.common.collect.Sets;
 import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
@@ -55,13 +57,10 @@ import org.hisp.dhis.trackedentity.TrackedEntityInstanceReminder;
 import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.validation.ValidationCriteria;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Abyot Asalefew
@@ -71,8 +70,6 @@ public class Program
     extends BaseIdentifiableObject
     implements VersionedObject
 {
-    private static final long serialVersionUID = -2807997671779497354L;
-   
     private String description;
 
     private int version;
@@ -101,6 +98,7 @@ public class Program
     @Scanned
     private Set<UserAuthorityGroup> userRoles = new HashSet<>();
 
+    @Scanned
     private Set<ProgramIndicator> programIndicators = new HashSet<>();
 
     private Boolean onlyEnrollOnce = false;
@@ -130,17 +128,20 @@ public class Program
     private Set<AttributeValue> attributeValues = new HashSet<>();
 
     private DataEntryForm dataEntryForm;
-    
+
     /**
      * The CategoryCombo used for data attributes.
      */
     private DataElementCategoryCombo categoryCombo;
 
+<<<<<<< TREE
     /**
      * The approval workflow (if any) for this program.
      */
     private DataApprovalWorkflow workflow;
 
+=======
+>>>>>>> MERGE-SOURCE
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -165,25 +166,25 @@ public class Program
         organisationUnits.add( organisationUnit );
         organisationUnit.getPrograms().add( this );
     }
-    
+
     public void removeOrganisationUnit( OrganisationUnit organisationUnit )
     {
         organisationUnits.remove( organisationUnit );
         organisationUnit.getPrograms().remove( this );
     }
-    
+
     public void updateOrganisationUnits( Set<OrganisationUnit> updates )
     {
         Set<OrganisationUnit> toRemove = Sets.difference( organisationUnits, updates );
         Set<OrganisationUnit> toAdd = Sets.difference( updates, organisationUnits );
-        
+
         toRemove.parallelStream().forEach( u -> u.getPrograms().remove( this ) );
         toAdd.parallelStream().forEach( u -> u.getPrograms().add( this ) );
-        
+
         organisationUnits.clear();
         organisationUnits.addAll( updates );
     }
-    
+
     /**
      * Returns the ProgramTrackedEntityAttribute of this Program which contains
      * the given TrackedEntityAttribute.
@@ -286,7 +287,7 @@ public class Program
 
         return null;
     }
-    
+
     public boolean isSingleProgramStage()
     {
         return programStages != null && programStages.size() == 1;
@@ -389,14 +390,6 @@ public class Program
         this.incidentDateLabel = incidentDateLabel;
     }
 
-    //TODO remove
-    @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String getKind()
-    {
-        return programType.name();
-    }
-    
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
@@ -409,7 +402,7 @@ public class Program
     {
         this.programType = programType;
     }
-    
+
     @JsonProperty( "validationCriterias" )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     @JsonView( { DetailedView.class, ExportView.class } )
@@ -456,7 +449,7 @@ public class Program
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public boolean isRegistration()
     {
-        return programType.equals( ProgramType.WITH_REGISTRATION );
+        return programType == ProgramType.WITH_REGISTRATION;
     }
 
     @JsonProperty
@@ -464,9 +457,9 @@ public class Program
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public boolean isWithoutRegistration()
     {
-        return programType.equals( ProgramType.WITHOUT_REGISTRATION );
+        return programType == ProgramType.WITHOUT_REGISTRATION;
     }
-    
+
     @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     @JsonView( { DetailedView.class, ExportView.class } )
@@ -510,9 +503,10 @@ public class Program
         this.onlyEnrollOnce = onlyEnrollOnce;
     }
 
-    @JsonProperty
+    @JsonProperty( "trackedEntityInstanceReminders" )
     @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlElementWrapper( localName = "trackedEntityInstanceReminders", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "trackedEntityInstanceReminder", namespace = DxfNamespaces.DXF_2_0 )
     public Set<TrackedEntityInstanceReminder> getInstanceReminders()
     {
         return instanceReminders;
@@ -685,6 +679,7 @@ public class Program
         this.categoryCombo = categoryCombo;
     }
 
+<<<<<<< TREE
     @JsonProperty
     @JsonSerialize( as = BaseIdentifiableObject.class )
     @JsonView( { DetailedView.class, ExportView.class } )
@@ -699,6 +694,8 @@ public class Program
         this.workflow = workflow;
     }
 
+=======
+>>>>>>> MERGE-SOURCE
     /**
      * Indicates whether this program has a category combination which is different
      * from the default category combination.
@@ -707,7 +704,7 @@ public class Program
     {
         return categoryCombo != null && !DataElementCategoryCombo.DEFAULT_CATEGORY_COMBO_NAME.equals( categoryCombo.getName() );
     }
-    
+
     @Override
     public void mergeWith( IdentifiableObject other, MergeStrategy strategy )
     {
@@ -760,7 +757,12 @@ public class Program
             organisationUnits.addAll( program.getOrganisationUnits() );
 
             programStages.clear();
-            programStages.addAll( program.getProgramStages() );
+
+            for ( ProgramStage programStage : program.getProgramStages() )
+            {
+                programStages.add( programStage );
+                programStage.setProgram( this );
+            }
 
             validationCriteria.clear();
             validationCriteria.addAll( program.getValidationCriteria() );

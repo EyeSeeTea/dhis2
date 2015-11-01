@@ -9,6 +9,7 @@ trackerCapture.controller('DataEntryController',
                 $timeout,
                 $translate,
                 Paginator,
+                CommonUtils,
                 DateUtils,
                 EventUtils,
                 orderByFilter,
@@ -16,8 +17,8 @@ trackerCapture.controller('DataEntryController',
                 EnrollmentService,
                 ProgramStageFactory,
                 DHIS2EventFactory,
-                OptionSetService,
                 ModalService,
+                DialogService,
                 CurrentSelection,
                 TrackerRulesExecutionService,
                 CustomFormService,
@@ -38,7 +39,8 @@ trackerCapture.controller('DataEntryController',
     //variable is set while looping through the program stages later.
     $scope.stagesCanBeShownAsTable = false;
     $scope.showHelpText = {};
-    $scope.hiddenFields = {};
+    $scope.hiddenFields = [];
+    $scope.assignedFields = [];
     $scope.errorMessages = {};
     $scope.warningMessages = {};
     $scope.hiddenSections = {};
@@ -89,6 +91,11 @@ trackerCapture.controller('DataEntryController',
             });
         }
 
+        $scope.assignedFields = [];
+        $scope.hiddenSections = [];
+        $scope.warningMessages = [];
+        $scope.errorMessages = [];
+        
         angular.forEach($rootScope.ruleeffects[event], function (effect) {
             if (effect.dataElement) {
                 //in the data entry controller we only care about the "hidefield", showerror and showwarning actions
@@ -116,27 +123,30 @@ trackerCapture.controller('DataEntryController',
                         $log.warn("ProgramRuleAction " + effect.id + " is of type HIDEFIELD, bot does not have a dataelement defined");
                     }
                 } else if (effect.action === "SHOWERROR") {
-                    if (effect.dataElement) {
+                    if (effect.ineffect) {
                         
-                        if(effect.ineffect) {
-                            $scope.errorMessages[effect.dataElement.id] = effect.content;
-                        } else {
-                            $scope.errorMessages[effect.dataElement.id] = false;
+                        if(effect.dataElement) {
+                            var message = effect.content + (effect.data ? effect.data : "");
+                            $scope.errorMessages[effect.dataElement.id] = message;
+                            $scope.errorMessages.push($translate.instant($scope.prStDes[effect.dataElement.id].dataElement.name) + ": " + message);
+                        }
+                        else
+                        {
+                            $scope.errorMessages.push(message);
                         }
                     }
                     else {
-                        $log.warn("ProgramRuleAction " + effect.id + " is of type HIDEFIELD, bot does not have a dataelement defined");
+                        
                     }
                 } else if (effect.action === "SHOWWARNING") {
-                    if (effect.dataElement) {
-                        if(effect.ineffect) {
-                            $scope.warningMessages[effect.dataElement.id] = effect.content;
+                    if (effect.ineffect) {
+                        if(effect.dataElement) {
+                            var message = effect.content + (effect.data ? effect.data : "");
+                            $scope.warningMessages[effect.dataElement.id] = effect.content + message;
+                            $scope.warningMessages.push($translate.instant($scope.prStDes[effect.dataElement.id].dataElement.name) + ": " + message);
                         } else {
-                            $scope.warningMessages[effect.dataElement.id] = false;
+                            $scope.warningMessages.push(message);
                         }
-                    }
-                    else {
-                        $log.warn("ProgramRuleAction " + effect.id + " is of type HIDEFIELD, bot does not have a dataelement defined");
                     }
                 } else if (effect.action === "HIDESECTION"){                    
                     if(effect.programStageSection){
@@ -149,8 +159,15 @@ trackerCapture.controller('DataEntryController',
                     else {
                         $log.warn("ProgramRuleAction " + effect.id + " is of type HIDESECTION, bot does not have a section defined");
                     }
+                } else if (effect.action === "ASSIGNVARIABLE") {
+                    if(effect.ineffect && effect.dataElement) {
+                        //For "ASSIGNVARIABLE" actions where we have a dataelement, we save the calculated value to the dataelement:
+                        //Blank out the value:
+                        affectedEvent[effect.dataElement.id] = effect.data;
+                        $scope.assignedFields[effect.dataElement.id] = true;
+                        $scope.saveDatavalueForEvent($scope.prStDes[effect.dataElement.id], null, affectedEvent);
+                    }
                 }
-                
             }
         });
     };
@@ -268,7 +285,7 @@ trackerCapture.controller('DataEntryController',
                     var eventStage = $scope.stagesById[dhis2Event.programStage];
                     if (angular.isObject(eventStage)) {
                         dhis2Event.name = eventStage.name;
-                        dhis2Event.reportDateDescription = eventStage.reportDateDescription;
+                        dhis2Event.excecutionDateLabel = eventStage.excecutionDateLabel ? eventStage.excecutionDateLabel : $translate.instant('event_date');
                         dhis2Event.dueDate = DateUtils.formatFromApiToUser(dhis2Event.dueDate);
                         dhis2Event.sortingDate = dhis2Event.dueDate;
 
@@ -373,7 +390,7 @@ trackerCapture.controller('DataEntryController',
                 var newEvent = ev;
                 newEvent.orgUnitName = dummyEvent.orgUnitName;
                 newEvent.name = dummyEvent.name;
-                newEvent.reportDateDescription = dummyEvent.reportDateDescription;
+                newEvent.excecutionDateLabel = dummyEvent.excecutionDateLabel;
                 newEvent.sortingDate = ev.eventDate ? ev.eventDate : ev.dueDate,
                 newEvent.statusColor = EventUtils.getEventStatusColor(ev);
                 newEvent.eventDate = DateUtils.formatFromApiToUser(ev.eventDate);
@@ -513,20 +530,12 @@ trackerCapture.controller('DataEntryController',
         });
 
         if (oldValue !== value) {
-            if (value) {
-                if (prStDe.dataElement.valueType === 'DATE') {
-                    value = DateUtils.formatFromUserToApi(value);
-                }
-                if (prStDe.dataElement.optionSetValue) {
-                    if (prStDe.dataElement.optionSet && $scope.optionSets[prStDe.dataElement.optionSet.id] && $scope.optionSets[prStDe.dataElement.optionSet.id].options) {
-                        value = OptionSetService.getCode($scope.optionSets[prStDe.dataElement.optionSet.id].options, value);
-                    }
-                }
-            }
-
+            
+            value = CommonUtils.formatDataValue(value, prStDe.dataElement, $scope.optionSets, 'API');
+            
             $scope.updateSuccess = false;
 
-            $scope.currentElement = {id: prStDe.dataElement.id, event: eventToSave.event, saved: false};
+            $scope.currentElement = {id: prStDe.dataElement.id, event: eventToSave.event, saved: false};            
 
             var ev = {event: eventToSave.event,
                 orgUnit: eventToSave.orgUnit,
@@ -807,24 +816,40 @@ trackerCapture.controller('DataEntryController',
         if ($scope.currentEvent.status === 'COMPLETED') {//activiate event
             modalOptions = {
                 closeButtonText: 'cancel',
-                actionButtonText: 'incomplete',
-                headerText: 'incomplete',
+                actionButtonText: 'edit',
+                headerText: 'edit',
                 bodyText: 'are_you_sure_to_incomplete_event'
             };
             dhis2Event.status = 'ACTIVE';
         }
         else {//complete event
-            modalOptions = {
-                closeButtonText: 'cancel',
-                actionButtonText: 'complete',
-                headerText: 'complete',
-                bodyText: 'are_you_sure_to_complete_event'
-            };
-            dhis2Event.status = 'COMPLETED';
+            
+            if($scope.errorMessages && $scope.errorMessages.length > 0) {
+                //There is unresolved program rule errors - show error message.
+                var dialogOptions = {
+                    headerText: 'errors',
+                    bodyText: 'please_fix_errors_before_completing',
+                    bodyList: $scope.errorMessages
+                };
+
+                DialogService.showDialog({}, dialogOptions);
+                
+                return;
+            }
+            else
+            {
+                modalOptions = {
+                    closeButtonText: 'cancel',
+                    actionButtonText: 'complete',
+                    headerText: 'complete',
+                    bodyText: 'are_you_sure_to_complete_event'
+                };
+                dhis2Event.status = 'COMPLETED';
+            }
         }
 
         ModalService.showModal({}, modalOptions).then(function (result) {
-
+            
             DHIS2EventFactory.update(dhis2Event).then(function (data) {
 
                 if ($scope.currentEvent.status === 'COMPLETED') {//activiate event                    
@@ -845,7 +870,23 @@ trackerCapture.controller('DataEntryController',
                     }
                     else {
                         if ($scope.currentStage.allowGenerateNextVisit) {
-                            $scope.showCreateEvent($scope.currentStage);
+                            if($scope.currentStage.repeatable){
+                                $scope.showCreateEvent($scope.currentStage);
+                            }
+                            else{
+                                var index = -1, stage = null;
+                                for(var i=0; i<$scope.programStages.length && index===-1; i++){
+                                    if($scope.currentStage.id === $scope.programStages[i].id){
+                                        index = i;
+                                        stage = $scope.programStages[i+1];
+                                    }
+                                }
+                                if(stage ){
+                                    if(!$scope.eventsByStage[stage.id] || $scope.eventsByStage[stage.id] && $scope.eventsByStage[stage.id].length === 0){
+                                        $scope.showCreateEvent(stage);
+                                    }
+                                }                                
+                            }
                         }
                     }
                 }
@@ -1107,7 +1148,7 @@ trackerCapture.controller('DataEntryController',
     $scope.eventPeriods = eventPeriods;
     $scope.selectedStage = $scope.stagesById[dummyEvent.programStage];
 
-    $scope.dhis2Event = {eventDate: '', dueDate: dummyEvent.dueDate, reportDateDescription: dummyEvent.reportDateDescription, name: dummyEvent.name, invalid: true};
+    $scope.dhis2Event = {eventDate: '', dueDate: dummyEvent.dueDate, excecutionDateLabel: dummyEvent.excecutionDateLabel, name: dummyEvent.name, invalid: true};
 
     if ($scope.selectedStage.periodType) {
         $scope.dhis2Event.eventDate = dummyEvent.dueDate;

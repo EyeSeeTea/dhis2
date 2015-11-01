@@ -64,11 +64,6 @@ public class BaseIdentifiableObject
     implements IdentifiableObject
 {
     /**
-     * Determines if a de-serialized file is compatible with this class.
-     */
-    private static final long serialVersionUID = 5532508099213570673L;
-
-    /**
      * The database internal identifier for this Object.
      */
     protected int id;
@@ -166,7 +161,7 @@ public class BaseIdentifiableObject
     @Override
     public int compareTo( IdentifiableObject object )
     {
-        return name == null ? ( object.getName() == null ? 0 : -1 ) : name.compareTo( object.getName() );
+        return name == null ? ( object.getDisplayName() == null ? 0 : -1 ) : name.compareTo( object.getDisplayName() );
     }
 
     // -------------------------------------------------------------------------

@@ -28,13 +28,23 @@ package org.hisp.dhis.fileresource;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.common.GenericIdentifiableObjectStore;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.google.common.io.ByteSource;
+import org.hisp.dhis.common.GenericIdentifiableObjectStore;
+import org.hisp.dhis.system.scheduling.Scheduler;
+import org.joda.time.DateTime;
+import org.joda.time.Duration;
+import org.joda.time.Hours;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.concurrent.ListenableFuture;
+
+import javax.annotation.PostConstruct;
+import java.io.File;
+import java.net.URI;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * @author Halvdan Hoem Grelland
@@ -42,7 +52,12 @@ import com.google.common.io.ByteSource;
 public class DefaultFileResourceService
     implements FileResourceService
 {
-    private static final Log log = LogFactory.getLog( DefaultFileResourceService.class );
+    private static final String KEY_FILE_CLEANUP_TASK = "fileResourceCleanupTask";
+
+    private static final Duration IS_ORPHAN_TIME_DELTA = Hours.TWO.toStandardDuration();
+
+    private static final Predicate<FileResource> IS_ORPHAN_PREDICATE =
+        ( fr -> !fr.isAssigned() || fr.getStorageStatus() != FileResourceStorageStatus.STORED );
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -62,6 +77,41 @@ public class DefaultFileResourceService
         this.fileResourceContentStore = fileResourceContentStore;
     }
 
+    private Scheduler scheduler;
+
+    public void setScheduler( Scheduler scheduler )
+    {
+        this.scheduler = scheduler;
+    }
+
+    private FileResourceUploadCallback uploadCallback;
+
+    public void setUploadCallback( FileResourceUploadCallback uploadCallback )
+    {
+        this.uploadCallback = uploadCallback;
+    }
+
+    private FileResourceCleanUpTask fileResourceCleanUpTask;
+
+    public void setFileResourceCleanUpTask( FileResourceCleanUpTask fileResourceCleanUpTask )
+    {
+        this.fileResourceCleanUpTask = fileResourceCleanUpTask;
+    }
+
+    // -------------------------------------------------------------------------
+    // Init
+    // -------------------------------------------------------------------------
+
+    @PostConstruct
+    public void init()
+    {
+        // Background task which queries for non-assigned or failed-upload
+        // FileResources and deletes them from the database and/or file store.
+        // Runs every day at 2 AM server time.
+
+        scheduler.scheduleTask( KEY_FILE_CLEANUP_TASK, fileResourceCleanUpTask, Scheduler.CRON_DAILY_2AM );
+    }
+
     // -------------------------------------------------------------------------
     // FileResourceService implementation
     // -------------------------------------------------------------------------
@@ -72,30 +122,51 @@ public class DefaultFileResourceService
         return fileResourceStore.getByUid( uid );
     }
 
+    @Override
+    public List<FileResource> getFileResources( List<String> uids )
+    {
+        return fileResourceStore.getByUid( uids );
+    }
+
+    @Override
+    public List<FileResource> getOrphanedFileResources( )
+    {
+        return fileResourceStore.getAllLeCreated( new DateTime().minus( IS_ORPHAN_TIME_DELTA ).toDate() )
+            .stream().filter( IS_ORPHAN_PREDICATE ).collect( Collectors.toList() );
+    }
+
     @Transactional
     @Override
-    public String saveFileResource( FileResource fileResource, ByteSource content )
+    public String saveFileResource( FileResource fileResource, File file )
     {
-        String storageKey = getRelativeStorageKey( fileResource );
+        fileResource.setStorageStatus( FileResourceStorageStatus.PENDING );
+        fileResourceStore.save( fileResource );
 
-        String key = fileResourceContentStore.saveFileResourceContent(
-            storageKey, content, fileResource.getContentLength(), fileResource.getContentMd5() );
+        final ListenableFuture<String> saveContentTask =
+            scheduler.executeTask( () -> fileResourceContentStore.saveFileResourceContent( fileResource, file ) );
 
-        if ( key == null )
-        {
-            log.debug( "Failed saving content for FileResource" );
-            return null;
-        }
+        final String uid = fileResource.getUid();
 
-        int id = fileResourceStore.save( fileResource );
+        // Ensures callback is registered after this transaction is committed.
+        // Works as a safeguard against the unlikely race condition which
+        // could occur when the callback is executed before the FileResource
+        // object has been written to the db. We should consider exposing the
+        // locking mechanisms of Hibernate which would offer a cleaner solution
+        // to this very issue.
 
-        if ( id <= 0 )
-        {
-            log.debug( "Failed persisting the FileResource: " + fileResource.getName() );
-            return null;
-        }
+        TransactionSynchronizationManager.registerSynchronization(
+            new TransactionSynchronizationAdapter()
+            {
+                @Override
+                public void afterCommit()
+                {
+                    super.afterCommit();
+                    saveContentTask.addCallback( uploadCallback.newInstance( uid ) );
+                }
+            }
+        );
 
-        return fileResource.getUid();
+        return uid;
     }
 
     @Transactional
@@ -114,14 +185,14 @@ public class DefaultFileResourceService
             return;
         }
 
-        fileResourceContentStore.deleteFileResourceContent( getRelativeStorageKey( fileResource ) );
+        fileResourceContentStore.deleteFileResourceContent( fileResource.getStorageKey() );
         fileResourceStore.delete( fileResource );
     }
 
     @Override
     public ByteSource getFileResourceContent( FileResource fileResource )
     {
-        return fileResourceContentStore.getFileResourceContent( getRelativeStorageKey( fileResource ) );
+        return fileResourceContentStore.getFileResourceContent( fileResource.getStorageKey() );
     }
 
     @Override
@@ -130,18 +201,23 @@ public class DefaultFileResourceService
         return fileResourceStore.getByUid( uid ) != null;
     }
 
+    @Transactional
     @Override
     public void updateFileResource( FileResource fileResource )
     {
         fileResourceStore.update( fileResource );
     }
 
-    // ---------------------------------------------------------------------
-    // Supportive methods
-    // ---------------------------------------------------------------------
-
-    private String getRelativeStorageKey( FileResource fileResource )
+    @Override
+    public URI getSignedGetFileResourceContentUri( String uid )
     {
-        return StringUtils.prependIfMissing( fileResource.getStorageKey(), fileResource.getDomain().getContainerName() + "/" );
+        FileResource fileResource = getFileResource( uid );
+
+        if ( fileResource == null )
+        {
+            return null;
+        }
+
+        return fileResourceContentStore.getSignedGetContentUri( fileResource.getStorageKey() );
     }
 }

@@ -39,7 +39,8 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
     $scope.treeLoaded = false;    
     $scope.selectedSection = {id: 'ALL'};    
     $rootScope.ruleeffects = {};
-    $scope.hiddenFields = {};
+    $scope.hiddenFields = [];
+    $scope.assignedFields = [];
     
     $scope.calendarSetting = CalendarService.getSetting();
     
@@ -145,6 +146,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         
         $scope.selectedProgramStage = null;
         $scope.eventFetched = false;
+        $scope.optionsReady = false;
         
         //Filtering
         $scope.reverse = false;
@@ -174,7 +176,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                 $scope.eventGridColumns.push({name: 'form_id', id: 'uid', valueType: 'TEXT', compulsory: false, filterWithRange: false, showFilter: false, show: false});
                 $scope.filterTypes['uid'] = 'TEXT';                
 
-                $scope.eventGridColumns.push({name: $scope.selectedProgramStage.reportDateDescription ? $scope.selectedProgramStage.reportDateDescription : 'incident_date', id: 'eventDate', valueType: 'DATE', filterWithRange: true, compulsory: false, showFilter: false, show: true});
+                $scope.eventGridColumns.push({name: $scope.selectedProgramStage.reportDateDescription ? $scope.selectedProgramStage.reportDateDescription : $translate.instant('incident_date'), id: 'eventDate', valueType: 'DATE', filterWithRange: true, compulsory: false, showFilter: false, show: true});
                 $scope.filterTypes['eventDate'] = 'DATE';
                 $scope.filterText['eventDate']= {};
 
@@ -226,6 +228,9 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                     angular.forEach($scope.selectedProgram.categoryCombo.categories, function(cat){
                         categoryIds.push(cat.id);
                     });
+                }
+                else{
+                    $scope.optionsReady = true;
                 }
                 
                 MetaDataFactory.getByIds('categories', categoryIds).then(function(categories){
@@ -973,12 +978,13 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         }
         return status;        
     };
-    
+
     //listen for rule effect changes    
     $scope.$on('ruleeffectsupdated', function(event, args) {
         $scope.warningMessages = [];
         $scope.hiddenSections = [];
         $scope.hiddenFields = [];
+        $scope.assignedFields = [];
         
         //console.log('args.event:  ', $rootScope.ruleeffects['SINGLE_EVENT'][0]);
         if($rootScope.ruleeffects[args.event]) {
@@ -1019,22 +1025,28 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                             $log.warn("ProgramRuleAction " + effect.id + " is of type HIDEFIELD, bot does not have a dataelement defined");
                         }
                     }
-                    if(effect.action === "HIDESECTION") {
+                    else if(effect.action === "HIDESECTION") {
                         if(effect.programStageSection){
                             $scope.hiddenSections[effect.programStageSection] = effect.programStageSection;
                         }
                     }
-                    if(effect.action === "SHOWERROR" && effect.dataElement.id){
+                    else if(effect.action === "SHOWERROR" && effect.dataElement.id){
                         var dialogOptions = {
                             headerText: 'validation_error',
-                            bodyText: effect.content
+                            bodyText: effect.content + (effect.data ? effect.data : "")
                         };
                         DialogService.showDialog({}, dialogOptions);
             
                         $scope.currentEvent[effect.dataElement.id] = $scope.currentEventOriginialValue[effect.dataElement.id];
                     }
-                    if(effect.action === "SHOWWARNING"){
-                        $scope.warningMessages.push(effect.content);
+                    else if(effect.action === "SHOWWARNING"){
+                        $scope.warningMessages.push(effect.content + (effect.data ? effect.data : ""));
+                    }
+                    else if (effect.action === "ASSIGNVARIABLE") {
+                        
+                        //For "ASSIGNVARIABLE" actions where we have a dataelement, we save the calculated value to the dataelement:
+                        affectedEvent[effect.dataElement.id] = effect.data;
+                        $scope.assignedFields[effect.dataElement.id] = true;
                     }
                 }
             });

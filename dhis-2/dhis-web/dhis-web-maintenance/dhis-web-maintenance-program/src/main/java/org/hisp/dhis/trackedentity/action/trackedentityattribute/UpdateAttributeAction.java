@@ -35,6 +35,7 @@ import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.legend.LegendService;
 import org.hisp.dhis.option.OptionService;
+import org.hisp.dhis.option.OptionSet;
 import org.hisp.dhis.system.util.AttributeUtils;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
@@ -204,6 +205,10 @@ public class UpdateAttributeAction
     public String execute()
         throws Exception
     {
+        OptionSet optionSet = optionService.getOptionSet( optionSetId );
+
+        valueType = optionSet != null && optionSet.getValueType() != null ? optionSet.getValueType() : valueType;
+        
         TrackedEntityAttribute trackedEntityAttribute = trackedEntityAttributeService.getTrackedEntityAttribute( id );
 
         trackedEntityAttribute.setName( StringUtils.trimToNull( name ) );
@@ -214,7 +219,7 @@ public class UpdateAttributeAction
         trackedEntityAttribute.setAggregationType( AggregationType.fromValue( aggregationType ) );
         trackedEntityAttribute.setExpression( expression );
         trackedEntityAttribute.setDisplayOnVisitSchedule( false );
-        trackedEntityAttribute.setOptionSet( null );
+        trackedEntityAttribute.setOptionSet( optionSet );
 
         unique = unique != null;
         trackedEntityAttribute.setUnique( unique );
@@ -242,10 +247,6 @@ public class UpdateAttributeAction
 
             trackedEntityAttribute.setOrgunitScope( orgunitScope );
             trackedEntityAttribute.setProgramScope( programScope );
-        }
-        else if ( ValueType.OPTION_SET == valueType )
-        {
-            trackedEntityAttribute.setOptionSet( optionService.getOptionSet( optionSetId ) );
         }
         else if ( ValueType.TRACKER_ASSOCIATE == valueType )
         {

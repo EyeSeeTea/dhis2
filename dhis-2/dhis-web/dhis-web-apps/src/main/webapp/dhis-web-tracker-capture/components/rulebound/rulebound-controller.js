@@ -4,11 +4,12 @@ trackerCapture.controller('RuleBoundController',
                 $scope,
                 $translate,
                 $log) {
-
     
     $scope.widget = $scope.$parent.$parent.biggerWidget ? $scope.$parent.$parent.biggerWidget
     : $scope.$parent.$parent.smallerWidget ? $scope.$parent.$parent.smallerWidget : null;
-    $scope.widgetTitle = $scope.widget.title;
+    $scope.widgetTitle = $scope.widget.title;    
+    $scope.emptyFeedbackListLabel = $translate.instant('no_feedback_exist');
+    $scope.emptyIndicatorListLabel = $translate.instant('no_indicators_exist');
     
     $scope.widgetTitleLabel = $translate.instant($scope.widgetTitle);
     
@@ -46,14 +47,17 @@ trackerCapture.controller('RuleBoundController',
                     {
                         keyDataInEffect = true;
                     }
-                } else {
+                }
+                else if(effect.action === "ASSIGNVARIABLE") {
+                    //the dataentry control saves the variable and or dataelement
+                }
+                else {
                     $log.warn("action: '" + effect.action + "' not supported by rulebound-controller.js");
                 }
             }
         });
         
         $scope.showKeyDataSection = keyDataInEffect;
-        $scope.showTextSection = textInEffect;
-        
+        $scope.showTextSection = textInEffect;        
     });     
 });

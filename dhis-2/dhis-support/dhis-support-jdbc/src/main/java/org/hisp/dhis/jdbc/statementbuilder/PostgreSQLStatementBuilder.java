@@ -202,7 +202,7 @@ public class PostgreSQLStatementBuilder
     @Override
     public String queryDataElementStructureForOrgUnit()
     {
-        StringBuffer sqlsb = new StringBuffer();
+        StringBuilder sqlsb = new StringBuilder();
         
         sqlsb.append( "(SELECT DISTINCT de.dataelementid, (de.name || ' ' || cc.name) AS DataElement " );
         sqlsb.append( "FROM dataelement AS de " );
@@ -216,7 +216,7 @@ public class PostgreSQLStatementBuilder
     @Override
     public String queryRawDataElementsForOrgUnitBetweenPeriods(Integer orgUnitId, List<Integer> betweenPeriodIds)
     {
-        StringBuffer sqlsb = new StringBuffer();
+        StringBuilder sqlsb = new StringBuilder();
 
         int i = 0;
         

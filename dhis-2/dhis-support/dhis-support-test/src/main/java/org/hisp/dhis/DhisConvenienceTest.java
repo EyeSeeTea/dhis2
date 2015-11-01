@@ -53,8 +53,6 @@ import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.expression.Expression;
 import org.hisp.dhis.expression.Operator;
 import org.hisp.dhis.external.location.LocationManager;
-import org.hisp.dhis.importexport.ImportDataValue;
-import org.hisp.dhis.importexport.ImportObjectStatus;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.IndicatorGroupSet;
@@ -1030,32 +1028,6 @@ public abstract class DhisConvenienceTest
         return expression;
     }
 
-    /**
-     * @param dataElementId         The data element identifier.
-     * @param categoryOptionComboId The data element category option combo
-     *                              identifier.
-     * @param periodId              The period identifier.
-     * @param sourceId              The source identifier.
-     * @param status                The status.
-     */
-    public static ImportDataValue createImportDataValue( int dataElementId, int categoryOptionComboId, int periodId,
-        int sourceId, ImportObjectStatus status )
-    {
-        ImportDataValue importDataValue = new ImportDataValue();
-
-        importDataValue.setDataElementId( dataElementId );
-        importDataValue.setCategoryOptionComboId( categoryOptionComboId );
-        importDataValue.setPeriodId( periodId );
-        importDataValue.setSourceId( sourceId );
-        importDataValue.setValue( String.valueOf( 10 ) );
-        importDataValue.setStoredBy( "StoredBy" );
-        importDataValue.setTimestamp( new Date() );
-        importDataValue.setComment( "Comment" );
-        importDataValue.setStatus( status.name() );
-
-        return importDataValue;
-    }
-
     public static Legend createLegend( char uniqueCharacter, Double startValue, Double endValue )
     {
         Legend legend = new Legend();
@@ -1129,7 +1101,7 @@ public abstract class DhisConvenienceTest
         credentials.setName( "UserCredentials" + uniqueCharacter );
         credentials.setUsername( "Username" + uniqueCharacter );
         credentials.setPassword( "Password" + uniqueCharacter );
-        credentials.setUser( user );
+        credentials.setUserInfo( user );
         user.setUserCredentials( credentials );
 
         return credentials;
@@ -1251,14 +1223,14 @@ public abstract class DhisConvenienceTest
         return createProgramStage( uniqueCharacter, minDays, false );
     }
 
-    public static ProgramStage createProgramStage( char uniqueCharacter, int minDays, boolean irregular )
+    public static ProgramStage createProgramStage( char uniqueCharacter, int minDays, boolean repeatable )
     {
         ProgramStage programStage = new ProgramStage();
 
         programStage.setName( "ProgramStage" + uniqueCharacter );
         programStage.setDescription( "description" + uniqueCharacter );
         programStage.setMinDaysFromStart( minDays );
-        programStage.setIrregular( irregular );
+        programStage.setRepeatable( repeatable );
 
         return programStage;
     }
@@ -1636,7 +1608,7 @@ public abstract class DhisConvenienceTest
 
         user.getUserCredentials().getUserAuthorityGroups().add( userAuthorityGroup );
         userService.addUser( user );
-        user.getUserCredentials().setUser( user );
+        user.getUserCredentials().setUserInfo( user );
         userService.addUserCredentials( user.getUserCredentials() );
 
         List<GrantedAuthority> authorities = new ArrayList<>();

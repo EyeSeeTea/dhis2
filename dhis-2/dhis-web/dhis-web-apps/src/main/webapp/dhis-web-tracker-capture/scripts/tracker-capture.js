@@ -14,7 +14,7 @@ var optionSetsInPromise = [];
 var attributesInPromise = [];
 
 dhis2.tc.store = null;
-dhis2.tc.metaDataCached = false;
+dhis2.tc.metaDataCached = dhis2.tc.metaDataCached || false;
 dhis2.tc.memoryOnly = $('html').hasClass('ie7') || $('html').hasClass('ie8');
 var adapters = [];    
 if( dhis2.tc.memoryOnly ) {
@@ -216,7 +216,7 @@ function getTrackedEntities()
 
 function getMetaPrograms()
 {
-    return getD2Objects('programs', 'programs', '../api/programs.json', 'filter=programType:eq:WITH_REGISTRATION&paging=false&fields=id,version,programTrackedEntityAttributes[trackedEntityAttribute[id,optionSet[id,version]]],programStages[id,name,version,minDaysFromStart,standardInterval,periodType,generatedByEnrollmentDate,reportDateDescription,repeatable,autoGenerateEvent,openAfterEnrollment,reportDateToUse,programStageDataElements[dataElement[optionSet[id,version]]]]', 'temp');
+    return getD2Objects('programs', 'programs', '../api/programs.json', 'filter=programType:eq:WITH_REGISTRATION&paging=false&fields=id,version,programTrackedEntityAttributes[trackedEntityAttribute[id,optionSet[id,version]]],programStages[id,name,version,minDaysFromStart,standardInterval,periodType,generatedByEnrollmentDate,excecutionDateLabel,repeatable,autoGenerateEvent,openAfterEnrollment,reportDateToUse,programStageDataElements[dataElement[optionSet[id,version]]]]', 'temp');
 }
 
 function getPrograms( programs )
@@ -271,7 +271,7 @@ function getProgram( id )
         return $.ajax( {
             url: '../api/programs/' + id + '.json',
             type: 'GET',
-            data: 'fields=id,name,type,version,dataEntryMethod,enrollmentDateLabel,incidentDateLabel,displayIncidentDate,ignoreOverdueEvents,selectEnrollmentDatesInFuture,selectIncidentDatesInFuture,onlyEnrollOnce,externalAccess,displayOnAllOrgunit,registration,relationshipText,relationshipFromA,relatedProgram[id,name],relationshipType[id,name],trackedEntity[id,name,description],userRoles[id,name],organisationUnits[id,name],userRoles[id,name],programStages[id,name,version,minDaysFromStart,standardInterval,periodType,generatedByEnrollmentDate,reportDateDescription,repeatable,autoGenerateEvent,openAfterEnrollment,reportDateToUse],dataEntryForm[name,style,htmlCode,format],programTrackedEntityAttributes[displayInList,mandatory,allowFutureDate,trackedEntityAttribute[id,unique]]'
+            data: 'fields=id,name,type,version,dataEntryMethod,enrollmentDateLabel,incidentDateLabel,displayIncidentDate,ignoreOverdueEvents,selectEnrollmentDatesInFuture,selectIncidentDatesInFuture,onlyEnrollOnce,externalAccess,displayOnAllOrgunit,registration,relationshipText,relationshipFromA,relatedProgram[id,name],relationshipType[id,name],trackedEntity[id,name,description],userRoles[id,name],organisationUnits[id,name],userRoles[id,name],programStages[id,name,version,minDaysFromStart,standardInterval,periodType,generatedByEnrollmentDate,excecutionDateLabel,repeatable,autoGenerateEvent,openAfterEnrollment,reportDateToUse],dataEntryForm[name,style,htmlCode,format],programTrackedEntityAttributes[displayInList,mandatory,allowFutureDate,trackedEntityAttribute[id,unique]]'
         }).done( function( program ){            
             var ou = {};
             if(program.organisationUnits){
@@ -317,7 +317,7 @@ function getProgramStages( programs )
                     var p = d.promise();
                     dhis2.tc.store.get('programStages', programStage.id).done(function(obj) {
                         if(!obj || obj.version !== programStage.version) {
-                            promise = promise.then( getD2Object( programStage.id, 'programStages', '../api/programStages', 'fields=id,name,sortOrder,version,dataEntryForm,captureCoordinates,blockEntryForm,autoGenerateEvent,allowGenerateNextVisit,generatedByEnrollmentDate,remindCompleted,reportDateDescription,minDaysFromStart,repeatable,openAfterEnrollment,standardInterval,periodType,reportDateToUse,programStageSections[id,name,programStageDataElements[dataElement[id]]],programStageDataElements[displayInReports,allowProvidedElsewhere,allowFutureDate,compulsory,dataElement[id,code,name,description,formName,valueType,optionSetValue,optionSet[id]]]', 'idb' ) );
+                            promise = promise.then( getD2Object( programStage.id, 'programStages', '../api/programStages', 'fields=id,name,sortOrder,version,dataEntryForm,captureCoordinates,blockEntryForm,autoGenerateEvent,allowGenerateNextVisit,generatedByEnrollmentDate,remindCompleted,excecutionDateLabel,minDaysFromStart,repeatable,openAfterEnrollment,standardInterval,periodType,reportDateToUse,programStageSections[id,name,programStageDataElements[dataElement[id]]],programStageDataElements[displayInReports,allowProvidedElsewhere,allowFutureDate,compulsory,dataElement[id,code,name,description,formName,valueType,optionSetValue,optionSet[id]]]', 'idb' ) );
                         }
                         d.resolve();
                     });
@@ -455,7 +455,7 @@ function getTrackedEntityAttributes( data )
             dhis2.tc.store.get('attributes', teAttribute.id).done(function(obj) {
                 if((!obj || obj.version !== teAttribute.version) && attributesInPromise.indexOf(teAttribute.id) === -1) {
                     attributesInPromise.push( teAttribute.id );
-                    promise = promise.then( getD2Object( teAttribute.id, 'attributes', '../api/trackedEntityAttributes', 'fields=id,name,code,version,description,valueType,optionSetValue,confidential,inherit,sortOrderInVisitSchedule,sortOrderInListNoProgram,displayOnVisitSchedule,displayInListNoProgram,unique,optionSet[id,version]', 'idb' ) );
+                    promise = promise.then( getD2Object( teAttribute.id, 'attributes', '../api/trackedEntityAttributes', 'fields=id,name,code,version,description,valueType,optionSetValue,confidential,inherit,sortOrderInVisitSchedule,sortOrderInListNoProgram,displayOnVisitSchedule,displayInListNoProgram,unique,programScope,orgunitScope,confidential,optionSet[id,version],trackedEntity[id,name]', 'idb' ) );
                 }
                 d.resolve();
             });
@@ -573,7 +573,7 @@ function getMetaProgramRules( programs )
 
 function getProgramRules( programRules )
 {
-    return checkAndGetD2Objects( programRules, 'programRules', '../api/programRules', 'fields=id,name,condition,description,program[id],programStage[id],priority,programRuleActions[id,content,location,data,programRuleActionType,programStageSection[id],dataElement[id],trackedEntityAttribute[id]]');
+    return checkAndGetD2Objects( programRules, 'programRules', '../api/programRules', 'fields=id,name,condition,description,program[id],programStage[id],priority,programRuleActions[id,content,location,data,programRuleActionType,programStageSection[id],dataElement[id],trackedEntityAttribute[id],programIndicator[id],programStage[id]]');
 }
 
 function getMetaProgramRuleVariables( programs )

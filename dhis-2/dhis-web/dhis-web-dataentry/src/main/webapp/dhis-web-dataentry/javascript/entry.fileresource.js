@@ -1,17 +1,19 @@
 ( function ( $ ) {
     $.fn.fileEntryField = function() {
-        var $container = $( this );
+        var $field = $( this );
 
-        var $field = $container.find( '.entryfileresource' );
-        var $button = $container.find( '.upload-button' );
+        var $input = $field.find( 'input[class="entryfileresource-input"]');
+        var $displayField = $field.find( '.upload-field' );
 
-        var $fileInput = $container.find( 'input[type=file]' );
+        var $button = $field.find( '.upload-button' );
 
-        var $fileinfo = $container.find( '.upload-fileinfo' );
+        var $fileInput = $field.find( 'input[type=file]' );
+
+        var $fileinfo = $field.find( '.upload-fileinfo' );
         var $fileinfoName = $fileinfo.find( '.upload-fileinfo-name' );
         var $fileinfoSize = $fileinfo.find( '.upload-fileinfo-size' );
 
-        var $progress = $container.find( '.upload-progress' );
+        var $progress = $field.find( '.upload-progress' );
         var $progressBar = $progress.find( '.upload-progress-bar' );
         var $progressInfo = $progress.find( '.upload-progress-info' );
 
@@ -21,7 +23,7 @@
 
         var dataElementId = split.dataElementId;
         var optionComboId = split.optionComboId;
-        var orgUnitid = dhis2.de.currentOrganisationUnitId;
+        var orgUnitid = split.organisationUnitId;
         var periodId = $( '#selectedPeriodId' ).val();
 
         var formData = {
@@ -40,17 +42,14 @@
                 type: 'POST',
                 dataType: 'json',
                 data: postData,
-                success: function()
-                {
+                success: function() {
                     $fileinfoName.text( '' );
                     $fileinfoSize.text( '' );
-                    $fileinfo.hide();
-                    $field.css( 'background-color', '' );
-                    $field.data( 'value', '');
+                    $displayField.css( 'background-color', '' );
+                    $input.val( '' );
                     setButtonUpload();
                 },
-                error: function( data )
-                {
+                error: function( data ) {
                     console.log( data.errorThrown );
                 }
             } );
@@ -116,29 +115,74 @@
         };
 
         var onFileDataValueSavedSuccess = function( fileResource ) {
-            var name = fileResource.name, size = '(' + filesize( fileResource.contentLength ) + ')';
+            var name = fileResource.name;
+            var size = '(' + filesize( fileResource.contentLength ) + ')';
 
             $fileinfoName.text( name );
             $fileinfoSize.text( size );
-            $progressBar.toggleClass( 'upload-progress-bar-complete' );
             $fileinfo.show();
+            $displayField.css( 'background-color', dhis2.de.cst.colorYellow );
             resetAndHideProgress();
-            setButtonDelete();
-            $button.button( 'enable' );
+
+            function onFileResourceConfirmedStored() {
+                $fileinfoName.text( '' );
+
+                $( '<a>', {
+                    text: name,
+                    title: name,
+                    target: '_blank',
+                    href: '../api/dataValues/files?' + $.param( formData )
+                } ).appendTo( $fileinfoName );
+
+                $displayField.css( 'background-color', dhis2.de.cst.colorGreen );
+
+                setButtonDelete();
+                $button.button( 'enable' );
+            }
+
+            function pollForFileResourceStored() {
+                $.ajax( {
+                    url: '../api/fileResources/' + fileResource.id,
+                    type: 'GET',
+                    dataType: 'json'
+                } ).done( function( data, textStatus, jqXHR ) {
+                    if ( data.storageStatus != 'STORED' ) {
+                        setTimeout( pollForFileResourceStored, 4000 /* 4 sec polling time */ );
+                    } else {
+                        onFileResourceConfirmedStored();
+                    }
+                } ).fail( function( jqXHR, textStatus, errorThrown ) {
+                    // Really shouldn't happen...
+                    $displayField.css( 'background-color', dhis2.de.cst.colorRed );
+                    throw 'Checking storage status of file failed: ' + errorThrown;
+                } );
+            }
+
+            if ( fileResource.storageStatus == 'STORED' ) {
+                onFileResourceConfirmedStored();
+            } else {
+                setTimeout( pollForFileResourceStored, 1500 );
+            }
+        };
+
+        var updateProgress = function( loaded, total ) {
+            var percent = parseInt( loaded / total * 100, 10 );
+            $progressBar.css( 'width', percent + '%' );
+            $progressInfo.text( percent + '%' );
         };
 
         var disableField = function() {
             $button.button( 'disable' );
-            $field.toggleClass( 'entryfileresource-disabled', true );
+            $displayField.toggleClass( 'upload-field-disabled', true );
         };
 
         var enableField = function() {
             $button.button( 'enable' );
-            $field.toggleClass( 'entryfileresource-disabled', false );
+            $displayField.toggleClass( 'upload-field-disabled', false );
         };
 
         $( document ).on( dhis2.de.event.dataValuesLoaded, function() {
-            ( !$field.data( 'value' ) ) ? setButtonUpload() : setButtonDelete();
+            ( !$input.val() ) ? setButtonUpload() : setButtonDelete();
         } );
 
         $( document ).on( "dhis2.offline", disableField );
@@ -148,36 +192,31 @@
         setButtonBlocked();
 
         $fileInput.fileupload( {
-            url: '../api/dataValues/files',
+            url: '../api/fileResources',
             paramName: 'file',
             multipart: true,
             replaceFileInput: false,
             progressInterval: 250, /* ms */
-            formData: formData,
-            start: function( e )
-            {
+            start: function( e ) {
                 $button.button( 'disable' );
                 $progressBar.toggleClass( 'upload-progress-bar-complete', false );
                 $fileinfo.hide();
                 $progress.show();
             },
-            progress: function( e, data )
-            {
-                var percent = parseInt( data.loaded / data.total * 100, 10 );
-                $progressBar.css( 'width', percent + '%' );
-                $progressInfo.text( percent + '%' );
+            progress: function( e, data ) {
+                updateProgress( data.loaded, data.total );
             },
-            fail: function( e, data )
-            {
+            fail: function( e, data ) {
+                console.error( data.errorThrown );
+                $displayField.css( 'background-color', dhis2.de.cst.colorRed );
                 setHeaderDelayMessage( i18n_file_upload_failed );
-                console.log( data.errorThrown );
                 setButtonUpload();
             },
-            done: function( e, data )
-            {
+            done: function( e, data ) {
                 var fileResource = data.result.response.fileResource;
+                $input.val( fileResource.id );
 
-                saveFileResource( dataElementId, optionComboId, id, fileResource, function() {
+                saveFileResource( dataElementId, optionComboId, $input.attr( 'id' ), fileResource, function() {
                     onFileDataValueSavedSuccess( fileResource );
                 } );
             }

@@ -35,7 +35,6 @@ import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dxf2.common.IdSchemes;
 import org.hisp.dhis.dxf2.common.ImportOptions;
-import org.hisp.dhis.dxf2.common.JacksonUtils;
 import org.hisp.dhis.dxf2.events.event.Event;
 import org.hisp.dhis.dxf2.events.event.EventSearchParams;
 import org.hisp.dhis.dxf2.events.event.EventService;
@@ -48,10 +47,13 @@ import org.hisp.dhis.dxf2.events.report.EventRows;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
+import org.hisp.dhis.dxf2.render.RenderService;
+import org.hisp.dhis.dxf2.utils.InputUtils;
 import org.hisp.dhis.dxf2.webmessage.WebMessageException;
 import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.importexport.ImportStrategy;
 import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramStageInstanceService;
 import org.hisp.dhis.program.ProgramStatus;
 import org.hisp.dhis.scheduling.TaskCategory;
 import org.hisp.dhis.scheduling.TaskId;
@@ -59,7 +61,6 @@ import org.hisp.dhis.system.scheduling.Scheduler;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.webapi.service.WebMessageService;
 import org.hisp.dhis.webapi.utils.ContextUtils;
-import org.hisp.dhis.dxf2.utils.InputUtils;
 import org.hisp.dhis.webapi.utils.WebMessageUtils;
 import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,7 +75,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -99,7 +99,6 @@ public class EventController
     // Dependencies
     //--------------------------------------------------------------------------
 
-
     @Autowired
     private CurrentUserService currentUserService;
 
@@ -120,9 +119,15 @@ public class EventController
 
     @Autowired
     private WebMessageService webMessageService;
-    
+
     @Autowired
     private InputUtils inputUtils;
+
+    @Autowired
+    private RenderService renderService;
+
+    @Autowired
+    private ProgramStageInstanceService programStageInstanceService;
 
     // -------------------------------------------------------------------------
     // READ
@@ -151,17 +156,17 @@ public class EventController
         @RequestParam( required = false ) boolean skipPaging,
         @RequestParam( required = false ) String attachment,
         @RequestParam Map<String, String> parameters, IdSchemes idSchemes, Model model, HttpServletResponse response, HttpServletRequest request )
-         throws WebMessageException
+        throws WebMessageException
     {
         WebOptions options = new WebOptions( parameters );
 
         DataElementCategoryOptionCombo attributeOptionCombo = inputUtils.getAttributeOptionCombo( attributeCc, attributeCos );
-        
+
         if ( attributeOptionCombo == null )
         {
             throw new WebMessageException( WebMessageUtils.conflict( "Illegal attribute option combo identifier: " + attributeCc + " " + attributeCos ) );
         }
-        
+
         EventSearchParams params = eventService.getFromUrl( program, programStage, programStatus, followUp, orgUnit, ouMode,
             trackedEntityInstance, startDate, endDate, status, lastUpdated, attributeOptionCombo, idSchemes, page, pageSize, totalPages, skipPaging, false );
 
@@ -213,17 +218,15 @@ public class EventController
         @RequestParam( required = false ) boolean skipPaging,
         @RequestParam( required = false ) String attachment,
         @RequestParam( required = false, defaultValue = "false" ) boolean skipHeader,
-        @RequestParam Map<String, String> parameters,
-        IdSchemes idSchemes, Model model, HttpServletResponse response, HttpServletRequest request ) throws IOException, WebMessageException
+        IdSchemes idSchemes, HttpServletResponse response, HttpServletRequest request ) throws IOException, WebMessageException
     {
-        
         DataElementCategoryOptionCombo attributeOptionCombo = inputUtils.getAttributeOptionCombo( attributeCc, attributeCos );
-        
+
         if ( attributeOptionCombo == null )
         {
             throw new WebMessageException( WebMessageUtils.conflict( "Illegal attribute option combo identifier: " + attributeCc + " " + attributeCos ) );
         }
-        
+
         EventSearchParams params = eventService.getFromUrl( program, programStage, programStatus, followUp, orgUnit, ouMode,
             trackedEntityInstance, startDate, endDate, status, lastUpdated, attributeOptionCombo, idSchemes, page, pageSize, totalPages, skipPaging, false );
 
@@ -261,19 +264,19 @@ public class EventController
         @RequestParam( required = false ) String attributeCos,
         @RequestParam( required = false ) boolean totalPages,
         @RequestParam( required = false ) boolean skipPaging,
-        @RequestParam Map<String, String> parameters, Model model, HttpServletRequest request )
+        @RequestParam Map<String, String> parameters, Model model )
         throws WebMessageException
-        
+
     {
         WebOptions options = new WebOptions( parameters );
-        
+
         DataElementCategoryOptionCombo attributeOptionCombo = inputUtils.getAttributeOptionCombo( attributeCc, attributeCos );
-        
+
         if ( attributeOptionCombo == null )
         {
             throw new WebMessageException( WebMessageUtils.conflict( "Illegal attribute option combo identifier: " + attributeCc + " " + attributeCos ) );
         }
-        
+
         EventSearchParams params = eventService.getFromUrl( program, null, programStatus, null,
             orgUnit, ouMode, null, startDate, endDate, eventStatus, null, attributeOptionCombo, null, null, null, totalPages, skipPaging, true );
 
@@ -288,14 +291,14 @@ public class EventController
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_DATAVALUE_ADD')" )
     public String getEvent( @PathVariable( "uid" ) String uid, @RequestParam Map<String, String> parameters,
-        Model model, HttpServletRequest request, HttpServletResponse response ) throws Exception
+        Model model, HttpServletRequest request ) throws Exception
     {
         WebOptions options = new WebOptions( parameters );
         Event event = eventService.getEvent( uid );
 
         if ( event == null )
         {
-            throw new WebMessageException( WebMessageUtils.notFound( "Event not found for uid: " + uid ) );
+            throw new WebMessageException( WebMessageUtils.notFound( "Event not found for ID " + uid ) );
         }
 
         if ( options.hasLinks() )
@@ -343,16 +346,9 @@ public class EventController
         {
             ImportSummaries importSummaries = eventService.addEventsXml( inputStream, importOptions );
 
-            for ( ImportSummary importSummary : importSummaries.getImportSummaries() )
-            {
-                if ( !importOptions.isDryRun() )
-                {
-                    if ( !importSummary.getStatus().equals( ImportStatus.ERROR ) )
-                    {
-                        importSummary.setHref( ContextUtils.getRootPath( request ) + RESOURCE_PATH + "/" + importSummary.getReference() );
-                    }
-                }
-            }
+            importSummaries.getImportSummaries().stream()
+                .filter( importSummary -> !importOptions.isDryRun() && !importSummary.getStatus().equals( ImportStatus.ERROR ) && !importOptions.getImportStrategy().isDelete() )
+                .forEach( importSummary -> importSummary.setHref( ContextUtils.getRootPath( request ) + RESOURCE_PATH + "/" + importSummary.getReference() ) );
 
             if ( importSummaries.getImportSummaries().size() == 1 )
             {
@@ -389,16 +385,9 @@ public class EventController
         {
             ImportSummaries importSummaries = eventService.addEventsJson( inputStream, importOptions );
 
-            for ( ImportSummary importSummary : importSummaries.getImportSummaries() )
-            {
-                if ( !importOptions.isDryRun() )
-                {
-                    if ( !importSummary.getStatus().equals( ImportStatus.ERROR ) )
-                    {
-                        importSummary.setHref( ContextUtils.getRootPath( request ) + RESOURCE_PATH + "/" + importSummary.getReference() );
-                    }
-                }
-            }
+            importSummaries.getImportSummaries().stream()
+                .filter( importSummary -> !importOptions.isDryRun() && !importSummary.getStatus().equals( ImportStatus.ERROR ) && !importOptions.getImportStrategy().isDelete() )
+                .forEach( importSummary -> importSummary.setHref( ContextUtils.getRootPath( request ) + RESOURCE_PATH + "/" + importSummary.getReference() ) );
 
             if ( importSummaries.getImportSummaries().size() == 1 )
             {
@@ -457,14 +446,12 @@ public class EventController
     @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_DATAVALUE_ADD')" )
     public void putXmlEvent( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, ImportOptions importOptions ) throws IOException, WebMessageException
     {
-        Event event = eventService.getEvent( uid );
-
-        if ( event == null )
+        if ( !programStageInstanceService.programStageInstanceExists( uid ) )
         {
-            throw new WebMessageException( WebMessageUtils.notFound( "Event not found for uid: " + uid ) );
+            throw new WebMessageException( WebMessageUtils.notFound( "Event not found for ID " + uid ) );
         }
 
-        Event updatedEvent = JacksonUtils.fromXml( request.getInputStream(), Event.class );
+        Event updatedEvent = renderService.fromXml( request.getInputStream(), Event.class );
         updatedEvent.setEvent( uid );
 
         ImportSummary importSummary = eventService.updateEvent( updatedEvent, false, importOptions );
@@ -475,14 +462,12 @@ public class EventController
     @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_DATAVALUE_ADD')" )
     public void putJsonEvent( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, ImportOptions importOptions ) throws IOException, WebMessageException
     {
-        Event event = eventService.getEvent( uid );
-
-        if ( event == null )
+        if ( !programStageInstanceService.programStageInstanceExists( uid ) )
         {
-            throw new WebMessageException( WebMessageUtils.notFound( "Event not found for uid: " + uid ) );
+            throw new WebMessageException( WebMessageUtils.notFound( "Event not found for ID " + uid ) );
         }
 
-        Event updatedEvent = JacksonUtils.fromJson( request.getInputStream(), Event.class );
+        Event updatedEvent = renderService.fromJson( request.getInputStream(), Event.class );
         updatedEvent.setEvent( uid );
 
         ImportSummary importSummary = eventService.updateEvent( updatedEvent, false, importOptions );
@@ -493,21 +478,19 @@ public class EventController
     @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_DATAVALUE_ADD')" )
     public void putJsonEventSingleValue( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, @PathVariable( "dataElementUid" ) String dataElementUid ) throws IOException, WebMessageException
     {
-        Event event = eventService.getEvent( uid );
-
-        if ( event == null )
+        if ( !programStageInstanceService.programStageInstanceExists( uid ) )
         {
-            throw new WebMessageException( WebMessageUtils.notFound( "Event not found for uid: " + uid ) );
+            throw new WebMessageException( WebMessageUtils.notFound( "Event not found for ID " + uid ) );
         }
 
         DataElement dataElement = dataElementService.getDataElement( dataElementUid );
 
         if ( dataElement == null )
         {
-            throw new WebMessageException( WebMessageUtils.notFound( "DataElement not found for uid: " + dataElementUid ) );
+            throw new WebMessageException( WebMessageUtils.notFound( "DataElement not found for ID " + dataElementUid ) );
         }
 
-        Event updatedEvent = JacksonUtils.fromJson( request.getInputStream(), Event.class );
+        Event updatedEvent = renderService.fromJson( request.getInputStream(), Event.class );
         updatedEvent.setEvent( uid );
 
         ImportSummary importSummary = eventService.updateEvent( updatedEvent, true );
@@ -518,14 +501,12 @@ public class EventController
     @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_DATAVALUE_ADD')" )
     public void putJsonEventForNote( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, ImportOptions importOptions ) throws IOException, WebMessageException
     {
-        Event event = eventService.getEvent( uid );
-
-        if ( event == null )
+        if ( !programStageInstanceService.programStageInstanceExists( uid ) )
         {
-            throw new WebMessageException( WebMessageUtils.notFound( "Event not found for uid: " + uid ) );
+            throw new WebMessageException( WebMessageUtils.notFound( "Event not found for ID " + uid ) );
         }
 
-        Event updatedEvent = JacksonUtils.fromJson( request.getInputStream(), Event.class );
+        Event updatedEvent = renderService.fromJson( request.getInputStream(), Event.class );
         updatedEvent.setEvent( uid );
 
         eventService.updateEventForNote( updatedEvent );
@@ -536,18 +517,16 @@ public class EventController
     @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_DATAVALUE_ADD')" )
     public void putJsonEventForEventDate( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, ImportOptions importOptions ) throws IOException, WebMessageException
     {
-        Event event = eventService.getEvent( uid );
-
-        if ( event == null )
+        if ( !programStageInstanceService.programStageInstanceExists( uid ) )
         {
-            throw new WebMessageException( WebMessageUtils.notFound( "Event not found for uid: " + uid ) );
+            throw new WebMessageException( WebMessageUtils.notFound( "Event not found for ID " + uid ) );
         }
 
-        Event updatedEvent = JacksonUtils.fromJson( request.getInputStream(), Event.class );
+        Event updatedEvent = renderService.fromJson( request.getInputStream(), Event.class );
         updatedEvent.setEvent( uid );
 
         eventService.updateEventForEventDate( updatedEvent );
-        webMessageService.send( WebMessageUtils.ok( "Event updated: " + uid ), response, request );
+        webMessageService.send( WebMessageUtils.ok( "Event updated " + uid ), response, request );
     }
 
     // -------------------------------------------------------------------------
@@ -556,16 +535,15 @@ public class EventController
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.DELETE )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_DATAVALUE_DELETE')" )
-    public void deleteEvent( HttpServletResponse response, @PathVariable( "uid" ) String uid ) throws WebMessageException
+    public void deleteEvent( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid ) throws WebMessageException
     {
-        Event event = eventService.getEvent( uid );
-
-        if ( event == null )
+        if ( !programStageInstanceService.programStageInstanceExists( uid ) )
         {
-            throw new WebMessageException( WebMessageUtils.notFound( "Event not found for uid: " + uid ) );
+            throw new WebMessageException( WebMessageUtils.notFound( "Event not found for ID " + uid ) );
         }
 
-        response.setStatus( HttpServletResponse.SC_NO_CONTENT );
-        eventService.deleteEvent( event );
+        response.setStatus( HttpServletResponse.SC_OK );
+        ImportSummary importSummary = eventService.deleteEvent( uid );
+        webMessageService.send( WebMessageUtils.importSummary( importSummary ), response, request );
     }
 }

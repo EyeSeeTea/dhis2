@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.hisp.dhis</groupId>
     <artifactId>dhis-services</artifactId>
-    <version>2.21-SNAPSHOT</version>
+    <version>2.22-SNAPSHOT</version>
   </parent>
 
   <artifactId>dhis-service-core</artifactId>
@@ -54,10 +54,6 @@
     <!-- Other -->
 
     <dependency>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-email</artifactId>
     </dependency>
@@ -97,8 +93,12 @@
       <groupId>org.apache.jclouds.provider</groupId>
       <artifactId>aws-s3</artifactId>
     </dependency>
-
-     <!-- SMS -->
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-ldap</artifactId>
+    </dependency>
+    
+    <!-- SMS -->
 
     <dependency>
       <groupId>org.smslib</groupId>

@@ -121,7 +121,7 @@ public class HibernateTrackedEntityInstanceStore
 
     private String buildTrackedEntityInstanceHql( TrackedEntityInstanceQueryParams params )
     {
-        String hql = "from TrackedEntityInstance tei";
+        String hql = "select distinct tei from TrackedEntityInstance tei left join fetch tei.attributeValues";
         SqlHelper hlp = new SqlHelper( true );
 
         if ( params.hasTrackedEntity() )
@@ -401,7 +401,7 @@ public class HibernateTrackedEntityInstanceStore
 
             if ( params.hasProgramStatus() )
             {
-                sql += "and pi.status = " + params.getProgramStatus() + " ";
+                sql += "and pi.status = '" + params.getProgramStatus() + "' ";
             }
 
             if ( params.hasFollowUp() )
@@ -541,5 +541,12 @@ public class HibernateTrackedEntityInstanceStore
         }
 
         return null;
+    }
+
+    @Override
+    public boolean exists( String uid )
+    {
+        Integer result = jdbcTemplate.queryForObject( "select count(*) from trackedentityinstance where uid=?", Integer.class, uid );
+        return result != null && result > 0;
     }
 }

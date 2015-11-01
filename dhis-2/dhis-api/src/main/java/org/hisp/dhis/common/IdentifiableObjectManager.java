@@ -117,6 +117,10 @@ public interface IdentifiableObjectManager
 
     <T extends NameableObject> Map<String, T> getIdMapNoAcl( Class<T> clazz, NameableProperty property );
 
+    <T extends IdentifiableObject> List<T> getObjects( Class<T> clazz, IdentifiableProperty property, Collection<String> identifiers );
+
+    <T extends IdentifiableObject> List<T> getObjects( Class<T> clazz, Collection<Integer> identifiers );
+    
     <T extends IdentifiableObject> T getObject( Class<T> clazz, IdentifiableProperty property, String id );
 
     IdentifiableObject getObject( String uid, String simpleClassName );
@@ -142,6 +146,8 @@ public interface IdentifiableObjectManager
     <T extends DimensionalObject> List<T> getDataDimensionsNoAcl( Class<T> clazz );
 
     void refresh( Object object );
+
+    void evict( Object object );
 
     // -------------------------------------------------------------------------
     // NO ACL

@@ -29,20 +29,21 @@ package org.hisp.dhis.webapi.controller.event;
  */
 
 import com.google.common.collect.Lists;
-
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.common.cache.CacheStrategy;
 import org.hisp.dhis.commons.util.TextUtils;
-import org.hisp.dhis.dxf2.common.JacksonUtils;
+import org.hisp.dhis.dxf2.common.ImportOptions;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstanceService;
-import org.hisp.dhis.fieldfilter.FieldFilterService;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
+import org.hisp.dhis.dxf2.render.RenderService;
+import org.hisp.dhis.dxf2.webmessage.WebMessageException;
 import org.hisp.dhis.event.EventStatus;
+import org.hisp.dhis.fieldfilter.FieldFilterService;
 import org.hisp.dhis.importexport.ImportStrategy;
 import org.hisp.dhis.node.NodeUtils;
 import org.hisp.dhis.node.types.CollectionNode;
@@ -71,7 +72,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
@@ -103,6 +103,9 @@ public class TrackedEntityInstanceController
     @Autowired
     private WebMessageService webMessageService;
 
+    @Autowired
+    private RenderService renderService;
+
     // -------------------------------------------------------------------------
     // READ
     // -------------------------------------------------------------------------
@@ -127,8 +130,7 @@ public class TrackedEntityInstanceController
         @RequestParam( required = false ) Integer page,
         @RequestParam( required = false ) Integer pageSize,
         @RequestParam( required = false ) boolean totalPages,
-        @RequestParam( required = false ) boolean skipPaging,
-        HttpServletResponse response ) throws Exception
+        @RequestParam( required = false ) boolean skipPaging ) throws Exception
     {
         List<String> fields = Lists.newArrayList( contextService.getParameterValues( "fields" ) );
 
@@ -142,7 +144,7 @@ public class TrackedEntityInstanceController
             program, programStatus, followUp, programStartDate, programEndDate, trackedEntity,
             eventStatus, eventStartDate, eventEndDate, skipMeta, page, pageSize, totalPages, skipPaging );
 
-        List<TrackedEntityInstance> trackedEntityInstances = trackedEntityInstanceService.getTrackedEntityInstances( instanceService.getTrackedEntityInstances( params ) );
+        List<TrackedEntityInstance> trackedEntityInstances = trackedEntityInstanceService.getTrackedEntityInstances( params );
 
         RootNode rootNode = NodeUtils.createMetadata();
         rootNode.addChild( fieldFilterService.filter( TrackedEntityInstance.class, trackedEntityInstances, fields ) );
@@ -209,7 +211,6 @@ public class TrackedEntityInstanceController
         @RequestParam( required = false ) Integer pageSize,
         @RequestParam( required = false ) boolean totalPages,
         @RequestParam( required = false ) boolean skipPaging,
-        Model model,
         HttpServletResponse response ) throws Exception
     {
         Set<String> orgUnits = TextUtils.splitToArray( ou, TextUtils.SEMICOLON );
@@ -243,7 +244,6 @@ public class TrackedEntityInstanceController
         @RequestParam( required = false ) Integer pageSize,
         @RequestParam( required = false ) boolean totalPages,
         @RequestParam( required = false ) boolean skipPaging,
-        Model model,
         HttpServletResponse response ) throws Exception
     {
         Set<String> orgUnits = TextUtils.splitToArray( ou, TextUtils.SEMICOLON );
@@ -277,7 +277,6 @@ public class TrackedEntityInstanceController
         @RequestParam( required = false ) Integer pageSize,
         @RequestParam( required = false ) boolean totalPages,
         @RequestParam( required = false ) boolean skipPaging,
-        Model model,
         HttpServletResponse response ) throws Exception
     {
         Set<String> orgUnits = TextUtils.splitToArray( ou, TextUtils.SEMICOLON );
@@ -317,16 +316,17 @@ public class TrackedEntityInstanceController
 
     @RequestMapping( value = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_XML_VALUE )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_INSTANCE_ADD')" )
-    public void postTrackedEntityInstanceXml( @RequestParam( defaultValue = "CREATE" ) ImportStrategy strategy, HttpServletRequest request, HttpServletResponse response )
-        throws IOException
+    public void postTrackedEntityInstanceXml( @RequestParam( defaultValue = "CREATE" ) ImportStrategy strategy,
+        ImportOptions importOptions, HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
-        ImportSummaries importSummaries = trackedEntityInstanceService.addTrackedEntityInstanceXml( request.getInputStream(), strategy );
+        importOptions.setStrategy( strategy );
+        ImportSummaries importSummaries = trackedEntityInstanceService.addTrackedEntityInstanceXml( request.getInputStream(), importOptions );
         response.setContentType( MediaType.APPLICATION_XML_VALUE );
 
         if ( importSummaries.getImportSummaries().size() > 1 )
         {
             response.setStatus( HttpServletResponse.SC_CREATED );
-            JacksonUtils.toXml( response.getOutputStream(), importSummaries );
+            renderService.toXml( response.getOutputStream(), importSummaries );
         }
         else
         {
@@ -354,16 +354,17 @@ public class TrackedEntityInstanceController
 
     @RequestMapping( value = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_INSTANCE_ADD')" )
-    public void postTrackedEntityInstanceJson( @RequestParam( defaultValue = "CREATE" ) ImportStrategy strategy, HttpServletRequest request, HttpServletResponse response )
-        throws IOException
+    public void postTrackedEntityInstanceJson( @RequestParam( defaultValue = "CREATE" ) ImportStrategy strategy,
+        ImportOptions importOptions, HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
-        ImportSummaries importSummaries = trackedEntityInstanceService.addTrackedEntityInstanceJson( request.getInputStream(), strategy );
+        importOptions.setStrategy( strategy );
+        ImportSummaries importSummaries = trackedEntityInstanceService.addTrackedEntityInstanceJson( request.getInputStream(), importOptions );
         response.setContentType( MediaType.APPLICATION_JSON_VALUE );
 
         if ( importSummaries.getImportSummaries().size() > 1 )
         {
             response.setStatus( HttpServletResponse.SC_CREATED );
-            JacksonUtils.toJson( response.getOutputStream(), importSummaries );
+            renderService.toJson( response.getOutputStream(), importSummaries );
         }
         else
         {
@@ -418,11 +419,14 @@ public class TrackedEntityInstanceController
     @RequestMapping( value = "/{id}", method = RequestMethod.DELETE )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_INSTANCE_ADD')" )
     @ResponseStatus( HttpStatus.NO_CONTENT )
-    public void deleteTrackedEntityInstance( @PathVariable String id )
-        throws NotFoundException
+    public void deleteTrackedEntityInstance( @PathVariable String id ) throws WebMessageException
     {
-        TrackedEntityInstance trackedEntityInstance = getTrackedEntityInstance( id );
-        trackedEntityInstanceService.deleteTrackedEntityInstance( trackedEntityInstance );
+        if ( !instanceService.trackedEntityInstanceExists( id ) )
+        {
+            throw new WebMessageException( WebMessageUtils.notFound( "Tracked entity instance not found for ID " + id ) );
+        }
+
+        trackedEntityInstanceService.deleteTrackedEntityInstance( id );
     }
 
     // -------------------------------------------------------------------------

@@ -11,6 +11,7 @@ Ext.onReady( function() {
 		extendCore,
 		createViewport,
 		dimConf,
+        chartConf,
 
 		ns = {
 			core: {},
@@ -2686,6 +2687,8 @@ Ext.onReady( function() {
 				favorite = Ext.clone(ns.app.layout);
 
 				// server sync
+                favorite.type = chartConf.c2s[favorite.type];
+                
 				favorite.showData = favorite.showValues;
 				delete favorite.showValues;
 
@@ -4435,8 +4438,7 @@ Ext.onReady( function() {
 					'ou': {id: 'ou', name: 'Organisation units'}
 				},
                 extendDim = function(dim) {
-                    var md = ns.app.response.metaData,
-                        dimConf = ns.core.conf.finals.dimension;
+                    var md = ns.app.response.metaData;
 
                     dim.id = dim.id || dim.dimension;
                     dim.name = dim.name || md.names[dim.dimension] || dimConf.objectNameMap[dim.dimension].name;
@@ -4754,27 +4756,27 @@ Ext.onReady( function() {
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('THIS_WEEK') - 1],
+                    relativePeriodId: 'THIS_WEEK',
                     boxLabel: NS.i18n.this_week
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_WEEK') - 1],
+                    relativePeriodId: 'LAST_WEEK',
                     boxLabel: NS.i18n.last_week
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_4_WEEKS') - 1],
+                    relativePeriodId: 'LAST_4_WEEKS',
                     boxLabel: NS.i18n.last_4_weeks
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_12_WEEKS') - 1],
+                    relativePeriodId: 'LAST_12_WEEKS',
                     boxLabel: NS.i18n.last_12_weeks
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_52_WEEKS') - 1],
+                    relativePeriodId: 'LAST_52_WEEKS',
                     boxLabel: NS.i18n.last_52_weeks
                 }
             ]
@@ -4794,27 +4796,27 @@ Ext.onReady( function() {
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('THIS_MONTH') - 1],
+                    relativePeriodId: 'THIS_MONTH',
                     boxLabel: NS.i18n.this_month
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_MONTH') - 1],
+                    relativePeriodId: 'LAST_MONTH',
                     boxLabel: NS.i18n.last_month
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_3_MONTHS') - 1],
+                    relativePeriodId: 'LAST_3_MONTHS',
                     boxLabel: NS.i18n.last_3_months
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_6_MONTHS') - 1],
+                    relativePeriodId: 'LAST_6_MONTHS',
                     boxLabel: NS.i18n.last_6_months
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_12_MONTHS') - 1],
+                    relativePeriodId: 'LAST_12_MONTHS',
                     boxLabel: NS.i18n.last_12_months,
                     checked: true
                 }
@@ -4835,17 +4837,17 @@ Ext.onReady( function() {
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('THIS_BIMONTH') - 1],
+                    relativePeriodId: 'THIS_BIMONTH',
                     boxLabel: NS.i18n.this_bimonth
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_BIMONTH') - 1],
+                    relativePeriodId: 'LAST_BIMONTH',
                     boxLabel: NS.i18n.last_bimonth
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_6_BIMONTHS') - 1],
+                    relativePeriodId: 'LAST_6_BIMONTHS',
                     boxLabel: NS.i18n.last_6_bimonths
                 }
             ]
@@ -4865,17 +4867,17 @@ Ext.onReady( function() {
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('THIS_QUARTER') - 1],
+                    relativePeriodId: 'THIS_QUARTER',
                     boxLabel: NS.i18n.this_quarter
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_QUARTER') - 1],
+                    relativePeriodId: 'LAST_QUARTER',
                     boxLabel: NS.i18n.last_quarter
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_4_QUARTERS') - 1],
+                    relativePeriodId: 'LAST_4_QUARTERS',
                     boxLabel: NS.i18n.last_4_quarters
                 }
             ]
@@ -4895,17 +4897,17 @@ Ext.onReady( function() {
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('THIS_SIX_MONTH') - 1],
+                    relativePeriodId: 'THIS_SIX_MONTH',
                     boxLabel: NS.i18n.this_sixmonth
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_SIX_MONTH') - 1],
+                    relativePeriodId: 'LAST_SIX_MONTH',
                     boxLabel: NS.i18n.last_sixmonth
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_2_SIXMONTHS') - 1],
+                    relativePeriodId: 'LAST_2_SIXMONTHS',
                     boxLabel: NS.i18n.last_2_sixmonths
                 }
             ]
@@ -4926,17 +4928,17 @@ Ext.onReady( function() {
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('THIS_FINANCIAL_YEAR') - 1],
+                    relativePeriodId: 'THIS_FINANCIAL_YEAR',
                     boxLabel: NS.i18n.this_financial_year
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_FINANCIAL_YEAR') - 1],
+                    relativePeriodId: 'LAST_FINANCIAL_YEAR',
                     boxLabel: NS.i18n.last_financial_year
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_5_FINANCIAL_YEARS') - 1],
+                    relativePeriodId: 'LAST_5_FINANCIAL_YEARS',
                     boxLabel: NS.i18n.last_5_financial_years
                 }
             ]
@@ -4956,17 +4958,17 @@ Ext.onReady( function() {
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('THIS_YEAR') - 1],
+                    relativePeriodId: 'THIS_YEAR',
                     boxLabel: NS.i18n.this_year
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_YEAR') - 1],
+                    relativePeriodId: 'LAST_YEAR',
                     boxLabel: NS.i18n.last_year
                 },
                 {
                     xtype: 'checkbox',
-                    relativePeriodId: rp[rp.push('LAST_5_YEARS') - 1],
+                    relativePeriodId: 'LAST_5_YEARS',
                     boxLabel: NS.i18n.last_5_years
                 }
             ]
@@ -7160,9 +7162,9 @@ Ext.onReady( function() {
 
         column = Ext.create('Ext.button.Button', {
             xtype: 'button',
-            chartType: ns.core.conf.finals.chart.column,
+            chartType: chartConf.client.column,
             icon: 'images/column.png',
-            name: ns.core.conf.finals.chart.column,
+            name: chartConf.client.column,
             tooltipText: NS.i18n.column_chart,
             pressed: true,
             listeners: {
@@ -7172,9 +7174,9 @@ Ext.onReady( function() {
 
         stackedcolumn = Ext.create('Ext.button.Button', {
             xtype: 'button',
-            chartType: ns.core.conf.finals.chart.stackedcolumn,
+            chartType: chartConf.client.stackedcolumn,
             icon: 'images/column-stacked.png',
-            name: ns.core.conf.finals.chart.stackedcolumn,
+            name: chartConf.client.stackedcolumn,
             tooltipText: NS.i18n.stacked_column_chart,
             listeners: {
                 added: buttonAddedListener
@@ -7183,9 +7185,9 @@ Ext.onReady( function() {
 
         bar = Ext.create('Ext.button.Button', {
             xtype: 'button',
-            chartType: ns.core.conf.finals.chart.bar,
+            chartType: chartConf.client.bar,
             icon: 'images/bar.png',
-            name: ns.core.conf.finals.chart.bar,
+            name: chartConf.client.bar,
             tooltipText: NS.i18n.bar_chart,
             listeners: {
                 added: buttonAddedListener
@@ -7194,9 +7196,9 @@ Ext.onReady( function() {
 
         stackedbar = Ext.create('Ext.button.Button', {
             xtype: 'button',
-            chartType: ns.core.conf.finals.chart.stackedbar,
+            chartType: chartConf.client.stackedbar,
             icon: 'images/bar-stacked.png',
-            name: ns.core.conf.finals.chart.stackedbar,
+            name: chartConf.client.stackedbar,
             tooltipText: NS.i18n.stacked_bar_chart,
             listeners: {
                 added: buttonAddedListener
@@ -7205,9 +7207,9 @@ Ext.onReady( function() {
 
         line = Ext.create('Ext.button.Button', {
             xtype: 'button',
-            chartType: ns.core.conf.finals.chart.line,
+            chartType: chartConf.client.line,
             icon: 'images/line.png',
-            name: ns.core.conf.finals.chart.line,
+            name: chartConf.client.line,
             tooltipText: NS.i18n.line_chart,
             listeners: {
                 added: buttonAddedListener
@@ -7216,9 +7218,9 @@ Ext.onReady( function() {
 
         area = Ext.create('Ext.button.Button', {
             xtype: 'button',
-            chartType: ns.core.conf.finals.chart.area,
+            chartType: chartConf.client.area,
             icon: 'images/area.png',
-            name: ns.core.conf.finals.chart.area,
+            name: chartConf.client.area,
             tooltipText: NS.i18n.area_chart,
             listeners: {
                 added: buttonAddedListener
@@ -7227,9 +7229,9 @@ Ext.onReady( function() {
 
         pie = Ext.create('Ext.button.Button', {
             xtype: 'button',
-            chartType: ns.core.conf.finals.chart.pie,
+            chartType: chartConf.client.pie,
             icon: 'images/pie.png',
-            name: ns.core.conf.finals.chart.pie,
+            name: chartConf.client.pie,
             tooltipText: NS.i18n.pie_chart,
             listeners: {
                 added: buttonAddedListener
@@ -7238,9 +7240,9 @@ Ext.onReady( function() {
 
         radar = Ext.create('Ext.button.Button', {
             xtype: 'button',
-            chartType: ns.core.conf.finals.chart.radar,
+            chartType: chartConf.client.radar,
             icon: 'images/radar.png',
-            name: ns.core.conf.finals.chart.radar,
+            name: chartConf.client.radar,
             tooltipText: NS.i18n.radar_chart,
             listeners: {
                 added: buttonAddedListener
@@ -7911,6 +7913,8 @@ Ext.onReady( function() {
 			layout: 'border',
             getLayoutWindow: getLayoutWindow,
             chartType: chartType,
+            westRegion: westRegion,
+            centerRegion: centerRegion,
             update: update,
 			items: [
 				westRegion,
@@ -7973,6 +7977,11 @@ Ext.onReady( function() {
 						}
 					}
 
+                    // remove params from url
+                    if (id || session) {
+                        history.pushState(null, null, '.')
+                    }
+
                     var initEl = document.getElementById('init');
                     initEl.parentNode.removeChild(initEl);
 
@@ -8008,6 +8017,7 @@ Ext.onReady( function() {
 				extendCore(ns.core);
 
 				dimConf = ns.core.conf.finals.dimension;
+                chartConf = ns.core.conf.finals.chart;
 				ns.app.viewport = createViewport();
 
                 ns.core.app.getViewportWidth = function() { return ns.app.viewport.getWidth(); };
@@ -8110,7 +8120,6 @@ Ext.onReady( function() {
                                                 NS.i18n = dhis2.util.parseJavaProperties(r.responseText);
 
                                                 if (keyUiLocale === defaultKeyUiLocale) {
-                                                    Ext.get('init').update(NS.i18n.initializing + '..');
                                                     fn();
                                                 }
                                                 else {
@@ -8123,7 +8132,6 @@ Ext.onReady( function() {
                                                             console.log('No translations found for system locale (' + keyUiLocale + ')');
                                                         },
                                                         callback: function() {
-                                                            Ext.get('init').update(NS.i18n.initializing + '..');
                                                             fn();
                                                         }
                                                     });
@@ -8134,7 +8142,6 @@ Ext.onReady( function() {
                                                     url: 'i18n/i18n_app_' + keyUiLocale + '.properties',
                                                     success: function(r) {
                                                         NS.i18n = dhis2.util.parseJavaProperties(r.responseText);
-                                                        Ext.get('init').update(NS.i18n.initializing + '..');
                                                     },
                                                     failure: function() {
                                                         alert('No translations found for system locale (' + keyUiLocale + ') or default locale (' + defaultKeyUiLocale + ').');

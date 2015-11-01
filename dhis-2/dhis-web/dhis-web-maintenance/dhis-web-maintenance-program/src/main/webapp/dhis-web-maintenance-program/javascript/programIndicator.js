@@ -1,3 +1,10 @@
+dhis2.util.namespace( 'dhis2.pi' );
+
+dhis2.pi.aggregatableValueTypes = [
+  'BOOLEAN', 'TRUE_ONLY', 'NUMBER', 'UNIT_INTERVAL', 'PERCENTAGE',
+  'INTEGER', 'INTEGER_POSITIVE', 'INTEGER_NEGATIVE', 'INTEGER_ZERO_OR_POSITIVE',
+  'DATE', 'DATETIME' ];  
+
 $(function() {
   dhis2.contextmenu.makeContextMenu({
     menuId: 'contextMenu',
@@ -72,7 +79,12 @@ function getTrackedEntityDataElements( type ) {
     }, function( json ) {
       var dataElements = jQuery('#' + fieldId);
       for( i in json.dataElements ) {
-        dataElements.append("<option value='" + json.dataElements[i].id + "' title='" + json.dataElements[i].name + "' suggested='" + json.dataElements[i].optionset + "'>" + json.dataElements[i].name + "</option>");
+		var de = json.dataElements[i];
+		
+		if ( !('expression' == type && de.valueType && dhis2.pi.aggregatableValueTypes.indexOf(de.valueType) == -1)) {
+          dataElements.append("<option value='" + json.dataElements[i].id + "' title='" + json.dataElements[i].name + 
+            "' suggested='" + json.dataElements[i].optionset + "'>" + json.dataElements[i].name + "</option>");
+        }
       }
     });
 }
@@ -129,14 +141,18 @@ function getExpressionDescription( type ) {
 	}
 	else
 	{
-		$.getJSON('../api/programIndicators/' + type + '/description', {
-			expression: expression
-		}, function( json ) {
-			if( 'OK' == json.status ){
-				setInnerHTML(type + '-description', json.description);
-			}
-			else {
-				setInnerHTML(type + '-description', json.message);
+		$.ajax({
+			url: '../api/programIndicators/' + type + '/description',
+			type: 'post',
+			data: expression,
+			contentType: 'text/plain',
+			success: function( json ) {
+				if ('OK' == json.status) {
+					setInnerHTML(type + '-description', json.description);
+				}
+				else {
+					setInnerHTML(type + '-description', json.message);
+				}
 			}
 		});
 	}
@@ -164,7 +180,7 @@ function setExpressionCount(type) {
 		$('#expression').val('V{enrollment_count}');
 	}
 	else if ('tei' == type) {
-		$('.#expression').val('V{tei_count}');
+		$('#expression').val('V{tei_count}');
 	}
 }
 

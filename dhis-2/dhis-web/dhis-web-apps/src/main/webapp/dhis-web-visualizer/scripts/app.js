@@ -11,6 +11,7 @@ Ext.onReady( function() {
         extendCore,
         createViewport,
         dimConf,
+        chartConf,
 
         ns = {
             core: {},
@@ -1199,6 +1200,8 @@ Ext.onReady( function() {
 				dimensions = [].concat(favorite.columns || [], favorite.rows || [], favorite.filters || []);
 
 				// server sync
+                favorite.type = chartConf.c2s[favorite.type];
+
 				favorite.showData = favorite.showValues;
 				delete favorite.showValues;
 
@@ -2549,6 +2552,7 @@ Ext.onReady( function() {
 					xColAxis,
 					xRowAxis,
 					config,
+                    dx = dimConf.data.objectName,
                     ind = dimConf.indicator.objectName,
                     legendSet,
                     fn;
@@ -2599,9 +2603,9 @@ Ext.onReady( function() {
 				ns.app.xResponse = xResponse;
 
                 // legend set
-                if (xLayout.type === 'gauge' && Ext.Array.contains(xLayout.axisObjectNames, ind) && xLayout.objectNameIdsMap[ind].length) {
+                if (xLayout.type === 'gauge' && Ext.Array.contains(xLayout.axisObjectNames, dx) && xLayout.dimensionNameIdsMap[dx].length) {
                     Ext.Ajax.request({
-                        url: ns.core.init.contextPath + '/api/indicators/' + xLayout.objectNameIdsMap[ind][0] + '.json?fields=legendSet[legends[id,name,startValue,endValue,color]]',
+                        url: ns.core.init.contextPath + '/api/indicators/' + xLayout.dimensionNameIdsMap[dx][0] + '.json?fields=legendSet[legends[id,name,startValue,endValue,color]]',
                         disableCaching: false,
                         success: function(r) {
                             legendSet = Ext.decode(r.responseText).legendSet;
@@ -2757,9 +2761,9 @@ Ext.onReady( function() {
 
         column = Ext.create('Ext.button.Button', {
             xtype: 'button',
-            chartType: ns.core.conf.finals.chart.column,
+            chartType: chartConf.client.column,
             icon: 'images/column.png',
-            name: ns.core.conf.finals.chart.column,
+            name: chartConf.client.column,
             tooltipText: NS.i18n.column_chart,
             pressed: true,
             listeners: {
@@ -2769,9 +2773,9 @@ Ext.onReady( function() {
 
         stackedcolumn = Ext.create('Ext.button.Button', {
             xtype: 'button',
-            chartType: ns.core.conf.finals.chart.stackedcolumn,
+            chartType: chartConf.client.stackedcolumn,
             icon: 'images/column-stacked.png',
-            name: ns.core.conf.finals.chart.stackedcolumn,
+            name: chartConf.client.stackedcolumn,
             tooltipText: NS.i18n.stacked_column_chart,
             listeners: {
                 added: buttonAddedListener
@@ -2780,9 +2784,9 @@ Ext.onReady( function() {
 
         bar = Ext.create('Ext.button.Button', {
             xtype: 'button',
-            chartType: ns.core.conf.finals.chart.bar,
+            chartType: chartConf.client.bar,
             icon: 'images/bar.png',
-            name: ns.core.conf.finals.chart.bar,
+            name: chartConf.client.bar,
             tooltipText: NS.i18n.bar_chart,
             listeners: {
                 added: buttonAddedListener
@@ -2791,9 +2795,9 @@ Ext.onReady( function() {
 
         stackedbar = Ext.create('Ext.button.Button', {
             xtype: 'button',
-            chartType: ns.core.conf.finals.chart.stackedbar,
+            chartType: chartConf.client.stackedbar,
             icon: 'images/bar-stacked.png',
-            name: ns.core.conf.finals.chart.stackedbar,
+            name: chartConf.client.stackedbar,
             tooltipText: NS.i18n.stacked_bar_chart,
             listeners: {
                 added: buttonAddedListener
@@ -2802,9 +2806,9 @@ Ext.onReady( function() {
 
         line = Ext.create('Ext.button.Button', {
             xtype: 'button',
-            chartType: ns.core.conf.finals.chart.line,
+            chartType: chartConf.client.line,
             icon: 'images/line.png',
-            name: ns.core.conf.finals.chart.line,
+            name: chartConf.client.line,
             tooltipText: NS.i18n.line_chart,
             listeners: {
                 added: buttonAddedListener
@@ -2813,9 +2817,9 @@ Ext.onReady( function() {
 
         area = Ext.create('Ext.button.Button', {
             xtype: 'button',
-            chartType: ns.core.conf.finals.chart.area,
+            chartType: chartConf.client.area,
             icon: 'images/area.png',
-            name: ns.core.conf.finals.chart.area,
+            name: chartConf.client.area,
             tooltipText: NS.i18n.area_chart,
             listeners: {
                 added: buttonAddedListener
@@ -2824,9 +2828,9 @@ Ext.onReady( function() {
 
         pie = Ext.create('Ext.button.Button', {
             xtype: 'button',
-            chartType: ns.core.conf.finals.chart.pie,
+            chartType: chartConf.client.pie,
             icon: 'images/pie.png',
-            name: ns.core.conf.finals.chart.pie,
+            name: chartConf.client.pie,
             tooltipText: NS.i18n.pie_chart,
             listeners: {
                 added: buttonAddedListener
@@ -2835,9 +2839,9 @@ Ext.onReady( function() {
 
         radar = Ext.create('Ext.button.Button', {
             xtype: 'button',
-            chartType: ns.core.conf.finals.chart.radar,
+            chartType: chartConf.client.radar,
             icon: 'images/radar.png',
-            name: ns.core.conf.finals.chart.radar,
+            name: chartConf.client.radar,
             tooltipText: NS.i18n.radar_chart,
             listeners: {
                 added: buttonAddedListener
@@ -2846,9 +2850,9 @@ Ext.onReady( function() {
 
         gauge = Ext.create('Ext.button.Button', {
             xtype: 'button',
-            chartType: ns.core.conf.finals.chart.gauge,
+            chartType: chartConf.client.gauge,
             icon: 'images/gauge.png',
-            name: ns.core.conf.finals.chart.gauge,
+            name: chartConf.client.gauge,
             tooltipText: NS.i18n.meter_chart,
             listeners: {
                 added: buttonAddedListener
@@ -7770,6 +7774,11 @@ Ext.onReady( function() {
 						}
 					}
 
+                    // remove params from url
+                    if (id || session) {
+                        history.pushState(null, null, '.')
+                    }
+
                     var initEl = document.getElementById('init');
                     initEl.parentNode.removeChild(initEl);
 
@@ -7821,6 +7830,7 @@ Ext.onReady( function() {
 				extendCore(ns.core);
 
 				dimConf = ns.core.conf.finals.dimension;
+                chartConf = ns.core.conf.finals.chart;
 				ns.app.viewport = createViewport();
 
                 ns.core.app.getViewportWidth = function() { return ns.app.viewport.getWidth(); };
@@ -7915,7 +7925,6 @@ Ext.onReady( function() {
                                                 NS.i18n = dhis2.util.parseJavaProperties(r.responseText);
 
                                                 if (keyUiLocale === defaultKeyUiLocale) {
-                                                    Ext.get('init').update(NS.i18n.initializing + '..');
                                                     fn();
                                                 }
                                                 else {
@@ -7928,7 +7937,6 @@ Ext.onReady( function() {
                                                             console.log('No translations found for system locale (' + keyUiLocale + ')');
                                                         },
                                                         callback: function() {
-                                                            Ext.get('init').update(NS.i18n.initializing + '..');
                                                             fn();
                                                         }
                                                     });
@@ -7939,7 +7947,6 @@ Ext.onReady( function() {
                                                     url: 'i18n/i18n_app_' + keyUiLocale + '.properties',
                                                     success: function(r) {
                                                         NS.i18n = dhis2.util.parseJavaProperties(r.responseText);
-                                                        Ext.get('init').update(NS.i18n.initializing + '..');
                                                     },
                                                     failure: function() {
                                                         alert('No translations found for system locale (' + keyUiLocale + ') or default locale (' + defaultKeyUiLocale + ').');

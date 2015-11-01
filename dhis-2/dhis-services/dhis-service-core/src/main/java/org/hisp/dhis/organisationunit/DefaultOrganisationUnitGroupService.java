@@ -77,21 +77,11 @@ public class DefaultOrganisationUnitGroupService
         i18nService = service;
     }
 
+    @Autowired
     private CurrentUserService currentUserService;
 
     @Autowired
-    public void setCurrentUserService( CurrentUserService currentUserService )
-    {
-        this.currentUserService = currentUserService;
-    }
-
     private OrganisationUnitService organisationUnitService;
-
-    @Autowired
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
-    {
-        this.organisationUnitService = organisationUnitService;
-    }
 
     // -------------------------------------------------------------------------
     // OrganisationUnitGroup
@@ -119,21 +109,6 @@ public class DefaultOrganisationUnitGroupService
     public OrganisationUnitGroup getOrganisationUnitGroup( int id )
     {
         return i18n( i18nService, organisationUnitGroupStore.get( id ) );
-    }
-
-    @Override
-    public List<OrganisationUnitGroup> getOrganisationUnitGroups( final Collection<Integer> identifiers )
-    {
-        List<OrganisationUnitGroup> objects = getAllOrganisationUnitGroups();
-
-        return identifiers == null ? objects : FilterUtils.filter( objects, new Filter<OrganisationUnitGroup>()
-        {
-            @Override
-            public boolean retain( OrganisationUnitGroup object )
-            {
-                return identifiers.contains( object.getId() );
-            }
-        } );
     }
 
     @Override
@@ -256,21 +231,6 @@ public class DefaultOrganisationUnitGroupService
     public OrganisationUnitGroupSet getOrganisationUnitGroupSet( String uid )
     {
         return i18n( i18nService, organisationUnitGroupSetStore.getByUid( uid ) );
-    }
-
-    @Override
-    public List<OrganisationUnitGroupSet> getOrganisationUnitGroupSets( final Collection<Integer> identifiers )
-    {
-        List<OrganisationUnitGroupSet> objects = getAllOrganisationUnitGroupSets();
-
-        return identifiers == null ? objects : FilterUtils.filter( objects, new Filter<OrganisationUnitGroupSet>()
-        {
-            @Override
-            public boolean retain( OrganisationUnitGroupSet object )
-            {
-                return identifiers.contains( object.getId() );
-            }
-        } );
     }
 
     @Override

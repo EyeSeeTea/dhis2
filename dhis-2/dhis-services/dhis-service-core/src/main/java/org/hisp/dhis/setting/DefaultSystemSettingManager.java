@@ -28,17 +28,27 @@ package org.hisp.dhis.setting;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.apache.commons.lang3.StringUtils;
-import org.hisp.dhis.system.util.ValidationUtils;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.lang3.StringUtils;
+import org.hisp.dhis.i18n.I18n;
+import org.hisp.dhis.i18n.I18nManager;
+import org.hisp.dhis.system.util.ValidationUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.Lists;
 
 /**
  * @author Stian Strandli
@@ -48,6 +58,15 @@ import java.util.Set;
 public class DefaultSystemSettingManager
     implements SystemSettingManager
 {
+    /**
+     * Cache for system settings. Does not accept nulls.
+     */
+    private static Cache<String, Optional<Serializable>> SETTING_CACHE = CacheBuilder.newBuilder()
+        .expireAfterAccess( 1, TimeUnit.HOURS )
+        .initialCapacity( 200 )
+        .maximumSize( 400 )
+        .build();
+    
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -66,6 +85,9 @@ public class DefaultSystemSettingManager
         this.flags = flags;
     }
 
+    @Autowired
+    private I18nManager i18nManager;
+
     // -------------------------------------------------------------------------
     // SystemSettingManager implementation
     // -------------------------------------------------------------------------
@@ -73,6 +95,8 @@ public class DefaultSystemSettingManager
     @Override
     public void saveSystemSetting( String name, Serializable value )
     {
+        SETTING_CACHE.invalidate( name );
+        
         SystemSetting setting = systemSettingStore.getByName( name );
 
         if ( setting == null )
@@ -93,25 +117,9 @@ public class DefaultSystemSettingManager
     }
 
     @Override
-    public Serializable getSystemSetting( String name )
-    {
-        SystemSetting setting = systemSettingStore.getByName( name );
-
-        return setting != null && setting.hasValue() ? setting.getValue() : null;
-    }
-
-    @Override
-    public Serializable getSystemSetting( String name, Serializable defaultValue )
-    {
-        SystemSetting setting = systemSettingStore.getByName( name );
-
-        return setting != null && setting.hasValue() ? setting.getValue() : defaultValue;
-    }
-
-    @Override
-    public List<SystemSetting> getAllSystemSettings()
-    {
-        return systemSettingStore.getAll();
+    public void saveSystemSetting( Setting setting, Serializable value )
+    {        
+        saveSystemSetting( setting.getName(), value );
     }
 
     @Override
@@ -121,10 +129,139 @@ public class DefaultSystemSettingManager
 
         if ( setting != null )
         {
+            SETTING_CACHE.invalidate( name );
+            
             systemSettingStore.delete( setting );
         }
     }
 
+    @Override
+    public void deleteSystemSetting( Setting setting )
+    {
+        deleteSystemSetting( setting.getName() );
+    }
+
+    @Override
+    public Serializable getSystemSetting( String name )
+    {
+        SystemSetting setting = systemSettingStore.getByName( name );
+
+        return setting != null && setting.hasValue() ? setting.getValue() : null;
+    }
+
+    @Override
+    public Serializable getSystemSetting( Setting setting )
+    {
+        try
+        {
+            Optional<Serializable> value = SETTING_CACHE.get( setting.getName(), () -> getSystemSettingOptional( setting.getName(), setting.getDefaultValue() ) );
+            
+            return value.orElse( null );
+        }
+        catch ( ExecutionException ignored )
+        {
+            return null;
+        }
+    }
+
+    @Override
+    public Serializable getSystemSetting( Setting setting, Serializable defaultValue )
+    {
+        return getSystemSettingOptional( setting.getName(), defaultValue ).orElse( null );
+    }
+
+    private Optional<Serializable> getSystemSettingOptional( String name, Serializable defaultValue )
+    {
+        SystemSetting setting = systemSettingStore.getByName( name );
+        
+        return setting != null && setting.hasValue() ? Optional.of( setting.getValue() ) : Optional.ofNullable( defaultValue );
+    }
+
+    @Override
+    public List<SystemSetting> getAllSystemSettings()
+    {
+        return systemSettingStore.getAll();
+    }
+    
+    @Override
+    public Map<String, Serializable> getSystemSettingsAsMap()
+    {
+        Map<String, Serializable> settingsMap = new HashMap<>();
+        
+        Collection<SystemSetting> systemSettings = getAllSystemSettings();
+
+        for ( SystemSetting systemSetting : systemSettings )
+        {
+            Serializable settingValue = systemSetting.getValue();
+            
+            if ( settingValue == null )
+            {
+                Optional<Setting> setting = Setting.getByName( systemSetting.getName() );
+                
+                if ( setting.isPresent() )
+                {
+                    settingValue = setting.get().getDefaultValue();
+                }
+            }
+
+            settingsMap.put( systemSetting.getName(), settingValue );
+        }
+
+        return settingsMap;
+    }
+
+    @Override
+    public Map<String, Serializable> getSystemSettingsAsMap( Set<String> names )
+    {
+        Map<String, Serializable> map = new HashMap<>();
+
+        for ( String name : names )
+        {
+            Serializable settingValue = getSystemSetting( name );
+
+            if ( settingValue == null )
+            {
+                Optional<Setting> setting = Setting.getByName( name );
+                
+                if ( setting.isPresent() )
+                {
+                    settingValue = setting.get().getDefaultValue();
+                }
+            }
+            
+            if ( settingValue != null )
+            {
+                map.put( name, settingValue );
+            }
+        }
+
+        return map;
+    }
+
+    @Override
+    public Map<String, Serializable> getSystemSettings( Collection<Setting> settings )
+    {
+        Map<String, Serializable> map = new HashMap<>();
+        
+        for ( Setting setting : settings )
+        {
+            Serializable value = getSystemSetting( setting );
+            
+            if ( value != null )
+            {
+                map.put( setting.getName(), value );
+            }
+        }
+        
+        return map;
+    }
+    
+    @Override
+    public void invalidateCache()
+    {
+        SETTING_CACHE.invalidateAll();
+    }
+    
     // -------------------------------------------------------------------------
     // Specific methods
     // -------------------------------------------------------------------------
@@ -135,11 +272,31 @@ public class DefaultSystemSettingManager
         Collections.sort( flags );
         return flags;
     }
+    
+    @Override
+    public List<StyleObject> getFlagObjects()
+    {
+        Collections.sort( flags );
+        
+        I18n i18n = i18nManager.getI18n();
+        
+        List<StyleObject> list = Lists.newArrayList();
+        
+        for ( String flag : flags )
+        {
+            String name = i18n.getString( flag );
+            String file = flag + ".png";
+            
+            list.add( new StyleObject( name, flag, file ) );
+        }
+        
+        return list;
+    }
 
     @Override
     public String getFlagImage()
     {
-        String flag = (String) getSystemSetting( KEY_FLAG, DEFAULT_FLAG );
+        String flag = (String) getSystemSetting( Setting.FLAG );
 
         return flag != null ? flag + ".png" : null;
     }
@@ -147,49 +304,49 @@ public class DefaultSystemSettingManager
     @Override
     public String getEmailHostName()
     {
-        return StringUtils.trimToNull( (String) getSystemSetting( KEY_EMAIL_HOST_NAME ) );
+        return StringUtils.trimToNull( (String) getSystemSetting( Setting.EMAIL_HOST_NAME ) );
     }
 
     @Override
     public int getEmailPort()
     {
-        return (Integer) getSystemSetting( KEY_EMAIL_PORT, DEFAULT_EMAIL_PORT );
+        return (Integer) getSystemSetting( Setting.EMAIL_PORT );
     }
 
     @Override
     public String getEmailUsername()
     {
-        return StringUtils.trimToNull( (String) getSystemSetting( KEY_EMAIL_USERNAME ) );
+        return StringUtils.trimToNull( (String) getSystemSetting( Setting.EMAIL_USERNAME ) );
     }
 
     @Override
     public boolean getEmailTls()
     {
-        return (Boolean) getSystemSetting( KEY_EMAIL_TLS, true );
+        return (Boolean) getSystemSetting( Setting.EMAIL_TLS );
     }
 
     @Override
     public String getEmailSender()
     {
-        return StringUtils.trimToNull( (String) getSystemSetting( KEY_EMAIL_SENDER ) );
+        return StringUtils.trimToNull( (String) getSystemSetting( Setting.EMAIL_SENDER ) );
     }
 
     @Override
     public String getInstanceBaseUrl()
     {
-        return StringUtils.trimToNull( (String) getSystemSetting( KEY_INSTANCE_BASE_URL ) );
+        return StringUtils.trimToNull( (String) getSystemSetting( Setting.INSTANCE_BASE_URL ) );
     }
 
     @Override
     public boolean accountRecoveryEnabled()
     {
-        return (Boolean) getSystemSetting( KEY_ACCOUNT_RECOVERY, false );
+        return (Boolean) getSystemSetting( Setting.ACCOUNT_RECOVERY );
     }
 
     @Override
     public boolean selfRegistrationNoRecaptcha()
     {
-        return (Boolean) getSystemSetting( KEY_SELF_REGISTRATION_NO_RECAPTCHA, false );
+        return (Boolean) getSystemSetting( Setting.SELF_REGISTRATION_NO_RECAPTCHA );
     }
 
     @Override
@@ -201,7 +358,7 @@ public class DefaultSystemSettingManager
     @Override
     public boolean systemNotificationEmailValid()
     {
-        String address = (String) getSystemSetting( KEY_SYSTEM_NOTIFICATIONS_EMAIL );
+        String address = (String) getSystemSetting( Setting.SYSTEM_NOTIFICATIONS_EMAIL );
 
         return address != null && ValidationUtils.emailIsValid( address );
     }
@@ -209,63 +366,18 @@ public class DefaultSystemSettingManager
     @Override
     public boolean hideUnapprovedDataInAnalytics()
     {
-        return (Boolean) getSystemSetting( SystemSettingManager.KEY_HIDE_UNAPPROVED_DATA_IN_ANALYTICS, false );
+        return (Boolean) getSystemSetting( Setting.HIDE_UNAPPROVED_DATA_IN_ANALYTICS );
     }
 
     @Override
     public String googleAnalyticsUA()
     {
-        return StringUtils.trimToNull( (String) getSystemSetting( KEY_GOOGLE_ANALYTICS_UA ) );
+        return StringUtils.trimToNull( (String) getSystemSetting( Setting.GOOGLE_ANALYTICS_UA ) );
     }
 
     @Override
     public Integer credentialsExpires()
     {
-        return (Integer) (getSystemSetting( KEY_CREDENTIALS_EXPIRES ) == null ? 0 : getSystemSetting( KEY_CREDENTIALS_EXPIRES ));
-    }
-
-    @Override
-    @SuppressWarnings( "unchecked" )
-    public List<String> getCorsWhitelist()
-    {
-        return (List<String>) (getSystemSetting( KEY_CORS_WHITELIST ) == null ? Collections.emptyList() : getSystemSetting( KEY_CORS_WHITELIST ));
-    }
-
-    @Override
-    public Map<String, Serializable> getSystemSettingsAsMap()
-    {
-        Map<String, Serializable> settingsMap = new HashMap<>();
-        Collection<SystemSetting> systemSettings = getAllSystemSettings();
-
-        for ( SystemSetting systemSetting : systemSettings )
-        {
-            Serializable settingValue = systemSetting.getValue();
-            if ( settingValue == null )
-            {
-                settingValue = DEFAULT_SETTINGS_VALUES.get( systemSetting.getName() );
-            }
-
-            settingsMap.put( systemSetting.getName(), settingValue );
-        }
-
-        return settingsMap;
-    }
-
-    @Override
-    public Map<String, Serializable> getSystemSettings( Set<String> names )
-    {
-        Map<String, Serializable> map = new HashMap<>();
-
-        for ( String name : names )
-        {
-            Serializable setting = getSystemSetting( name, DEFAULT_SETTINGS_VALUES.get( name ) );
-
-            if ( setting != null )
-            {
-                map.put( name, setting );
-            }
-        }
-
-        return map;
+        return (Integer) getSystemSetting( Setting.CREDENTIALS_EXPIRES );
     }
 }

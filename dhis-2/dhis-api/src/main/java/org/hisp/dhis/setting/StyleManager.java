@@ -28,7 +28,7 @@ package org.hisp.dhis.setting;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.SortedMap;
+import java.util.List;
 
 /**
  * @author Lars Helge Overland
@@ -47,5 +47,5 @@ public interface StyleManager
     
     String getCurrentStyleDirectory();
         
-    SortedMap<String, String> getStyles();
+    List<StyleObject> getStyles();
 }

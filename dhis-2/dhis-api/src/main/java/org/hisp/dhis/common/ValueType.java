@@ -29,15 +29,17 @@ package org.hisp.dhis.common;
  */
 
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
 
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /**
  * @author Lars Helge Overland
  */
+@JacksonXmlRootElement( localName = "valueType", namespace = DxfNamespaces.DXF_2_0 )
 public enum ValueType
 {
     TEXT( String.class ),
@@ -57,19 +59,24 @@ public enum ValueType
     INTEGER_NEGATIVE( Integer.class ),
     INTEGER_ZERO_OR_POSITIVE( Integer.class ),
     TRACKER_ASSOCIATE( TrackedEntityInstance.class ),
-    OPTION_SET( String.class ),
     USERNAME( String.class ),
     FILE_RESOURCE( String.class ),
     COORDINATE( String.class);
 
-    public static final List<ValueType> INTEGER_TYPES = Lists.newArrayList(
+    public static final Set<ValueType> INTEGER_TYPES = Sets.newHashSet(
         INTEGER, INTEGER_POSITIVE, INTEGER_NEGATIVE, INTEGER_ZERO_OR_POSITIVE );
 
-    public static final List<ValueType> NUMERIC_TYPES = Lists.newArrayList(
+    public static final Set<ValueType> NUMERIC_TYPES = Sets.newHashSet(
         INTEGER, INTEGER_POSITIVE, INTEGER_NEGATIVE, INTEGER_ZERO_OR_POSITIVE, NUMBER, UNIT_INTERVAL, PERCENTAGE );
 
-    public static final List<ValueType> TEXT_TYPES = Lists.newArrayList( 
+    public static final Set<ValueType> BOOLEAN_TYPES = Sets.newHashSet(
+        BOOLEAN, TRUE_ONLY );
+    
+    public static final Set<ValueType> TEXT_TYPES = Sets.newHashSet( 
         TEXT, LONG_TEXT, LETTER, COORDINATE );
+    
+    public static final Set<ValueType> DATE_TYPES = Sets.newHashSet(
+        DATE, DATETIME );
     
     private final Class<?> javaClass;
 
@@ -90,22 +97,27 @@ public enum ValueType
 
     public boolean isInteger()
     {
-        return this == INTEGER || this == INTEGER_POSITIVE || this == INTEGER_NEGATIVE || this == INTEGER_ZERO_OR_POSITIVE;
+        return INTEGER_TYPES.contains( this );
     }
 
     public boolean isNumeric()
     {
-        return this.isInteger() || this == NUMBER || this == UNIT_INTERVAL || this == PERCENTAGE;
+        return NUMERIC_TYPES.contains( this );
+    }
+    
+    public boolean isBoolean()
+    {
+        return BOOLEAN_TYPES.contains( this );
     }
 
     public boolean isText()
     {
-        return this == TEXT || this == LONG_TEXT || this == COORDINATE;
+        return TEXT_TYPES.contains( this );
     }
 
     public boolean isDate()
     {
-        return this == DATE || this == DATETIME;
+        return DATE_TYPES.contains( this );
     }
 
     public boolean isFile()

@@ -35,7 +35,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.amplecode.quick.BatchHandlerFactory;
 import org.amplecode.quick.StatementHolder;
 import org.amplecode.quick.StatementManager;
 import org.apache.commons.logging.Log;
@@ -66,9 +65,6 @@ public class TableAlteror
 
     @Autowired
     private StatementBuilder statementBuilder;
-
-    @Autowired
-    private BatchHandlerFactory batchHandlerFactory;
 
     @Autowired
     private OrganisationUnitService organisationUnitService;
@@ -854,6 +850,8 @@ public class TableAlteror
         executeSql( "update programstage set excecutiondatelabel = reportdatedescription where excecutiondatelabel is not null" );
         executeSql( "alter table programstage drop column reportdatedescription" );
         executeSql( "update programstage set reportdatetouse = 'indicentDate' where reportdatetouse='dateOfIncident'" );
+        
+        executeSql( "alter table programindicator drop column missingvaluereplacement" );
         
         // Remove data mart
         executeSql( "drop table aggregateddatasetcompleteness" );

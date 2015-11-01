@@ -76,6 +76,11 @@ public class FileResource
      */
     private FileResourceDomain domain;
 
+    /**
+     * Current storage status of content.
+     */
+    private FileResourceStorageStatus storageStatus = FileResourceStorageStatus.NONE;
+
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -175,6 +180,19 @@ public class FileResource
         return assigned;
     }
 
+    public void setStorageStatus( FileResourceStorageStatus storageStatus )
+    {
+        this.storageStatus = storageStatus;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public FileResourceStorageStatus getStorageStatus()
+    {
+        return storageStatus;
+    }
+
     public void setAssigned( boolean assigned )
     {
         this.assigned = assigned;
@@ -196,6 +214,6 @@ public class FileResource
 
     private String generateStorageKey()
     {
-        return UUID.randomUUID().toString();
+        return domain.getContainerName() + "/" + UUID.randomUUID().toString();
     }
 }

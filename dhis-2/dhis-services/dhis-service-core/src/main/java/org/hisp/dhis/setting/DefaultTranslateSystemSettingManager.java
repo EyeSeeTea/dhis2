@@ -28,14 +28,10 @@ package org.hisp.dhis.setting;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.setting.SystemSettingManager.DEFAULT_APPLICATION_TITLE;
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_APPLICATION_FOOTER;
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_APPLICATION_INTRO;
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_APPLICATION_NOTIFICATION;
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_APPLICATION_TITLE;
-
 import java.util.Hashtable;
 import java.util.Map;
+
+import org.hisp.dhis.util.ObjectUtils;
 
 /**
  * @author James Chang
@@ -63,10 +59,10 @@ public class DefaultTranslateSystemSettingManager
     {
         Map<String, String> translations = new Hashtable<>();
 
-        translations.put( KEY_APPLICATION_TITLE, getSystemSettingWithFallbacks( KEY_APPLICATION_TITLE, localeStr, DEFAULT_APPLICATION_TITLE ) );        
-        translations.put( KEY_APPLICATION_INTRO, getSystemSettingWithFallbacks( KEY_APPLICATION_INTRO, localeStr, "" ) );
-        translations.put( KEY_APPLICATION_NOTIFICATION, getSystemSettingWithFallbacks( KEY_APPLICATION_NOTIFICATION, localeStr, "" ) );
-        translations.put( KEY_APPLICATION_FOOTER, getSystemSettingWithFallbacks( KEY_APPLICATION_FOOTER, localeStr, "" ) );
+        translations.put( Setting.APPLICATION_TITLE.getDefaultValue().toString(), getSystemSettingWithFallbacks( Setting.APPLICATION_TITLE.getDefaultValue().toString(), localeStr, Setting.APPLICATION_TITLE.getDefaultValue().toString() ) );        
+        translations.put( Setting.APPLICATION_INTRO.getDefaultValue().toString(), getSystemSettingWithFallbacks( Setting.APPLICATION_INTRO.getDefaultValue().toString(), localeStr, "" ) );
+        translations.put( Setting.APPLICATION_NOTIFICATION.getDefaultValue().toString(), getSystemSettingWithFallbacks( Setting.APPLICATION_NOTIFICATION.getDefaultValue().toString(), localeStr, "" ) );
+        translations.put( Setting.APPLICATION_FOOTER.getDefaultValue().toString(), getSystemSettingWithFallbacks( Setting.APPLICATION_FOOTER.getDefaultValue().toString(), localeStr, "" ) );
                 
         return translations;
     }
@@ -76,10 +72,14 @@ public class DefaultTranslateSystemSettingManager
     {
         Map<String, String> translations = new Hashtable<>();
 
-        translations.put( KEY_APPLICATION_TITLE, systemSettingManager.getSystemSetting( KEY_APPLICATION_TITLE + localeStr, DEFAULT_APPLICATION_TITLE ).toString() );        
-        translations.put( KEY_APPLICATION_INTRO, systemSettingManager.getSystemSetting( KEY_APPLICATION_INTRO + localeStr, "" ).toString() );
-        translations.put( KEY_APPLICATION_NOTIFICATION, systemSettingManager.getSystemSetting( KEY_APPLICATION_NOTIFICATION + localeStr, "" ).toString() );
-        translations.put( KEY_APPLICATION_FOOTER, systemSettingManager.getSystemSetting( KEY_APPLICATION_FOOTER + localeStr, "" ).toString() );
+        translations.put( Setting.APPLICATION_TITLE.getDefaultValue().toString(), ObjectUtils.firstNonNull( 
+            systemSettingManager.getSystemSetting( Setting.APPLICATION_TITLE.getDefaultValue().toString() + localeStr ), Setting.APPLICATION_TITLE.getDefaultValue().toString() ).toString() );        
+        translations.put( Setting.APPLICATION_INTRO.getDefaultValue().toString(), ObjectUtils.firstNonNull( 
+            systemSettingManager.getSystemSetting( Setting.APPLICATION_INTRO.getDefaultValue().toString() + localeStr ), "" ).toString() );
+        translations.put( Setting.APPLICATION_NOTIFICATION.getDefaultValue().toString(), ObjectUtils.firstNonNull( 
+            systemSettingManager.getSystemSetting( Setting.APPLICATION_NOTIFICATION.getDefaultValue().toString() + localeStr ), "" ).toString() );
+        translations.put( Setting.APPLICATION_FOOTER.getDefaultValue().toString(), ObjectUtils.firstNonNull( 
+            systemSettingManager.getSystemSetting( Setting.APPLICATION_FOOTER.getDefaultValue().toString() + localeStr ), "" ).toString() );
                 
         return translations;
     }
@@ -92,11 +92,11 @@ public class DefaultTranslateSystemSettingManager
     {
         String settingValue = "";
 
-        String keyWithLocale = (String) systemSettingManager.getSystemSetting( keyName + localeStr, "" );
+        String keyWithLocale = (String) ObjectUtils.firstNonNull( systemSettingManager.getSystemSetting( keyName + localeStr ), "" );
 
         if ( keyWithLocale.isEmpty() )
         {
-            settingValue = (String) systemSettingManager.getSystemSetting( keyName, defaultValue );          
+            settingValue = (String) ObjectUtils.firstNonNull( systemSettingManager.getSystemSetting( keyName ), defaultValue );          
         }
         else
         {

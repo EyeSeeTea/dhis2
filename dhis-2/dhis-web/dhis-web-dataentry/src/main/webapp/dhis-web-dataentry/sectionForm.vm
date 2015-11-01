@@ -82,7 +82,7 @@
     #end
     <tr>
     <td id="${dataElement.uid}-cell" #if( $mark == 1 )class="alt"#else class="reg"#end>
-    <span id="${dataElement.uid}-dataelement" #if( $decoration && $dataElement.hasDescription() ) title="$!{dataElement.description}"#end >
+    <span id="${dataElement.uid}-dataelement" #if( $decoration && $dataElement.hasDescription() ) title="$!{dataElement.displayDescription}"#end >
     #if( $decoration && $!dataElement.hasUrl() )<a href="${dataElement.url}" target="_blank">#end${encoder.htmlEncode( $dataElement.getFormNameFallback() )}#if( $decoration && $dataElement.hasUrl() )</a>#end
     </span></td>    
     #foreach( $optionCombo in $optionCombos )
@@ -102,8 +102,9 @@
         <td><textarea name="entryfield" class="entryfield entryarea" id="${dataEntryId}" tabindex="${tabIndex}" #if( $greyedField || !$hasAccess ) disabled="disabled"#end></textarea></td>
     #elseif( "FILE_RESOURCE" == $dataElement.valueType )
         <td>
-            <div class="entryfileresource-container">
-                <div id="${dataEntryId}" class="entryfileresource">
+            <div class="entryfileresource" id="${dataEntryId}" tabindex="${tabIndex}">
+                <input class="entryfileresource-input" id="input-${dataEntryId}" #if( $greyedField || !$hasAccess ) disabled="disabled" #end>
+                <div class="upload-field">
                     <div class="upload-fileinfo">
                         <div class="upload-fileinfo-size"></div>
                         <div class="upload-fileinfo-name"></div>

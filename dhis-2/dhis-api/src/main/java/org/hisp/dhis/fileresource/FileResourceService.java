@@ -30,15 +30,23 @@ package org.hisp.dhis.fileresource;
 
 import com.google.common.io.ByteSource;
 
+import java.io.File;
+import java.net.URI;
+import java.util.List;
+
 /**
  * @author Halvdan Hoem Grelland
  */
 public interface FileResourceService
 {
     FileResource getFileResource( String uid );
-    
-    String saveFileResource( FileResource fileResource, ByteSource content );
-    
+
+    List<FileResource> getFileResources( List<String> uids );
+
+    List<FileResource> getOrphanedFileResources();
+
+    String saveFileResource( FileResource fileResource, File file );
+
     void deleteFileResource( String uid );
     
     ByteSource getFileResourceContent( FileResource fileResource );
@@ -46,4 +54,6 @@ public interface FileResourceService
     boolean fileResourceExists( String uid );
     
     void updateFileResource( FileResource fileResource );
+
+    URI getSignedGetFileResourceContentUri( String uid );
 }

@@ -71,4 +71,10 @@ public class DefaultConfigurationService
         
         return iterator.hasNext() ? iterator.next() : new Configuration();
     }
+
+    @Override
+    public boolean isCorsWhitelisted( String origin )
+    {
+        return getConfiguration().getCorsWhitelist().contains( origin );
+    }
 }

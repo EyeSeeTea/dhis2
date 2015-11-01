@@ -31,8 +31,6 @@ trackerCapture.controller('RegistrationController',
     $scope.registrationMode = 'REGISTRATION';    
     $scope.hiddenFields = {};
     
-    //$scope.editingDisabled = angular.isUndefined($scope.editingDisabled) ? false : $scope.editingDisabled;
-    
     $scope.attributesById = CurrentSelection.getAttributesById();
     if(!$scope.attributesById){
         $scope.attributesById = [];
@@ -66,8 +64,7 @@ trackerCapture.controller('RegistrationController',
         $scope.trackedEntities.selected = $scope.trackedEntities.available[0];
     });
 
-    //watch for selection of program
-    $scope.$watch('selectedProgram', function() {        
+    var getProgramRules = function(){
         $scope.trackedEntityForm = null;
         $scope.customForm = null;        
         $scope.allProgramRules = {constants: [], programIndicators: {}, programValidations: [], programVariables: [], programRules: []};
@@ -75,11 +72,19 @@ trackerCapture.controller('RegistrationController',
             TrackerRulesFactory.getRules($scope.selectedProgram.id).then(function(rules){                    
                 $scope.allProgramRules = rules;
             });
-        }
-        
-        if($scope.registrationMode === 'REGISTRATION'){
-            $scope.getAttributes($scope.registrationMode);
         }        
+    };
+    
+    //watch for selection of program
+    $scope.$watch('selectedProgram', function(newValue, oldValue) {
+        if( newValue !== oldValue )
+        {
+            getProgramRules();
+            
+            if($scope.registrationMode === 'REGISTRATION'){
+                $scope.getAttributes($scope.registrationMode);
+            }
+        }                
     }); 
     
     //listen to modes of registration
@@ -97,8 +102,12 @@ trackerCapture.controller('RegistrationController',
         if($scope.registrationMode === 'PROFILE'){
             $scope.selectedEnrollment = args.enrollment;
         }
-        
+
         $scope.getAttributes($scope.registrationMode);
+        
+        if($scope.selectedProgram && $scope.selectedProgram.id){
+            getProgramRules();
+        }
     });
         
     $scope.getAttributes = function(_mode){        
@@ -121,13 +130,22 @@ trackerCapture.controller('RegistrationController',
     var goToDashboard = function(destination, teiId){
         //reset form
         $scope.selectedTei = {};
-        $scope.selectedEnrollment = {};
-        $scope.outerForm.submitted = false;         
+        $scope.selectedEnrollment = {enrollmentDate: $scope.today, incidentDate: $scope.today, orgUnitName: $scope.selectedOrgUnit.name};
+        $scope.outerForm.submitted = false;
+        $scope.outerForm.$setPristine();
 
         if(destination === 'DASHBOARD') {
             $location.path('/dashboard').search({tei: teiId,                                            
                                     program: $scope.selectedProgram ? $scope.selectedProgram.id: null});
-        }        
+        }
+        else if (destination === 'SELF'){
+            //notify user
+            var dialogOptions = {
+                    headerText: 'success',
+                    bodyText: 'registration_complete'
+                };
+            DialogService.showDialog({}, dialogOptions);
+        }
     };
     
     var reloadProfileWidget = function(){
@@ -149,7 +167,7 @@ trackerCapture.controller('RegistrationController',
             if(reg.reference && reg.status === 'SUCCESS'){                
                 $scope.tei.trackedEntityInstance = reg.reference;
                 
-                if( $scope.registrationMode === 'PROFILE' ){                    
+                if( $scope.registrationMode === 'PROFILE' ){
                     reloadProfileWidget();
                 }
                 else{
@@ -268,7 +286,7 @@ trackerCapture.controller('RegistrationController',
                         if(effect.ineffect) {
                             var dialogOptions = {
                                 headerText: 'validation_error',
-                                bodyText: effect.content + effect.data
+                                bodyText: effect.content + (effect.data ? effect.data : "")
                             };
                             DialogService.showDialog({}, dialogOptions);
                             $scope.selectedTei[effect.trackedEntityAttribute.id] = $scope.tei[effect.trackedEntityAttribute.id];
@@ -280,7 +298,7 @@ trackerCapture.controller('RegistrationController',
                 } else if (effect.action === "SHOWWARNING") {
                     if (effect.trackedEntityAttribute) {
                         if(effect.ineffect) {
-                            $scope.warningMessages.push(effect.content + effect.data);
+                            $scope.warningMessages.push(effect.content + (effect.data ? effect.data : ""));
                         }
                     }
                     else {
@@ -340,9 +358,8 @@ trackerCapture.controller('RegistrationController',
         return status;        
     };
     
-    $scope.getTrackerAssociate = function(selectedAttribute){
-        
-        
+    $scope.getTrackerAssociate = function(selectedAttribute, existingAssociateUid){        
+
         var modalInstance = $modal.open({
             templateUrl: 'components/teiadd/tei-add.html',
             controller: 'TEIAddController',
@@ -362,6 +379,9 @@ trackerCapture.controller('RegistrationController',
                 },
                 selectedAttribute: function(){
                     return selectedAttribute;
+                },
+                existingAssociateUid: function(){
+                    return existingAssociateUid;
                 },
                 selectedProgram: function(){
                     return $scope.selectedProgram;

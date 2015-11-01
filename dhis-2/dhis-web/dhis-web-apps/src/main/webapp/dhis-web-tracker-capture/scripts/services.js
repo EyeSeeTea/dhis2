@@ -492,6 +492,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 }
                 delete tei[k];
             }
+            formTei.attributes = tei.attributes;
             return {tei: tei, formEmpty: formEmpty};
         }
     };
@@ -517,6 +518,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     var convertFromUserToApi = function(enrollment){
         enrollment.incidentDate = DateUtils.formatFromUserToApi(enrollment.incidentDate);
         enrollment.enrollmentDate = DateUtils.formatFromUserToApi(enrollment.enrollmentDate);
+        delete enrollment.orgUnitName;
         return enrollment;
     };
     return {        
@@ -711,7 +713,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 })
 
 /* Factory for getting tracked entity attributes */
-.factory('AttributesFactory', function($q, $rootScope, TCStorageService, orderByFilter, DateUtils, OptionSetService) {      
+.factory('AttributesFactory', function($q, $rootScope, TCStorageService, orderByFilter, DateUtils, OptionSetService, OperatorFactory) {      
 
     return {
         getAll: function(){
@@ -881,6 +883,14 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 }
             }
             return val;
+        },
+        generateAttributeFilters: function(attributes){
+            angular.forEach(attributes, function(attribute){
+                if(attribute.valueType === 'NUMBER' || attribute.valueType === 'DATE'){
+                    attribute.operator = OperatorFactory.defaultOperators[0];
+                }
+            });            
+            return attributes;
         }
     };
 })
@@ -1602,7 +1612,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                               orgUnit: orgUnit.id,
                               orgUnitName: orgUnit.name,
                               name: programStage.name,
-                              reportDateDescription: programStage.reportDateDescription,
+                              excecutionDateLabel: programStage.excecutionDateLabel,
                               enrollmentStatus: 'ACTIVE',
                               enrollment: enrollment.enrollment,
                               status: 'SCHEDULED'};

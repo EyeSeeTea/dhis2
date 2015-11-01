@@ -55,6 +55,18 @@ function changeValueType(value) {
   updateAggreationOperation(value);
 }
 
+function dataValueOptionSetChanged() {
+  var optionSetId = $('#selectedOptionSetId').val();
+  var valueType = $('#selectedOptionSetId').find(':selected').data('valuetype');
+  if ( optionSetId != 0 && valueType ) {
+	  $('#valueType').val(valueType);
+	  $('#valueType').prop('disabled', true);
+  }
+  else {
+	  $('#valueType').prop('disabled', false);
+  }
+}
+
 function updateAggreationOperation( value ) {
   if( isValueTypeText(value) || value == 'DATE' || value == 'TRUE_ONLY' ) {
     hideById("aggregationType");
@@ -140,7 +152,7 @@ function removeDataElement( context ) {
 }
 
 function domainTypeChange( domainType ) {
-  if( domainType == 'aggregate' ) {
+  if( domainType == 'AGGREGATE' ) {
     enable('selectedCategoryComboId');
   }
   else {

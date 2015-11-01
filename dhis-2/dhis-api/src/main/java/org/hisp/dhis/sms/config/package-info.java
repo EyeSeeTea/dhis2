@@ -42,4 +42,3 @@ package org.hisp.dhis.sms.config;
 import javax.xml.bind.annotation.XmlSchema;
 import javax.xml.bind.annotation.XmlNs;
 import javax.xml.bind.annotation.XmlNsForm;
-

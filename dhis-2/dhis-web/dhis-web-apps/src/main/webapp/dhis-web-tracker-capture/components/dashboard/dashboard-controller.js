@@ -360,8 +360,9 @@ trackerCapture.controller('DashboardController',
         }, function(){            
         });
     };
+    
     $scope.back = function(){
-        $location.path('/').search({program: $scope.selectedProgramId});                   
+        $location.path('/').search({program: $scope.selectedProgramId});        
     };
     
     $scope.displayEnrollment = false;
@@ -402,14 +403,12 @@ trackerCapture.controller('DashboardController',
     };
     
     $scope.stickUnstick = function(){        
-        $scope.stickyDisabled = !$scope.stickyDisabled;
-        
+        $scope.stickyDisabled = !$scope.stickyDisabled;        
         var layout = getCurrentDashboardLayout();        
         var layoutKey = $scope.selectedProgram && $scope.selectedProgram.id ? $scope.selectedProgram.id : 'DEFAULT';        
         layout[layoutKey].stickRightSide = !$scope.stickyDisabled;        
         DashboardLayoutService.saveLayout(layout, false).then(function(){
-        });
-        
+        });        
     };
     
     $scope.showHideWidgets = function(){
