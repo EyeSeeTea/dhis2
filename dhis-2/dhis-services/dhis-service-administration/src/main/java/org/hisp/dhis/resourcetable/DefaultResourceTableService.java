@@ -195,54 +195,9 @@ public class DefaultResourceTableService
     @Transactional
     public void generateDataElementTable()
     {
-<<<<<<< TREE
-        // ---------------------------------------------------------------------
-        // Create table
-        // ---------------------------------------------------------------------
-
-        List<DataElement> dataElements = new ArrayList<>( idObjectManager.getAllNoAcl( DataElement.class ) );
-
-        resourceTableStore.createDataElementStructure();
-
-        // ---------------------------------------------------------------------
-        // Populate table
-        // ---------------------------------------------------------------------
-
-        List<Object[]> batchArgs = new ArrayList<>();
-
-        for ( DataElement dataElement : dataElements )
-        {
-            List<Object> values = new ArrayList<>();
-
-            final DataSet dataSet = dataElement.getDataSet();
-            final PeriodType periodType = dataElement.getPeriodType();
-
-            // -----------------------------------------------------------------
-            // Use highest approval level if data set does not require approval,
-            // or null if approval is required.
-            // -----------------------------------------------------------------
-
-            values.add( dataElement.getId() );
-            values.add( dataElement.getUid() );
-            values.add( dataElement.getName() );
-            values.add( dataSet != null ? dataSet.getId() : null );
-            values.add( dataSet != null ? dataSet.getUid() : null );
-            values.add( dataSet != null ? dataSet.getName() : null );
-            values.add( dataSet != null && dataSet.getWorkflow() != null ? null : APPROVAL_LEVEL_HIGHEST );
-            values.add( periodType != null ? periodType.getId() : null );
-            values.add( periodType != null ? periodType.getName() : null );
-
-            batchArgs.add( values.toArray() );
-        }
-
-        resourceTableStore.batchUpdate( 9, TABLE_NAME_DATA_ELEMENT_STRUCTURE, batchArgs );
-
-        log.info( "Data element table generated" );
-=======
-        resourceTableStore.generateResourceTable( new DataElementResourceTable( 
+        resourceTableStore.generateResourceTable( new DataElementResourceTable(
             idObjectManager.getAllNoAcl( DataElement.class ),
             statementBuilder.getColumnQuote() ) );
->>>>>>> MERGE-SOURCE
     }
 
     @Override

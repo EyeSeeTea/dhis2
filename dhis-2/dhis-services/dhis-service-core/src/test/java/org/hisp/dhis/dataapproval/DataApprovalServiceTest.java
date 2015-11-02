@@ -94,15 +94,9 @@ public class DataApprovalServiceTest
     private DataElementCategoryService categoryService;
 
     @Autowired
-<<<<<<< TREE
-=======
-    private DataSetService dataSetService;
-
-    @Autowired
     private SystemSettingManager systemSettingManager;
 
     @Autowired
->>>>>>> MERGE-SOURCE
     private OrganisationUnitService organisationUnitService;
    
     @Autowired 

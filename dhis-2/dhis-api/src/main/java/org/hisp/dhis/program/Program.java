@@ -134,14 +134,11 @@ public class Program
      */
     private DataElementCategoryCombo categoryCombo;
 
-<<<<<<< TREE
     /**
      * The approval workflow (if any) for this program.
      */
     private DataApprovalWorkflow workflow;
 
-=======
->>>>>>> MERGE-SOURCE
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -679,7 +676,6 @@ public class Program
         this.categoryCombo = categoryCombo;
     }
 
-<<<<<<< TREE
     @JsonProperty
     @JsonSerialize( as = BaseIdentifiableObject.class )
     @JsonView( { DetailedView.class, ExportView.class } )
@@ -694,8 +690,6 @@ public class Program
         this.workflow = workflow;
     }
 
-=======
->>>>>>> MERGE-SOURCE
     /**
      * Indicates whether this program has a category combination which is different
      * from the default category combination.
