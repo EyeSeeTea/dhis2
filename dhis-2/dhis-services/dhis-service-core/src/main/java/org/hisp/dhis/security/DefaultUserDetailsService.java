@@ -55,18 +55,12 @@ public class DefaultUserDetailsService
         }
 
         // ---------------------------------------------------------------------
-        // LDAP
-        // ---------------------------------------------------------------------
-
-        String user = credentials.hasLdapId() ? credentials.getLdapId() : credentials.getUsername();
-
-        // ---------------------------------------------------------------------
         // UserDetails
         // ---------------------------------------------------------------------
 
         boolean credentialsExpired = userService.credentialsNonExpired( credentials );
 
-        return new User( user, credentials.getPassword(),
+        return new User( credentials.getUsername(), credentials.getPassword(),
             !credentials.isDisabled(), true, credentialsExpired, true, SecurityUtils.getGrantedAuthorities( credentials ) );
     }
 }

@@ -58,7 +58,7 @@
     <constructor-arg index="0" value="DC=global,DC=jhpiego,DC=net"/>
     <constructor-arg index="1" value="(CN={0})"/>
     <constructor-arg index="2" ref="contextSource" />
-  </bean> 
+  </bean>
 
   <bean id="ldapUrl" class="org.hisp.dhis.external.conf.ConfigurationPropertyFactoryBean"><constructor-arg value="LDAP_URL" /></bean>
   

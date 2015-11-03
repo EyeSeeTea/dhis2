@@ -80,6 +80,8 @@ public class ConfigurationPropertyFactoryBean
         
         String value = configurationProvider.getProperty( key );
         
+        System.out.println( "CONF VAL " + value );
+        
         if ( list )
         {
             return value != null ? Lists.newArrayList( value.split( ";" ) ) : value;
