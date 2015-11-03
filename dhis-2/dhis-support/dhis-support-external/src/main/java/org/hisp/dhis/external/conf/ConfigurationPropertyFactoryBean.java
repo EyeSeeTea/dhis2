@@ -28,13 +28,9 @@ package org.hisp.dhis.external.conf;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
-
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
-
-import com.google.common.collect.Lists;
 
 /**
  * Factory bean which allows for DHIS configuration property values to be 
@@ -61,13 +57,6 @@ public class ConfigurationPropertyFactoryBean
         this.key = key;
     }
     
-    private boolean list;
-
-    public void setList( boolean list )
-    {
-        this.list = list;
-    }
-
     // -------------------------------------------------------------------------
     // FactoryBean implementation
     // -------------------------------------------------------------------------
@@ -78,24 +67,13 @@ public class ConfigurationPropertyFactoryBean
     {
         Assert.notNull( key, "Configuration key must be specified" );
         
-        String value = configurationProvider.getProperty( key );
-        
-        System.out.println( "CONF VAL " + value );
-        
-        if ( list )
-        {
-            return value != null ? Lists.newArrayList( value.split( ";" ) ) : value;
-        }
-        else
-        {
-            return value;
-        }
+        return configurationProvider.getProperty( key );
     }
 
     @Override
-    public Class<?> getObjectType()
+    public Class<String> getObjectType()
     {
-        return list ? List.class : String.class;
+        return String.class;
     }
 
     @Override

@@ -28,8 +28,6 @@ package org.hisp.dhis.security.ldap.authentication;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.apache.commons.beanutils.BeanUtils;
-
 import org.hisp.dhis.external.conf.DhisConfigurationProvider;
 import org.hisp.dhis.user.UserCredentials;
 import org.hisp.dhis.user.UserService;
@@ -68,14 +66,6 @@ public class DhisBindAuthenticator
         System.out.println( "AUTH " + authentication );
         System.out.println( "AT NAME " + authentication.getName() );
         
-        try
-        {
-        System.out.println( "AT " + BeanUtils.describe( authentication ) );
-        }
-        catch ( Exception ex)
-        {
-        }        
-
         System.out.println( "A princ " + authentication.getPrincipal() );
         System.out.println( "A princ " + authentication.getPrincipal().getClass() );
         System.out.println( "A cred " + authentication.getCredentials() );
