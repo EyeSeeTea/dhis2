@@ -40,9 +40,12 @@ public class DefaultUserDetailsService
     {
         UserCredentials credentials = userService.getUserCredentialsByUsername( username );
 
+        // ---------------------------------------------------------------------
+        // OpenId
+        // ---------------------------------------------------------------------
+
         if ( credentials == null )
         {
-            // TODO: try with openid identifier if username not found, we might want to refactor this into a OpenIDUserDetailsService.
             credentials = userService.getUserCredentialsByOpenID( username );
 
             if ( credentials == null )
@@ -51,9 +54,19 @@ public class DefaultUserDetailsService
             }
         }
 
+        // ---------------------------------------------------------------------
+        // LDAP
+        // ---------------------------------------------------------------------
+
+        String user = credentials.hasLdapId() ? credentials.getLdapId() : credentials.getUsername();
+
+        // ---------------------------------------------------------------------
+        // UserDetails
+        // ---------------------------------------------------------------------
+
         boolean credentialsExpired = userService.credentialsNonExpired( credentials );
 
-        return new User( credentials.getUsername(), credentials.getPassword(),
+        return new User( user, credentials.getPassword(),
             !credentials.isDisabled(), true, credentialsExpired, true, SecurityUtils.getGrantedAuthorities( credentials ) );
     }
 }
