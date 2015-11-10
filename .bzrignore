@@ -27,5 +27,5 @@ overlays/
 ./.travis.yml
 .DS_Store
 dhis-2/projectFilesBackup
-./**/dhis-web-commons/javascripts/dhis2/coverage/
-./**/dhis-web-commons/javascripts/dhis2/node_modules/
+coverage
+node_modules
