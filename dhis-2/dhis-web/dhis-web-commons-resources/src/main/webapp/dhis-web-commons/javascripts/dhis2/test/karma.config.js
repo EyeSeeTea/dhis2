@@ -1,9 +1,15 @@
 module.exports = function karmaConfigHandler(config) {
     config.set({
-        browsers: [ 'Chrome' ], // run in Chrome
+        browsers: [ 'PhantomJS' ], // run in Headless browser PhantomJS
         singleRun: false,
-        frameworks: [ 'mocha', 'chai', 'sinon', 'sinon-chai' ], // use the mocha test framework
+        frameworks: [
+            'mocha', // Test runner
+            'chai',  // Assertion library
+            'sinon', // Mocking library
+            'sinon-chai' // Assertions for mocks and spies
+        ],
         files: [
+            '../node_modules/phantomjs-polyfill/bind-polyfill.js',
             '../../angular/angular.js',
             '../node_modules/angular-mocks/angular-mocks.js',
             '../dhis2.angular.*.js',

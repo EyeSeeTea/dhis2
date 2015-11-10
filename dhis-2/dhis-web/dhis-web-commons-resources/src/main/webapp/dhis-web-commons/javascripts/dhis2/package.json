@@ -37,8 +37,11 @@
     "eslint-config-dhis2": "0.0.5",
     "eslint-plugin-react": "^3.8.0",
     "karma-coverage": "^0.5.3",
+    "karma-phantomjs-launcher": "^0.2.1",
     "karma-sinon": "^1.0.4",
     "karma-sinon-chai": "^1.1.0",
+    "phantomjs": "^1.9.18",
+    "phantomjs-polyfill": "0.0.1",
     "sinon": "^1.17.2",
     "sinon-chai": "^2.8.0"
   }
