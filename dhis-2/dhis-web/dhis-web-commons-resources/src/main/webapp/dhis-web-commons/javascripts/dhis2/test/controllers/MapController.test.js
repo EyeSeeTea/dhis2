@@ -45,7 +45,7 @@ describe('Tracker Controllers: MapController', () => {
     });
 
     it('should set the injected location onto the $scope', () => {
-        expect(mockScope.location).to.equal('theInjectedLocation')
+        expect(mockScope.location).to.equal('theInjectedLocation');
     });
 
     it('should call close() on the $modelInstance when calling close() on the $scope', () => {

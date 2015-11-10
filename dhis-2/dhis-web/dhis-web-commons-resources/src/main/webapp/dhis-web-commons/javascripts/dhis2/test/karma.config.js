@@ -1,6 +1,4 @@
-var webpack = require('webpack');
-
-module.exports = function (config) {
+module.exports = function karmaConfigHandler(config) {
     config.set({
         browsers: [ 'Chrome' ], // run in Chrome
         singleRun: false,
@@ -19,21 +17,21 @@ module.exports = function (config) {
         coverageReporter: {
             type: 'lcov',
             dir: '../coverage',
-            subdir: function(browser) {
+            subdir: function simplifyBrowsername(browser) {
                 // normalization process to keep a consistent browser name accross different OS
                 return browser.toLowerCase().split(/[ /-]/)[0];
-            }
+            },
         },
         webpack: { // kind of a copy of your webpack config
             devtool: 'inline-source-map', // just do inline source maps instead of the default
             module: {
                 loaders: [
-                    { test: /\.js$/, loader: 'babel-loader' }
-                ]
-            }
+                    { test: /\.js$/, loader: 'babel-loader' },
+                ],
+            },
         },
         webpackServer: {
-            noInfo: true // please don't spam the console when running in karma!
-        }
+            noInfo: true, // please don't spam the console when running in karma!
+        },
     });
 };
