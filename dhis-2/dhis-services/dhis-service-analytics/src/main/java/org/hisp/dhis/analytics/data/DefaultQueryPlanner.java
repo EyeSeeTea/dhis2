@@ -150,16 +150,6 @@ public class DefaultQueryPlanner
             violation = "Category option combos cannot be specified when data elements are not specified";
         }
 
-        if ( !params.getAllProgramDataElements().isEmpty() && !params.hasProgram() )
-        {
-            violation = "Program must be specified when tracker data elements are specified";
-        }
-
-        if ( !params.getAllProgramAttributes().isEmpty() && !params.hasProgram() )
-        {
-            violation = "Program must be specified when program attributes are specified";
-        }
-
         if ( !nonAggDataElements.isEmpty() )
         {
             violation = "Data elements must be of a type that allows aggregation: " + getUids( nonAggDataElements );

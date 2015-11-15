@@ -1129,6 +1129,11 @@ public abstract class DhisConvenienceTest
         return role;
     }
 
+    public static Program createProgram( char uniqueCharacter )
+    {
+        return createProgram( uniqueCharacter, null, null );
+    }
+    
     public static Program createProgram( char uniqueCharacter, Set<ProgramStage> programStages,
         OrganisationUnit unit )
     {

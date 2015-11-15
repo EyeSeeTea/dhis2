@@ -67,6 +67,8 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.period.RelativePeriodEnum;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 import org.hisp.dhis.user.CurrentUserService;
@@ -115,6 +117,8 @@ public class DataQueryServiceTest
     
     private DataElementGroupSet deGroupSetA;
     
+    private Program prA;
+    
     private PeriodType monthly = PeriodType.getPeriodTypeByName( MonthlyPeriodType.NAME );
     
     @Autowired
@@ -137,6 +141,9 @@ public class DataQueryServiceTest
 
     @Autowired
     private TrackedEntityAttributeService attributeService;
+    
+    @Autowired
+    private ProgramService programService;
     
     @Override
     public void setUpTest()
@@ -237,6 +244,10 @@ public class DataQueryServiceTest
         deGroupSetA.addDataElementGroup( deGroupC );
         
         dataElementService.updateDataElementGroupSet( deGroupSetA );
+
+        prA = createProgram( 'A' );
+        
+        programService.addProgram( prA );
         
         // ---------------------------------------------------------------------
         // Mock injection

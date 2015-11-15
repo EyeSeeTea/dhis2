@@ -38,6 +38,7 @@ import static org.hisp.dhis.common.DimensionType.PERIOD;
 import static org.hisp.dhis.common.DimensionType.PROGRAM_ATTRIBUTE;
 import static org.hisp.dhis.common.DimensionType.PROGRAM_DATAELEMENT;
 import static org.hisp.dhis.common.DimensionType.PROGRAM_INDICATOR;
+import static org.hisp.dhis.common.DimensionalObjectUtils.COMPOSITE_DIM_OBJECT_SEP;
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
 import static org.hisp.dhis.commons.util.TextUtils.splitSafe;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_LEVEL;
@@ -88,7 +89,9 @@ import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.period.RelativePeriodEnum;
 import org.hisp.dhis.period.RelativePeriods;
 import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramDataElement;
 import org.hisp.dhis.program.ProgramIndicator;
+import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.security.acl.AclService;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeDimension;
@@ -112,6 +115,9 @@ public class DefaultDimensionService
 
     @Autowired
     private DataElementOperandService operandService;
+    
+    @Autowired
+    private ProgramService programService;
 
     @Autowired
     private PeriodService periodService;
@@ -457,12 +463,20 @@ public class DefaultDimensionService
                     {
                         if ( DimensionalObjectUtils.isCompositeDimensionalObject( uid ) )
                         {
-                            DataElementOperand operand = operandService.getOrAddDataElementOperand( 
-                                splitSafe( uid, DataElementOperand.ESCAPED_SEPARATOR, 0 ), splitSafe( uid, DataElementOperand.ESCAPED_SEPARATOR, 1 ) );
+                            String id0 = splitSafe( uid, COMPOSITE_DIM_OBJECT_SEP, 0 );
+                            String id1 = splitSafe( uid, COMPOSITE_DIM_OBJECT_SEP, 1 );
+                            
+                            DataElementOperand operand = operandService.getOrAddDataElementOperand( id0, id1 );
+
+                            ProgramDataElement programDataElement = programService.getProgramDataElement( id0, id1 );
                             
                             if ( operand != null )
                             {
                                 object.getDataDimensionItems().add( DataDimensionItem.create( operand ) );
+                            }
+                            else if ( programDataElement != null )
+                            {
+                                object.getDataDimensionItems().add( DataDimensionItem.create( programDataElement ) );
                             }
                         }
                         else

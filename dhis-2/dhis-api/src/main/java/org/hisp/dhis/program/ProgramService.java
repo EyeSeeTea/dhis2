@@ -229,13 +229,23 @@ public interface ProgramService
     /**
      * Get {@link Program} by the current user and a certain type
      *
-     * @param type The type of program. There are three types, include Multi
-     *        events with registration, Single event with registration and
-     *        Single event without registration.
+     * @param type The type of program. There are three types, include multi
+     *        events with registration, single event with registration and
+     *        single event without registration.
      * @return Program list by a type specified
      */
     List<Program> getByCurrentUser( ProgramType type );
 
+    /**
+     * Creates a program data element based on the program and data element with
+     * the given program and data element identifiers.
+     * 
+     * @param programUid the program identifier.
+     * @param dataElementUid the data element identifier.
+     * @return a program data element.
+     */
+    ProgramDataElement getProgramDataElement( String programUid, String dataElementUid );
+    
     /**
      * Sets the given merge organisation units on the given programs. Only 
      * the sub-hierarchy of the current user is modified. 

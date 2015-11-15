@@ -54,11 +54,12 @@ import com.google.common.collect.Sets;
  */
 public class DimensionalObjectUtils
 {
-    private static final Pattern INT_PATTERN = Pattern.compile( "^(0|-?[1-9]\\d*)$" );
-    private static final Pattern COMPOSITE_DIMENSIONAL_OBJECT_PATTERN = Pattern.compile( "([a-zA-Z]\\w{10})\\.([a-zA-Z]\\w{10})" );
-    
+    public static final String COMPOSITE_DIM_OBJECT_SEP = "\\.";
     public static final String TITLE_ITEM_SEP = ", ";
 
+    private static final Pattern INT_PATTERN = Pattern.compile( "^(0|-?[1-9]\\d*)$" );
+    private static final Pattern COMPOSITE_DIM_OBJECT_PATTERN = Pattern.compile( "([a-zA-Z]\\w{10})\\.([a-zA-Z]\\w{10})" );
+    
     public static List<DimensionalObject> getCopies( List<DimensionalObject> dimensions )
     {
         List<DimensionalObject> list = new ArrayList<>();
@@ -340,7 +341,7 @@ public class DimensionalObjectUtils
      */
     public static boolean isCompositeDimensionalObject( String expression )
     {
-        return expression != null && COMPOSITE_DIMENSIONAL_OBJECT_PATTERN.matcher( expression ).matches();
+        return expression != null && COMPOSITE_DIM_OBJECT_PATTERN.matcher( expression ).matches();
     }
 
     /**

@@ -64,7 +64,6 @@ public class DataElementOperand
     extends BaseNameableObject
 {
     public static final String SEPARATOR = ".";
-    public static final String ESCAPED_SEPARATOR = "\\.";
     public static final String NAME_TOTAL = "(Total)";
 
     private static final String TYPE_VALUE = "value";

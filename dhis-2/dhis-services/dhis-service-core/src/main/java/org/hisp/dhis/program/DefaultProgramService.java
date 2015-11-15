@@ -35,6 +35,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitQueryParams;
@@ -93,6 +95,13 @@ public class DefaultProgramService
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
     {
         this.organisationUnitService = organisationUnitService;
+    }
+    
+    private DataElementService dataElementService;
+
+    public void setDataElementService( DataElementService dataElementService )
+    {
+        this.dataElementService = dataElementService;
     }
 
     // -------------------------------------------------------------------------
@@ -287,6 +296,21 @@ public class DefaultProgramService
         }
 
         return programs;
+    }
+
+    @Override
+    public ProgramDataElement getProgramDataElement( String programUid, String dataElementUid )
+    {
+        Program program = programStore.getByUid( programUid );
+        
+        DataElement dataElement = dataElementService.getDataElement( dataElementUid );
+        
+        if ( program == null || dataElement == null )
+        {
+            return null;
+        }
+        
+        return new ProgramDataElement( program, dataElement );
     }
 
     @Override

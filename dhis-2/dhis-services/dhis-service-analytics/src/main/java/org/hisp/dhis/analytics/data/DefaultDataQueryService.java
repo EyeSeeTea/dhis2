@@ -53,6 +53,7 @@ import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_ORGUNIT_GROUP;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT_CHILDREN;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT_GRANDCHILDREN;
+import static org.hisp.dhis.common.DimensionalObjectUtils.COMPOSITE_DIM_OBJECT_SEP;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -93,6 +94,7 @@ import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.period.RelativePeriodEnum;
 import org.hisp.dhis.period.RelativePeriods;
 import org.hisp.dhis.period.comparator.AscendingPeriodEndDateComparator;
+import org.hisp.dhis.program.ProgramDataElement;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStageService;
 import org.hisp.dhis.system.util.ReflectionUtils;
@@ -269,12 +271,20 @@ public class DefaultDataQueryService
                 }
                 else if ( DimensionalObjectUtils.isCompositeDimensionalObject( uid ) )
                 {
-                    DataElementOperand operand = operandService.getDataElementOperand( 
-                        splitSafe( uid, DataElementOperand.ESCAPED_SEPARATOR, 0 ), splitSafe( uid, DataElementOperand.ESCAPED_SEPARATOR, 1 ) );
+                    String id0 = splitSafe( uid, COMPOSITE_DIM_OBJECT_SEP, 0 );
+                    String id1 = splitSafe( uid, COMPOSITE_DIM_OBJECT_SEP, 1 );
+                    
+                    DataElementOperand operand = operandService.getDataElementOperand( id0, id1 );
+
+                    ProgramDataElement programDataElement = programService.getProgramDataElement( id0, id1 );
                     
                     if ( operand != null )
                     {
                         dataDimensionItems.add( operand );
+                    }                    
+                    else if ( programDataElement != null )
+                    {
+                        dataDimensionItems.add( programDataElement );
                     }
                 }
                 else if ( CodeGenerator.isValidCode( uid ) )
