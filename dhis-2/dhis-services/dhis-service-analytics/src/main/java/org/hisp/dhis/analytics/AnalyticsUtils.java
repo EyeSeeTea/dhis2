@@ -29,7 +29,6 @@ package org.hisp.dhis.analytics;
  */
 
 import static org.hisp.dhis.common.DataDimensionItem.DATA_DIMENSION_TYPE_CLASS_MAP;
-import static org.hisp.dhis.common.DataDimensionItem.DATA_DIMENSION_TYPE_DOMAIN_MAP;
 import static org.hisp.dhis.system.util.DateUtils.getMediumDateString;
 
 import java.util.ArrayList;
@@ -42,7 +41,6 @@ import org.hisp.dhis.common.IllegalQueryException;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.NameableObjectUtils;
 import org.hisp.dhis.commons.util.TextUtils;
-import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.system.util.MathUtils;
@@ -124,12 +122,7 @@ public class AnalyticsUtils
             {
                 continue;
             }
-            
-            if ( clazz.equals( DataElement.class ) && !( ((DataElement) object).getDomainType().equals( DATA_DIMENSION_TYPE_DOMAIN_MAP.get( itemType ) ) ) )
-            {
-                continue;
-            }
-            
+                        
             list.add( object );
         }
         

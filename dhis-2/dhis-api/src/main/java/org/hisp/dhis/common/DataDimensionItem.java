@@ -34,10 +34,10 @@ import java.util.Set;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementDomain;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.program.ProgramDataElement;
 import org.hisp.dhis.program.ProgramIndicator;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 
@@ -58,16 +58,13 @@ public class DataDimensionItem
 {    
     public static final Set<Class<? extends IdentifiableObject>> DATA_DIMENSION_CLASSES = ImmutableSet.<Class<? extends IdentifiableObject>>builder().
         add( Indicator.class ).add( DataElement.class ).add( DataElementOperand.class ).
-        add( DataSet.class ).add( ProgramIndicator.class ).add( TrackedEntityAttribute.class ).build();
+        add( DataSet.class ).add( ProgramIndicator.class ).add( ProgramDataElement.class ).add( TrackedEntityAttribute.class ).build();
     
     public static final Map<DataDimensionItemType, Class<? extends NameableObject>> DATA_DIMENSION_TYPE_CLASS_MAP = ImmutableMap.<DataDimensionItemType, Class<? extends NameableObject>>builder().
         put( DataDimensionItemType.INDICATOR, Indicator.class ).put( DataDimensionItemType.AGGREGATE_DATA_ELEMENT, DataElement.class ).
         put( DataDimensionItemType.DATA_ELEMENT_OPERAND, DataElementOperand.class ).put( DataDimensionItemType.DATA_SET, DataSet.class ).
-        put( DataDimensionItemType.PROGRAM_INDICATOR, ProgramIndicator.class ).put( DataDimensionItemType.PROGRAM_ATTRIBUTE, TrackedEntityAttribute.class ).
-        put( DataDimensionItemType.PROGRAM_DATA_ELEMENT, DataElement.class ).build();
-    
-    public static final Map<DataDimensionItemType, DataElementDomain> DATA_DIMENSION_TYPE_DOMAIN_MAP = ImmutableMap.<DataDimensionItemType, DataElementDomain>builder().
-        put( DataDimensionItemType.AGGREGATE_DATA_ELEMENT, DataElementDomain.AGGREGATE ).put( DataDimensionItemType.PROGRAM_DATA_ELEMENT, DataElementDomain.TRACKER ).build();
+        put( DataDimensionItemType.PROGRAM_INDICATOR, ProgramIndicator.class ).put( DataDimensionItemType.PROGRAM_DATA_ELEMENT, ProgramDataElement.class ).
+        put( DataDimensionItemType.PROGRAM_ATTRIBUTE, TrackedEntityAttribute.class ).build();
     
     private int id;
     
@@ -84,9 +81,11 @@ public class DataDimensionItem
     private DataSet dataSet;
     
     private ProgramIndicator programIndicator;
+
+    private ProgramDataElement programDataElement;
     
     private TrackedEntityAttribute trackedEntityAttribute;
-
+    
     // -------------------------------------------------------------------------
     // Constructor
     // -------------------------------------------------------------------------
@@ -118,6 +117,10 @@ public class DataDimensionItem
         else if ( ProgramIndicator.class.isAssignableFrom( object.getClass() ) )
         {
             dimension.setProgramIndicator( (ProgramIndicator) object );
+        }
+        else if ( ProgramDataElement.class.isAssignableFrom( object.getClass() ) )
+        {
+            dimension.setProgramDataElement( (ProgramDataElement) object );
         }
         else if ( TrackedEntityAttribute.class.isAssignableFrom( object.getClass() ) )
         {
@@ -157,6 +160,10 @@ public class DataDimensionItem
         {
             return programIndicator;
         }
+        else if ( programDataElement != null )
+        {
+            return programDataElement;
+        }
         else if ( trackedEntityAttribute != null )
         {
             return trackedEntityAttribute;
@@ -176,14 +183,7 @@ public class DataDimensionItem
         }
         else if ( dataElement != null )
         {
-            if ( DataElementDomain.TRACKER.equals( dataElement.getDomainType() ) )
-            {
-                return DataDimensionItemType.PROGRAM_DATA_ELEMENT;
-            }
-            else
-            {
-                return DataDimensionItemType.AGGREGATE_DATA_ELEMENT;
-            }
+            return DataDimensionItemType.AGGREGATE_DATA_ELEMENT;
         }
         else if ( dataElementOperand != null )
         {
@@ -196,6 +196,10 @@ public class DataDimensionItem
         else if ( programIndicator != null )
         {
             return DataDimensionItemType.PROGRAM_INDICATOR;
+        }
+        else if ( programDataElement != null )
+        {
+            return DataDimensionItemType.PROGRAM_DATA_ELEMENT;
         }
         else if ( trackedEntityAttribute != null )
         {
@@ -288,6 +292,20 @@ public class DataDimensionItem
     public void setProgramIndicator( ProgramIndicator programIndicator )
     {
         this.programIndicator = programIndicator;
+    }
+
+    @JsonProperty
+    @JsonSerialize( as = BaseNameableObject.class )
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public ProgramDataElement getProgramDataElement()
+    {
+        return programDataElement;
+    }
+
+    public void setProgramDataElement( ProgramDataElement programDataElement )
+    {
+        this.programDataElement = programDataElement;
     }
 
     @JsonProperty
