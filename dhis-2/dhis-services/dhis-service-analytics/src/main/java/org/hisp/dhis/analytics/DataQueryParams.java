@@ -203,18 +203,18 @@ public class DataQueryParams
     protected String approvalLevel;
     
     // -------------------------------------------------------------------------
-    // Event properties
+    // Event transient properties
     // -------------------------------------------------------------------------
     
     /**
      * The program for events.
      */
-    protected Program program;
+    protected transient Program program;
     
     /**
      * The program stage for events.
      */
-    protected ProgramStage programStage;
+    protected transient ProgramStage programStage;
     
     // -------------------------------------------------------------------------
     // Transient properties

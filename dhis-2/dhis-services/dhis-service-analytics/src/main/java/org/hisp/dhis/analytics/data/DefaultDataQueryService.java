@@ -96,7 +96,6 @@ import org.hisp.dhis.period.RelativePeriods;
 import org.hisp.dhis.period.comparator.AscendingPeriodEndDateComparator;
 import org.hisp.dhis.program.ProgramDataElement;
 import org.hisp.dhis.program.ProgramService;
-import org.hisp.dhis.program.ProgramStageService;
 import org.hisp.dhis.system.util.ReflectionUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
@@ -121,9 +120,6 @@ public class DefaultDataQueryService
     private ProgramService programService;
     
     @Autowired
-    private ProgramStageService programStageService;
-    
-    @Autowired
     private CurrentUserService currentUserService;
 
     public void setCurrentUserService( CurrentUserService currentUserService )
@@ -139,7 +135,7 @@ public class DefaultDataQueryService
     public DataQueryParams getFromUrl( Set<String> dimensionParams, Set<String> filterParams, AggregationType aggregationType,
         String measureCriteria, boolean skipMeta, boolean skipData, boolean skipRounding, boolean completedOnly, boolean hierarchyMeta, boolean ignoreLimit,
         boolean hideEmptyRows, boolean showHierarchy, DisplayProperty displayProperty, IdentifiableProperty outputIdScheme, 
-        String approvalLevel, Date relativePeriodDate, String userOrgUnit, String program, String stage, I18nFormat format )
+        String approvalLevel, Date relativePeriodDate, String userOrgUnit, I18nFormat format )
     {
         DataQueryParams params = new DataQueryParams();
         
@@ -172,16 +168,6 @@ public class DefaultDataQueryService
         params.setOutputIdScheme( outputIdScheme );
         params.setApprovalLevel( approvalLevel );
         
-        if ( program != null )
-        {
-            params.setProgram( programService.getProgram( program ) );
-        }
-
-        if ( stage != null )
-        {
-            params.setProgramStage( programStageService.getProgramStage( stage ) );
-        }
-
         return params;
     }
 
