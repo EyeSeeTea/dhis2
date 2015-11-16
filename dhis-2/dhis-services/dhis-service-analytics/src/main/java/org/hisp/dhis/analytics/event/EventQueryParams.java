@@ -53,6 +53,7 @@ import org.hisp.dhis.legend.Legend;
 import org.hisp.dhis.option.OptionSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
+import org.hisp.dhis.program.ProgramDataElement;
 import org.hisp.dhis.program.ProgramIndicator;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 
@@ -155,8 +156,9 @@ public class EventQueryParams
 
         for ( NameableObject object : dataQueryParams.getProgramDataElements() )
         {
-            DataElement element = (DataElement) object;
-            QueryItem item = new QueryItem( element, element.getLegendSet(), element.getValueType(), element.getAggregationType(), element.getOptionSet() );
+            ProgramDataElement programElement = (ProgramDataElement) object;
+            DataElement element = programElement.getDataElement(); 
+            QueryItem item = new QueryItem( element, programElement.getLegendSet(), element.getValueType(), programElement.getAggregationType(), element.getOptionSet() );
             params.getItems().add( item );
         }
 

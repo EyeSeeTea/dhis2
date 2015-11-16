@@ -280,8 +280,8 @@ public class DataQueryParams
         params.displayProperty = this.displayProperty;
         params.outputIdScheme = this.outputIdScheme;
         params.approvalLevel = this.approvalLevel;
-        params.program = this.program;
-        params.programStage = this.programStage;
+        //params.program = this.program;
+        //params.programStage = this.programStage;
         
         params.partitions = new Partitions( this.partitions );
         params.dataType = this.dataType;

@@ -28,16 +28,20 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.legend.LegendSet;
 
 import static org.hisp.dhis.common.DimensionalObjectUtils.COMPOSITE_DIM_OBJECT_PLAIN_SEP;
+
+import org.hisp.dhis.analytics.AggregationType;
+import org.hisp.dhis.common.BaseDimensionalObject;
+import org.hisp.dhis.common.DimensionType;
 
 /**
  * @author Lars Helge Overland
  */
 public class ProgramDataElement
-    extends BaseNameableObject
+    extends BaseDimensionalObject
 {
     private Program program;
     
@@ -66,10 +70,33 @@ public class ProgramDataElement
     {
         return program.getName() + " " + dataElement.getName();
     }
+
     
     public String getAnalyticsId()
     {
         return program.getUid() + COMPOSITE_DIM_OBJECT_PLAIN_SEP + dataElement.getUid();
+    }
+    
+    // -------------------------------------------------------------------------
+    // DimensionalObject
+    // -------------------------------------------------------------------------
+
+    @Override
+    public DimensionType getDimensionType()
+    {
+        return DimensionType.PROGRAM_DATAELEMENT;
+    }
+
+    @Override
+    public LegendSet getLegendSet()
+    {
+        return dataElement.getLegendSet();
+    }
+
+    @Override
+    public AggregationType getAggregationType()
+    {
+        return dataElement.getAggregationType();
     }
     
     // -------------------------------------------------------------------------
