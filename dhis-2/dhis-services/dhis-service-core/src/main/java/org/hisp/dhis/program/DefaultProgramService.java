@@ -103,6 +103,13 @@ public class DefaultProgramService
     {
         this.dataElementService = dataElementService;
     }
+    
+    private ProgramDataElementStore programDataElementStore;
+
+    public void setProgramDataElementStore( ProgramDataElementStore programDataElementStore )
+    {
+        this.programDataElementStore = programDataElementStore;
+    }
 
     // -------------------------------------------------------------------------
     // Implementation methods
@@ -298,6 +305,30 @@ public class DefaultProgramService
         return programs;
     }
 
+    @Override
+    public ProgramDataElement getOrAddProgramDataElement( String programUid, String dataElementUid )
+    {
+        Program program = programStore.getByUid( programUid );
+        
+        DataElement dataElement = dataElementService.getDataElement( dataElementUid );
+        
+        if ( program == null || dataElement == null )
+        {
+            return null;
+        }
+        
+        ProgramDataElement programDataElement = programDataElementStore.get( program, dataElement );
+        
+        if ( programDataElement == null )
+        {
+            programDataElement = new ProgramDataElement( program, dataElement );
+            
+            programDataElementStore.save( programDataElement );
+        }
+        
+        return programDataElement;
+    }
+        
     @Override
     public ProgramDataElement getProgramDataElement( String programUid, String dataElementUid )
     {

@@ -237,6 +237,15 @@ public interface ProgramService
     List<Program> getByCurrentUser( ProgramType type );
 
     /**
+     * Gets or adds a program data element for the given program and data element.
+     * 
+     * @param programUid the program identifier.
+     * @param dataElementUid the data element identifier.
+     * @return a program data element.
+     */
+    ProgramDataElement getOrAddProgramDataElement(  String programUid, String dataElementUid  );
+    
+    /**
      * Creates a program data element based on the program and data element with
      * the given program and data element identifiers.
      * 

@@ -468,7 +468,7 @@ public class DefaultDimensionService
                             
                             DataElementOperand operand = operandService.getOrAddDataElementOperand( id0, id1 );
 
-                            ProgramDataElement programDataElement = programService.getProgramDataElement( id0, id1 );
+                            ProgramDataElement programDataElement = programService.getOrAddProgramDataElement( id0, id1 );
                             
                             if ( operand != null )
                             {
