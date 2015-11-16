@@ -43,10 +43,9 @@ public class HibernateProgramTrackedEntityAttributeStore
     extends HibernateIdentifiableObjectStore<ProgramTrackedEntityAttribute>
         implements ProgramTrackedEntityAttributeStore
 {
-    @Override
     public ProgramTrackedEntityAttribute get( Program program, TrackedEntityAttribute attribute )
     {
-        return (ProgramTrackedEntityAttribute) getCriteria(
+        return (ProgramTrackedEntityAttribute) getCriteria( 
             Restrictions.eq( "program", program ),
             Restrictions.eq( "attribute", attribute ) ).uniqueResult();
     }

@@ -47,6 +47,8 @@ import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 public class ProgramTrackedEntityAttribute
     extends BaseIdentifiableObject
 {
+    private Program program;
+
     private TrackedEntityAttribute attribute;
 
     private boolean displayInList;
@@ -63,23 +65,26 @@ public class ProgramTrackedEntityAttribute
     {
     }
 
-    public ProgramTrackedEntityAttribute( TrackedEntityAttribute attribute, int sortOrder, boolean displayInList )
+    public ProgramTrackedEntityAttribute( Program program, TrackedEntityAttribute attribute, int sortOrder, boolean displayInList )
     {
+        this.program = program;
         this.attribute = attribute;
         this.displayInList = displayInList;
     }
 
-    public ProgramTrackedEntityAttribute( TrackedEntityAttribute attribute, boolean displayInList,
+    public ProgramTrackedEntityAttribute( Program program, TrackedEntityAttribute attribute, boolean displayInList,
         Boolean mandatory )
     {
+        this.program = program;
         this.attribute = attribute;
         this.displayInList = displayInList;
         this.mandatory = mandatory;
     }
 
-    public ProgramTrackedEntityAttribute( TrackedEntityAttribute attribute, boolean displayInList,
+    public ProgramTrackedEntityAttribute( Program program, TrackedEntityAttribute attribute, boolean displayInList,
         Boolean mandatory, Boolean allowFutureDate )
     {
+        this.program = program;
         this.attribute = attribute;
         this.displayInList = displayInList;
         this.mandatory = mandatory;
@@ -91,16 +96,17 @@ public class ProgramTrackedEntityAttribute
     // -------------------------------------------------------------------------
 
     @JsonProperty
+    @JsonSerialize( as = BaseIdentifiableObject.class )
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public Boolean isMandatory()
+    public Program getProgram()
     {
-        return mandatory;
+        return program;
     }
 
-    public void setMandatory( Boolean mandatory )
+    public void setProgram( Program program )
     {
-        this.mandatory = mandatory;
+        this.program = program;
     }
 
     @JsonProperty( "trackedEntityAttribute" )
@@ -115,6 +121,19 @@ public class ProgramTrackedEntityAttribute
     public void setAttribute( TrackedEntityAttribute attribute )
     {
         this.attribute = attribute;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Boolean isMandatory()
+    {
+        return mandatory;
+    }
+
+    public void setMandatory( Boolean mandatory )
+    {
+        this.mandatory = mandatory;
     }
 
     @JsonProperty
