@@ -53,7 +53,7 @@ import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_ORGUNIT_GROUP;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT_CHILDREN;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT_GRANDCHILDREN;
-import static org.hisp.dhis.common.DimensionalObjectUtils.COMPOSITE_DIM_OBJECT_SEP;
+import static org.hisp.dhis.common.DimensionalObjectUtils.COMPOSITE_DIM_OBJECT_ESCAPED_SEP;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -271,8 +271,8 @@ public class DefaultDataQueryService
                 }
                 else if ( DimensionalObjectUtils.isCompositeDimensionalObject( uid ) )
                 {
-                    String id0 = splitSafe( uid, COMPOSITE_DIM_OBJECT_SEP, 0 );
-                    String id1 = splitSafe( uid, COMPOSITE_DIM_OBJECT_SEP, 1 );
+                    String id0 = splitSafe( uid, COMPOSITE_DIM_OBJECT_ESCAPED_SEP, 0 );
+                    String id1 = splitSafe( uid, COMPOSITE_DIM_OBJECT_ESCAPED_SEP, 1 );
                     
                     DataElementOperand operand = operandService.getDataElementOperand( id0, id1 );
 

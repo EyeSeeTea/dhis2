@@ -68,6 +68,8 @@ import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.period.RelativePeriodEnum;
 import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramDataElement;
+import org.hisp.dhis.program.ProgramDataElementStore;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
@@ -84,12 +86,15 @@ import static org.hisp.dhis.common.DimensionalObject.*;
 public class DataQueryServiceTest
     extends DhisSpringTest
 {
+    private Program prA;
+    
     private DataElement deA;
     private DataElement deB;
     private DataElement deC;
     private DataElement deD;
-    private DataElement deE;
-    private DataElement deF;
+    
+    private ProgramDataElement pdA;
+    private ProgramDataElement pdB;
     
     private DataElementCategoryOptionCombo cocA;
     
@@ -117,8 +122,6 @@ public class DataQueryServiceTest
     
     private DataElementGroupSet deGroupSetA;
     
-    private Program prA;
-    
     private PeriodType monthly = PeriodType.getPeriodTypeByName( MonthlyPeriodType.NAME );
     
     @Autowired
@@ -145,15 +148,23 @@ public class DataQueryServiceTest
     @Autowired
     private ProgramService programService;
     
+    @Autowired
+    private ProgramDataElementStore programDataElementStore;
+    
     @Override
     public void setUpTest()
     {
+        prA = createProgram( 'A' );
+        
+        programService.addProgram( prA );
+        
         deA = createDataElement( 'A' );
         deB = createDataElement( 'B' );
         deC = createDataElement( 'C' );
         deD = createDataElement( 'D' );
-        deE = createDataElement( 'E' );
-        deF = createDataElement( 'F' );
+        
+        DataElement deE = createDataElement( 'E' );
+        DataElement deF = createDataElement( 'F' );
         
         deE.setDomainType( DataElementDomain.TRACKER );
         deF.setDomainType( DataElementDomain.TRACKER );
@@ -164,6 +175,12 @@ public class DataQueryServiceTest
         dataElementService.addDataElement( deD );
         dataElementService.addDataElement( deE );
         dataElementService.addDataElement( deF );
+        
+        pdA = new ProgramDataElement( prA, deE );
+        pdB = new ProgramDataElement( prA, deF );
+        
+        programDataElementStore.save( pdA );
+        programDataElementStore.save( pdB );
         
         cocA = categoryService.getDefaultDataElementCategoryOptionCombo();
 
@@ -245,10 +262,6 @@ public class DataQueryServiceTest
         
         dataElementService.updateDataElementGroupSet( deGroupSetA );
 
-        prA = createProgram( 'A' );
-        
-        programService.addProgram( prA );
-        
         // ---------------------------------------------------------------------
         // Mock injection
         // ---------------------------------------------------------------------
@@ -435,7 +448,7 @@ public class DataQueryServiceTest
     public void testGetFromUrlC()
     {
         Set<String> dimensionParams = new HashSet<>();
-        dimensionParams.add( "dx:" + deA.getUid() + ";" + deB.getUid() + ";" + deE.getUid() + ";" + deF.getUid() );
+        dimensionParams.add( "dx:" + deA.getUid() + ";" + deB.getUid() + ";" + pdA.getAnalyticsId() + ";" + pdB.getAnalyticsId() );
 
         Set<String> filterParams = new HashSet<>();
         filterParams.add( "ou:" + ouA.getUid() );
@@ -659,8 +672,8 @@ public class DataQueryServiceTest
         chart.getFilterDimensions().add( DimensionalObject.PERIOD_DIM_ID );
         
         chart.addDataDimensionItem( deA );
-        chart.addDataDimensionItem( deE );
-        chart.addDataDimensionItem( deF );
+        chart.addDataDimensionItem( pdA );
+        chart.addDataDimensionItem( pdB );
         
         chart.getOrganisationUnitGroups().add( ouGroupA );
         chart.getOrganisationUnitGroups().add( ouGroupB );

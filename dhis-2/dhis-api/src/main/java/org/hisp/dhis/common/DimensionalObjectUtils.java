@@ -54,7 +54,8 @@ import com.google.common.collect.Sets;
  */
 public class DimensionalObjectUtils
 {
-    public static final String COMPOSITE_DIM_OBJECT_SEP = "\\.";
+    public static final String COMPOSITE_DIM_OBJECT_ESCAPED_SEP = "\\.";
+    public static final String COMPOSITE_DIM_OBJECT_PLAIN_SEP = ".";
     public static final String TITLE_ITEM_SEP = ", ";
 
     private static final Pattern INT_PATTERN = Pattern.compile( "^(0|-?[1-9]\\d*)$" );

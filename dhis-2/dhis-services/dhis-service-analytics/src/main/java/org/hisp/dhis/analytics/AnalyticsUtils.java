@@ -118,12 +118,10 @@ public class AnalyticsUtils
         {
             Class<?> clazz = ReflectionUtils.getRealClass( object.getClass() );
             
-            if ( !clazz.equals( DATA_DIMENSION_TYPE_CLASS_MAP.get( itemType ) ) )
+            if ( clazz.equals( DATA_DIMENSION_TYPE_CLASS_MAP.get( itemType ) ) )
             {
-                continue;
+                list.add( object );
             }
-                        
-            list.add( object );
         }
         
         return list;

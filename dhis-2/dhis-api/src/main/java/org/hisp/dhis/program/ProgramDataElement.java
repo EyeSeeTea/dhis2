@@ -31,6 +31,8 @@ package org.hisp.dhis.program;
 import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.dataelement.DataElement;
 
+import static org.hisp.dhis.common.DimensionalObjectUtils.COMPOSITE_DIM_OBJECT_PLAIN_SEP;
+
 /**
  * @author Lars Helge Overland
  */
@@ -63,6 +65,11 @@ public class ProgramDataElement
     public String getName()
     {
         return program.getName() + " " + dataElement.getName();
+    }
+    
+    public String getAnalyticsId()
+    {
+        return program.getUid() + COMPOSITE_DIM_OBJECT_PLAIN_SEP + dataElement.getUid();
     }
     
     // -------------------------------------------------------------------------

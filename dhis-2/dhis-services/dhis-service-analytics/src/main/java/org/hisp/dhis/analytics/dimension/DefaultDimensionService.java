@@ -38,7 +38,7 @@ import static org.hisp.dhis.common.DimensionType.PERIOD;
 import static org.hisp.dhis.common.DimensionType.PROGRAM_ATTRIBUTE;
 import static org.hisp.dhis.common.DimensionType.PROGRAM_DATAELEMENT;
 import static org.hisp.dhis.common.DimensionType.PROGRAM_INDICATOR;
-import static org.hisp.dhis.common.DimensionalObjectUtils.COMPOSITE_DIM_OBJECT_SEP;
+import static org.hisp.dhis.common.DimensionalObjectUtils.COMPOSITE_DIM_OBJECT_ESCAPED_SEP;
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
 import static org.hisp.dhis.commons.util.TextUtils.splitSafe;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_LEVEL;
@@ -463,8 +463,8 @@ public class DefaultDimensionService
                     {
                         if ( DimensionalObjectUtils.isCompositeDimensionalObject( uid ) )
                         {
-                            String id0 = splitSafe( uid, COMPOSITE_DIM_OBJECT_SEP, 0 );
-                            String id1 = splitSafe( uid, COMPOSITE_DIM_OBJECT_SEP, 1 );
+                            String id0 = splitSafe( uid, COMPOSITE_DIM_OBJECT_ESCAPED_SEP, 0 );
+                            String id1 = splitSafe( uid, COMPOSITE_DIM_OBJECT_ESCAPED_SEP, 1 );
                             
                             DataElementOperand operand = operandService.getOrAddDataElementOperand( id0, id1 );
 
