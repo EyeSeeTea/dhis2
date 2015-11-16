@@ -61,10 +61,6 @@ public class HibernateProgramStageInstanceStore
     extends HibernateIdentifiableObjectStore<ProgramStageInstance>
     implements ProgramStageInstanceStore
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
     @Autowired
     private TrackedEntityInstanceReminderService reminderService;
 
