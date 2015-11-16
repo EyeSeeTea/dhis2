@@ -215,11 +215,6 @@ public class DefaultQueryPlanner
         }
     }
 
-    public void moveDataDimensionFirst( DataQueryParams params )
-    {
-
-    }
-
     @Override
     public DataQueryGroups planQuery( DataQueryParams params, int optimalQueries, String tableName )
     {
