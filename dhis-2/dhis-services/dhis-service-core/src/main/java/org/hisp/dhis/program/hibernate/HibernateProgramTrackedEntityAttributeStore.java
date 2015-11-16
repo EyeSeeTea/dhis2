@@ -28,24 +28,26 @@ package org.hisp.dhis.program.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
-import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramDataElement;
-import org.hisp.dhis.program.ProgramDataElementStore;
+import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
+import org.hisp.dhis.program.ProgramTrackedEntityAttributeStore;
+import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
+
+import org.hibernate.criterion.Restrictions;
 
 /**
  * @author Lars Helge Overland
  */
-public class HibernateProgramDataElementStore
-    extends HibernateIdentifiableObjectStore<ProgramDataElement>
-        implements ProgramDataElementStore
+public class HibernateProgramTrackedEntityAttributeStore
+    extends HibernateIdentifiableObjectStore<ProgramTrackedEntityAttribute>
+        implements ProgramTrackedEntityAttributeStore
 {
-    public ProgramDataElement get( Program program, DataElement dataElement )
+    @Override
+    public ProgramTrackedEntityAttribute get( Program program, TrackedEntityAttribute attribute )
     {
-        return (ProgramDataElement) getCriteria( 
+        return (ProgramTrackedEntityAttribute) getCriteria(
             Restrictions.eq( "program", program ),
-            Restrictions.eq( "dataElement", dataElement ) ).uniqueResult();
+            Restrictions.eq( "attribute", attribute ) ).uniqueResult();
     }
 }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.program.hibernate;
+package org.hisp.dhis.program;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,24 +28,12 @@ package org.hisp.dhis.program.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hibernate.criterion.Restrictions;
-import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramDataElement;
-import org.hisp.dhis.program.ProgramDataElementStore;
+import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 
 /**
  * @author Lars Helge Overland
  */
-public class HibernateProgramDataElementStore
-    extends HibernateIdentifiableObjectStore<ProgramDataElement>
-        implements ProgramDataElementStore
+public interface ProgramTrackedEntityAttributeStore
 {
-    public ProgramDataElement get( Program program, DataElement dataElement )
-    {
-        return (ProgramDataElement) getCriteria( 
-            Restrictions.eq( "program", program ),
-            Restrictions.eq( "dataElement", dataElement ) ).uniqueResult();
-    }
+    ProgramTrackedEntityAttribute get( Program program, TrackedEntityAttribute attribute );
 }
