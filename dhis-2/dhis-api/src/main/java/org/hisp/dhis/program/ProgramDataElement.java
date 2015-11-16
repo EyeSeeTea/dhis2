@@ -40,7 +40,11 @@ public class ProgramDataElement
     private Program program;
     
     private DataElement dataElement;
-    
+
+    // -------------------------------------------------------------------------
+    // Constructors
+    // -------------------------------------------------------------------------
+
     public ProgramDataElement()
     {
     }
@@ -50,6 +54,20 @@ public class ProgramDataElement
         this.program = program;
         this.dataElement = dataElement;
     }
+
+    // -------------------------------------------------------------------------
+    // Logic
+    // -------------------------------------------------------------------------
+
+    @Override
+    public String getName()
+    {
+        return program.getName() + " " + dataElement.getName();
+    }
+    
+    // -------------------------------------------------------------------------
+    // Get and set methods
+    // -------------------------------------------------------------------------
 
     public Program getProgram()
     {
