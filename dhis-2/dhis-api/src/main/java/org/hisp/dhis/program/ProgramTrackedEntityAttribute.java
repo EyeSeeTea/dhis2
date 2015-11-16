@@ -40,19 +40,13 @@ import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 
-import java.io.Serializable;
-
 /**
  * @author Chau Thu Tran
  */
 @JacksonXmlRootElement( localName = "programTrackedEntityAttribute", namespace = DxfNamespaces.DXF_2_0 )
 public class ProgramTrackedEntityAttribute
-    implements Serializable
+    extends BaseIdentifiableObject
 {
-    private static final long serialVersionUID = -2420475559273198337L;
-
-    private int id;
-
     private TrackedEntityAttribute attribute;
 
     private boolean displayInList;
@@ -95,16 +89,6 @@ public class ProgramTrackedEntityAttribute
     // -------------------------------------------------------------------------
     // Getters && Setters
     // -------------------------------------------------------------------------
-
-    public int getId()
-    {
-        return id;
-    }
-
-    public void setId( int id )
-    {
-        this.id = id;
-    }
 
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )

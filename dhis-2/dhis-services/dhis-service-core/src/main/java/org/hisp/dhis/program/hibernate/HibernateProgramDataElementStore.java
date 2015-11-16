@@ -7,6 +7,9 @@ import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramDataElement;
 import org.hisp.dhis.program.ProgramDataElementStore;
 
+/**
+ * @author Lars Helge Overland
+ */
 public class HibernateProgramDataElementStore
     extends HibernateIdentifiableObjectStore<ProgramDataElement>
         implements ProgramDataElementStore
