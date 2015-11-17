@@ -491,12 +491,6 @@
     <property name="sessionFactory" ref="sessionFactory" />
   </bean>
 
-  <bean id="org.hisp.dhis.program.ProgramTrackedEntityAttributeStore" 
-    class="org.hisp.dhis.program.hibernate.HibernateProgramTrackedEntityAttributeStore">
-    <property name="clazz" value="org.hisp.dhis.program.ProgramTrackedEntityAttribute" />
-    <property name="sessionFactory" ref="sessionFactory" />      
-  </bean>
-
   <bean id="org.hisp.dhis.trackedentity.TrackedEntityInstanceStore"
     class="org.hisp.dhis.trackedentity.hibernate.HibernateTrackedEntityInstanceStore">
     <property name="clazz" value="org.hisp.dhis.trackedentity.TrackedEntityInstance" />

@@ -39,6 +39,7 @@ import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.program.ProgramDataElement;
 import org.hisp.dhis.program.ProgramIndicator;
+import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -84,7 +85,7 @@ public class DataDimensionItem
 
     private ProgramDataElement programDataElement;
     
-    private TrackedEntityAttribute trackedEntityAttribute;
+    private ProgramTrackedEntityAttribute programAttribute;
     
     // -------------------------------------------------------------------------
     // Constructor
@@ -122,9 +123,9 @@ public class DataDimensionItem
         {
             dimension.setProgramDataElement( (ProgramDataElement) object );
         }
-        else if ( TrackedEntityAttribute.class.isAssignableFrom( object.getClass() ) )
+        else if ( ProgramTrackedEntityAttribute.class.isAssignableFrom( object.getClass() ) )
         {
-            dimension.setTrackedEntityAttribute( (TrackedEntityAttribute) object );
+            dimension.setProgramAttribute( (ProgramTrackedEntityAttribute) object );
         }
         else
         {
@@ -164,9 +165,9 @@ public class DataDimensionItem
         {
             return programDataElement;
         }
-        else if ( trackedEntityAttribute != null )
+        else if ( programAttribute != null )
         {
-            return trackedEntityAttribute;
+            return programAttribute;
         }
         
         return null;
@@ -201,7 +202,7 @@ public class DataDimensionItem
         {
             return DataDimensionItemType.PROGRAM_DATA_ELEMENT;
         }
-        else if ( trackedEntityAttribute != null )
+        else if ( programAttribute != null )
         {
             return DataDimensionItemType.PROGRAM_ATTRIBUTE;
         }
@@ -312,13 +313,13 @@ public class DataDimensionItem
     @JsonSerialize( as = BaseNameableObject.class )
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public TrackedEntityAttribute getTrackedEntityAttribute()
+    public ProgramTrackedEntityAttribute getProgramAttribute()
     {
-        return trackedEntityAttribute;
+        return programAttribute;
     }
 
-    public void setTrackedEntityAttribute( TrackedEntityAttribute trackedEntityAttribute )
+    public void setProgramAttribute( ProgramTrackedEntityAttribute programAttribute )
     {
-        this.trackedEntityAttribute = trackedEntityAttribute;
-    }
+        this.programAttribute = programAttribute;
+    }    
 }

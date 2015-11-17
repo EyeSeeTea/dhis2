@@ -96,7 +96,9 @@ import org.hisp.dhis.period.RelativePeriods;
 import org.hisp.dhis.period.comparator.AscendingPeriodEndDateComparator;
 import org.hisp.dhis.program.ProgramDataElement;
 import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.system.util.ReflectionUtils;
+import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,6 +120,9 @@ public class DefaultDataQueryService
 
     @Autowired
     private ProgramService programService;
+    
+    @Autowired
+    private TrackedEntityAttributeService attributeService;
     
     @Autowired
     private CurrentUserService currentUserService;
@@ -260,17 +265,21 @@ public class DefaultDataQueryService
                     String id0 = splitSafe( uid, COMPOSITE_DIM_OBJECT_ESCAPED_SEP, 0 );
                     String id1 = splitSafe( uid, COMPOSITE_DIM_OBJECT_ESCAPED_SEP, 1 );
                     
-                    DataElementOperand operand = operandService.getDataElementOperand( id0, id1 );
-
-                    ProgramDataElement programDataElement = programService.getProgramDataElement( id0, id1 );
+                    DataElementOperand operand = null;
+                    ProgramDataElement programDataElement = null;                    
+                    ProgramTrackedEntityAttribute programAttribute = null;
                     
-                    if ( operand != null )
+                    if ( ( operand = operandService.getDataElementOperand( id0, id1 ) ) != null )
                     {
                         dataDimensionItems.add( operand );
                     }                    
-                    else if ( programDataElement != null )
+                    else if ( ( programDataElement = programService.getProgramDataElement( id0, id1 ) ) != null )
                     {
                         dataDimensionItems.add( programDataElement );
+                    }
+                    else if ( ( programAttribute = attributeService.getProgramTrackedEntityAttribute( id0, id1 ) ) != null )
+                    {
+                        dataDimensionItems.add( programAttribute );
                     }
                 }
                 else if ( CodeGenerator.isValidCode( uid ) )
