@@ -55,6 +55,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.program.ProgramDataElement;
 import org.hisp.dhis.program.ProgramIndicator;
+import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 
 /**
@@ -156,16 +157,17 @@ public class EventQueryParams
 
         for ( NameableObject object : dataQueryParams.getProgramDataElements() )
         {
-            ProgramDataElement programElement = (ProgramDataElement) object;
-            DataElement element = programElement.getDataElement(); 
-            QueryItem item = new QueryItem( element, programElement.getLegendSet(), element.getValueType(), programElement.getAggregationType(), element.getOptionSet() );
+            ProgramDataElement element = (ProgramDataElement) object;
+            DataElement dataElement = element.getDataElement(); 
+            QueryItem item = new QueryItem( dataElement, element.getLegendSet(), dataElement.getValueType(), element.getAggregationType(), dataElement.getOptionSet() );
             params.getItems().add( item );
         }
 
         for ( NameableObject object : dataQueryParams.getProgramAttributes() )
         {
-            TrackedEntityAttribute element = (TrackedEntityAttribute) object;
-            QueryItem item = new QueryItem( element, element.getLegendSet(), element.getValueType(), element.getAggregationType(), element.getOptionSet() );
+            ProgramTrackedEntityAttribute element = (ProgramTrackedEntityAttribute) object;
+            TrackedEntityAttribute attribute = element.getAttribute();
+            QueryItem item = new QueryItem( element, element.getLegendSet(), attribute.getValueType(), element.getAggregationType(), attribute.getOptionSet() );
             params.getItems().add( item );
         }
 
