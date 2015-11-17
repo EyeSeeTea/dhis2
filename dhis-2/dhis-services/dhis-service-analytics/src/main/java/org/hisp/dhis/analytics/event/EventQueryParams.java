@@ -159,7 +159,8 @@ public class EventQueryParams
         {
             ProgramDataElement element = (ProgramDataElement) object;
             DataElement dataElement = element.getDataElement(); 
-            QueryItem item = new QueryItem( dataElement, element.getLegendSet(), dataElement.getValueType(), element.getAggregationType(), dataElement.getOptionSet() );
+            QueryItem item = new QueryItem( dataElement, dataElement.getLegendSet(), dataElement.getValueType(), dataElement.getAggregationType(), dataElement.getOptionSet() );
+            item.setProgram( element.getProgram() );
             params.getItems().add( item );
         }
 
@@ -167,21 +168,25 @@ public class EventQueryParams
         {
             ProgramTrackedEntityAttribute element = (ProgramTrackedEntityAttribute) object;
             TrackedEntityAttribute attribute = element.getAttribute();
-            QueryItem item = new QueryItem( element, element.getLegendSet(), attribute.getValueType(), element.getAggregationType(), attribute.getOptionSet() );
+            QueryItem item = new QueryItem( attribute, attribute.getLegendSet(), attribute.getValueType(), attribute.getAggregationType(), attribute.getOptionSet() );
+            item.setProgram( element.getProgram() );
             params.getItems().add( item );
         }
 
         for ( NameableObject object : dataQueryParams.getFilterProgramDataElements() )
         {
-            DataElement element = (DataElement) object;
-            QueryItem item = new QueryItem( element, element.getLegendSet(), element.getValueType(), element.getAggregationType(), element.getOptionSet() );
+            ProgramDataElement element = (ProgramDataElement) object;
+            DataElement dataElement = element.getDataElement(); 
+            QueryItem item = new QueryItem( dataElement, dataElement.getLegendSet(), dataElement.getValueType(), dataElement.getAggregationType(), dataElement.getOptionSet() );
+            item.setProgram( element.getProgram() );
             params.getItemFilters().add( item );
         }
 
         for ( NameableObject object : dataQueryParams.getFilterProgramAttributes() )
         {
-            TrackedEntityAttribute element = (TrackedEntityAttribute) object;
-            QueryItem item = new QueryItem( element, element.getLegendSet(), element.getValueType(), element.getAggregationType(), element.getOptionSet() );
+            ProgramTrackedEntityAttribute element = (ProgramTrackedEntityAttribute) object;
+            TrackedEntityAttribute attribute = element.getAttribute();
+            QueryItem item = new QueryItem( attribute, attribute.getLegendSet(), attribute.getValueType(), attribute.getAggregationType(), attribute.getOptionSet() );
             params.getItemFilters().add( item );
         }
 

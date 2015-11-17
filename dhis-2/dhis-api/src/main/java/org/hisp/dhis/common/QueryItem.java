@@ -35,6 +35,7 @@ import java.util.List;
 import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.legend.LegendSet;
 import org.hisp.dhis.option.OptionSet;
+import org.hisp.dhis.program.Program;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 
 /**
@@ -56,6 +57,8 @@ public class QueryItem
     private AggregationType aggregationType;
 
     private OptionSet optionSet;
+    
+    private Program program;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -262,5 +265,15 @@ public class QueryItem
     public void setOptionSet( OptionSet optionSet )
     {
         this.optionSet = optionSet;
+    }
+
+    public Program getProgram()
+    {
+        return program;
+    }
+
+    public void setProgram( Program program )
+    {
+        this.program = program;
     }
 }

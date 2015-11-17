@@ -250,6 +250,7 @@ public class DefaultEventQueryPlanner
                 query.getItems().clear();
                 query.getItemProgramIndicators().clear();
                 query.setValue( item.getItem() );
+                query.setProgram( item.getProgram() );
                 queries.add( query );
             }
             
@@ -259,6 +260,7 @@ public class DefaultEventQueryPlanner
                 query.getItems().clear();
                 query.getItemProgramIndicators().clear();
                 query.setProgramIndicator( programIndicator );
+                query.setProgram( programIndicator.getProgram() );
                 queries.add( query );
             }
         }
@@ -269,6 +271,7 @@ public class DefaultEventQueryPlanner
                 EventQueryParams query = params.instance();
                 query.getItems().clear();
                 query.getItems().add( item );
+                query.setProgram( item.getProgram() );
                 queries.add( query );
             }
         }
