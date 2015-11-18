@@ -162,7 +162,7 @@ public class DefaultEventQueryPlanner
                 
                 for ( EventQueryParams byPeriodType : groupedByPeriodType )
                 {
-                    queries.addAll( groupByItems( byPeriodType ) );
+                    queries.addAll( groupByQueryItems( byPeriodType ) );
                 }
             }
         }
@@ -238,7 +238,7 @@ public class DefaultEventQueryPlanner
      * Group by items if query items are to be collapsed in order to aggregate
      * each item individually.
      */
-    private List<EventQueryParams> groupByItems( EventQueryParams params )
+    private List<EventQueryParams> groupByQueryItems( EventQueryParams params )
     {
         List<EventQueryParams> queries = new ArrayList<>();
         
