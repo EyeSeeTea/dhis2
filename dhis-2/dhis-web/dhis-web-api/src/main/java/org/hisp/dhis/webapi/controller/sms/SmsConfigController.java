@@ -21,31 +21,23 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-
 @RestController
 public class SmsConfigController
 {
-    
-    
-    private static final Log log = LogFactory.getLog( SmsConfigController.class );
 
-    
-    
+    private static final Log log = LogFactory.getLog( SmsConfigController.class );
 
     ///////////////////////////////////////////////////////// Dependencies
     ///////////////////////////////////////////////////////// //////////////////////////////////////////////////////////////
 
     @Autowired
     private OutboundSmsTransportService transportService;
-    
 
     @Autowired
     private SmsConfigurationManager smsConfigManager;
 
     @Autowired
     private RenderService renderService;
-    
-    
 
     /////////////////////////////////////////////////////////////////// GET
     /////////////////////////////////////////////////////////////////// ///////////////////////////////////////////////////////
@@ -72,26 +64,23 @@ public class SmsConfigController
     // Get Gateway Status
 
     @RequestMapping( value = SmsApiMapping.GETSMSGATEWAYSTATUS, method = RequestMethod.GET )
-    public void getSMSGatewayStatus( 
-        
-        HttpServletRequest request,
-        HttpServletResponse response )
+    public void getSMSGatewayStatus(
+
+        HttpServletRequest request, HttpServletResponse response )
             throws IOException
     {
 
         // Need to implemented in DefaultOutBoundTransportService
 
-        
-       if ( transportService.getGatewayStatus() == SMSGatewayStatus.UNDEFINED)
-       {
-           renderService.toJson( response.getOutputStream(), " No Default Gateway Set ");
-           return;
-           
-       }
-     
-           renderService.toJson( response.getOutputStream(), " Gateway :"+ transportService.getDefaultGateway()+" :"+ 
-               transportService.getGatewayStatus().toString());
-  
+        if ( transportService.getGatewayStatus() == SMSGatewayStatus.UNDEFINED )
+        {
+            renderService.toJson( response.getOutputStream(), " No Default Gateway Set " );
+            return;
+
+        }
+
+        renderService.toJson( response.getOutputStream(), " Gateway :" + transportService.getDefaultGateway() + " :"
+            + transportService.getGatewayStatus().toString() );
 
     }
 
@@ -157,99 +146,64 @@ public class SmsConfigController
 
     }
 
-  
-
-    
-    
     ///////////////////////////////////////////////////////////// POST
     ///////////////////////////////////////////////////////////// ////////////////////////////////////////////////////////
-    
-    
-    
-    
+
     @RequestMapping( value = SmsApiMapping.SETDEFAULTSMSGATEWAY, method = RequestMethod.GET )
     public void setDefaultSMSGateway(
 
-        @RequestParam String gatewayId, 
-        HttpServletRequest request,
-        HttpServletResponse response ) throws IOException 
+        @RequestParam String gatewayId, HttpServletRequest request, HttpServletResponse response )
+            throws IOException
     {
 
-       
-        if( !smsConfigManager.gatewayExists( gatewayId ))
+        if ( !smsConfigManager.gatewayExists( gatewayId ) )
         {
-            renderService.toJson( response.getOutputStream(), gatewayId + " Does not Exist ");
+            renderService.toJson( response.getOutputStream(), gatewayId + " Does not Exist " );
             return;
         }
-             
-        if (smsConfigManager.setDefaultSMSGateway( gatewayId ))
+
+        if ( smsConfigManager.setDefaultSMSGateway( gatewayId ) )
         {
-            renderService.toJson( response.getOutputStream(), gatewayId + " Set to default ");
-            log.info( gatewayId +" set to Default " );
-            
-        }else
-        {
-            renderService.toJson( response.getOutputStream(), gatewayId + " Not  set to default ");
-            log.info( gatewayId +" NOT set to Default " );
+            renderService.toJson( response.getOutputStream(), gatewayId + " Set to default " );
+            log.info( gatewayId + " set to Default " );
+
         }
-        
+        else
+        {
+            renderService.toJson( response.getOutputStream(), gatewayId + " Not  set to default " );
+            log.info( gatewayId + " NOT set to Default " );
+        }
+
     }
-    
-    
-    @RequestMapping( value = SmsApiMapping.ADDSMSGATEWAY, method = RequestMethod.POST)
+
+    @RequestMapping( value = SmsApiMapping.ADDSMSGATEWAY, method = RequestMethod.POST )
     public void addSMSGateway(
 
-       
-        HttpServletRequest request,
-        HttpServletResponse response )
+        HttpServletRequest request, HttpServletResponse response )
     {
-        
 
         // either through query parameters or through JSON/XML
-        
+
     }
 
-    
-    @RequestMapping( value = SmsApiMapping.REMOVESMSGATEWAY, method = RequestMethod.POST)
+    @RequestMapping( value = SmsApiMapping.REMOVESMSGATEWAY, method = RequestMethod.POST )
     public void removeSMSGateway(
 
-        @RequestParam String gatewayId, 
-        HttpServletRequest request,
-        HttpServletResponse response )
+        @RequestParam String gatewayId, HttpServletRequest request, HttpServletResponse response )
     {
 
         // either through query parameters or through JSON/XML
-        
+
     }
-    
-    
-    @RequestMapping( value = SmsApiMapping.REMOVEALLSMSGATEWAY, method = RequestMethod.POST)
+
+    @RequestMapping( value = SmsApiMapping.REMOVEALLSMSGATEWAY, method = RequestMethod.POST )
     public void removeAllSMSGateway(
 
-        HttpServletRequest request,
-        HttpServletResponse response )
+        HttpServletRequest request, HttpServletResponse response )
     {
 
         // either through query parameters or through JSON/XML
-        
+
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
 }

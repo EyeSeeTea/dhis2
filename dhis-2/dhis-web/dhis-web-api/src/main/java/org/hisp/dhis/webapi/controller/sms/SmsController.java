@@ -31,28 +31,22 @@ public class SmsController
 
     private static final Log log = LogFactory.getLog( SmsController.class );
 
-  
-
-    // 
+    //
     // Dependencies
-    // 
+    //
 
     @Autowired
     private OutboundSmsTransportService transportService;
 
     @Autowired
     private CurrentUserService currentUserService;
-    
+
     @Autowired
     private OutboundSmsService outBoundSmSService;
 
     @Autowired
     RenderService renderService;
 
-    
-
-    
-    
     // -------------------------------------------------------------------------
     // GET
     // -------------------------------------------------------------------------
@@ -66,16 +60,7 @@ public class SmsController
     {
 
         int sms_id = 0;
-        Set<String> recipients = new HashSet<String>();
-        recipients.add( recipient );
-        OutboundSms sms = new OutboundSms();
-        sms.setRecipients( recipients );
-        sms.setMessage( textMessage );
-        sms.setStatus( OutboundSmsStatus.OUTBOUND );
-        sms.setUser( currentUserService.getCurrentUser() );
-        
-        
-
+        OutboundSms sms = createSMS( recipient, textMessage );
         String gateWayId = transportService.getDefaultGateway();
         boolean isServiceEnabled = transportService.isEnabled();
         ServletOutputStream output = response.getOutputStream();
@@ -99,7 +84,7 @@ public class SmsController
                 outBoundSmSService.saveOutboundSms( sms );
                 renderService.toJson( output, result + " SMS ID :" + sms_id );
                 log.info( " SMS Sent Successfully " );
-                
+
             }
             else
             {
@@ -111,9 +96,9 @@ public class SmsController
             }
 
         }
-        catch (SmsServiceException e)
+        catch ( SmsServiceException e )
         {
-            log.warn( " SMSServiceException "+ sms + e.getMessage() );
+            log.warn( " SMSServiceException " + sms + e.getMessage() );
             sms.setStatus( OutboundSmsStatus.ERROR );
         }
         catch ( Exception e )
@@ -123,6 +108,19 @@ public class SmsController
         }
 
     }
- 
+
+    private OutboundSms createSMS( String recipient, String textMessage )
+    {
+
+        Set<String> recipients = new HashSet<String>();
+        recipients.add( recipient );
+        OutboundSms sms = new OutboundSms();
+        sms.setRecipients( recipients );
+        sms.setMessage( textMessage );
+        sms.setStatus( OutboundSmsStatus.OUTBOUND );
+        sms.setUser( currentUserService.getCurrentUser() );
+
+        return sms;
+    }
 
 }
