@@ -289,5 +289,10 @@ public class EventQueryPlannerTest
         List<EventQueryParams> queries = queryPlanner.planAggregateQuery( params );
         
         assertEquals( 12, queries.size() );
+        
+        for ( EventQueryParams query : queries )
+        {
+            assertTrue( query.hasValueDimension() );
+        }
     }
 }
