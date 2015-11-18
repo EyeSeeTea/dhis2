@@ -103,6 +103,7 @@ public class SimplisticHttpGetGateWay
     {
         log.debug( "Starting gateway. " + getGatewayId() );
         super.startGateway();
+       
     }
 
     @Override

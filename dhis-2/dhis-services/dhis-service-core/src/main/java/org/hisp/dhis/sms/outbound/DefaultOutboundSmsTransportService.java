@@ -49,6 +49,7 @@ import org.smslib.GatewayException;
 import org.smslib.IInboundMessageNotification;
 import org.smslib.IOutboundMessageNotification;
 import org.smslib.OutboundMessage;
+import org.smslib.OutboundMessage.MessageStatuses;
 import org.smslib.SMSLibException;
 import org.smslib.Service;
 import org.smslib.Message.MessageEncodings;
@@ -60,12 +61,19 @@ public class DefaultOutboundSmsTransportService
     private static final Log log = LogFactory.getLog( DefaultOutboundSmsTransportService.class );
 
     private static final String BULK_GATEWAY = "bulk_gw";
+
     private static final String CLICKATELL_GATEWAY = "clickatell_gw";
+
     private static final String HTTP_GATEWAY = "generic_http_gw";
+
     private static final String MODEM_GATEWAY = "modem_gw";
+
     private static final String SMPP_GATEWAY = "smpp_gw";
-    
-    public static final Map<String, String> GATEWAY_MAP = new HashMap<>(); //TODO fix, poor solution
+
+    public static final Map<String, String> GATEWAY_MAP = new HashMap<>(); // TODO
+                                                                           // fix,
+                                                                           // poor
+                                                                           // solution
 
     private SmsConfiguration config;
 
@@ -81,7 +89,7 @@ public class DefaultOutboundSmsTransportService
     {
         this.smppInboundMessageNotification = smppInboundMessageNotification;
     }
-    
+
     private OutboundSmsService outboundSmsService;
 
     public void setOutboundSmsService( OutboundSmsService outboundSmsService )
@@ -107,7 +115,7 @@ public class DefaultOutboundSmsTransportService
         {
             reloadConfig();
         }
-        
+
         return GATEWAY_MAP;
     }
 
@@ -213,11 +221,11 @@ public class DefaultOutboundSmsTransportService
         else
         {
             GateWayFactory gatewayFactory = new GateWayFactory();
-            
+
             for ( SmsGatewayConfig gatewayConfig : config.getGateways() )
             {
                 try
-                {                    
+                {
                     gateway = gatewayFactory.create( gatewayConfig );
 
                     service.addGateway( gateway );
@@ -308,6 +316,7 @@ public class DefaultOutboundSmsTransportService
 
         if ( gatewayConfig instanceof BulkSmsGatewayConfig )
         {
+           
             gatewayId = GATEWAY_MAP.get( BULK_GATEWAY );
         }
         else if ( gatewayConfig instanceof ClickatellGatewayConfig )
@@ -409,7 +418,7 @@ public class DefaultOutboundSmsTransportService
         OutboundMessage outboundMessage = new OutboundMessage( recipient, sms.getMessage() );
 
         // Check if text contain any specific unicode character
-        
+
         for ( char each : sms.getMessage().toCharArray() )
         {
             if ( !Character.UnicodeBlock.of( each ).equals( UnicodeBlock.BASIC_LATIN ) )
@@ -437,10 +446,13 @@ public class DefaultOutboundSmsTransportService
             if ( gatewayId == null || gatewayId.isEmpty() )
             {
                 sent = getService().sendMessage( outboundMessage );
+               
             }
             else
             {
+
                 sent = getService().sendMessage( outboundMessage, gatewayId );
+                
             }
         }
         catch ( SMSLibException e )
@@ -467,19 +479,22 @@ public class DefaultOutboundSmsTransportService
         {
             if ( recipients.size() > 1 )
             {
-                // Make sure we delete "tmp" group
                 removeGroup( recipient );
             }
             sms.setStatus( OutboundSmsStatus.ERROR );
         }
 
-        if ( sent )
+        if ( outboundMessage.getMessageStatus() == MessageStatuses.SENT )
         {
+
+            log.warn( "MESSAGE isss \n" + outboundMessage );
             message = "success";
             sms.setStatus( OutboundSmsStatus.SENT );
         }
         else
         {
+
+            log.warn( "Message isss \n" + outboundMessage );
             log.warn( "Message not sent" );
             message = "message_not_sent";
             sms.setStatus( OutboundSmsStatus.ERROR );
@@ -533,5 +548,38 @@ public class DefaultOutboundSmsTransportService
     private void removeGroup( String groupName )
     {
         getService().removeGroup( groupName );
+    }
+
+   
+
+    @Override
+    public SMSServiceStatus getServiceStatusEnum()
+    {
+        ServiceStatus serviceStatus = getService().getServiceStatus();
+
+        if ( serviceStatus == ServiceStatus.STARTED )
+        {
+            return SMSServiceStatus.STARTED;
+        }
+        else if ( serviceStatus == ServiceStatus.STARTING )
+        {
+            return SMSServiceStatus.STARTING;
+        }
+        else if ( serviceStatus == ServiceStatus.STOPPED )
+        {
+            return SMSServiceStatus.STOPPED;
+        }
+        else
+        {
+            return SMSServiceStatus.STOPPING;
+        }
+    }
+
+    @Override
+    public boolean isGatewayAlive()
+    {
+        
+
+        return false;
     }
 }

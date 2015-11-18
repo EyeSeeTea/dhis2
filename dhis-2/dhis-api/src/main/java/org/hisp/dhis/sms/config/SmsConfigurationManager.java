@@ -35,4 +35,9 @@ public interface SmsConfigurationManager
     void updateSmsConfiguration( SmsConfiguration config );
     
     SmsGatewayConfig checkInstanceOfGateway( Class<?> clazz );
+    
+    
+    
+    
+    
 }

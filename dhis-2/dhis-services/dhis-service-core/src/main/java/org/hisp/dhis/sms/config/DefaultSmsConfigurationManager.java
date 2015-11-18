@@ -29,6 +29,7 @@ package org.hisp.dhis.sms.config;
  */
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 
@@ -36,6 +37,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.setting.Setting;
 import org.hisp.dhis.setting.SystemSettingManager;
+import org.smslib.AGateway;
+import org.smslib.AGateway.GatewayStatuses;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -51,6 +54,8 @@ public class DefaultSmsConfigurationManager
 
     @Autowired
     private SystemSettingManager systemSettingManager;
+    
+    private SmsConfiguration config;
 
     @Autowired( required = false )
     private List<SmsConfigurable> smsConfigurables;
@@ -130,4 +135,6 @@ public class DefaultSmsConfigurationManager
         
         return null;
     }
+
+ 
 }
