@@ -487,14 +487,14 @@ public class DefaultOutboundSmsTransportService
         if ( outboundMessage.getMessageStatus() == MessageStatuses.SENT )
         {
 
-            log.warn( "MESSAGE isss \n" + outboundMessage );
+            
             message = "success";
             sms.setStatus( OutboundSmsStatus.SENT );
         }
         else
         {
 
-            log.warn( "Message isss \n" + outboundMessage );
+            log.warn( "Message  \n" + outboundMessage );
             log.warn( "Message not sent" );
             message = "message_not_sent";
             sms.setStatus( OutboundSmsStatus.ERROR );
