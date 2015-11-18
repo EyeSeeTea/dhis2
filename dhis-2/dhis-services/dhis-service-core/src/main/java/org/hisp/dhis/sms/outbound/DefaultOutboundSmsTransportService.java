@@ -578,7 +578,7 @@ public class DefaultOutboundSmsTransportService
     }
 
     @Override
-    public SMSGatewayStatus isGatewayAlive()
+    public SMSGatewayStatus getGatewayStatus()
     {
         if(getDefaultGateway() == null)
         {

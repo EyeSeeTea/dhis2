@@ -14,6 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.dxf2.render.RenderService;
 import org.hisp.dhis.sms.SmsServiceException;
 import org.hisp.dhis.sms.outbound.OutboundSms;
+import org.hisp.dhis.sms.outbound.OutboundSmsService;
 import org.hisp.dhis.sms.outbound.OutboundSmsStatus;
 import org.hisp.dhis.sms.outbound.OutboundSmsTransportService;
 import org.hisp.dhis.user.CurrentUserService;
@@ -41,6 +42,9 @@ public class SmsController
 
     @Autowired
     private CurrentUserService currentUserService;
+    
+    @Autowired
+    private OutboundSmsService outBoundSmSService;
 
     @Autowired
     RenderService renderService;
@@ -69,6 +73,8 @@ public class SmsController
         sms.setMessage( textMessage );
         sms.setStatus( OutboundSmsStatus.OUTBOUND );
         sms.setUser( currentUserService.getCurrentUser() );
+        
+        
 
         String gateWayId = transportService.getDefaultGateway();
         boolean isServiceEnabled = transportService.isEnabled();
@@ -89,13 +95,18 @@ public class SmsController
             if ( result.equals( "success" ) )
             {
 
-                log.info( " SMS Sent Successfully " );
+                sms.setStatus( OutboundSmsStatus.SENT );
+                outBoundSmSService.saveOutboundSms( sms );
                 renderService.toJson( output, result + " SMS ID :" + sms_id );
+                log.info( " SMS Sent Successfully " );
+                
             }
             else
             {
-                log.info( " SMS Sending Failed " );
+                sms.setStatus( OutboundSmsStatus.ERROR );
+                outBoundSmSService.saveOutboundSms( sms );
                 renderService.toJson( output, result + " SMS ID :" + sms_id );
+                log.info( " SMS Sending Failed " );
 
             }
 
@@ -103,6 +114,7 @@ public class SmsController
         catch (SmsServiceException e)
         {
             log.warn( " SMSServiceException "+ sms + e.getMessage() );
+            sms.setStatus( OutboundSmsStatus.ERROR );
         }
         catch ( Exception e )
         {

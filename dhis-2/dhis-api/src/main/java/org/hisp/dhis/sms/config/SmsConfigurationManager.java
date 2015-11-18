@@ -36,6 +36,10 @@ public interface SmsConfigurationManager
     
     SmsGatewayConfig checkInstanceOfGateway( Class<?> clazz );
     
+    boolean setDefaultSMSGateway(String gatewayId);
+    
+    boolean gatewayExists (String gatewayId);
+    
     
     
     

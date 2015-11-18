@@ -60,7 +60,7 @@ public interface OutboundSmsTransportService extends SmsConfigurable
  //   String getGatewayStatus(String gatewayId);
     
     SMSServiceStatus getServiceStatusEnum();
-    SMSGatewayStatus isGatewayAlive();
+    SMSGatewayStatus getGatewayStatus();
 
     boolean isEnabled();
 
