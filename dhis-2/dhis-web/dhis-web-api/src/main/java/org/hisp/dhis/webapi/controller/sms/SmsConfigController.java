@@ -5,9 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.hisp.dhis.dxf2.render.RenderService;
-import org.hisp.dhis.sms.config.SMSGatewatStatus;
-import org.hisp.dhis.sms.config.SmsConfiguration;
-import org.hisp.dhis.sms.config.SmsConfigurationManager;
+
 import org.hisp.dhis.sms.outbound.OutboundSmsTransportService;
 import org.hisp.dhis.sms.outbound.SMSServiceStatus;
 
@@ -28,8 +26,6 @@ public class SmsConfigController
     @Autowired
     private OutboundSmsTransportService transportService;
     
-    @Autowired
-    private SmsConfigurationManager smsConfigManager;
 
 
     @Autowired
