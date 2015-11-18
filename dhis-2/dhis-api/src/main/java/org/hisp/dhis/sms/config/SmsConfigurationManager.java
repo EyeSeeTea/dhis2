@@ -40,6 +40,10 @@ public interface SmsConfigurationManager
     
     boolean gatewayExists (String gatewayId);
     
+    boolean removeSMSGatewayById(String gatewayId);
+    
+    String addSMSGateway();
+    
     
     
     

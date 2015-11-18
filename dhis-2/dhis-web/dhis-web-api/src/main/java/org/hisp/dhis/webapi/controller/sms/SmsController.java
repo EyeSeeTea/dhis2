@@ -1,7 +1,9 @@
 package org.hisp.dhis.webapi.controller.sms;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletOutputStream;
@@ -70,7 +72,7 @@ public class SmsController
             if ( !isServiceEnabled || gateWayId == null || gateWayId.trim().length() <= 0 )
             {
 
-                renderService.toJson( output, "Service Not Enabled Or Incorrect Gateway " );
+                renderService.toJson( output,  createMap("Service Not Enabled Or Incorrect Gateway " ));
                 return;
 
             }
@@ -82,7 +84,7 @@ public class SmsController
 
                 sms.setStatus( OutboundSmsStatus.SENT );
                 outBoundSmSService.saveOutboundSms( sms );
-                renderService.toJson( output, result + " SMS ID :" + sms_id );
+                renderService.toJson( output,  createMap(result + " SMS ID :" + sms_id ));
                 log.info( " SMS Sent Successfully " );
 
             }
@@ -90,7 +92,7 @@ public class SmsController
             {
                 sms.setStatus( OutboundSmsStatus.ERROR );
                 outBoundSmSService.saveOutboundSms( sms );
-                renderService.toJson( output, result + " SMS ID :" + sms_id );
+                renderService.toJson( output,  createMap(result + " SMS ID :" + sms_id ));
                 log.info( " SMS Sending Failed " );
 
             }
@@ -109,6 +111,33 @@ public class SmsController
 
     }
 
+   
+    
+    
+    
+    ////////////////////////////////////////////////////////// POST //////////////////////////////////////////////////////////////////////////////////
+    
+    
+    @RequestMapping (value = SmsApiMapping.RECEIVESMS, method = RequestMethod.POST)
+    public void receiveSMSMEssage()
+    {
+
+        // either through query parameters or through JSON/XML
+
+        
+    }
+    
+    
+
+    private Map<String,Object> createMap(Object value)
+    {
+       
+        Map <String, Object> result = new  HashMap<String, Object>();
+        result.put( "result", value );
+        
+        return result;
+    }
+    
     private OutboundSms createSMS( String recipient, String textMessage )
     {
 

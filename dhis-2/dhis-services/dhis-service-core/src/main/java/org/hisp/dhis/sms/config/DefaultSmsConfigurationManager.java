@@ -176,5 +176,24 @@ public class DefaultSmsConfigurationManager
         
     }
 
+    @Override
+    public boolean removeSMSGatewayById( String gatewayId )
+    {
+
+        return false;
+    }
+
+    
+    
+    
+    
+    
+    @Override
+    public String addSMSGateway()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
  
 }
