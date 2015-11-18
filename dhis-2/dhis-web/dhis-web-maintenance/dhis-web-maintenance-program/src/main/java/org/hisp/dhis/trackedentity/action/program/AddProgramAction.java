@@ -249,6 +249,13 @@ public class AddProgramAction
     {
         this.categoryComboId = categoryComboId;
     }
+    
+    private boolean skipOffline;
+
+    public void setSkipOffline( boolean skipOffline )
+    {
+        this.skipOffline = skipOffline;
+    }
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -278,6 +285,7 @@ public class AddProgramAction
         program.setSelectEnrollmentDatesInFuture( selectEnrollmentDatesInFuture );
         program.setSelectIncidentDatesInFuture( selectIncidentDatesInFuture );
         program.setDataEntryMethod( dataEntryMethod );
+        program.setSkipOffline( skipOffline );
 
         if ( programType == ProgramType.WITH_REGISTRATION )
         {
@@ -340,7 +348,7 @@ public class AddProgramAction
 
         if ( jsonAttributeValues != null )
         {
-            AttributeUtils.updateAttributeValuesFromJson( program.getAttributeValues(), jsonAttributeValues, attributeService );
+            AttributeUtils.updateAttributeValuesFromJson( program, program.getAttributeValues(), jsonAttributeValues, attributeService );
         }
 
         programService.updateProgram( program );

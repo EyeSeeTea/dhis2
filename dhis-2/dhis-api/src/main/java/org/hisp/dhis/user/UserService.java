@@ -196,13 +196,6 @@ public interface UserService
      */
     void updateUserCredentials( UserCredentials userCredentials );
 
-    /**
-     * Retrieves the UserCredentials of the given User.
-     *
-     * @param user the User.
-     * @return the UserCredentials.
-     */
-    UserCredentials getUserCredentials( User user );
 
     /**
      * Retrieves the UserCredentials associated with the User with the given
@@ -365,8 +358,6 @@ public interface UserService
      * @return number of UserAuthorityGroups.
      */
     int countDataSetUserAuthorityGroups( DataSet dataSet );
-
-    void assignDataSetToUserRole( DataSet dataSet );
 
     /**
      * Returns the number of UserAuthorityGroups.
