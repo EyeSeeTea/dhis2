@@ -146,6 +146,11 @@ public class QueryItem
     {
         return filters != null && !filters.isEmpty();
     }
+    
+    public boolean hasProgram()
+    {
+        return program != null;
+    }
 
     public boolean isProgramIndicator()
     {

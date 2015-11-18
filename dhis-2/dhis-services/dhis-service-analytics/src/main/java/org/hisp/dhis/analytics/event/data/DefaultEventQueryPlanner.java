@@ -150,19 +150,19 @@ public class DefaultEventQueryPlanner
 
         List<EventQueryParams> queries = new ArrayList<>();
         
-        List<EventQueryParams> groupedByPartition = groupByPartition( params, validPartitions );
+        List<EventQueryParams> groupedByQueryItems = groupByQueryItems( params );
         
-        for ( EventQueryParams byPartition : groupedByPartition )
-        {
-            List<EventQueryParams> groupedByOrgUnitLevel = convert( queryPlanner.groupByOrgUnitLevel( byPartition ) );
+        for ( EventQueryParams byQueryItem : groupedByQueryItems )
+        {        
+            List<EventQueryParams> groupedByPartition = groupByPartition( byQueryItem, validPartitions );
             
-            for ( EventQueryParams byOrgUnitLevel : groupedByOrgUnitLevel )
+            for ( EventQueryParams byPartition : groupedByPartition )
             {
-                List<EventQueryParams> groupedByPeriodType = convert( queryPlanner.groupByPeriodType( byOrgUnitLevel ) );
+                List<EventQueryParams> groupedByOrgUnitLevel = convert( queryPlanner.groupByOrgUnitLevel( byPartition ) );
                 
-                for ( EventQueryParams byPeriodType : groupedByPeriodType )
+                for ( EventQueryParams byOrgUnitLevel : groupedByOrgUnitLevel )
                 {
-                    queries.addAll( groupByQueryItems( byPeriodType ) );
+                    queries.addAll( convert( queryPlanner.groupByPeriodType( byOrgUnitLevel ) ) );
                 }
             }
         }
@@ -250,7 +250,12 @@ public class DefaultEventQueryPlanner
                 query.getItems().clear();
                 query.getItemProgramIndicators().clear();
                 query.setValue( item.getItem() );
-                query.setProgram( item.getProgram() );
+                
+                if ( item.hasProgram() )
+                {
+                    query.setProgram( item.getProgram() );
+                }
+                
                 queries.add( query );
             }
             

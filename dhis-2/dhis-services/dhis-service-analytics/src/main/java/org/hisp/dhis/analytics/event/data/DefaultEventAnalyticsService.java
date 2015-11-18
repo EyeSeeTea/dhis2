@@ -193,9 +193,9 @@ public class DefaultEventAnalyticsService
         if ( !params.isSkipMeta() )
         {
             Map<Object, Object> metaData = new HashMap<>();
-    
+
             Map<String, String> uidNameMap = getUidNameMap( params );
-    
+            
             metaData.put( NAMES_META_KEY, uidNameMap );
             metaData.put( PERIOD_DIM_ID, getUids( params.getDimensionOrFilterItems( PERIOD_DIM_ID ) ) );
             metaData.put( ORGUNIT_DIM_ID, getUids( params.getDimensionOrFilterItems( ORGUNIT_DIM_ID ) ) );

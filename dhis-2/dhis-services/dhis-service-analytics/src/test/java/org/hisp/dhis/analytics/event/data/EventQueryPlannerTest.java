@@ -30,15 +30,26 @@ package org.hisp.dhis.analytics.event.data;
 
 import static org.junit.Assert.assertEquals;
 
+import static org.hisp.dhis.common.NameableObjectUtils.getList;
+
 import java.util.List;
 
 import org.hisp.dhis.DhisSpringTest;
+import org.hisp.dhis.analytics.AggregationType;
+import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.analytics.Partitions;
 import org.hisp.dhis.analytics.event.EventQueryParams;
 import org.hisp.dhis.analytics.event.EventQueryPlanner;
+import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.common.ValueType;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementDomain;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramDataElement;
+import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
+import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.joda.time.DateTime;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,11 +63,33 @@ public class EventQueryPlannerTest
     extends DhisSpringTest
 {
     private Program prA;
+    
+    private DataElement deA;
+    private DataElement deB;
+    private DataElement deC;
+    private DataElement deD;
+    
+    private ProgramDataElement pdeA;
+    private ProgramDataElement pdeB;
+    private ProgramDataElement pdeC;
+    private ProgramDataElement pdeD;
+    
+    private TrackedEntityAttribute atA;
+    private TrackedEntityAttribute atB;
+    
+    private ProgramTrackedEntityAttribute patA;
+    private ProgramTrackedEntityAttribute patB;
+    
     private OrganisationUnit ouA;
     private OrganisationUnit ouB;
+    private OrganisationUnit ouC;
+    private OrganisationUnit ouD;
     
     @Autowired
     private EventQueryPlanner queryPlanner;
+    
+    @Autowired
+    private IdentifiableObjectManager idObjectManager;
     
     @Autowired
     private OrganisationUnitService organisationUnitService;
@@ -64,14 +97,40 @@ public class EventQueryPlannerTest
     @Override
     public void setUpTest()
     {
-        prA = new Program();
+        prA = createProgram( 'A' );
         prA.setUid( "programuida" );
+        
+        idObjectManager.save( prA );
+        
+        deA = createDataElement( 'A', ValueType.INTEGER, AggregationType.SUM, DataElementDomain.TRACKER );
+        deB = createDataElement( 'B', ValueType.INTEGER, AggregationType.SUM, DataElementDomain.TRACKER );
+        deC = createDataElement( 'C', ValueType.INTEGER, AggregationType.AVERAGE_SUM_ORG_UNIT, DataElementDomain.TRACKER );
+        deD = createDataElement( 'D', ValueType.INTEGER, AggregationType.AVERAGE_SUM_ORG_UNIT, DataElementDomain.TRACKER );
+        
+        idObjectManager.save( deA );
+        idObjectManager.save( deB );
+        idObjectManager.save( deC );
+        idObjectManager.save( deD );
+        
+        pdeA = new ProgramDataElement( prA, deA );
+        pdeB = new ProgramDataElement( prA, deB );
+        pdeC = new ProgramDataElement( prA, deC );
+        pdeD = new ProgramDataElement( prA, deD );
+        
+        idObjectManager.save( pdeA );
+        idObjectManager.save( pdeB );
+        idObjectManager.save( pdeC );
+        idObjectManager.save( pdeD );
         
         ouA = createOrganisationUnit( 'A' );
         ouB = createOrganisationUnit( 'B', ouA );
+        ouC = createOrganisationUnit( 'C', ouA );
+        ouD = createOrganisationUnit( 'D', ouB );
         
         organisationUnitService.addOrganisationUnit( ouA );
         organisationUnitService.addOrganisationUnit( ouB );
+        organisationUnitService.addOrganisationUnit( ouC );
+        organisationUnitService.addOrganisationUnit( ouD );
     }
     
     @Test
@@ -180,5 +239,18 @@ public class EventQueryPlannerTest
 
         assertEquals( 1, partitions.getPartitions().size() );
         assertEquals( "analytics_event_2010_programuida", partitions.getSinglePartition() );
+    }
+
+    @Test
+    public void testFromDataQueryParams()
+    {
+        DataQueryParams dataQueryParams = new DataQueryParams();
+        dataQueryParams.setProgramDataElements( getList( pdeA, pdeB, pdeC, pdeD ) );
+        dataQueryParams.setOrganisationUnits( getList( ouA, ouB, ouC, ouD ) );
+        dataQueryParams.setPeriods( getList( createPeriod( "200101" ), createPeriod( "200103" ), createPeriod( "200105" ), createPeriod( "200107" ) ) );
+
+        EventQueryParams params = EventQueryParams.fromDataQueryParams( dataQueryParams );
+        
+        assertEquals( 4, params.getItems().size() );
     }
 }
