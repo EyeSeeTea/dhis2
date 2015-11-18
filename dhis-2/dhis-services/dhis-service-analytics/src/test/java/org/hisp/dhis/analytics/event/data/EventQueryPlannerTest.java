@@ -288,6 +288,6 @@ public class EventQueryPlannerTest
         
         List<EventQueryParams> queries = queryPlanner.planAggregateQuery( params );
         
-        System.out.println( queries );
+        assertEquals( 12, queries.size() );
     }
 }
