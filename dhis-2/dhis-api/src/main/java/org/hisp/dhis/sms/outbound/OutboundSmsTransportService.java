@@ -3,6 +3,7 @@ package org.hisp.dhis.sms.outbound;
 import java.util.Map;
 
 import org.hisp.dhis.sms.SmsServiceException;
+import org.hisp.dhis.sms.config.SMSGatewayStatus;
 import org.hisp.dhis.sms.config.SmsConfigurable;
 import org.hisp.dhis.sms.config.SmsConfiguration;
 
@@ -59,7 +60,7 @@ public interface OutboundSmsTransportService extends SmsConfigurable
  //   String getGatewayStatus(String gatewayId);
     
     SMSServiceStatus getServiceStatusEnum();
-    boolean isGatewayAlive();
+    SMSGatewayStatus isGatewayAlive();
 
     boolean isEnabled();
 

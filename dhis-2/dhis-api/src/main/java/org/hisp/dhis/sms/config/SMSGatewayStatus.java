@@ -1,6 +1,6 @@
 package org.hisp.dhis.sms.config;
 
-public enum SMSGatewatStatus
+public enum SMSGatewayStatus
 {
     STOPPED,STOPPING, STARTING, STARTED, UNDEFINED
 

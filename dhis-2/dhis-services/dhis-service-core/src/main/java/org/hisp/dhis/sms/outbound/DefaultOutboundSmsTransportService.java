@@ -42,9 +42,11 @@ import org.hisp.dhis.sms.config.ClickatellGatewayConfig;
 import org.hisp.dhis.sms.config.GateWayFactory;
 import org.hisp.dhis.sms.config.GenericHttpGatewayConfig;
 import org.hisp.dhis.sms.config.SMPPGatewayConfig;
+import org.hisp.dhis.sms.config.SMSGatewayStatus;
 import org.hisp.dhis.sms.config.SmsConfiguration;
 import org.hisp.dhis.sms.config.SmsGatewayConfig;
 import org.smslib.AGateway;
+import org.smslib.AGateway.GatewayStatuses;
 import org.smslib.GatewayException;
 import org.smslib.IInboundMessageNotification;
 import org.smslib.IOutboundMessageNotification;
@@ -576,10 +578,35 @@ public class DefaultOutboundSmsTransportService
     }
 
     @Override
-    public boolean isGatewayAlive()
+    public SMSGatewayStatus isGatewayAlive()
     {
+        if(getDefaultGateway() == null)
+        {
+            return SMSGatewayStatus.UNDEFINED;
+        }
         
+        AGateway aGateway =  getService().getGateway( getDefaultGateway() );
+        
+        if (aGateway.getStatus() == GatewayStatuses.STARTED )
+        {
+            return SMSGatewayStatus.STARTED;
+        }
 
-        return false;
+        if (aGateway.getStatus() == GatewayStatuses.STOPPED )
+        {
+            return SMSGatewayStatus.STOPPED;
+        }
+
+        if (aGateway.getStatus() == GatewayStatuses.STARTING )
+        {
+            return SMSGatewayStatus.STARTING;
+        }
+
+        if (aGateway.getStatus() == GatewayStatuses.STOPPING )
+        {
+            return SMSGatewayStatus.STOPPING;
+        }
+ 
+        return SMSGatewayStatus.UNDEFINED;
     }
 }

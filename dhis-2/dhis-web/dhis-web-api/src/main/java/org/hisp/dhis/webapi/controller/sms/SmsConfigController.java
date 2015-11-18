@@ -5,7 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.hisp.dhis.dxf2.render.RenderService;
-
+import org.hisp.dhis.sms.config.SMSGatewayStatus;
 import org.hisp.dhis.sms.outbound.OutboundSmsTransportService;
 import org.hisp.dhis.sms.outbound.SMSServiceStatus;
 
@@ -67,14 +67,17 @@ public class SmsConfigController
 
         // Need to implemented in DefaultOutBoundTransportService
 
-       boolean isAlive = transportService.isGatewayAlive();
-       if (isAlive)
+        
+       if ( transportService.isGatewayAlive() == SMSGatewayStatus.UNDEFINED)
        {
-           renderService.toJson( response.getOutputStream(), " Gateway "+ transportService.getDefaultGateway() + ": ALIVE " );
+           renderService.toJson( response.getOutputStream(), " No Default Gateway Set ");
+           return;
            
-       }else{
-           renderService.toJson( response.getOutputStream(), " Gateway "+ transportService.getDefaultGateway()+ ": DEAD " );
        }
+     
+           renderService.toJson( response.getOutputStream(), " Gateway "+ transportService.getDefaultGateway()+ 
+               transportService.isGatewayAlive().toString());
+  
 
     }
 

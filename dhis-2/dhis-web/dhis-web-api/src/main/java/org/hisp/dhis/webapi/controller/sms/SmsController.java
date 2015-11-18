@@ -30,8 +30,7 @@ public class SmsController
 
     private static final Log log = LogFactory.getLog( SmsController.class );
 
-
-    
+  
 
     // 
     // Dependencies
@@ -47,8 +46,7 @@ public class SmsController
     RenderService renderService;
 
     
-    
-    
+
     
     
     // -------------------------------------------------------------------------
@@ -113,22 +111,6 @@ public class SmsController
         }
 
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+ 
 
 }
