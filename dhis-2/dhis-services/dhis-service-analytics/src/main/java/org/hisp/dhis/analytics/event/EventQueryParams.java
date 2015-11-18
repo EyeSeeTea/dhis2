@@ -33,8 +33,10 @@ import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -49,6 +51,7 @@ import org.hisp.dhis.common.NameableObjectUtils;
 import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.commons.collection.ListUtils;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dxf2.common.JacksonUtils;
 import org.hisp.dhis.legend.Legend;
 import org.hisp.dhis.option.OptionSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -456,19 +459,22 @@ public class EventQueryParams
 
     public String toString()
     {
-        return "[" +
-            "Program: " + program + ", " +
-            "Stage: " + programStage + ", " +
-            "Start date: " + startDate + ", " +
-            "End date: " + endDate + ", " +
-            "Items: " + items + ", " +
-            "Item filters: " + itemFilters + ", " +
-            "Value: " + value + ", " +
-            "Item program indicators: " + itemProgramIndicators + ", " +
-            "Program indicator: " + programIndicator + ", " +
-            "Aggregation type: " + aggregationType + ", " +
-            "Dimensions: " + dimensions + ", " +
-            "Filters: " + filters + "]";
+        Map<String, Object> map = new HashMap<>();
+        
+        map.put( "Program", program );
+        map.put( "Stage", programStage );
+        map.put( "Start date", startDate );
+        map.put( "End date", endDate );
+        map.put( "Items", items );
+        map.put( "Item filters", itemFilters );
+        map.put( "Value", value );
+        map.put( "Item program indicators", itemProgramIndicators );
+        map.put( "Program indicator", programIndicator );
+        map.put( "Aggregation type", aggregationType );
+        map.put( "Dimensions", dimensions );
+        map.put( "Filters", filters );
+        
+        return JacksonUtils.toJsonAsStringSilent( map );
     }
 
     // -------------------------------------------------------------------------

@@ -287,6 +287,7 @@ public class EventQueryPlannerTest
         EventQueryParams params = EventQueryParams.fromDataQueryParams( dataQueryParams );
         
         List<EventQueryParams> queries = queryPlanner.planAggregateQuery( params );
-                
+        
+        System.out.println( queries );
     }
 }
