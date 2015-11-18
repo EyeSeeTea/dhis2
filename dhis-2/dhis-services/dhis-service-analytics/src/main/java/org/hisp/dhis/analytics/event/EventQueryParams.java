@@ -457,6 +457,7 @@ public class EventQueryParams
         return SortOrder.ASC.equals( sortOrder ) ? -1 : SortOrder.DESC.equals( sortOrder ) ? 1 : 0;
     }
 
+    @Override
     public String toString()
     {
         Map<String, Object> map = new HashMap<>();
