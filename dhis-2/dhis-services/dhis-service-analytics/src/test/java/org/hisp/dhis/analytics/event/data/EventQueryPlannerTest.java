@@ -29,6 +29,8 @@ package org.hisp.dhis.analytics.event.data;
  */
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import static org.hisp.dhis.common.NameableObjectUtils.getList;
 
@@ -40,7 +42,9 @@ import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.analytics.Partitions;
 import org.hisp.dhis.analytics.event.EventQueryParams;
 import org.hisp.dhis.analytics.event.EventQueryPlanner;
+import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementDomain;
@@ -265,5 +269,12 @@ public class EventQueryPlannerTest
         EventQueryParams params = EventQueryParams.fromDataQueryParams( dataQueryParams );
         
         assertEquals( 6, params.getItems().size() );
+        assertNull( params.getDimension( DimensionalObject.DATA_X_DIM_ID ) );
+        assertTrue( params.isAggregateData() );
+        
+        for ( QueryItem item : params.getItems() )
+        {
+            assertEquals( prA, item.getProgram() );
+        }
     }
 }
