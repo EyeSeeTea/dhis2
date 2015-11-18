@@ -40,7 +40,6 @@ import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.program.ProgramDataElement;
 import org.hisp.dhis.program.ProgramIndicator;
 import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
-import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -59,13 +58,13 @@ public class DataDimensionItem
 {    
     public static final Set<Class<? extends IdentifiableObject>> DATA_DIMENSION_CLASSES = ImmutableSet.<Class<? extends IdentifiableObject>>builder().
         add( Indicator.class ).add( DataElement.class ).add( DataElementOperand.class ).
-        add( DataSet.class ).add( ProgramIndicator.class ).add( ProgramDataElement.class ).add( TrackedEntityAttribute.class ).build();
+        add( DataSet.class ).add( ProgramIndicator.class ).add( ProgramDataElement.class ).add( ProgramTrackedEntityAttribute.class ).build();
     
     public static final Map<DataDimensionItemType, Class<? extends NameableObject>> DATA_DIMENSION_TYPE_CLASS_MAP = ImmutableMap.<DataDimensionItemType, Class<? extends NameableObject>>builder().
         put( DataDimensionItemType.INDICATOR, Indicator.class ).put( DataDimensionItemType.AGGREGATE_DATA_ELEMENT, DataElement.class ).
         put( DataDimensionItemType.DATA_ELEMENT_OPERAND, DataElementOperand.class ).put( DataDimensionItemType.DATA_SET, DataSet.class ).
         put( DataDimensionItemType.PROGRAM_INDICATOR, ProgramIndicator.class ).put( DataDimensionItemType.PROGRAM_DATA_ELEMENT, ProgramDataElement.class ).
-        put( DataDimensionItemType.PROGRAM_ATTRIBUTE, TrackedEntityAttribute.class ).build();
+        put( DataDimensionItemType.PROGRAM_ATTRIBUTE, ProgramTrackedEntityAttribute.class ).build();
     
     private int id;
     

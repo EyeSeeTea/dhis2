@@ -68,12 +68,11 @@ public class ProgramDataElement
         return program.getName() + " " + dataElement.getName();
     }
 
-    
     public String getAnalyticsId()
     {
         return program.getUid() + COMPOSITE_DIM_OBJECT_PLAIN_SEP + dataElement.getUid();
     }
-        
+    
     // -------------------------------------------------------------------------
     // Get and set methods
     // -------------------------------------------------------------------------

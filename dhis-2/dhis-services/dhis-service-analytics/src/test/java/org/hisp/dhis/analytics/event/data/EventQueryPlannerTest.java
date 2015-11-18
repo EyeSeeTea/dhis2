@@ -258,11 +258,12 @@ public class EventQueryPlannerTest
     {
         DataQueryParams dataQueryParams = new DataQueryParams();
         dataQueryParams.setProgramDataElements( getList( pdeA, pdeB, pdeC, pdeD ) );
+        dataQueryParams.setProgramAttributes( getList( patA, patB ) );
         dataQueryParams.setOrganisationUnits( getList( ouA, ouB, ouC, ouD ) );
         dataQueryParams.setPeriods( getList( createPeriod( "200101" ), createPeriod( "200103" ), createPeriod( "200105" ), createPeriod( "200107" ) ) );
 
         EventQueryParams params = EventQueryParams.fromDataQueryParams( dataQueryParams );
         
-        assertEquals( 4, params.getItems().size() );
+        assertEquals( 6, params.getItems().size() );
     }
 }

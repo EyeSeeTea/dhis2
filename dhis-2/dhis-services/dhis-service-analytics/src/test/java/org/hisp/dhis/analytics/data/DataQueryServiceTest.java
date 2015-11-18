@@ -45,6 +45,7 @@ import org.hisp.dhis.analytics.DataQueryService;
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.common.DimensionType;
 import org.hisp.dhis.common.DimensionalObject;
+import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.common.IllegalQueryException;
 import org.hisp.dhis.common.NameableObject;
@@ -71,8 +72,8 @@ import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramDataElement;
 import org.hisp.dhis.program.ProgramDataElementStore;
 import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
-import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.junit.Test;
@@ -101,8 +102,11 @@ public class DataQueryServiceTest
     private DataSet dsA;
     private DataSet dsB;
     
-    private TrackedEntityAttribute paA;
-    private TrackedEntityAttribute paB;
+    private TrackedEntityAttribute atA;
+    private TrackedEntityAttribute atB;
+    
+    private ProgramTrackedEntityAttribute patA;
+    private ProgramTrackedEntityAttribute patB;
     
     private OrganisationUnit ouA;
     private OrganisationUnit ouB;
@@ -143,7 +147,7 @@ public class DataQueryServiceTest
     private OrganisationUnitGroupService organisationUnitGroupService;
 
     @Autowired
-    private TrackedEntityAttributeService attributeService;
+    private IdentifiableObjectManager idObjectManager;
     
     @Autowired
     private ProgramService programService;
@@ -190,11 +194,17 @@ public class DataQueryServiceTest
         dataSetService.addDataSet( dsA );
         dataSetService.addDataSet( dsB );
         
-        paA = createTrackedEntityAttribute( 'A' );
-        paB = createTrackedEntityAttribute( 'B' );
+        atA = createTrackedEntityAttribute( 'A' );
+        atB = createTrackedEntityAttribute( 'B' );
         
-        attributeService.addTrackedEntityAttribute( paA );
-        attributeService.addTrackedEntityAttribute( paB );
+        idObjectManager.save( atA );
+        idObjectManager.save( atB );
+        
+        patA = new ProgramTrackedEntityAttribute( prA, atA );
+        patB = new ProgramTrackedEntityAttribute( prA, atB );
+        
+        idObjectManager.save( patA );
+        idObjectManager.save( patB );
         
         ouA = createOrganisationUnit( 'A' );
         ouB = createOrganisationUnit( 'B' );
@@ -465,7 +475,7 @@ public class DataQueryServiceTest
     public void testGetFromUrlD()
     {
         Set<String> dimensionParams = new HashSet<>();
-        dimensionParams.add( "dx:" + deA.getUid() + ";" + deB.getUid() + ";" + paA.getUid() + ";" + paB.getUid() );
+        dimensionParams.add( "dx:" + deA.getUid() + ";" + deB.getUid() + ";" + patA.getAnalyticsId() + ";" + patB.getAnalyticsId() );
 
         Set<String> filterParams = new HashSet<>();
         filterParams.add( "ou:" + ouA.getUid() );
