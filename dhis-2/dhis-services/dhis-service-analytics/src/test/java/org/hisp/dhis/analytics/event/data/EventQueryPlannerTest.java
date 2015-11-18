@@ -87,7 +87,6 @@ public class EventQueryPlannerTest
     private OrganisationUnit ouA;
     private OrganisationUnit ouB;
     private OrganisationUnit ouC;
-    private OrganisationUnit ouD;
     
     @Autowired
     private EventQueryPlanner queryPlanner;
@@ -141,12 +140,10 @@ public class EventQueryPlannerTest
         ouA = createOrganisationUnit( 'A' );
         ouB = createOrganisationUnit( 'B', ouA );
         ouC = createOrganisationUnit( 'C', ouA );
-        ouD = createOrganisationUnit( 'D', ouB );
         
         organisationUnitService.addOrganisationUnit( ouA );
         organisationUnitService.addOrganisationUnit( ouB );
         organisationUnitService.addOrganisationUnit( ouC );
-        organisationUnitService.addOrganisationUnit( ouD );
     }
     
     @Test
@@ -263,7 +260,7 @@ public class EventQueryPlannerTest
         DataQueryParams dataQueryParams = new DataQueryParams();
         dataQueryParams.setProgramDataElements( getList( pdeA, pdeB, pdeC, pdeD ) );
         dataQueryParams.setProgramAttributes( getList( patA, patB ) );
-        dataQueryParams.setOrganisationUnits( getList( ouA, ouB, ouC, ouD ) );
+        dataQueryParams.setOrganisationUnits( getList( ouA, ouB, ouC ) );
         dataQueryParams.setPeriods( getList( createPeriod( "200101" ), createPeriod( "200103" ), createPeriod( "200105" ), createPeriod( "200107" ) ) );
 
         EventQueryParams params = EventQueryParams.fromDataQueryParams( dataQueryParams );
@@ -276,5 +273,20 @@ public class EventQueryPlannerTest
         {
             assertEquals( prA, item.getProgram() );
         }
+    }
+
+    @Test
+    public void testPlanAggregateDataQueryA()
+    {
+        DataQueryParams dataQueryParams = new DataQueryParams();
+        dataQueryParams.setProgramDataElements( getList( pdeA, pdeB, pdeC, pdeD ) );
+        dataQueryParams.setProgramAttributes( getList( patA, patB ) );
+        dataQueryParams.setOrganisationUnits( getList( ouA, ouB, ouC ) );
+        dataQueryParams.setPeriods( getList( createPeriod( "200101" ), createPeriod( "200103" ), createPeriod( "200105" ), createPeriod( "200107" ) ) );
+
+        EventQueryParams params = EventQueryParams.fromDataQueryParams( dataQueryParams );
+        
+        List<EventQueryParams> queries = queryPlanner.planAggregateQuery( params );
+                
     }
 }
