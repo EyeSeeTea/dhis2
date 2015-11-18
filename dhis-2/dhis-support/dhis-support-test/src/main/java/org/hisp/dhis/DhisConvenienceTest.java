@@ -1169,11 +1169,9 @@ public abstract class DhisConvenienceTest
 
         if ( attributes != null )
         {
-            int i = 0;
-
             for ( TrackedEntityAttribute attribute : attributes )
             {
-                program.getProgramAttributes().add( new ProgramTrackedEntityAttribute( program, attribute, i++, false ) );
+                program.getProgramAttributes().add( new ProgramTrackedEntityAttribute( program, attribute, false, false ) );
             }
         }
 

@@ -122,6 +122,18 @@ public class EventQueryPlannerTest
         idObjectManager.save( pdeC );
         idObjectManager.save( pdeD );
         
+        atA = createTrackedEntityAttribute( 'A' );
+        atB = createTrackedEntityAttribute( 'B' );
+        
+        idObjectManager.save( atA );
+        idObjectManager.save( atB );
+        
+        patA = new ProgramTrackedEntityAttribute( prA, atA );
+        patB = new ProgramTrackedEntityAttribute( prA, atB );
+        
+        idObjectManager.save( patA );
+        idObjectManager.save( patB );
+        
         ouA = createOrganisationUnit( 'A' );
         ouB = createOrganisationUnit( 'B', ouA );
         ouC = createOrganisationUnit( 'C', ouA );

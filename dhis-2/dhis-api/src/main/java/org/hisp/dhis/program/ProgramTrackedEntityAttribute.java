@@ -68,11 +68,10 @@ public class ProgramTrackedEntityAttribute
     {
     }
 
-    public ProgramTrackedEntityAttribute( Program program, TrackedEntityAttribute attribute, int sortOrder, boolean displayInList )
+    public ProgramTrackedEntityAttribute( Program program, TrackedEntityAttribute attribute )
     {
         this.program = program;
         this.attribute = attribute;
-        this.displayInList = displayInList;
     }
 
     public ProgramTrackedEntityAttribute( Program program, TrackedEntityAttribute attribute, boolean displayInList,
