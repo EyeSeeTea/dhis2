@@ -30,7 +30,6 @@ package org.hisp.dhis.attribute;
 
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.i18n.I18nService;
-import org.hisp.dhis.schema.Schema;
 import org.hisp.dhis.schema.SchemaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -262,6 +261,7 @@ public class DefaultAttributeService
 
         attributeValue.setAutoFields();
         attributeValueStore.save( attributeValue );
+        object.getAttributeValues().add( attributeValue );
     }
 
     @Override
@@ -275,6 +275,7 @@ public class DefaultAttributeService
 
         attributeValue.setAutoFields();
         attributeValueStore.update( attributeValue );
+        object.getAttributeValues().add( attributeValue );
     }
 
     @Override
@@ -293,6 +294,24 @@ public class DefaultAttributeService
     public List<AttributeValue> getAllAttributeValues()
     {
         return new ArrayList<>( attributeValueStore.getAll() );
+    }
+
+    @Override
+    public List<AttributeValue> getAllAttributeValuesByAttribute( Attribute attribute )
+    {
+        return attributeValueStore.getAllByAttribute( attribute );
+    }
+
+    @Override
+    public List<AttributeValue> getAllAttributeValuesByAttributeAndValue( Attribute attribute, String value )
+    {
+        return attributeValueStore.getAllByAttributeAndValue( attribute, value );
+    }
+
+    @Override
+    public <T extends IdentifiableObject> boolean isAttributeValueUnique( T object, AttributeValue attributeValue )
+    {
+        return attributeValueStore.isAttributeValueUnique( object, attributeValue );
     }
 
     @Override

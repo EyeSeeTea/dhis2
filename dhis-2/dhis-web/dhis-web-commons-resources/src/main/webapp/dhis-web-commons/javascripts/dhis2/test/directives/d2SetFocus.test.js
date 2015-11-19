@@ -6,41 +6,67 @@ describe('Directives: d2SetFocus', () => {
     let element;
     let $timeout;
     let render;
-
     beforeEach(module('d2Directives'));
     beforeEach(inject(($injector) => {
         const $compile = $injector.get('$compile');
         const $rootScope = $injector.get('$rootScope');
-
-        render = () => {
-            $compile(element)(mock$scope);
-            mock$scope.$digest();
-        };
-
         $timeout = $injector.get('$timeout');
-        element = angular.element('<input d2-set-focus="true" />');
-        element[0].focus = spy();
-
         mock$scope = $rootScope.$new();
         mock$scope.isFocused = false;
+        render = (elm) =>
+        {
+            elm[0].focus = spy();
+            $compile(elm)(mock$scope);
+            mock$scope.$digest();
+            $timeout.flush();
+        };
     }));
 
-    it('should render correctly', () => {
-        render();
-
-        $timeout.flush();
-
-        expect(element[0].focus).to.be.calledOnce;
+    it('should set the focus when the attribute property is set to true', () => {
+        var elm = angular.element('<input d2-set-focus="true" />');
+        render(elm);
+        expect(elm[0].focus).to.be.calledOnce;
     });
 
-    it('should not set focus when the property is set to false', () => {
-        element = angular.element('<input d2-set-focus="false" />');
-        element[0].focus = spy();
+    it('should not set focus when the attribute property is set to false', () => {
+        var elm = angular.element('<input d2-set-focus="false" />');
+        render(elm);
+        expect(elm[0].focus).to.not.be.called;
+    });
+});
 
-        render();
 
-        $timeout.flush();
+describe('Directives: d2Enter', () => {
+    let mock$scope;
+    let element;
+    let $timeout;
+    let render;
 
-        expect(element[0].focus).to.not.be.called;
+    beforeEach(module('d2Directives'));
+
+
+    beforeEach(inject(($injector) => {
+        const $compile = $injector.get('$compile');
+        const $rootScope = $injector.get('$rootScope');
+        $timeout = $injector.get('$timeout');
+        mock$scope = $rootScope.$new();
+        mock$scope.search = function() {
+            var a=100;
+        };
+        mock$scope.message="testMessage";
+        render = (elm) => {
+            mock$scope.search = spy();
+            $compile(elm)(mock$scope);
+            mock$scope.$digest();
+        };
+    }));
+
+    it('should call the resgistered function on key press event', () => {
+        var elm = angular.element('<input type="text" d2-enter="search(message)"/>');
+        render(elm);
+        var e = jQuery.Event("keydown");
+        e.which = 13; // # Some key code value
+        elm .trigger(e);
+        expect(mock$scope.search).to.be.calledOnce;
     });
 });

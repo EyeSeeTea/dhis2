@@ -28,9 +28,14 @@ package org.hisp.dhis.attribute.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.attribute.Attribute;
 import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.attribute.AttributeValueStore;
+import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
+
+import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -39,4 +44,27 @@ public class HibernateAttributeValueStore
     extends HibernateGenericStore<AttributeValue>
     implements AttributeValueStore
 {
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public List<AttributeValue> getAllByAttribute( Attribute attribute )
+    {
+        return getCriteria().add( Restrictions.eq( "attribute", attribute ) ).list();
+    }
+
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public List<AttributeValue> getAllByAttributeAndValue( Attribute attribute, String value )
+    {
+        return getCriteria()
+            .add( Restrictions.eq( "attribute", attribute ) )
+            .add( Restrictions.eq( "value", value ) )
+            .list();
+    }
+
+    @Override
+    public <T extends IdentifiableObject> boolean isAttributeValueUnique( T object, AttributeValue attributeValue )
+    {
+        List<AttributeValue> values = getAllByAttributeAndValue( attributeValue.getAttribute(), attributeValue.getValue() );
+        return values.isEmpty() || (values.size() == 1 && object != null && object.getAttributeValues().contains( values.get( 0 ) ));
+    }
 }
