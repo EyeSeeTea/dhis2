@@ -318,7 +318,7 @@ public class DefaultOutboundSmsTransportService
 
         if ( gatewayConfig instanceof BulkSmsGatewayConfig )
         {
-           
+
             gatewayId = GATEWAY_MAP.get( BULK_GATEWAY );
         }
         else if ( gatewayConfig instanceof ClickatellGatewayConfig )
@@ -448,13 +448,13 @@ public class DefaultOutboundSmsTransportService
             if ( gatewayId == null || gatewayId.isEmpty() )
             {
                 sent = getService().sendMessage( outboundMessage );
-               
+
             }
             else
             {
 
                 sent = getService().sendMessage( outboundMessage, gatewayId );
-                
+
             }
         }
         catch ( SMSLibException e )
@@ -489,14 +489,12 @@ public class DefaultOutboundSmsTransportService
         if ( outboundMessage.getMessageStatus() == MessageStatuses.SENT )
         {
 
-            
             message = "success";
             sms.setStatus( OutboundSmsStatus.SENT );
         }
         else
         {
 
-            log.warn( "Message  \n" + outboundMessage );
             log.warn( "Message not sent" );
             message = "message_not_sent";
             sms.setStatus( OutboundSmsStatus.ERROR );
@@ -552,8 +550,6 @@ public class DefaultOutboundSmsTransportService
         getService().removeGroup( groupName );
     }
 
-   
-
     @Override
     public SMSServiceStatus getServiceStatusEnum()
     {
@@ -580,33 +576,33 @@ public class DefaultOutboundSmsTransportService
     @Override
     public SMSGatewayStatus getGatewayStatus()
     {
-        if(getDefaultGateway() == null)
+        if ( getDefaultGateway() == null )
         {
             return SMSGatewayStatus.UNDEFINED;
         }
-        
-        AGateway aGateway =  getService().getGateway( getDefaultGateway() );
-        
-        if (aGateway.getStatus() == GatewayStatuses.STARTED )
+
+        AGateway aGateway = getService().getGateway( getDefaultGateway() );
+
+        if ( aGateway.getStatus() == GatewayStatuses.STARTED )
         {
             return SMSGatewayStatus.STARTED;
         }
 
-        if (aGateway.getStatus() == GatewayStatuses.STOPPED )
+        if ( aGateway.getStatus() == GatewayStatuses.STOPPED )
         {
             return SMSGatewayStatus.STOPPED;
         }
 
-        if (aGateway.getStatus() == GatewayStatuses.STARTING )
+        if ( aGateway.getStatus() == GatewayStatuses.STARTING )
         {
             return SMSGatewayStatus.STARTING;
         }
 
-        if (aGateway.getStatus() == GatewayStatuses.STOPPING )
+        if ( aGateway.getStatus() == GatewayStatuses.STOPPING )
         {
             return SMSGatewayStatus.STOPPING;
         }
- 
+
         return SMSGatewayStatus.UNDEFINED;
     }
 }
