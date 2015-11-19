@@ -92,6 +92,7 @@ import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramDataElement;
 import org.hisp.dhis.program.ProgramIndicator;
 import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.security.acl.AclService;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeDimension;
@@ -465,16 +466,16 @@ public class DefaultDimensionService
                         {
                             String id0 = splitSafe( uid, COMPOSITE_DIM_OBJECT_ESCAPED_SEP, 0 );
                             String id1 = splitSafe( uid, COMPOSITE_DIM_OBJECT_ESCAPED_SEP, 1 );
-                            
-                            DataElementOperand operand = operandService.getOrAddDataElementOperand( id0, id1 );
 
-                            ProgramDataElement programDataElement = programService.getOrAddProgramDataElement( id0, id1 );
+                            DataElementOperand operand = null;
+                            ProgramDataElement programDataElement = null;                    
+                            ProgramTrackedEntityAttribute programAttribute = null;
                             
-                            if ( operand != null )
+                            if ( ( operand = operandService.getOrAddDataElementOperand( id0, id1 ) ) != null )
                             {
                                 object.getDataDimensionItems().add( DataDimensionItem.create( operand ) );
                             }
-                            else if ( programDataElement != null )
+                            else if ( ( programDataElement = programService.getOrAddProgramDataElement( id0, id1 ) ) != null )
                             {
                                 object.getDataDimensionItems().add( DataDimensionItem.create( programDataElement ) );
                             }
