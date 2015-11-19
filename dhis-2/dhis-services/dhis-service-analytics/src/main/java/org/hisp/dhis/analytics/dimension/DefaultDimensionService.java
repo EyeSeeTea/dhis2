@@ -96,6 +96,7 @@ import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.security.acl.AclService;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeDimension;
+import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 import org.hisp.dhis.trackedentity.TrackedEntityDataElementDimension;
 import org.hisp.dhis.trackedentity.TrackedEntityProgramIndicatorDimension;
 import org.hisp.dhis.user.CurrentUserService;
@@ -119,6 +120,9 @@ public class DefaultDimensionService
     
     @Autowired
     private ProgramService programService;
+    
+    @Autowired
+    private TrackedEntityAttributeService attributeService;
 
     @Autowired
     private PeriodService periodService;
@@ -478,6 +482,10 @@ public class DefaultDimensionService
                             else if ( ( programDataElement = programService.getOrAddProgramDataElement( id0, id1 ) ) != null )
                             {
                                 object.getDataDimensionItems().add( DataDimensionItem.create( programDataElement ) );
+                            }
+                            else if ( ( programAttribute = attributeService.getOrAddProgramTrackedEntityAttribute( id0, id1 ) ) != null )
+                            {
+                                object.getDataDimensionItems().add( DataDimensionItem.create( programAttribute ) );
                             }
                         }
                         else
