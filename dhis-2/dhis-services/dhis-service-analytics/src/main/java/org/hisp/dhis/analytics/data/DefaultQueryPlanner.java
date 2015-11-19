@@ -46,7 +46,6 @@ import org.hisp.dhis.common.ListMap;
 import org.hisp.dhis.common.MaintenanceModeException;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.ValueType;
-import org.hisp.dhis.commons.collection.ListUtils;
 import org.hisp.dhis.commons.collection.PaginatedList;
 import org.hisp.dhis.commons.filter.FilterUtils;
 import org.hisp.dhis.dataelement.DataElement;
@@ -54,11 +53,14 @@ import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.program.ProgramDataElement;
 import org.hisp.dhis.setting.Setting;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.filter.AggregatableDataElementFilter;
 import org.hisp.dhis.system.util.MathUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -102,8 +104,9 @@ public class DefaultQueryPlanner
             throw new IllegalQueryException( "Params cannot be null" );
         }
 
-        List<NameableObject> dataElements = ListUtils.union( params.getDataElements(), params.getProgramDataElements() );
-        List<DataElement> nonAggDataElements = FilterUtils.inverseFilter( asTypedList( dataElements, DataElement.class ), AggregatableDataElementFilter.INSTANCE );
+        final List<NameableObject> dataElements = Lists.newArrayList( params.getDataElements() );
+        params.getProgramDataElements().stream().forEach( pde -> dataElements.add( ((ProgramDataElement) pde).getDataElement() ) );        
+        final List<DataElement> nonAggDataElements = FilterUtils.inverseFilter( asTypedList( dataElements, DataElement.class ), AggregatableDataElementFilter.INSTANCE );
 
         if ( params.getDimensions().isEmpty() )
         {
