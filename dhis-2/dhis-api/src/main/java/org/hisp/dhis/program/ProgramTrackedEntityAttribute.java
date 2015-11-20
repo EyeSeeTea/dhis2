@@ -99,7 +99,7 @@ public class ProgramTrackedEntityAttribute
     // -------------------------------------------------------------------------
     // Logic
     // -------------------------------------------------------------------------
-
+    
     public String getAnalyticsId()
     {
         return program.getUid() + COMPOSITE_DIM_OBJECT_PLAIN_SEP + attribute.getUid();

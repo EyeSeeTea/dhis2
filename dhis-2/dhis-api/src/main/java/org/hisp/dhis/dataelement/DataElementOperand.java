@@ -49,6 +49,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 
+import static org.hisp.dhis.common.DimensionalObjectUtils.COMPOSITE_DIM_OBJECT_PLAIN_SEP;
+
 /**
  * This object can act both as a hydrated persisted object and as a wrapper
  * object (but not both at the same time).
@@ -63,7 +65,7 @@ import java.util.regex.Matcher;
 public class DataElementOperand
     extends BaseNameableObject
 {
-    public static final String SEPARATOR = ".";
+    public static final String SEPARATOR = COMPOSITE_DIM_OBJECT_PLAIN_SEP;
     public static final String NAME_TOTAL = "(Total)";
 
     private static final String TYPE_VALUE = "value";
