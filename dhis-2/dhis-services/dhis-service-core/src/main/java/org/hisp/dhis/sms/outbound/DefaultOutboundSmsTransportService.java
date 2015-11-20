@@ -483,7 +483,7 @@ public class DefaultOutboundSmsTransportService
             {
                 removeGroup( recipient );
             }
-            sms.setStatus( OutboundSmsStatus.ERROR );
+            
         }
 
         if ( outboundMessage.getMessageStatus() == MessageStatuses.SENT )
@@ -494,8 +494,8 @@ public class DefaultOutboundSmsTransportService
         }
         else
         {
-
-            log.warn( "Message not sent" );
+            log.error( "Message not sent Failure " + outboundMessage.getFailureCause().toString() );
+            log.error( "Message not sent Status " + outboundMessage.getMessageStatus().toString() );
             message = "message_not_sent";
             sms.setStatus( OutboundSmsStatus.ERROR );
         }
