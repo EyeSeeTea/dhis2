@@ -30,6 +30,7 @@ package org.hisp.dhis.analytics.event;
 
 import static org.hisp.dhis.common.DimensionalObject.DATA_X_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObjectUtils.asTypedList;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -45,9 +46,8 @@ import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.analytics.EventOutputType;
 import org.hisp.dhis.analytics.Partitions;
 import org.hisp.dhis.analytics.SortOrder;
+import org.hisp.dhis.common.DimensionalItemObject;
 import org.hisp.dhis.common.DimensionalObject;
-import org.hisp.dhis.common.NameableObject;
-import org.hisp.dhis.common.NameableObjectUtils;
 import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.commons.collection.ListUtils;
 import org.hisp.dhis.dataelement.DataElement;
@@ -158,7 +158,7 @@ public class EventQueryParams
 
         dataQueryParams.copyTo( params );
 
-        for ( NameableObject object : dataQueryParams.getProgramDataElements() )
+        for ( DimensionalItemObject object : dataQueryParams.getProgramDataElements() )
         {
             ProgramDataElement element = (ProgramDataElement) object;
             DataElement dataElement = element.getDataElement(); 
@@ -167,7 +167,7 @@ public class EventQueryParams
             params.getItems().add( item );
         }
 
-        for ( NameableObject object : dataQueryParams.getProgramAttributes() )
+        for ( DimensionalItemObject object : dataQueryParams.getProgramAttributes() )
         {
             ProgramTrackedEntityAttribute element = (ProgramTrackedEntityAttribute) object;
             TrackedEntityAttribute attribute = element.getAttribute();
@@ -176,7 +176,7 @@ public class EventQueryParams
             params.getItems().add( item );
         }
 
-        for ( NameableObject object : dataQueryParams.getFilterProgramDataElements() )
+        for ( DimensionalItemObject object : dataQueryParams.getFilterProgramDataElements() )
         {
             ProgramDataElement element = (ProgramDataElement) object;
             DataElement dataElement = element.getDataElement(); 
@@ -185,7 +185,7 @@ public class EventQueryParams
             params.getItemFilters().add( item );
         }
 
-        for ( NameableObject object : dataQueryParams.getFilterProgramAttributes() )
+        for ( DimensionalItemObject object : dataQueryParams.getFilterProgramAttributes() )
         {
             ProgramTrackedEntityAttribute element = (ProgramTrackedEntityAttribute) object;
             TrackedEntityAttribute attribute = element.getAttribute();
@@ -193,7 +193,7 @@ public class EventQueryParams
             params.getItemFilters().add( item );
         }
 
-        for ( NameableObject object : dataQueryParams.getProgramIndicators() )
+        for ( DimensionalItemObject object : dataQueryParams.getProgramIndicators() )
         {
             ProgramIndicator programIndicator = (ProgramIndicator) object;
             params.getItemProgramIndicators().add( programIndicator );
@@ -216,7 +216,7 @@ public class EventQueryParams
      */
     public void replacePeriodsWithStartEndDates()
     {
-        List<Period> periods = NameableObjectUtils.asTypedList( getDimensionOrFilterItems( PERIOD_DIM_ID ), Period.class );
+        List<Period> periods = asTypedList( getDimensionOrFilterItems( PERIOD_DIM_ID ) );
 
         for ( Period period : periods )
         {
@@ -268,9 +268,9 @@ public class EventQueryParams
     /**
      * Get nameable objects part of items and item filters.
      */
-    public Set<NameableObject> getNameableObjectItems()
+    public Set<DimensionalObject> getDimensionalObjectItems()
     {
-        Set<NameableObject> objects = new HashSet<NameableObject>();
+        Set<DimensionalObject> objects = new HashSet<>();
 
         for ( QueryItem item : ListUtils.union( items, itemFilters ) )
         {
@@ -385,7 +385,7 @@ public class EventQueryParams
     {
         Set<OrganisationUnit> children = new HashSet<>();
 
-        for ( NameableObject object : getDimensionOrFilterItems( DimensionalObject.ORGUNIT_DIM_ID ) )
+        for ( DimensionalItemObject object : getDimensionOrFilterItems( DimensionalObject.ORGUNIT_DIM_ID ) )
         {
             OrganisationUnit unit = (OrganisationUnit) object;
             children.addAll( unit.getChildren() );

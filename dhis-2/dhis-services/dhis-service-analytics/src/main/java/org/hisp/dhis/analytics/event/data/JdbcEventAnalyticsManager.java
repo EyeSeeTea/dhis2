@@ -51,10 +51,10 @@ import org.hisp.dhis.analytics.EventOutputType;
 import org.hisp.dhis.analytics.event.EventAnalyticsManager;
 import org.hisp.dhis.analytics.event.EventQueryParams;
 import org.hisp.dhis.common.DimensionType;
+import org.hisp.dhis.common.DimensionalItemObject;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
-import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.QueryFilter;
 import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.commons.collection.ListUtils;
@@ -556,7 +556,7 @@ public class JdbcEventAnalyticsManager
         {
             sql += "and (";
             
-            for ( NameableObject object : params.getDimensionOrFilterItems( ORGUNIT_DIM_ID ) )
+            for ( DimensionalItemObject object : params.getDimensionOrFilterItems( ORGUNIT_DIM_ID ) )
             {
                 OrganisationUnit unit = (OrganisationUnit) object;
                 sql += "uidlevel" + unit.getLevel() + " = '" + unit.getUid() + "' or ";

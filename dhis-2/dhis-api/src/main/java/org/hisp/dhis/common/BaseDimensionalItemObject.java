@@ -28,34 +28,42 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
-
-import org.hisp.dhis.user.User;
-
 /**
  * @author Lars Helge Overland
  */
-public interface DimensionService
+public class BaseDimensionalItemObject
+    extends BaseNameableObject
+    implements DimensionalItemObject
 {
-    DimensionalObject getDimension( String uid );
-    
-    DimensionalObject getDimension( String uid, DimensionType dimensionType );
-    
-    List<DimensionalItemObject> getCanReadDimensionItems( String uid );
-    
-    <T extends IdentifiableObject> List<T> getCanReadObjects( List<T> objects );
-    
-    <T extends IdentifiableObject> List<T> getCanReadObjects( User user, List<T> objects );
-    
-    DimensionType getDimensionType( String uid );
-    
-    List<DimensionalObject> getAllDimensions();
-    
-    List<DimensionalObject> getDimensionConstraints();
-    
-    DimensionalObject getDimensionalObjectCopy( String uid, boolean filterCanRead );
-    
-    void mergeAnalyticalObject( BaseAnalyticalObject object );
-    
-    void mergeEventAnalyticalObject( EventAnalyticalObject object );
+    private String dimensionItem;
+
+    // -------------------------------------------------------------------------
+    // Constructors
+    // -------------------------------------------------------------------------
+
+    public BaseDimensionalItemObject()
+    {
+    }
+
+    public BaseDimensionalItemObject( String dimensionItem )
+    {
+        this.uid = dimensionItem;
+        this.code = dimensionItem;
+        this.name = dimensionItem;
+        this.dimensionItem = dimensionItem;
+    }
+
+    // -------------------------------------------------------------------------
+    // Get and set methods
+    // -------------------------------------------------------------------------
+
+    public String getDimensionItem()
+    {
+        return dimensionItem;
+    }
+
+    public void setDimensionItem( String dimensionItem )
+    {
+        this.dimensionItem = dimensionItem;
+    }    
 }

@@ -36,6 +36,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.BaseNameableObject;
+import org.hisp.dhis.common.DimensionalItemObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeStrategy;
@@ -52,6 +53,7 @@ import java.util.Set;
 @JacksonXmlRootElement( localName = "organisationUnitGroup", namespace = DxfNamespaces.DXF_2_0 )
 public class OrganisationUnitGroup
     extends BaseNameableObject
+    implements DimensionalItemObject
 {
     private String symbol;
 
@@ -78,6 +80,12 @@ public class OrganisationUnitGroup
     // Logic
     // -------------------------------------------------------------------------
 
+    @Override
+    public String getDimensionItem()
+    {
+        return uid;
+    }
+    
     public boolean addOrganisationUnit( OrganisationUnit organisationUnit )
     {
         members.add( organisationUnit );

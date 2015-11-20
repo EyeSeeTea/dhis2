@@ -32,6 +32,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.hisp.dhis.common.BaseNameableObject;
+import org.hisp.dhis.common.DimensionalItemObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.adapter.JacksonPeriodTypeDeserializer;
 import org.hisp.dhis.common.adapter.JacksonPeriodTypeSerializer;
@@ -53,6 +54,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 @JacksonXmlRootElement( localName = "period", namespace = DxfNamespaces.DXF_2_0 )
 public class Period
     extends BaseNameableObject
+    implements DimensionalItemObject
 {
     public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
 
@@ -113,7 +115,11 @@ public class Period
     // Logic
     // -------------------------------------------------------------------------
 
-
+    public String getDimensionItem()
+    {
+        return getIsoDate();
+    }
+    
     @Override
     public void setAutoFields()
     {

@@ -32,7 +32,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import static org.hisp.dhis.common.NameableObjectUtils.getList;
+import static org.hisp.dhis.common.DimensionalObjectUtils.getList;
 
 import java.util.List;
 

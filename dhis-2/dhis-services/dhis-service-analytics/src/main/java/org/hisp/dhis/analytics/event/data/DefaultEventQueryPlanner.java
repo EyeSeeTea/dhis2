@@ -100,7 +100,7 @@ public class DefaultEventQueryPlanner
             violation = "Query items cannot be specified more than once: " + params.getDuplicateQueryItems();
         }
         
-        if ( params.hasValueDimension() && params.getNameableObjectItems().contains( params.getValue() ) )
+        if ( params.hasValueDimension() && params.getDimensionalObjectItems().contains( params.getValue() ) )
         {
             violation = "Value dimension cannot also be specified as an item or item filter";
         }

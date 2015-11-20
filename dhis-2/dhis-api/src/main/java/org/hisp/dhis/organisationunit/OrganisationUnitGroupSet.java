@@ -37,10 +37,10 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseDimensionalObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DimensionType;
+import org.hisp.dhis.common.DimensionalItemObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeStrategy;
-import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.adapter.JacksonOrganisationUnitGroupSymbolSerializer;
 import org.hisp.dhis.common.annotation.Scanned;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
@@ -176,7 +176,7 @@ public class OrganisationUnitGroupSet
     @JsonView( { DetailedView.class, DimensionalView.class } )
     @JacksonXmlElementWrapper( localName = "items", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "item", namespace = DxfNamespaces.DXF_2_0 )
-    public List<NameableObject> getItems()
+    public List<DimensionalItemObject> getItems()
     {
         return new ArrayList<>( organisationUnitGroups );
     }

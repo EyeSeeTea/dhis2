@@ -38,6 +38,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.google.common.collect.Sets;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.BaseNameableObject;
+import org.hisp.dhis.common.DimensionalItemObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeStrategy;
@@ -73,7 +74,7 @@ import java.util.Set;
 @JacksonXmlRootElement( localName = "dataSet", namespace = DxfNamespaces.DXF_2_0 )
 public class DataSet
     extends BaseNameableObject
-    implements VersionedObject
+    implements VersionedObject, DimensionalItemObject
 {
     public static final int NO_EXPIRY = 0;
 
@@ -249,6 +250,12 @@ public class DataSet
     // Logic
     // -------------------------------------------------------------------------
 
+    @Override
+    public String getDimensionItem()
+    {
+        return uid;
+    }
+    
     public void addOrganisationUnit( OrganisationUnit organisationUnit )
     {
         sources.add( organisationUnit );

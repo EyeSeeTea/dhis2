@@ -35,6 +35,7 @@ import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.common.BaseDimensionalObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DimensionType;
+import org.hisp.dhis.common.DimensionalItemObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeStrategy;
@@ -55,6 +56,7 @@ import com.google.common.collect.Sets;
 @JacksonXmlRootElement( localName = "programIndicator", namespace = DxfNamespaces.DXF_2_0 )
 public class ProgramIndicator
     extends BaseDimensionalObject
+    implements DimensionalItemObject
 {
     public static final String SEPARATOR_ID = "\\.";
     public static final String SEP_OBJECT = ":";
@@ -116,6 +118,12 @@ public class ProgramIndicator
     // Logic
     // -------------------------------------------------------------------------
 
+    @Override
+    public String getDimensionItem()
+    {
+        return uid;
+    }
+    
     public boolean hasFilter()
     {
         return filter != null;

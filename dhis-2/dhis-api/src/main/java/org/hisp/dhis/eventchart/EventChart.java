@@ -37,13 +37,13 @@ import org.hisp.dhis.chart.BaseChart;
 import org.hisp.dhis.common.AnalyticsType;
 import org.hisp.dhis.common.BaseDimensionalObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.DimensionalItemObject;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.DimensionalObjectUtils;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.EventAnalyticalObject;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeStrategy;
-import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.DimensionalView;
 import org.hisp.dhis.common.view.ExportView;
@@ -184,7 +184,7 @@ public class EventChart
     }
 
     @Override
-    public List<NameableObject> series()
+    public List<DimensionalItemObject> series()
     {
         String series = columnDimensions.get( 0 );
 
@@ -197,7 +197,7 @@ public class EventChart
     }
 
     @Override
-    public List<NameableObject> category()
+    public List<DimensionalItemObject> category()
     {
         String category = rowDimensions.get( 0 );
 

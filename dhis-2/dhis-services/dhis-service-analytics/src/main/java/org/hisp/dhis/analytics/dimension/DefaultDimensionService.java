@@ -59,13 +59,13 @@ import org.hisp.dhis.common.BaseDimensionalObject;
 import org.hisp.dhis.common.DataDimensionItem;
 import org.hisp.dhis.common.DimensionService;
 import org.hisp.dhis.common.DimensionType;
+import org.hisp.dhis.common.DimensionalItemObject;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.DimensionalObjectUtils;
 import org.hisp.dhis.common.EventAnalyticalObject;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.MergeStrategy;
-import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.commons.collection.UniqueArrayList;
 import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
@@ -218,11 +218,11 @@ public class DefaultDimensionService
     }
     
     @Override
-    public List<NameableObject> getCanReadDimensionItems( String uid )
+    public List<DimensionalItemObject> getCanReadDimensionItems( String uid )
     {
         DimensionalObject dimension = getDimension( uid );
 
-        List<NameableObject> items = new ArrayList<>();
+        List<DimensionalItemObject> items = new ArrayList<>();
 
         if ( dimension != null && dimension.hasItems() )
         {            
@@ -420,7 +420,7 @@ public class DefaultDimensionService
         if ( filterCanRead )
         {
             User user = currentUserService.getCurrentUser();
-            List<NameableObject> items = getCanReadObjects( user, dimension.getItems() );
+            List<DimensionalItemObject> items = getCanReadObjects( user, dimension.getItems() );
             copy.setItems( items );
         }
         
@@ -456,7 +456,7 @@ public class DefaultDimensionService
 
             String dimensionId = dimension.getDimension();
 
-            List<NameableObject> items = dimension.getItems();
+            List<DimensionalItemObject> items = dimension.getItems();
 
             if ( items != null )
             {
@@ -490,7 +490,7 @@ public class DefaultDimensionService
                         }
                         else
                         {
-                            NameableObject dataObject = identifiableObjectManager.get( DataDimensionItem.DATA_DIMENSION_CLASSES, uid );
+                            DimensionalItemObject dataObject = identifiableObjectManager.get( DataDimensionItem.DATA_DIMENSION_CLASSES, uid );
                             
                             if ( dataObject != null )
                             {

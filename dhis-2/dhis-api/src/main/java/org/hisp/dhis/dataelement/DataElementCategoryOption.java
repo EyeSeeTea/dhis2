@@ -36,6 +36,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.BaseNameableObject;
+import org.hisp.dhis.common.DimensionalItemObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeStrategy;
@@ -55,6 +56,7 @@ import java.util.Set;
 @JacksonXmlRootElement( localName = "categoryOption", namespace = DxfNamespaces.DXF_2_0 )
 public class DataElementCategoryOption
     extends BaseNameableObject
+    implements DimensionalItemObject
 {
     public static final String DEFAULT_NAME = "default";
 
@@ -89,6 +91,12 @@ public class DataElementCategoryOption
     // Logic
     // -------------------------------------------------------------------------
 
+    @Override
+    public String getDimensionItem()
+    {
+        return uid;
+    }
+    
     public boolean isDefault()
     {
         return name.equals( DEFAULT_NAME );

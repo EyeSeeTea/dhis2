@@ -94,7 +94,7 @@ public class DataDimensionItem
     {
     }
 
-    public static DataDimensionItem create( NameableObject object )
+    public static DataDimensionItem create( DimensionalItemObject object )
     {
         DataDimensionItem dimension = new DataDimensionItem();
         
@@ -138,7 +138,7 @@ public class DataDimensionItem
     // Logic
     // -------------------------------------------------------------------------
 
-    public NameableObject getNameableObject()
+    public DimensionalItemObject getDimensionalItemObject()
     {
         if ( indicator != null )
         {

@@ -33,8 +33,8 @@ import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.analytics.DataQueryService;
 import org.hisp.dhis.common.DimensionalObject;
+import org.hisp.dhis.common.DimensionalObjectUtils;
 import org.hisp.dhis.common.DisplayProperty;
-import org.hisp.dhis.common.NameableObjectUtils;
 import org.hisp.dhis.commons.filter.FilterUtils;
 import org.hisp.dhis.dxf2.render.RenderService;
 import org.hisp.dhis.organisationunit.FeatureType;
@@ -173,7 +173,7 @@ public class GeoFeatureController
 
         DimensionalObject dim = params.getDimension( DimensionalObject.ORGUNIT_DIM_ID );
 
-        List<OrganisationUnit> organisationUnits = NameableObjectUtils.asTypedList( dim.getItems() );
+        List<OrganisationUnit> organisationUnits = DimensionalObjectUtils.asTypedList( dim.getItems() );
 
         FilterUtils.filter( organisationUnits, new OrganisationUnitWithValidCoordinatesFilter() );
 

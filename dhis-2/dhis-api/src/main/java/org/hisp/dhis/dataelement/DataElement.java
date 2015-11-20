@@ -37,10 +37,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.common.BaseDimensionalObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DimensionType;
+import org.hisp.dhis.common.DimensionalItemObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeStrategy;
@@ -85,6 +85,7 @@ import com.google.common.collect.Sets;
 @JacksonXmlRootElement( localName = "dataElement", namespace = DxfNamespaces.DXF_2_0 )
 public class DataElement
     extends BaseDimensionalObject
+    implements DimensionalItemObject
 {
     public static final String[] I18N_PROPERTIES = { "name", "shortName", "description", "formName" };
 
@@ -168,6 +169,12 @@ public class DataElement
     // Logic
     // -------------------------------------------------------------------------
 
+    @Override
+    public String getDimensionItem()
+    {
+        return uid;
+    }
+    
     public void addDataElementGroup( DataElementGroup group )
     {
         groups.add( group );

@@ -87,7 +87,8 @@ public interface DimensionalObject
         PERIOD_DIM_ID, "Period",
         ORGUNIT_DIM_ID, "Organisation unit" );
     
-    Map<DimensionType, Class<? extends DimensionalObject>> DYNAMIC_DIMENSION_TYPE_CLASS_MAP = ImmutableMap.<DimensionType, Class<? extends DimensionalObject>>builder().
+    Map<DimensionType, Class<? extends DimensionalObject>> DYNAMIC_DIMENSION_TYPE_CLASS_MAP = 
+        ImmutableMap.<DimensionType, Class<? extends DimensionalObject>>builder().
         put( DimensionType.CATEGORY, DataElementCategory.class ).
         put( DimensionType.DATAELEMENT_GROUPSET, DataElementGroupSet.class ).
         put( DimensionType.ORGANISATIONUNIT_GROUPSET, OrganisationUnitGroupSet.class ).
@@ -95,7 +96,8 @@ public interface DimensionalObject
         put( DimensionType.PROGRAM_ATTRIBUTE, TrackedEntityAttribute.class ).
         put( DimensionType.PROGRAM_DATAELEMENT, DataElement.class ).build();              
 
-    Map<Class<? extends DimensionalObject>, Class<? extends NameableObject>> DIMENSION_CLASS_ITEM_CLASS_MAP = ImmutableMap.<Class<? extends DimensionalObject>, Class<? extends NameableObject>>builder().
+    Map<Class<? extends DimensionalObject>, Class<? extends DimensionalItemObject>> DIMENSION_CLASS_ITEM_CLASS_MAP = 
+        ImmutableMap.<Class<? extends DimensionalObject>, Class<? extends DimensionalItemObject>>builder().
         put( DataElementCategory.class, DataElementCategoryOption.class ).
         put( DataElementGroupSet.class, DataElementGroup.class ).
         put( OrganisationUnitGroupSet.class, OrganisationUnitGroup.class ).
@@ -126,7 +128,7 @@ public interface DimensionalObject
     /**
      * Dimension items.
      */
-    List<NameableObject> getItems();
+    List<DimensionalItemObject> getItems();
 
     /**
      * Indicates whether all available items in this dimension are included.

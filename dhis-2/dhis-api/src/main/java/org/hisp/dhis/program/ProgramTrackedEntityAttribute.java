@@ -39,6 +39,7 @@ import static org.hisp.dhis.common.DimensionalObjectUtils.COMPOSITE_DIM_OBJECT_P
 
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.BaseNameableObject;
+import org.hisp.dhis.common.DimensionalItemObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeStrategy;
@@ -52,6 +53,7 @@ import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 @JacksonXmlRootElement( localName = "programTrackedEntityAttribute", namespace = DxfNamespaces.DXF_2_0 )
 public class ProgramTrackedEntityAttribute
     extends BaseNameableObject
+    implements DimensionalItemObject
 {
     private Program program;
 
@@ -100,7 +102,8 @@ public class ProgramTrackedEntityAttribute
     // Logic
     // -------------------------------------------------------------------------
     
-    public String getAnalyticsId()
+    @Override
+    public String getDimensionItem()
     {
         return program.getUid() + COMPOSITE_DIM_OBJECT_PLAIN_SEP + attribute.getUid();
     }

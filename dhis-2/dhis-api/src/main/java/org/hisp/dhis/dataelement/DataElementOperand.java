@@ -38,6 +38,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.BaseNameableObject;
+import org.hisp.dhis.common.DimensionalItemObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.view.DetailedView;
@@ -64,6 +65,7 @@ import static org.hisp.dhis.common.DimensionalObjectUtils.COMPOSITE_DIM_OBJECT_P
 @JacksonXmlRootElement( localName = "dataElementOperand", namespace = DxfNamespaces.DXF_2_0 )
 public class DataElementOperand
     extends BaseNameableObject
+    implements DimensionalItemObject
 {
     public static final String SEPARATOR = COMPOSITE_DIM_OBJECT_PLAIN_SEP;
     public static final String NAME_TOTAL = "(Total)";
@@ -154,6 +156,12 @@ public class DataElementOperand
     // -------------------------------------------------------------------------
     // Logic
     // -------------------------------------------------------------------------
+
+    @Override
+    public String getDimensionItem()
+    {
+        return dataElement.getUid() + SEPARATOR + categoryOptionCombo.getUid();
+    }
 
     @Override
     public boolean haveUniqueNames()
@@ -314,16 +322,6 @@ public class DataElementOperand
     public String getColumnName()
     {
         return COLUMN_PREFIX + dataElementId + COLUMN_SEPARATOR + optionComboId;
-    }
-
-    /**
-     * Returns an identifier on the format <data element uid>.<category option combo uid>.
-     *
-     * @return an identifier.
-     */
-    public String getAnalyticsId()
-    {
-        return dataElement.getUid() + SEPARATOR + categoryOptionCombo.getUid();
     }
 
     /**
