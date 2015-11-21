@@ -240,8 +240,8 @@ public class BaseDimensionalObject
 
     @Override
     @JsonProperty
-    @JsonSerialize( contentAs = BaseNameableObject.class )
-    @JsonDeserialize( contentAs = BaseNameableObject.class )
+    @JsonSerialize( contentAs = BaseDimensionalItemObject.class )
+    @JsonDeserialize( contentAs = BaseDimensionalItemObject.class )
     @JsonView( { DimensionalView.class } )
     @JacksonXmlElementWrapper( localName = "items", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "item", namespace = DxfNamespaces.DXF_2_0 )
