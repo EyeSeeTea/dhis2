@@ -84,8 +84,7 @@ import com.google.common.collect.Sets;
  */
 @JacksonXmlRootElement( localName = "dataElement", namespace = DxfNamespaces.DXF_2_0 )
 public class DataElement
-    extends BaseDimensionalObject
-    implements DimensionalItemObject
+    extends BaseDimensionalObject implements DimensionalItemObject
 {
     public static final String[] I18N_PROPERTIES = { "name", "shortName", "description", "formName" };
 
@@ -392,6 +391,11 @@ public class DataElement
         return categoryCombo != null;
     }
 
+    public boolean hasAggregationType()
+    {
+        return aggregationType != null;
+    }
+    
     /**
      * Tests whether the DataElement is associated with a
      * DataElementCategoryCombo with more than one DataElementCategory, or any

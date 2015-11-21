@@ -91,7 +91,6 @@ public class TrackedEntityAttribute
 
     public TrackedEntityAttribute()
     {
-
     }
 
     public TrackedEntityAttribute( String name, String description, ValueType valueType, Boolean inherit, Boolean displayOnVisitSchedule )

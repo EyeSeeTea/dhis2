@@ -28,15 +28,38 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.analytics.AggregationType;
+import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.DimensionalView;
+import org.hisp.dhis.common.view.ExportView;
+import org.hisp.dhis.legend.LegendSet;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+
 /**
  * @author Lars Helge Overland
  */
 public class BaseDimensionalItemObject
-    extends BaseNameableObject
-    implements DimensionalItemObject
+    extends BaseNameableObject implements DimensionalItemObject
 {
-    private String dimensionItem;
+    /**
+     * The dimension type.
+     */
+    private DimensionType dimensionType;
 
+    /**
+     * The legend set for this dimension.
+     */
+    protected LegendSet legendSet;
+    
+    /**
+     * The aggregation type for this dimension.
+     */
+    protected AggregationType aggregationType;
+    
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -50,20 +73,108 @@ public class BaseDimensionalItemObject
         this.uid = dimensionItem;
         this.code = dimensionItem;
         this.name = dimensionItem;
-        this.dimensionItem = dimensionItem;
+    }
+
+    // -------------------------------------------------------------------------
+    // Logic
+    // -------------------------------------------------------------------------
+
+    @Override
+    public boolean hasLegendSet()
+    {
+        return getLegendSet() != null;
+    }
+    
+    @Override
+    public boolean hasAggregationType()
+    {
+        return aggregationType != null;
     }
 
     // -------------------------------------------------------------------------
     // Get and set methods
     // -------------------------------------------------------------------------
 
+    @Override
+    @JsonProperty
+    @JsonView( { DimensionalView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getDimensionItem()
     {
-        return dimensionItem;
+        return uid;
     }
 
     public void setDimensionItem( String dimensionItem )
     {
-        this.dimensionItem = dimensionItem;
-    }    
+        this.uid = dimensionItem;
+    }
+
+    @Override
+    @JsonProperty
+    @JsonView( { DimensionalView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public DimensionType getDimensionType()
+    {
+        return dimensionType;
+    }
+
+    public void setDimensionType( DimensionType dimensionType )
+    {
+        this.dimensionType = dimensionType;
+    }
+
+    @Override
+    @JsonProperty
+    @JsonSerialize( as = BaseIdentifiableObject.class )
+    @JsonView( { DimensionalView.class, DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public LegendSet getLegendSet()
+    {
+        return legendSet;
+    }
+
+    public void setLegendSet( LegendSet legendSet )
+    {
+        this.legendSet = legendSet;
+    }
+
+    @Override
+    @JsonProperty
+    @JsonView( { DimensionalView.class, DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public AggregationType getAggregationType()
+    {
+        return aggregationType;
+    }
+
+    public void setAggregationType( AggregationType aggregationType )
+    {
+        this.aggregationType = aggregationType;
+    }
+
+    // -------------------------------------------------------------------------
+    // Merge
+    // -------------------------------------------------------------------------
+
+    @Override
+    public void mergeWith( IdentifiableObject other, MergeStrategy strategy )
+    {
+        super.mergeWith( other, strategy );
+
+        if ( other.getClass().isInstance( this ) )
+        {
+            DimensionalItemObject object = (DimensionalItemObject) other;
+            
+            if ( strategy.isReplace() )
+            {
+                legendSet = object.getLegendSet();
+                aggregationType = object.getAggregationType();
+            }
+            else if ( strategy.isReplace() )
+            {
+                legendSet = object.getLegendSet() == null ? legendSet : object.getLegendSet();
+                aggregationType = object.getAggregationType() == null ? aggregationType : object.getAggregationType();
+            }
+        }
+    }
 }

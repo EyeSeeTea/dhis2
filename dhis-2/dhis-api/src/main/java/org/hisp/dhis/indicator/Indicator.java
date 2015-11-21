@@ -35,16 +35,15 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+
+import org.hisp.dhis.common.BaseDimensionalItemObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.BaseNameableObject;
-import org.hisp.dhis.common.DimensionalItemObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeStrategy;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.legend.LegendSet;
 import org.hisp.dhis.schema.PropertyType;
 import org.hisp.dhis.schema.annotation.Property;
 
@@ -56,8 +55,7 @@ import java.util.Set;
  */
 @JacksonXmlRootElement( localName = "indicator", namespace = DxfNamespaces.DXF_2_0 )
 public class Indicator
-    extends BaseNameableObject
-    implements DimensionalItemObject
+    extends BaseDimensionalItemObject
 {
     private boolean annualized;
 
@@ -86,11 +84,6 @@ public class Indicator
 
     private Set<DataSet> dataSets = new HashSet<>();
 
-    /**
-     * The legend set for this indicator.
-     */
-    private LegendSet legendSet;
-
     public Indicator()
     {
     }
@@ -99,12 +92,6 @@ public class Indicator
     // Logic
     // -------------------------------------------------------------------------
 
-    @Override
-    public String getDimensionItem()
-    {
-        return uid;
-    }
-    
     public void addIndicatorGroup( IndicatorGroup group )
     {
         groups.add( group );
@@ -168,8 +155,7 @@ public class Indicator
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
-
-
+    
     @Override
     public boolean haveUniqueNames()
     {
@@ -334,20 +320,6 @@ public class Indicator
         this.dataSets = dataSets;
     }
 
-    @JsonProperty
-    @JsonSerialize( as = BaseIdentifiableObject.class )
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public LegendSet getLegendSet()
-    {
-        return legendSet;
-    }
-
-    public void setLegendSet( LegendSet legendSet )
-    {
-        this.legendSet = legendSet;
-    }
-
     @Override
     public void mergeWith( IdentifiableObject other, MergeStrategy strategy )
     {
@@ -368,7 +340,6 @@ public class Indicator
                 explodedNumerator = indicator.getExplodedNumerator();
                 explodedDenominator = indicator.getExplodedDenominator();
                 indicatorType = indicator.getIndicatorType();
-                legendSet = indicator.getLegendSet();
             }
             else if ( strategy.isMerge() )
             {
@@ -379,7 +350,6 @@ public class Indicator
                 explodedNumerator = indicator.getExplodedNumerator() == null ? explodedNumerator : indicator.getExplodedNumerator();
                 explodedDenominator = indicator.getExplodedDenominator() == null ? explodedDenominator : indicator.getExplodedDenominator();
                 indicatorType = indicator.getIndicatorType() == null ? indicatorType : indicator.getIndicatorType();
-                legendSet = indicator.getLegendSet() == null ? legendSet : indicator.getLegendSet();
             }
 
             dataSets.clear();

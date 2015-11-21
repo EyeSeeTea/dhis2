@@ -55,8 +55,7 @@ import com.google.common.collect.Sets;
  */
 @JacksonXmlRootElement( localName = "programIndicator", namespace = DxfNamespaces.DXF_2_0 )
 public class ProgramIndicator
-    extends BaseDimensionalObject
-    implements DimensionalItemObject
+    extends BaseDimensionalObject implements DimensionalItemObject
 {
     public static final String SEPARATOR_ID = "\\.";
     public static final String SEP_OBJECT = ":";
@@ -134,6 +133,12 @@ public class ProgramIndicator
         return decimals != null && decimals >= 0;
     }
 
+    @Override
+    public boolean hasAggregationType()
+    {
+        return aggregationType != null;
+    }
+    
     /**
      * Returns aggregation type, if not exists returns AVERAGE.
      */

@@ -37,9 +37,8 @@ import com.google.common.base.MoreObjects;
 
 import static org.hisp.dhis.common.DimensionalObjectUtils.COMPOSITE_DIM_OBJECT_PLAIN_SEP;
 
+import org.hisp.dhis.common.BaseDimensionalItemObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.BaseNameableObject;
-import org.hisp.dhis.common.DimensionalItemObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeStrategy;
@@ -52,8 +51,7 @@ import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
  */
 @JacksonXmlRootElement( localName = "programTrackedEntityAttribute", namespace = DxfNamespaces.DXF_2_0 )
 public class ProgramTrackedEntityAttribute
-    extends BaseNameableObject
-    implements DimensionalItemObject
+    extends BaseDimensionalItemObject
 {
     private Program program;
 

@@ -34,10 +34,10 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+
+import org.hisp.dhis.common.BaseDimensionalItemObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.DataDimensionType;
-import org.hisp.dhis.common.DimensionalItemObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeStrategy;
@@ -53,8 +53,7 @@ import java.util.Set;
  */
 @JacksonXmlRootElement( localName = "categoryOptionGroup", namespace = DxfNamespaces.DXF_2_0 )
 public class CategoryOptionGroup
-    extends BaseNameableObject
-    implements DimensionalItemObject
+    extends BaseDimensionalItemObject
 {
     @Scanned
     private Set<DataElementCategoryOption> members = new HashSet<>();
@@ -81,12 +80,6 @@ public class CategoryOptionGroup
     // -------------------------------------------------------------------------
     // Logic
     // -------------------------------------------------------------------------
-
-    @Override
-    public String getDimensionItem()
-    {
-        return uid;
-    }
     
     public void addCategoryOption( DataElementCategoryOption categoryOption )
     {

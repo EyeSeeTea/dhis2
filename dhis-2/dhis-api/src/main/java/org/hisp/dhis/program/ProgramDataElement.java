@@ -30,16 +30,14 @@ package org.hisp.dhis.program;
 
 import static org.hisp.dhis.common.DimensionalObjectUtils.COMPOSITE_DIM_OBJECT_PLAIN_SEP;
 
-import org.hisp.dhis.common.BaseNameableObject;
-import org.hisp.dhis.common.DimensionalItemObject;
+import org.hisp.dhis.common.BaseDimensionalItemObject;
 import org.hisp.dhis.dataelement.DataElement;
 
 /**
  * @author Lars Helge Overland
  */
 public class ProgramDataElement
-    extends BaseNameableObject
-    implements DimensionalItemObject
+    extends BaseDimensionalItemObject
 {
     private Program program;
     

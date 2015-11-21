@@ -37,9 +37,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hisp.dhis.common.BaseDimensionalItemObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.BaseNameableObject;
-import org.hisp.dhis.common.DimensionalItemObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeStrategy;
@@ -60,8 +59,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
  */
 @JacksonXmlRootElement( localName = "categoryOptionCombo", namespace = DxfNamespaces.DXF_2_0 )
 public class DataElementCategoryOptionCombo
-    extends BaseNameableObject
-    implements DimensionalItemObject
+    extends BaseDimensionalItemObject
 {
     public static final String DEFAULT_NAME = "default";
 
