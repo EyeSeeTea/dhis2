@@ -70,7 +70,7 @@ public class ProgramDataElement
     @Override
     public String getName()
     {
-        return program.getName() + " " + dataElement.getName();
+        return program.getDisplayName() + " " + dataElement.getDisplayName();
     }
     
     // -------------------------------------------------------------------------

@@ -106,6 +106,12 @@ public class ProgramTrackedEntityAttribute
         return program.getUid() + COMPOSITE_DIM_OBJECT_PLAIN_SEP + attribute.getUid();
     }
     
+    @Override
+    public String getName()
+    {
+        return program.getDisplayName() + " " + attribute.getDisplayName();
+    }
+    
     // -------------------------------------------------------------------------
     // Getters && Setters
     // -------------------------------------------------------------------------
