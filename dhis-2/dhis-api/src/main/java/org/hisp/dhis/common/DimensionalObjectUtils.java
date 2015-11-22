@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -434,6 +435,17 @@ public class DimensionalObjectUtils
         }
         
         return objects;
+    }
+    
+    /**
+     * Returns dimension item identifiers for the given collection of DimensionalItemObject.
+     * 
+     * @param objects the DimensionalItemObjects.
+     * @return a list of dimension item identifiers.
+     */
+    public static List<String> getDimensionalItemIds( Collection<DimensionalItemObject> objects )
+    {
+        return objects.stream().map( o -> o.getDimensionItem() ).collect( Collectors.toList() );
     }
 
     /**

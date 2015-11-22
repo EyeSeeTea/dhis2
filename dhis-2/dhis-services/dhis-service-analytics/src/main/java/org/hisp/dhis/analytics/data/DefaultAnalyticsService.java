@@ -50,6 +50,7 @@ import static org.hisp.dhis.organisationunit.OrganisationUnit.getParentNameGraph
 import static org.hisp.dhis.period.PeriodType.getPeriodTypeFromIsoString;
 import static org.hisp.dhis.reporttable.ReportTable.IRT2D;
 import static org.hisp.dhis.reporttable.ReportTable.addIfEmpty;
+import static org.hisp.dhis.common.DimensionalObjectUtils.getDimensionalItemIds;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -540,7 +541,7 @@ public class DefaultAnalyticsService
             {
                 if ( !metaData.keySet().contains( dim.getDimension() ) )
                 {
-                    metaData.put( dim.getDimension(), getUids( dim.getItems() ) );
+                    metaData.put( dim.getDimension(), getDimensionalItemIds( dim.getItems() ) );
                 }
             }
 
@@ -964,7 +965,7 @@ public class DefaultAnalyticsService
                 }
                 else
                 {
-                    map.put( object.getUid(), object.getDisplayProperty( params.getDisplayProperty() ) );
+                    map.put( object.getDimensionItem(), object.getDisplayProperty( params.getDisplayProperty() ) );
                 }
 
                 if ( DimensionType.ORGANISATIONUNIT.equals( dimension.getDimensionType() ) && params.isHierarchyMeta() )
