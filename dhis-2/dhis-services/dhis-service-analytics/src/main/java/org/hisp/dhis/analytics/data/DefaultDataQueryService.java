@@ -44,9 +44,9 @@ import static org.hisp.dhis.common.DimensionalObject.LONGITUDE_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getLocalPeriodIdentifier;
-import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
 import static org.hisp.dhis.common.DimensionalObjectUtils.asList;
 import static org.hisp.dhis.common.DimensionalObjectUtils.asTypedList;
+import static org.hisp.dhis.common.DimensionalObjectUtils.getDimensionalItemIds;
 import static org.hisp.dhis.commons.collection.ListUtils.sort;
 import static org.hisp.dhis.commons.util.TextUtils.splitSafe;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_LEVEL;
@@ -193,17 +193,17 @@ public class DefaultDataQueryService
 
             for ( DimensionalObject column : object.getColumns() )
             {
-                params.addDimension( getDimension( column.getDimension(), getUids( column.getItems() ), date, userOrgUnits, format, false ) );
+                params.addDimension( getDimension( column.getDimension(), getDimensionalItemIds( column.getItems() ), date, userOrgUnits, format, false ) );
             }
 
             for ( DimensionalObject row : object.getRows() )
             {
-                params.addDimension( getDimension( row.getDimension(), getUids( row.getItems() ), date, userOrgUnits, format, false ) );
+                params.addDimension( getDimension( row.getDimension(), getDimensionalItemIds( row.getItems() ), date, userOrgUnits, format, false ) );
             }
 
             for ( DimensionalObject filter : object.getFilters() )
             {
-                params.getFilters().add( getDimension( filter.getDimension(), getUids( filter.getItems() ), date, userOrgUnits, format, false ) );
+                params.getFilters().add( getDimension( filter.getDimension(), getDimensionalItemIds( filter.getItems() ), date, userOrgUnits, format, false ) );
             }
         }
 

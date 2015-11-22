@@ -168,29 +168,6 @@ public class DataElementOperand
     }
 
     @Override
-    public String getUid()
-    {
-        if ( uid != null )
-        {
-            return uid;
-        }
-
-        String uid = null;
-
-        if ( dataElement != null )
-        {
-            uid = dataElement.getUid();
-        }
-
-        if ( categoryOptionCombo != null )
-        {
-            uid += SEPARATOR + categoryOptionCombo.getUid();
-        }
-
-        return uid;
-    }
-
-    @Override
     public String getName()
     {
         if ( name != null )

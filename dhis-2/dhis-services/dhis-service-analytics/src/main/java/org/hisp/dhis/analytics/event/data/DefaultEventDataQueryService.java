@@ -32,7 +32,7 @@ import static org.hisp.dhis.common.DimensionalObject.DIMENSION_NAME_SEP;
 import static org.hisp.dhis.common.DimensionalObject.ITEM_SEP;
 import static org.hisp.dhis.common.DimensionalObjectUtils.getDimensionFromParam;
 import static org.hisp.dhis.common.DimensionalObjectUtils.getDimensionItemsFromParam;
-import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
+import static org.hisp.dhis.common.DimensionalObjectUtils.getDimensionalItemIds;
 
 import static org.hisp.dhis.analytics.event.EventAnalyticsService.ITEM_EXECUTION_DATE;
 import static org.hisp.dhis.analytics.event.EventAnalyticsService.ITEM_ORG_UNIT_CODE;
@@ -257,7 +257,7 @@ public class DefaultEventDataQueryService
             for ( DimensionalObject dimension : ListUtils.union( object.getColumns(), object.getRows() ) )
             {
                 DimensionalObject dimObj = dataQueryService.
-                    getDimension( dimension.getDimension(), getUids( dimension.getItems() ), date, null, format, true );
+                    getDimension( dimension.getDimension(), getDimensionalItemIds( dimension.getItems() ), date, null, format, true );
                 
                 if ( dimObj != null )
                 {
@@ -272,7 +272,7 @@ public class DefaultEventDataQueryService
             for ( DimensionalObject filter : object.getFilters() )
             {
                 DimensionalObject dimObj = dataQueryService.
-                    getDimension( filter.getDimension(), getUids( filter.getItems() ), date, null, format, true );
+                    getDimension( filter.getDimension(), getDimensionalItemIds( filter.getItems() ), date, null, format, true );
                 
                 if ( dimObj != null )
                 {

@@ -46,8 +46,8 @@ import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.common.DimensionType;
 import org.hisp.dhis.common.DimensionalItemObject;
 import org.hisp.dhis.common.DimensionalObject;
+import org.hisp.dhis.common.DimensionalObjectUtils;
 import org.hisp.dhis.common.IdentifiableObjectManager;
-import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.common.IllegalQueryException;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
@@ -315,7 +315,7 @@ public class DataQueryServiceTest
     {
         List<DimensionalItemObject> items = Lists.newArrayList( deA, deB, deC, dsA, dsB );
         
-        List<String> itemUids = IdentifiableObjectUtils.getUids( items );
+        List<String> itemUids = DimensionalObjectUtils.getDimensionalItemIds( items );
         
         DimensionalObject actual = dataQueryService.getDimension( DimensionalObject.DATA_X_DIM_ID, itemUids, null, null, null, false );
         
@@ -334,7 +334,7 @@ public class DataQueryServiceTest
         
         List<DimensionalItemObject> items = Lists.newArrayList( opA, opB, opC );
         
-        List<String> itemUids = IdentifiableObjectUtils.getUids( items );
+        List<String> itemUids = DimensionalObjectUtils.getDimensionalItemIds( items );
         
         DimensionalObject actual = dataQueryService.getDimension( DimensionalObject.DATA_X_DIM_ID, itemUids, null, null, null, false );
         
@@ -349,7 +349,7 @@ public class DataQueryServiceTest
     {
         List<DimensionalItemObject> items = Lists.newArrayList( ouA, ouB, ouC );
         
-        List<String> itemUids = IdentifiableObjectUtils.getUids( items );
+        List<String> itemUids = DimensionalObjectUtils.getDimensionalItemIds( items );
 
         DimensionalObject actual = dataQueryService.getDimension( DimensionalObject.ORGUNIT_DIM_ID, itemUids, null, null, null, false );
         
@@ -393,7 +393,7 @@ public class DataQueryServiceTest
     {
         List<DimensionalItemObject> items = Lists.newArrayList( ouGroupA, ouGroupB );
         
-        List<String> itemUids = IdentifiableObjectUtils.getUids( items );
+        List<String> itemUids = DimensionalObjectUtils.getDimensionalItemIds( items );
         
         DimensionalObject actual = dataQueryService.getDimension( ouGroupSetA.getUid(), itemUids, null, null, null, false );
         
@@ -408,7 +408,7 @@ public class DataQueryServiceTest
     {
         List<DimensionalItemObject> items = Lists.newArrayList( deGroupA, deGroupB );
         
-        List<String> itemUids = IdentifiableObjectUtils.getUids( items );
+        List<String> itemUids = DimensionalObjectUtils.getDimensionalItemIds( items );
         
         DimensionalObject actual = dataQueryService.getDimension( deGroupSetA.getUid(), itemUids, null, null, null, false );
         

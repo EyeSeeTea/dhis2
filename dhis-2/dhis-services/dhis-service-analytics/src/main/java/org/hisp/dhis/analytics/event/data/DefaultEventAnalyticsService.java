@@ -33,7 +33,7 @@ import static org.hisp.dhis.analytics.AnalyticsService.OU_HIERARCHY_KEY;
 import static org.hisp.dhis.analytics.AnalyticsService.OU_NAME_HIERARCHY_KEY;
 import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
-import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
+import static org.hisp.dhis.common.DimensionalObjectUtils.getDimensionalItemIds;
 import static org.hisp.dhis.common.DimensionalObjectUtils.asTypedList;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.getParentGraphMap;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.getParentNameGraphMap;
@@ -197,8 +197,8 @@ public class DefaultEventAnalyticsService
             Map<String, String> uidNameMap = getUidNameMap( params );
             
             metaData.put( NAMES_META_KEY, uidNameMap );
-            metaData.put( PERIOD_DIM_ID, getUids( params.getDimensionOrFilterItems( PERIOD_DIM_ID ) ) );
-            metaData.put( ORGUNIT_DIM_ID, getUids( params.getDimensionOrFilterItems( ORGUNIT_DIM_ID ) ) );
+            metaData.put( PERIOD_DIM_ID, getDimensionalItemIds( params.getDimensionOrFilterItems( PERIOD_DIM_ID ) ) );
+            metaData.put( ORGUNIT_DIM_ID, getDimensionalItemIds( params.getDimensionOrFilterItems( ORGUNIT_DIM_ID ) ) );
 
             User user = currentUserService.getCurrentUser();
 
