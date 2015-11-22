@@ -98,7 +98,7 @@ public class DefaultStartupRoutineExecutor
     {
         if ( TRUE.equalsIgnoreCase( System.getProperty( SKIP_PROP ) ) )
         {
-            LOG.info( "Skipping startup routines" );
+            LOG.info( "Skipping startup routines, " + SKIP_PROP + " is true" );
             return;
         }
         

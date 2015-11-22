@@ -196,6 +196,15 @@ public interface ProgramService
     Set<Program> getCurrentUserPrograms( ProgramType programType );
 
     /**
+     * Sets the given merge organisation units on the given programs. Only 
+     * the sub-hierarchy of the current user is modified. 
+     * 
+     * @param program the program.
+     * @param mergeOrganisationUnits the merge organisation units.
+     */
+    void mergeWithCurrentUserOrganisationUnits( Program program, Collection<OrganisationUnit> mergeOrganisationUnits );
+    
+    /**
      * Gets or adds a program data element for the given program and data element.
      * 
      * @param programUid the program identifier.
@@ -214,12 +223,5 @@ public interface ProgramService
      */
     ProgramDataElement getProgramDataElement( String programUid, String dataElementUid );
     
-    /**
-     * Sets the given merge organisation units on the given programs. Only 
-     * the sub-hierarchy of the current user is modified. 
-     * 
-     * @param program the program.
-     * @param mergeOrganisationUnits the merge organisation units.
-     */
-    void mergeWithCurrentUserOrganisationUnits( Program program, Collection<OrganisationUnit> mergeOrganisationUnits );
+    List<ProgramDataElement> getGeneratedProgramDataElements( String programUid );
 }
