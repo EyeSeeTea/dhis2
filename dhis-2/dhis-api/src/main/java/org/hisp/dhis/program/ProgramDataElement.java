@@ -30,8 +30,20 @@ package org.hisp.dhis.program;
 
 import static org.hisp.dhis.common.DimensionalObjectUtils.COMPOSITE_DIM_OBJECT_PLAIN_SEP;
 
+import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.common.BaseDimensionalItemObject;
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.common.ValueType;
+import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.legend.LegendSet;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 /**
  * @author Lars Helge Overland
@@ -62,21 +74,49 @@ public class ProgramDataElement
     // -------------------------------------------------------------------------
 
     @Override
+    public String getName()
+    {
+        return program.getDisplayName() + " " + dataElement.getDisplayName();
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public ValueType getValueType()
+    {
+        return dataElement.getValueType();
+    }
+    
+    // -------------------------------------------------------------------------
+    // DimensionalItemObject
+    // -------------------------------------------------------------------------
+
+    @Override
     public String getDimensionItem()
     {
         return program.getUid() + COMPOSITE_DIM_OBJECT_PLAIN_SEP + dataElement.getUid();
     }
     
     @Override
-    public String getName()
+    public LegendSet getLegendSet()
     {
-        return program.getDisplayName() + " " + dataElement.getDisplayName();
+        return dataElement.getLegendSet();
+    }
+    
+    @Override
+    public AggregationType getAggregationType()
+    {
+        return dataElement.getAggregationType();
     }
     
     // -------------------------------------------------------------------------
     // Get and set methods
     // -------------------------------------------------------------------------
 
+    @JsonProperty
+    @JsonSerialize( as = BaseIdentifiableObject.class )
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Program getProgram()
     {
         return program;
@@ -87,6 +127,10 @@ public class ProgramDataElement
         this.program = program;
     }
 
+    @JsonProperty
+    @JsonSerialize( as = BaseIdentifiableObject.class )
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public DataElement getDataElement()
     {
         return dataElement;

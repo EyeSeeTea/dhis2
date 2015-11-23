@@ -37,13 +37,16 @@ import com.google.common.base.MoreObjects;
 
 import static org.hisp.dhis.common.DimensionalObjectUtils.COMPOSITE_DIM_OBJECT_PLAIN_SEP;
 
+import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.common.BaseDimensionalItemObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeStrategy;
+import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
+import org.hisp.dhis.legend.LegendSet;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 
 /**
@@ -101,15 +104,39 @@ public class ProgramTrackedEntityAttribute
     // -------------------------------------------------------------------------
     
     @Override
+    public String getName()
+    {
+        return program.getDisplayName() + " " + attribute.getDisplayName();
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public ValueType getValueType()
+    {
+        return attribute.getValueType();
+    }
+    
+    // -------------------------------------------------------------------------
+    // DimensionalItemObject
+    // -------------------------------------------------------------------------
+    
+    @Override
     public String getDimensionItem()
     {
         return program.getUid() + COMPOSITE_DIM_OBJECT_PLAIN_SEP + attribute.getUid();
     }
     
     @Override
-    public String getName()
+    public LegendSet getLegendSet()
     {
-        return program.getDisplayName() + " " + attribute.getDisplayName();
+        return attribute.getLegendSet();
+    }
+    
+    @Override
+    public AggregationType getAggregationType()
+    {
+        return attribute.getAggregationType();
     }
     
     // -------------------------------------------------------------------------

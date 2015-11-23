@@ -40,6 +40,7 @@ import org.hisp.dhis.common.BaseDimensionalItemObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.expression.ExpressionService;
@@ -95,10 +96,10 @@ public class DataElementOperand
 
     private String operandName;
 
-    private AggregationType aggregationType;
-
     private List<Integer> aggregationLevels = new ArrayList<>();
 
+    private ValueType valueType;
+    
     private int frequencyOrder;
 
     private String operandType;
@@ -152,7 +153,7 @@ public class DataElementOperand
     }
 
     // -------------------------------------------------------------------------
-    // Logic
+    // DimensionalItemObject
     // -------------------------------------------------------------------------
 
     @Override
@@ -160,6 +161,10 @@ public class DataElementOperand
     {
         return dataElement.getUid() + SEPARATOR + categoryOptionCombo.getUid();
     }
+    
+    // -------------------------------------------------------------------------
+    // Logic
+    // -------------------------------------------------------------------------
 
     @Override
     public boolean haveUniqueNames()
@@ -354,7 +359,9 @@ public class DataElementOperand
         this.optionComboId = categoryOptionCombo.getUid();
         this.operandId = dataElementId + SEPARATOR + optionComboId;
         this.operandName = getPrettyName( dataElement, categoryOptionCombo );
+        this.legendSet = dataElement.getLegendSet();
         this.aggregationType = dataElement.getAggregationType();
+        this.valueType = dataElement.getValueType();
         this.frequencyOrder = dataElement.getFrequencyOrder();
         this.aggregationLevels = new ArrayList<>( dataElement.getAggregationLevels() );
 
@@ -372,7 +379,9 @@ public class DataElementOperand
         this.dataElementId = dataElement.getUid();
         this.operandId = String.valueOf( dataElementId );
         this.operandName = getPrettyName( dataElement, null );
+        this.legendSet = dataElement.getLegendSet();
         this.aggregationType = dataElement.getAggregationType();
+        this.valueType = dataElement.getValueType();
         this.frequencyOrder = dataElement.getFrequencyOrder();
         this.aggregationLevels = new ArrayList<>( dataElement.getAggregationLevels() );
 
@@ -487,19 +496,6 @@ public class DataElementOperand
 
     @JsonProperty
     @JsonView( { DetailedView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public AggregationType getAggregationType()
-    {
-        return aggregationType;
-    }
-
-    public void setAggregationType( AggregationType aggregationType )
-    {
-        this.aggregationType = aggregationType;
-    }
-
-    @JsonProperty
-    @JsonView( { DetailedView.class } )
     @JacksonXmlElementWrapper( localName = "aggregationLevels", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "aggregationLevel", namespace = DxfNamespaces.DXF_2_0 )
     public List<Integer> getAggregationLevels()
@@ -510,6 +506,19 @@ public class DataElementOperand
     public void setAggregationLevels( List<Integer> aggregationLevels )
     {
         this.aggregationLevels = aggregationLevels;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public ValueType getValueType()
+    {
+        return valueType;
+    }
+
+    public void setValueType( ValueType valueType )
+    {
+        this.valueType = valueType;
     }
 
     @JsonProperty
