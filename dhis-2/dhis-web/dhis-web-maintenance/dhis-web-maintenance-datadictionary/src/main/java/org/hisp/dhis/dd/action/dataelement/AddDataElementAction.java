@@ -44,7 +44,6 @@ import org.hisp.dhis.legend.LegendService;
 import org.hisp.dhis.legend.LegendSet;
 import org.hisp.dhis.option.OptionService;
 import org.hisp.dhis.option.OptionSet;
-import org.hisp.dhis.system.util.AttributeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -205,7 +204,7 @@ public class AddDataElementAction
     // -------------------------------------------------------------------------
 
     @Override
-    public String execute()
+    public String execute() throws Exception
     {
         DataElement dataElement = new DataElement();
 
@@ -235,7 +234,7 @@ public class AddDataElementAction
 
         if ( jsonAttributeValues != null )
         {
-            AttributeUtils.updateAttributeValuesFromJson( dataElement, dataElement.getAttributeValues(), jsonAttributeValues, attributeService );
+            attributeService.updateAttributeValues( dataElement, jsonAttributeValues );
         }
 
         dataElementService.addDataElement( dataElement );

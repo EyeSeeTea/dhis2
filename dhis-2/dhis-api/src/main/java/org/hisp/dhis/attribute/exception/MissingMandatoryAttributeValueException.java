@@ -1,4 +1,4 @@
-package org.hisp.dhis.external.conf;
+package org.hisp.dhis.attribute.exception;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,53 +28,15 @@ package org.hisp.dhis.external.conf;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.attribute.AttributeValue;
+
 /**
- * @author Lars Helge Overland
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public enum ConfigurationKey
+public class MissingMandatoryAttributeValueException extends Exception
 {
-    SYSTEM_ID( "system.id" ),
-    SYSTEM_READ_ONLY_MODE( "system.read_only_mode", "off" ),
-    CONNECTION_DIALECT( "connection.dialect" ),
-    CONNECTION_DRIVER_CLASS( "connection.driver_class" ),
-    CONNECTION_URL( "connection.url" ),
-    CONNECTION_USERNAME( "connection.username" ),
-    CONNECTION_PASSWORD( "connection.password" ),
-    CONNECTION_SCHEMA( "connection.schema" ),
-    LDAP_URL( "ldap.url", "ldaps://0:1" ),
-    LDAP_MANAGER_DN( "ldap.manager.dn" ),
-    LDAP_MANAGER_PASSWORD( "ldap.manager.password" ),
-    LDAP_SEARCH_BASE( "ldap.search.base", "" ),
-    LDAP_SEARCH_FILTER( "ldap.search.filter", "(cn={0})" ),
-    FILESTORE_PROVIDER( "filestore.provider", "filesystem" ),
-    FILE_STORE_CONTAINER( "filestore.container", "files" ),
-    FILE_STORE_LOCATION( "filestore.location" ),
-    FILE_STORE_IDENTITY( "filestore.identity", "" ),
-    FILE_STORE_SECRET( "filestore.secret", "" );
-
-    private final String key;
-    
-    private final String defaultValue;
-    
-    ConfigurationKey( String key )
+    public MissingMandatoryAttributeValueException( AttributeValue attributeValue )
     {
-        this.key = key;
-        this.defaultValue = null;
-    }
-
-    ConfigurationKey( String key, String defaultValue )
-    {
-        this.key = key;
-        this.defaultValue = defaultValue;
-    }
-    
-    public String getKey()
-    {
-        return key;
-    }
-    
-    public String getDefaultValue()
-    {
-        return defaultValue;
+        super( "Missing mandatory attribute " + attributeValue.getAttribute().getName() + "(" + attributeValue.getAttribute().getUid() + ")" );
     }
 }

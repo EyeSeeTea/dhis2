@@ -1,4 +1,4 @@
-package org.hisp.dhis.attribute;
+package org.hisp.dhis.attribute.exception;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,13 +28,22 @@ package org.hisp.dhis.attribute;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.attribute.AttributeValue;
+
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public class NonUniqueAttributeValueException extends Exception
 {
-    public NonUniqueAttributeValueException( String message )
+    public NonUniqueAttributeValueException( AttributeValue attributeValue )
     {
-        super( message );
+        super( "Value " + attributeValue.getValue() + " already exists for attribute "
+            + attributeValue.getAttribute().getName() + "(" + attributeValue.getAttribute().getUid() + ")" );
+    }
+
+    public NonUniqueAttributeValueException( AttributeValue attributeValue, String value )
+    {
+        super( "Value " + value + " already exists for attribute "
+            + attributeValue.getAttribute().getName() + "(" + attributeValue.getAttribute().getUid() + ")" );
     }
 }

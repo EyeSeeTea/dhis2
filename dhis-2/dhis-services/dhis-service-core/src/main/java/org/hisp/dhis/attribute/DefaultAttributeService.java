@@ -28,14 +28,22 @@ package org.hisp.dhis.attribute;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import net.sf.json.JSONObject;
+import org.hisp.dhis.attribute.exception.NonUniqueAttributeValueException;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.i18n.I18nService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.hisp.dhis.i18n.I18nUtils.i18n;
 
@@ -127,98 +135,21 @@ public class DefaultAttributeService
     }
 
     @Override
-    public List<Attribute> getDataElementAttributes()
+    public List<Attribute> getAttributes( Class<?> klass )
     {
-        return new ArrayList<>( i18n( i18nService, attributeStore.getDataElementAttributes() ) );
+        return new ArrayList<>( i18n( i18nService, attributeStore.getAttributes( klass ) ) );
     }
 
     @Override
-    public List<Attribute> getDataElementGroupAttributes()
+    public List<Attribute> getMandatoryAttributes( Class<?> klass )
     {
-        return new ArrayList<>( i18n( i18nService, attributeStore.getDataElementGroupAttributes() ) );
+        return new ArrayList<>( i18n( i18nService, attributeStore.getMandatoryAttributes( klass ) ) );
     }
 
     @Override
-    public List<Attribute> getIndicatorAttributes()
+    public List<Attribute> getUniqueAttributes( Class<?> klass )
     {
-        return new ArrayList<>( i18n( i18nService, attributeStore.getIndicatorAttributes() ) );
-    }
-
-    @Override
-    public List<Attribute> getIndicatorGroupAttributes()
-    {
-        return new ArrayList<>( i18n( i18nService, attributeStore.getIndicatorGroupAttributes() ) );
-    }
-
-    @Override
-    public List<Attribute> getDataSetAttributes()
-    {
-        return new ArrayList<>( i18n( i18nService, attributeStore.getDataSetAttributes() ) );
-    }
-
-    @Override
-    public List<Attribute> getOrganisationUnitAttributes()
-    {
-        return new ArrayList<>( i18n( i18nService, attributeStore.getOrganisationUnitAttributes() ) );
-    }
-
-    @Override
-    public List<Attribute> getOrganisationUnitGroupAttributes()
-    {
-        return new ArrayList<>( i18n( i18nService, attributeStore.getOrganisationUnitGroupAttributes() ) );
-    }
-
-    @Override public List<Attribute> getOrganisationUnitGroupSetAttributes()
-    {
-        return new ArrayList<>( i18n( i18nService, attributeStore.getOrganisationUnitGroupSetAttributes() ) );
-    }
-
-    @Override
-    public List<Attribute> getUserAttributes()
-    {
-        return new ArrayList<>( i18n( i18nService, attributeStore.getUserAttributes() ) );
-    }
-
-    @Override
-    public List<Attribute> getUserGroupAttributes()
-    {
-        return new ArrayList<>( i18n( i18nService, attributeStore.getUserGroupAttributes() ) );
-    }
-
-    @Override
-    public List<Attribute> getProgramAttributes()
-    {
-        return new ArrayList<>( i18n( i18nService, attributeStore.getProgramAttributes() ) );
-    }
-
-    @Override
-    public List<Attribute> getProgramStageAttributes()
-    {
-        return new ArrayList<>( i18n( i18nService, attributeStore.getProgramStageAttributes() ) );
-    }
-
-    @Override
-    public List<Attribute> getTrackedEntityAttributes()
-    {
-        return new ArrayList<>( i18n( i18nService, attributeStore.getTrackedEntityAttributes() ) );
-    }
-
-    @Override
-    public List<Attribute> getTrackedEntityAttributeAttributes()
-    {
-        return new ArrayList<>( i18n( i18nService, attributeStore.getTrackedEntityAttributeAttributes() ) );
-    }
-
-    @Override
-    public List<Attribute> getCategoryOptionAttributes()
-    {
-        return new ArrayList<>( i18n( i18nService, attributeStore.getCategoryOptionAttributes() ) );
-    }
-
-    @Override
-    public List<Attribute> getCategoryOptionGroupAttributes()
-    {
-        return new ArrayList<>( i18n( i18nService, attributeStore.getCategoryOptionGroupAttributes() ) );
+        return new ArrayList<>( i18n( i18nService, attributeStore.getUniqueAttributes( klass ) ) );
     }
 
     @Override
@@ -265,7 +196,7 @@ public class DefaultAttributeService
 
             if ( !values.isEmpty() )
             {
-                throw new NonUniqueAttributeValueException( "Value " + attributeValue.getValue() + " already exists for attribute." );
+                throw new NonUniqueAttributeValueException( attributeValue );
             }
         }
 
@@ -289,7 +220,7 @@ public class DefaultAttributeService
 
             if ( values.size() > 1 || (values.size() == 1 && !object.getAttributeValues().contains( values.get( 0 ) )) )
             {
-                throw new NonUniqueAttributeValueException( "Value " + attributeValue.getValue() + " already exists for attribute." );
+                throw new NonUniqueAttributeValueException( attributeValue );
             }
         }
 
@@ -338,5 +269,88 @@ public class DefaultAttributeService
     public int getAttributeValueCount()
     {
         return attributeValueStore.getCount();
+    }
+
+    @Override
+    public <T extends IdentifiableObject> void updateAttributeValues( T object, List<String> jsonAttributeValues ) throws NonUniqueAttributeValueException
+    {
+        updateAttributeValues( object, getJsonAttributeValues( jsonAttributeValues ) );
+    }
+
+    @Override
+    public <T extends IdentifiableObject> void updateAttributeValues( T object, Set<AttributeValue> attributeValues ) throws NonUniqueAttributeValueException
+    {
+        Map<String, AttributeValue> attributeValueMap = attributeValues.stream()
+            .collect( Collectors.toMap( av -> av.getAttribute().getUid(), av -> av ) );
+
+        Iterator<AttributeValue> iterator = object.getAttributeValues().iterator();
+
+        while ( iterator.hasNext() )
+        {
+            AttributeValue attributeValue = iterator.next();
+
+            if ( attributeValueMap.containsKey( attributeValue.getAttribute().getUid() ) )
+            {
+                AttributeValue av = attributeValueMap.get( attributeValue.getAttribute().getUid() );
+
+                if ( attributeValue.isUnique() )
+                {
+                    if ( manager.isAttributeValueUnique( object.getClass(), object, attributeValue.getAttribute(), av.getValue() ) )
+                    {
+                        attributeValue.setValue( av.getValue() );
+                    }
+                    else
+                    {
+                        throw new NonUniqueAttributeValueException( attributeValue, av.getValue() );
+                    }
+                }
+                else
+                {
+                    attributeValue.setValue( av.getValue() );
+                }
+
+                attributeValueMap.remove( attributeValue.getAttribute().getUid() );
+            }
+            else
+            {
+                iterator.remove();
+            }
+        }
+
+        for ( String uid : attributeValueMap.keySet() )
+        {
+            AttributeValue attributeValue = attributeValueMap.get( uid );
+            addAttributeValue( object, attributeValue );
+        }
+    }
+
+    //--------------------------------------------------------------------------------------------------
+    // Helpers
+    //--------------------------------------------------------------------------------------------------
+
+    private Set<AttributeValue> getJsonAttributeValues( List<String> jsonAttributeValues )
+    {
+        Set<AttributeValue> attributeValues = new HashSet<>();
+
+        for ( String jsonValue : jsonAttributeValues )
+        {
+            JSONObject json = JSONObject.fromObject( jsonValue );
+            Integer id = json.getInt( "id" );
+            String value = json.getString( "value" );
+
+            Attribute attribute = getAttribute( id );
+
+            if ( attribute == null || StringUtils.isEmpty( value ) )
+            {
+                continue;
+            }
+
+            AttributeValue attributeValue = new AttributeValue( value, attribute );
+            attributeValue.setId( id );
+
+            attributeValues.add( attributeValue );
+        }
+
+        return attributeValues;
     }
 }
