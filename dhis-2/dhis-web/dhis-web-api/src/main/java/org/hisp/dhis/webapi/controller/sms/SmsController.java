@@ -120,7 +120,31 @@ public class SmsController
 
         if ( result.equals( "success" ) )
         {
-            webMessageService.send( WebMessageUtils.ok( result ), response, request );
+            webMessageService.send( WebMessageUtils.ok( "Message Sent" ), response, request );
+        }
+        else
+        {
+            throw new WebMessageException( WebMessageUtils.error( "Message seding failed" ) );
+        }
+    }
+
+    @RequestMapping( value = SENDSMS, method = RequestMethod.POST, consumes = "application/json" )
+    public void sendSMSMessage( @RequestBody Map<String, Object> jsonMessage, HttpServletResponse response,
+        HttpServletRequest request )
+            throws WebMessageException
+    {
+        if ( jsonMessage == null )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "Request body must be specified" ) );
+        }
+
+        OutboundSms sms = createOutBoundSMS( jsonMessage.get( "recipient" ), jsonMessage.get( "message" ) );
+
+        String result = smsSender.sendMessage( sms );
+
+        if ( result.equals( "success" ) )
+        {
+            webMessageService.send( WebMessageUtils.ok( "Message Sent Json" ), response, request );
         }
         else
         {
