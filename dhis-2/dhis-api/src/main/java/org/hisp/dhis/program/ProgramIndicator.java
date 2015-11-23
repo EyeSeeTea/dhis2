@@ -41,6 +41,7 @@ import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeStrategy;
 import org.hisp.dhis.common.RegexUtils;
 import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.DimensionalView;
 import org.hisp.dhis.common.view.ExportView;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -118,6 +119,9 @@ public class ProgramIndicator
     // -------------------------------------------------------------------------
 
     @Override
+    @JsonProperty
+    @JsonView( { DimensionalView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getDimensionItem()
     {
         return uid;

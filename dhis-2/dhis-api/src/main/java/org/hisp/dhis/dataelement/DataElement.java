@@ -169,6 +169,9 @@ public class DataElement
     // -------------------------------------------------------------------------
 
     @Override
+    @JsonProperty
+    @JsonView( { DimensionalView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getDimensionItem()
     {
         return uid;
