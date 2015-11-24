@@ -31,23 +31,14 @@ package org.hisp.dhis.webapi.controller.sms;
  * Zubair <rajazubair.asghar@gmail.com>
  */
 
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.hisp.dhis.dxf2.webmessage.WebMessageException;
 import org.hisp.dhis.sms.SmsSender;
-import org.hisp.dhis.sms.incoming.IncomingSms;
 import org.hisp.dhis.sms.incoming.IncomingSmsService;
-import org.hisp.dhis.sms.incoming.SmsMessageEncoding;
-import org.hisp.dhis.sms.incoming.SmsMessageStatus;
-import org.hisp.dhis.sms.outbound.OutboundSms;
-import org.hisp.dhis.sms.outbound.OutboundSmsStatus;
-import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.webapi.service.WebMessageService;
 import org.hisp.dhis.webapi.utils.WebMessageUtils;
 
@@ -67,9 +58,9 @@ public class SmsController
 
     public static final String SENDSMSTOALL = "/sendSMSToAll";
 
-    public static final String LISTALLSMSINBOX = "/listAllSMSInbox";
+    public static final String GETAALLINBOUNDSMS = "/getAllInboundSMS";
 
-    public static final String LISTALLSMSSENT = "/listAllSMSSent";
+    public static final String GETALLOUTBOUNDSMS = "/getAllOutboundSMS";
 
     public static final String RECEIVESMS = "/receiveSMS";
 
@@ -87,9 +78,6 @@ public class SmsController
     private SmsSender smsSender;
 
     @Autowired
-    private CurrentUserService currentUserService;
-
-    @Autowired
     private WebMessageService webMessageService;
 
     @Autowired
@@ -99,6 +87,7 @@ public class SmsController
     // POST
     // -------------------------------------------------------------------------
 
+    @PreAuthorize( "hasRole('ALL') or hasRole(' F_MOBILE_SENDSMS')" )
     @RequestMapping( value = SENDSMS, method = RequestMethod.POST )
     public void sendSMSMessage( @RequestParam String recipient, @RequestParam String message,
         HttpServletResponse response, HttpServletRequest request )
@@ -114,9 +103,7 @@ public class SmsController
             throw new WebMessageException( WebMessageUtils.conflict( "Message must be specified" ) );
         }
 
-        OutboundSms sms = createOutBoundSMS( recipient, message );
-
-        String result = smsSender.sendMessage( sms );
+        String result = smsSender.sendMessage( message, recipient );
 
         if ( result.equals( "success" ) )
         {
@@ -128,6 +115,7 @@ public class SmsController
         }
     }
 
+    @PreAuthorize( "hasRole('ALL') or hasRole(' F_MOBILE_SENDSMS')" )
     @RequestMapping( value = SENDSMS, method = RequestMethod.POST, consumes = "application/json" )
     public void sendSMSMessage( @RequestBody Map<String, Object> jsonMessage, HttpServletResponse response,
         HttpServletRequest request )
@@ -138,13 +126,12 @@ public class SmsController
             throw new WebMessageException( WebMessageUtils.conflict( "Request body must be specified" ) );
         }
 
-        OutboundSms sms = createOutBoundSMS( jsonMessage.get( "recipient" ), jsonMessage.get( "message" ) );
-
-        String result = smsSender.sendMessage( sms );
+        String result = smsSender.sendMessage( jsonMessage.get( "message" ).toString(),
+            jsonMessage.get( "recipient" ).toString() );
 
         if ( result.equals( "success" ) )
         {
-            webMessageService.send( WebMessageUtils.ok( "Message Sent Json" ), response, request );
+            webMessageService.send( WebMessageUtils.ok( "Message Sent" ), response, request );
         }
         else
         {
@@ -154,14 +141,15 @@ public class SmsController
 
     @RequestMapping( value = RECEIVESMS, method = RequestMethod.POST )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_MOBILE_SETTINGS')" )
-    public void receiveSMSMessage( @RequestParam String sender, @RequestParam( required = false ) String received_time,
-        @RequestParam String message, @RequestParam( defaultValue = "Unknown", required = false ) String gateway,
-        HttpServletRequest request, HttpServletResponse response)
+    public void receiveSMSMessage( @RequestParam String originator,
+        @RequestParam( required = false ) String received_time, @RequestParam String message,
+        @RequestParam( defaultValue = "Unknown", required = false ) String gateway, HttpServletRequest request,
+        HttpServletResponse response)
             throws WebMessageException
     {
-        if ( sender == null || sender.length() <= 0 )
+        if ( originator == null || originator.length() <= 0 )
         {
-            throw new WebMessageException( WebMessageUtils.conflict( "Sender must be specified" ) );
+            throw new WebMessageException( WebMessageUtils.conflict( "originator must be specified" ) );
         }
 
         if ( message == null || message.length() <= 0 )
@@ -169,8 +157,7 @@ public class SmsController
             throw new WebMessageException( WebMessageUtils.conflict( "Message must be specified" ) );
         }
 
-        IncomingSms sms = createIncomingSMS( message, sender, gateway );
-        incomingSMSService.save( sms );
+        incomingSMSService.save( message, originator, gateway );
 
         webMessageService.send( WebMessageUtils.ok( "Received" ), response, request );
     }
@@ -186,40 +173,10 @@ public class SmsController
             throw new WebMessageException( WebMessageUtils.conflict( "RequestBody must not be empty" ) );
         }
 
-        IncomingSms sms = createIncomingSMS( jsonMassage.get( "message" ), jsonMassage.get( "originator" ),
-            jsonMassage.get( "gateway" ) );
-        incomingSMSService.save( sms );
+        incomingSMSService.save( jsonMassage.get( "message" ).toString(), jsonMassage.get( "originator" ).toString(),
+            jsonMassage.get( "gateway" ).toString() );
 
-        webMessageService.send( WebMessageUtils.ok( "Received Json" ), response, request );
+        webMessageService.send( WebMessageUtils.ok( "Received" ), response, request );
     }
 
-    // -------------------------------------------------------------------------
-    // Utility Methods
-    // -------------------------------------------------------------------------
-
-    private IncomingSms createIncomingSMS( Object text, Object originator, Object gateway )
-    {
-        IncomingSms sms = new IncomingSms();
-        sms.setText( text.toString() );
-        sms.setOriginator( originator.toString() );
-        sms.setGatewayId( gateway.toString() );
-        sms.setSentDate( new Date() );
-        sms.setReceivedDate( new Date() );
-        sms.setEncoding( SmsMessageEncoding.ENC7BIT );
-        sms.setStatus( SmsMessageStatus.INCOMING );
-        return sms;
-    }
-
-    private OutboundSms createOutBoundSMS( Object recipient, Object textMessage )
-    {
-        Set<String> recipients = new HashSet<String>();
-        recipients.add( recipient.toString() );
-
-        OutboundSms sms = new OutboundSms();
-        sms.setRecipients( recipients );
-        sms.setMessage( textMessage.toString() );
-        sms.setStatus( OutboundSmsStatus.OUTBOUND );
-        sms.setUser( currentUserService.getCurrentUser() );
-        return sms;
-    }
 }

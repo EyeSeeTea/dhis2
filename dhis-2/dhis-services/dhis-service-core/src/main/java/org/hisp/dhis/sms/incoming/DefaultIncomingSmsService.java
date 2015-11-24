@@ -29,6 +29,7 @@ package org.hisp.dhis.sms.incoming;
  */
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.hisp.dhis.sms.MessageQueue;
@@ -118,7 +119,7 @@ public class DefaultIncomingSmsService
         {
             e.printStackTrace();
         }
-        
+
         return msgList;
     }
 
@@ -127,6 +128,21 @@ public class DefaultIncomingSmsService
     {
         incomingSmsStore.save( incomingSms );
         incomingSmsQueue.put( incomingSms );
+    }
+
+    @Override
+    public void save( String message, String originator, String gateway )
+    {
+        IncomingSms sms = new IncomingSms();
+        sms.setText( message );
+        sms.setOriginator( originator );
+        sms.setGatewayId( gateway );
+        sms.setSentDate( new Date() );
+        sms.setReceivedDate( new Date() );
+        sms.setEncoding( SmsMessageEncoding.ENC7BIT );
+        sms.setStatus( SmsMessageStatus.INCOMING );
+        save( sms );
+
     }
 
     @Override
@@ -145,7 +161,7 @@ public class DefaultIncomingSmsService
         {
             e.printStackTrace();
         }
-        
+
         msgList.clear();
     }
 
@@ -203,4 +219,5 @@ public class DefaultIncomingSmsService
     {
         return incomingSmsStore.getSmsByStatus( status, keyword, min, max );
     }
+
 }
