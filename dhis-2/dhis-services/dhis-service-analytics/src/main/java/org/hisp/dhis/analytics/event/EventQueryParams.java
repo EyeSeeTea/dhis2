@@ -48,8 +48,6 @@ import org.hisp.dhis.analytics.Partitions;
 import org.hisp.dhis.analytics.SortOrder;
 import org.hisp.dhis.common.DimensionalItemObject;
 import org.hisp.dhis.common.DimensionalObject;
-import org.hisp.dhis.common.NameableObject;
-import org.hisp.dhis.common.NameableObjectUtils;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.commons.collection.ListUtils;
@@ -70,24 +68,54 @@ import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 public class EventQueryParams
     extends DataQueryParams
 {
+    /**
+     * The start date for the period dimension, can be null.
+     */
     private Date startDate;
 
+    /**
+     * The end date fore the period dimension, can be null.
+     */
     private Date endDate;
 
+    /**
+     * The query items.
+     */
     private List<QueryItem> items = new ArrayList<>();
 
+    /**
+     * The query item filters.
+     */
     private List<QueryItem> itemFilters = new ArrayList<>();
 
+    /**
+     * The dimensional object for which to produce aggregated data.
+     */
     private DimensionalObject value;
 
+    /**
+     * Program indicators specified as dimensional items of the data dimension.
+     */
     private List<ProgramIndicator> itemProgramIndicators = new ArrayList<>();
 
+    /**
+     * The program indicator for which to produce aggregated data.
+     */
     private ProgramIndicator programIndicator;
 
+    /**
+     * Columns to sort ascending.
+     */
     private List<String> asc = new ArrayList<>();
 
+    /**
+     * Columns to sort descending.
+     */
     private List<String> desc = new ArrayList<>();
     
+    /**
+     * The organisation unit selection mode.
+     */
     private OrganisationUnitSelectionMode organisationUnitMode;
 
     /**
