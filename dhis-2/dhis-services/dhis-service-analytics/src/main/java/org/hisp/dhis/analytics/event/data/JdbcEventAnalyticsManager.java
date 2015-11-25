@@ -37,6 +37,7 @@ import static org.hisp.dhis.commons.util.TextUtils.removeLastOr;
 import static org.hisp.dhis.commons.util.TextUtils.trimEnd;
 import static org.hisp.dhis.system.util.DateUtils.getMediumDateString;
 import static org.hisp.dhis.system.util.MathUtils.getRounded;
+import static org.hisp.dhis.common.DimensionalObjectUtils.COMPOSITE_DIM_OBJECT_PLAIN_SEP;
 
 import java.util.List;
 import java.util.Set;
@@ -173,7 +174,8 @@ public class JdbcEventAnalyticsManager
             {
                 if ( params.hasValueDimension() )
                 {
-                    grid.addValue( params.getValue().getUid() );
+                    String itemId = params.getProgram().getUid() + COMPOSITE_DIM_OBJECT_PLAIN_SEP + params.getValue().getUid();
+                    grid.addValue( itemId );
                 }
                 else if ( params.hasProgramIndicatorDimension() )
                 {
