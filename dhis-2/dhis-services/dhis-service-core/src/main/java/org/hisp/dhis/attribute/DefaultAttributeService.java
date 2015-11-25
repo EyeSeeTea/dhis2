@@ -29,10 +29,12 @@ package org.hisp.dhis.attribute;
  */
 
 import net.sf.json.JSONObject;
+import org.hisp.dhis.attribute.exception.MissingMandatoryAttributeValueException;
 import org.hisp.dhis.attribute.exception.NonUniqueAttributeValueException;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.i18n.I18nService;
+import org.hisp.dhis.validation.ValidationViolation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -272,18 +274,76 @@ public class DefaultAttributeService
     }
 
     @Override
-    public <T extends IdentifiableObject> void updateAttributeValues( T object, List<String> jsonAttributeValues ) throws NonUniqueAttributeValueException
+    public <T extends IdentifiableObject> List<ValidationViolation> validateAttributeValues( T object, Set<AttributeValue> attributeValues )
+    {
+        List<ValidationViolation> validationViolations = new ArrayList<>();
+
+        Map<String, AttributeValue> attributeValueMap = attributeValues.stream()
+            .collect( Collectors.toMap( av -> av.getAttribute().getUid(), av -> av ) );
+
+        Iterator<AttributeValue> iterator = object.getAttributeValues().iterator();
+        List<Attribute> mandatoryAttributes = getMandatoryAttributes( object.getClass() );
+
+        while ( iterator.hasNext() )
+        {
+            AttributeValue attributeValue = iterator.next();
+
+            if ( attributeValueMap.containsKey( attributeValue.getAttribute().getUid() ) )
+            {
+                AttributeValue av = attributeValueMap.get( attributeValue.getAttribute().getUid() );
+
+                if ( attributeValue.isUnique() )
+                {
+                    if ( !manager.isAttributeValueUnique( object.getClass(), object, attributeValue.getAttribute(), av.getValue() ) )
+                    {
+                        validationViolations.add( new ValidationViolation( attributeValue.getAttribute().getUid(),
+                            "Value '" + av.getValue() + "' already exists for attribute '"
+                                + attributeValue.getAttribute().getDisplayName() + "' (" + attributeValue.getAttribute().getUid() + ")" ) );
+                    }
+                }
+
+                attributeValueMap.remove( attributeValue.getAttribute().getUid() );
+                mandatoryAttributes.remove( attributeValue.getAttribute() );
+            }
+        }
+
+        for ( String uid : attributeValueMap.keySet() )
+        {
+            AttributeValue attributeValue = attributeValueMap.get( uid );
+
+            if ( !attributeValue.getAttribute().getSupportedClasses().contains( object.getClass() ) )
+            {
+                validationViolations.add( new ValidationViolation( attributeValue.getAttribute().getUid(),
+                    "Attribute '" + attributeValue.getAttribute().getDisplayName() + "' (" + attributeValue.getAttribute().getUid() + ") is not supported for type "
+                        + object.getClass().getSimpleName() ) );
+            }
+            else
+            {
+                mandatoryAttributes.remove( attributeValue.getAttribute() );
+            }
+        }
+
+        mandatoryAttributes.stream()
+            .forEach( att -> validationViolations.add(
+                new ValidationViolation( att.getUid(), "Missing mandatory attribute '" + att.getDisplayName() + "' (" + att.getUid() + ")" ) ) );
+
+        return validationViolations;
+    }
+
+    @Override
+    public <T extends IdentifiableObject> void updateAttributeValues( T object, List<String> jsonAttributeValues ) throws Exception
     {
         updateAttributeValues( object, getJsonAttributeValues( jsonAttributeValues ) );
     }
 
     @Override
-    public <T extends IdentifiableObject> void updateAttributeValues( T object, Set<AttributeValue> attributeValues ) throws NonUniqueAttributeValueException
+    public <T extends IdentifiableObject> void updateAttributeValues( T object, Set<AttributeValue> attributeValues ) throws Exception
     {
         Map<String, AttributeValue> attributeValueMap = attributeValues.stream()
             .collect( Collectors.toMap( av -> av.getAttribute().getUid(), av -> av ) );
 
         Iterator<AttributeValue> iterator = object.getAttributeValues().iterator();
+        List<Attribute> mandatoryAttributes = getMandatoryAttributes( object.getClass() );
 
         while ( iterator.hasNext() )
         {
@@ -310,6 +370,7 @@ public class DefaultAttributeService
                 }
 
                 attributeValueMap.remove( attributeValue.getAttribute().getUid() );
+                mandatoryAttributes.remove( attributeValue.getAttribute() );
             }
             else
             {
@@ -321,6 +382,12 @@ public class DefaultAttributeService
         {
             AttributeValue attributeValue = attributeValueMap.get( uid );
             addAttributeValue( object, attributeValue );
+            mandatoryAttributes.remove( attributeValue.getAttribute() );
+        }
+
+        if ( !mandatoryAttributes.isEmpty() )
+        {
+            throw new MissingMandatoryAttributeValueException( mandatoryAttributes );
         }
     }
 

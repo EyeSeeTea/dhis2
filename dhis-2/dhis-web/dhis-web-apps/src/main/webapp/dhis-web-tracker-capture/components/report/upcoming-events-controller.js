@@ -94,43 +94,44 @@ trackerCapture.controller('UpcomingEventsController',
                                         DateUtils.formatFromUserToApi($scope.report.endDate), 
                                         'ACTIVE',
                                         'SCHEDULE', 
-                                        $scope.pager).then(function(data){                     
-                
-            if( data.pager ){
-                $scope.pager = data.pager;
-                $scope.pager.toolBarDisplay = 5;
+                                        $scope.pager).then(function(data){            
+            if( data ) {
+                if( data.pager ){
+                    $scope.pager = data.pager;
+                    $scope.pager.toolBarDisplay = 5;
 
-                Paginator.setPage($scope.pager.page);
-                Paginator.setPageCount($scope.pager.pageCount);
-                Paginator.setPageSize($scope.pager.pageSize);
-                Paginator.setItemCount($scope.pager.total);                    
-            }
+                    Paginator.setPage($scope.pager.page);
+                    Paginator.setPageCount($scope.pager.pageCount);
+                    Paginator.setPageSize($scope.pager.pageSize);
+                    Paginator.setItemCount($scope.pager.total);                    
+                }
 
-            angular.forEach(data.eventRows, function(row){
-                var upcomingEvent = {};
-                angular.forEach(row.attributes, function(att){
-                    var val = AttributesFactory.formatAttributeValue(att, $scope.attributesById, $scope.optionSets, 'USER');
-                    upcomingEvent[att.attribute] = val;                        
+                angular.forEach(data.eventRows, function(row){
+                    var upcomingEvent = {};
+                    angular.forEach(row.attributes, function(att){
+                        var val = AttributesFactory.formatAttributeValue(att, $scope.attributesById, $scope.optionSets, 'USER');
+                        upcomingEvent[att.attribute] = val;                        
+                    });
+
+                    upcomingEvent.dueDate = DateUtils.formatFromApiToUser(row.dueDate);
+                    upcomingEvent.event = row.event;
+                    upcomingEvent.eventName = $scope.programStages[row.programStage].name;
+                    upcomingEvent.eventOrgUnitName = row.eventOrgUnitName;
+                    upcomingEvent.orgUnitName = row.eventOrgUnitName;
+                    upcomingEvent.followup = row.followup;
+                    upcomingEvent.program = row.program;
+                    upcomingEvent.programStage = row.programStage;
+                    upcomingEvent.trackedEntityInstance = row.trackedEntityInstance;                
+                    upcomingEvent.created = DateUtils.formatFromApiToUser(row.registrationDate);;
+                    $scope.upcomingEvents.push(upcomingEvent);
+
                 });
-                    
-                upcomingEvent.dueDate = DateUtils.formatFromApiToUser(row.dueDate);
-                upcomingEvent.event = row.event;
-                upcomingEvent.eventName = $scope.programStages[row.programStage].name;
-                upcomingEvent.eventOrgUnitName = row.eventOrgUnitName;
-                upcomingEvent.orgUnitName = row.eventOrgUnitName;
-                upcomingEvent.followup = row.followup;
-                upcomingEvent.program = row.program;
-                upcomingEvent.programStage = row.programStage;
-                upcomingEvent.trackedEntityInstance = row.trackedEntityInstance;                
-                upcomingEvent.created = DateUtils.formatFromApiToUser(row.registrationDate);;
-                $scope.upcomingEvents.push(upcomingEvent);
 
-            });
-
-            //sort upcoming events by their due dates - this is default
-            if(!$scope.sortColumn.id){                                      
-                $scope.sortGrid({id: 'dueDate', name: $translate('due_date'), valueType: 'date', displayInListNoProgram: false, showFilter: false, show: true});
-                $scope.reverse = false;
+                //sort upcoming events by their due dates - this is default
+                if(!$scope.sortColumn.id){                                      
+                    $scope.sortGrid({id: 'dueDate', name: $translate.instant('due_date'), valueType: 'DATE', displayInListNoProgram: false, showFilter: false, show: true});
+                    $scope.reverse = false;
+                }
             }
 
             $scope.reportFinished = true;
@@ -161,12 +162,12 @@ trackerCapture.controller('UpcomingEventsController',
                     col.eventCol = false;
                 });
                 
-                $scope.gridColumns.push({name: $translate('event_orgunit_name'), id: 'orgUnitName', type: 'string', displayInListNoProgram: false, showFilter: false, show: true, eventCol: true});
-                $scope.filterTypes['orgUnitName'] = 'string';
-                $scope.gridColumns.push({name: $translate('event_name'), id: 'eventName', type: 'string', displayInListNoProgram: false, showFilter: false, show: true, eventCol: true});
-                $scope.filterTypes['eventName'] = 'string';
-                $scope.gridColumns.push({name: $translate('due_date'), id: 'dueDate', type: 'date', displayInListNoProgram: false, showFilter: false, show: true, eventCol: true});
-                $scope.filterTypes['dueDate'] = 'date';
+                $scope.gridColumns.push({name: $translate.instant('event_orgunit_name'), id: 'orgUnitName', valueType: 'TEXT', displayInListNoProgram: false, showFilter: false, show: true, eventCol: true});
+                $scope.filterTypes['orgUnitName'] = 'TEXT';
+                $scope.gridColumns.push({name: $translate.instant('event_name'), id: 'eventName', valueType: 'TEXT', displayInListNoProgram: false, showFilter: false, show: true, eventCol: true});
+                $scope.filterTypes['eventName'] = 'TEXT';
+                $scope.gridColumns.push({name: $translate.instant('due_date'), id: 'dueDate', valueType: 'DATE', displayInListNoProgram: false, showFilter: false, show: true, eventCol: true});
+                $scope.filterTypes['dueDate'] = 'DATE';
                 $scope.filterText['dueDate']= {};                
             });
             
@@ -208,7 +209,7 @@ trackerCapture.controller('UpcomingEventsController',
             return;
         }        
         $scope.sortColumn = gridHeader;
-        if($scope.sortColumn.valueType === 'date'){
+        if($scope.sortColumn.valueType === 'DATE'){
             $scope.reverse = true;
         }
         else{
@@ -217,7 +218,7 @@ trackerCapture.controller('UpcomingEventsController',
     };
     
     $scope.d2Sort = function(upcomingDueEvent){ 
-        if($scope.sortColumn && $scope.sortColumn.valueType === 'date'){            
+        if($scope.sortColumn && $scope.sortColumn.valueType === 'DATE'){            
             var d = upcomingDueEvent[$scope.sortColumn.id];         
             return DateUtils.getDate(d);
         }

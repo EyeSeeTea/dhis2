@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.schema;
+package org.hisp.dhis.sms.config;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,44 +28,11 @@ package org.hisp.dhis.dxf2.schema;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.common.DxfNamespaces;
-
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * Temporary wrapper for ValidationViolation
- *
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * Zubair <rajazubair.asghar@gmail.com>
  */
-@JacksonXmlRootElement( localName = "validationViolations", namespace = DxfNamespaces.DXF_2_0 )
-public class ValidationViolations
+public enum SMSGatewayStatus
 {
-    private List<ValidationViolation> validationViolations = new ArrayList<>();
+    STOPPED,STOPPING, STARTING, STARTED, UNDEFINED
 
-    public ValidationViolations()
-    {
-    }
-
-    public ValidationViolations( List<ValidationViolation> validationViolations )
-    {
-        this.validationViolations = validationViolations;
-    }
-
-    @JsonProperty
-    @JacksonXmlElementWrapper( localName = "validationViolations", namespace = DxfNamespaces.DXF_2_0, useWrapping = false )
-    @JacksonXmlProperty( localName = "validationViolation", namespace = DxfNamespaces.DXF_2_0 )
-    public List<ValidationViolation> getValidationViolations()
-    {
-        return validationViolations;
-    }
-
-    public void setValidationViolations( List<ValidationViolation> validationViolations )
-    {
-        this.validationViolations = validationViolations;
-    }
 }

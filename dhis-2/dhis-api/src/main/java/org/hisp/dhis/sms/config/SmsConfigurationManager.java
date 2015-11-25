@@ -28,6 +28,9 @@ package org.hisp.dhis.sms.config;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * Zubair <rajazubair.asghar@gmail.com>
+ */
 public interface SmsConfigurationManager
 {
     SmsConfiguration getSmsConfiguration();
@@ -35,4 +38,12 @@ public interface SmsConfigurationManager
     void updateSmsConfiguration( SmsConfiguration config );
     
     SmsGatewayConfig checkInstanceOfGateway( Class<?> clazz );
+    
+    boolean setDefaultSMSGateway(String gatewayId);
+    
+    boolean gatewayExists (String gatewayId);
+    
+    boolean removeSMSGatewayById(String gatewayId);
+    
+    String addSMSGateway();
 }

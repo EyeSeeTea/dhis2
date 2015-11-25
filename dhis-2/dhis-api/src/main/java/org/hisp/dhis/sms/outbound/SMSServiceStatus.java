@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.schema;
+package org.hisp.dhis.sms.outbound;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,31 +28,10 @@ package org.hisp.dhis.dxf2.schema;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.validation.ValidationViolation;
-
-import java.util.List;
-
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * Zubair <rajazubair.asghar@gmail.com>
  */
-public interface SchemaValidator
+public enum SMSServiceStatus
 {
-    /**
-     * Validate object against its schema, the object is required to be non-null and have a schema associated with it.
-     *
-     * @param object    Object to validate
-     * @param persisted Only include persisted properties
-     * @return WebMessage containing validation response
-     */
-    List<ValidationViolation> validate( Object object, boolean persisted );
-
-    /**
-     * Validate object against its schema, the object is required to be non-null and have a schema associated with it.
-     *
-     * Only persisted values will be checked.
-     *
-     * @param object Object to validate
-     * @return WebMessage containing validation response
-     */
-    List<ValidationViolation> validate( Object object );
+    STARTED, STOPPED, STARTING, STOPPING
 }
