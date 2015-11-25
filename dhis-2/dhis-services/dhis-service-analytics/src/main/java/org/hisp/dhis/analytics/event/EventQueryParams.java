@@ -87,20 +87,46 @@ public class EventQueryParams
     
     private String organisationUnitMode;
 
+    /**
+     * The page number.
+     */
     private Integer page;
 
+    /**
+     * The page size.
+     */
     private Integer pageSize;
 
+    /**
+     * The value sort order.
+     */
     private SortOrder sortOrder;
 
+    /**
+     * The max limit of records to return.
+     */
     private Integer limit;
 
+    /**
+     * Indicates the event output type which can be by event, enrollment type
+     * or tracked entity instance.
+     */
     private EventOutputType outputType;
 
+    /**
+     * Indicates whether the data dimension items should be collapsed into a
+     * single dimension.
+     */
     private boolean collapseDataDimensions;
 
+    /**
+     * Indicates whether request is intended to fetch coordinates only.
+     */
     private boolean coordinatesOnly;
 
+    /**
+     * Indicates whether the query originates from an aggregate data query.
+     */
     private boolean aggregateData;
 
     // -------------------------------------------------------------------------
