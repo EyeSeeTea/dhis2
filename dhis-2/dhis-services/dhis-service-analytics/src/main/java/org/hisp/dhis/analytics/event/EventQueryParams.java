@@ -91,7 +91,7 @@ public class EventQueryParams
     /**
      * The dimensional object for which to produce aggregated data.
      */
-    private DimensionalObject value;
+    private DimensionalItemObject value;
 
     /**
      * Program indicators specified as dimensional items of the data dimension.
@@ -325,9 +325,9 @@ public class EventQueryParams
     /**
      * Get nameable objects part of items and item filters.
      */
-    public Set<DimensionalObject> getDimensionalObjectItems()
+    public Set<DimensionalItemObject> getDimensionalObjectItems()
     {
-        Set<DimensionalObject> objects = new HashSet<>();
+        Set<DimensionalItemObject> objects = new HashSet<>();
 
         for ( QueryItem item : ListUtils.union( items, itemFilters ) )
         {
@@ -579,12 +579,12 @@ public class EventQueryParams
         this.itemFilters = itemFilters;
     }
 
-    public DimensionalObject getValue()
+    public DimensionalItemObject getValue()
     {
         return value;
     }
 
-    public void setValue( DimensionalObject value )
+    public void setValue( DimensionalItemObject value )
     {
         this.value = value;
     }

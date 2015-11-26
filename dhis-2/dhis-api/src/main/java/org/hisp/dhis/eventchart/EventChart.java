@@ -35,7 +35,7 @@ import java.util.List;
 import org.hisp.dhis.analytics.EventOutputType;
 import org.hisp.dhis.chart.BaseChart;
 import org.hisp.dhis.common.AnalyticsType;
-import org.hisp.dhis.common.BaseDimensionalObject;
+import org.hisp.dhis.common.BaseDimensionalItemObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DimensionalItemObject;
 import org.hisp.dhis.common.DimensionalObject;
@@ -134,7 +134,7 @@ public class EventChart
     /**
      * Value dimension.
      */
-    private transient DimensionalObject value;
+    private transient DimensionalItemObject value;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -384,16 +384,15 @@ public class EventChart
 
     @Override
     @JsonProperty
-    @JsonDeserialize( as = BaseDimensionalObject.class )
-    @JsonSerialize( as = BaseDimensionalObject.class )
+    @JsonDeserialize( as = BaseDimensionalItemObject.class )
     @JsonView( { DimensionalView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public DimensionalObject getValue()
+    public DimensionalItemObject getValue()
     {
         return value;
     }
 
-    public void setValue( DimensionalObject value )
+    public void setValue( DimensionalItemObject value )
     {
         this.value = value;
     }

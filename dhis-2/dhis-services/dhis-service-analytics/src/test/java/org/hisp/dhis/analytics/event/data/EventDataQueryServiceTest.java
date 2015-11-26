@@ -317,7 +317,6 @@ public class EventDataQueryServiceTest
         DimensionalObjectUtils.setDimensionItemsForFilters( dim, grid, true );
 
         assertNotNull( dim );
-        assertEquals( tea.getDimension(), dim.getDimension() );
         assertEquals( DimensionType.PROGRAM_ATTRIBUTE, dim.getDimensionType() );
         assertEquals( AnalyticsType.EVENT, dim.getAnalyticsType() );
         assertEquals( tead.getFilter(), dim.getFilter() );

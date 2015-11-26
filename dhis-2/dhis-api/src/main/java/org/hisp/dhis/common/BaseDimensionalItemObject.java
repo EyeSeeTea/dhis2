@@ -43,7 +43,8 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
  * @author Lars Helge Overland
  */
 public class BaseDimensionalItemObject
-    extends BaseNameableObject implements DimensionalItemObject
+    extends BaseNameableObject 
+        implements DimensionalItemObject
 {
     /**
      * The dimension type.

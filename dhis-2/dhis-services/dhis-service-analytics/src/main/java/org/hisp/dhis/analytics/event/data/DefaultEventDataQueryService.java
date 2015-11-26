@@ -49,6 +49,7 @@ import org.hisp.dhis.analytics.EventOutputType;
 import org.hisp.dhis.analytics.SortOrder;
 import org.hisp.dhis.analytics.event.EventDataQueryService;
 import org.hisp.dhis.analytics.event.EventQueryParams;
+import org.hisp.dhis.common.DimensionalItemObject;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.DisplayProperty;
 import org.hisp.dhis.common.EventAnalyticalObject;
@@ -378,7 +379,7 @@ public class DefaultEventDataQueryService
         throw new IllegalQueryException( "Item identifier does not reference any data element or attribute part of the program: " + item );
     }
     
-    private DimensionalObject getValueDimension( String value )
+    private DimensionalItemObject getValueDimension( String value )
     {
         if ( value == null )
         {
