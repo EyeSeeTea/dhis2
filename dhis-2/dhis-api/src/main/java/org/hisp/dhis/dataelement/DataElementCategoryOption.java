@@ -90,12 +90,6 @@ public class DataElementCategoryOption
     // Logic
     // -------------------------------------------------------------------------
 
-    @Override
-    public String getDimensionItem()
-    {
-        return uid;
-    }
-    
     public boolean isDefault()
     {
         return name.equals( DEFAULT_NAME );

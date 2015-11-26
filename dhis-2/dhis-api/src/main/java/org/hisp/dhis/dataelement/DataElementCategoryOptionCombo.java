@@ -89,12 +89,6 @@ public class DataElementCategoryOptionCombo
     {
 
     }
-
-    @Override
-    public String getDimensionItem()
-    {
-        return uid;
-    }
     
     // -------------------------------------------------------------------------
     // hashCode, equals and toString

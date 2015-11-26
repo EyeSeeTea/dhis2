@@ -77,12 +77,6 @@ public class DataElementGroup
     // -------------------------------------------------------------------------
     // Logic
     // -------------------------------------------------------------------------
-
-    @Override
-    public String getDimensionItem()
-    {
-        return uid;
-    }
     
     public void addDataElement( DataElement dataElement )
     {
