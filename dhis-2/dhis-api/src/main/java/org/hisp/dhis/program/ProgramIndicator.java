@@ -1,5 +1,7 @@
 package org.hisp.dhis.program;
 
+import java.util.List;
+
 /*
  * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
@@ -32,10 +34,12 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.hisp.dhis.analytics.AggregationType;
-import org.hisp.dhis.common.BaseDimensionalObject;
+import org.hisp.dhis.common.AnalyticsType;
+import org.hisp.dhis.common.BaseDimensionalItemObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DimensionType;
 import org.hisp.dhis.common.DimensionalItemObject;
+import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeStrategy;
@@ -49,6 +53,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 /**
@@ -56,7 +61,7 @@ import com.google.common.collect.Sets;
  */
 @JacksonXmlRootElement( localName = "programIndicator", namespace = DxfNamespaces.DXF_2_0 )
 public class ProgramIndicator
-    extends BaseDimensionalObject implements DimensionalItemObject
+    extends BaseDimensionalItemObject implements DimensionalObject
 {
     public static final String SEPARATOR_ID = "\\.";
     public static final String SEP_OBJECT = ":";
@@ -211,7 +216,7 @@ public class ProgramIndicator
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getFilter()
     {
-        return filter;
+        return filter; // Note: Also overrides DimensionalObject
     }
 
     public void setFilter( String filter )
@@ -271,5 +276,51 @@ public class ProgramIndicator
                 displayInForm = programIndicator.getDisplayInForm() == null ? displayInForm : programIndicator.getDisplayInForm();
             }
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // DimensionalObject
+    // -------------------------------------------------------------------------
+
+    @Override
+    public String getDimension()
+    {
+        return uid;
+    }
+
+    @Override
+    public String getDimensionName()
+    {
+        return getDimension();
+    }
+
+    @Override
+    public List<DimensionalItemObject> getItems()
+    {
+        return Lists.newArrayList();
+    }
+
+    @Override
+    public boolean isAllItems()
+    {
+        return false;
+    }
+
+    @Override
+    public boolean hasItems()
+    {
+        return false;
+    }
+
+    @Override
+    public AnalyticsType getAnalyticsType()
+    {
+        return AnalyticsType.EVENT;
+    }
+
+    @Override
+    public boolean isDataDimension()
+    {
+        return false;
     }
 }

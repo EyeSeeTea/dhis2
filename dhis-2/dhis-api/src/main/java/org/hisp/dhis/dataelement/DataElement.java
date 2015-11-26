@@ -37,10 +37,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.hisp.dhis.common.BaseDimensionalObject;
+import org.hisp.dhis.common.AnalyticsType;
+import org.hisp.dhis.common.BaseDimensionalItemObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DimensionType;
 import org.hisp.dhis.common.DimensionalItemObject;
+import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeStrategy;
@@ -65,6 +67,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 /**
@@ -84,7 +87,7 @@ import com.google.common.collect.Sets;
  */
 @JacksonXmlRootElement( localName = "dataElement", namespace = DxfNamespaces.DXF_2_0 )
 public class DataElement
-    extends BaseDimensionalObject implements DimensionalItemObject
+    extends BaseDimensionalItemObject implements DimensionalObject
 {
     public static final String[] I18N_PROPERTIES = { "name", "shortName", "description", "formName" };
 
@@ -702,5 +705,57 @@ public class DataElement
             aggregationLevels.clear();
             aggregationLevels.addAll( dataElement.getAggregationLevels() );
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // DimensionalObject
+    // -------------------------------------------------------------------------
+
+    @Override
+    public String getDimension()
+    {
+        return uid;
+    }
+
+    @Override
+    public String getDimensionName()
+    {
+        return getDimension();
+    }
+
+    @Override
+    public List<DimensionalItemObject> getItems()
+    {
+        return Lists.newArrayList();
+    }
+
+    @Override
+    public boolean isAllItems()
+    {
+        return false;
+    }
+
+    @Override
+    public boolean hasItems()
+    {
+        return false;
+    }
+
+    @Override
+    public String getFilter()
+    {
+        return null;
+    }
+
+    @Override
+    public AnalyticsType getAnalyticsType()
+    {
+        return AnalyticsType.EVENT;
+    }
+
+    @Override
+    public boolean isDataDimension()
+    {
+        return false;
     }
 }
