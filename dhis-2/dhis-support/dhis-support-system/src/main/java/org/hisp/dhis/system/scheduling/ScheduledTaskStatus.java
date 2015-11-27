@@ -1,4 +1,4 @@
-package org.hisp.dhis.scheduling;
+package org.hisp.dhis.system.scheduling;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,54 +28,25 @@ package org.hisp.dhis.scheduling;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.ListMap;
-import org.hisp.dhis.system.scheduling.ScheduledTaskStatus;
-
-import java.util.Set;
-
 /**
- * @author Lars Helge Overland
- */
-public interface SchedulingManager
+* @author Lars Helge Overland
+*/
+public enum ScheduledTaskStatus
 {
-    String TASK_RESOURCE_TABLE = "resourceTableTask";
-    String TASK_RESOURCE_TABLE_15_MINS = "resourceTable15MinTask";
-    String TASK_DATAMART_LAST_YEAR = "dataMartLastYearTask";
-    String TASK_ANALYTICS_ALL = "analyticsAllTask";
-    String TASK_ANALYTICS_LAST_3_YEARS = "analyticsLast3YearsTask";
-    String TASK_MONITORING_LAST_DAY = "monitoringLastDayTask";
-    String TASK_DATA_SYNCH = "dataSynchTask";
+    RUNNING( "running" ), 
+    DONE( "done" ), 
+    STOPPED( "stopped" ), 
+    NOT_STARTED( "not_started" );
     
-    /**
-     * Schedules all tasks.
-     */
-    void scheduleTasks();
+    private final String key;
     
-    /**
-     * Schedules the given tasks.
-     * 
-     * @param cronKeyMap a mapping of cron expressions and task keys.
-     */
-    void scheduleTasks( ListMap<String, String> cronKeyMap );
-    
-    /**
-     * Stops all tasks.
-     */
-    void stopTasks();
-    
-    /**
-     * Gets a mapping of cron expressions and list of task keys for all scheduled
-     * tasks.
-     */
-    ListMap<String, String> getCronKeyMap();
-    
-    /**
-     * Gets all keys currenty scheduled for any task.
-     */
-    Set<String> getScheduledKeys();
-    
-    /**
-     * Gets the task status.
-     */
-    ScheduledTaskStatus getTaskStatus();   
+    private ScheduledTaskStatus( String key )
+    {
+        this.key = key;
+    }
+
+    public String getKey()
+    {
+        return key;
+    }
 }

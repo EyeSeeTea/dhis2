@@ -30,6 +30,8 @@ package org.hisp.dhis.scheduling;
 
 import java.util.Map;
 
+import org.hisp.dhis.system.scheduling.ScheduledTaskStatus;
+
 /**
  * @author Chau Thu Tran
  *
@@ -38,7 +40,7 @@ import java.util.Map;
 public interface ProgramSchedulingManager
 {
     final String TASK_SENDING_MESSAGE = "sendingMessageTask";
-    
+
     void scheduleTasks();
     
     void scheduleTasks( Map<String, String> keyCronMap );
@@ -49,5 +51,5 @@ public interface ProgramSchedulingManager
     
     Map<String, String> getScheduledTasks();
     
-    String getTaskStatus();   
+    ScheduledTaskStatus getTaskStatus();   
 }
