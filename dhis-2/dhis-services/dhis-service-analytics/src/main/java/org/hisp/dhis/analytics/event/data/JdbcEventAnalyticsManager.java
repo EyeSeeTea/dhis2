@@ -37,6 +37,7 @@ import static org.hisp.dhis.commons.util.TextUtils.removeLastOr;
 import static org.hisp.dhis.commons.util.TextUtils.trimEnd;
 import static org.hisp.dhis.system.util.DateUtils.getMediumDateString;
 import static org.hisp.dhis.system.util.MathUtils.getRounded;
+import static org.hisp.dhis.common.DimensionalObjectUtils.COMPOSITE_DIM_OBJECT_PLAIN_SEP;
 
 import java.util.List;
 import java.util.Set;
@@ -51,10 +52,11 @@ import org.hisp.dhis.analytics.EventOutputType;
 import org.hisp.dhis.analytics.event.EventAnalyticsManager;
 import org.hisp.dhis.analytics.event.EventQueryParams;
 import org.hisp.dhis.common.DimensionType;
+import org.hisp.dhis.common.DimensionalItemObject;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
-import org.hisp.dhis.common.NameableObject;
+import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.common.QueryFilter;
 import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.commons.collection.ListUtils;
@@ -172,7 +174,8 @@ public class JdbcEventAnalyticsManager
             {
                 if ( params.hasValueDimension() )
                 {
-                    grid.addValue( params.getValue().getUid() );
+                    String itemId = params.getProgram().getUid() + COMPOSITE_DIM_OBJECT_PLAIN_SEP + params.getValue().getUid();
+                    grid.addValue( itemId );
                 }
                 else if ( params.hasProgramIndicatorDimension() )
                 {
@@ -544,11 +547,11 @@ public class JdbcEventAnalyticsManager
         // Organisation units
         // ---------------------------------------------------------------------
 
-        if ( params.isOrganisationUnitMode( DimensionalObject.OU_MODE_SELECTED ) )
+        if ( params.isOrganisationUnitMode( OrganisationUnitSelectionMode.SELECTED ) )
         {
             sql += "and ou in (" + getQuotedCommaDelimitedString( getUids( params.getDimensionOrFilterItems( ORGUNIT_DIM_ID ) ) ) + ") ";
         }
-        else if ( params.isOrganisationUnitMode( DimensionalObject.OU_MODE_CHILDREN ) )
+        else if ( params.isOrganisationUnitMode( OrganisationUnitSelectionMode.CHILDREN ) )
         {
             sql += "and ou in (" + getQuotedCommaDelimitedString( getUids( params.getOrganisationUnitChildren() ) ) + ") ";
         }
@@ -556,7 +559,7 @@ public class JdbcEventAnalyticsManager
         {
             sql += "and (";
             
-            for ( NameableObject object : params.getDimensionOrFilterItems( ORGUNIT_DIM_ID ) )
+            for ( DimensionalItemObject object : params.getDimensionOrFilterItems( ORGUNIT_DIM_ID ) )
             {
                 OrganisationUnit unit = (OrganisationUnit) object;
                 sql += "uidlevel" + unit.getLevel() + " = '" + unit.getUid() + "' or ";

@@ -761,6 +761,7 @@ public class TableAlteror
         executeSql( "UPDATE attribute SET trackedentityattributeattribute=false WHERE trackedentityattributeattribute IS NULL" );
         executeSql( "UPDATE attribute SET categoryoptionattribute=false WHERE categoryoptionattribute IS NULL" );
         executeSql( "UPDATE attribute SET categoryoptiongroupattribute=false WHERE categoryoptiongroupattribute IS NULL" );
+        executeSql( "UPDATE attribute SET documentattribute=false WHERE documentattribute IS NULL" );
 
         executeSql( "ALTER TABLE trackedentityattributedimension DROP COLUMN operator" );
         executeSql( "ALTER TABLE trackedentitydataelementdimension DROP COLUMN operator" );
@@ -802,6 +803,8 @@ public class TableAlteror
         executeSql( "alter table datavalue alter column comment type varchar(50000)" );
         executeSql( "alter table datavalueaudit alter column value type varchar(50000)" );
         executeSql( "alter table trackedentitydatavalue alter column value type varchar(50000)" );
+
+        executeSql( "update trackedentitydatavalue set providedelsewhere=false where providedelsewhere is null" );
 
         executeSql( "update datavalueaudit set attributeoptioncomboid = " + defaultOptionComboId + " where attributeoptioncomboid is null" );
         executeSql( "alter table datavalueaudit alter column attributeoptioncomboid set not null;" );

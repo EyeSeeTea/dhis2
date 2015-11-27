@@ -32,7 +32,7 @@ import static org.hisp.dhis.common.DimensionalObject.DIMENSION_NAME_SEP;
 import static org.hisp.dhis.common.DimensionalObject.ITEM_SEP;
 import static org.hisp.dhis.common.DimensionalObjectUtils.getDimensionFromParam;
 import static org.hisp.dhis.common.DimensionalObjectUtils.getDimensionItemsFromParam;
-import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
+import static org.hisp.dhis.common.DimensionalObjectUtils.getDimensionalItemIds;
 
 import static org.hisp.dhis.analytics.event.EventAnalyticsService.ITEM_EXECUTION_DATE;
 import static org.hisp.dhis.analytics.event.EventAnalyticsService.ITEM_ORG_UNIT_CODE;
@@ -49,10 +49,12 @@ import org.hisp.dhis.analytics.EventOutputType;
 import org.hisp.dhis.analytics.SortOrder;
 import org.hisp.dhis.analytics.event.EventDataQueryService;
 import org.hisp.dhis.analytics.event.EventQueryParams;
+import org.hisp.dhis.common.DimensionalItemObject;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.DisplayProperty;
 import org.hisp.dhis.common.EventAnalyticalObject;
 import org.hisp.dhis.common.IllegalQueryException;
+import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.common.QueryFilter;
 import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.common.QueryOperator;
@@ -134,7 +136,7 @@ public class DefaultEventDataQueryService
 
     @Override
     public EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate,
-        Set<String> dimension, Set<String> filter, String ouMode, Set<String> asc, Set<String> desc,
+        Set<String> dimension, Set<String> filter, OrganisationUnitSelectionMode ouMode, Set<String> asc, Set<String> desc,
         boolean skipMeta, boolean skipData, boolean completedOnly, boolean hierarchyMeta, boolean coordinatesOnly, 
         DisplayProperty displayProperty, String userOrgUnit, Integer page, Integer pageSize, I18nFormat format )
     {
@@ -257,7 +259,7 @@ public class DefaultEventDataQueryService
             for ( DimensionalObject dimension : ListUtils.union( object.getColumns(), object.getRows() ) )
             {
                 DimensionalObject dimObj = dataQueryService.
-                    getDimension( dimension.getDimension(), getUids( dimension.getItems() ), date, null, format, true );
+                    getDimension( dimension.getDimension(), getDimensionalItemIds( dimension.getItems() ), date, null, format, true );
                 
                 if ( dimObj != null )
                 {
@@ -272,7 +274,7 @@ public class DefaultEventDataQueryService
             for ( DimensionalObject filter : object.getFilters() )
             {
                 DimensionalObject dimObj = dataQueryService.
-                    getDimension( filter.getDimension(), getUids( filter.getItems() ), date, null, format, true );
+                    getDimension( filter.getDimension(), getDimensionalItemIds( filter.getItems() ), date, null, format, true );
                 
                 if ( dimObj != null )
                 {
@@ -377,7 +379,7 @@ public class DefaultEventDataQueryService
         throw new IllegalQueryException( "Item identifier does not reference any data element or attribute part of the program: " + item );
     }
     
-    private DimensionalObject getValueDimension( String value )
+    private DimensionalItemObject getValueDimension( String value )
     {
         if ( value == null )
         {

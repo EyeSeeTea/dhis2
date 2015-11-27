@@ -402,15 +402,10 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                                 ' ng-blur="saveDatavalue(prStDes.' + fieldId + ', outerForm.' + fieldId + ')"' +
                                                 commonInputFieldProperty + ' >';
                                     }
-                                    else if (prStDe.dataElement.valueType === "BOOLEAN") {
-                                        newInputField = '<select ' +
-                                                ' ng-change="saveDatavalue(prStDes.' + fieldId + ', outerForm.' + fieldId + ')" ' +
-                                                ' ng-class="{{getInputNotifcationClass(prStDes.' + fieldId + '.dataElement.id, true)}}" ' +
-                                                commonInputFieldProperty + '>' +
-                                                '<option value="">{{\'please_select\'| translate}}</option>' +
-                                                '<option value="false">{{\'no\'| translate}}</option>' +
-                                                '<option value="true">{{\'yes\'| translate}}</option>' +
-                                                '</select> ';
+                                    else if (prStDe.dataElement.valueType === "BOOLEAN") {                                    	
+                                    	newInputField = '<label class="radio-inline"><input type="radio" ng-change="saveDatavalue()" ' + commonInputFieldProperty + ' value="">{{\'no_value\'| translate}}</label>' + 
+                                    					'<label class="radio-inline"><input type="radio" ng-change="saveDatavalue()" ' + commonInputFieldProperty + ' value="true">{{\'yes\'| translate}}</label>' +
+                                    					'<label class="radio-inline"><input type="radio" ng-change="saveDatavalue()" ' + commonInputFieldProperty + ' value="false">{{\'no\'| translate}}</label>';                                   					
                                     }
                                     else if (prStDe.dataElement.valueType === "DATE") {
                                         var maxDate = prStDe.allowFutureDate ? '' : 0;
@@ -532,13 +527,9 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                             commonInputFieldProperty + ' >';
                                 }
                                 else if (att.valueType === "BOOLEAN") {
-                                    newInputField = '<select ' +
-                                            ' ng-change="teiValueUpdated(selectedTei,\'' + attId + '\')" ' +
-                                            commonInputFieldProperty + ' > ' +
-                                            ' <option value="">{{\'please_select\'| translate}}</option>' +
-                                            ' <option value="false">{{\'no\'| translate}}</option>' +
-                                            ' <option value="true">{{\'yes\'| translate}}</option>' +
-                                            '</select> ';
+                                	newInputField = '<label class="radio-inline"><input type="radio" ng-change="teiValueUpdated(selectedTei,\'' + attId + '\')" ' + commonInputFieldProperty + ' value="">{{\'no_value\'| translate}}</label>' + 
+				                					'<label class="radio-inline"><input type="radio" ng-change="teiValueUpdated(selectedTei,\'' + attId + '\')" ' + commonInputFieldProperty + ' value="true">{{\'yes\'| translate}}</label>' +
+				                					'<label class="radio-inline"><input type="radio" ng-change="teiValueUpdated(selectedTei,\'' + attId + '\')" ' + commonInputFieldProperty + ' value="false">{{\'no\'| translate}}</label>';
                                 }
                                 else if (att.valueType === "DATE") {
                                     newInputField = '<input  type="text" ' +
@@ -1052,7 +1043,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             variables = pushVariable(variables, 'current_date', DateUtils.getToday(), null, 'DATE', true, 'V', '' );
             
             variables = pushVariable(variables, 'event_date', executingEvent.eventDate, null, 'DATE', true, 'V', '' );
-            variables = pushVariable(variables, 'due_date', executingEvent.eventDate, null, 'DATE', true, 'V', '' );
+            variables = pushVariable(variables, 'due_date', executingEvent.dueDate, null, 'DATE', true, 'V', '' );
             variables = pushVariable(variables, 'event_count', evs ? evs.all.length : 0, null, 'INTEGER', true, 'V', '' );
     
             variables = pushVariable(variables, 'enrollment_date', selectedEnrollment ? selectedEnrollment.enrollmentDate : '', null, 'DATE', selectedEnrollment ? true : false, 'V', '' );

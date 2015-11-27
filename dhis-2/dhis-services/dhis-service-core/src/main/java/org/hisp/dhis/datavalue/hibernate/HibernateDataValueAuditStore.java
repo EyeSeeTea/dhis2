@@ -28,15 +28,14 @@ package org.hisp.dhis.datavalue.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.google.common.collect.Lists;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.common.AuditType;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.datavalue.DataValue;
@@ -45,6 +44,9 @@ import org.hisp.dhis.datavalue.DataValueAuditStore;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodStore;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Quang Nguyen
@@ -88,30 +90,71 @@ public class HibernateDataValueAuditStore
     public List<DataValueAudit> getDataValueAudits( DataValue dataValue )
     {
         return getDataValueAudits( dataValue.getDataElement(), dataValue.getPeriod(),
-            dataValue.getSource(), dataValue.getCategoryOptionCombo(), dataValue.getAttributeOptionCombo() );
+            dataValue.getSource(), dataValue.getCategoryOptionCombo(), dataValue.getAttributeOptionCombo(), null );
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public List<DataValueAudit> getDataValueAudits( DataElement dataElement, Period period,
-        OrganisationUnit organisationUnit, DataElementCategoryOptionCombo categoryOptionCombo, DataElementCategoryOptionCombo attributeOptionCombo )
+    @SuppressWarnings( "unchecked" )
+    public List<DataValueAudit> getDataValueAudits( DataElement dataElement, Period period, OrganisationUnit organisationUnit,
+        DataElementCategoryOptionCombo categoryOptionCombo, DataElementCategoryOptionCombo attributeOptionCombo, AuditType auditType )
+    {
+        return getDataValueAudits( dataElement, Lists.newArrayList( period ), Lists.newArrayList( organisationUnit ), categoryOptionCombo, attributeOptionCombo, auditType );
+    }
+
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public List<DataValueAudit> getDataValueAudits( DataElement dataElement, List<Period> periods, List<OrganisationUnit> organisationUnits,
+        DataElementCategoryOptionCombo categoryOptionCombo, DataElementCategoryOptionCombo attributeOptionCombo, AuditType auditType )
     {
         Session session = sessionFactory.getCurrentSession();
+        List<Period> storedPeriods = new ArrayList<>();
 
-        Period storedPeriod = periodStore.reloadPeriod( period );
-
-        if( storedPeriod == null )
+        if ( !periods.isEmpty() )
         {
-            return new ArrayList<>();
+            for ( Period period : periods )
+            {
+                Period storedPeriod = periodStore.reloadPeriod( period );
+
+                if ( storedPeriod != null )
+                {
+                    storedPeriods.add( storedPeriod );
+                }
+            }
         }
 
-        Criteria criteria = session.createCriteria( DataValueAudit.class )
-            .add( Restrictions.eq( "dataElement", dataElement ) )
-            .add( Restrictions.eq( "period", storedPeriod ) )
-            .add( Restrictions.eq( "organisationUnit", organisationUnit ) )
-            .add( Restrictions.eq( "categoryOptionCombo", categoryOptionCombo ) )
-            .add( Restrictions.eq( "attributeOptionCombo", attributeOptionCombo ) )
-            .addOrder( Order.desc( "timestamp" ) );
+        Criteria criteria = session.createCriteria( DataValueAudit.class );
+
+        if ( dataElement != null )
+        {
+            criteria.add( Restrictions.eq( "dataElement", dataElement ) );
+        }
+
+        if ( !storedPeriods.isEmpty() )
+        {
+            criteria.add( Restrictions.in( "period", storedPeriods ) );
+        }
+
+        if ( !organisationUnits.isEmpty() )
+        {
+            criteria.add( Restrictions.in( "organisationUnit", organisationUnits ) );
+        }
+
+        if ( categoryOptionCombo != null )
+        {
+            criteria.add( Restrictions.eq( "categoryOptionCombo", categoryOptionCombo ) );
+        }
+
+        if ( attributeOptionCombo != null )
+        {
+            criteria.add( Restrictions.eq( "attributeOptionCombo", attributeOptionCombo ) );
+        }
+
+        if ( auditType != null )
+        {
+            criteria.add( Restrictions.eq( "auditType", auditType ) );
+        }
+
+        criteria.addOrder( Order.desc( "timestamp" ) );
 
         return criteria.list();
     }

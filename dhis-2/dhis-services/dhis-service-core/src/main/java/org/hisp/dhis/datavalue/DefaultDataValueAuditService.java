@@ -28,13 +28,14 @@ package org.hisp.dhis.datavalue;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
-
+import com.google.common.collect.Lists;
+import org.hisp.dhis.common.AuditType;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * @author Quang Nguyen
@@ -65,50 +66,22 @@ public class DefaultDataValueAuditService
     }
 
     @Override
-    @Transactional
-    public void deleteDataValueAudit( DataValueAudit dataValueAudit )
-    {
-        dataValueAuditStore.deleteDataValueAudit( dataValueAudit );
-    }
-
-    @Override
     public List<DataValueAudit> getDataValueAudits( DataValue dataValue )
     {
         return dataValueAuditStore.getDataValueAudits( dataValue );
     }
 
     @Override
-    public List<DataValueAudit> getDataValueAudits( DataElement dataElement, Period period,
-        OrganisationUnit organisationUnit, DataElementCategoryOptionCombo categoryOptionCombo, DataElementCategoryOptionCombo attributeOptionCombo )
+    public List<DataValueAudit> getDataValueAudits( DataElement dataElement, Period period, OrganisationUnit organisationUnit,
+        DataElementCategoryOptionCombo categoryOptionCombo, DataElementCategoryOptionCombo attributeOptionCombo, AuditType auditType )
     {
-        return dataValueAuditStore.getDataValueAudits( dataElement, period, organisationUnit, categoryOptionCombo, attributeOptionCombo );
+        return getDataValueAudits( dataElement, Lists.newArrayList( period ), Lists.newArrayList( organisationUnit ), categoryOptionCombo, attributeOptionCombo, auditType );
     }
 
     @Override
-    @Transactional
-    public int deleteDataValueAuditByDataElement( DataElement dataElement )
+    public List<DataValueAudit> getDataValueAudits( DataElement dataElement, List<Period> periods, List<OrganisationUnit> organisationUnits,
+        DataElementCategoryOptionCombo categoryOptionCombo, DataElementCategoryOptionCombo attributeOptionCombo, AuditType auditType )
     {
-        return dataValueAuditStore.deleteDataValueAuditByDataElement( dataElement );
-    }
-
-    @Override
-    @Transactional
-    public int deleteDataValueAuditByPeriod( Period period )
-    {
-        return dataValueAuditStore.deleteDataValueAuditByPeriod( period );
-    }
-
-    @Override
-    @Transactional
-    public int deleteDataValueAuditByOrganisationUnit( OrganisationUnit organisationUnit )
-    {
-        return dataValueAuditStore.deleteDataValueAuditByOrganisationUnit( organisationUnit );
-    }
-
-    @Override
-    @Transactional
-    public int deleteDataValueAuditByCategoryOptionCombo( DataElementCategoryOptionCombo categoryOptionCombo )
-    {
-        return dataValueAuditStore.deleteDataValueAuditByCategoryOptionCombo( categoryOptionCombo );
+        return dataValueAuditStore.getDataValueAudits( dataElement, periods, organisationUnits, categoryOptionCombo, attributeOptionCombo, auditType );
     }
 }
