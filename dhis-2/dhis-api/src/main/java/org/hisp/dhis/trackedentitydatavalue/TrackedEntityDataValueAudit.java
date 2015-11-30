@@ -30,6 +30,7 @@ package org.hisp.dhis.trackedentitydatavalue;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.AuditType;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.dataelement.DataElement;
@@ -42,11 +43,12 @@ import java.util.Objects;
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
+@JacksonXmlRootElement( localName = "trackedEntityDataValueAudit", namespace = DxfNamespaces.DXF_2_0 )
 public class TrackedEntityDataValueAudit
     implements Serializable
 {
     private int id;
-    
+
     private DataElement dataElement;
 
     private ProgramStageInstance programStageInstance;
@@ -64,10 +66,6 @@ public class TrackedEntityDataValueAudit
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
-
-    public TrackedEntityDataValueAudit()
-    {
-    }
 
     public TrackedEntityDataValueAudit( TrackedEntityDataValue trackedEntityDataValue, String value, String modifiedBy, Date timestamp, AuditType auditType )
     {
