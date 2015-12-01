@@ -68,8 +68,13 @@ public class DefaultTrackedEntityDataValueService
     @Override
     public void saveTrackedEntityDataValue( TrackedEntityDataValue dataValue )
     {
-        if ( dataValue.getValue() != null )
+        if ( !StringUtils.isEmpty( dataValue.getValue() ) )
         {
+            if ( StringUtils.isEmpty( dataValue.getStoredBy() ) )
+            {
+                dataValue.setStoredBy( currentUserService.getCurrentUsername() );
+            }
+
             dataValueStore.saveVoid( dataValue );
         }
     }
@@ -83,8 +88,12 @@ public class DefaultTrackedEntityDataValueService
         }
         else
         {
-            TrackedEntityDataValueAudit dataValueAudit = new TrackedEntityDataValueAudit( dataValue, dataValue.getValue(), dataValue.getStoredBy(),
-                new Date(), AuditType.UPDATE );
+            if ( StringUtils.isEmpty( dataValue.getStoredBy() ) )
+            {
+                dataValue.setStoredBy( currentUserService.getCurrentUsername() );
+            }
+
+            TrackedEntityDataValueAudit dataValueAudit = new TrackedEntityDataValueAudit( dataValue, dataValue.getValue(), dataValue.getStoredBy(), AuditType.UPDATE );
 
             dataValueAuditService.addTrackedEntityDataValueAudit( dataValueAudit );
             dataValueStore.update( dataValue );
@@ -94,8 +103,8 @@ public class DefaultTrackedEntityDataValueService
     @Override
     public void deleteTrackedEntityDataValue( TrackedEntityDataValue dataValue )
     {
-        TrackedEntityDataValueAudit dataValueAudit = new TrackedEntityDataValueAudit( dataValue, dataValue.getValue(), currentUserService.getCurrentUsername(),
-            new Date(), AuditType.DELETE );
+        TrackedEntityDataValueAudit dataValueAudit = new TrackedEntityDataValueAudit( dataValue, dataValue.getValue(),
+            currentUserService.getCurrentUsername(), AuditType.DELETE );
 
         dataValueAuditService.addTrackedEntityDataValueAudit( dataValueAudit );
         dataValueStore.delete( dataValue );
@@ -109,7 +118,7 @@ public class DefaultTrackedEntityDataValueService
 
         for ( TrackedEntityDataValue dataValue : dataValues )
         {
-            TrackedEntityDataValueAudit dataValueAudit = new TrackedEntityDataValueAudit( dataValue, dataValue.getValue(), username, new Date(), AuditType.DELETE );
+            TrackedEntityDataValueAudit dataValueAudit = new TrackedEntityDataValueAudit( dataValue, dataValue.getValue(), username, AuditType.DELETE );
             dataValueAuditService.addTrackedEntityDataValueAudit( dataValueAudit );
         }
 

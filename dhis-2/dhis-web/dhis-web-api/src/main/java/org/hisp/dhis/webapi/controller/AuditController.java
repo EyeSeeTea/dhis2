@@ -30,19 +30,26 @@ package org.hisp.dhis.webapi.controller;
 
 import org.hisp.dhis.common.AuditType;
 import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.datavalue.DataValueAudit;
 import org.hisp.dhis.datavalue.DataValueAuditService;
 import org.hisp.dhis.dxf2.webmessage.WebMessageException;
 import org.hisp.dhis.fieldfilter.FieldFilterService;
 import org.hisp.dhis.node.NodeUtils;
+import org.hisp.dhis.node.types.CollectionNode;
 import org.hisp.dhis.node.types.RootNode;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramStageInstanceService;
+import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
+import org.hisp.dhis.trackedentity.TrackedEntityInstance;
+import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueAudit;
+import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueAuditService;
 import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValueAudit;
 import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValueAuditService;
 import org.hisp.dhis.webapi.utils.WebMessageUtils;
@@ -76,29 +83,63 @@ public class AuditController
     private TrackedEntityDataValueAuditService trackedEntityDataValueAuditService;
 
     @Autowired
+    private TrackedEntityAttributeValueAuditService trackedEntityAttributeValueAuditService;
+
+    @Autowired
     private FieldFilterService fieldFilterService;
 
     @RequestMapping( value = "dataValue", method = RequestMethod.GET )
     public @ResponseBody RootNode getAggregateDataValueAudit(
-        @RequestParam( required = false ) String de,
+        @RequestParam( required = false, defaultValue = "" ) List<String> ds,
+        @RequestParam( required = false, defaultValue = "" ) List<String> de,
         @RequestParam( required = false, defaultValue = "" ) List<String> pe,
         @RequestParam( required = false, defaultValue = "" ) List<String> ou,
         @RequestParam( required = false ) String co,
         @RequestParam( required = false ) String cc,
-        @RequestParam( required = false ) AuditType auditType
+        @RequestParam( required = false ) AuditType auditType,
+        @RequestParam( required = false ) boolean skipPaging,
+        @RequestParam( required = false, defaultValue = "50" ) int pageSize,
+        @RequestParam( required = false, defaultValue = "1" ) int page
     ) throws WebMessageException
     {
-        DataElement dataElement = getDataElement( de );
+        List<DataElement> dataElements = new ArrayList<>();
+        dataElements.addAll( getDataElements( de ) );
+        dataElements.addAll( getDataElementsByDataSet( ds ) );
+
         List<Period> periods = getPeriods( pe );
         List<OrganisationUnit> organisationUnits = getOrganisationUnit( ou );
         DataElementCategoryOptionCombo categoryOptionCombo = getCategoryOptionCombo( co );
         DataElementCategoryOptionCombo attributeOptionCombo = getAttributeOptionCombo( cc );
 
-        List<DataValueAudit> dataValueAudits = dataValueAuditService.getDataValueAudits( dataElement, periods,
-            organisationUnits, categoryOptionCombo, attributeOptionCombo, auditType );
+        List<DataValueAudit> dataValueAudits;
+        Pager pager = null;
 
-        RootNode rootNode = NodeUtils.createRootNode( "dataValueAudits" );
-        rootNode.addChild( fieldFilterService.filter( DataValueAudit.class, dataValueAudits, new ArrayList<>() ) );
+        if ( skipPaging )
+        {
+            dataValueAudits = dataValueAuditService.getDataValueAudits( dataElements, periods,
+                organisationUnits, categoryOptionCombo, attributeOptionCombo, auditType );
+        }
+        else
+        {
+            int total = dataValueAuditService.countDataValueAudits( dataElements, periods, organisationUnits, categoryOptionCombo,
+                attributeOptionCombo, auditType );
+
+            pager = new Pager( page, total, pageSize );
+
+            dataValueAudits = dataValueAuditService.getDataValueAudits( dataElements, periods,
+                organisationUnits, categoryOptionCombo, attributeOptionCombo, auditType, pager.getOffset(), pager.getPageSize() );
+        }
+
+        RootNode rootNode = NodeUtils.createMetadata();
+
+        if ( pager != null )
+        {
+            rootNode.addChild( NodeUtils.createPager( pager ) );
+        }
+
+        CollectionNode trackedEntityAttributeValueAudits = rootNode.addChild( new CollectionNode( "dataValueAudits", true ) );
+        trackedEntityAttributeValueAudits.addChildren( fieldFilterService.filter( DataValueAudit.class,
+            dataValueAudits, new ArrayList<>() ).getChildren() );
 
         return rootNode;
     }
@@ -107,17 +148,89 @@ public class AuditController
     public @ResponseBody RootNode getTrackedEntityDataValueAudit(
         @RequestParam( required = false, defaultValue = "" ) List<String> de,
         @RequestParam( required = false, defaultValue = "" ) List<String> ps,
-        @RequestParam( required = false ) AuditType auditType
+        @RequestParam( required = false ) AuditType auditType,
+        @RequestParam( required = false ) boolean skipPaging,
+        @RequestParam( required = false, defaultValue = "50" ) int pageSize,
+        @RequestParam( required = false, defaultValue = "1" ) int page
     ) throws WebMessageException
     {
         List<DataElement> dataElements = getDataElements( de );
         List<ProgramStageInstance> programStageInstances = getProgramStageInstances( ps );
 
-        List<TrackedEntityDataValueAudit> dataValueAudits = trackedEntityDataValueAuditService.getTrackedEntityDataValueAudits(
-            dataElements, programStageInstances, auditType );
+        List<TrackedEntityDataValueAudit> dataValueAudits;
+        Pager pager = null;
 
-        RootNode rootNode = NodeUtils.createRootNode( "trackedEntityDataValueAudits" );
-        rootNode.addChild( fieldFilterService.filter( TrackedEntityDataValueAudit.class, dataValueAudits, new ArrayList<>() ) );
+        if ( skipPaging )
+        {
+            dataValueAudits = trackedEntityDataValueAuditService.getTrackedEntityDataValueAudits(
+                dataElements, programStageInstances, auditType );
+        }
+        else
+        {
+            int total = trackedEntityDataValueAuditService.countTrackedEntityDataValueAudits( dataElements, programStageInstances, auditType );
+
+            pager = new Pager( page, total, pageSize );
+
+            dataValueAudits = trackedEntityDataValueAuditService.getTrackedEntityDataValueAudits(
+                dataElements, programStageInstances, auditType, pager.getOffset(), pager.getPageSize() );
+        }
+
+        RootNode rootNode = NodeUtils.createMetadata();
+
+        if ( pager != null )
+        {
+            rootNode.addChild( NodeUtils.createPager( pager ) );
+        }
+
+        CollectionNode trackedEntityAttributeValueAudits = rootNode.addChild( new CollectionNode( "trackedEntityDataValueAudits", true ) );
+        trackedEntityAttributeValueAudits.addChildren( fieldFilterService.filter( TrackedEntityDataValueAudit.class,
+            dataValueAudits, new ArrayList<>() ).getChildren() );
+
+        return rootNode;
+    }
+
+    @RequestMapping( value = "trackedEntityAttributeValue", method = RequestMethod.GET )
+    public @ResponseBody RootNode getTrackedEntityAttributeValueAudit(
+        @RequestParam( required = false, defaultValue = "" ) List<String> tea,
+        @RequestParam( required = false, defaultValue = "" ) List<String> te,
+        @RequestParam( required = false ) AuditType auditType,
+        @RequestParam( required = false ) boolean skipPaging,
+        @RequestParam( required = false, defaultValue = "50" ) int pageSize,
+        @RequestParam( required = false, defaultValue = "1" ) int page
+    ) throws WebMessageException
+    {
+        List<TrackedEntityAttribute> trackedEntityAttributes = getTrackedEntityAttributes( tea );
+        List<TrackedEntityInstance> trackedEntityInstances = getTrackedEntityInstances( te );
+
+        List<TrackedEntityAttributeValueAudit> attributeValueAudits;
+        Pager pager = null;
+
+        if ( skipPaging )
+        {
+            attributeValueAudits = trackedEntityAttributeValueAuditService.getTrackedEntityAttributeValueAudits(
+                trackedEntityAttributes, trackedEntityInstances, auditType );
+        }
+        else
+        {
+            int total = trackedEntityAttributeValueAuditService.countTrackedEntityAttributeValueAudits( trackedEntityAttributes,
+                trackedEntityInstances, auditType );
+
+            pager = new Pager( page, total, pageSize );
+
+            attributeValueAudits = trackedEntityAttributeValueAuditService.getTrackedEntityAttributeValueAudits(
+                trackedEntityAttributes, trackedEntityInstances, auditType, pager.getOffset(), pager.getPageSize() );
+        }
+
+        RootNode rootNode = NodeUtils.createMetadata();
+
+        if ( pager != null )
+        {
+            rootNode.addChild( NodeUtils.createPager( pager ) );
+        }
+
+        CollectionNode trackedEntityAttributeValueAudits = rootNode.addChild( new CollectionNode( "trackedEntityAttributeValueAudits", true ) );
+        trackedEntityAttributeValueAudits.addChildren( fieldFilterService.filter( TrackedEntityAttributeValueAudit.class,
+            attributeValueAudits, new ArrayList<>() ).getChildren() );
 
         return rootNode;
     }
@@ -126,11 +239,79 @@ public class AuditController
     // Helpers
     //-----------------------------------------------------------------------------------------------------------------
 
-    private List<ProgramStageInstance> getProgramStageInstances( List<String> psIdentifier ) throws WebMessageException
+    private List<TrackedEntityInstance> getTrackedEntityInstances( List<String> teiIdentifiers ) throws WebMessageException
+    {
+        List<TrackedEntityInstance> trackedEntityInstances = new ArrayList<>();
+
+        for ( String tei : teiIdentifiers )
+        {
+            TrackedEntityInstance trackedEntityInstance = getTrackedEntityInstance( tei );
+
+            if ( trackedEntityInstance != null )
+            {
+                trackedEntityInstances.add( trackedEntityInstance );
+            }
+        }
+
+        return trackedEntityInstances;
+    }
+
+    private TrackedEntityInstance getTrackedEntityInstance( String tei ) throws WebMessageException
+    {
+        if ( tei == null )
+        {
+            return null;
+        }
+
+        TrackedEntityInstance trackedEntityInstance = manager.get( TrackedEntityInstance.class, tei );
+
+        if ( trackedEntityInstance == null )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "Illegal trackedEntityInstance identifier: " + tei ) );
+        }
+
+        return trackedEntityInstance;
+    }
+
+    private List<TrackedEntityAttribute> getTrackedEntityAttributes( List<String> teaIdentifiers ) throws WebMessageException
+    {
+        List<TrackedEntityAttribute> trackedEntityAttributes = new ArrayList<>();
+
+        for ( String tea : teaIdentifiers )
+        {
+            TrackedEntityAttribute trackedEntityAttribute = getTrackedEntityAttribute( tea );
+
+            if ( trackedEntityAttribute != null )
+            {
+                trackedEntityAttributes.add( trackedEntityAttribute );
+            }
+        }
+
+        return trackedEntityAttributes;
+    }
+
+    private TrackedEntityAttribute getTrackedEntityAttribute( String tea ) throws WebMessageException
+    {
+        if ( tea == null )
+        {
+            return null;
+        }
+
+        TrackedEntityAttribute trackedEntityAttribute = manager.get( TrackedEntityAttribute.class, tea );
+
+        if ( trackedEntityAttribute == null )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "Illegal trackedEntityAttribute identifier: " + tea ) );
+        }
+
+        return trackedEntityAttribute;
+    }
+
+    private List<ProgramStageInstance> getProgramStageInstances( List<String> psIdentifiers ) throws WebMessageException
     {
         List<ProgramStageInstance> programStageInstances = new ArrayList<>();
 
-        for ( String ps : psIdentifier )
+        for ( String ps : psIdentifiers )
         {
             ProgramStageInstance programStageInstance = getProgramStageInstance( ps );
 
@@ -158,6 +339,25 @@ public class AuditController
         }
 
         return programStageInstance;
+    }
+
+    private List<DataElement> getDataElementsByDataSet( List<String> dsIdentifiers ) throws WebMessageException
+    {
+        List<DataElement> dataElements = new ArrayList<>();
+
+        for ( String ds : dsIdentifiers )
+        {
+            DataSet dataSet = manager.get( DataSet.class, ds );
+
+            if ( dataSet == null )
+            {
+                throw new WebMessageException( WebMessageUtils.conflict( "Illegal dataSet identifier: " + ds ) );
+            }
+
+            dataElements.addAll( dataSet.getDataElements() );
+        }
+
+        return dataElements;
     }
 
     private List<DataElement> getDataElements( List<String> deIdentifier ) throws WebMessageException

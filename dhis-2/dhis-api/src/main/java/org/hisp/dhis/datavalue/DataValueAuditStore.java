@@ -66,57 +66,21 @@ public interface DataValueAuditStore
      * Returns all DataValueAudits which match the given DataElement, Period,
      * OrganisationUnit and DataElementCategoryOptionCombo.
      *
-     * @param dataElement          the DataElement of the DataValueAudits.
-     * @param period               the Period of the DataValueAudits.
-     * @param organisationUnit     the OrganisationUnit of the DataValueAudits.
+     * @param dataElements         the DataElement of the DataValueAudits.
+     * @param periods              the Period of the DataValueAudits.
+     * @param organisationUnits    the OrganisationUnit of the DataValueAudits.
      * @param categoryOptionCombo  the DataElementCategoryOptionCombo of the DataValueAudits.
      * @param attributeOptionCombo the attribute option combo.
      * @return a list of DataValueAudits which match the given DataElement, Period,
      * OrganisationUnit and DataElementCategoryOptionCombo, or an empty list
      * if no DataValueAudits match.
      */
-    List<DataValueAudit> getDataValueAudits( DataElement dataElement, Period period, OrganisationUnit organisationUnit,
+    List<DataValueAudit> getDataValueAudits( List<DataElement> dataElements, List<Period> periods, List<OrganisationUnit> organisationUnits,
         DataElementCategoryOptionCombo categoryOptionCombo, DataElementCategoryOptionCombo attributeOptionCombo, AuditType auditType );
 
-    List<DataValueAudit> getDataValueAudits( DataElement dataElement, List<Period> period, List<OrganisationUnit> organisationUnits,
+    List<DataValueAudit> getDataValueAudits( List<DataElement> dataElements, List<Period> periods, List<OrganisationUnit> organisationUnits,
+        DataElementCategoryOptionCombo categoryOptionCombo, DataElementCategoryOptionCombo attributeOptionCombo, AuditType auditType, int first, int max );
+
+    int countDataValueAudits( List<DataElement> dataElements, List<Period> periods, List<OrganisationUnit> organisationUnits,
         DataElementCategoryOptionCombo categoryOptionCombo, DataElementCategoryOptionCombo attributeOptionCombo, AuditType auditType );
-
-    /**
-     * Deletes a DataValueAudit.
-     *
-     * @param dataValueAudit the DataValueAudit to delete.
-     */
-    void deleteDataValueAudit( DataValueAudit dataValueAudit );
-
-    /**
-     * Deletes all DataValueAudits for the given DataElement.
-     *
-     * @param dataElement the DataElement for which the DataValueAudits should be deleted.
-     * @return the number of deleted DataValueAudits.
-     */
-    int deleteDataValueAuditByDataElement( DataElement dataElement );
-
-    /**
-     * Deletes all DataValueAudits for the given Period.
-     *
-     * @param period the Period for which the DataValueAudits should be deleted.
-     * @return the number of deleted DataValueAudits.
-     */
-    int deleteDataValueAuditByPeriod( Period period );
-
-    /**
-     * Deletes all DataValues for the given OrganisationUnit.
-     *
-     * @param organisationUnit the OrganisationUnit for which the DataValueAudits should be deleted.
-     * @return the number of deleted DataValueAudits.
-     */
-    int deleteDataValueAuditByOrganisationUnit( OrganisationUnit organisationUnit );
-
-    /**
-     * Deletes all DataValues for the given DataElementCategoryOptionCombo.
-     *
-     * @param categoryOptionCombo the DataElementCategoryOptionCombo for which the DataValueAudits should be deleted.
-     * @return the number of deleted DataValueAudits.
-     */
-    int deleteDataValueAuditByCategoryOptionCombo( DataElementCategoryOptionCombo categoryOptionCombo );
 }

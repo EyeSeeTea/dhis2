@@ -30,10 +30,10 @@ package org.hisp.dhis.datavalue.hibernate;
 
 import com.google.common.collect.Lists;
 import org.hibernate.Criteria;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.common.AuditType;
 import org.hisp.dhis.dataelement.DataElement;
@@ -81,7 +81,6 @@ public class HibernateDataValueAuditStore
     public void addDataValueAudit( DataValueAudit dataValueAudit )
     {
         Session session = sessionFactory.getCurrentSession();
-
         session.save( dataValueAudit );
     }
 
@@ -89,22 +88,44 @@ public class HibernateDataValueAuditStore
     @Override
     public List<DataValueAudit> getDataValueAudits( DataValue dataValue )
     {
-        return getDataValueAudits( dataValue.getDataElement(), dataValue.getPeriod(),
-            dataValue.getSource(), dataValue.getCategoryOptionCombo(), dataValue.getAttributeOptionCombo(), null );
+        return getDataValueAudits( Lists.newArrayList( dataValue.getDataElement() ), Lists.newArrayList( dataValue.getPeriod() ),
+            Lists.newArrayList( dataValue.getSource() ), dataValue.getCategoryOptionCombo(), dataValue.getAttributeOptionCombo(), null );
     }
 
     @Override
     @SuppressWarnings( "unchecked" )
-    public List<DataValueAudit> getDataValueAudits( DataElement dataElement, Period period, OrganisationUnit organisationUnit,
+    public List<DataValueAudit> getDataValueAudits( List<DataElement> dataElements, List<Period> periods, List<OrganisationUnit> organisationUnits,
         DataElementCategoryOptionCombo categoryOptionCombo, DataElementCategoryOptionCombo attributeOptionCombo, AuditType auditType )
     {
-        return getDataValueAudits( dataElement, Lists.newArrayList( period ), Lists.newArrayList( organisationUnit ), categoryOptionCombo, attributeOptionCombo, auditType );
+        Criteria criteria = getDataValueAuditCriteria( dataElements, periods, organisationUnits, categoryOptionCombo, attributeOptionCombo, auditType );
+        criteria.addOrder( Order.desc( "created" ) );
+
+        return criteria.list();
     }
 
     @Override
     @SuppressWarnings( "unchecked" )
-    public List<DataValueAudit> getDataValueAudits( DataElement dataElement, List<Period> periods, List<OrganisationUnit> organisationUnits,
+    public List<DataValueAudit> getDataValueAudits( List<DataElement> dataElements, List<Period> periods, List<OrganisationUnit> organisationUnits,
+        DataElementCategoryOptionCombo categoryOptionCombo, DataElementCategoryOptionCombo attributeOptionCombo, AuditType auditType, int first, int max )
+    {
+        Criteria criteria = getDataValueAuditCriteria( dataElements, periods, organisationUnits, categoryOptionCombo, attributeOptionCombo, auditType );
+        criteria.addOrder( Order.desc( "created" ) );
+        criteria.setFirstResult( first );
+        criteria.setMaxResults( max );
+
+        return criteria.list();
+    }
+
+    @Override
+    public int countDataValueAudits( List<DataElement> dataElements, List<Period> periods, List<OrganisationUnit> organisationUnits,
         DataElementCategoryOptionCombo categoryOptionCombo, DataElementCategoryOptionCombo attributeOptionCombo, AuditType auditType )
+    {
+        return ((Number) getDataValueAuditCriteria( dataElements, periods, organisationUnits, categoryOptionCombo, attributeOptionCombo, auditType )
+            .setProjection( Projections.countDistinct( "id" ) ).uniqueResult()).intValue();
+    }
+
+    private Criteria getDataValueAuditCriteria( List<DataElement> dataElements, List<Period> periods, List<OrganisationUnit> organisationUnits, DataElementCategoryOptionCombo categoryOptionCombo, DataElementCategoryOptionCombo attributeOptionCombo, AuditType
+        auditType )
     {
         Session session = sessionFactory.getCurrentSession();
         List<Period> storedPeriods = new ArrayList<>();
@@ -124,9 +145,9 @@ public class HibernateDataValueAuditStore
 
         Criteria criteria = session.createCriteria( DataValueAudit.class );
 
-        if ( dataElement != null )
+        if ( !dataElements.isEmpty() )
         {
-            criteria.add( Restrictions.eq( "dataElement", dataElement ) );
+            criteria.add( Restrictions.in( "dataElement", dataElements ) );
         }
 
         if ( !storedPeriods.isEmpty() )
@@ -154,58 +175,6 @@ public class HibernateDataValueAuditStore
             criteria.add( Restrictions.eq( "auditType", auditType ) );
         }
 
-        criteria.addOrder( Order.desc( "timestamp" ) );
-
-        return criteria.list();
-    }
-
-    @Override
-    public void deleteDataValueAudit( DataValueAudit dataValueAudit )
-    {
-        Session session = sessionFactory.getCurrentSession();
-
-        session.delete( dataValueAudit );
-    }
-
-    @Override
-    public int deleteDataValueAuditByDataElement( DataElement dataElement )
-    {
-        Query query = sessionFactory.getCurrentSession()
-            .createQuery( "delete DataValueAudit where dataElement = :dataElement" )
-            .setEntity( "dataElement", dataElement );
-
-        return query.executeUpdate();
-    }
-
-    @Override
-    public int deleteDataValueAuditByPeriod( Period period )
-    {
-        Period storedPeriod = periodStore.reloadPeriod( period );
-
-        Query query = sessionFactory.getCurrentSession()
-            .createQuery( "delete DataValueAudit where period = :period" )
-            .setEntity( "period", storedPeriod );
-
-        return query.executeUpdate();
-    }
-
-    @Override
-    public int deleteDataValueAuditByOrganisationUnit( OrganisationUnit organisationUnit )
-    {
-        Query query = sessionFactory.getCurrentSession()
-            .createQuery( "delete DataValueAudit where organisationUnit = :organisationUnit" )
-            .setEntity( "organisationUnit", organisationUnit );
-
-        return query.executeUpdate();
-    }
-
-    @Override
-    public int deleteDataValueAuditByCategoryOptionCombo( DataElementCategoryOptionCombo categoryOptionCombo )
-    {
-        Query query = sessionFactory.getCurrentSession()
-            .createQuery( "delete DataValueAudit where categoryOptionCombo = :categoryOptionCombo or attributeOptionCombo = :categoryOptionCombo" )
-            .setEntity( "categoryOptionCombo", categoryOptionCombo );
-
-        return query.executeUpdate();
+        return criteria;
     }
 }

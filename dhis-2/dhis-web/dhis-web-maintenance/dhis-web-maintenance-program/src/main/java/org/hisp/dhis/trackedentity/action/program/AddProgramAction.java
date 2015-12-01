@@ -31,6 +31,7 @@ package org.hisp.dhis.trackedentity.action.program;
 import com.opensymphony.xwork2.Action;
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.attribute.AttributeService;
+import org.hisp.dhis.dataapproval.DataApprovalWorkflowService;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
@@ -91,6 +92,9 @@ public class AddProgramAction
     @Autowired
     private DataElementCategoryService categoryService;
 
+    @Autowired
+    private DataApprovalWorkflowService workflowService;
+
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
@@ -100,6 +104,13 @@ public class AddProgramAction
     public void setName( String name )
     {
         this.name = name;
+    }
+    
+    private String shortName;
+
+    public void setShortName( String shortName )
+    {
+        this.shortName = shortName;
     }
 
     private String description;
@@ -256,6 +267,13 @@ public class AddProgramAction
         this.skipOffline = skipOffline;
     }
 
+    private Integer workflowId;
+
+    public void setWorkflowId( Integer workflowId )
+    {
+        this.workflowId = workflowId;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -274,6 +292,7 @@ public class AddProgramAction
         Program program = new Program();
 
         program.setName( StringUtils.trimToNull( name ) );
+        program.setShortName( StringUtils.trimToNull( shortName ) );
         program.setDescription( StringUtils.trimToNull( description ) );
         program.setVersion( 1 );
         program.setEnrollmentDateLabel( StringUtils.trimToNull( enrollmentDateLabel ) );
@@ -322,6 +341,11 @@ public class AddProgramAction
         if ( categoryComboId != null )
         {
             program.setCategoryCombo( categoryService.getDataElementCategoryCombo( categoryComboId ) );
+        }
+
+        if ( workflowId != null && workflowId > 0 )
+        {
+            program.setWorkflow( workflowService.getWorkflow( workflowId ) );
         }
 
         programService.addProgram( program );

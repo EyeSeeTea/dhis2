@@ -30,6 +30,7 @@ package org.hisp.dhis.trackedentitydatavalue;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.AuditType;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.dataelement.DataElement;
@@ -42,14 +43,17 @@ import java.util.Objects;
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
+@JacksonXmlRootElement( localName = "trackedEntityDataValueAudit", namespace = DxfNamespaces.DXF_2_0 )
 public class TrackedEntityDataValueAudit
     implements Serializable
 {
+    private int id;
+
     private DataElement dataElement;
 
     private ProgramStageInstance programStageInstance;
 
-    private Date timestamp;
+    private Date created;
 
     private String value;
 
@@ -67,22 +71,22 @@ public class TrackedEntityDataValueAudit
     {
     }
 
-    public TrackedEntityDataValueAudit( TrackedEntityDataValue trackedEntityDataValue, String value, String modifiedBy, Date timestamp, AuditType auditType )
+    public TrackedEntityDataValueAudit( TrackedEntityDataValue trackedEntityDataValue, String value, String modifiedBy, AuditType auditType )
     {
         this.dataElement = trackedEntityDataValue.getDataElement();
         this.programStageInstance = trackedEntityDataValue.getProgramStageInstance();
         this.providedElsewhere = trackedEntityDataValue.getProvidedElsewhere();
 
+        this.created = new Date();
         this.value = value;
         this.modifiedBy = modifiedBy;
-        this.timestamp = timestamp;
         this.auditType = auditType;
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hash( dataElement, programStageInstance, timestamp, value, providedElsewhere, modifiedBy, auditType );
+        return Objects.hash( dataElement, programStageInstance, created, value, providedElsewhere, modifiedBy, auditType );
     }
 
     @Override
@@ -102,7 +106,7 @@ public class TrackedEntityDataValueAudit
 
         return Objects.equals( this.dataElement, other.dataElement )
             && Objects.equals( this.programStageInstance, other.programStageInstance )
-            && Objects.equals( this.timestamp, other.timestamp )
+            && Objects.equals( this.created, other.created )
             && Objects.equals( this.value, other.value )
             && Objects.equals( this.providedElsewhere, other.providedElsewhere )
             && Objects.equals( this.modifiedBy, other.modifiedBy )
@@ -112,6 +116,16 @@ public class TrackedEntityDataValueAudit
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
+
+    public int getId()
+    {
+        return id;
+    }
+
+    public void setId( int id )
+    {
+        this.id = id;
+    }
 
     @JsonProperty
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
@@ -139,14 +153,14 @@ public class TrackedEntityDataValueAudit
 
     @JsonProperty
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public Date getTimestamp()
+    public Date getCreated()
     {
-        return timestamp;
+        return created;
     }
 
-    public void setTimestamp( Date timestamp )
+    public void setCreated( Date created )
     {
-        this.timestamp = timestamp;
+        this.created = created;
     }
 
     @JsonProperty
