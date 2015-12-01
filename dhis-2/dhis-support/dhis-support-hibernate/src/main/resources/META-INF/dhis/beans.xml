@@ -93,7 +93,7 @@
   <bean id="encryptionPassword" class="org.hisp.dhis.hibernate.ConnectionPropertyFactoryBean">
     <property name="hibernateConfigurationProvider" ref="hibernateConfigurationProvider" />
     <property name="hibernateProperty" value="encryption.password" />
-    <property name="defaultValue" value="Super_secret" />
+    <property name="defaultValue" value="J7GhAs287hsSQlKd9g5" />
   </bean>
 
 
