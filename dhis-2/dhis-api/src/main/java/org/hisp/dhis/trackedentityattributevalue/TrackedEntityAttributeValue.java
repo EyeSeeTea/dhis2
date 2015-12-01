@@ -214,7 +214,7 @@ public class TrackedEntityAttributeValue
     }
 
     /**
-     * Used by hibernare to set the objects value
+     * Used by hibernate to set the objects value
      */
     public void setPlainValue( String plainValue )
     {
