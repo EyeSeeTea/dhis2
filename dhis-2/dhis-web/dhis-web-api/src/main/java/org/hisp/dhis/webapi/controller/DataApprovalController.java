@@ -29,6 +29,7 @@ package org.hisp.dhis.webapi.controller;
  */
 
 import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.common.SetMap;
 import org.hisp.dhis.dataapproval.DataApproval;
 import org.hisp.dhis.dataapproval.DataApprovalLevel;
 import org.hisp.dhis.dataapproval.DataApprovalLevelService;
@@ -67,7 +68,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import javafx.util.Pair;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -265,18 +265,21 @@ public class DataApprovalController
 
         OrganisationUnit orgUnit = organisationUnitService.getOrganisationUnit( ou );
 
-        Set<Pair<DataApprovalWorkflow, DataElementCategoryCombo>> pairs = new HashSet<>();
+        SetMap<DataApprovalWorkflow, DataElementCategoryCombo> workflowCategoryComboMap = new SetMap<>();
 
         for ( DataSet dataSet : dataSets )
         {
-            pairs.add( new Pair<>( dataSet.getWorkflow(), dataSet.getCategoryCombo() ) );
+            workflowCategoryComboMap.putValue( dataSet.getWorkflow(), dataSet.getCategoryCombo() );
         }
 
         List<DataApprovalStatus> statusList = new ArrayList<>();
 
-        for ( Pair<DataApprovalWorkflow, DataElementCategoryCombo> pair : pairs )
+        for ( DataApprovalWorkflow workflow : workflowCategoryComboMap.keySet() )
         {
-            statusList.addAll( dataApprovalService.getUserDataApprovalsAndPermissions( pair.getKey(), period, orgUnit, pair.getValue() ) );
+            for ( DataElementCategoryCombo attributeCombo : workflowCategoryComboMap.get( workflow ) )
+            {
+                statusList.addAll( dataApprovalService.getUserDataApprovalsAndPermissions( workflow, period, orgUnit, attributeCombo ) );
+            }
         }
 
         List<Map<String, Object>> list = new ArrayList<>();
