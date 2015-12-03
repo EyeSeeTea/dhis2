@@ -336,42 +336,44 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
 
                         if(event.notes && !$scope.noteExists){
                             $scope.noteExists = true;
-                        }
+                        }                  
 
-                        //check if event is empty
-                        if(!angular.isUndefined(event.dataValues)){                            
+                        angular.forEach(event.dataValues, function(dataValue){
 
-                            angular.forEach(event.dataValues, function(dataValue){
-
-                                //converting event.datavalues[i].datavalue.dataelement = value to
-                                //event[dataElement] = value for easier grid display.                                
-                                if($scope.prStDes[dataValue.dataElement]){
-                                    var val = dataValue.value;                                  
-                                    if(angular.isObject($scope.prStDes[dataValue.dataElement].dataElement)){
-                                        val = CommonUtils.formatDataValue(val, $scope.prStDes[dataValue.dataElement].dataElement, $scope.optionSets, 'USER');                                                                          
-                                    }
-                                    
-                                    event[dataValue.dataElement] = val;
-                                    
-                                    if($scope.prStDes[dataValue.dataElement].dataElement.valueType === 'FILE_RESOURCE'){
-                                        FileService.get(val).then(function(response){
-                                            if(response && response.name){
-                                                if(!$scope.fileNames[event.event]){
-                                                    $scope.fileNames[event.event] = [];
-                                                } 
-                                                $scope.fileNames[event.event][dataValue.dataElement] = response.name;
-                                            }
-                                        });
-                                    }
+                            //converting event.datavalues[i].datavalue.dataelement = value to
+                            //event[dataElement] = value for easier grid display.                                
+                            if($scope.prStDes[dataValue.dataElement]){
+                                var val = dataValue.value;                                  
+                                if(angular.isObject($scope.prStDes[dataValue.dataElement].dataElement)){
+                                    val = CommonUtils.formatDataValue(val, $scope.prStDes[dataValue.dataElement].dataElement, $scope.optionSets, 'USER');                                                                          
                                 }
-                            });
 
-                            event['uid'] = event.event;                                
-                            event.eventDate = DateUtils.formatFromApiToUser(event.eventDate);                                
-                            event['eventDate'] = event.eventDate;
+                                event[dataValue.dataElement] = val;
 
-                            delete event.dataValues;
+                                if($scope.prStDes[dataValue.dataElement].dataElement.valueType === 'FILE_RESOURCE'){
+                                    FileService.get(val).then(function(response){
+                                        if(response && response.name){
+                                            if(!$scope.fileNames[event.event]){
+                                                $scope.fileNames[event.event] = [];
+                                            } 
+                                            $scope.fileNames[event.event][dataValue.dataElement] = response.name;
+                                        }
+                                    });
+                                }
+                            }
+                        });
+
+                        event['uid'] = event.event;                                
+                        event.eventDate = DateUtils.formatFromApiToUser(event.eventDate);                                
+                        event['eventDate'] = event.eventDate;
+                        if(event.status === "ACTIVE") {
+                            event.status = false;
+                        } else if(event.status === "COMPLETED") {
+                            event.status = true;
                         }
+
+                        delete event.dataValues;
+                        
                     });
 
                     $scope.dhis2Events = data.events; 
@@ -520,7 +522,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
     };
     
     $scope.showEventRegistration = function(){        
-        $scope.displayCustomForm = $scope.customForm ? true:false;        
+        $scope.displayCustomForm = $scope.customForm ? true:false;
         $scope.currentEvent = {};
         $scope.eventRegistration = !$scope.eventRegistration;          
         $scope.currentEvent = angular.copy($scope.newDhis2Event);        
@@ -622,7 +624,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                 program: $scope.selectedProgram.id,
                 programStage: $scope.selectedProgramStage.id,
                 orgUnit: $scope.selectedOrgUnit.id,
-                status: 'ACTIVE',            
+                status: $scope.currentEvent.status ? 'COMPLETED' : 'ACTIVE',
                 eventDate: DateUtils.formatFromUserToApi(newEvent.eventDate),
                 dataValues: dataValues
         }; 
@@ -735,7 +737,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                             program: $scope.currentEvent.program,
                             programStage: $scope.currentEvent.programStage,
                             orgUnit: $scope.currentEvent.orgUnit,
-                            status: 'ACTIVE',                                        
+                            status: $scope.currentEvent.status ? 'COMPLETED' : 'ACTIVE',
                             eventDate: DateUtils.formatFromUserToApi($scope.currentEvent.eventDate),
                             event: $scope.currentEvent.event, 
                             dataValues: dataValues

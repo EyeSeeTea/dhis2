@@ -208,7 +208,7 @@ Ext.onReady( function() {
 
 			conf.layout = {
 				west_width: 424,
-				west_fieldset_width: 418,
+				west_fieldset_width: 420,
 				west_width_padding: 2,
 				west_fill: 2,
 				west_fill_accordion_indicator: 81,
@@ -283,11 +283,11 @@ Ext.onReady( function() {
             conf.url = {
                 analysisFields: [
                     '*',
-                    'program[id,name]',
-                    'programStage[id,name]',
-                    'columns[dimension,filter,items[id,' + init.namePropertyUrl + ']]',
-                    'rows[dimension,filter,items[id,' + init.namePropertyUrl + ']]',
-                    'filters[dimension,filter,items[id,' + init.namePropertyUrl + ']]',
+                    'program[id,displayName|rename(name)]',
+                    'programStage[id,displayName|rename(name)]',
+                    'columns[dimension,filter,items[dimensionItem|rename(id),' + init.namePropertyUrl + ']]',
+                    'rows[dimension,filter,items[dimensionItem|rename(id),' + init.namePropertyUrl + ']]',
+                    'filters[dimension,filter,items[dimensionItem|rename(id),' + init.namePropertyUrl + ']]',
                     '!lastUpdated',
                     '!href',
                     '!created',
@@ -2117,7 +2117,14 @@ Ext.onReady( function() {
 					dx = dimConf.indicator.dimensionName,
 					co = dimConf.category.dimensionName,
                     aggTypes = ['COUNT', 'SUM', 'STDDEV', 'VARIANCE', 'MIN', 'MAX'],
-                    displayProperty = xLayout.displayProperty || init.userAccount.settings.keyAnalysisDisplayProperty || 'name';
+                    propertyMap = {
+                        'name': 'name',
+                        'displayName': 'name',
+                        'shortName': 'shortName',
+                        'displayShortName': 'shortName'
+                    },
+                    keyAnalysisDisplayProperty = init.userAccount.settings.keyAnalysisDisplayProperty,
+                    displayProperty = propertyMap[keyAnalysisDisplayProperty] || propertyMap[xLayout.displayProperty] || 'name';
 
 				for (var i = 0, dimName, items; i < axisDimensionNames.length; i++) {
 					dimName = axisDimensionNames[i];
@@ -3182,19 +3189,25 @@ Ext.onReady( function() {
 
                 // init
                 var defaultKeyUiLocale = 'en',
-                    defaultKeyAnalysisDisplayProperty = 'name',
+                    defaultKeyAnalysisDisplayProperty = 'displayName',
+                    displayPropertyMap = {
+                        'name': 'displayName',
+                        'displayName': 'displayName',
+                        'shortName': 'displayShortName',
+                        'displayShortName': 'displayShortName'
+                    },
                     namePropertyUrl,
                     contextPath,
                     keyUiLocale;
 
                 init.userAccount.settings.keyUiLocale = init.userAccount.settings.keyUiLocale || defaultKeyUiLocale;
-                init.userAccount.settings.keyAnalysisDisplayProperty = init.userAccount.settings.keyAnalysisDisplayProperty || defaultKeyAnalysisDisplayProperty;
+                init.userAccount.settings.keyAnalysisDisplayProperty = displayPropertyMap[init.userAccount.settings.keyAnalysisDisplayProperty] || defaultKeyAnalysisDisplayProperty;
 
                 // local vars
                 contextPath = init.contextPath;
                 keyUiLocale = init.userAccount.settings.keyUiLocale;
                 keyAnalysisDisplayProperty = init.userAccount.settings.keyAnalysisDisplayProperty;
-                namePropertyUrl = keyAnalysisDisplayProperty === defaultKeyAnalysisDisplayProperty ? keyAnalysisDisplayProperty : keyAnalysisDisplayProperty + '|rename(' + defaultKeyAnalysisDisplayProperty + ')';
+                namePropertyUrl = keyAnalysisDisplayProperty + '|rename(name)';
 
                 init.namePropertyUrl = namePropertyUrl;
 
@@ -3236,7 +3249,7 @@ Ext.onReady( function() {
 
         // dimensions
 		requests.push({
-			url: init.contextPath + '/api/dimensions.' + type + '?fields=id,name&paging=false',
+			url: init.contextPath + '/api/dimensions.' + type + '?fields=id,displayName|rename(name)&paging=false',
             disableCaching: false,
 			success: function(r) {
 				init.dimensions = r.responseText ? Ext.decode(r.responseText).dimensions : r.dimensions;
@@ -3246,7 +3259,7 @@ Ext.onReady( function() {
 
         // legend sets
         requests.push({
-            url: init.contextPath + '/api/legendSets.json?fields=id,name,legends[id,name,startValue,endValue,color]&paging=false',
+            url: init.contextPath + '/api/legendSets.json?fields=id,displayName|rename(name),legends[id,displayName|rename(name),startValue,endValue,color]&paging=false',
             success: function(r) {
                 init.legendSets = Ext.decode(r.responseText).legendSets || [];
                 fn();

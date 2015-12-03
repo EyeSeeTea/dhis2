@@ -28,6 +28,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
                 TEIService) {  
     
     $scope.maxOptionSize = 30;
+    $scope.model = {};
     
     //Selection
     $scope.ouModes = [{name: 'SELECTED'}, {name: 'CHILDREN'}, {name: 'DESCENDANTS'}, {name: 'ACCESSIBLE'}];         
@@ -37,18 +38,11 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
     $scope.treeLoaded = false;
     $scope.searchOuTree = false;
     $scope.teiListMode = {onlyActive: false};
-    $scope.enrollmentStatus = 'ALL';
-    
-    //Paging
-    $scope.pager = {pageSize: 50, page: 1, toolBarDisplay: 5};   
-    
-    //EntityList
-    $scope.showTrackedEntityDiv = false;
-    
+    $scope.enrollmentStatus = 'ALL';    
+       
     //Searching
     $scope.showSearchDiv = false;
     $scope.searchText = null;
-    $scope.emptySearchText = false;
     $scope.searchFilterExists = false;   
     $scope.defaultOperators = OperatorFactory.defaultOperators;
     $scope.boolOperators = OperatorFactory.boolOperators;
@@ -56,10 +50,21 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
     $scope.searchMode = { listAll: 'LIST_ALL', freeText: 'FREE_TEXT', attributeBased: 'ATTRIBUTE_BASED' };    
     $scope.optionSets = null;
     $scope.attributesById = null;
-    $scope.doSearch = true;
-    
-    //Registration
-    $scope.showRegistrationDiv = false;    
+    $scope.doSearch = true;    
+       
+    function resetParams(){
+        $scope.trackedEntityList = null;
+        $scope.sortColumn = {};
+        $scope.emptySearchText = false;
+        $scope.emptySearchAttribute = false;
+        $scope.showRegistrationDiv = false;  
+        $scope.showTrackedEntityDiv = false;        
+        $scope.teiFetched = false;        
+        $scope.queryUrl = null;
+        $scope.programUrl = null;
+        $scope.attributeUrl = {url: null, hasValue: false};
+        $scope.pager = {pageSize: 50, page: 1, toolBarDisplay: 5};
+    }
     
     //watch for selection of org unit from tree
     $scope.$watch('selectedOrgUnit', function() {           
@@ -97,6 +102,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
             }
             
             //Labels
+            $scope.trackerCaptureLabel = $translate.instant('tracker_capture');
             $scope.orgUnitLabel = $translate.instant('org_unit');
             $scope.listAllLabel = $translate.instant('list_all');
             $scope.registerLabel = $translate.instant('register');
@@ -115,7 +121,9 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
             $scope.showHideLabel = $translate.instant('show_hide_columns');
             $scope.listProgramsLabel = $translate.instant('list_programs');
             $scope.settingsLabel = $translate.instant('settings');
+            $scope.displayModeLabel = $translate.instant('display_mode');
             
+            resetParams();
             $scope.loadPrograms($scope.selectedOrgUnit);
         }
     });
@@ -150,6 +158,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
             ProgramFactory.getProgramsByOu($scope.selectedOrgUnit, $scope.selectedProgram).then(function(response){
                 $scope.programs = response.programs;
                 $scope.selectedProgram = response.selectedProgram;
+                $scope.model.selectedProgram = $scope.selectedProgram;
                 $scope.trackedEntityList = null;
                 $scope.selectedSearchMode = $scope.searchMode.listAll;
                 $scope.processAttributes();
@@ -158,6 +167,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
     };
     
     $scope.getProgramAttributes = function(program){ 
+        resetParams();
         $scope.selectedProgram = program;
         $scope.trackedEntityList = null;
         $scope.processAttributes();              
@@ -166,15 +176,12 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
     $scope.processAttributes = function(){
         $scope.sortColumn = {};
         AttributesFactory.getByProgram($scope.selectedProgram).then(function(atts){
-            $scope.attributes = AttributesFactory.generateAttributeFilters(atts);
-            var grid = TEIGridService.generateGridColumns($scope.attributes, $scope.selectedOuMode.name);
-            $scope.gridColumns = grid.columns;
-            
+            $scope.attributes = AttributesFactory.generateAttributeFilters(atts);            
             if($scope.showRegistrationDiv){
                 $scope.doSearch = false;
             }
 
-            if($scope.doSearch){
+            if($scope.doSearch && $scope.selectedProgram && $scope.selectedProgram.displayFrontPageList){
                 $scope.search($scope.searchMode);
             } 
         });
@@ -204,18 +211,12 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
     };
    
     //$scope.searchParam = {bools: []};
-    $scope.search = function(mode){        
-        $scope.selectedSearchMode = mode;
-        $scope.emptySearchText = false;
-        $scope.emptySearchAttribute = false;
-        $scope.showRegistrationDiv = false;  
-        $scope.showTrackedEntityDiv = false;        
-        $scope.teiFetched = false;
-        $scope.trackedEntityList = null;
-        
-        $scope.queryUrl = null;
-        $scope.programUrl = null;
-        $scope.attributeUrl = {url: null, hasValue: false};
+    $scope.search = function(mode){  
+        resetParams()
+        var grid = TEIGridService.generateGridColumns($scope.attributes, $scope.selectedOuMode.name);
+        $scope.gridColumns = grid.columns;
+            
+        $scope.selectedSearchMode = mode;        
     
         if($scope.selectedProgram){
             $scope.programUrl = 'program=' + $scope.selectedProgram.id;
@@ -224,10 +225,13 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
         //check search mode
         if( $scope.selectedSearchMode === $scope.searchMode.freeText ){     
 
-            if( $scope.searchText ){
-                $scope.queryUrl = 'query=LIKE:' + $scope.searchText;
-            }            
-                        
+            if(!$scope.searchText){                
+                $scope.emptySearchText = true;
+                $scope.teiFetched = false;
+                return;
+            }       
+            
+            $scope.queryUrl = 'query=LIKE:' + $scope.searchText;            
             $scope.attributes = EntityQueryFactory.resetAttributesQuery($scope.attributes, $scope.enrollment);
             $scope.searchingOrgUnit = $scope.selectedOrgUnit;
         }
@@ -316,8 +320,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
     };
     
     $scope.showRegistration = function(){
-        $scope.showRegistrationDiv = !$scope.showRegistrationDiv;
-        
+        $scope.showRegistrationDiv = !$scope.showRegistrationDiv;        
         if($scope.showRegistrationDiv){
             $scope.showTrackedEntityDiv = false;
             $scope.showSearchDiv = false;
@@ -325,16 +328,23 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
                 $rootScope.$broadcast('registrationWidget', {registrationMode: 'REGISTRATION'});
             }, 200);
         }
-        else{            
-            $scope.doSearch = true;
-            if(!$scope.trackedEntityList){
-                if($scope.doSearch){
-                    $scope.search($scope.searchMode);
-                }
-            }                        
-            $scope.showTrackedEntityDiv = true;
-        }
     };    
+    
+    $scope.showDisplayMode = function(){        
+        
+        var modalInstance = $modal.open({
+            templateUrl: 'views/display-mode-modal.html',
+            controller: 'DisplayModeController',
+            resolve: {
+                programs: function(){
+                    return $scope.programs;
+                }                
+            }
+        });
+
+        modalInstance.result.then(function () {           
+        }, function () {});
+    };
     
     $scope.showHideColumns = function(){
         $scope.hiddenGridColumns = 0;
