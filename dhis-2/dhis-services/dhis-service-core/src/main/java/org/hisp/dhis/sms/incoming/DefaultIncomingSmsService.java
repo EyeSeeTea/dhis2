@@ -36,188 +36,159 @@ import org.hisp.dhis.sms.MessageQueue;
 import org.smslib.InboundMessage;
 import org.smslib.Service;
 
-public class DefaultIncomingSmsService
-    implements IncomingSmsService
-{
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
+public class DefaultIncomingSmsService implements IncomingSmsService {
+	// -------------------------------------------------------------------------
+	// Dependencies
+	// -------------------------------------------------------------------------
 
-    private IncomingSmsStore incomingSmsStore;
+	private IncomingSmsStore incomingSmsStore;
 
-    private MessageQueue incomingSmsQueue;
+	private MessageQueue incomingSmsQueue;
 
-    @Override
-    public void setIncomingSmsQueue( MessageQueue incomingSmsQueue )
-    {
-        this.incomingSmsQueue = incomingSmsQueue;
-    }
+	@Override
+	public void setIncomingSmsQueue(MessageQueue incomingSmsQueue) {
+		this.incomingSmsQueue = incomingSmsQueue;
+	}
 
-    public void setIncomingSmsStore( IncomingSmsStore incomingSmsStore )
-    {
-        this.incomingSmsStore = incomingSmsStore;
-    }
+	public void setIncomingSmsStore(IncomingSmsStore incomingSmsStore) {
+		this.incomingSmsStore = incomingSmsStore;
+	}
 
-    // -------------------------------------------------------------------------
-    // Input & Output
-    // -------------------------------------------------------------------------
+	// -------------------------------------------------------------------------
+	// Input & Output
+	// -------------------------------------------------------------------------
 
-    private List<InboundMessage> msgList = new ArrayList<>();
+	private List<InboundMessage> msgList = new ArrayList<>();
 
-    public void setMsgList( List<InboundMessage> msgList )
-    {
-        this.msgList = msgList;
-    }
+	public void setMsgList(List<InboundMessage> msgList) {
+		this.msgList = msgList;
+	}
 
-    // -------------------------------------------------------------------------
-    // Implementation
-    // -------------------------------------------------------------------------
+	// -------------------------------------------------------------------------
+	// Implementation
+	// -------------------------------------------------------------------------
 
-    @Override
-    public List<IncomingSms> listAllMessageFromModem()
-    {
-        List<IncomingSms> result = new ArrayList<>();
+	@Override
+	public List<IncomingSms> listAllMessageFromModem() {
+		List<IncomingSms> result = new ArrayList<>();
 
-        try
-        {
-            Service.getInstance().readMessages( msgList, InboundMessage.MessageClasses.ALL );
-        }
-        catch ( Exception e )
-        {
-            e.printStackTrace();
-        }
+		try {
+			Service.getInstance().readMessages(msgList, InboundMessage.MessageClasses.ALL);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-        if ( msgList.size() > 0 )
-        {
-            for ( InboundMessage each : msgList )
-            {
-                IncomingSms incomingSms = convertToIncomingSms( each );
+		if (msgList.size() > 0) {
+			for (InboundMessage each : msgList) {
+				IncomingSms incomingSms = convertToIncomingSms(each);
 
-                result.add( incomingSms );
-            }
+				result.add(incomingSms);
+			}
 
-            msgList.clear();
-        }
+			msgList.clear();
+		}
 
-        return result;
-    }
+		return result;
+	}
 
-    @Override
-    public List<IncomingSms> listAllMessage()
-    {
-        return (List<IncomingSms>) incomingSmsStore.getAllSmses();
-    }
+	@Override
+	public List<IncomingSms> listAllMessage() {
+		return (List<IncomingSms>) incomingSmsStore.getAllSmses();
+	}
 
-    @Override
-    public List<InboundMessage> getMsgList()
-    {
-        try
-        {
-            Service.getInstance().readMessages( msgList, InboundMessage.MessageClasses.ALL );
-        }
-        catch ( Exception e )
-        {
-            e.printStackTrace();
-        }
+	@Override
+	public List<InboundMessage> getMsgList() {
+		try {
+			Service.getInstance().readMessages(msgList, InboundMessage.MessageClasses.ALL);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-        return msgList;
-    }
+		return msgList;
+	}
 
-    @Override
-    public void save( IncomingSms incomingSms )
-    {
-        incomingSmsStore.save( incomingSms );
-        incomingSmsQueue.put( incomingSms );
-    }
+	@Override
+	public int save(IncomingSms incomingSms) {
+		int smsId = incomingSmsStore.save(incomingSms);
+		incomingSmsQueue.put(incomingSms);
+		return smsId;
+	}
 
-    @Override
-    public void save( String message, String originator, String gateway )
-    {
-        IncomingSms sms = new IncomingSms();
-        sms.setText( message );
-        sms.setOriginator( originator );
-        sms.setGatewayId( gateway );
-        sms.setSentDate( new Date() );
-        sms.setReceivedDate( new Date() );
-        sms.setEncoding( SmsMessageEncoding.ENC7BIT );
-        sms.setStatus( SmsMessageStatus.INCOMING );
-        save( sms );
+	@Override
+	public int save(String message, String originator, String gateway) {
+		IncomingSms sms = new IncomingSms();
+		sms.setText(message);
+		sms.setOriginator(originator);
+		sms.setGatewayId(gateway);
+		sms.setSentDate(new Date());
+		sms.setReceivedDate(new Date());
+		sms.setEncoding(SmsMessageEncoding.ENC7BIT);
+		sms.setStatus(SmsMessageStatus.INCOMING);
+		return save(sms);
 
-    }
+	}
 
-    @Override
-    public void deleteAllFromModem()
-    {
-        try
-        {
-            Service.getInstance().readMessages( msgList, InboundMessage.MessageClasses.ALL );
+	@Override
+	public void deleteAllFromModem() {
+		try {
+			Service.getInstance().readMessages(msgList, InboundMessage.MessageClasses.ALL);
 
-            for ( InboundMessage each : msgList )
-            {
-                Service.getInstance().deleteMessage( each );
-            }
-        }
-        catch ( Exception e )
-        {
-            e.printStackTrace();
-        }
+			for (InboundMessage each : msgList) {
+				Service.getInstance().deleteMessage(each);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-        msgList.clear();
-    }
+		msgList.clear();
+	}
 
-    @Override
-    public void deleteById( Integer id )
-    {
-        IncomingSms incomingSms = incomingSmsStore.get( id );
+	@Override
+	public void deleteById(Integer id) {
+		IncomingSms incomingSms = incomingSmsStore.get(id);
 
-        incomingSmsStore.delete( incomingSms );
-    }
+		incomingSmsStore.delete(incomingSms);
+	}
 
-    @Override
-    public IncomingSms findBy( Integer id )
-    {
-        return incomingSmsStore.get( id );
-    }
+	@Override
+	public IncomingSms findBy(Integer id) {
+		return incomingSmsStore.get(id);
+	}
 
-    @Override
-    public IncomingSms getNextUnprocessed()
-    {
-        return null;
-    }
+	@Override
+	public IncomingSms getNextUnprocessed() {
+		return null;
+	}
 
-    @Override
-    public void update( IncomingSms incomingSms )
-    {
-        incomingSmsStore.update( incomingSms );
-    }
+	@Override
+	public void update(IncomingSms incomingSms) {
+		incomingSmsStore.update(incomingSms);
+	}
 
-    @Override
-    public List<IncomingSms> getSmsByStatus( SmsMessageStatus status, String keyword )
-    {
-        return incomingSmsStore.getSmsByStatus( status, keyword );
-    }
+	@Override
+	public List<IncomingSms> getSmsByStatus(SmsMessageStatus status, String keyword) {
+		return incomingSmsStore.getSmsByStatus(status, keyword);
+	}
 
-    @Override
-    public IncomingSms convertToIncomingSms( InboundMessage message )
-    {
-        IncomingSms incomingSms = new IncomingSms();
+	@Override
+	public IncomingSms convertToIncomingSms(InboundMessage message) {
+		IncomingSms incomingSms = new IncomingSms();
 
-        incomingSms.setOriginator( message.getOriginator() );
-        incomingSms.setEncoding( SmsMessageEncoding.ENC7BIT );
-        incomingSms.setSentDate( message.getDate() );
-        incomingSms.setReceivedDate( message.getDate() );
-        incomingSms.setText( message.getText() );
-        incomingSms.setGatewayId( message.getGatewayId() );
-        incomingSms.setStatus( SmsMessageStatus.PROCESSED );
-        incomingSms.setStatusMessage( "imported" );
+		incomingSms.setOriginator(message.getOriginator());
+		incomingSms.setEncoding(SmsMessageEncoding.ENC7BIT);
+		incomingSms.setSentDate(message.getDate());
+		incomingSms.setReceivedDate(message.getDate());
+		incomingSms.setText(message.getText());
+		incomingSms.setGatewayId(message.getGatewayId());
+		incomingSms.setStatus(SmsMessageStatus.PROCESSED);
+		incomingSms.setStatusMessage("imported");
 
-        return incomingSms;
-    }
+		return incomingSms;
+	}
 
-    @Override
-    public List<IncomingSms> getSmsByStatus( SmsMessageStatus status, String keyword, Integer min, Integer max )
-    {
-        return incomingSmsStore.getSmsByStatus( status, keyword, min, max );
-    }
+	@Override
+	public List<IncomingSms> getSmsByStatus(SmsMessageStatus status, String keyword, Integer min, Integer max) {
+		return incomingSmsStore.getSmsByStatus(status, keyword, min, max);
+	}
 
 }

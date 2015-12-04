@@ -61,9 +61,9 @@ public interface IncomingSmsService
 
     List<InboundMessage> getMsgList();
 
-    void save( IncomingSms sms );
+    int save( IncomingSms sms );
 
-    void save( String message, String originator, String gateway );
+    int save( String message, String originator, String gateway );
 
     void setIncomingSmsQueue( MessageQueue incomingSmsQueue );
 
