@@ -30,7 +30,6 @@ package org.hisp.dhis.sms.listener;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.common.ValueType;
-import org.hisp.dhis.commons.util.TextUtils;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataset.CompleteDataSetRegistration;
@@ -73,47 +72,23 @@ import java.util.regex.Pattern;
 public class J2MEDataValueSMSListener
     implements IncomingSmsListener
 {
+    
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
+
     private DataValueService dataValueService;
-
-    public void setDataValueService( DataValueService dataValueService )
-    {
-        this.dataValueService = dataValueService;
-    }
-
+    
     private DataElementCategoryService dataElementCategoryService;
-
-    public void setDataElementCategoryService( DataElementCategoryService dataElementCategoryService )
-    {
-        this.dataElementCategoryService = dataElementCategoryService;
-    }
-
+    
     private SMSCommandService smsCommandService;
-
-    public void setSmsCommandService( SMSCommandService smsCommandService )
-    {
-        this.smsCommandService = smsCommandService;
-    }
-
+    
     private UserService userService;
-
-    public void setUserService( UserService userService )
-    {
-        this.userService = userService;
-    }
-
+    
     private CompleteDataSetRegistrationService registrationService;
-
-    public void setRegistrationService( CompleteDataSetRegistrationService registrationService )
-    {
-        this.registrationService = registrationService;
-    }
-
+    
     private SmsSender smsSender;
 
-    public void setSmsSender( SmsSender smsSender )
-    {
-        this.smsSender = smsSender;
-    }
 
     // -------------------------------------------------------------------------
     // IncomingSmsListener implementation
@@ -123,20 +98,7 @@ public class J2MEDataValueSMSListener
     @Override
     public boolean accept( IncomingSms sms )
     {
-        String message = sms.getText();
-        String commandString = null;
-
-        if ( message.indexOf( TextUtils.SPACE ) > 0 )
-        {
-            commandString = message.substring( 0, message.indexOf( " " ) );
-            message = message.substring( commandString.length() );
-        }
-        else
-        {
-            commandString = message;
-        }
-
-        return smsCommandService.getSMSCommand( commandString, ParserType.J2ME_PARSER ) != null;
+        return smsCommandService.getSMSCommand( getCommandString( sms ), ParserType.J2ME_PARSER ) != null;
     }
 
     @Transactional
@@ -144,20 +106,12 @@ public class J2MEDataValueSMSListener
     public void receive( IncomingSms sms )
     {
         String message = sms.getText();
-        String commandString = null;
-        if ( message.indexOf( " " ) > 0 )
-        {
-            commandString = message.substring( 0, message.indexOf( " " ) );
-            message = message.substring( commandString.length() );
-        }
-        else
-        {
-            commandString = message;
-        }
-
-        SMSCommand smsCommand = smsCommandService.getSMSCommand( commandString, ParserType.J2ME_PARSER );
+        
+        SMSCommand smsCommand = smsCommandService.getSMSCommand( getCommandString( sms ), ParserType.J2ME_PARSER );
+        
         String token[] = message.split( "!" );
         Map<String, String> parsedMessage = this.parse( token[1], smsCommand );
+        
         String senderPhoneNumber = StringUtils.replace( sms.getOriginator(), "+", "" );
         Collection<OrganisationUnit> orgUnits = getOrganisationUnitsByPhoneNumber( senderPhoneNumber );
 
@@ -399,6 +353,26 @@ public class J2MEDataValueSMSListener
             registrationService.saveCompleteDataSetRegistration( registration, false );
         }
     }
+    
+    private String getCommandString( IncomingSms sms )
+    {
+        String message = sms.getText();
+        String commandString = null;
+
+        for ( int i = 0; i < message.length(); i++ )
+        {
+            String c = String.valueOf( message.charAt( i ) );
+
+            if ( c.matches( "\\W" ) )
+            {
+                commandString = message.substring( 0, i );
+                message = message.substring( commandString.length() + 1 );
+                break;
+            }
+        }
+
+        return commandString;
+    }
 
     private void sendSuccessFeedback( String sender, SMSCommand command, Map<String, String> parsedMessage,
         Period period, OrganisationUnit orgunit )
@@ -558,4 +532,41 @@ public class J2MEDataValueSMSListener
 
         throw new IllegalArgumentException( "Couldn't make a period of type " + periodType.getName() + " and name " + periodName );
     }
+    
+    public void setDataValueService( DataValueService dataValueService )
+    {
+        this.dataValueService = dataValueService;
+    }
+
+    
+
+    public void setDataElementCategoryService( DataElementCategoryService dataElementCategoryService )
+    {
+        this.dataElementCategoryService = dataElementCategoryService;
+    }
+
+
+    public void setSmsCommandService( SMSCommandService smsCommandService )
+    {
+        this.smsCommandService = smsCommandService;
+    }
+
+
+    public void setUserService( UserService userService )
+    {
+        this.userService = userService;
+    }
+
+
+    public void setRegistrationService( CompleteDataSetRegistrationService registrationService )
+    {
+        this.registrationService = registrationService;
+    }
+
+
+    public void setSmsSender( SmsSender smsSender )
+    {
+        this.smsSender = smsSender;
+    }
+
 }

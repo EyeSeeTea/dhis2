@@ -36,10 +36,16 @@ import org.hisp.dhis.sms.incoming.IncomingSms;
 import org.hisp.dhis.sms.incoming.IncomingSmsListener;
 import org.hisp.dhis.sms.incoming.SmsMessageStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.TaskExecutor;
 
 public class SmsPublisher
 {
+
     private static final Log log = LogFactory.getLog( SmsPublisher.class );
+
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
 
     private List<IncomingSmsListener> listeners;
 
@@ -49,15 +55,19 @@ public class SmsPublisher
 
     private SmsSender smsSender;
 
+    @Autowired
+    private TaskExecutor smsPublisherTaskExecutor;
+
     public void start()
     {
         messageQueue.initialize();
-
         if ( thread == null )
         {
             thread = new SMSConsumerThread();
-            thread.start();
+            smsPublisherTaskExecutor.execute( thread );
+            log.info("SMS Consumer Started" );
         }
+
     }
 
     public void stop()
@@ -70,8 +80,10 @@ public class SmsPublisher
         thread = null;
     }
 
+    
+    
     private class SMSConsumerThread
-        extends Thread
+        implements Runnable
     {
         private boolean stop;
 
@@ -99,7 +111,7 @@ public class SmsPublisher
                 }
                 catch ( InterruptedException e )
                 {
-                    e.printStackTrace();
+                    log.warn( "Thread Interupted" );
                 }
             }
         }
@@ -107,7 +119,7 @@ public class SmsPublisher
         private void fetchAndParseSMS()
         {
             IncomingSms message = messageQueue.get();
-            
+
             while ( message != null )
             {
                 log.info( "Received SMS: " + message.getText() );
@@ -122,7 +134,7 @@ public class SmsPublisher
                             return;
                         }
                     }
-                    
+
                     smsSender.sendMessage( "No command found", message.getOriginator() );
                     message.setStatus( SmsMessageStatus.UNHANDLED );
                 }
@@ -147,6 +159,8 @@ public class SmsPublisher
         }
     }
 
+
+     
     public void setMessageQueue( MessageQueue messageQueue )
     {
         this.messageQueue = messageQueue;
@@ -157,7 +171,7 @@ public class SmsPublisher
         return listeners;
     }
 
-    @Autowired(required=false)
+    @Autowired( required = false )
     public void setListeners( List<IncomingSmsListener> listeners )
     {
         this.listeners = listeners;
@@ -172,4 +186,5 @@ public class SmsPublisher
     {
         this.smsSender = smsSender;
     }
+
 }

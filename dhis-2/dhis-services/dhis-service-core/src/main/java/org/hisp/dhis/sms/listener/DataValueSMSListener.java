@@ -150,22 +150,7 @@ public class DataValueSMSListener
     @Override
     public boolean accept( IncomingSms sms )
     {
-        String message = sms.getText();
-        String commandString = null;
-
-        for ( int i = 0; i < message.length(); i++ )
-        {
-            String c = String.valueOf( message.charAt( i ) );
-            
-            if ( c.matches( "\\W" ) )
-            {
-                commandString = message.substring( 0, i );
-                message = message.substring( commandString.length() + 1 );
-                break;
-            }
-        }
-
-        return smsCommandService.getSMSCommand( commandString, ParserType.KEY_VALUE_PARSER ) != null;
+        return smsCommandService.getSMSCommand( getCommandString( sms ), ParserType.KEY_VALUE_PARSER ) != null;
     }
 
     @Transactional
@@ -173,20 +158,7 @@ public class DataValueSMSListener
     public void receive( IncomingSms sms )
     {
         String message = sms.getText();
-        String commandString = null;
-
-        for ( int i = 0; i < message.length(); i++ )
-        {
-            String c = String.valueOf( message.charAt( i ) );
-            if ( c.matches( "\\W" ) )
-            {
-                commandString = message.substring( 0, i );
-                message = message.substring( commandString.length() + 1 );
-                break;
-            }
-        }
-
-        SMSCommand smsCommand = smsCommandService.getSMSCommand( commandString, ParserType.KEY_VALUE_PARSER );
+        SMSCommand smsCommand = smsCommandService.getSMSCommand( getCommandString( sms ), ParserType.KEY_VALUE_PARSER );
         Map<String, String> parsedMessage = this.parse( message, smsCommand );
 
         Date date = lookForDate( message );
@@ -210,8 +182,8 @@ public class DataValueSMSListener
 
         if ( dataSetService.isLocked( smsCommand.getDataset(), period, orgUnit, null, null ) )
         {
-            throw new SMSParserException( "Dataset is locked for the period " + period.getStartDate() + " - "
-                + period.getEndDate() );
+            throw new SMSParserException(
+                "Dataset is locked for the period " + period.getStartDate() + " - " + period.getEndDate() );
         }
 
         boolean valueStored = false;
@@ -263,8 +235,8 @@ public class DataValueSMSListener
 
         if ( !StringUtils.isBlank( smsCommand.getSeparator() ) )
         {
-            String x = "([^\\s|" + smsCommand.getSeparator().trim() + "]+)\\s*\\" + smsCommand.getSeparator().trim() + "\\s*([\\w ]+)\\s*(\\"
-                + smsCommand.getSeparator().trim() + "|$)*\\s*";
+            String x = "([^\\s|" + smsCommand.getSeparator().trim() + "]+)\\s*\\" + smsCommand.getSeparator().trim()
+                + "\\s*([\\w ]+)\\s*(\\" + smsCommand.getSeparator().trim() + "|$)*\\s*";
             pattern = Pattern.compile( x );
         }
 
@@ -302,7 +274,7 @@ public class DataValueSMSListener
             cal.setTime( date );
             int year = Calendar.getInstance().get( Calendar.YEAR );
             int month = Calendar.getInstance().get( Calendar.MONTH );
-            
+
             if ( cal.get( Calendar.MONTH ) < month )
             {
                 cal.set( Calendar.YEAR, year );
@@ -311,7 +283,7 @@ public class DataValueSMSListener
             {
                 cal.set( Calendar.YEAR, year - 1 );
             }
-            
+
             date = cal.getTime();
         }
         catch ( Exception e )
@@ -411,8 +383,8 @@ public class DataValueSMSListener
             storedBy = "[unknown] from [" + sender + "]";
         }
 
-        DataElementCategoryOptionCombo optionCombo = dataElementCategoryService.getDataElementCategoryOptionCombo( code
-            .getOptionId() );
+        DataElementCategoryOptionCombo optionCombo = dataElementCategoryService
+            .getDataElementCategoryOptionCombo( code.getOptionId() );
 
         Period period = getPeriod( command, date );
 
@@ -434,7 +406,7 @@ public class DataValueSMSListener
         if ( !StringUtils.isEmpty( value ) )
         {
             boolean newDataValue = false;
-            
+
             if ( dv == null )
             {
                 dv = new DataValue();
@@ -492,8 +464,8 @@ public class DataValueSMSListener
                 String targetDataElementId = formula.substring( 1, formula.length() );
                 String operation = String.valueOf( formula.charAt( 0 ) );
 
-                DataElement targetDataElement = dataElementService.getDataElement( Integer
-                    .parseInt( targetDataElementId ) );
+                DataElement targetDataElement = dataElementService
+                    .getDataElement( Integer.parseInt( targetDataElementId ) );
 
                 if ( targetDataElement == null )
                 {
@@ -509,8 +481,8 @@ public class DataValueSMSListener
                 if ( targetDataValue == null )
                 {
                     targetDataValue = new DataValue();
-                    targetDataValue.setCategoryOptionCombo( dataElementCategoryService
-                        .getDefaultDataElementCategoryOptionCombo() );
+                    targetDataValue.setCategoryOptionCombo(
+                        dataElementCategoryService.getDefaultDataElementCategoryOptionCombo() );
                     targetDataValue.setSource( orgunit );
                     targetDataValue.setDataElement( targetDataElement );
                     targetDataValue.setPeriod( period );
@@ -530,7 +502,6 @@ public class DataValueSMSListener
                 {
                     targetValue = targetValue - Integer.parseInt( value );
                 }
-
 
                 targetDataValue.setValue( String.valueOf( targetValue ) );
                 targetDataValue.setLastUpdated( new java.util.Date() );
@@ -655,8 +626,8 @@ public class DataValueSMSListener
         registerCompleteDataSet( command.getDataset(), period, orgunit, storedBy );
     }
 
-    protected void sendSuccessFeedback( String sender, SMSCommand command, Map<String, String> parsedMessage,
-        Date date, OrganisationUnit orgunit )
+    protected void sendSuccessFeedback( String sender, SMSCommand command, Map<String, String> parsedMessage, Date date,
+        OrganisationUnit orgunit )
     {
         String reportBack = "Thank you! Values entered: ";
         String notInReport = "Missing values for: ";
@@ -732,7 +703,8 @@ public class DataValueSMSListener
         DataElementCategoryOptionCombo optionCombo = dataElementCategoryService
             .getDefaultDataElementCategoryOptionCombo(); // TODO
 
-        if ( registrationService.getCompleteDataSetRegistration( dataSet, period, organisationUnit, optionCombo ) == null )
+        if ( registrationService.getCompleteDataSetRegistration( dataSet, period, organisationUnit,
+            optionCombo ) == null )
         {
             registration.setDataSet( dataSet );
             registration.setPeriod( period );
@@ -756,5 +728,25 @@ public class DataValueSMSListener
         {
             registrationService.deleteCompleteDataSetRegistration( registration );
         }
+    }
+
+    private String getCommandString( IncomingSms sms )
+    {
+        String message = sms.getText();
+        String commandString = null;
+
+        for ( int i = 0; i < message.length(); i++ )
+        {
+            String c = String.valueOf( message.charAt( i ) );
+
+            if ( c.matches( "\\W" ) )
+            {
+                commandString = message.substring( 0, i );
+                message = message.substring( commandString.length() + 1 );
+                break;
+            }
+        }
+
+        return commandString;
     }
 }

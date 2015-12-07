@@ -27,6 +27,9 @@ package org.hisp.dhis.webapi.controller.sms;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.text.ParseException;
+import java.util.Date;
+
 /**
  * Zubair <rajazubair.asghar@gmail.com>
  */
@@ -51,94 +54,130 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value = "/sms")
-public class SmsController {
-	// -------------------------------------------------------------------------
-	// Dependencies
-	// -------------------------------------------------------------------------
+@RequestMapping( value = "/sms" )
+public class SmsController
+{
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
 
-	@Autowired
-	private SmsSender smsSender;
+    @Autowired
+    private SmsSender smsSender;
 
-	@Autowired
-	private WebMessageService webMessageService;
+    @Autowired
+    private WebMessageService webMessageService;
 
-	@Autowired
-	private IncomingSmsService incomingSMSService;
+    @Autowired
+    private IncomingSmsService incomingSMSService;
 
-	// -------------------------------------------------------------------------
-	// POST
-	// -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // POST
+    // -------------------------------------------------------------------------
 
-	@PreAuthorize("hasRole('ALL') or hasRole(' F_MOBILE_SENDSMS')")
-	@RequestMapping(value = "/outbound", method = RequestMethod.POST)
-	public void sendSMSMessage(@RequestParam String recipient, @RequestParam String message,
-			HttpServletResponse response, HttpServletRequest request) throws WebMessageException {
-		if (recipient == null || recipient.length() <= 0) {
-			throw new WebMessageException(WebMessageUtils.conflict("Recipient must be specified"));
-		}
+    @PreAuthorize( "hasRole('ALL') or hasRole(' F_MOBILE_SENDSMS')" )
+    @RequestMapping( value = "/outbound", method = RequestMethod.POST )
+    public void sendSMSMessage( @RequestParam String recipient, @RequestParam String message,
+        HttpServletResponse response, HttpServletRequest request )
+            throws WebMessageException
+    {
+        if ( recipient == null || recipient.length() <= 0 )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "Recipient must be specified" ) );
+        }
 
-		if (message == null || message.length() <= 0) {
-			throw new WebMessageException(WebMessageUtils.conflict("Message must be specified"));
-		}
+        if ( message == null || message.length() <= 0 )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "Message must be specified" ) );
+        }
 
-		String result = smsSender.sendMessage(message, recipient);
+        String result = smsSender.sendMessage( message, recipient );
 
-		if (result.equals("success")) {
-			webMessageService.send(WebMessageUtils.ok("Message Sent"), response, request);
-		} else {
-			throw new WebMessageException(WebMessageUtils.error("Message seding failed"));
-		}
-	}
+        if ( result.equals( "success" ) )
+        {
+            webMessageService.send( WebMessageUtils.ok( "Message Sent" ), response, request );
+        }
+        else
+        {
+            throw new WebMessageException( WebMessageUtils.error( "Message seding failed" ) );
+        }
+    }
 
-	@PreAuthorize("hasRole('ALL') or hasRole(' F_MOBILE_SENDSMS')")
-	@RequestMapping(value = "/outbound", method = RequestMethod.POST, consumes = "application/json")
-	public void sendSMSMessage(@RequestBody Map<String, Object> jsonMessage, HttpServletResponse response,
-			HttpServletRequest request) throws WebMessageException {
-		if (jsonMessage == null) {
-			throw new WebMessageException(WebMessageUtils.conflict("Request body must be specified"));
-		}
+    @PreAuthorize( "hasRole('ALL') or hasRole(' F_MOBILE_SENDSMS')" )
+    @RequestMapping( value = "/outbound", method = RequestMethod.POST, consumes = "application/json" )
+    public void sendSMSMessage( @RequestBody Map<String, Object> jsonMessage, HttpServletResponse response,
+        HttpServletRequest request )
+            throws WebMessageException
+    {
+        if ( jsonMessage == null )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "Request body must be specified" ) );
+        }
 
-		String result = smsSender.sendMessage(jsonMessage.get("message").toString(),
-				jsonMessage.get("recipient").toString());
+        String result = smsSender.sendMessage( jsonMessage.get( "message" ).toString(),
+            jsonMessage.get( "recipient" ).toString() );
 
-		if (result.equals("success")) {
-			webMessageService.send(WebMessageUtils.ok("Message Sent"), response, request);
-		} else {
-			throw new WebMessageException(WebMessageUtils.error("Message seding failed"));
-		}
-	}
+        if ( result.equals( "success" ) )
+        {
+            webMessageService.send( WebMessageUtils.ok( "Message Sent" ), response, request );
+        }
+        else
+        {
+            throw new WebMessageException( WebMessageUtils.error( "Message seding failed" ) );
+        }
+    }
 
-	@RequestMapping(value = "/inbound", method = RequestMethod.POST)
-	@PreAuthorize("hasRole('ALL') or hasRole('F_MOBILE_SETTINGS')")
-	public void receiveSMSMessage(@RequestParam String originator, @RequestParam(required = false) String received_time,
-			@RequestParam String message, @RequestParam(defaultValue = "Unknown", required = false) String gateway,
-			HttpServletRequest request, HttpServletResponse response) throws WebMessageException {
-		if (originator == null || originator.length() <= 0) {
-			throw new WebMessageException(WebMessageUtils.conflict("originator must be specified"));
-		}
+    @RequestMapping( value = "/inbound", method = RequestMethod.POST )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_MOBILE_SETTINGS')" )
+    public void receiveSMSMessage( @RequestParam String originator,
+        @RequestParam( required = false ) String received_time, @RequestParam String message,
+        @RequestParam( defaultValue = "Unknown", required = false ) String gateway, HttpServletRequest request,
+        HttpServletResponse response)
+            throws WebMessageException, ParseException
+    {
+        if ( originator == null || originator.length() <= 0 )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "originator must be specified" ) );
+        }
 
-		if (message == null || message.length() <= 0) {
-			throw new WebMessageException(WebMessageUtils.conflict("Message must be specified"));
-		}
+        if ( message == null || message.length() <= 0 )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "Message must be specified" ) );
+        }
 
-		int smsid = incomingSMSService.save(message, originator, gateway);
+        int smsId = incomingSMSService.save( message, originator, gateway, received_time );
+        if ( smsId < 0 )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "Date cannot be parsed" ) );
+        }
+        else
+        {
+            webMessageService.send( WebMessageUtils.ok( "Received: SMS ID " + smsId ), response, request );
+        }
 
-		webMessageService.send(WebMessageUtils.ok("Received: SMS ID " + smsid), response, request);
-	}
+    }
 
-	@RequestMapping(value = "/inbound", method = RequestMethod.POST, consumes = "application/json")
-	@PreAuthorize("hasRole('ALL') or hasRole('F_MOBILE_SETTINGS')")
-	public void receiveSMSMessage(@RequestBody Map<String, Object> jsonMassage, HttpServletRequest request,
-			HttpServletResponse response) throws WebMessageException {
-		if (jsonMassage == null) {
-			throw new WebMessageException(WebMessageUtils.conflict("RequestBody must not be empty"));
-		}
+    @RequestMapping( value = "/inbound", method = RequestMethod.POST, consumes = "application/json" )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_MOBILE_SETTINGS')" )
+    public void receiveSMSMessage( @RequestBody Map<String, Object> jsonMassage, HttpServletRequest request,
+        HttpServletResponse response )
+            throws WebMessageException, ParseException
+    {
+        if ( jsonMassage == null )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "RequestBody must not be empty" ) );
+        }
 
-		int smsid = incomingSMSService.save(jsonMassage.get("message").toString(), jsonMassage.get("originator").toString(),
-				jsonMassage.get("gateway").toString());
+        int smsId = incomingSMSService.save( jsonMassage.get( "message" ).toString(),
+            jsonMassage.get( "originator" ).toString(), jsonMassage.get( "gateway" ).toString(),
+            jsonMassage.get( "received_time" ).toString() );
 
-		webMessageService.send(WebMessageUtils.ok("Received: SMS ID " + smsid), response, request);
-	}
-
+        if ( smsId < 0 )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "Date cannot be parsed" ) );
+        }
+        else
+        {
+            webMessageService.send( WebMessageUtils.ok( "Received: SMS ID " + smsId ), response, request );
+        }
+    }
 }

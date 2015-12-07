@@ -49,25 +49,19 @@ import org.hisp.dhis.sms.parse.SMSParserException;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
 
-public class ProgramStageDataEntrySMSListener 
+public class ProgramStageDataEntrySMSListener
     implements IncomingSmsListener
-{    
+{
     private static final String defaultPattern = "([a-zA-Z]+)\\s*(\\d+)";
-    
-    private SMSCommandService smsCommandService;
 
-    public void setSmsCommandService( SMSCommandService smsCommandService )
-    {
-        this.smsCommandService = smsCommandService;
-    }
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
+
+    private SMSCommandService smsCommandService;
 
     private UserService userService;
 
-    public void setUserService( UserService userService )
-    {
-        this.userService = userService;
-    }
-    
     // -------------------------------------------------------------------------
     // IncomingSmsListener implementation
     // -------------------------------------------------------------------------
@@ -75,49 +69,21 @@ public class ProgramStageDataEntrySMSListener
     @Override
     public boolean accept( IncomingSms sms )
     {
-        String message = sms.getText();
-        String commandString = null;
-
-        for ( int i = 0; i < message.length(); i++ )
-        {
-            String c = String.valueOf( message.charAt( i ) );
-            if ( c.matches( "\\W" ) )
-            {
-                commandString = message.substring( 0, i );
-                message = message.substring( commandString.length() + 1 );
-                break;
-            }
-        }
-
-        return smsCommandService.getSMSCommand( commandString, ParserType.PROGRAM_STAGE_DATAENTRY_PARSER ) != null;
+        return smsCommandService.getSMSCommand( getCommandString( sms ),
+            ParserType.PROGRAM_STAGE_DATAENTRY_PARSER ) != null;
     }
 
     @Override
     public void receive( IncomingSms sms )
     {
         String message = sms.getText();
-        String commandString = null;
-
-        for ( int i = 0; i < message.length(); i++ )
-        {
-            String c = String.valueOf( message.charAt( i ) );
-            if ( c.matches( "\\W" ) )
-            {
-                commandString = message.substring( 0, i );
-                message = message.substring( commandString.length() + 1 );
-                break;
-            }
-        }
-
-        SMSCommand smsCommand = smsCommandService.getSMSCommand( commandString,
+        SMSCommand smsCommand = smsCommandService.getSMSCommand( getCommandString( sms ),
             ParserType.TRACKED_ENTITY_REGISTRATION_PARSER );
-        
+
         this.parse( message, smsCommand );
 
         lookForDate( message );
-        
-        //TODO what to do with the above?
-        
+
         String senderPhoneNumber = StringUtils.replace( sms.getOriginator(), "+", "" );
         Collection<OrganisationUnit> orgUnits = getOrganisationUnitsByPhoneNumber( senderPhoneNumber );
 
@@ -133,7 +99,7 @@ public class ProgramStageDataEntrySMSListener
             }
         }
     }
-    
+
     private Map<String, String> parse( String message, SMSCommand smsCommand )
     {
         HashMap<String, String> output = new HashMap<>();
@@ -158,7 +124,7 @@ public class ProgramStageDataEntrySMSListener
 
         return output;
     }
-    
+
     private Date lookForDate( String message )
     {
         if ( !message.contains( " " ) )
@@ -177,7 +143,7 @@ public class ProgramStageDataEntrySMSListener
             cal.setTime( date );
             int year = Calendar.getInstance().get( Calendar.YEAR );
             int month = Calendar.getInstance().get( Calendar.MONTH );
-            
+
             if ( cal.get( Calendar.MONTH ) < month )
             {
                 cal.set( Calendar.YEAR, year );
@@ -186,7 +152,7 @@ public class ProgramStageDataEntrySMSListener
             {
                 cal.set( Calendar.YEAR, year - 1 );
             }
-            
+
             date = cal.getTime();
         }
         catch ( Exception e )
@@ -196,12 +162,12 @@ public class ProgramStageDataEntrySMSListener
 
         return date;
     }
-    
+
     private Collection<OrganisationUnit> getOrganisationUnitsByPhoneNumber( String sender )
     {
         Collection<OrganisationUnit> orgUnits = new ArrayList<>();
         Collection<User> users = userService.getUsersByPhoneNumber( sender );
-        
+
         for ( User u : users )
         {
             if ( u.getOrganisationUnits() != null )
@@ -211,5 +177,35 @@ public class ProgramStageDataEntrySMSListener
         }
 
         return orgUnits;
+    }
+
+    private String getCommandString( IncomingSms sms )
+    {
+        String message = sms.getText();
+        String commandString = null;
+
+        for ( int i = 0; i < message.length(); i++ )
+        {
+            String c = String.valueOf( message.charAt( i ) );
+
+            if ( c.matches( "\\W" ) )
+            {
+                commandString = message.substring( 0, i );
+                message = message.substring( commandString.length() + 1 );
+                break;
+            }
+        }
+
+        return commandString;
+    }
+
+    public void setSmsCommandService( SMSCommandService smsCommandService )
+    {
+        this.smsCommandService = smsCommandService;
+    }
+
+    public void setUserService( UserService userService )
+    {
+        this.userService = userService;
     }
 }

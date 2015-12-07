@@ -63,50 +63,25 @@ import org.hisp.dhis.user.UserService;
 public class TrackedEntityRegistrationSMSListener
     implements IncomingSmsListener
 {
-    private static final String defaultPattern = "([a-zA-Z]+)\\s*(\\d+)";
-    
-    private SMSCommandService smsCommandService;
 
-    public void setSmsCommandService( SMSCommandService smsCommandService )
-    {
-        this.smsCommandService = smsCommandService;
-    }
+    private static final String defaultPattern = "([a-zA-Z]+)\\s*(\\d+)";
+
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
+
+    private SMSCommandService smsCommandService;
 
     private UserService userService;
 
-    public void setUserService( UserService userService )
-    {
-        this.userService = userService;
-    }
-
     private TrackedEntityService trackedEntityService;
-
-    public void setTrackedEntityService( TrackedEntityService trackedEntityService )
-    {
-        this.trackedEntityService = trackedEntityService;
-    }
 
     private TrackedEntityInstanceService trackedEntityInstanceService;
 
-    public void setTrackedEntityInstanceService( TrackedEntityInstanceService trackedEntityInstanceService )
-    {
-        this.trackedEntityInstanceService = trackedEntityInstanceService;
-    }
-
     private ProgramInstanceService programInstanceService;
 
-    public void setProgramInstanceService( ProgramInstanceService programInstanceService )
-    {
-        this.programInstanceService = programInstanceService;
-    }
-
     private SmsSender smsSender;
-    
-    public void setSmsSender( SmsSender smsSender )
-    {
-        this.smsSender = smsSender;
-    }
-    
+
     // -------------------------------------------------------------------------
     // IncomingSmsListener implementation
     // -------------------------------------------------------------------------
@@ -114,43 +89,16 @@ public class TrackedEntityRegistrationSMSListener
     @Override
     public boolean accept( IncomingSms sms )
     {
-        String message = sms.getText();
-        String commandString = null;
-
-        for ( int i = 0; i < message.length(); i++ )
-        {
-            String c = String.valueOf( message.charAt( i ) );
-            if ( c.matches( "\\W" ) )
-            {
-                commandString = message.substring( 0, i );
-                message = message.substring( commandString.length() + 1 );
-                break;
-            }
-        }
-
-        return smsCommandService.getSMSCommand( commandString, ParserType.TRACKED_ENTITY_REGISTRATION_PARSER ) != null;
+        return smsCommandService.getSMSCommand( getCommandString( sms ), ParserType.TRACKED_ENTITY_REGISTRATION_PARSER ) != null;
     }
 
     @Override
     public void receive( IncomingSms sms )
     {
         String message = sms.getText();
-        String commandString = null;
-
-        for ( int i = 0; i < message.length(); i++ )
-        {
-            String c = String.valueOf( message.charAt( i ) );
-            if ( c.matches( "\\W" ) )
-            {
-                commandString = message.substring( 0, i );
-                message = message.substring( commandString.length() + 1 );
-                break;
-            }
-        }
-
-        SMSCommand smsCommand = smsCommandService.getSMSCommand( commandString,
+        SMSCommand smsCommand = smsCommandService.getSMSCommand( getCommandString( sms ),
             ParserType.TRACKED_ENTITY_REGISTRATION_PARSER );
-        
+
         Map<String, String> parsedMessage = this.parse( message, smsCommand );
 
         Date date = lookForDate( message );
@@ -180,12 +128,11 @@ public class TrackedEntityRegistrationSMSListener
         {
             if ( parsedMessage.containsKey( code.getCode().toUpperCase() ) )
             {
-                TrackedEntityAttributeValue trackedEntityAttributeValue = this.createTrackedEntityAttributeValue(
-                    parsedMessage, code, smsCommand, trackedEntityInstance );
+                TrackedEntityAttributeValue trackedEntityAttributeValue = this
+                    .createTrackedEntityAttributeValue( parsedMessage, code, smsCommand, trackedEntityInstance );
                 patientAttributeValues.add( trackedEntityAttributeValue );
             }
         }
-        
 
         int trackedEntityInstanceId = 0;
         if ( patientAttributeValues.size() > 0 )
@@ -194,9 +141,11 @@ public class TrackedEntityRegistrationSMSListener
                 null, null, patientAttributeValues );
         }
 
-        programInstanceService.enrollTrackedEntityInstance( trackedEntityInstanceService.getTrackedEntityInstance( trackedEntityInstanceId ), smsCommand.getProgram(), new Date(), date, orgUnit );
+        programInstanceService.enrollTrackedEntityInstance(
+            trackedEntityInstanceService.getTrackedEntityInstance( trackedEntityInstanceId ), smsCommand.getProgram(),
+            new Date(), date, orgUnit );
         smsSender.sendMessage( "Register new User successfully", senderPhoneNumber );
-        
+
     }
 
     private TrackedEntityAttributeValue createTrackedEntityAttributeValue( Map<String, String> parsedMessage,
@@ -233,7 +182,7 @@ public class TrackedEntityRegistrationSMSListener
         if ( orgUnit == null && orgUnits.size() > 1 )
         {
             String messageListingOrgUnits = smsCommand.getMoreThanOneOrgUnitMessage();
-            
+
             for ( Iterator<OrganisationUnit> i = orgUnits.iterator(); i.hasNext(); )
             {
                 OrganisationUnit o = i.next();
@@ -243,7 +192,7 @@ public class TrackedEntityRegistrationSMSListener
                     messageListingOrgUnits += ",";
                 }
             }
-            
+
             throw new SMSParserException( messageListingOrgUnits );
         }
 
@@ -283,7 +232,7 @@ public class TrackedEntityRegistrationSMSListener
             cal.setTime( date );
             int year = Calendar.getInstance().get( Calendar.YEAR );
             int month = Calendar.getInstance().get( Calendar.MONTH );
-            
+
             if ( cal.get( Calendar.MONTH ) < month )
             {
                 cal.set( Calendar.YEAR, year );
@@ -292,7 +241,7 @@ public class TrackedEntityRegistrationSMSListener
             {
                 cal.set( Calendar.YEAR, year - 1 );
             }
-            
+
             date = cal.getTime();
         }
         catch ( Exception e )
@@ -307,16 +256,16 @@ public class TrackedEntityRegistrationSMSListener
     {
         HashMap<String, String> output = new HashMap<>();
         Pattern pattern = Pattern.compile( defaultPattern );
-        
+
         if ( !StringUtils.isBlank( smsCommand.getSeparator() ) )
         {
             String x = "(\\w+)\\s*\\" + smsCommand.getSeparator().trim() + "\\s*([\\w ]+)\\s*(\\"
                 + smsCommand.getSeparator().trim() + "|$)*\\s*";
             pattern = Pattern.compile( x );
         }
-        
+
         Matcher matcher = pattern.matcher( message );
-        
+
         while ( matcher.find() )
         {
             String key = matcher.group( 1 );
@@ -330,4 +279,55 @@ public class TrackedEntityRegistrationSMSListener
 
         return output;
     }
+
+    private String getCommandString( IncomingSms sms )
+    {
+        String message = sms.getText();
+        String commandString = null;
+
+        for ( int i = 0; i < message.length(); i++ )
+        {
+            String c = String.valueOf( message.charAt( i ) );
+
+            if ( c.matches( "\\W" ) )
+            {
+                commandString = message.substring( 0, i );
+                message = message.substring( commandString.length() + 1 );
+                break;
+            }
+        }
+
+        return commandString;
+    }
+
+    public void setSmsCommandService( SMSCommandService smsCommandService )
+    {
+        this.smsCommandService = smsCommandService;
+    }
+
+    public void setUserService( UserService userService )
+    {
+        this.userService = userService;
+    }
+
+    public void setTrackedEntityService( TrackedEntityService trackedEntityService )
+    {
+        this.trackedEntityService = trackedEntityService;
+    }
+
+    public void setTrackedEntityInstanceService( TrackedEntityInstanceService trackedEntityInstanceService )
+    {
+        this.trackedEntityInstanceService = trackedEntityInstanceService;
+    }
+
+    public void setProgramInstanceService( ProgramInstanceService programInstanceService )
+    {
+        this.programInstanceService = programInstanceService;
+    }
+
+    public void setSmsSender( SmsSender smsSender )
+    {
+        this.smsSender = smsSender;
+    }
+
 }

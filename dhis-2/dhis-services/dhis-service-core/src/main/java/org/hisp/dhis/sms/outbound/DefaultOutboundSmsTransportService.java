@@ -72,10 +72,7 @@ public class DefaultOutboundSmsTransportService
 
     private static final String SMPP_GATEWAY = "smpp_gw";
 
-    public static final Map<String, String> GATEWAY_MAP = new HashMap<>(); // TODO
-                                                                           // fix,
-                                                                           // poor
-                                                                           // solution
+    public static final Map<String, String> GATEWAY_MAP = new HashMap<>(); 
 
     private SmsConfiguration config;
 
@@ -86,25 +83,10 @@ public class DefaultOutboundSmsTransportService
     // -------------------------------------------------------------------------
 
     private IInboundMessageNotification smppInboundMessageNotification;
-
-    public void setSmppInboundMessageNotification( IInboundMessageNotification smppInboundMessageNotification )
-    {
-        this.smppInboundMessageNotification = smppInboundMessageNotification;
-    }
-
+    
     private OutboundSmsService outboundSmsService;
-
-    public void setOutboundSmsService( OutboundSmsService outboundSmsService )
-    {
-        this.outboundSmsService = outboundSmsService;
-    }
-
+    
     private SmsPublisher smsPublisher;
-
-    public void setSmsPublisher( SmsPublisher smsPublisher )
-    {
-        this.smsPublisher = smsPublisher;
-    }
 
     // -------------------------------------------------------------------------
     // OutboundSmsTransportService implementation
@@ -483,7 +465,7 @@ public class DefaultOutboundSmsTransportService
             {
                 removeGroup( recipient );
             }
-            
+
         }
 
         if ( outboundMessage.getMessageStatus() == MessageStatuses.SENT )
@@ -604,5 +586,23 @@ public class DefaultOutboundSmsTransportService
         }
 
         return SMSGatewayStatus.UNDEFINED;
+    }
+    
+    public void setSmppInboundMessageNotification( IInboundMessageNotification smppInboundMessageNotification )
+    {
+        this.smppInboundMessageNotification = smppInboundMessageNotification;
+    }
+
+    
+
+    public void setOutboundSmsService( OutboundSmsService outboundSmsService )
+    {
+        this.outboundSmsService = outboundSmsService;
+    }
+
+
+    public void setSmsPublisher( SmsPublisher smsPublisher )
+    {
+        this.smsPublisher = smsPublisher;
     }
 }
