@@ -645,6 +645,9 @@
 
 	<bean id="smsPublisherTaskExecutor"
 		class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+		<property name="corePoolSize" value="5" />
+		<property name="maxPoolSize" value="10" />
+		<property name="queueCapacity" value="25" />
 	</bean>
 
 
@@ -1173,6 +1176,7 @@
 		class="org.hisp.dhis.sms.DatabaseSupportedInternalMemoryMessageQueue">
 		<property name="smsStore" ref="org.hisp.dhis.sms.hibernate.IncomingSmsStore" />
 	</bean>
+
 
 	<bean id="org.hisp.dhis.sms.SmsPublisher" class="org.hisp.dhis.sms.SmsPublisher">
 		<property name="messageQueue" ref="org.hisp.dhis.sms.MessageQueue" />

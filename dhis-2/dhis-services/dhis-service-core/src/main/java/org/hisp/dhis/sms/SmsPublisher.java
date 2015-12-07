@@ -65,7 +65,7 @@ public class SmsPublisher
         {
             thread = new SMSConsumerThread();
             smsPublisherTaskExecutor.execute( thread );
-            log.info("SMS Consumer Started" );
+            log.info( "SMS Consumer Started" );
         }
 
     }
@@ -80,8 +80,6 @@ public class SmsPublisher
         thread = null;
     }
 
-    
-    
     private class SMSConsumerThread
         implements Runnable
     {
@@ -111,7 +109,7 @@ public class SmsPublisher
                 }
                 catch ( InterruptedException e )
                 {
-                    log.warn( "Thread Interupted" );
+                    e.printStackTrace();
                 }
             }
         }
@@ -159,8 +157,6 @@ public class SmsPublisher
         }
     }
 
-
-     
     public void setMessageQueue( MessageQueue messageQueue )
     {
         this.messageQueue = messageQueue;
