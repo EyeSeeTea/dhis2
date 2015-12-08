@@ -72,23 +72,52 @@ import java.util.regex.Pattern;
 public class J2MEDataValueSMSListener
     implements IncomingSmsListener
 {
-    
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
     private DataValueService dataValueService;
-    
+
+    public void setDataValueService( DataValueService dataValueService )
+    {
+        this.dataValueService = dataValueService;
+    }
+
     private DataElementCategoryService dataElementCategoryService;
-    
+
+    public void setDataElementCategoryService( DataElementCategoryService dataElementCategoryService )
+    {
+        this.dataElementCategoryService = dataElementCategoryService;
+    }
+
     private SMSCommandService smsCommandService;
-    
+
+    public void setSmsCommandService( SMSCommandService smsCommandService )
+    {
+        this.smsCommandService = smsCommandService;
+    }
+
     private UserService userService;
-    
+
+    public void setUserService( UserService userService )
+    {
+        this.userService = userService;
+    }
+
     private CompleteDataSetRegistrationService registrationService;
-    
+
+    public void setRegistrationService( CompleteDataSetRegistrationService registrationService )
+    {
+        this.registrationService = registrationService;
+    }
+
     private SmsSender smsSender;
 
+    public void setSmsSender( SmsSender smsSender )
+    {
+        this.smsSender = smsSender;
+    }
 
     // -------------------------------------------------------------------------
     // IncomingSmsListener implementation
@@ -106,12 +135,12 @@ public class J2MEDataValueSMSListener
     public void receive( IncomingSms sms )
     {
         String message = sms.getText();
-        
+
         SMSCommand smsCommand = smsCommandService.getSMSCommand( getCommandString( sms ), ParserType.J2ME_PARSER );
-        
+
         String token[] = message.split( "!" );
         Map<String, String> parsedMessage = this.parse( token[1], smsCommand );
-        
+
         String senderPhoneNumber = StringUtils.replace( sms.getOriginator(), "+", "" );
         Collection<OrganisationUnit> orgUnits = getOrganisationUnitsByPhoneNumber( senderPhoneNumber );
 
@@ -194,8 +223,8 @@ public class J2MEDataValueSMSListener
             storedBy = "[unknown] from [" + sender + "]";
         }
 
-        DataElementCategoryOptionCombo optionCombo = dataElementCategoryService.getDataElementCategoryOptionCombo( code
-            .getOptionId() );
+        DataElementCategoryOptionCombo optionCombo = dataElementCategoryService
+            .getDataElementCategoryOptionCombo( code.getOptionId() );
 
         DataValue dv = dataValueService.getDataValue( code.getDataElement(), period, orgUnit, optionCombo );
 
@@ -342,7 +371,8 @@ public class J2MEDataValueSMSListener
         DataElementCategoryOptionCombo optionCombo = dataElementCategoryService
             .getDefaultDataElementCategoryOptionCombo(); // TODO
 
-        if ( registrationService.getCompleteDataSetRegistration( dataSet, period, organisationUnit, optionCombo ) == null )
+        if ( registrationService.getCompleteDataSetRegistration( dataSet, period, organisationUnit,
+            optionCombo ) == null )
         {
             registration.setDataSet( dataSet );
             registration.setPeriod( period );
@@ -353,7 +383,7 @@ public class J2MEDataValueSMSListener
             registrationService.saveCompleteDataSetRegistration( registration, false );
         }
     }
-    
+
     private String getCommandString( IncomingSms sms )
     {
         String message = sms.getText();
@@ -436,17 +466,17 @@ public class J2MEDataValueSMSListener
             String pattern = "yyyy-MM-dd";
             SimpleDateFormat formatter = new SimpleDateFormat( pattern );
             Date date = null;
-            
+
             try
             {
                 date = formatter.parse( periodName );
             }
             catch ( ParseException e )
             {
-                throw new IllegalArgumentException( "Couldn't make a period of type " + periodType.getName()
-                    + " and name " + periodName, e );
+                throw new IllegalArgumentException(
+                    "Couldn't make a period of type " + periodType.getName() + " and name " + periodName, e );
             }
-            
+
             return periodType.createPeriod( date );
         }
 
@@ -462,8 +492,8 @@ public class J2MEDataValueSMSListener
             }
             catch ( ParseException e )
             {
-                throw new IllegalArgumentException( "Couldn't make a period of type " + periodType.getName()
-                    + " and name " + periodName, e );
+                throw new IllegalArgumentException(
+                    "Couldn't make a period of type " + periodType.getName() + " and name " + periodName, e );
             }
 
             return periodType.createPeriod( date );
@@ -501,7 +531,7 @@ public class J2MEDataValueSMSListener
             Calendar cal = Calendar.getInstance();
 
             int month = 0;
-            
+
             if ( periodName.substring( 0, periodName.indexOf( " " ) ).equals( "Jan" ) )
             {
                 month = 1;
@@ -530,43 +560,7 @@ public class J2MEDataValueSMSListener
             }
         }
 
-        throw new IllegalArgumentException( "Couldn't make a period of type " + periodType.getName() + " and name " + periodName );
+        throw new IllegalArgumentException(
+            "Couldn't make a period of type " + periodType.getName() + " and name " + periodName );
     }
-    
-    public void setDataValueService( DataValueService dataValueService )
-    {
-        this.dataValueService = dataValueService;
-    }
-
-    
-
-    public void setDataElementCategoryService( DataElementCategoryService dataElementCategoryService )
-    {
-        this.dataElementCategoryService = dataElementCategoryService;
-    }
-
-
-    public void setSmsCommandService( SMSCommandService smsCommandService )
-    {
-        this.smsCommandService = smsCommandService;
-    }
-
-
-    public void setUserService( UserService userService )
-    {
-        this.userService = userService;
-    }
-
-
-    public void setRegistrationService( CompleteDataSetRegistrationService registrationService )
-    {
-        this.registrationService = registrationService;
-    }
-
-
-    public void setSmsSender( SmsSender smsSender )
-    {
-        this.smsSender = smsSender;
-    }
-
 }

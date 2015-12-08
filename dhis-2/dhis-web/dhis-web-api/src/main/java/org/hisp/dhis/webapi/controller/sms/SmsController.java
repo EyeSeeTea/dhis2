@@ -29,8 +29,6 @@ package org.hisp.dhis.webapi.controller.sms;
  */
 
 import java.text.ParseException;
-import java.util.Date;
-
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;

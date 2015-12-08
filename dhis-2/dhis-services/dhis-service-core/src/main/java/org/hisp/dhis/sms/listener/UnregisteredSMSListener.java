@@ -53,7 +53,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UnregisteredSMSListener
     implements IncomingSmsListener
 {
-    
+
     public static final String USER_NAME = "anonymous";
 
     // -------------------------------------------------------------------------
@@ -62,14 +62,38 @@ public class UnregisteredSMSListener
 
     private SMSCommandService smsCommandService;
 
+    public void setSmsCommandService( SMSCommandService smsCommandService )
+    {
+        this.smsCommandService = smsCommandService;
+    }
+
     private UserService userService;
+
+    public void setUserService( UserService userService )
+    {
+        this.userService = userService;
+    }
 
     private MessageService messageService;
 
+    public void setMessageService( MessageService messageService )
+    {
+        this.messageService = messageService;
+    }
+
     private SmsMessageSender smsMessageSender;
+
+    public void setSmsMessageSender( SmsMessageSender smsMessageSender )
+    {
+        this.smsMessageSender = smsMessageSender;
+    }
 
     private IncomingSmsService incomingSmsService;
 
+    public void setIncomingSmsService( IncomingSmsService incomingSmsService )
+    {
+        this.incomingSmsService = incomingSmsService;
+    }
 
     // -------------------------------------------------------------------------
     // IncomingSmsListener implementation
@@ -173,30 +197,5 @@ public class UnregisteredSMSListener
         }
 
         return commandString;
-    }
-
-    public void setSmsCommandService( SMSCommandService smsCommandService )
-    {
-        this.smsCommandService = smsCommandService;
-    }
-
-    public void setUserService( UserService userService )
-    {
-        this.userService = userService;
-    }
-
-    public void setMessageService( MessageService messageService )
-    {
-        this.messageService = messageService;
-    }
-
-    public void setSmsMessageSender( SmsMessageSender smsMessageSender )
-    {
-        this.smsMessageSender = smsMessageSender;
-    }
-
-    public void setIncomingSmsService( IncomingSmsService incomingSmsService )
-    {
-        this.incomingSmsService = incomingSmsService;
     }
 }

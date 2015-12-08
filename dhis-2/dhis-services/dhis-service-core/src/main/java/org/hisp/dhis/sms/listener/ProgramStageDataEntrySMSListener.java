@@ -60,7 +60,17 @@ public class ProgramStageDataEntrySMSListener
 
     private SMSCommandService smsCommandService;
 
+    public void setSmsCommandService( SMSCommandService smsCommandService )
+    {
+        this.smsCommandService = smsCommandService;
+    }
+
     private UserService userService;
+
+    public void setUserService( UserService userService )
+    {
+        this.userService = userService;
+    }
 
     // -------------------------------------------------------------------------
     // IncomingSmsListener implementation
@@ -197,15 +207,5 @@ public class ProgramStageDataEntrySMSListener
         }
 
         return commandString;
-    }
-
-    public void setSmsCommandService( SMSCommandService smsCommandService )
-    {
-        this.smsCommandService = smsCommandService;
-    }
-
-    public void setUserService( UserService userService )
-    {
-        this.userService = userService;
     }
 }

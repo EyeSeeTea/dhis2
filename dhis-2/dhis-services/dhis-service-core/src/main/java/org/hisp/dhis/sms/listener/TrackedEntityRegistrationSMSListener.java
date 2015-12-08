@@ -72,15 +72,45 @@ public class TrackedEntityRegistrationSMSListener
 
     private SMSCommandService smsCommandService;
 
+    public void setSmsCommandService( SMSCommandService smsCommandService )
+    {
+        this.smsCommandService = smsCommandService;
+    }
+
     private UserService userService;
+
+    public void setUserService( UserService userService )
+    {
+        this.userService = userService;
+    }
 
     private TrackedEntityService trackedEntityService;
 
+    public void setTrackedEntityService( TrackedEntityService trackedEntityService )
+    {
+        this.trackedEntityService = trackedEntityService;
+    }
+
     private TrackedEntityInstanceService trackedEntityInstanceService;
+
+    public void setTrackedEntityInstanceService( TrackedEntityInstanceService trackedEntityInstanceService )
+    {
+        this.trackedEntityInstanceService = trackedEntityInstanceService;
+    }
 
     private ProgramInstanceService programInstanceService;
 
+    public void setProgramInstanceService( ProgramInstanceService programInstanceService )
+    {
+        this.programInstanceService = programInstanceService;
+    }
+
     private SmsSender smsSender;
+
+    public void setSmsSender( SmsSender smsSender )
+    {
+        this.smsSender = smsSender;
+    }
 
     // -------------------------------------------------------------------------
     // IncomingSmsListener implementation
@@ -89,7 +119,8 @@ public class TrackedEntityRegistrationSMSListener
     @Override
     public boolean accept( IncomingSms sms )
     {
-        return smsCommandService.getSMSCommand( getCommandString( sms ), ParserType.TRACKED_ENTITY_REGISTRATION_PARSER ) != null;
+        return smsCommandService.getSMSCommand( getCommandString( sms ),
+            ParserType.TRACKED_ENTITY_REGISTRATION_PARSER ) != null;
     }
 
     @Override
@@ -222,12 +253,15 @@ public class TrackedEntityRegistrationSMSListener
         }
 
         Date date = null;
+        
         String dateString = message.trim().split( " " )[0];
+        
         SimpleDateFormat format = new SimpleDateFormat( "ddMM" );
 
         try
         {
             Calendar cal = Calendar.getInstance();
+            
             date = format.parse( dateString );
             cal.setTime( date );
             int year = Calendar.getInstance().get( Calendar.YEAR );
@@ -299,35 +333,4 @@ public class TrackedEntityRegistrationSMSListener
 
         return commandString;
     }
-
-    public void setSmsCommandService( SMSCommandService smsCommandService )
-    {
-        this.smsCommandService = smsCommandService;
-    }
-
-    public void setUserService( UserService userService )
-    {
-        this.userService = userService;
-    }
-
-    public void setTrackedEntityService( TrackedEntityService trackedEntityService )
-    {
-        this.trackedEntityService = trackedEntityService;
-    }
-
-    public void setTrackedEntityInstanceService( TrackedEntityInstanceService trackedEntityInstanceService )
-    {
-        this.trackedEntityInstanceService = trackedEntityInstanceService;
-    }
-
-    public void setProgramInstanceService( ProgramInstanceService programInstanceService )
-    {
-        this.programInstanceService = programInstanceService;
-    }
-
-    public void setSmsSender( SmsSender smsSender )
-    {
-        this.smsSender = smsSender;
-    }
-
 }
