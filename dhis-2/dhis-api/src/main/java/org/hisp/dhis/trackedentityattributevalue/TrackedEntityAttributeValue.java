@@ -28,6 +28,7 @@ package org.hisp.dhis.trackedentityattributevalue;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -56,13 +57,20 @@ public class TrackedEntityAttributeValue
      */
     private static final long serialVersionUID = -4469496681709547707L;
 
-    public static final String UNKNOWN = " ";
-
     private TrackedEntityAttribute attribute;
 
     private TrackedEntityInstance entityInstance;
 
+    private String encryptedValue;
+
+    private String plainValue;
+
+    /**
+     * This value is only used to store values from setValue when we don't know
+     * if attribute is set or not.
+    */
     private String value;
+
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -74,16 +82,16 @@ public class TrackedEntityAttributeValue
 
     public TrackedEntityAttributeValue( TrackedEntityAttribute attribute, TrackedEntityInstance entityInstance )
     {
-        this.attribute = attribute;
-        this.entityInstance = entityInstance;
+        setAttribute( attribute );
+        setEntityInstance( entityInstance );
     }
 
     public TrackedEntityAttributeValue( TrackedEntityAttribute attribute, TrackedEntityInstance entityInstance,
         String value )
     {
-        this.attribute = attribute;
-        this.entityInstance = entityInstance;
-        this.value = value;
+        setAttribute( attribute );
+        setEntityInstance( entityInstance );
+        setValue( value );
     }
 
     // -------------------------------------------------------------------------
@@ -97,7 +105,7 @@ public class TrackedEntityAttributeValue
         int result = 1;
         result = prime * result + ((entityInstance == null) ? 0 : entityInstance.hashCode());
         result = prime * result + ((attribute == null) ? 0 : attribute.hashCode());
-        result = prime * result + ((value == null) ? 0 : value.hashCode());
+        result = prime * result + ((getValue() == null) ? 0 : getValue().hashCode());
         return result;
     }
 
@@ -145,14 +153,14 @@ public class TrackedEntityAttributeValue
             return false;
         }
 
-        if ( value == null )
+        if ( getValue() == null )
         {
-            if ( other.value != null )
+            if ( other.getValue() != null )
             {
                 return false;
             }
         }
-        else if ( !value.equals( other.value ) )
+        else if ( !getValue().equals( other.getValue() ) )
         {
             return false;
         }
@@ -163,22 +171,70 @@ public class TrackedEntityAttributeValue
     @Override
     public String toString()
     {
-        return "[Tracked attribute=" + attribute + ", entityInstance=" + entityInstance + ", value='" + value + "'"
-            + "]";
+        return "[Tracked attribute=" + attribute + ", entityInstance=" + entityInstance + ", value='" + getValue() + "']";
     }
 
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
 
+    /**
+     * Retrieves the encrypted value if the attribute is confidential. If the 
+     * value is not confidential, returns old value. Should be null unless it was
+     * confidential at an earlier stage.
+     * 
+     * @return String with decrypted value or null.
+     */
+    @JsonIgnore
+    public String getEncryptedValue()
+    {
+        return (getAttribute().getConfidential() && this.value != null ? this.value : this.encryptedValue);
+    }
+
+    public void setEncryptedValue( String encryptedValue )
+    {
+        this.encryptedValue = encryptedValue;
+    }
+
+    /**
+     * Retrieves the plain-text value is the attribute isn't confidential. If 
+     * the value is confidential, this value should be null, unless it was 
+     * non-confidential at an earlier stage.
+     * 
+     * @return String with plain-text value or null.
+     */
+    @JsonIgnore
+    public String getPlainValue()
+    {
+        return (!getAttribute().getConfidential() && this.value != null ? this.value : this.plainValue);
+    }
+
+    public void setPlainValue( String plainValue )
+    {
+        this.plainValue = plainValue;
+    }
+
+    /**
+     * Returns the encrypted or the plain-text value, based on the attribute's 
+     * confidential value.
+     * 
+     * @return String with value, either plain-text or decrypted.
+     */
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getValue()
     {
-        return value;
+        return (getAttribute().getConfidential() ? this.getEncryptedValue() : this.getPlainValue());
     }
 
+    /**
+     * Since we never can be 100% certain Attribute is not null, we store the 
+     * value in a temporary variable. The getEncrypted and getPlaintext methods 
+     * will handle this value when requested.
+     * 
+     * @param value the value to be stored
+     */
     public void setValue( String value )
     {
         this.value = value;

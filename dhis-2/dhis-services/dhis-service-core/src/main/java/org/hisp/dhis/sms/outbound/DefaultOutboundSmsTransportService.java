@@ -72,7 +72,7 @@ public class DefaultOutboundSmsTransportService
 
     private static final String SMPP_GATEWAY = "smpp_gw";
 
-    public static final Map<String, String> GATEWAY_MAP = new HashMap<>(); 
+    public static final Map<String, String> GATEWAY_MAP = new HashMap<>();
 
     private SmsConfiguration config;
 
@@ -177,7 +177,6 @@ public class DefaultOutboundSmsTransportService
             message = "sms_unable_or_there_is_no_gateway_service_not_started";
             log.debug( "Sms not enabled or there is no any gateway, won't start service" );
         }
-
     }
 
     @Override
@@ -300,7 +299,6 @@ public class DefaultOutboundSmsTransportService
 
         if ( gatewayConfig instanceof BulkSmsGatewayConfig )
         {
-
             gatewayId = GATEWAY_MAP.get( BULK_GATEWAY );
         }
         else if ( gatewayConfig instanceof ClickatellGatewayConfig )
@@ -421,22 +419,17 @@ public class DefaultOutboundSmsTransportService
             outboundMessage.setFrom( longNumber );
         }
 
-        boolean sent = false;
-
         try
         {
             log.info( "Sending message " + sms );
 
             if ( gatewayId == null || gatewayId.isEmpty() )
             {
-                sent = getService().sendMessage( outboundMessage );
-
+                getService().sendMessage( outboundMessage );
             }
             else
             {
-
-                sent = getService().sendMessage( outboundMessage, gatewayId );
-
+                getService().sendMessage( outboundMessage, gatewayId );
             }
         }
         catch ( SMSLibException e )
@@ -465,12 +458,10 @@ public class DefaultOutboundSmsTransportService
             {
                 removeGroup( recipient );
             }
-
         }
 
         if ( outboundMessage.getMessageStatus() == MessageStatuses.SENT )
         {
-
             message = "success";
             sms.setStatus( OutboundSmsStatus.SENT );
         }

@@ -36,9 +36,9 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.google.common.collect.Sets;
-import org.hisp.dhis.attribute.AttributeValue;
+
+import org.hisp.dhis.common.BaseDimensionalItemObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeStrategy;
@@ -48,6 +48,7 @@ import org.hisp.dhis.common.adapter.JacksonPeriodTypeSerializer;
 import org.hisp.dhis.common.annotation.Scanned;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
+import org.hisp.dhis.dataapproval.DataApprovalWorkflow;
 import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
@@ -57,7 +58,6 @@ import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataentryform.DataEntryForm;
 import org.hisp.dhis.indicator.Indicator;
-import org.hisp.dhis.legend.LegendSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.user.UserGroup;
@@ -73,7 +73,7 @@ import java.util.Set;
  */
 @JacksonXmlRootElement( localName = "dataSet", namespace = DxfNamespaces.DXF_2_0 )
 public class DataSet
-    extends BaseNameableObject
+    extends BaseDimensionalItemObject
     implements VersionedObject
 {
     public static final int NO_EXPIRY = 0;
@@ -157,14 +157,9 @@ public class DataSet
     private boolean notifyCompletingUser;
 
     /**
-     * Indicating whether to approve data for this data set.
+     * The approval workflow (if any) for this data set.
      */
-    private boolean approveData;
-
-    /**
-     * Set of the dynamic attributes values that belong to this data element.
-     */
-    private Set<AttributeValue> attributeValues = new HashSet<>();
+    private DataApprovalWorkflow workflow;
 
     // -------------------------------------------------------------------------
     // Form properties
@@ -214,18 +209,12 @@ public class DataSet
      */
     private boolean renderHorizontally;
 
-    /**
-     * The legend set for this indicator.
-     */
-    private LegendSet legendSet;
-
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
 
     public DataSet()
     {
-
     }
 
     public DataSet( String name )
@@ -254,7 +243,7 @@ public class DataSet
     // -------------------------------------------------------------------------
     // Logic
     // -------------------------------------------------------------------------
-
+    
     public void addOrganisationUnit( OrganisationUnit organisationUnit )
     {
         sources.add( organisationUnit );
@@ -637,28 +626,14 @@ public class DataSet
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public boolean isApproveData()
+    public DataApprovalWorkflow getWorkflow()
     {
-        return approveData;
+        return workflow;
     }
 
-    public void setApproveData( boolean approveData )
+    public void setWorkflow( DataApprovalWorkflow workflow )
     {
-        this.approveData = approveData;
-    }
-
-    @JsonProperty( "attributeValues" )
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlElementWrapper( localName = "attributeValues", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "attributeValue", namespace = DxfNamespaces.DXF_2_0 )
-    public Set<AttributeValue> getAttributeValues()
-    {
-        return attributeValues;
-    }
-
-    public void setAttributeValues( Set<AttributeValue> attributeValues )
-    {
-        this.attributeValues = attributeValues;
+        this.workflow = workflow;
     }
 
     @JsonProperty
@@ -765,20 +740,6 @@ public class DataSet
         this.dataElementDecoration = dataElementDecoration;
     }
 
-    @JsonProperty
-    @JsonSerialize( as = BaseIdentifiableObject.class )
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public LegendSet getLegendSet()
-    {
-        return legendSet;
-    }
-
-    public void setLegendSet( LegendSet legendSet )
-    {
-        this.legendSet = legendSet;
-    }
-
     @Override
     public void mergeWith( IdentifiableObject other, MergeStrategy strategy )
     {
@@ -803,14 +764,12 @@ public class DataSet
             {
                 periodType = dataSet.getPeriodType();
                 dataEntryForm = dataSet.getDataEntryForm();
-                legendSet = dataSet.getLegendSet();
                 notificationRecipients = dataSet.getNotificationRecipients();
             }
             else if ( strategy.isMerge() )
             {
                 periodType = dataSet.getPeriodType() == null ? periodType : dataSet.getPeriodType();
                 dataEntryForm = dataSet.getDataEntryForm() == null ? dataEntryForm : dataSet.getDataEntryForm();
-                legendSet = dataSet.getLegendSet() == null ? legendSet : dataSet.getLegendSet();
                 notificationRecipients = dataSet.getNotificationRecipients() == null ? notificationRecipients : dataSet.getNotificationRecipients();
             }
 
@@ -825,9 +784,6 @@ public class DataSet
 
             removeAllOrganisationUnits();
             dataSet.getSources().forEach( this::addOrganisationUnit );
-
-            attributeValues.clear();
-            attributeValues.addAll( dataSet.getAttributeValues() );
         }
     }
 }

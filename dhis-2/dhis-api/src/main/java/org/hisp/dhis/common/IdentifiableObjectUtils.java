@@ -28,18 +28,8 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.calendar.Calendar;
 import org.hisp.dhis.calendar.DateTimeUnit;
@@ -50,8 +40,16 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author Lars Helge Overland
@@ -63,9 +61,9 @@ public class IdentifiableObjectUtils
     private static final SimpleDateFormat LONG_DATE_FORMAT = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss" );
 
     public static final Map<String, String> CLASS_ALIAS = ImmutableMap.<String, String>builder().
-    	put( "CategoryOption", DataElementCategoryOption.class.getSimpleName() ).
-    	put( "Category", DataElementCategory.class.getSimpleName() ).
-    	put( "CategoryCombo", DataElementCategoryCombo.class.getSimpleName()).build();
+        put( "CategoryOption", DataElementCategoryOption.class.getSimpleName() ).
+        put( "Category", DataElementCategory.class.getSimpleName() ).
+        put( "CategoryCombo", DataElementCategoryCombo.class.getSimpleName() ).build();
 
     /**
      * Joins the names of the IdentifiableObjects in the given list and separates
@@ -202,61 +200,6 @@ public class IdentifiableObjectUtils
     }
 
     /**
-     * Returns a list of IdentifiableObjects.
-     *
-     * @param objects the IdentifiableObjects to include in the list.
-     * @return a list of IdentifiableObjects.
-     */
-    public static List<IdentifiableObject> getList( IdentifiableObject... objects )
-    {
-        List<IdentifiableObject> list = new ArrayList<>();
-
-        if ( objects != null )
-        {
-            Collections.addAll( list, objects );
-        }
-
-        return list;
-    }
-
-    /**
-     * Returns a list with erasure IdentifiableObject based on the given collection.
-     *
-     * @param collection the collection.
-     * @return a list of IdentifiableObjects.
-     */
-    public static List<IdentifiableObject> asList( Collection<? extends IdentifiableObject> collection )
-    {
-        List<IdentifiableObject> list = new ArrayList<>();
-        list.addAll( collection );
-        return list;
-    }
-
-    /**
-     * Returns a list typed with the desired erasure based on the given collection.
-     * This operation implies an unchecked cast and it is the responsibility of
-     * the caller to make sure the cast is valid.
-     *
-     * @param collection the collection.
-     * @return a list.
-     */
-    @SuppressWarnings( "unchecked" )
-    public static <T extends IdentifiableObject> List<T> asTypedList( Collection<IdentifiableObject> collection )
-    {
-        List<T> list = new ArrayList<>();
-
-        if ( collection != null )
-        {
-            for ( IdentifiableObject object : collection )
-            {
-                list.add( (T) object );
-            }
-        }
-
-        return list;
-    }
-
-    /**
      * Removes duplicates from the given list while maintaining the order.
      *
      * @param list the list.
@@ -314,14 +257,14 @@ public class IdentifiableObjectUtils
     }
 
     /**
-     * Returns a mapping between the uid and the display name of the given 
+     * Returns a mapping between the uid and the display name of the given
      * identifiable objects.
      *
      * @param objects the identifiable objects.
      * @return mapping between the uid and the display name of the given objects.
      */
     public static Map<String, String> getUidNameMap( Collection<? extends IdentifiableObject> objects )
-    {        
+    {
         return objects.stream().collect( Collectors.toMap( IdentifiableObject::getUid, IdentifiableObject::getDisplayName ) );
     }
 
@@ -339,16 +282,17 @@ public class IdentifiableObjectUtils
 
     /**
      * Returns a map of identifiable properties and objects.
-     * 
-     * @param objects the objects.
-     * @param property the identifiable property.
+     *
+     * @param objects  the objects.
+     * @param idScheme the id scheme to use.
      * @return a map.
      */
     @SuppressWarnings( "unchecked" )
-    public static <T extends IdentifiableObject> Map<String, T> getMap( List<T> objects, IdentifiableProperty property )
+    public static <T extends IdentifiableObject> Map<String, T> getMap( List<T> objects, IdScheme idScheme )
     {
         Map<String, T> map = new HashMap<>();
-        
+        IdentifiableProperty property = idScheme.getIdentifiableProperty();
+
         for ( T object : objects )
         {
             if ( IdentifiableProperty.ID.equals( property ) )
@@ -389,7 +333,7 @@ public class IdentifiableObjectUtils
                 }
             }
         }
-        
+
         return map;
     }
 }

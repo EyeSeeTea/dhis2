@@ -43,7 +43,8 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.cfg.Configuration;
-import org.hisp.dhis.external.location.LocationManager;
+import org.hisp.dhis.external.conf.ConfigurationKey;
+import org.hisp.dhis.external.conf.DhisConfigurationProvider;
 import org.hisp.dhis.external.location.LocationManagerException;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
@@ -67,8 +68,6 @@ public class DefaultHibernateConfigurationProvider
     // -------------------------------------------------------------------------
 
     private String defaultPropertiesFile = "hibernate-default.properties";
-    private String regularPropertiesFile = "hibernate.properties";
-    private String testPropertiesFile = "hibernate-test.properties";
     
     private List<Resource> jarResources = new ArrayList<>();
     private List<Resource> dirResources = new ArrayList<>();
@@ -77,15 +76,15 @@ public class DefaultHibernateConfigurationProvider
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private LocationManager locationManager;
+    private DhisConfigurationProvider configurationProvider;
 
-    public void setLocationManager( LocationManager locationManager )
+    public void setConfigurationProvider( DhisConfigurationProvider configurationProvider )
     {
-        this.locationManager = locationManager;
+        this.configurationProvider = configurationProvider;
     }
 
     // -------------------------------------------------------------------------
-    // Initialise
+    // Initialize
     // -------------------------------------------------------------------------
 
     @PostConstruct
@@ -95,6 +94,8 @@ public class DefaultHibernateConfigurationProvider
         Configuration configuration = new Configuration();
 
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+
+        boolean testing = "true".equals( System.getProperty( "org.hisp.dhis.test", "false" ) );
 
         // ---------------------------------------------------------------------
         // Add mapping resources
@@ -131,7 +132,7 @@ public class DefaultHibernateConfigurationProvider
         }
 
         // ---------------------------------------------------------------------
-        // Add default properties
+        // Add default properties from class path
         // ---------------------------------------------------------------------
 
         Properties defaultProperties = getProperties( defaultPropertiesFile );
@@ -139,41 +140,29 @@ public class DefaultHibernateConfigurationProvider
         configuration.addProperties( defaultProperties );
 
         // ---------------------------------------------------------------------
-        // Choose which properties file to look for
-        // ---------------------------------------------------------------------
-
-        boolean testing = "true".equals( System.getProperty( "org.hisp.dhis.test", "false" ) );
-
-        String propertiesFile = testing ? testPropertiesFile : regularPropertiesFile;
-
-        // ---------------------------------------------------------------------
-        // Add custom properties from classpath
-        // ---------------------------------------------------------------------
-
-        Properties customProperties = getProperties( propertiesFile );
-
-        if ( customProperties != null )
-        {
-            configuration.addProperties( customProperties );
-        }
-
-        // ---------------------------------------------------------------------
         // Add custom properties from file system
         // ---------------------------------------------------------------------
         
-        try
+        if ( !testing )
         {
-            configuration.addProperties( getProperties( locationManager.getInputStream( propertiesFile ) ) );   
-        }
-        catch ( LocationManagerException ex )
-        {
-            log.info( "Could not read external configuration from file system" );
+            try
+            {
+                Properties fileProperties = configurationProvider.getProperties();
+                
+                mapToHibernateProperties( fileProperties );
+                
+                configuration.addProperties( fileProperties );
+            }
+            catch ( LocationManagerException ex )
+            {
+                log.info( "Could not read external configuration from file system" );
+            }
         }
 
         // ---------------------------------------------------------------------
         // Disable second-level cache during testing
         // ---------------------------------------------------------------------
-        
+
         if ( testing )
         {
             configuration.setProperty( "hibernate.cache.use_second_level_cache", "false" );
@@ -211,6 +200,26 @@ public class DefaultHibernateConfigurationProvider
     // Supportive methods
     // -------------------------------------------------------------------------
 
+    private void mapToHibernateProperties( Properties properties )
+    {
+        putIfExists( properties, ConfigurationKey.CONNECTION_DIALECT.getKey(), "hibernate.dialect" );
+        putIfExists( properties, ConfigurationKey.CONNECTION_DRIVER_CLASS.getKey(), "hibernate.connection.driver_class" );
+        putIfExists( properties, ConfigurationKey.CONNECTION_URL.getKey(), "hibernate.connection.url" );
+        putIfExists( properties, ConfigurationKey.CONNECTION_USERNAME.getKey(), "hibernate.connection.username" );
+        putIfExists( properties, ConfigurationKey.CONNECTION_PASSWORD.getKey(), "hibernate.connection.password" );
+        putIfExists( properties, ConfigurationKey.CONNECTION_SCHEMA.getKey(), "hibernate.hbm2ddl.auto" );
+    }
+    
+    private void putIfExists( Properties properties, String from, String to )
+    {
+        String value = properties.getProperty( from );
+        
+        if ( value != null && !value.isEmpty() )
+        {
+            properties.put( to, value );
+        }
+    }
+    
     private Properties getProperties( String path )
         throws IOException
     {

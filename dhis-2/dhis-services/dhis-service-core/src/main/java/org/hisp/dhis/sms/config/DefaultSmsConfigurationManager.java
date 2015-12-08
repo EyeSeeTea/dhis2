@@ -30,6 +30,8 @@ package org.hisp.dhis.sms.config;
 
 import java.util.List;
 import javax.annotation.PostConstruct;
+
+import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -51,8 +53,6 @@ public class DefaultSmsConfigurationManager
 
     @Autowired
     private SystemSettingManager systemSettingManager;
-    
-  
 
     @Autowired( required = false )
     private List<SmsConfigurable> smsConfigurables;
@@ -136,29 +136,35 @@ public class DefaultSmsConfigurationManager
     @Override
     public boolean setDefaultSMSGateway( String gatewayId )
     {
-
         boolean result = false;
+        
         SmsConfiguration config = getSmsConfiguration();
         
-        if( config == null )return result;
+        if ( config == null )
+        {
+            return result;
+        }
         
         List <SmsGatewayConfig> smsGatewayList = config.getGateways();
-        for (SmsGatewayConfig gw : smsGatewayList)
+
+        for ( SmsGatewayConfig gw : smsGatewayList )
         {
-            if (gw.getName().equals( gatewayId ))
+            if ( gw.getName().equals( gatewayId ) )
             {
                 gw.setDefault( true );
                 result = true;
-                
-            }else{
-                
+
+            }
+            else
+            {
                 gw.setDefault( false );
-                
+
             }
         }
+
         updateSmsConfiguration( config );
-        return result;
         
+        return result;
     }
 
     @Override
@@ -166,34 +172,27 @@ public class DefaultSmsConfigurationManager
     {
         SmsConfiguration config = getSmsConfiguration();
         List<SmsGatewayConfig> gatewayList = config.getGateways();
-        for (SmsGatewayConfig gw : gatewayList)
+        
+        for ( SmsGatewayConfig gw : gatewayList )
         {
-            if (gw.getName().equals( gatewayId ))
+            if ( gw.getName().equals( gatewayId ) )
+            {
                 return true;
+            }
         }
-        
+
         return false;
-        
     }
 
     @Override
     public boolean removeSMSGatewayById( String gatewayId )
     {
-
         return false;
     }
 
-    
-    
-    
-    
-    
     @Override
     public String addSMSGateway()
     {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
- 
+        throw new NotImplementedException();
+    } 
 }

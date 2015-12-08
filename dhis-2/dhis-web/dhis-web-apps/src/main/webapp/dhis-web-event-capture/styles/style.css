@@ -377,3 +377,52 @@ div#orgUnitTree {
     //height: 1.5em; 
     height: inherit;  //this is to make it play nice with bootstrap
 }
+
+.btn-file {
+    position: relative;
+    overflow: hidden;
+}
+.btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    background: red;
+    cursor: inherit;
+    display: block;
+}
+
+.contextMenuItems .divider {
+    height: 1px;
+    margin: 5px 0;
+    overflow: hidden;
+    background-color: #e5e5e5
+}
+
+.wrap-text {
+    word-wrap: break-word;
+}
+
+.default-form-completed {
+    width: 100%;
+}
+
+.custom-form-completed {
+    width: 35%
+}
+
+
+
+/*.file-input input[readonly] {
+    background-color: white !important;
+    cursor: text !important;
+}*/
+
+/*input[type='file'] {
+    opacity:0
+}*/

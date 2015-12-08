@@ -36,7 +36,6 @@ import java.util.Set;
 import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
-import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementGroup;
@@ -44,9 +43,9 @@ import org.hisp.dhis.dataelement.DataElementGroupSet;
 import org.hisp.dhis.legend.LegendSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
-import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
 /**
@@ -64,11 +63,6 @@ public interface DimensionalObject
     String ORGUNIT_GROUP_DIM_ID = "oug"; // Used for org unit target
     String ITEM_DIM_ID = "item";
 
-    String OU_MODE_SELECTED = "selected"; //TODO replace with OrganisationUnitSelectionMode
-    String OU_MODE_CHILDREN = "children";
-    String OU_MODE_DESCENDANTS = "descendants";
-    String OU_MODE_ALL = "all";
-    
     String DIMENSION_SEP = "-";
 
     String LONGITUDE_DIM_ID = "longitude";
@@ -87,15 +81,13 @@ public interface DimensionalObject
         PERIOD_DIM_ID, "Period",
         ORGUNIT_DIM_ID, "Organisation unit" );
     
-    Map<DimensionType, Class<? extends DimensionalObject>> DYNAMIC_DIMENSION_TYPE_CLASS_MAP = ImmutableMap.<DimensionType, Class<? extends DimensionalObject>>builder().
-        put( DimensionType.CATEGORY, DataElementCategory.class ).
-        put( DimensionType.DATAELEMENT_GROUPSET, DataElementGroupSet.class ).
-        put( DimensionType.ORGANISATIONUNIT_GROUPSET, OrganisationUnitGroupSet.class ).
-        put( DimensionType.CATEGORYOPTION_GROUPSET, CategoryOptionGroupSet.class ).
-        put( DimensionType.PROGRAM_ATTRIBUTE, TrackedEntityAttribute.class ).
-        put( DimensionType.PROGRAM_DATAELEMENT, DataElement.class ).build();              
-
-    Map<Class<? extends DimensionalObject>, Class<? extends NameableObject>> DIMENSION_CLASS_ITEM_CLASS_MAP = ImmutableMap.<Class<? extends DimensionalObject>, Class<? extends NameableObject>>builder().
+    Set<Class<? extends IdentifiableObject>> DYNAMIC_DIMENSION_CLASSES = ImmutableSet.<Class<? extends IdentifiableObject>>builder().
+        add( DataElementCategory.class ).
+        add( DataElementGroupSet.class ).
+        add( OrganisationUnitGroupSet.class ).
+        add( CategoryOptionGroupSet.class ).build();
+    
+    Map<Class<? extends DimensionalObject>, Class<? extends DimensionalItemObject>> DIMENSION_CLASS_ITEM_CLASS_MAP = ImmutableMap.<Class<? extends DimensionalObject>, Class<? extends DimensionalItemObject>>builder().
         put( DataElementCategory.class, DataElementCategoryOption.class ).
         put( DataElementGroupSet.class, DataElementGroup.class ).
         put( OrganisationUnitGroupSet.class, OrganisationUnitGroup.class ).
@@ -126,7 +118,7 @@ public interface DimensionalObject
     /**
      * Dimension items.
      */
-    List<NameableObject> getItems();
+    List<DimensionalItemObject> getItems();
 
     /**
      * Indicates whether all available items in this dimension are included.

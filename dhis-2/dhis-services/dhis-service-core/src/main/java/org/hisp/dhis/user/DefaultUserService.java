@@ -496,24 +496,6 @@ public class DefaultUserService
     }
 
     @Override
-    public void assignDataSetToUserRole( DataSet dataSet )
-    {
-        User currentUser = currentUserService.getCurrentUser();
-
-        if ( !currentUserService.currentUserIsSuper() && currentUser != null )
-        {
-            UserCredentials userCredentials = getUserCredentials( currentUser );
-
-            for ( UserAuthorityGroup userAuthorityGroup : userCredentials.getUserAuthorityGroups() )
-            {
-                userAuthorityGroup.getDataSets().add( dataSet );
-
-                updateUserAuthorityGroup( userAuthorityGroup );
-            }
-        }
-    }
-
-    @Override
     public void canIssueFilter( Collection<UserAuthorityGroup> userRoles )
     {
         User user = currentUserService.getCurrentUser();
@@ -554,6 +536,18 @@ public class DefaultUserService
     @Override
     public void encodeAndSetPassword( UserCredentials userCredentials, String rawPassword )
     {
+        if ( StringUtils.isEmpty( rawPassword ) && !userCredentials.isExternalAuth() )
+        {
+            return; // Leave unchanged if internal authentication and no password supplied
+        }
+        
+        if ( userCredentials.isExternalAuth() )
+        {
+            userCredentials.setPassword( UserService.PW_NO_INTERNAL_LOGIN );
+            
+            return; // Set unusable, not-encoded password if external authentication
+        }
+        
         boolean isNewPassword = StringUtils.isBlank( userCredentials.getPassword() ) ||
             !passwordManager.matches( rawPassword, userCredentials.getPassword() );
 
@@ -562,18 +556,9 @@ public class DefaultUserService
             userCredentials.setPasswordLastUpdated( new Date() );
         }
 
+        // Encode and set password
+        
         userCredentials.setPassword( passwordManager.encode( rawPassword ) );
-    }
-
-    @Override
-    public UserCredentials getUserCredentials( User user )
-    {
-        if ( user == null )
-        {
-            return null;
-        }
-
-        return userCredentialsStore.get( user.getId() );
     }
 
     @Override
@@ -583,9 +568,15 @@ public class DefaultUserService
     }
 
     @Override
-    public UserCredentials getUserCredentialsByOpenID( String openId )
+    public UserCredentials getUserCredentialsByOpenId( String openId )
     {
-        return userCredentialsStore.getUserCredentialsByOpenID( openId );
+        return userCredentialsStore.getUserCredentialsByOpenId( openId );
+    }
+
+    @Override
+    public UserCredentials getUserCredentialsByLdapId( String ldapId )
+    {
+        return userCredentialsStore.getUserCredentialsByLdapId( ldapId );
     }
 
     @Override

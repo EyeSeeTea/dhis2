@@ -28,57 +28,82 @@ package org.hisp.dhis.attribute;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.DhisSpringTest;
+import org.hisp.dhis.common.ValueType;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.indicator.IndicatorGroup;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-import org.hisp.dhis.DhisSpringTest;
-
+/**
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
+ */
 public class AttributeStoreTest
     extends DhisSpringTest
 {
     @Autowired
     private AttributeStore attributeStore;
 
-    private Attribute attribute1;
-
-    private Attribute attribute2;
+    private Attribute atA;
+    private Attribute atB;
 
     @Override
     protected void setUpTest()
     {
-        attribute1 = new Attribute();
-        attribute1.setName( "attribute_simple" );
-        attribute1.setValueType( "string" );
-        attribute1.setIndicatorAttribute( true );
-        attribute1.setDataElementAttribute( true );
+        atA = new Attribute();
+        atA.setName( "attribute_simple" );
+        atA.setValueType( ValueType.TEXT );
+        atA.setIndicatorAttribute( true );
+        atA.setDataElementAttribute( true );
 
-        attribute2 = new Attribute();
-        attribute2.setName( "attribute_with_options" );
-        attribute2.setValueType( "string" );
-        attribute2.setOrganisationUnitAttribute( true );
-        attribute2.setDataElementAttribute( true );
+        atB = new Attribute();
+        atB.setName( "attribute_with_options" );
+        atB.setValueType( ValueType.TEXT );
+        atB.setOrganisationUnitAttribute( true );
+        atB.setDataElementAttribute( true );
 
-        attributeStore.save( attribute1 );
-        attributeStore.save( attribute2 );
+        attributeStore.save( atA );
+        attributeStore.save( atB );
     }
 
     @Test
     public void testGetDataElementAttributes()
     {
-        assertEquals( 2, attributeStore.getDataElementAttributes().size() );
+        assertEquals( 2, attributeStore.getAttributes( DataElement.class ).size() );
     }
 
     @Test
     public void testGetIndicatorAttributes()
     {
-        assertEquals( 1, attributeStore.getIndicatorAttributes().size() );
+        assertEquals( 1, attributeStore.getAttributes( Indicator.class ).size() );
     }
 
     @Test
     public void testGetOrganisationUnitAttributes()
     {
-        assertEquals( 1, attributeStore.getOrganisationUnitAttributes().size() );
+        assertEquals( 1, attributeStore.getAttributes( OrganisationUnit.class ).size() );
+    }
+
+    @Test
+    public void testGetSupportedClasses()
+    {
+        Attribute attribute = new Attribute( "AttributeName", ValueType.TEXT );
+        attribute.setDataElementAttribute( true );
+
+        assertEquals( 1, attribute.getSupportedClasses().size() );
+        assertTrue( attribute.getSupportedClasses().contains( DataElement.class ) );
+
+        attribute.setDataElementAttribute( false );
+        attribute.setIndicatorAttribute( true );
+        attribute.setIndicatorGroupAttribute( true );
+
+        assertEquals( 2, attribute.getSupportedClasses().size() );
+        assertTrue( attribute.getSupportedClasses().contains( Indicator.class ) );
+        assertTrue( attribute.getSupportedClasses().contains( IndicatorGroup.class ) );
     }
 }

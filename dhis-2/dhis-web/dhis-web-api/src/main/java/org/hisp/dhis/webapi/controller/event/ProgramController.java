@@ -29,7 +29,6 @@ package org.hisp.dhis.webapi.controller.event;
  */
 
 import com.google.common.collect.Lists;
-import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
@@ -37,6 +36,7 @@ import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStatus;
 import org.hisp.dhis.query.Order;
 import org.hisp.dhis.query.Query;
+import org.hisp.dhis.query.QueryParserException;
 import org.hisp.dhis.schema.descriptors.ProgramSchemaDescriptor;
 import org.hisp.dhis.webapi.controller.AbstractCrudController;
 import org.hisp.dhis.webapi.webdomain.WebMetaData;
@@ -47,6 +47,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -79,12 +80,11 @@ public class ProgramController
 
     @Override
     @SuppressWarnings( "unchecked" )
-    protected List<Program> getEntityList( WebMetaData metaData, WebOptions options, List<String> filters, List<Order> orders )
+    protected List<Program> getEntityList( WebMetaData metaData, WebOptions options, List<String> filters, List<Order> orders ) throws QueryParserException
     {
         Boolean userFilter = Boolean.parseBoolean( options.getOptions().get( "userFilter" ) );
 
         List<Program> entityList;
-        boolean haveFilters = !filters.isEmpty();
         Query query = queryService.getQueryFromUrl( getEntityClass(), filters, orders );
         query.setDefaultOrder();
 
@@ -92,25 +92,14 @@ public class ProgramController
         {
             entityList = Lists.newArrayList( manager.filter( getEntityClass(), options.getOptions().get( "query" ) ) );
         }
-        else if ( options.hasPaging() && !haveFilters )
-        {
-            int count = queryService.count( query );
-
-            Pager pager = new Pager( options.getPage(), count, options.getPageSize() );
-            metaData.setPager( pager );
-
-            query.setFirstResult( pager.getOffset() );
-            query.setMaxResults( pager.getPageSize() );
-            entityList = (List<Program>) queryService.query( query ).getItems();
-        }
         else
         {
-            entityList = (List<Program>) queryService.query( query ).getItems();
+            entityList = (List<Program>) queryService.query( query );
         }
 
         if ( userFilter )
         {
-            List<Program> programs = Lists.newArrayList( programService.getProgramsByCurrentUser() );
+            Set<Program> programs = programService.getCurrentUserPrograms();
             entityList.retainAll( programs );
             metaData.setPager( null );
         }

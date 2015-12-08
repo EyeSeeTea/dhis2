@@ -1,4 +1,5 @@
 package org.hisp.dhis.webapi.controller.sms;
+
 /*
  * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
@@ -30,10 +31,6 @@ package org.hisp.dhis.webapi.controller.sms;
 import java.text.ParseException;
 import java.util.Date;
 
-/**
- * Zubair <rajazubair.asghar@gmail.com>
- */
-
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -53,6 +50,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Zubair <rajazubair.asghar@gmail.com>
+ */
 @RestController
 @RequestMapping( value = "/sms" )
 public class SmsController

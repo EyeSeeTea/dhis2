@@ -30,6 +30,7 @@ package org.hisp.dhis.dxf2.events.enrollment;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.common.exception.InvalidIdentifierReferenceException;
@@ -171,6 +172,8 @@ public abstract class AbstractEnrollmentService
         enrollment.setEnrollmentDate( programInstance.getEnrollmentDate() );
         enrollment.setIncidentDate( programInstance.getIncidentDate() );
         enrollment.setFollowup( programInstance.getFollowup() );
+        enrollment.setCompletedDate( programInstance.getEndDate() );
+        enrollment.setCompletedUser( programInstance.getCompletedUser() );
 
         List<TrackedEntityComment> comments = programInstance.getComments();
 
@@ -394,6 +397,31 @@ public abstract class AbstractEnrollmentService
 
         return importSummary;
     }
+    
+    @Override
+    public ImportSummary updateEnrollmentForNote( Enrollment enrollment )
+    {
+        ImportSummary importSummary = new ImportSummary();
+
+        if ( enrollment == null || enrollment.getEnrollment() == null )
+        {
+            return new ImportSummary( ImportStatus.ERROR, "No enrollment or enrollment ID was supplied" ).incrementIgnored();
+        }
+
+        ProgramInstance programInstance = programInstanceService.getProgramInstance( enrollment.getEnrollment() );
+
+        if ( programInstance == null )
+        {
+            return new ImportSummary( ImportStatus.ERROR, "Enrollment ID was not valid." ).incrementIgnored();
+        }
+
+        saveTrackedEntityComment( programInstance, enrollment );
+
+        importSummary.setReference( enrollment.getEnrollment() );
+        importSummary.getImportCount().incrementUpdated();
+
+        return importSummary;
+    }
 
     // -------------------------------------------------------------------------
     // DELETE
@@ -469,7 +497,7 @@ public abstract class AbstractEnrollmentService
         }
 
         // ignore attributes which do not belong to this program
-        trackedEntityInstance.getAttributeValues().stream()
+        trackedEntityInstance.getTrackedEntityAttributeValues().stream()
             .filter( value -> mandatoryMap.containsKey( value.getAttribute() ) )
             .forEach( value -> attributeValueMap.put( value.getAttribute().getUid(), value.getValue() ) );
 
@@ -544,7 +572,7 @@ public abstract class AbstractEnrollmentService
             attributeValueMap.put( attribute.getAttribute(), attribute.getValue() );
         }
 
-        trackedEntityInstance.getAttributeValues().stream()
+        trackedEntityInstance.getTrackedEntityAttributeValues().stream()
             .filter( value -> attributeValueMap.containsKey( value.getAttribute().getUid() ) )
             .forEach( value -> {
                 String newValue = attributeValueMap.get( value.getAttribute().getUid() );

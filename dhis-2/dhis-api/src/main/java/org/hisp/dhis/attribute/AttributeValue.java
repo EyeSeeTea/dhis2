@@ -72,14 +72,19 @@ public class AttributeValue
 
     public AttributeValue()
     {
-        this.created = new Date();
-        this.lastUpdated = new Date();
+        setAutoFields();
     }
 
     public AttributeValue( String value )
     {
         this();
         this.value = value;
+    }
+
+    public AttributeValue( String value, Attribute attribute )
+    {
+        this( value );
+        this.attribute = attribute;
     }
 
     public void setAutoFields()
@@ -121,7 +126,7 @@ public class AttributeValue
     {
         return "AttributeValue{" +
             "id=" + id +
-            ", attribute=" + ( attribute != null ? attribute.getUid() : "" ) +
+            ", attribute=" + (attribute != null ? attribute.getUid() : "") +
             ", value='" + value + '\'' +
             '}';
     }
@@ -188,5 +193,15 @@ public class AttributeValue
     public void setValue( String value )
     {
         this.value = value;
+    }
+
+    public boolean isUnique()
+    {
+        return attribute != null && attribute.isUnique();
+    }
+
+    public boolean isMandatory()
+    {
+        return attribute != null && attribute.isMandatory();
     }
 }

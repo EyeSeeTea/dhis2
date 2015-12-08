@@ -47,7 +47,6 @@ import org.hisp.dhis.legend.LegendService;
 import org.hisp.dhis.legend.LegendSet;
 import org.hisp.dhis.option.OptionService;
 import org.hisp.dhis.option.OptionSet;
-import org.hisp.dhis.system.util.AttributeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -225,7 +224,7 @@ public class UpdateDataElementAction
     // -------------------------------------------------------------------------
 
     @Override
-    public String execute()
+    public String execute() throws Exception
     {
         DataElement dataElement = dataElementService.getDataElement( id );
 
@@ -237,7 +236,7 @@ public class UpdateDataElementAction
         LegendSet legendSet = legendService.getLegendSet( selectedLegendSetId );
 
         valueType = optionSet != null && optionSet.getValueType() != null ? optionSet.getValueType() : valueType;
-        
+
         dataElement.setName( StringUtils.trimToNull( name ) );
         dataElement.setShortName( StringUtils.trimToNull( shortName ) );
         dataElement.setCode( StringUtils.trimToNull( code ) );
@@ -285,7 +284,7 @@ public class UpdateDataElementAction
 
         if ( jsonAttributeValues != null )
         {
-            AttributeUtils.updateAttributeValuesFromJson( dataElement.getAttributeValues(), jsonAttributeValues, attributeService );
+            attributeService.updateAttributeValues( dataElement, jsonAttributeValues );
         }
 
         dataElementService.updateDataElement( dataElement );

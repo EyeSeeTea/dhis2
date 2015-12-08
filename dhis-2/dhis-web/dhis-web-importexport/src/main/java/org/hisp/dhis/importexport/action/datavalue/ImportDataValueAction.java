@@ -28,13 +28,12 @@ package org.hisp.dhis.importexport.action.datavalue;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import com.opensymphony.xwork2.Action;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.common.IdentifiableProperty;
+import org.hibernate.SessionFactory;
 import org.hisp.dhis.commons.util.StreamUtils;
 import org.hisp.dhis.dxf2.adx.AdxDataService;
 import org.hisp.dhis.dxf2.common.ImportOptions;
@@ -48,7 +47,9 @@ import org.hisp.dhis.system.scheduling.Scheduler;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.opensymphony.xwork2.Action;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 
 /**
  * @author Lars Helge Overland
@@ -60,12 +61,15 @@ public class ImportDataValueAction
 
     @Autowired
     private DataValueSetService dataValueSetService;
-    
+
     @Autowired
     private AdxDataService adxDataService;
 
     @Autowired
     private CurrentUserService currentUserService;
+    
+    @Autowired
+    private SessionFactory sessionFactory;
 
     @Autowired
     private Scheduler scheduler;
@@ -97,24 +101,24 @@ public class ImportDataValueAction
     {
         this.strategy = ImportStrategy.valueOf( stgy );
     }
-    
-    private IdentifiableProperty idScheme;
 
-    public void setIdScheme( IdentifiableProperty idScheme )
+    private String idScheme;
+
+    public void setIdScheme( String idScheme )
     {
         this.idScheme = idScheme;
     }
 
-    private IdentifiableProperty dataElementIdScheme;
+    private String dataElementIdScheme;
 
-    public void setDataElementIdScheme( IdentifiableProperty dataElementIdScheme )
+    public void setDataElementIdScheme( String dataElementIdScheme )
     {
         this.dataElementIdScheme = dataElementIdScheme;
     }
 
-    private IdentifiableProperty orgUnitIdScheme;
+    private String orgUnitIdScheme;
 
-    public void setOrgUnitIdScheme( IdentifiableProperty orgUnitIdScheme )
+    public void setOrgUnitIdScheme( String orgUnitIdScheme )
     {
         this.orgUnitIdScheme = orgUnitIdScheme;
     }
@@ -134,7 +138,7 @@ public class ImportDataValueAction
     }
 
     private boolean preheatCache = true;
-    
+
     public void setPreheatCache( boolean preheatCache )
     {
         this.preheatCache = preheatCache;
@@ -158,13 +162,16 @@ public class ImportDataValueAction
 
         in = StreamUtils.wrapAndCheckCompressionFormat( in );
 
-        ImportOptions options = new ImportOptions().
-            setIdScheme( idScheme ).setDataElementIdScheme( dataElementIdScheme ).setOrgUnitIdScheme( orgUnitIdScheme ).
-            setDryRun( dryRun ).setPreheatCache( preheatCache ).setStrategy( strategy ).setSkipExistingCheck( skipExistingCheck );
-        
+        ImportOptions options = new ImportOptions().setDryRun( dryRun )
+            .setPreheatCache( preheatCache ).setStrategy( strategy ).setSkipExistingCheck( skipExistingCheck )
+            .setIdScheme( StringUtils.trimToNull( idScheme ) )
+            .setDataElementIdScheme( StringUtils.trimToNull( dataElementIdScheme ) )
+            .setOrgUnitIdScheme( StringUtils.trimToNull( orgUnitIdScheme ) );
+
         log.info( options );
 
-        scheduler.executeTask( new ImportDataValueTask( dataValueSetService, adxDataService, in, options, taskId, importFormat ) );
+        scheduler.executeTask( new ImportDataValueTask( dataValueSetService, 
+            adxDataService, sessionFactory, in, options, taskId, importFormat ) );
 
         return SUCCESS;
     }

@@ -39,6 +39,7 @@ import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.analytics.AnalyticsService;
 import org.hisp.dhis.analytics.AnalyticsUtils;
 import org.hisp.dhis.analytics.DataQueryParams;
+import org.hisp.dhis.analytics.DataQueryService;
 import org.hisp.dhis.common.DisplayProperty;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.IdentifiableProperty;
@@ -63,8 +64,11 @@ public class AnalyticsController
     private static final String RESOURCE_PATH = "/analytics";
 
     @Autowired
-    private AnalyticsService analyticsService;
+    private DataQueryService dataQueryService;
     
+    @Autowired
+    private AnalyticsService analyticsService;
+        
     @Autowired
     private ContextUtils contextUtils;
 
@@ -95,15 +99,13 @@ public class AnalyticsController
         @RequestParam( required = false ) String approvalLevel,
         @RequestParam( required = false ) Date relativePeriodDate,
         @RequestParam( required = false ) String userOrgUnit,
-        @RequestParam( required = false ) String program,
-        @RequestParam( required = false ) String stage,
         @RequestParam( required = false ) String columns,
         @RequestParam( required = false ) String rows,
         Model model,
         HttpServletResponse response ) throws Exception
     {
-        DataQueryParams params = analyticsService.getFromUrl( dimension, filter, aggregationType, measureCriteria, skipMeta, skipData, skipRounding, completedOnly, hierarchyMeta, 
-            ignoreLimit, hideEmptyRows, showHierarchy, displayProperty, outputIdScheme, approvalLevel, relativePeriodDate, userOrgUnit, program, stage, i18nManager.getI18nFormat() );
+        DataQueryParams params = dataQueryService.getFromUrl( dimension, filter, aggregationType, measureCriteria, skipMeta, skipData, skipRounding, completedOnly, hierarchyMeta, 
+            ignoreLimit, hideEmptyRows, showHierarchy, displayProperty, outputIdScheme, approvalLevel, relativePeriodDate, userOrgUnit, i18nManager.getI18nFormat() );
 
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_JSON, CacheStrategy.RESPECT_SYSTEM_SETTING );
         Grid grid = analyticsService.getAggregatedDataValues( params, tableLayout, getItemsFromParam( columns ), getItemsFromParam( rows ) );
@@ -132,15 +134,13 @@ public class AnalyticsController
         @RequestParam( required = false ) String approvalLevel,
         @RequestParam( required = false ) Date relativePeriodDate,
         @RequestParam( required = false ) String userOrgUnit,
-        @RequestParam( required = false ) String program,
-        @RequestParam( required = false ) String stage,
         @RequestParam( required = false ) String columns,
         @RequestParam( required = false ) String rows,
         Model model,
         HttpServletResponse response ) throws Exception
     {
-        DataQueryParams params = analyticsService.getFromUrl( dimension, filter, aggregationType, measureCriteria, skipMeta, skipData, skipRounding, completedOnly, hierarchyMeta, 
-            ignoreLimit, hideEmptyRows, showHierarchy, displayProperty, outputIdScheme, approvalLevel, relativePeriodDate, userOrgUnit, program, stage, i18nManager.getI18nFormat() );
+        DataQueryParams params = dataQueryService.getFromUrl( dimension, filter, aggregationType, measureCriteria, skipMeta, skipData, skipRounding, completedOnly, hierarchyMeta, 
+            ignoreLimit, hideEmptyRows, showHierarchy, displayProperty, outputIdScheme, approvalLevel, relativePeriodDate, userOrgUnit, i18nManager.getI18nFormat() );
 
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_XML, CacheStrategy.RESPECT_SYSTEM_SETTING );
         Grid grid = analyticsService.getAggregatedDataValues( params, tableLayout, getItemsFromParam( columns ), getItemsFromParam( rows ) );
@@ -167,15 +167,13 @@ public class AnalyticsController
         @RequestParam( required = false ) String approvalLevel,
         @RequestParam( required = false ) Date relativePeriodDate,
         @RequestParam( required = false ) String userOrgUnit,
-        @RequestParam( required = false ) String program,
-        @RequestParam( required = false ) String stage,
         @RequestParam( required = false ) String columns,
         @RequestParam( required = false ) String rows,
         Model model,
         HttpServletResponse response ) throws Exception
     {
-        DataQueryParams params = analyticsService.getFromUrl( dimension, filter, aggregationType, measureCriteria, skipMeta, skipData, skipRounding, completedOnly, hierarchyMeta, 
-            ignoreLimit, hideEmptyRows, showHierarchy, displayProperty, outputIdScheme, approvalLevel, relativePeriodDate, userOrgUnit, program, stage, i18nManager.getI18nFormat() );
+        DataQueryParams params = dataQueryService.getFromUrl( dimension, filter, aggregationType, measureCriteria, skipMeta, skipData, skipRounding, completedOnly, hierarchyMeta, 
+            ignoreLimit, hideEmptyRows, showHierarchy, displayProperty, outputIdScheme, approvalLevel, relativePeriodDate, userOrgUnit, i18nManager.getI18nFormat() );
 
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_HTML, CacheStrategy.RESPECT_SYSTEM_SETTING );
         Grid grid = analyticsService.getAggregatedDataValues( params, tableLayout, getItemsFromParam( columns ), getItemsFromParam( rows ) );
@@ -202,15 +200,13 @@ public class AnalyticsController
         @RequestParam( required = false ) String approvalLevel,
         @RequestParam( required = false ) Date relativePeriodDate,
         @RequestParam( required = false ) String userOrgUnit,
-        @RequestParam( required = false ) String program,
-        @RequestParam( required = false ) String stage,
         @RequestParam( required = false ) String columns,
         @RequestParam( required = false ) String rows,
         Model model,
         HttpServletResponse response ) throws Exception
     {
-        DataQueryParams params = analyticsService.getFromUrl( dimension, filter, aggregationType, measureCriteria, skipMeta, skipData, skipRounding, completedOnly, hierarchyMeta, 
-            ignoreLimit, hideEmptyRows, showHierarchy, displayProperty, outputIdScheme, approvalLevel, relativePeriodDate, userOrgUnit, program, stage, i18nManager.getI18nFormat() );
+        DataQueryParams params = dataQueryService.getFromUrl( dimension, filter, aggregationType, measureCriteria, skipMeta, skipData, skipRounding, completedOnly, hierarchyMeta, 
+            ignoreLimit, hideEmptyRows, showHierarchy, displayProperty, outputIdScheme, approvalLevel, relativePeriodDate, userOrgUnit, i18nManager.getI18nFormat() );
 
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_HTML, CacheStrategy.RESPECT_SYSTEM_SETTING );
         Grid grid = analyticsService.getAggregatedDataValues( params, tableLayout, getItemsFromParam( columns ), getItemsFromParam( rows ) );
@@ -237,15 +233,13 @@ public class AnalyticsController
         @RequestParam( required = false ) String approvalLevel,
         @RequestParam( required = false ) Date relativePeriodDate,
         @RequestParam( required = false ) String userOrgUnit,
-        @RequestParam( required = false ) String program,
-        @RequestParam( required = false ) String stage,
         @RequestParam( required = false ) String columns,
         @RequestParam( required = false ) String rows,
         Model model,
         HttpServletResponse response ) throws Exception
     {
-        DataQueryParams params = analyticsService.getFromUrl( dimension, filter, aggregationType, measureCriteria, skipMeta, skipData, skipRounding, completedOnly, hierarchyMeta, 
-            ignoreLimit, hideEmptyRows, showHierarchy, displayProperty, outputIdScheme, approvalLevel, relativePeriodDate, userOrgUnit, program, stage, i18nManager.getI18nFormat() );
+        DataQueryParams params = dataQueryService.getFromUrl( dimension, filter, aggregationType, measureCriteria, skipMeta, skipData, skipRounding, completedOnly, hierarchyMeta, 
+            ignoreLimit, hideEmptyRows, showHierarchy, displayProperty, outputIdScheme, approvalLevel, relativePeriodDate, userOrgUnit, i18nManager.getI18nFormat() );
 
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_CSV, CacheStrategy.RESPECT_SYSTEM_SETTING, "data.csv", true );
         Grid grid = analyticsService.getAggregatedDataValues( params, tableLayout, getItemsFromParam( columns ), getItemsFromParam( rows ) );
@@ -272,15 +266,13 @@ public class AnalyticsController
         @RequestParam( required = false ) String approvalLevel,
         @RequestParam( required = false ) Date relativePeriodDate,
         @RequestParam( required = false ) String userOrgUnit,
-        @RequestParam( required = false ) String program,
-        @RequestParam( required = false ) String stage,
         @RequestParam( required = false ) String columns,
         @RequestParam( required = false ) String rows,
         Model model,
         HttpServletResponse response ) throws Exception
     {
-        DataQueryParams params = analyticsService.getFromUrl( dimension, filter, aggregationType, measureCriteria, skipMeta, skipData, skipRounding, completedOnly, hierarchyMeta, 
-            ignoreLimit, hideEmptyRows, showHierarchy, displayProperty, outputIdScheme, approvalLevel, relativePeriodDate, userOrgUnit, program, stage, i18nManager.getI18nFormat() );
+        DataQueryParams params = dataQueryService.getFromUrl( dimension, filter, aggregationType, measureCriteria, skipMeta, skipData, skipRounding, completedOnly, hierarchyMeta, 
+            ignoreLimit, hideEmptyRows, showHierarchy, displayProperty, outputIdScheme, approvalLevel, relativePeriodDate, userOrgUnit, i18nManager.getI18nFormat() );
 
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_EXCEL, CacheStrategy.RESPECT_SYSTEM_SETTING, "data.xls", true );
         Grid grid = analyticsService.getAggregatedDataValues( params, tableLayout, getItemsFromParam( columns ), getItemsFromParam( rows ) );
@@ -307,15 +299,13 @@ public class AnalyticsController
         @RequestParam( required = false ) Integer approvalLevel,
         @RequestParam( required = false ) Date relativePeriodDate,
         @RequestParam( required = false ) String userOrgUnit,
-        @RequestParam( required = false ) String program,
-        @RequestParam( required = false ) String stage,
         @RequestParam( required = false ) String columns,
         @RequestParam( required = false ) String rows,
         Model model,
         HttpServletResponse response ) throws Exception
     {
-        DataQueryParams params = analyticsService.getFromUrl( dimension, filter, null, null,
-            true, false, false, false, false, false, false, false, null, null, null, null, null, null, null, i18nManager.getI18nFormat() );
+        DataQueryParams params = dataQueryService.getFromUrl( dimension, filter, null, null,
+            true, false, false, false, false, false, false, false, null, null, null, null, null, i18nManager.getI18nFormat() );
 
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_XML, CacheStrategy.RESPECT_SYSTEM_SETTING, "data.jrxml", false );
         Grid grid = analyticsService.getAggregatedDataValues( params );
@@ -343,15 +333,13 @@ public class AnalyticsController
         @RequestParam( required = false ) String approvalLevel,
         @RequestParam( required = false ) Date relativePeriodDate,
         @RequestParam( required = false ) String userOrgUnit,
-        @RequestParam( required = false ) String program,
-        @RequestParam( required = false ) String stage,
         @RequestParam( required = false ) String columns,
         @RequestParam( required = false ) String rows,
         Model model,
         HttpServletResponse response ) throws Exception
     {
-        DataQueryParams params = analyticsService.getFromUrl( dimension, filter, aggregationType, measureCriteria, skipMeta, skipData, skipRounding, completedOnly, hierarchyMeta, 
-            ignoreLimit, hideEmptyRows, showHierarchy, displayProperty, outputIdScheme, approvalLevel, relativePeriodDate, userOrgUnit, program, stage, i18nManager.getI18nFormat() );
+        DataQueryParams params = dataQueryService.getFromUrl( dimension, filter, aggregationType, measureCriteria, skipMeta, skipData, skipRounding, completedOnly, hierarchyMeta, 
+            ignoreLimit, hideEmptyRows, showHierarchy, displayProperty, outputIdScheme, approvalLevel, relativePeriodDate, userOrgUnit, i18nManager.getI18nFormat() );
 
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_TEXT, CacheStrategy.NO_CACHE, "debug.sql", false );
         return AnalyticsUtils.getDebugDataSql( params );

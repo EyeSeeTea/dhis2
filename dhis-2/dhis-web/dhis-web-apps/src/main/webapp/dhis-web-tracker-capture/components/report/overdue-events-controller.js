@@ -51,18 +51,16 @@ trackerCapture.controller('OverdueEventsController',
     //watch for selection of org unit from tree
     $scope.$watch('selectedOrgUnit', function() {
         $scope.reportFinished = false;
-        $scope.reportStarted = false;
-        $scope.selectedProgram = null;
-        if( angular.isObject($scope.selectedOrgUnit)){            
-            $scope.loadPrograms($scope.selectedOrgUnit);
+        $scope.reportStarted = false;        
+        if( angular.isObject($scope.selectedOrgUnit)){
+            $scope.loadPrograms();
         }
     });
     
     //load programs associated with the selected org unit.
-    $scope.loadPrograms = function(orgUnit) {        
-        $scope.selectedOrgUnit = orgUnit;        
+    $scope.loadPrograms = function() {
         if (angular.isObject($scope.selectedOrgUnit)){
-            ProgramFactory.getProgramsByOu($scope.selectedOrgUnit, $scope.selectedProgram).then(function(response){
+            ProgramFactory.getAllForUser($scope.selectedProgram).then(function(response){
                 $scope.programs = response.programs;
                 $scope.selectedProgram = response.selectedProgram;
             });
@@ -97,44 +95,45 @@ trackerCapture.controller('OverdueEventsController',
             $scope.reportStarted = true;            
             $scope.overdueEvents = [];
             
-            EventReportService.getEventReport($scope.selectedOrgUnit.id, $scope.selectedOuMode, $scope.selectedProgram.id, null, null, 'ACTIVE','OVERDUE', $scope.pager).then(function(data){                     
-                if( data.pager ){
-                    $scope.pager = data.pager;
-                    $scope.pager.toolBarDisplay = 5;
+            EventReportService.getEventReport($scope.selectedOrgUnit.id, $scope.selectedOuMode, $scope.selectedProgram.id, null, null, 'ACTIVE','OVERDUE', $scope.pager).then(function(data){                
+                if( data ) {
+                    if( data.pager ){
+                        $scope.pager = data.pager;
+                        $scope.pager.toolBarDisplay = 5;
 
-                    Paginator.setPage($scope.pager.page);
-                    Paginator.setPageCount($scope.pager.pageCount);
-                    Paginator.setPageSize($scope.pager.pageSize);
-                    Paginator.setItemCount($scope.pager.total);                    
-                }
-                    
-                angular.forEach(data.eventRows, function(row){
-                    var overdueEvent = {};                    
-                    angular.forEach(row.attributes, function(att){
-                        var val = AttributesFactory.formatAttributeValue(att, $scope.attributesById, $scope.optionSets, 'USER');                        
-                        overdueEvent[att.attribute] = val;                        
+                        Paginator.setPage($scope.pager.page);
+                        Paginator.setPageCount($scope.pager.pageCount);
+                        Paginator.setPageSize($scope.pager.pageSize);
+                        Paginator.setItemCount($scope.pager.total);                    
+                    }
+
+                    angular.forEach(data.eventRows, function(row){
+                        var overdueEvent = {};                    
+                        angular.forEach(row.attributes, function(att){
+                            var val = AttributesFactory.formatAttributeValue(att, $scope.attributesById, $scope.optionSets, 'USER');                        
+                            overdueEvent[att.attribute] = val;                        
+                        });
+
+                        overdueEvent.dueDate = DateUtils.formatFromApiToUser(row.dueDate);
+                        overdueEvent.event = row.event;
+                        overdueEvent.eventName = $scope.programStages[row.programStage].name;
+                        overdueEvent.orgUnitName = row.orgUnitName;                    
+                        overdueEvent.followup = row.followup;
+                        overdueEvent.program = row.program;
+                        overdueEvent.programStage = row.programStage;
+                        overdueEvent.trackedEntityInstance = row.trackedEntityInstance;
+                        $scope.overdueEvents.push(overdueEvent);
+
                     });
-                    
-                    overdueEvent.dueDate = DateUtils.formatFromApiToUser(row.dueDate);
-                    overdueEvent.event = row.event;
-                    overdueEvent.eventName = $scope.programStages[row.programStage].name;
-                    overdueEvent.orgUnitName = row.orgUnitName;                    
-                    overdueEvent.followup = row.followup;
-                    overdueEvent.program = row.program;
-                    overdueEvent.programStage = row.programStage;
-                    overdueEvent.trackedEntityInstance = row.trackedEntityInstance;
-                    $scope.overdueEvents.push(overdueEvent);
-                    
-                });
-                
-                //sort overdue events by their due dates - this is default
-                if(!$scope.sortColumn.id){                                      
-                    $scope.sortGrid({id: 'dueDate', name: $translate('due_date'), valueType: 'date', displayInListNoProgram: false, showFilter: false, show: true});
-                    $scope.reverse = false;
-                }
-        
+
+                    //sort overdue events by their due dates - this is default
+                    if(!$scope.sortColumn.id){                                      
+                        $scope.sortGrid({id: 'dueDate', name: $translate.instant('due_date'), valueType: 'DATE', displayInListNoProgram: false, showFilter: false, show: true});
+                        $scope.reverse = false;
+                    }
+                }                
                 $scope.reportFinished = true;
-                $scope.reportStarted = false;
+                $scope.reportStarted = false;                
             });
         }
     };    
@@ -155,21 +154,19 @@ trackerCapture.controller('OverdueEventsController',
 
             AttributesFactory.getByProgram($scope.selectedProgram).then(function(atts){            
                 var grid = TEIGridService.generateGridColumns(atts, $scope.selectedOuMode);
-                $scope.gridColumns = grid.columns;
+                $scope.gridColumns = [];
+                $scope.gridColumns.push({name: $translate.instant('due_date'), id: 'dueDate', valueType: 'DATE', displayInListNoProgram: false, showFilter: false, show: true, eventCol: true});
+                $scope.gridColumns.push({name: $translate.instant('event_name'), id: 'eventName', valueType: 'TEXT', displayInListNoProgram: false, showFilter: false, show: true, eventCol: true});
+                $scope.gridColumns = $scope.gridColumns.concat(grid.columns);
+                
+                $scope.filterTypes['eventName'] = 'TEXT';                
+                $scope.filterTypes['dueDate'] = 'DATE';
+                $scope.filterText['dueDate']= {};
                 
                 angular.forEach($scope.gridColumns, function(col){
                     col.eventCol = false;
                 });
-
-                $scope.gridColumns.push({name: $translate('event_orgunit_name'), id: 'orgUnitName', type: 'string', displayInListNoProgram: false, showFilter: false, show: true, eventCol: true});
-                $scope.filterTypes['orgUnitName'] = 'string';
-                $scope.gridColumns.push({name: $translate('event_name'), id: 'eventName', type: 'string', displayInListNoProgram: false, showFilter: false, show: true, eventCol: true});
-                $scope.filterTypes['eventName'] = 'string';
-                $scope.gridColumns.push({name: $translate('due_date'), id: 'dueDate', type: 'date', displayInListNoProgram: false, showFilter: false, show: true, eventCol: true});
-                $scope.filterTypes['dueDate'] = 'date';
-                $scope.filterText['dueDate']= {};                
-            });
-            
+            });            
         }      
     };
     
@@ -209,7 +206,7 @@ trackerCapture.controller('OverdueEventsController',
             return;
         }        
         $scope.sortColumn = gridHeader;
-        if($scope.sortColumn.valueType === 'date'){
+        if($scope.sortColumn.valueType === 'DATE'){
             $scope.reverse = true;
         }
         else{
@@ -219,7 +216,7 @@ trackerCapture.controller('OverdueEventsController',
     
     
     $scope.d2Sort = function(overDueEvent){ 
-        if($scope.sortColumn && $scope.sortColumn.valueType === 'date'){            
+        if($scope.sortColumn && $scope.sortColumn.valueType === 'DATE'){            
             var d = overDueEvent[$scope.sortColumn.id];         
             return DateUtils.getDate(d);
         }

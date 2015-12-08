@@ -29,9 +29,9 @@ package org.hisp.dhis.trackedentity.action.program;
  */
 
 import com.opensymphony.xwork2.Action;
-
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.attribute.AttributeService;
+import org.hisp.dhis.dataapproval.DataApprovalWorkflowService;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
@@ -39,7 +39,6 @@ import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.program.ProgramType;
 import org.hisp.dhis.relationship.RelationshipType;
 import org.hisp.dhis.relationship.RelationshipTypeService;
-import org.hisp.dhis.system.util.AttributeUtils;
 import org.hisp.dhis.trackedentity.TrackedEntity;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
@@ -75,9 +74,12 @@ public class UpdateProgramAction
 
     @Autowired
     private AttributeService attributeService;
-    
+
     @Autowired
     private DataElementCategoryService categoryService;
+
+    @Autowired
+    private DataApprovalWorkflowService workflowService;
 
     // -------------------------------------------------------------------------
     // Input/Output
@@ -95,6 +97,13 @@ public class UpdateProgramAction
     public void setName( String name )
     {
         this.name = name;
+    }
+
+    private String shortName;
+
+    public void setShortName( String shortName )
+    {
+        this.shortName = shortName;
     }
 
     private String description;
@@ -264,12 +273,33 @@ public class UpdateProgramAction
     {
         this.jsonAttributeValues = jsonAttributeValues;
     }
-    
+
     private Integer categoryComboId;
 
     public void setCategoryComboId( Integer categoryComboId )
     {
         this.categoryComboId = categoryComboId;
+    }
+
+    private boolean skipOffline;
+
+    public void setSkipOffline( boolean skipOffline )
+    {
+        this.skipOffline = skipOffline;
+    }
+
+    private Integer workflowId;
+
+    public void setWorkflowId( Integer workflowId )
+    {
+        this.workflowId = workflowId;
+    }
+    
+    private boolean displayFrontPageList;
+
+    public void setDisplayFrontPageList( boolean displayFrontPageList )
+    {
+        this.displayFrontPageList = displayFrontPageList;
     }
 
     // -------------------------------------------------------------------------
@@ -289,9 +319,10 @@ public class UpdateProgramAction
         selectEnrollmentDatesInFuture = (selectEnrollmentDatesInFuture == null) ? false : selectEnrollmentDatesInFuture;
         selectIncidentDatesInFuture = (selectIncidentDatesInFuture == null) ? false : selectIncidentDatesInFuture;
         dataEntryMethod = (dataEntryMethod == null) ? false : dataEntryMethod;
-        
+
         Program program = programService.getProgram( id );
         program.setName( StringUtils.trimToNull( name ) );
+        program.setShortName( StringUtils.trimToNull( shortName ) );
         program.setDescription( StringUtils.trimToNull( description ) );
         program.setEnrollmentDateLabel( StringUtils.trimToNull( enrollmentDateLabel ) );
         program.setIncidentDateLabel( StringUtils.trimToNull( incidentDateLabel ) );
@@ -301,6 +332,8 @@ public class UpdateProgramAction
         program.setSelectEnrollmentDatesInFuture( selectEnrollmentDatesInFuture );
         program.setSelectIncidentDatesInFuture( selectIncidentDatesInFuture );
         program.setDataEntryMethod( dataEntryMethod );
+        program.setSkipOffline( skipOffline );
+        program.setDisplayFrontPageList( displayFrontPageList ); 
 
         if ( program.isRegistration() )
         {
@@ -316,8 +349,8 @@ public class UpdateProgramAction
             RelationshipType relationshipType = relationshipTypeService.getRelationshipType( relationshipTypeId );
             program.setRelationshipType( relationshipType );
             program.setRelationshipFromA( relationshipFromA );
-            program.setRelationshipText( relationshipText ); 
-            
+            program.setRelationshipText( relationshipText );
+
             Program relatedProgram = programService.getProgram( relatedProgramId );
             program.setRelatedProgram( relatedProgram );
         }
@@ -354,7 +387,7 @@ public class UpdateProgramAction
             {
                 TrackedEntityAttribute attribute = trackedEntityAttributeService.getTrackedEntityAttribute( Integer
                     .parseInt( ids[1] ) );
-                ProgramTrackedEntityAttribute programAttribute = new ProgramTrackedEntityAttribute( attribute,
+                ProgramTrackedEntityAttribute programAttribute = new ProgramTrackedEntityAttribute( program, attribute,
                     personDisplayNames.get( index ), mandatory.get( index ), allowFutureDate.get( index ) );
                 program.getProgramAttributes().add( programAttribute );
             }
@@ -367,14 +400,22 @@ public class UpdateProgramAction
 
         if ( jsonAttributeValues != null )
         {
-            AttributeUtils.updateAttributeValuesFromJson( program.getAttributeValues(), jsonAttributeValues, attributeService );
-        }
-        
-        if ( categoryComboId != null )
-        {
-                program.setCategoryCombo( categoryService.getDataElementCategoryCombo( categoryComboId ) );
+            attributeService.updateAttributeValues( program, jsonAttributeValues );
         }
 
+        if ( categoryComboId != null )
+        {
+            program.setCategoryCombo( categoryService.getDataElementCategoryCombo( categoryComboId ) );
+        }
+
+        if ( workflowId != null && workflowId > 0 )
+        {
+            program.setWorkflow( workflowService.getWorkflow( workflowId ) );
+        }
+        else
+        {
+            program.setWorkflow( null );
+        }
         programService.updateProgram( program );
 
         return SUCCESS;

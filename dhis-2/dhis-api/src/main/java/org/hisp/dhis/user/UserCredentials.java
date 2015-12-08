@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DimensionType;
 import org.hisp.dhis.common.DimensionalObject;
@@ -47,6 +48,7 @@ import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.program.Program;
 import org.hisp.dhis.schema.PropertyType;
 import org.hisp.dhis.schema.annotation.Property;
 import org.hisp.dhis.schema.annotation.PropertyRange;
@@ -75,9 +77,20 @@ public class UserCredentials
     private String username;
 
     /**
+     * Indicates whether this credentials can only be authenticated externally,
+     * such as through OpenID or LDAP.
+     */
+    private boolean externalAuth;
+
+    /**
      * Unique OpenID.
      */
     private String openId;
+
+    /**
+     * Unique LDAP distinguished name.
+     */
+    private String ldapId;
 
     /**
      * Required. Will be stored as a hash.
@@ -261,6 +274,22 @@ public class UserCredentials
 
         return dataSets;
     }
+    
+    /**
+     * Returns a set of the programs for all user authority groups
+     * of this user credentials.
+     */
+    public Set<Program> getAllPrograms()
+    {
+        Set<Program> programs = new HashSet<>();
+
+        for ( UserAuthorityGroup group : userAuthorityGroups )
+        {
+            programs.addAll( group.getPrograms() );
+        }
+
+        return programs;
+    }
 
     /**
      * Indicates whether this user credentials can issue the given user authority
@@ -435,6 +464,22 @@ public class UserCredentials
         return constraints != null && !constraints.isEmpty();
     }
 
+    /**
+     * Indicates whether an LDAP identifier is set.
+     */
+    public boolean hasLdapId()
+    {
+        return ldapId != null && !ldapId.isEmpty();
+    }
+
+    /**
+     * Indicates whether a password is set.
+     */
+    public boolean hasPassword()
+    {
+        return password != null;
+    }
+
     // -------------------------------------------------------------------------
     // hashCode and equals
     // -------------------------------------------------------------------------
@@ -504,6 +549,19 @@ public class UserCredentials
     public void setPassword( String password )
     {
         this.password = password;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isExternalAuth()
+    {
+        return externalAuth;
+    }
+
+    public void setExternalAuth( boolean externalAuth )
+    {
+        this.externalAuth = externalAuth;
     }
 
     @JsonProperty
@@ -588,6 +646,19 @@ public class UserCredentials
     public void setOpenId( String openId )
     {
         this.openId = openId;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getLdapId()
+    {
+        return ldapId;
+    }
+
+    public void setLdapId( String ldapId )
+    {
+        this.ldapId = ldapId;
     }
 
     @JsonProperty
@@ -694,10 +765,12 @@ public class UserCredentials
             if ( strategy.isReplace() )
             {
                 openId = userCredentials.getOpenId();
+                ldapId = userCredentials.getLdapId();
             }
             else if ( strategy.isMerge() )
             {
                 openId = userCredentials.getOpenId() == null ? openId : userCredentials.getOpenId();
+                ldapId = userCredentials.getLdapId() == null ? ldapId : userCredentials.getLdapId();
             }
 
             userAuthorityGroups.clear();

@@ -69,6 +69,8 @@
     <property name="reportDateToUse" />
 
     <property name="preGenerateUID" />
+    
+    <property name="hideDueDate" />
 
     <property name="sortOrder" column="sort_order" />
 
@@ -77,7 +79,7 @@
 
     <!-- Dynamic attribute values -->
 
-    <set name="attributeValues" table="programstageattributevalues">
+    <set name="attributeValues" table="programstageattributevalues" cascade="delete-orphan">
       <cache usage="read-write" />
       <key column="programstageid" />
       <many-to-many class="org.hisp.dhis.attribute.AttributeValue" column="attributevalueid" unique="true" />

@@ -35,9 +35,8 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
-import org.hisp.dhis.attribute.AttributeValue;
+import org.hisp.dhis.common.BaseDimensionalItemObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.DataDimensionType;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
@@ -54,7 +53,7 @@ import java.util.Set;
  */
 @JacksonXmlRootElement( localName = "categoryOptionGroup", namespace = DxfNamespaces.DXF_2_0 )
 public class CategoryOptionGroup
-    extends BaseNameableObject
+    extends BaseDimensionalItemObject
 {
     @Scanned
     private Set<DataElementCategoryOption> members = new HashSet<>();
@@ -62,11 +61,6 @@ public class CategoryOptionGroup
     private CategoryOptionGroupSet groupSet;
 
     private DataDimensionType dataDimensionType;
-
-    /**
-     * Set of the dynamic attributes values that belong to this data element.
-     */
-    private Set<AttributeValue> attributeValues = new HashSet<>();
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -86,7 +80,7 @@ public class CategoryOptionGroup
     // -------------------------------------------------------------------------
     // Logic
     // -------------------------------------------------------------------------
-
+    
     public void addCategoryOption( DataElementCategoryOption categoryOption )
     {
         members.add( categoryOption );
@@ -145,20 +139,6 @@ public class CategoryOptionGroup
         this.dataDimensionType = dataDimensionType;
     }
 
-    @JsonProperty( "attributeValues" )
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlElementWrapper( localName = "attributeValues", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "attributeValue", namespace = DxfNamespaces.DXF_2_0 )
-    public Set<AttributeValue> getAttributeValues()
-    {
-        return attributeValues;
-    }
-
-    public void setAttributeValues( Set<AttributeValue> attributeValues )
-    {
-        this.attributeValues = attributeValues;
-    }
-
     @Override
     public void mergeWith( IdentifiableObject other, MergeStrategy strategy )
     {
@@ -185,9 +165,6 @@ public class CategoryOptionGroup
             {
                 addCategoryOption( categoryOption );
             }
-
-            attributeValues.clear();
-            attributeValues.addAll( categoryOptionGroup.getAttributeValues() );
         }
     }
 }

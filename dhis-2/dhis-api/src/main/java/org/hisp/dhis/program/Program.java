@@ -35,8 +35,8 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.google.common.collect.Sets;
-import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeStrategy;
@@ -44,6 +44,7 @@ import org.hisp.dhis.common.VersionedObject;
 import org.hisp.dhis.common.annotation.Scanned;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
+import org.hisp.dhis.dataapproval.DataApprovalWorkflow;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataentryform.DataEntryForm;
@@ -66,7 +67,7 @@ import java.util.Set;
  */
 @JacksonXmlRootElement( localName = "program", namespace = DxfNamespaces.DXF_2_0 )
 public class Program
-    extends BaseIdentifiableObject
+    extends BaseNameableObject
     implements VersionedObject
 {
     private String description;
@@ -92,6 +93,7 @@ public class Program
 
     private Boolean ignoreOverdueEvents = false;
 
+    @Scanned
     private List<ProgramTrackedEntityAttribute> programAttributes = new ArrayList<>();
 
     @Scanned
@@ -118,13 +120,8 @@ public class Program
     private Program relatedProgram;
 
     private Boolean dataEntryMethod = false;
-
+    
     private TrackedEntity trackedEntity;
-
-    /**
-     * Set of the dynamic attributes values that belong to this data element.
-     */
-    private Set<AttributeValue> attributeValues = new HashSet<>();
 
     private DataEntryForm dataEntryForm;
 
@@ -132,6 +129,19 @@ public class Program
      * The CategoryCombo used for data attributes.
      */
     private DataElementCategoryCombo categoryCombo;
+
+    /**
+     * Property indicating whether offline storage is enabled for this program
+     * or not
+     */
+    private boolean skipOffline;
+
+    /**
+     * The approval workflow (if any) for this program.
+     */
+    private DataApprovalWorkflow workflow;
+    
+    private Boolean displayFrontPageList = false;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -629,20 +639,6 @@ public class Program
         this.trackedEntity = trackedEntity;
     }
 
-    @JsonProperty( "attributeValues" )
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlElementWrapper( localName = "attributeValues", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "attributeValue", namespace = DxfNamespaces.DXF_2_0 )
-    public Set<AttributeValue> getAttributeValues()
-    {
-        return attributeValues;
-    }
-
-    public void setAttributeValues( Set<AttributeValue> attributeValues )
-    {
-        this.attributeValues = attributeValues;
-    }
-
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( localName = "dataEntryForm", namespace = DxfNamespaces.DXF_2_0 )
@@ -670,6 +666,19 @@ public class Program
         this.categoryCombo = categoryCombo;
     }
 
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public DataApprovalWorkflow getWorkflow()
+    {
+        return workflow;
+    }
+
+    public void setWorkflow( DataApprovalWorkflow workflow )
+    {
+        this.workflow = workflow;
+    }
+
     /**
      * Indicates whether this program has a category combination which is different
      * from the default category combination.
@@ -677,6 +686,32 @@ public class Program
     public boolean hasCategoryCombo()
     {
         return categoryCombo != null && !DataElementCategoryCombo.DEFAULT_CATEGORY_COMBO_NAME.equals( categoryCombo.getName() );
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isSkipOffline()
+    {
+        return skipOffline;
+    }
+
+    public void setSkipOffline( boolean skipOffline )
+    {
+        this.skipOffline = skipOffline;
+    }
+    
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Boolean getDisplayFrontPageList()
+    {
+        return displayFrontPageList;
+    }
+
+    public void setDisplayFrontPageList( Boolean displayFrontPageList )
+    {
+        this.displayFrontPageList = displayFrontPageList;
     }
 
     @Override
@@ -749,9 +784,6 @@ public class Program
 
             instanceReminders.clear();
             instanceReminders.addAll( program.getInstanceReminders() );
-
-            attributeValues.clear();
-            attributeValues.addAll( program.getAttributeValues() );
         }
-    }
+    }    
 }

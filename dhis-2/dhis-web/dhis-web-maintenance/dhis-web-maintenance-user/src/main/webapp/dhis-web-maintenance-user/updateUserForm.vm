@@ -42,6 +42,8 @@
 
     selectionTreeSelection.setMultipleSelectionAllowed(true);
     selectionTree.buildSelectionTree();
+    
+    externalAuthChanged();
 
     $('#urAvailable').selected({
       url: '../api/userRoles.json?canIssue=true',
@@ -95,6 +97,11 @@
       <td colspan="3"><input type="text" id="username" name="username" value="$encoder.htmlEncode( $userCredentials.username )" disabled="disabled" autocomplete="off"/></td>
     </tr>
 
+    <tr class="account">
+		<td><label for="externalAuth">$i18n.getString( "external_authentication_only" ) (OpenID or LDAP)</label></td>
+		<td colspan="3"><input type="checkbox" id="externalAuth" name="externalAuth" value="true" onchange="javascript:externalAuthChanged()"#if( $!userCredentials.externalAuth ) checked="checked"#end></td>
+	</tr>
+
     <tr>
       <td><label for="rawPassword">$i18n.getString( "password" )</label></td>
       <td colspan="3"><input type="password" id="rawPassword" name="rawPassword" autocomplete="off"></td>
@@ -123,6 +130,11 @@
     <tr>
       <td><label for="openId">$i18n.getString( "openid" )</label></td>
       <td colspan="3"><input type="text" id="openId" name="openId" value="$!encoder.htmlEncode( $userCredentials.openId )"></td>
+    </tr>
+
+    <tr>
+      <td><label for="ldapId">$i18n.getString( "ldap_id" )</label></td>
+      <td colspan="3"><input type="text" id="ldapId" name="ldapId" value="$!encoder.htmlEncode( $userCredentials.ldapId )"></td>
     </tr>
 
     <tr>

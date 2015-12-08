@@ -28,6 +28,12 @@ package org.hisp.dhis.query;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Projections;
@@ -38,16 +44,14 @@ import org.hisp.dhis.schema.Property;
 import org.hisp.dhis.schema.Schema;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 /**
+ * Implementation of QueryEngine that uses Hibernate Criteria and
+ * supports idObjects only.
+ *
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class CriteriaQueryEngine<T> implements QueryEngine<T>
+public class CriteriaQueryEngine<T extends IdentifiableObject> 
+    implements QueryEngine<T>
 {
     @Autowired
     private final List<HibernateGenericStore<T>> hibernateGenericStores = new ArrayList<>();
@@ -118,27 +122,73 @@ public class CriteriaQueryEngine<T> implements QueryEngine<T>
 
     private Criteria buildCriteria( Criteria criteria, Query query )
     {
-        if ( query.getFirstResult() != null )
-        {
-            criteria.setFirstResult( query.getFirstResult() );
-        }
+        List<org.hisp.dhis.query.Criterion> criterions = getCriterions( query );
 
-        if ( query.getMaxResults() != null )
-        {
-            criteria.setMaxResults( query.getMaxResults() );
-        }
-
-        for ( org.hisp.dhis.query.Criterion criterion : query.getCriterions() )
+        for ( org.hisp.dhis.query.Criterion criterion : criterions )
         {
             addCriterion( criteria, criterion, query.getSchema() );
         }
 
-        for ( Order order : query.getOrders() )
+        // no more criterions available, so we can do our own paging
+        if ( query.getCriterions().isEmpty() )
         {
-            criteria.addOrder( getHibernateOrder( order ) );
+            if ( query.getFirstResult() != null )
+            {
+                criteria.setFirstResult( query.getFirstResult() );
+            }
+
+            if ( query.getMaxResults() != null )
+            {
+                criteria.setMaxResults( query.getMaxResults() );
+            }
+
+            for ( Order order : query.getOrders() )
+            {
+                criteria.addOrder( getHibernateOrder( order ) );
+            }
         }
 
         return criteria;
+    }
+
+    /**
+     * Remove criterions that can be applied by criteria engine, and return those. The rest of
+     * the criterions will be passed on to the next query engine.
+     *
+     * @param query Query
+     * @return List of usable criterions for this engine
+     */
+    private List<org.hisp.dhis.query.Criterion> getCriterions( Query query )
+    {
+        List<org.hisp.dhis.query.Criterion> criterions = new ArrayList<>();
+
+        Iterator<org.hisp.dhis.query.Criterion> criterionIterator = query.getCriterions().iterator();
+
+        while ( criterionIterator.hasNext() )
+        {
+            org.hisp.dhis.query.Criterion criterion = criterionIterator.next();
+
+            if ( Restriction.class.isInstance( criterion ) )
+            {
+                Restriction restriction = (Restriction) criterion;
+
+                if ( !restriction.getPath().contains( "\\." ) )
+                {
+                    if ( query.getSchema().haveProperty( restriction.getPath() ) )
+                    {
+                        Property property = query.getSchema().getProperty( restriction.getPath() );
+
+                        if ( property.isSimple() && property.isPersisted() )
+                        {
+                            criterions.add( criterion );
+                            criterionIterator.remove();
+                        }
+                    }
+                }
+            }
+        }
+
+        return criterions;
     }
 
     private void addJunction( org.hibernate.criterion.Junction junction, org.hisp.dhis.query.Criterion criterion, Schema schema )
@@ -209,7 +259,6 @@ public class CriteriaQueryEngine<T> implements QueryEngine<T>
         }
     }
 
-    // TODO verify parameters length
     private Criterion getHibernateCriterion( Schema schema, Restriction restriction )
     {
         if ( restriction == null || restriction.getOperator() == null )
@@ -219,67 +268,7 @@ public class CriteriaQueryEngine<T> implements QueryEngine<T>
 
         Property property = schema.getProperty( restriction.getPath() );
 
-        List<Object> parameters = new ArrayList<>();
-
-        for ( Object parameter : restriction.getParameters() )
-        {
-            parameters.add( QueryUtils.getValue( property.getKlass(), parameter ) );
-        }
-
-        switch ( restriction.getOperator() )
-        {
-            case EQ:
-            {
-                return Restrictions.eq( property.getFieldName(), parameters.get( 0 ) );
-            }
-            case NE:
-            {
-                return Restrictions.ne( property.getFieldName(), parameters.get( 0 ) );
-            }
-            case GT:
-            {
-                return Restrictions.gt( property.getFieldName(), parameters.get( 0 ) );
-            }
-            case LT:
-            {
-                return Restrictions.lt( property.getFieldName(), parameters.get( 0 ) );
-            }
-            case GE:
-            {
-                return Restrictions.ge( property.getFieldName(), parameters.get( 0 ) );
-            }
-            case LE:
-            {
-                return Restrictions.le( property.getFieldName(), parameters.get( 0 ) );
-            }
-            case BETWEEN:
-            {
-                return Restrictions.between( property.getFieldName(), parameters.get( 0 ), parameters.get( 1 ) );
-            }
-            case LIKE:
-            {
-                return Restrictions.like( property.getFieldName(), parameters.get( 0 ) );
-            }
-            case ILIKE:
-            {
-                return Restrictions.ilike( property.getFieldName(), parameters.get( 0 ) );
-            }
-            case IN:
-            {
-                if ( !Collection.class.isInstance( parameters.get( 0 ) ) || ((Collection<?>) parameters.get( 0 )).isEmpty() )
-                {
-                    return null;
-                }
-
-                return Restrictions.in( property.getFieldName(), (Collection<?>) parameters.get( 0 ) );
-            }
-            case NULL:
-            {
-                return Restrictions.isNull( property.getFieldName() );
-            }
-        }
-
-        return null;
+        return restriction.getOperator().getHibernateCriterion( property );
     }
 
     public org.hibernate.criterion.Order getHibernateOrder( Order order )
@@ -289,7 +278,7 @@ public class CriteriaQueryEngine<T> implements QueryEngine<T>
             return null;
         }
 
-        org.hibernate.criterion.Order criteriaOrder = null;
+        org.hibernate.criterion.Order criteriaOrder;
 
         if ( order.isAscending() )
         {

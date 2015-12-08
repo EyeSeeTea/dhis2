@@ -140,17 +140,36 @@
                                 </textarea>                                              
                             </div>
                             <div ng-switch-when="BOOLEAN">
-                                <select ng-model="currentEvent[eventGridColumn.id]"                                                                
-                                        ng-required={{eventGridColumn.compulsory}}
-                                        ng-disabled="assignedFields[eventGridColumn.id]"
-                                        name="foo" 
-                                        input-field-id={{eventGridColumn.id}} 
-                                        ng-change="saveDatavalue()" 
-                                        class="form-control">
-                                <option value="">{{pleaseSelectLabel}}</option>                        
-                                <option value="false">{{'no'| translate}}</option>
-                                <option value="true">{{'yes'| translate}}</option>
-                                </select>
+                                <label class="radio-inline">
+                                    <input  type="radio" 
+                                            ng-model="currentEvent[eventGridColumn.id]"                                                                
+                                            ng-required={{eventGridColumn.compulsory}}
+                                            ng-disabled="assignedFields[eventGridColumn.id]"
+                                            input-field-id={{eventGridColumn.id}} 
+                                            ng-change="saveDatavalue()" 
+                                           value=""> 
+                                    {{'no_value'| translate}}
+                                </label>
+                                <label class="radio-inline">
+                                    <input  type="radio" 
+                                            ng-model="currentEvent[eventGridColumn.id]"                                                                
+                                            ng-required={{eventGridColumn.compulsory}}
+                                            ng-disabled="assignedFields[eventGridColumn.id]"
+                                            input-field-id={{eventGridColumn.id}} 
+                                            ng-change="saveDatavalue()" 
+                                           value="true"> 
+                                    {{'yes'| translate}}
+                                </label>
+                                <label class="radio-inline">
+                                    <input  type="radio" 
+                                            ng-model="currentEvent[eventGridColumn.id]"                                                                
+                                            ng-required={{eventGridColumn.compulsory}}
+                                            ng-disabled="assignedFields[eventGridColumn.id]"
+                                            input-field-id={{eventGridColumn.id}} 
+                                            ng-change="saveDatavalue()" 
+                                           value="false"> 
+                                    {{'no'| translate}}
+                                </label>
                             </div>
                             <div ng-switch-when="DATE">
                                 <input type="text"                                                                
@@ -187,6 +206,35 @@
                                        input-field-id={{eventGridColumn.id}} 
                                        ng-change="saveDatavalue()" />
                             </div>
+                            <div ng-switch-when="FILE_RESOURCE">                                
+                                <div class="input-group">
+                                    <div class="form-control">
+                                        <a href ng-click="downloadFile(currentEvent.event, eventGridColumn.id)">{{fileNames[currentEvent.event][eventGridColumn.id]}}</a>                                        
+                                    </div>
+                                    <span class="input-group-btn">
+                                        <span class="btn btn-primary btn-file">
+                                            <span ng-if="currentEvent[eventGridColumn.id]" 
+                                                  title="{{'delete' | translate}}" 
+                                                  d2-file-input-name="fileNames[currentEvent.event][eventGridColumn.id]" 
+                                                  d2-file-input-delete="currentEvent[eventGridColumn.id]">
+                                                <a href ng-click="deleteFile(eventGridColumn.id)"><i class="fa fa-trash alert-danger"></i></a>
+                                            </span>
+                                            <span ng-if="!currentEvent[eventGridColumn.id]" title="{{'upload' | translate}}">
+                                                <i class="fa fa-upload"></i>
+                                                <input type="file" 
+                                                       ng-required={{eventGridColumn.compulsory}}
+                                                       ng-disabled="assignedFields[eventGridColumn.id]"
+                                                       name="foo"
+                                                       input-field-id={{eventGridColumn.id}}
+                                                       d2-file-input-instant="false"
+                                                       d2-file-input="currentEvent" 
+                                                       d2-file-input-current-name="currentFileNames"
+                                                       d2-file-input-name="fileNames">
+                                            </span>                                                
+                                        </span>
+                                    </span>                
+                                </div>
+                            </div>
                             <div ng-switch-default>
                                 <input type="text"                                             
                                     ng-model="currentEvent[eventGridColumn.id]"                                        
@@ -204,16 +252,20 @@
                 </td>
             </tr>        
         </tbody>
-    </table>    
+    </table>
+    
 </div>
 
 <div ng-if='selectedProgramStage.programStageSections.length'>
     <div ng-include="'views/event-details.html'"></div>
-
     <div ng-repeat='section in selectedProgramStage.programStageSections' ng-if="section.id === selectedSection.id || selectedSection.id === 'ALL' && !hiddenSections[section.id] ">
         <div class="vertical-spacing section-label">
            {{section.name}}
         </div>
+        
+        <div class="vertical-spacing" ng-if="!section.programStageDataElements || section.programStageDataElements.length === 0">
+            <div class="alert alert-warning">{{'section'| translate}} {{section.name}} {{'has_no_dataelements'| translate}}</div>
+        </div>  
         
         <table class="dhis2-list-table-striped">                    
             <thead>                        
@@ -358,17 +410,36 @@
                                     </textarea>                                             
                                 </div>
                                 <div ng-switch-when="BOOLEAN">
-                                    <select ng-model="currentEvent[de.dataElement.id]"                                                 
+                                    <label class="radio-inline">
+                                        <input type="radio" 
+                                            ng-model="currentEvent[de.dataElement.id]"                                                 
                                             ng-required={{prStDes[de.dataElement.id].compulsory}}
                                             ng-disabled="assignedFields[de.dataElement.id]"
-                                            name="foo" 
                                             input-field-id={{de.dataElement.id}} 
-                                            ng-change="saveDatavalue()" 
-                                            class="form-control">
-                                        <option value="">{{pleaseSelectLabel}}</option>                        
-                                        <option value="false">{{'no'| translate}}</option>
-                                        <option value="true">{{'yes'| translate}}</option>
-                                    </select>
+                                            ng-change="saveDatavalue()">
+                                            value="">
+                                        {{'no_value'| translate}}
+                                    </label>
+                                    <label class="radio-inline">
+                                        <input type="radio" 
+                                            ng-model="currentEvent[de.dataElement.id]"                                                 
+                                            ng-required={{prStDes[de.dataElement.id].compulsory}}
+                                            ng-disabled="assignedFields[de.dataElement.id]"
+                                            input-field-id={{de.dataElement.id}} 
+                                            ng-change="saveDatavalue()">
+                                            value="true">
+                                        {{'yes'| translate}}
+                                    </label>
+                                    <label class="radio-inline">
+                                        <input type="radio" 
+                                            ng-model="currentEvent[de.dataElement.id]"                                                 
+                                            ng-required={{prStDes[de.dataElement.id].compulsory}}
+                                            ng-disabled="assignedFields[de.dataElement.id]"
+                                            input-field-id={{de.dataElement.id}} 
+                                            ng-change="saveDatavalue()">
+                                            value="false">
+                                        {{'no'| translate}}
+                                    </label>
                                 </div>
                                 <div ng-switch-when="DATE">
                                     <input type="text"                                                                
@@ -407,6 +478,35 @@
                                            input-field-id={{de.dataElement.id}}
                                            ng-change="saveDatavalue()" />
                                 </div>
+                                <div ng-switch-when="FILE_RESOURCE">
+                                    <div class="input-group">
+                                        <div class="form-control">
+                                            <a href ng-click="downloadFile(currentEvent.event, de.dataElement.id)">{{fileNames[currentEvent.event][de.dataElement.id]}}</a>                                        
+                                        </div>
+                                        <span class="input-group-btn">
+                                            <span class="btn btn-primary btn-file">
+                                                <span ng-if="currentEvent[de.dataElement.id]" 
+                                                      title="{{'delete' | translate}}" 
+                                                      d2-file-input-name="fileNames[currentEvent.event][de.dataElement.id]" 
+                                                      d2-file-input-delete="currentEvent[de.dataElement.id]">
+                                                    <a href ng-click="deleteFile(de.dataElement.id)"><i class="fa fa-trash alert-danger"></i></a>
+                                                </span>
+                                                <span ng-if="!currentEvent[de.dataElement.id]" title="{{'upload' | translate}}">
+                                                    <i class="fa fa-upload"></i>
+                                                    <input type="file" 
+                                                           ng-required={{eventGridColumn.compulsory}}
+                                                           ng-disabled="assignedFields[de.dataElement.id]"
+                                                           name="foo"
+                                                           input-field-id={{de.dataElement.id}}
+                                                           d2-file-input-instant="false"
+                                                           d2-file-input="currentEvent" 
+                                                           d2-file-input-current-name="currentFileNames"
+                                                           d2-file-input-name="fileNames">
+                                                </span>                                                
+                                            </span>
+                                        </span>                
+                                    </div>                                    
+                                </div>
                                 <div ng-switch-default>
                                     <input type="text"                                                  
                                         ng-model="currentEvent[de.dataElement.id]"                                                 
@@ -429,5 +529,5 @@
             </tbody>
         </table>
     </div> 
-
+    
 </div>

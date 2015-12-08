@@ -28,11 +28,7 @@ package org.hisp.dhis.trackedentity.action.programstage;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import com.opensymphony.xwork2.Action;
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.dataelement.DataElement;
@@ -45,13 +41,15 @@ import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageDataElement;
 import org.hisp.dhis.program.ProgramStageDataElementService;
 import org.hisp.dhis.program.ProgramStageService;
-import org.hisp.dhis.system.util.AttributeUtils;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceReminder;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.opensymphony.xwork2.Action;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -341,6 +339,13 @@ public class AddProgramStageAction
     {
         this.jsonAttributeValues = jsonAttributeValues;
     }
+    
+    private Boolean hideDueDate;
+
+    public void setHideDueDate( Boolean hideDueDate )
+    {
+        this.hideDueDate = hideDueDate;
+    }
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -363,6 +368,7 @@ public class AddProgramStageAction
         allowGenerateNextVisit = (allowGenerateNextVisit == null) ? false : allowGenerateNextVisit;
         openAfterEnrollment = (openAfterEnrollment == null) ? false : openAfterEnrollment;
         preGenerateUID = (preGenerateUID == null) ? false : preGenerateUID;
+        hideDueDate = (hideDueDate == null) ? false : hideDueDate;
 
         ProgramStage programStage = new ProgramStage();
         Program program = programService.getProgram( id );
@@ -407,6 +413,7 @@ public class AddProgramStageAction
         programStage.setReportDateToUse( reportDateToUse );
         programStage.setPreGenerateUID( preGenerateUID );
         programStage.setSortOrder( program.getProgramStages().size() + 1 );
+        programStage.setHideDueDate( hideDueDate );
 
         // SMS Reminder
 
@@ -439,8 +446,7 @@ public class AddProgramStageAction
 
         if ( jsonAttributeValues != null )
         {
-            AttributeUtils.updateAttributeValuesFromJson( programStage.getAttributeValues(), jsonAttributeValues,
-                attributeService );
+            attributeService.updateAttributeValues( programStage, jsonAttributeValues );
         }
 
         programStageService.saveProgramStage( programStage );

@@ -37,12 +37,31 @@ import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeStrategy;
+import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
+import org.hisp.dhis.dataelement.CategoryOptionGroup;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryOption;
+import org.hisp.dhis.dataelement.DataElementGroup;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.document.Document;
+import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.option.OptionSet;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.trackedentity.TrackedEntity;
+import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
+import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserGroup;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -51,7 +70,7 @@ import java.util.Set;
 public class Attribute
     extends BaseIdentifiableObject
 {
-    private String valueType;
+    private ValueType valueType;
 
     private boolean dataElementAttribute;
 
@@ -85,34 +104,83 @@ public class Attribute
 
     private boolean categoryOptionGroupAttribute;
 
+    private boolean documentAttribute;
+
     private boolean mandatory;
+
+    private boolean unique;
 
     private Integer sortOrder;
 
     private OptionSet optionSet;
-
-    private Set<AttributeValue> attributeValues = new HashSet<>();
 
     public Attribute()
     {
 
     }
 
-    public Attribute( String name, String valueType )
+    public Attribute( String name, ValueType valueType )
     {
         this.name = name;
         this.valueType = valueType;
     }
 
+    @Override
+    public int hashCode()
+    {
+        return 31 * super.hashCode() + Objects.hash( valueType, dataElementAttribute, dataElementGroupAttribute, indicatorAttribute, indicatorGroupAttribute, dataSetAttribute, organisationUnitAttribute, organisationUnitGroupAttribute,
+            organisationUnitGroupSetAttribute, userAttribute, userGroupAttribute, programAttribute, programStageAttribute, trackedEntityAttribute, trackedEntityAttributeAttribute, categoryOptionAttribute, categoryOptionGroupAttribute, mandatory, unique,
+            sortOrder, optionSet );
+    }
+
+    @Override
+    public boolean equals( Object obj )
+    {
+        if ( this == obj )
+        {
+            return true;
+        }
+        if ( obj == null || getClass() != obj.getClass() )
+        {
+            return false;
+        }
+        if ( !super.equals( obj ) )
+        {
+            return false;
+        }
+        final Attribute other = (Attribute) obj;
+        return Objects.equals( this.valueType, other.valueType )
+            && Objects.equals( this.dataElementAttribute, other.dataElementAttribute )
+            && Objects.equals( this.dataElementGroupAttribute, other.dataElementGroupAttribute )
+            && Objects.equals( this.indicatorAttribute, other.indicatorAttribute )
+            && Objects.equals( this.indicatorGroupAttribute, other.indicatorGroupAttribute )
+            && Objects.equals( this.dataSetAttribute, other.dataSetAttribute )
+            && Objects.equals( this.organisationUnitAttribute, other.organisationUnitAttribute )
+            && Objects.equals( this.organisationUnitGroupAttribute, other.organisationUnitGroupAttribute )
+            && Objects.equals( this.organisationUnitGroupSetAttribute, other.organisationUnitGroupSetAttribute )
+            && Objects.equals( this.userAttribute, other.userAttribute )
+            && Objects.equals( this.userGroupAttribute, other.userGroupAttribute )
+            && Objects.equals( this.programAttribute, other.programAttribute )
+            && Objects.equals( this.programStageAttribute, other.programStageAttribute )
+            && Objects.equals( this.trackedEntityAttribute, other.trackedEntityAttribute )
+            && Objects.equals( this.trackedEntityAttributeAttribute, other.trackedEntityAttributeAttribute )
+            && Objects.equals( this.categoryOptionAttribute, other.categoryOptionAttribute )
+            && Objects.equals( this.categoryOptionGroupAttribute, other.categoryOptionGroupAttribute )
+            && Objects.equals( this.mandatory, other.mandatory )
+            && Objects.equals( this.unique, other.unique )
+            && Objects.equals( this.sortOrder, other.sortOrder )
+            && Objects.equals( this.optionSet, other.optionSet );
+    }
+
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String getValueType()
+    public ValueType getValueType()
     {
         return valueType;
     }
 
-    public void setValueType( String valueType )
+    public void setValueType( ValueType valueType )
     {
         this.valueType = valueType;
     }
@@ -128,6 +196,19 @@ public class Attribute
     public void setMandatory( boolean mandatory )
     {
         this.mandatory = mandatory;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isUnique()
+    {
+        return unique;
+    }
+
+    public void setUnique( boolean unique )
+    {
+        this.unique = unique;
     }
 
     @JsonProperty
@@ -341,6 +422,19 @@ public class Attribute
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isDocumentAttribute()
+    {
+        return documentAttribute;
+    }
+
+    public void setDocumentAttribute( boolean documentAttribute )
+    {
+        this.documentAttribute = documentAttribute;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public OptionSet getOptionSet()
     {
         return optionSet;
@@ -364,15 +458,31 @@ public class Attribute
         this.sortOrder = sortOrder;
     }
 
-    public Set<AttributeValue> getAttributeValues()
+    public List<Class<? extends IdentifiableObject>> getSupportedClasses()
     {
-        return attributeValues;
+        List<Class<? extends IdentifiableObject>> klasses = new ArrayList<>();
+
+        if ( dataElementAttribute ) klasses.add( DataElement.class );
+        if ( dataElementGroupAttribute ) klasses.add( DataElementGroup.class );
+        if ( categoryOptionAttribute ) klasses.add( DataElementCategoryOption.class );
+        if ( categoryOptionGroupAttribute ) klasses.add( CategoryOptionGroup.class );
+        if ( indicatorAttribute ) klasses.add( Indicator.class );
+        if ( indicatorGroupAttribute ) klasses.add( IndicatorGroup.class );
+        if ( dataSetAttribute ) klasses.add( DataSet.class );
+        if ( organisationUnitAttribute ) klasses.add( OrganisationUnit.class );
+        if ( organisationUnitGroupAttribute ) klasses.add( OrganisationUnitGroup.class );
+        if ( organisationUnitGroupSetAttribute ) klasses.add( OrganisationUnitGroupSet.class );
+        if ( userAttribute ) klasses.add( User.class );
+        if ( userGroupAttribute ) klasses.add( UserGroup.class );
+        if ( programAttribute ) klasses.add( Program.class );
+        if ( programStageAttribute ) klasses.add( ProgramStage.class );
+        if ( trackedEntityAttribute ) klasses.add( TrackedEntity.class );
+        if ( trackedEntityAttributeAttribute ) klasses.add( TrackedEntityAttribute.class );
+        if ( documentAttribute ) klasses.add( Document.class );
+
+        return klasses;
     }
 
-    public void setAttributeValues( Set<AttributeValue> attributeValues )
-    {
-        this.attributeValues = attributeValues;
-    }
 
     @Override
     public void mergeWith( IdentifiableObject other, MergeStrategy strategy )
@@ -411,9 +521,6 @@ public class Attribute
                 valueType = attribute.getValueType() == null ? valueType : attribute.getValueType();
                 sortOrder = attribute.getSortOrder() == null ? sortOrder : attribute.getSortOrder();
             }
-
-            attributeValues.clear();
-            attributeValues.addAll( attribute.getAttributeValues() );
         }
     }
 
@@ -440,7 +547,6 @@ public class Attribute
             .add( "categoryOptionAttribute", categoryOptionAttribute )
             .add( "categoryOptionGroupAttribute", categoryOptionGroupAttribute )
             .add( "mandatory", mandatory )
-            .add( "attributeValues", attributeValues )
             .toString();
     }
 }

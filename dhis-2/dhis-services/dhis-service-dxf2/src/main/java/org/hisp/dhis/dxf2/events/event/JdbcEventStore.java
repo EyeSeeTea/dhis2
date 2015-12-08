@@ -32,9 +32,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.common.IdSchemes;
 import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.commons.util.SqlHelper;
-import org.hisp.dhis.dxf2.common.IdSchemes;
 import org.hisp.dhis.dxf2.events.enrollment.EnrollmentStatus;
 import org.hisp.dhis.dxf2.events.report.EventRow;
 import org.hisp.dhis.dxf2.events.trackedentity.Attribute;
@@ -125,6 +125,9 @@ public class JdbcEventStore
                 event.setEventDate( DateUtils.getLongGmtDateString( rowSet.getDate( "psi_executiondate" ) ) );
                 event.setCreated( DateUtils.getLongGmtDateString( rowSet.getDate( "psi_created" ) ) );
                 event.setLastUpdated( DateUtils.getLongGmtDateString( rowSet.getDate( "psi_lastupdated" ) ) );
+
+                event.setCompletedUser( rowSet.getString( "psi_completeduser" ) );
+                event.setCompletedDate( DateUtils.getLongGmtDateString( rowSet.getDate( "psi_completeddate" ) ) );
 
                 if ( rowSet.getBoolean( "ps_capturecoordinates" ) )
                 {
@@ -337,7 +340,7 @@ public class JdbcEventStore
 
         String sql =
             "select psi.programstageinstanceid as psi_id, psi.uid as psi_uid, psi.status as psi_status, psi.executiondate as psi_executiondate, psi.duedate as psi_duedate, psi.completeduser as psi_completeduser, " +
-                "psi.longitude as psi_longitude, psi.latitude as psi_latitude, psi.created as psi_created, psi.lastupdated as psi_lastupdated, " +
+                "psi.longitude as psi_longitude, psi.latitude as psi_latitude, psi.created as psi_created, psi.lastupdated as psi_lastupdated, psi.completeddate as psi_completeddate, " +
                 "pi.uid as pi_uid, pi.status as pi_status, pi.followup as pi_followup, p.uid as p_uid, p.code as p_code, " +
                 "p.type as p_type, ps.uid as ps_uid, ps.code as ps_code, ps.capturecoordinates as ps_capturecoordinates, " +
                 "ou.uid as ou_uid, ou.code as ou_code, ou.name as ou_name, tei.trackedentityinstanceid as tei_id, tei.uid as tei_uid " +
@@ -385,8 +388,8 @@ public class JdbcEventStore
         {
             sql += hlp.whereAnd() + " psi.lastupdated > '" + DateUtils.getLongDateString( params.getLastUpdated() ) + "' ";
         }
-        
-        if( params.getCategoryOptionCombo() != null )
+
+        if ( params.getCategoryOptionCombo() != null )
         {
             sql += hlp.whereAnd() + " psi.attributeoptioncomboid = " + params.getCategoryOptionCombo().getId() + " ";
         }

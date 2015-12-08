@@ -361,7 +361,12 @@ public class DefaultDataSetService
             return true;
         }
 
-        DataApprovalStatus dataApprovalStatus = dataApprovalService.getDataApprovalStatus( dataSet, period, organisationUnit, attributeOptionCombo );
+        if ( dataSet.getWorkflow() == null )
+        {
+            return false;
+        }
+
+        DataApprovalStatus dataApprovalStatus = dataApprovalService.getDataApprovalStatus( dataSet.getWorkflow(), period, organisationUnit, attributeOptionCombo );
         
         return dataApprovalStatus.getState().isApproved();
     }
@@ -396,13 +401,11 @@ public class DefaultDataSetService
     {
         now = now != null ? now : new Date();
 
-        int expiryDays = dataElement.getExpiryDays();
-
-        boolean expired = expiryDays != DataSet.NO_EXPIRY && new DateTime( period.getEndDate() ).plusDays( expiryDays ).isBefore( new DateTime( now ) );
-
+        boolean expired = dataElement.isExpired( period, now );
+        
         return expired && lockExceptionStore.getCount( dataElement, period, organisationUnit ) == 0L;
     }
-
+    
     @Override
     public void mergeWithCurrentUserOrganisationUnits( DataSet dataSet, Collection<OrganisationUnit> mergeOrganisationUnits )
     {

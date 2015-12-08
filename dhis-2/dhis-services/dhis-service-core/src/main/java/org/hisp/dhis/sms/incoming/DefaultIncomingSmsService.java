@@ -49,17 +49,17 @@ public class DefaultIncomingSmsService
 
     private IncomingSmsStore incomingSmsStore;
 
+    public void setIncomingSmsStore( IncomingSmsStore incomingSmsStore )
+    {
+        this.incomingSmsStore = incomingSmsStore;
+    }
+
     private MessageQueue incomingSmsQueue;
 
     @Override
     public void setIncomingSmsQueue( MessageQueue incomingSmsQueue )
     {
         this.incomingSmsQueue = incomingSmsQueue;
-    }
-
-    public void setIncomingSmsStore( IncomingSmsStore incomingSmsStore )
-    {
-        this.incomingSmsStore = incomingSmsStore;
     }
 
     // -------------------------------------------------------------------------
@@ -239,5 +239,4 @@ public class DefaultIncomingSmsService
     {
         return incomingSmsStore.getSmsByStatus( status, keyword, min, max );
     }
-
 }

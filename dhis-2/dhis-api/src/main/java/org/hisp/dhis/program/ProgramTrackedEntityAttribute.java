@@ -34,24 +34,28 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.google.common.base.MoreObjects;
+import org.hisp.dhis.analytics.AggregationType;
+import org.hisp.dhis.common.BaseDimensionalItemObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.MergeStrategy;
+import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
+import org.hisp.dhis.legend.LegendSet;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 
-import java.io.Serializable;
+import static org.hisp.dhis.common.DimensionalObjectUtils.COMPOSITE_DIM_OBJECT_PLAIN_SEP;
 
 /**
  * @author Chau Thu Tran
  */
 @JacksonXmlRootElement( localName = "programTrackedEntityAttribute", namespace = DxfNamespaces.DXF_2_0 )
 public class ProgramTrackedEntityAttribute
-    implements Serializable
+    extends BaseDimensionalItemObject
 {
-    private static final long serialVersionUID = -2420475559273198337L;
-
-    private int id;
+    private Program program;
 
     private TrackedEntityAttribute attribute;
 
@@ -69,23 +73,25 @@ public class ProgramTrackedEntityAttribute
     {
     }
 
-    public ProgramTrackedEntityAttribute( TrackedEntityAttribute attribute, int sortOrder, boolean displayInList )
+    public ProgramTrackedEntityAttribute( Program program, TrackedEntityAttribute attribute )
     {
+        this.program = program;
         this.attribute = attribute;
-        this.displayInList = displayInList;
     }
 
-    public ProgramTrackedEntityAttribute( TrackedEntityAttribute attribute, boolean displayInList,
+    public ProgramTrackedEntityAttribute( Program program, TrackedEntityAttribute attribute, boolean displayInList,
         Boolean mandatory )
     {
+        this.program = program;
         this.attribute = attribute;
         this.displayInList = displayInList;
         this.mandatory = mandatory;
     }
 
-    public ProgramTrackedEntityAttribute( TrackedEntityAttribute attribute, boolean displayInList,
+    public ProgramTrackedEntityAttribute( Program program, TrackedEntityAttribute attribute, boolean displayInList,
         Boolean mandatory, Boolean allowFutureDate )
     {
+        this.program = program;
         this.attribute = attribute;
         this.displayInList = displayInList;
         this.mandatory = mandatory;
@@ -93,30 +99,73 @@ public class ProgramTrackedEntityAttribute
     }
 
     // -------------------------------------------------------------------------
-    // Getters && Setters
+    // Logic
     // -------------------------------------------------------------------------
 
-    public int getId()
+    @Override
+    public boolean haveUniqueNames()
     {
-        return id;
+        return false;
     }
 
-    public void setId( int id )
+    @Override
+    public String getName()
     {
-        this.id = id;
+        return (program != null ? program.getDisplayName() + " " : "") + (attribute != null ? attribute.getDisplayName() : "");
+    }
+
+    @Override
+    public String getShortName()
+    {
+        return (program != null ? program.getDisplayShortName() + " " : "") + (attribute != null ? attribute.getDisplayShortName() : "");
     }
 
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public Boolean isMandatory()
+    public ValueType getValueType()
     {
-        return mandatory;
+        return attribute.getValueType();
     }
 
-    public void setMandatory( Boolean mandatory )
+    // -------------------------------------------------------------------------
+    // DimensionalItemObject
+    // -------------------------------------------------------------------------
+
+    @Override
+    public String getDimensionItem()
     {
-        this.mandatory = mandatory;
+        return program.getUid() + COMPOSITE_DIM_OBJECT_PLAIN_SEP + attribute.getUid();
+    }
+
+    @Override
+    public LegendSet getLegendSet()
+    {
+        return attribute.getLegendSet();
+    }
+
+    @Override
+    public AggregationType getAggregationType()
+    {
+        return attribute.getAggregationType();
+    }
+
+    // -------------------------------------------------------------------------
+    // Getters && Setters
+    // -------------------------------------------------------------------------
+
+    @JsonProperty
+    @JsonSerialize( as = BaseIdentifiableObject.class )
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Program getProgram()
+    {
+        return program;
+    }
+
+    public void setProgram( Program program )
+    {
+        this.program = program;
     }
 
     @JsonProperty( "trackedEntityAttribute" )
@@ -131,6 +180,19 @@ public class ProgramTrackedEntityAttribute
     public void setAttribute( TrackedEntityAttribute attribute )
     {
         this.attribute = attribute;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Boolean isMandatory()
+    {
+        return mandatory;
+    }
+
+    public void setMandatory( Boolean mandatory )
+    {
+        this.mandatory = mandatory;
     }
 
     @JsonProperty
@@ -169,5 +231,32 @@ public class ProgramTrackedEntityAttribute
             .add( "mandatory", mandatory )
             .add( "allowFutureDate", allowFutureDate )
             .toString();
+    }
+
+    @Override
+    public void mergeWith( IdentifiableObject other, MergeStrategy strategy )
+    {
+        super.mergeWith( other, strategy );
+
+        if ( other.getClass().isInstance( this ) )
+        {
+            ProgramTrackedEntityAttribute programTrackedEntityAttribute = (ProgramTrackedEntityAttribute) other;
+            displayInList = programTrackedEntityAttribute.isDisplayInList();
+
+            if ( strategy.isReplace() )
+            {
+                program = programTrackedEntityAttribute.getProgram();
+                attribute = programTrackedEntityAttribute.getAttribute();
+                mandatory = programTrackedEntityAttribute.isMandatory();
+                allowFutureDate = programTrackedEntityAttribute.getAllowFutureDate();
+            }
+            else if ( strategy.isMerge() )
+            {
+                program = programTrackedEntityAttribute.getProgram() == null ? program : programTrackedEntityAttribute.getProgram();
+                attribute = programTrackedEntityAttribute.getAttribute() == null ? attribute : programTrackedEntityAttribute.getAttribute();
+                mandatory = programTrackedEntityAttribute.isMandatory() == null ? mandatory : programTrackedEntityAttribute.isMandatory();
+                allowFutureDate = programTrackedEntityAttribute.getAllowFutureDate() == null ? allowFutureDate : programTrackedEntityAttribute.getAllowFutureDate();
+            }
+        }
     }
 }

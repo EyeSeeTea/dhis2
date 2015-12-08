@@ -28,18 +28,16 @@ package org.hisp.dhis.user.action.usergroup;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import com.opensymphony.xwork2.Action;
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.attribute.AttributeService;
-import org.hisp.dhis.system.util.AttributeUtils;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupService;
 import org.hisp.dhis.user.UserService;
 
-import com.opensymphony.xwork2.Action;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class AddUserGroupAction
     implements Action
@@ -118,15 +116,14 @@ public class AddUserGroupAction
 
         if ( jsonAttributeValues != null )
         {
-            AttributeUtils.updateAttributeValuesFromJson( userGroup.getAttributeValues(), jsonAttributeValues,
-                attributeService );
+            attributeService.updateAttributeValues( userGroup, jsonAttributeValues );
         }
 
         for ( String uid : userGroupsSelected )
         {
             userGroup.addManagedGroup( userGroupService.getUserGroup( uid ) );
         }
-        
+
         userGroupService.addUserGroup( userGroup );
 
         return SUCCESS;

@@ -40,10 +40,13 @@ public class DefaultUserDetailsService
     {
         UserCredentials credentials = userService.getUserCredentialsByUsername( username );
 
+        // ---------------------------------------------------------------------
+        // OpenId
+        // ---------------------------------------------------------------------
+
         if ( credentials == null )
         {
-            // TODO: try with openid identifier if username not found, we might want to refactor this into a OpenIDUserDetailsService.
-            credentials = userService.getUserCredentialsByOpenID( username );
+            credentials = userService.getUserCredentialsByOpenId( username );
 
             if ( credentials == null )
             {
@@ -53,7 +56,9 @@ public class DefaultUserDetailsService
 
         boolean credentialsExpired = userService.credentialsNonExpired( credentials );
 
+        boolean enabled = !credentials.isDisabled() && !credentials.isExternalAuth();
+        
         return new User( credentials.getUsername(), credentials.getPassword(),
-            !credentials.isDisabled(), true, credentialsExpired, true, SecurityUtils.getGrantedAuthorities( credentials ) );
+            enabled, true, credentialsExpired, true, SecurityUtils.getGrantedAuthorities( credentials ) );
     }
 }

@@ -28,7 +28,12 @@ package org.hisp.dhis.attribute;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.attribute.exception.NonUniqueAttributeValueException;
+import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.validation.ValidationViolation;
+
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -101,117 +106,11 @@ public interface AttributeService
      */
     List<Attribute> getAllAttributes();
 
-    /**
-     * Gets attributes which are associated with data elements.
-     *
-     * @return a set of attributes associated with data elements.
-     */
-    List<Attribute> getDataElementAttributes();
+    List<Attribute> getAttributes( Class<?> klass );
 
-    /**
-     * Gets attributes which are associated with data element groups.
-     *
-     * @return a set of attributes associated with data element groups.
-     */
-    List<Attribute> getDataElementGroupAttributes();
+    List<Attribute> getMandatoryAttributes( Class<?> klass );
 
-    /**
-     * Gets attributes which are associated with indicators.
-     *
-     * @return a set of attributes associated with indicators.
-     */
-    List<Attribute> getIndicatorAttributes();
-
-    /**
-     * Gets attributes which are associated with data elements.
-     *
-     * @return a set of attributes associated with data elements.
-     */
-    List<Attribute> getIndicatorGroupAttributes();
-
-    /**
-     * Gets attributes which are associated with data sets.
-     *
-     * @return a set of attributes associated with data sets.
-     */
-    List<Attribute> getDataSetAttributes();
-
-    /**
-     * Gets attributes which are associated with organisation units.
-     *
-     * @return a set of attributes associated with organisation units.
-     */
-    List<Attribute> getOrganisationUnitAttributes();
-
-    /**
-     * Gets attributes which are associated with organisation unit groups.
-     *
-     * @return a set of attributes associated with organisation unit groups.
-     */
-    List<Attribute> getOrganisationUnitGroupAttributes();
-
-    /**
-     * Gets attributes which are associated with organisation unit group sets.
-     *
-     * @return a set of attributes associated with organisation unit group sets.
-     */
-    List<Attribute> getOrganisationUnitGroupSetAttributes();
-
-    /**
-     * Gets attributes which are associated with users.
-     *
-     * @return a set of attributes which are associated with users.
-     */
-    List<Attribute> getUserAttributes();
-
-    /**
-     * Gets attributes which are associated with user groups.
-     *
-     * @return a set of attributes which are associated with user groups.
-     */
-    List<Attribute> getUserGroupAttributes();
-
-    /**
-     * Gets attributes which are associated with programs.
-     *
-     * @return a set of attributes which are associated with programs.
-     */
-    List<Attribute> getProgramAttributes();
-
-    /**
-     * Gets attributes which are associated with program stages.
-     *
-     * @return a set of attributes which are associated with programs.
-     */
-    List<Attribute> getProgramStageAttributes();
-
-    /**
-     * Gets attributes which are associated with tracked entities.
-     *
-     * @return a set of attributes which are associated with programs.
-     */
-    List<Attribute> getTrackedEntityAttributes();
-
-    /**
-     * Gets attributes which are associated with tracked entity attributes
-     *
-     * @return a set of attributes which are associated with tracked entity attributes
-     */
-    List<Attribute> getTrackedEntityAttributeAttributes();
-
-    /**
-     * Gets attributes which are associated with category option attributes
-     *
-     * @return a set of attributes which are associated with category option attributes
-     */
-    List<Attribute> getCategoryOptionAttributes();
-
-    /**
-     * Gets attributes which are associated with category option group attributes
-     *
-     * @return a set of attributes which are associated with category option group attributes
-     */
-    List<Attribute> getCategoryOptionGroupAttributes();
+    List<Attribute> getUniqueAttributes( Class<?> klass );
 
     /**
      * Gets the number of attributes.
@@ -240,14 +139,14 @@ public interface AttributeService
      *
      * @param attributeValue the attribute value.
      */
-    void addAttributeValue( AttributeValue attributeValue );
+    <T extends IdentifiableObject> void addAttributeValue( T object, AttributeValue attributeValue ) throws NonUniqueAttributeValueException;
 
     /**
      * Updates an attribute value.
      *
      * @param attributeValue the attribute value.
      */
-    void updateAttributeValue( AttributeValue attributeValue );
+    <T extends IdentifiableObject> void updateAttributeValue( T object, AttributeValue attributeValue ) throws NonUniqueAttributeValueException;
 
     /**
      * Deletes an attribute value.
@@ -271,10 +170,22 @@ public interface AttributeService
      */
     List<AttributeValue> getAllAttributeValues();
 
+    List<AttributeValue> getAllAttributeValuesByAttribute( Attribute attribute );
+
+    List<AttributeValue> getAllAttributeValuesByAttributeAndValue( Attribute attribute, String value );
+
+    <T extends IdentifiableObject> boolean isAttributeValueUnique( T object, AttributeValue attributeValue );
+
     /**
      * Gets the number of attribute values.
      *
      * @return the number of attribute values.
      */
     int getAttributeValueCount();
+
+    <T extends IdentifiableObject> List<ValidationViolation> validateAttributeValues( T object, Set<AttributeValue> attributeValues );
+
+    <T extends IdentifiableObject> void updateAttributeValues( T object, List<String> jsonAttributeValues ) throws Exception;
+
+    <T extends IdentifiableObject> void updateAttributeValues( T object, Set<AttributeValue> attributeValues ) throws Exception;
 }

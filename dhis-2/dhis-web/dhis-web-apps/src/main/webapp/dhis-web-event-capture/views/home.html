@@ -41,7 +41,8 @@
                         {{registeringUnitLabel}}
                     </div>
                     <div class="col-sm-8">
-                        <input type="text" class="form-control" selected-org-unit ng-model="selectedOrgUnit.name" value="{{selectedOrgUnit.name|| pleaseSelectLabel}}" disabled=""></td>
+                        <input type="text" class="form-control" selected-org-unit ng-model="selectedOrgUnit.name"
+                               value="{{selectedOrgUnit.name|| pleaseSelectLabel}}" disabled="">
                     </div>
                 </div>
                 <div class="row col-sm-12 small-vertical-spacing">
@@ -60,7 +61,7 @@
                         </select>
                     </div>
                 </div>
-                <div class="row col-sm-12 small-vertical-spacing" ng-repeat="category in selectedCategories">
+                <div class="row col-sm-12 small-vertical-spacing" ng-if="selectedProgram" ng-repeat="category in selectedCategories">
                     <div class="col-sm-4">
                         {{category.name}}
                     </div>
@@ -112,22 +113,24 @@
         <div ng-include="'views/eventList.html'"></div>
         <!-- event grid ends -->
 
-        <!-- event update in full / registration begins-->            
+        <!-- event update in full / registration begins-->
         <form name="outerForm" novalidate>
             <div ng-if="editingEventInFull || eventRegistration">
                 <h3>
-                    <span ng-if="editingEventInFull">{{'event_details'| translate}}</span>                       
-                    <span ng-if="eventRegistration">{{'new_event'| translate}}</span>                            
+                    <span ng-if="editingEventInFull">{{'event_details'| translate}}</span>
+                    <span ng-if="eventRegistration">{{'new_event'| translate}}</span>
                 </h3>
                 <div class="col-sm-8">
                     <div class="bordered-div">
                         <div ng-if="displayCustomForm" ng-include="'views/ec-custom-form.html'"></div>  
                         <div ng-if="!displayCustomForm" ng-include="'views/defaultForm.html'"></div>
+                        <div ng-include="'views/completedForm.html'"></div>
+
                         <div ng-include="'views/comments-section.html'"></div>
                         <div ng-include="'views/buttons-section.html'"></div>
                     </div>                    
                 </div>
-                <div class="col-sm-4"ng-if="allProgramRules.programIndicators.rules && allProgramRules.programIndicators.rules.length > 0">
+                <div class="col-sm-4" ng-if="allProgramRules.programIndicators.rules && allProgramRules.programIndicators.rules.length > 0">
                     <div class="bordered-div">
                         <div ng-if="allProgramRules.programIndicators.rules && allProgramRules.programIndicators.rules.length > 0" ng-include="'views/indicators.html'"></div>
                         <div ng-if="warningMessages.length > 0" ng-include="'views/warnings.html'"></div>

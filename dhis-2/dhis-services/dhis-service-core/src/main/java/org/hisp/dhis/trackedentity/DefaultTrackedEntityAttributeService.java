@@ -36,6 +36,8 @@ import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
+import org.hisp.dhis.program.ProgramTrackedEntityAttributeStore;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.MathUtils;
 import org.hisp.dhis.user.UserService;
@@ -69,6 +71,13 @@ public class DefaultTrackedEntityAttributeService
     public void setProgramService( ProgramService programService )
     {
         this.programService = programService;
+    }
+
+    private ProgramTrackedEntityAttributeStore programAttributeStore;
+
+    public void setProgramAttributeStore( ProgramTrackedEntityAttributeStore programAttributeStore )
+    {
+        this.programAttributeStore = programAttributeStore;
     }
 
     @Autowired
@@ -298,5 +307,48 @@ public class DefaultTrackedEntityAttributeService
         }
 
         return null;
+    }
+
+    // -------------------------------------------------------------------------
+    // ProgramTrackedEntityAttribute
+    // -------------------------------------------------------------------------
+
+    @Override
+    public ProgramTrackedEntityAttribute getOrAddProgramTrackedEntityAttribute( String programUid, String attributeUid )
+    {
+        Program program = programService.getProgram( programUid );
+        
+        TrackedEntityAttribute attribute = getTrackedEntityAttribute( attributeUid );
+        
+        if ( program == null || attribute == null )
+        {
+            return null;
+        }
+        
+        ProgramTrackedEntityAttribute programAttribute = programAttributeStore.get( program, attribute );
+        
+        if ( programAttribute == null )
+        {
+            programAttribute = new ProgramTrackedEntityAttribute( program, attribute );
+            
+            programAttributeStore.save( programAttribute );
+        }
+        
+        return programAttribute;
+    }        
+    
+    @Override
+    public ProgramTrackedEntityAttribute getProgramTrackedEntityAttribute( String programUid, String attributeUid )
+    {
+        Program program = programService.getProgram( programUid );
+        
+        TrackedEntityAttribute attribute = getTrackedEntityAttribute( attributeUid );
+        
+        if ( program == null || attribute == null )
+        {
+            return null;
+        }
+        
+        return programAttributeStore.get( program, attribute );
     }
 }

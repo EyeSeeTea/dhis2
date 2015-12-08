@@ -28,13 +28,10 @@ package org.hisp.dhis.dxf2.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.common.IdentifiableProperty.UID;
-
-import org.hisp.dhis.common.IdentifiableProperty;
+import com.google.common.base.MoreObjects;
+import org.hisp.dhis.common.IdSchemes;
 import org.hisp.dhis.common.MergeStrategy;
 import org.hisp.dhis.importexport.ImportStrategy;
-
-import com.google.common.base.MoreObjects;
 
 /**
  * The idScheme is a general setting which will apply to all objects. The idSchemes
@@ -45,14 +42,9 @@ import com.google.common.base.MoreObjects;
  */
 public class ImportOptions
 {
-    private static final ImportOptions DEFAULT_OPTIONS = new ImportOptions().
-        setDataElementIdScheme( UID ).setOrgUnitIdScheme( UID ).setImportStrategy( ImportStrategy.NEW_AND_UPDATES );
+    private static final ImportOptions DEFAULT_OPTIONS = new ImportOptions().setImportStrategy( ImportStrategy.NEW_AND_UPDATES );
 
-    private IdentifiableProperty idScheme;
-
-    private IdentifiableProperty dataElementIdScheme;
-
-    private IdentifiableProperty orgUnitIdScheme;
+    private IdSchemes idSchemes = new IdSchemes();
 
     private boolean dryRun;
 
@@ -67,32 +59,25 @@ public class ImportOptions
     private boolean skipExistingCheck;
 
     private boolean sharing;
-    
+
     private boolean strictPeriods;
 
     private boolean strictCategoryOptionCombos;
-    
+
     private boolean strictAttributeOptionCombos;
-    
+
     private boolean strictOrganisationUnits;
-    
+
     private boolean requireCategoryOptionCombo;
-    
+
     private boolean requireAttributeOptionCombo;
-    
+
     //--------------------------------------------------------------------------
     // Constructors
     //--------------------------------------------------------------------------
 
     public ImportOptions()
     {
-    }
-    
-    public ImportOptions( IdentifiableProperty idScheme, IdentifiableProperty dataElementIdScheme, IdentifiableProperty orgUnitIdscheme )
-    {
-        this.idScheme = idScheme;
-        this.dataElementIdScheme = dataElementIdScheme;
-        this.orgUnitIdScheme = orgUnitIdscheme;
     }
 
     //--------------------------------------------------------------------------
@@ -103,24 +88,14 @@ public class ImportOptions
     {
         return DEFAULT_OPTIONS;
     }
-    
+
     //--------------------------------------------------------------------------
     // Get methods
     //--------------------------------------------------------------------------
 
-    public IdentifiableProperty getIdScheme()
+    public IdSchemes getIdSchemes()
     {
-        return idScheme != null ? idScheme : IdentifiableProperty.UID;
-    }
-
-    public IdentifiableProperty getDataElementIdScheme()
-    {
-        return dataElementIdScheme != null ? dataElementIdScheme : ( idScheme != null ? idScheme : IdentifiableProperty.UID );
-    }
-
-    public IdentifiableProperty getOrgUnitIdScheme()
-    {
-        return orgUnitIdScheme != null ? orgUnitIdScheme : ( idScheme != null ? idScheme : IdentifiableProperty.UID );
+        return idSchemes;
     }
 
     public boolean isDryRun()
@@ -162,7 +137,7 @@ public class ImportOptions
     {
         return sharing;
     }
-    
+
     public boolean isStrictPeriods()
     {
         return strictPeriods;
@@ -197,22 +172,45 @@ public class ImportOptions
     // Set methods
     //--------------------------------------------------------------------------
 
-    public ImportOptions setIdScheme( IdentifiableProperty scheme )
+    public ImportOptions setProgramStageIdScheme( String idScheme )
     {
-        this.idScheme = scheme != null ? scheme : null;
+        idSchemes.setProgramStageIdScheme( idScheme );
         return this;
     }
 
-    public ImportOptions setDataElementIdScheme( IdentifiableProperty scheme )
+    public ImportOptions setProgramIdScheme( String idScheme )
     {
-        this.dataElementIdScheme = scheme != null ? scheme : null;
+        idSchemes.setProgramIdScheme( idScheme );
         return this;
     }
 
-    public ImportOptions setOrgUnitIdScheme( IdentifiableProperty scheme )
+    public ImportOptions setOrgUnitIdScheme( String idScheme )
     {
-        this.orgUnitIdScheme = scheme != null ? scheme : null;
+        idSchemes.setOrgUnitIdScheme( idScheme );
         return this;
+    }
+
+    public ImportOptions setCategoryOptionComboIdScheme( String idScheme )
+    {
+        idSchemes.setCategoryOptionComboIdScheme( idScheme );
+        return this;
+    }
+
+    public ImportOptions setDataElementIdScheme( String idScheme )
+    {
+        idSchemes.setDataElementIdScheme( idScheme );
+        return this;
+    }
+
+    public ImportOptions setIdScheme( String idScheme )
+    {
+        idSchemes.setIdScheme( idScheme );
+        return this;
+    }
+
+    public void setIdSchemes( IdSchemes idSchemes )
+    {
+        this.idSchemes = idSchemes == null ? new IdSchemes() : idSchemes;
     }
 
     public ImportOptions setDryRun( boolean dryRun )
@@ -297,9 +295,7 @@ public class ImportOptions
     public String toString()
     {
         return MoreObjects.toStringHelper( this.getClass() ).
-            add( "Id scheme", idScheme ).
-            add( "Data element id scheme", dataElementIdScheme ).
-            add( "Org unit id scheme", orgUnitIdScheme ).
+            add( "ID Schemes", idSchemes ).
             add( "Dry run", dryRun ).
             add( "Preheat cache", preheatCache ).
             add( "Async", async ).

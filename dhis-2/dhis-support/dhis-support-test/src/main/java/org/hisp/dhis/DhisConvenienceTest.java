@@ -111,7 +111,6 @@ import javax.xml.namespace.NamespaceContext;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringReader;
@@ -414,16 +413,15 @@ public abstract class DhisConvenienceTest
      * @param uniqueCharacter A unique character to identify the object.
      * @param valueType       The value type.
      * @param aggregationType The aggregation type.
-     * @param categoryCombo   The category combo.
+     * @param domainType      The domain type.
      */
-    public static DataElement createDataElement( char uniqueCharacter, ValueType valueType, AggregationType aggregationType,
-        DataElementCategoryCombo categoryCombo )
+    public static DataElement createDataElement( char uniqueCharacter, ValueType valueType, AggregationType aggregationType, DataElementDomain domainType )
     {
         DataElement dataElement = createDataElement( uniqueCharacter );
         dataElement.setValueType( valueType );
         dataElement.setDomainType( DataElementDomain.AGGREGATE );
         dataElement.setAggregationType( aggregationType );
-        dataElement.setCategoryCombo( categoryCombo );
+        dataElement.setDomainType( domainType );
 
         return dataElement;
     }
@@ -1050,16 +1048,16 @@ public abstract class DhisConvenienceTest
 
         return legendSet;
     }
-    
+
     public static Chart createChart( char uniqueCharacter )
     {
         Chart chart = new Chart();
         chart.setAutoFields();
         chart.setName( "Chart" + uniqueCharacter );
         chart.setType( ChartType.COLUMN );
-        
+
         return chart;
-        
+
     }
 
     public static Chart createChart( char uniqueCharacter, List<Indicator> indicators, List<Period> periods,
@@ -1129,6 +1127,11 @@ public abstract class DhisConvenienceTest
         return role;
     }
 
+    public static Program createProgram( char uniqueCharacter )
+    {
+        return createProgram( uniqueCharacter, null, null );
+    }
+    
     public static Program createProgram( char uniqueCharacter, Set<ProgramStage> programStages,
         OrganisationUnit unit )
     {
@@ -1165,11 +1168,9 @@ public abstract class DhisConvenienceTest
 
         if ( attributes != null )
         {
-            int i = 0;
-
             for ( TrackedEntityAttribute attribute : attributes )
             {
-                program.getProgramAttributes().add( new ProgramTrackedEntityAttribute( attribute, i++, false ) );
+                program.getProgramAttributes().add( new ProgramTrackedEntityAttribute( program, attribute, false, false ) );
             }
         }
 
@@ -1302,7 +1303,7 @@ public abstract class DhisConvenienceTest
         attributeValue.setAttribute( attribute );
         attributeValue.setEntityInstance( entityInstance );
         attributeValue.setValue( "Attribute" + uniqueChar );
-        entityInstance.getAttributeValues().add( attributeValue );
+        entityInstance.getTrackedEntityAttributeValues().add( attributeValue );
 
         return entityInstance;
     }
@@ -1572,7 +1573,8 @@ public abstract class DhisConvenienceTest
      * @param auths                     authorities to grant to user.
      * @return the user.
      */
-    protected User createUserAndInjectSecurityContext( Set<OrganisationUnit> organisationUnits, Set<OrganisationUnit> dataViewOrganisationUnits, boolean allAuth, String... auths )
+    protected User createUserAndInjectSecurityContext( Set<OrganisationUnit> organisationUnits,
+        Set<OrganisationUnit> dataViewOrganisationUnits, boolean allAuth, String... auths )
     {
         Assert.notNull( userService, "UserService must be injected in test" );
 

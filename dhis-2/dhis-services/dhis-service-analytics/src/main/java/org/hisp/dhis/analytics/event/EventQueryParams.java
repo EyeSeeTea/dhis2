@@ -30,11 +30,14 @@ package org.hisp.dhis.analytics.event;
 
 import static org.hisp.dhis.common.DimensionalObject.DATA_X_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObjectUtils.asTypedList;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -43,17 +46,20 @@ import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.analytics.EventOutputType;
 import org.hisp.dhis.analytics.Partitions;
 import org.hisp.dhis.analytics.SortOrder;
+import org.hisp.dhis.common.DimensionalItemObject;
 import org.hisp.dhis.common.DimensionalObject;
-import org.hisp.dhis.common.NameableObject;
-import org.hisp.dhis.common.NameableObjectUtils;
+import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.commons.collection.ListUtils;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dxf2.common.JacksonUtils;
 import org.hisp.dhis.legend.Legend;
 import org.hisp.dhis.option.OptionSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
+import org.hisp.dhis.program.ProgramDataElement;
 import org.hisp.dhis.program.ProgramIndicator;
+import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 
 /**
@@ -62,40 +68,96 @@ import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 public class EventQueryParams
     extends DataQueryParams
 {
+    /**
+     * The start date for the period dimension, can be null.
+     */
     private Date startDate;
 
+    /**
+     * The end date fore the period dimension, can be null.
+     */
     private Date endDate;
 
+    /**
+     * The query items.
+     */
     private List<QueryItem> items = new ArrayList<>();
 
+    /**
+     * The query item filters.
+     */
     private List<QueryItem> itemFilters = new ArrayList<>();
 
-    private DimensionalObject value;
+    /**
+     * The dimensional object for which to produce aggregated data.
+     */
+    private DimensionalItemObject value;
 
+    /**
+     * Program indicators specified as dimensional items of the data dimension.
+     */
     private List<ProgramIndicator> itemProgramIndicators = new ArrayList<>();
 
+    /**
+     * The program indicator for which to produce aggregated data.
+     */
     private ProgramIndicator programIndicator;
 
+    /**
+     * Columns to sort ascending.
+     */
     private List<String> asc = new ArrayList<>();
 
+    /**
+     * Columns to sort descending.
+     */
     private List<String> desc = new ArrayList<>();
     
-    private String organisationUnitMode;
+    /**
+     * The organisation unit selection mode.
+     */
+    private OrganisationUnitSelectionMode organisationUnitMode;
 
+    /**
+     * The page number.
+     */
     private Integer page;
 
+    /**
+     * The page size.
+     */
     private Integer pageSize;
 
+    /**
+     * The value sort order.
+     */
     private SortOrder sortOrder;
 
+    /**
+     * The max limit of records to return.
+     */
     private Integer limit;
 
+    /**
+     * Indicates the event output type which can be by event, enrollment type
+     * or tracked entity instance.
+     */
     private EventOutputType outputType;
 
+    /**
+     * Indicates whether the data dimension items should be collapsed into a
+     * single dimension.
+     */
     private boolean collapseDataDimensions;
 
+    /**
+     * Indicates whether request is intended to fetch coordinates only.
+     */
     private boolean coordinatesOnly;
 
+    /**
+     * Indicates whether the query originates from an aggregate data query.
+     */
     private boolean aggregateData;
 
     // -------------------------------------------------------------------------
@@ -153,35 +215,42 @@ public class EventQueryParams
 
         dataQueryParams.copyTo( params );
 
-        for ( NameableObject object : dataQueryParams.getProgramDataElements() )
+        for ( DimensionalItemObject object : dataQueryParams.getProgramDataElements() )
         {
-            DataElement element = (DataElement) object;
-            QueryItem item = new QueryItem( element, element.getLegendSet(), element.getValueType(), element.getAggregationType(), element.getOptionSet() );
+            ProgramDataElement element = (ProgramDataElement) object;
+            DataElement dataElement = element.getDataElement(); 
+            QueryItem item = new QueryItem( dataElement, dataElement.getLegendSet(), dataElement.getValueType(), dataElement.getAggregationType(), dataElement.getOptionSet() );
+            item.setProgram( element.getProgram() );
             params.getItems().add( item );
         }
 
-        for ( NameableObject object : dataQueryParams.getProgramAttributes() )
+        for ( DimensionalItemObject object : dataQueryParams.getProgramAttributes() )
         {
-            TrackedEntityAttribute element = (TrackedEntityAttribute) object;
-            QueryItem item = new QueryItem( element, element.getLegendSet(), element.getValueType(), element.getAggregationType(), element.getOptionSet() );
+            ProgramTrackedEntityAttribute element = (ProgramTrackedEntityAttribute) object;
+            TrackedEntityAttribute attribute = element.getAttribute();
+            QueryItem item = new QueryItem( attribute, attribute.getLegendSet(), attribute.getValueType(), attribute.getAggregationType(), attribute.getOptionSet() );
+            item.setProgram( element.getProgram() );
             params.getItems().add( item );
         }
 
-        for ( NameableObject object : dataQueryParams.getFilterProgramDataElements() )
+        for ( DimensionalItemObject object : dataQueryParams.getFilterProgramDataElements() )
         {
-            DataElement element = (DataElement) object;
-            QueryItem item = new QueryItem( element, element.getLegendSet(), element.getValueType(), element.getAggregationType(), element.getOptionSet() );
+            ProgramDataElement element = (ProgramDataElement) object;
+            DataElement dataElement = element.getDataElement(); 
+            QueryItem item = new QueryItem( dataElement, dataElement.getLegendSet(), dataElement.getValueType(), dataElement.getAggregationType(), dataElement.getOptionSet() );
+            item.setProgram( element.getProgram() );
             params.getItemFilters().add( item );
         }
 
-        for ( NameableObject object : dataQueryParams.getFilterProgramAttributes() )
+        for ( DimensionalItemObject object : dataQueryParams.getFilterProgramAttributes() )
         {
-            TrackedEntityAttribute element = (TrackedEntityAttribute) object;
-            QueryItem item = new QueryItem( element, element.getLegendSet(), element.getValueType(), element.getAggregationType(), element.getOptionSet() );
+            ProgramTrackedEntityAttribute element = (ProgramTrackedEntityAttribute) object;
+            TrackedEntityAttribute attribute = element.getAttribute();
+            QueryItem item = new QueryItem( attribute, attribute.getLegendSet(), attribute.getValueType(), attribute.getAggregationType(), attribute.getOptionSet() );
             params.getItemFilters().add( item );
         }
 
-        for ( NameableObject object : dataQueryParams.getProgramIndicators() )
+        for ( DimensionalItemObject object : dataQueryParams.getProgramIndicators() )
         {
             ProgramIndicator programIndicator = (ProgramIndicator) object;
             params.getItemProgramIndicators().add( programIndicator );
@@ -204,7 +273,7 @@ public class EventQueryParams
      */
     public void replacePeriodsWithStartEndDates()
     {
-        List<Period> periods = NameableObjectUtils.asTypedList( getDimensionOrFilterItems( PERIOD_DIM_ID ), Period.class );
+        List<Period> periods = asTypedList( getDimensionOrFilterItems( PERIOD_DIM_ID ) );
 
         for ( Period period : periods )
         {
@@ -256,9 +325,9 @@ public class EventQueryParams
     /**
      * Get nameable objects part of items and item filters.
      */
-    public Set<NameableObject> getNameableObjectItems()
+    public Set<DimensionalItemObject> getDimensionalObjectItems()
     {
-        Set<NameableObject> objects = new HashSet<NameableObject>();
+        Set<DimensionalItemObject> objects = new HashSet<>();
 
         for ( QueryItem item : ListUtils.union( items, itemFilters ) )
         {
@@ -348,9 +417,9 @@ public class EventQueryParams
     /**
      * Indicates whether this query is of the given organisation unit mode.
      */
-    public boolean isOrganisationUnitMode( String mode )
+    public boolean isOrganisationUnitMode( OrganisationUnitSelectionMode mode )
     {
-        return organisationUnitMode != null && organisationUnitMode.equalsIgnoreCase( mode );
+        return organisationUnitMode != null && organisationUnitMode == mode;
     }
 
     /**
@@ -373,7 +442,7 @@ public class EventQueryParams
     {
         Set<OrganisationUnit> children = new HashSet<>();
 
-        for ( NameableObject object : getDimensionOrFilterItems( DimensionalObject.ORGUNIT_DIM_ID ) )
+        for ( DimensionalItemObject object : getDimensionOrFilterItems( DimensionalObject.ORGUNIT_DIM_ID ) )
         {
             OrganisationUnit unit = (OrganisationUnit) object;
             children.addAll( unit.getChildren() );
@@ -445,21 +514,25 @@ public class EventQueryParams
         return SortOrder.ASC.equals( sortOrder ) ? -1 : SortOrder.DESC.equals( sortOrder ) ? 1 : 0;
     }
 
+    @Override
     public String toString()
     {
-        return "[" +
-            "Program: " + program + ", " +
-            "Stage: " + programStage + ", " +
-            "Start date: " + startDate + ", " +
-            "End date: " + endDate + ", " +
-            "Items: " + items + ", " +
-            "Item filters: " + itemFilters + ", " +
-            "Value: " + value + ", " +
-            "Item program indicators: " + itemProgramIndicators + ", " +
-            "Program indicator: " + programIndicator + ", " +
-            "Aggregation type: " + aggregationType + ", " +
-            "Dimensions: " + dimensions + ", " +
-            "Filters: " + filters + "]";
+        Map<String, Object> map = new HashMap<>();
+        
+        map.put( "Program", program );
+        map.put( "Stage", programStage );
+        map.put( "Start date", startDate );
+        map.put( "End date", endDate );
+        map.put( "Items", items );
+        map.put( "Item filters", itemFilters );
+        map.put( "Value", value );
+        map.put( "Item program indicators", itemProgramIndicators );
+        map.put( "Program indicator", programIndicator );
+        map.put( "Aggregation type", aggregationType );
+        map.put( "Dimensions", dimensions );
+        map.put( "Filters", filters );
+        
+        return JacksonUtils.toJsonAsStringSilent( map );
     }
 
     // -------------------------------------------------------------------------
@@ -506,12 +579,12 @@ public class EventQueryParams
         this.itemFilters = itemFilters;
     }
 
-    public DimensionalObject getValue()
+    public DimensionalItemObject getValue()
     {
         return value;
     }
 
-    public void setValue( DimensionalObject value )
+    public void setValue( DimensionalItemObject value )
     {
         this.value = value;
     }
@@ -568,12 +641,12 @@ public class EventQueryParams
         this.desc = desc;
     }
 
-    public String getOrganisationUnitMode()
+    public OrganisationUnitSelectionMode getOrganisationUnitMode()
     {
         return organisationUnitMode;
     }
 
-    public void setOrganisationUnitMode( String organisationUnitMode )
+    public void setOrganisationUnitMode( OrganisationUnitSelectionMode organisationUnitMode )
     {
         this.organisationUnitMode = organisationUnitMode;
     }

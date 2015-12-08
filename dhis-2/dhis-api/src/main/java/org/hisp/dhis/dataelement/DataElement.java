@@ -32,13 +32,13 @@ import static org.hisp.dhis.dataset.DataSet.NO_EXPIRY;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.hisp.dhis.attribute.AttributeValue;
-import org.hisp.dhis.common.BaseDimensionalObject;
+import org.hisp.dhis.common.BaseDimensionalItemObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DimensionType;
 import org.hisp.dhis.common.DxfNamespaces;
@@ -52,12 +52,14 @@ import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.comparator.DataSetFrequencyComparator;
 import org.hisp.dhis.option.OptionSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.period.YearlyPeriodType;
 import org.hisp.dhis.schema.PropertyType;
 import org.hisp.dhis.schema.annotation.Property;
 import org.hisp.dhis.schema.annotation.PropertyRange;
 import org.hisp.dhis.util.ObjectUtils;
+import org.joda.time.DateTime;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -84,7 +86,7 @@ import com.google.common.collect.Sets;
  */
 @JacksonXmlRootElement( localName = "dataElement", namespace = DxfNamespaces.DXF_2_0 )
 public class DataElement
-    extends BaseDimensionalObject
+    extends BaseDimensionalItemObject
 {
     public static final String[] I18N_PROPERTIES = { "name", "shortName", "description", "formName" };
 
@@ -141,11 +143,6 @@ public class DataElement
     private boolean zeroIsSignificant;
 
     /**
-     * Set of the dynamic attributes values that belong to this data element.
-     */
-    private Set<AttributeValue> attributeValues = new HashSet<>();
-
-    /**
      * The option set for data values linked to this data element.
      */
     private OptionSet optionSet;
@@ -172,7 +169,7 @@ public class DataElement
     // -------------------------------------------------------------------------
     // Logic
     // -------------------------------------------------------------------------
-
+    
     public void addDataElementGroup( DataElementGroup group )
     {
         groups.add( group );
@@ -318,7 +315,7 @@ public class DataElement
     {
         for ( DataSet dataSet : dataSets )
         {
-            if ( dataSet != null && dataSet.isApproveData() )
+            if ( dataSet != null && dataSet.getWorkflow() != null )
             {
                 return true;
             }
@@ -439,7 +436,7 @@ public class DataElement
 
     /**
      * Returns the minimum number of expiry days from the data sets of this data
-     * element.
+     * element. Returns {@link DataSet.NO_EXPIRY} if no data sets has expiry.
      */
     public int getExpiryDays()
     {
@@ -455,6 +452,22 @@ public class DataElement
 
         return expiryDays == Integer.MAX_VALUE ? NO_EXPIRY : expiryDays;
     }
+    
+    /**
+     * Indicates whether the given period is considered expired for the end date
+     * of the given date based on the expiry days of the data sets associated 
+     * with this data element.
+     * 
+     * @param period the period.
+     * @param now the date used as basis.
+     * @return true or false.
+     */
+    public boolean isExpired( Period period, Date now )
+    {
+        int expiryDays = getExpiryDays();
+        
+        return expiryDays != DataSet.NO_EXPIRY && new DateTime( period.getEndDate() ).plusDays( expiryDays ).isBefore( new DateTime( now ) );
+    }
 
     public boolean hasDescription()
     {
@@ -469,12 +482,6 @@ public class DataElement
     public boolean hasOptionSet()
     {
         return optionSet != null;
-    }
-
-    @Override
-    public boolean hasLegendSet()
-    {
-        return legendSet != null;
     }
 
     // -------------------------------------------------------------------------
@@ -629,20 +636,6 @@ public class DataElement
         this.zeroIsSignificant = zeroIsSignificant;
     }
 
-    @JsonProperty( "attributeValues" )
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlElementWrapper( localName = "attributeValues", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "attributeValue", namespace = DxfNamespaces.DXF_2_0 )
-    public Set<AttributeValue> getAttributeValues()
-    {
-        return attributeValues;
-    }
-
-    public void setAttributeValues( Set<AttributeValue> attributeValues )
-    {
-        this.attributeValues = attributeValues;
-    }
-
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
@@ -706,9 +699,6 @@ public class DataElement
 
             aggregationLevels.clear();
             aggregationLevels.addAll( dataElement.getAggregationLevels() );
-
-            attributeValues.clear();
-            attributeValues.addAll( dataElement.getAttributeValues() );
         }
     }
 }

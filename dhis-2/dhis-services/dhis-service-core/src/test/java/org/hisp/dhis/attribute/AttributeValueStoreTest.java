@@ -28,51 +28,58 @@ package org.hisp.dhis.attribute;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
-import javax.annotation.Resource;
-
 import org.hisp.dhis.DhisSpringTest;
-import org.hisp.dhis.common.GenericStore;
+import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.common.ValueType;
+import org.hisp.dhis.dataelement.DataElement;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import static org.junit.Assert.*;
+
+/**
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
+ */
 public class AttributeValueStoreTest
     extends DhisSpringTest
 {
-    @Resource(name="org.hisp.dhis.attribute.AttributeValueStore")
-    private GenericStore<AttributeValue> attributeValueStore;
-    
-    @Resource(name="org.hisp.dhis.attribute.AttributeStore")
-    private AttributeStore attributeStore;
-    
-    private AttributeValue attributeValue1;
+    @Autowired
+    private AttributeValueStore attributeValueStore;
 
-    private AttributeValue attributeValue2;
+    @Autowired
+    private AttributeStore attributeStore;
+
+    @Autowired
+    private IdentifiableObjectManager manager;
+
+    private AttributeValue avA;
+    private AttributeValue avB;
+
+    private Attribute atA;
 
     @Override
     protected void setUpTest()
     {
-        Attribute attribute1 = new Attribute();
-        attribute1.setName( "attribute_simple" );
-        attribute1.setValueType( "string" );
+        atA = new Attribute();
+        atA.setName( "attribute_simple" );
+        atA.setValueType( ValueType.TEXT );
 
-        attributeStore.save( attribute1 );
+        attributeStore.save( atA );
 
-        attributeValue1 = new AttributeValue( "value 1" );
-        attributeValue1.setAttribute( attribute1 );
+        avA = new AttributeValue( "value 1" );
+        avA.setAttribute( atA );
 
-        attributeValue2 = new AttributeValue( "value 2" );
-        attributeValue2.setAttribute( attribute1 );
+        avB = new AttributeValue( "value 2" );
+        avB.setAttribute( atA );
 
-        attributeValueStore.save( attributeValue1 );
-        attributeValueStore.save( attributeValue2 );
+        attributeValueStore.save( avA );
+        attributeValueStore.save( avB );
     }
 
     @Test
     public void testGetAttribute()
     {
-        AttributeValue av = attributeValueStore.get( attributeValue1.getId() );
+        AttributeValue av = attributeValueStore.get( avA.getId() );
 
         assertNotNull( av );
         assertNotNull( av.getAttribute() );
@@ -81,9 +88,37 @@ public class AttributeValueStoreTest
     @Test
     public void testGetValue()
     {
-        AttributeValue av = attributeValueStore.get( attributeValue1.getId() );
+        AttributeValue av = attributeValueStore.get( avA.getId() );
 
         assertNotNull( av );
         assertEquals( "value 1", av.getValue() );
+    }
+
+    @Test
+    public void testGetAllByAttribute()
+    {
+        assertEquals( 2, attributeValueStore.getAllByAttribute( atA ).size() );
+    }
+
+    @Test
+    public void testGetAllByAttributeAndValue()
+    {
+        assertEquals( 0, attributeValueStore.getAllByAttributeAndValue( atA, "null" ).size() );
+        assertEquals( 1, attributeValueStore.getAllByAttributeAndValue( atA, "value 1" ).size() );
+        assertEquals( 1, attributeValueStore.getAllByAttributeAndValue( atA, "value 2" ).size() );
+    }
+
+    @Test
+    public void testIsAttributeValueUnique()
+    {
+        DataElement dataElementA = createDataElement( 'A' );
+        dataElementA.getAttributeValues().add( avA );
+        DataElement dataElementB = createDataElement( 'B' );
+
+        manager.save( dataElementA );
+        manager.save( dataElementB );
+
+        assertTrue( attributeValueStore.isAttributeValueUnique( dataElementA, avA ) );
+        assertFalse( attributeValueStore.isAttributeValueUnique( dataElementB, avA ) );
     }
 }

@@ -28,15 +28,14 @@ package org.hisp.dhis.datavalue.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.google.common.collect.Lists;
 import org.hibernate.Criteria;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.common.AuditType;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.datavalue.DataValue;
@@ -45,6 +44,9 @@ import org.hisp.dhis.datavalue.DataValueAuditStore;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodStore;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Quang Nguyen
@@ -79,90 +81,108 @@ public class HibernateDataValueAuditStore
     public void addDataValueAudit( DataValueAudit dataValueAudit )
     {
         Session session = sessionFactory.getCurrentSession();
-
         session.save( dataValueAudit );
     }
 
+    @Override
+    public void deleteDataValueAudits( OrganisationUnit organisationUnit )
+    {
+        String hql = "delete from DataValueAudit d where d.organisationUnit = :unit";
+        
+        sessionFactory.getCurrentSession().createQuery( hql ).
+            setEntity( "unit", organisationUnit ).executeUpdate();
+    }
 
     @Override
     public List<DataValueAudit> getDataValueAudits( DataValue dataValue )
     {
-        return getDataValueAudits( dataValue.getDataElement(), dataValue.getPeriod(),
-            dataValue.getSource(), dataValue.getCategoryOptionCombo(), dataValue.getAttributeOptionCombo() );
+        return getDataValueAudits( Lists.newArrayList( dataValue.getDataElement() ), Lists.newArrayList( dataValue.getPeriod() ),
+            Lists.newArrayList( dataValue.getSource() ), dataValue.getCategoryOptionCombo(), dataValue.getAttributeOptionCombo(), null );
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public List<DataValueAudit> getDataValueAudits( DataElement dataElement, Period period,
-        OrganisationUnit organisationUnit, DataElementCategoryOptionCombo categoryOptionCombo, DataElementCategoryOptionCombo attributeOptionCombo )
+    @SuppressWarnings( "unchecked" )
+    public List<DataValueAudit> getDataValueAudits( List<DataElement> dataElements, List<Period> periods, List<OrganisationUnit> organisationUnits,
+        DataElementCategoryOptionCombo categoryOptionCombo, DataElementCategoryOptionCombo attributeOptionCombo, AuditType auditType )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        Period storedPeriod = periodStore.reloadPeriod( period );
-
-        if( storedPeriod == null )
-        {
-            return new ArrayList<>();
-        }
-
-        Criteria criteria = session.createCriteria( DataValueAudit.class )
-            .add( Restrictions.eq( "dataElement", dataElement ) )
-            .add( Restrictions.eq( "period", storedPeriod ) )
-            .add( Restrictions.eq( "organisationUnit", organisationUnit ) )
-            .add( Restrictions.eq( "categoryOptionCombo", categoryOptionCombo ) )
-            .add( Restrictions.eq( "attributeOptionCombo", attributeOptionCombo ) )
-            .addOrder( Order.desc( "timestamp" ) );
+        Criteria criteria = getDataValueAuditCriteria( dataElements, periods, organisationUnits, categoryOptionCombo, attributeOptionCombo, auditType );
+        criteria.addOrder( Order.desc( "created" ) );
 
         return criteria.list();
     }
 
     @Override
-    public void deleteDataValueAudit( DataValueAudit dataValueAudit )
+    @SuppressWarnings( "unchecked" )
+    public List<DataValueAudit> getDataValueAudits( List<DataElement> dataElements, List<Period> periods, List<OrganisationUnit> organisationUnits,
+        DataElementCategoryOptionCombo categoryOptionCombo, DataElementCategoryOptionCombo attributeOptionCombo, AuditType auditType, int first, int max )
+    {
+        Criteria criteria = getDataValueAuditCriteria( dataElements, periods, organisationUnits, categoryOptionCombo, attributeOptionCombo, auditType );
+        criteria.addOrder( Order.desc( "created" ) );
+        criteria.setFirstResult( first );
+        criteria.setMaxResults( max );
+
+        return criteria.list();
+    }
+
+    @Override
+    public int countDataValueAudits( List<DataElement> dataElements, List<Period> periods, List<OrganisationUnit> organisationUnits,
+        DataElementCategoryOptionCombo categoryOptionCombo, DataElementCategoryOptionCombo attributeOptionCombo, AuditType auditType )
+    {
+        return ((Number) getDataValueAuditCriteria( dataElements, periods, organisationUnits, categoryOptionCombo, attributeOptionCombo, auditType )
+            .setProjection( Projections.countDistinct( "id" ) ).uniqueResult()).intValue();
+    }
+
+    private Criteria getDataValueAuditCriteria( List<DataElement> dataElements, List<Period> periods, List<OrganisationUnit> organisationUnits, DataElementCategoryOptionCombo categoryOptionCombo, DataElementCategoryOptionCombo attributeOptionCombo, AuditType
+        auditType )
     {
         Session session = sessionFactory.getCurrentSession();
+        List<Period> storedPeriods = new ArrayList<>();
 
-        session.delete( dataValueAudit );
-    }
+        if ( !periods.isEmpty() )
+        {
+            for ( Period period : periods )
+            {
+                Period storedPeriod = periodStore.reloadPeriod( period );
 
-    @Override
-    public int deleteDataValueAuditByDataElement( DataElement dataElement )
-    {
-        Query query = sessionFactory.getCurrentSession()
-            .createQuery( "delete DataValueAudit where dataElement = :dataElement" )
-            .setEntity( "dataElement", dataElement );
+                if ( storedPeriod != null )
+                {
+                    storedPeriods.add( storedPeriod );
+                }
+            }
+        }
 
-        return query.executeUpdate();
-    }
+        Criteria criteria = session.createCriteria( DataValueAudit.class );
 
-    @Override
-    public int deleteDataValueAuditByPeriod( Period period )
-    {
-        Period storedPeriod = periodStore.reloadPeriod( period );
+        if ( !dataElements.isEmpty() )
+        {
+            criteria.add( Restrictions.in( "dataElement", dataElements ) );
+        }
 
-        Query query = sessionFactory.getCurrentSession()
-            .createQuery( "delete DataValueAudit where period = :period" )
-            .setEntity( "period", storedPeriod );
+        if ( !storedPeriods.isEmpty() )
+        {
+            criteria.add( Restrictions.in( "period", storedPeriods ) );
+        }
 
-        return query.executeUpdate();
-    }
+        if ( !organisationUnits.isEmpty() )
+        {
+            criteria.add( Restrictions.in( "organisationUnit", organisationUnits ) );
+        }
 
-    @Override
-    public int deleteDataValueAuditByOrganisationUnit( OrganisationUnit organisationUnit )
-    {
-        Query query = sessionFactory.getCurrentSession()
-            .createQuery( "delete DataValueAudit where organisationUnit = :organisationUnit" )
-            .setEntity( "organisationUnit", organisationUnit );
+        if ( categoryOptionCombo != null )
+        {
+            criteria.add( Restrictions.eq( "categoryOptionCombo", categoryOptionCombo ) );
+        }
 
-        return query.executeUpdate();
-    }
+        if ( attributeOptionCombo != null )
+        {
+            criteria.add( Restrictions.eq( "attributeOptionCombo", attributeOptionCombo ) );
+        }
 
-    @Override
-    public int deleteDataValueAuditByCategoryOptionCombo( DataElementCategoryOptionCombo categoryOptionCombo )
-    {
-        Query query = sessionFactory.getCurrentSession()
-            .createQuery( "delete DataValueAudit where categoryOptionCombo = :categoryOptionCombo or attributeOptionCombo = :categoryOptionCombo" )
-            .setEntity( "categoryOptionCombo", categoryOptionCombo );
+        if ( auditType != null )
+        {
+            criteria.add( Restrictions.eq( "auditType", auditType ) );
+        }
 
-        return query.executeUpdate();
+        return criteria;
     }
 }

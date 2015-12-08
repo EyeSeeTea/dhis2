@@ -28,13 +28,7 @@ package org.hisp.dhis.startup;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.collect.Lists;
 import org.amplecode.quick.StatementHolder;
 import org.amplecode.quick.StatementManager;
 import org.apache.commons.logging.Log;
@@ -46,7 +40,12 @@ import org.hisp.dhis.system.startup.AbstractStartupRoutine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.collect.Lists;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Lars Helge Overland
@@ -71,7 +70,7 @@ public class TableAlteror
 
     @Autowired
     private CategoryOptionComboStore categoryOptionComboStore;
-    
+
     // -------------------------------------------------------------------------
     // Execute
     // -------------------------------------------------------------------------
@@ -272,7 +271,7 @@ public class TableAlteror
         executeSql( "ALTER TABLE programrule ALTER condition TYPE text" );
         executeSql( "ALTER TABLE programruleaction ALTER content TYPE text" );
         executeSql( "ALTER TABLE programruleaction ALTER data TYPE text" );
-
+        executeSql( "ALTER TABLE trackedentitycomment ALTER commenttext TYPE text" );
 
         executeSql( "ALTER TABLE minmaxdataelement RENAME minvalue TO minimumvalue" );
         executeSql( "ALTER TABLE minmaxdataelement RENAME maxvalue TO maximumvalue" );
@@ -717,6 +716,7 @@ public class TableAlteror
         executeSql( "UPDATE optionset SET version=0 WHERE version IS NULL" );
         executeSql( "UPDATE dataset SET version=0 WHERE version IS NULL" );
         executeSql( "UPDATE program SET version=0 WHERE version IS NULL" );
+        executeSql( "update program set shortname = substring(name,0,50) where shortname is null" );
         executeSql( "update program set categorycomboid = " + defaultCategoryComboId + " where categorycomboid is null" );
         executeSql( "update programstageinstance set attributeoptioncomboid = " + defaultOptionComboId + " where attributeoptioncomboid is null" );
 
@@ -761,6 +761,7 @@ public class TableAlteror
         executeSql( "UPDATE attribute SET trackedentityattributeattribute=false WHERE trackedentityattributeattribute IS NULL" );
         executeSql( "UPDATE attribute SET categoryoptionattribute=false WHERE categoryoptionattribute IS NULL" );
         executeSql( "UPDATE attribute SET categoryoptiongroupattribute=false WHERE categoryoptiongroupattribute IS NULL" );
+        executeSql( "UPDATE attribute SET documentattribute=false WHERE documentattribute IS NULL" );
 
         executeSql( "ALTER TABLE trackedentityattributedimension DROP COLUMN operator" );
         executeSql( "ALTER TABLE trackedentitydataelementdimension DROP COLUMN operator" );
@@ -770,7 +771,11 @@ public class TableAlteror
 
         //update programruleaction:
         executeSql( "ALTER TABLE programruleaction DROP COLUMN name" );
-
+        
+        //update programrule
+        executeSql( "UPDATE programrule SET rulecondition = condition WHERE rulecondition IS NULL" );
+        executeSql( "ALTER TABLE programrule DROP COLUMN condition" );
+        
         // data approval
         executeSql( "UPDATE dataapproval SET accepted=false WHERE accepted IS NULL" );
         executeSql( "ALTER TABLE dataapproval ALTER COLUMN accepted SET NOT NULL" );
@@ -801,6 +806,10 @@ public class TableAlteror
         executeSql( "alter table datavalue alter column value type varchar(50000)" );
         executeSql( "alter table datavalue alter column comment type varchar(50000)" );
         executeSql( "alter table datavalueaudit alter column value type varchar(50000)" );
+        executeSql( "alter table trackedentitydatavalue alter column value type varchar(50000)" );
+        executeSql( "alter table trackedentityattributevalue alter column value type varchar(50000)" );
+
+        executeSql( "update trackedentitydatavalue set providedelsewhere=false where providedelsewhere is null" );
 
         executeSql( "update datavalueaudit set attributeoptioncomboid = " + defaultOptionComboId + " where attributeoptioncomboid is null" );
         executeSql( "alter table datavalueaudit alter column attributeoptioncomboid set not null;" );
@@ -811,6 +820,7 @@ public class TableAlteror
         executeSql( "UPDATE attributevalue SET created=now() WHERE created IS NULL" );
         executeSql( "UPDATE attributevalue SET lastupdated=now() WHERE lastupdated IS NULL" );
         executeSql( "ALTER TABLE attributevalue ALTER value TYPE text" );
+        executeSql( "DELETE FROM attributevalue where value IS NULL or value=''" );
 
         executeSql( "update dashboarditem set shape = 'normal' where shape is null" );
 
@@ -831,7 +841,7 @@ public class TableAlteror
         executeSql( "update dataelementcategory set datadimensiontype = 'ATTRIBUTE' where dimensiontype = 'attribute'" );
         executeSql( "update dataelementcategory set datadimensiontype = 'DISAGGREGATION' where datadimensiontype is null" );
         executeSql( "alter table dataelementcategory drop column dimensiontype" );
-        
+
         executeSql( "update categoryoptiongroupset set datadimensiontype = 'ATTRIBUTE' where datadimensiontype is null" );
         executeSql( "update categoryoptiongroup set datadimensiontype = 'ATTRIBUTE' where datadimensiontype is null" );
 
@@ -847,13 +857,13 @@ public class TableAlteror
         executeSql( "alter table program drop column dateofenrollmentdescription" );
         executeSql( "alter table program drop column dateofincidentdescription" );
         executeSql( "alter table programinstance drop column dateofincident" );
-        
+
         executeSql( "update programstage set excecutiondatelabel = reportdatedescription where excecutiondatelabel is not null" );
         executeSql( "alter table programstage drop column reportdatedescription" );
         executeSql( "update programstage set reportdatetouse = 'indicentDate' where reportdatetouse='dateOfIncident'" );
-        
+
         executeSql( "alter table programindicator drop column missingvaluereplacement" );
-        
+
         // Remove data mart
         executeSql( "drop table aggregateddatasetcompleteness" );
         executeSql( "drop table aggregateddatasetcompleteness_temp" );
@@ -867,9 +877,9 @@ public class TableAlteror
         executeSql( "drop table aggregatedorgunitdatavalue_temp" );
         executeSql( "drop table aggregatedorgunitindicatorvalue" );
         executeSql( "drop table aggregatedorgunitindicatorvalue_temp" );
-        
+
         updateEnums();
-        
+
         oauth2();
 
         upgradeDataValuesWithAttributeOptionCombo();
@@ -877,6 +887,9 @@ public class TableAlteror
         upgradeMapViewsToAnalyticalObject();
         upgradeTranslations();
 
+        upgradeToDataApprovalWorkflows();
+        executeSql( "alter table dataapproval alter column workflowid set not null" );
+        executeSql( "alter table dataapproval add constraint dataapproval_unique_key unique (dataapprovallevelid,workflowid,periodid,organisationunitid,attributeoptioncomboid)" );
         updateOptions();
 
         upgradeAggregationType( "reporttable" );
@@ -884,9 +897,9 @@ public class TableAlteror
 
         updateRelativePeriods();
         updateNameColumnLengths();
-        
+
         organisationUnitService.updatePaths();
-        
+
         categoryOptionComboStore.updateNames();
 
         log.info( "Tables updated" );
@@ -921,11 +934,11 @@ public class TableAlteror
         executeSql( "update report set type='JASPER_REPORT_TABLE' where type='jasperReportTable'" );
         executeSql( "update report set type='JASPER_JDBC' where type='jasperJdbc'" );
         executeSql( "update report set type='HTML' where type='html'" );
-        
+
         executeSql( "update dashboarditem set shape='NORMAL' where shape ='normal'" );
         executeSql( "update dashboarditem set shape='DOUBLE_WIDTH' where shape ='double_width'" );
         executeSql( "update dashboarditem set shape='FULL_WIDTH' where shape ='full_width'" );
-        
+
         executeSql( "update reporttable set displaydensity='COMFORTABLE' where displaydensity='comfortable'" );
         executeSql( "update reporttable set displaydensity='NORMAL' where displaydensity='normal'" );
         executeSql( "update reporttable set displaydensity='COMPACT' where displaydensity='compact'" );
@@ -941,7 +954,7 @@ public class TableAlteror
         executeSql( "update eventreport set fontsize='LARGE' where fontsize='large'" );
         executeSql( "update eventreport set fontsize='NORMAL' where fontsize='normal'" );
         executeSql( "update eventreport set fontsize='SMALL' where fontsize='small'" );
-        
+
         executeSql( "update reporttable set digitgroupseparator='NONE' where digitgroupseparator='none'" );
         executeSql( "update reporttable set digitgroupseparator='SPACE' where digitgroupseparator='space'" );
         executeSql( "update reporttable set digitgroupseparator='COMMA' where digitgroupseparator='comma'" );
@@ -976,13 +989,13 @@ public class TableAlteror
         executeSql( "update eventchart set type='PIE' where type='pie'" );
         executeSql( "update eventchart set type='RADAR' where type='radar'" );
         executeSql( "update eventchart set type='GAUGE' where type='gauge'" );
-        
+
         executeSql( "update dataentryform set style='COMFORTABLE' where style='comfortable'" );
         executeSql( "update dataentryform set style='NORMAL' where style='regular'" );
         executeSql( "update dataentryform set style='COMPACT' where style='compact'" );
         executeSql( "update dataentryform set style='NONE' where style='none'" );
     }
-    
+
     private void upgradeAggregationType( String table )
     {
         executeSql( "update " + table + " set aggregationtype='SUM' where aggregationtype='sum'" );
@@ -1017,15 +1030,15 @@ public class TableAlteror
         executeSql( "update relativeperiods set lastsixmonth = false where lastsixmonth is null" );
         executeSql( "update relativeperiods set lastweek = false where lastweek is null" );
     }
-    
+
     private void updateNameColumnLengths()
     {
-        List<String> tables = Lists.newArrayList( "user", "usergroup", "organisationunit", "orgunitgroup", "orgunitgroupset", 
-            "section", "dataset", "sqlview", "dataelement", "dataelementgroup", "dataelementgroupset", "categorycombo", 
-            "dataelementcategory", "indicator", "indicatorgroup", "indicatorgroupset", "indicatortype", 
+        List<String> tables = Lists.newArrayList( "user", "usergroup", "organisationunit", "orgunitgroup", "orgunitgroupset",
+            "section", "dataset", "sqlview", "dataelement", "dataelementgroup", "dataelementgroupset", "categorycombo",
+            "dataelementcategory", "indicator", "indicatorgroup", "indicatorgroupset", "indicatortype",
             "validationrule", "validationrulegroup", "constant", "attribute", "attributegroup",
             "program", "programstage", "programindicator", "trackedentity", "trackedentityattribute" );
-        
+
         for ( String table : tables )
         {
             executeSql( "alter table " + table + " alter column name type character varying(230)" );
@@ -1123,6 +1136,45 @@ public class TableAlteror
         executeSql( statementBuilder.getDropPrimaryKey( "translation" ) );
         executeSql( statementBuilder.getAddPrimaryKeyToExistingTable( "translation", "translationid" ) );
         executeSql( statementBuilder.getDropNotNullConstraint( "translation", "objectid", "integer" ) );
+    }
+
+    /**
+     * Convert from older releases where dataApproval referenced dataset
+     * instead of workflow:
+     *
+     * For every dataset that has either ("approve data" == true) *or*
+     * (existing data approval database records referencing it), a workflow will
+     * be created with the same name as the data set. This workflow will be
+     * associated with all approval levels in the system and have a period type
+     * equal to the data set's period type. If the data set's approvedata ==
+     * true, then the data set will be associated with this workflow.
+     * If there are existing data approval records that reference this data set,
+     * then they will be changed to reference the associated workflow instead.
+     */
+    private void upgradeToDataApprovalWorkflows()
+    {
+        if ( executeSql( "update dataset set approvedata = approvedata where datasetid < 0" ) < 0 )
+        {
+            return; // Already converted because dataset.approvedata no longer exists.
+        }
+
+        executeSql( "insert into dataapprovalworkflow ( workflowid, uid, created, lastupdated, name, periodtypeid, userid, publicaccess ) "
+            + "select " + statementBuilder.getAutoIncrementValue() + ", " + statementBuilder.getUid() + ", now(), now(), ds.name, ds.periodtypeid, ds.userid, ds.publicaccess "
+            + "from (select datasetid from dataset where approvedata = true union select distinct datasetid from dataapproval) as a "
+            + "join dataset ds on ds.datasetid = a.datasetid" );
+
+        executeSql( "insert into dataapprovalworkflowlevels (workflowid, dataapprovallevelid) "
+            + "select w.workflowid, l.dataapprovallevelid from dataapprovalworkflow w "
+            + "cross join dataapprovallevel l" );
+
+        executeSql( "update dataset set workflowid = ( select w.workflowid from dataapprovalworkflow w where w.name = dataset.name)" );
+        executeSql( "alter table dataset drop column approvedata cascade" ); // Cascade to SQL Views, if any.
+
+        executeSql( "update dataapproval set workflowid = ( select ds.workflowid from dataset ds where ds.datasetid = dataapproval.datasetid)" );
+        executeSql( "alter table dataapproval drop constraint dataapproval_unique_key" );
+        executeSql( "alter table dataapproval drop column datasetid cascade" ); // Cascade to SQL Views, if any.
+
+        log.info( "Added any workflows needed for approvble datasets and/or approved data." );
     }
 
     private List<Integer> getDistinctIdList( String table, String col1 )

@@ -28,82 +28,17 @@ package org.hisp.dhis.system.util;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import net.sf.json.JSONObject;
-import org.hisp.dhis.attribute.Attribute;
-import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.attribute.AttributeValue;
-import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * @author mortenoh
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public class AttributeUtils
 {
-    /**
-     * Given a list of JSON formatted values (with keys: 'id' and 'value'), this
-     * method will add/update {@link AttributeValue} into the given {@code Set}.
-     * 
-     * @param jsonAttributeValues List of JSON formatted values, needs two keys:
-     *        id => ID of attribute this value belongs to value => Actual value
-     * @param attributeValues Set that will be updated
-     * @param attributeService
-     */
-    public static void updateAttributeValuesFromJson( Set<AttributeValue> attributeValues,
-        List<String> jsonAttributeValues, AttributeService attributeService )
-    {
-        attributeValues.clear();
-
-        for ( String jsonAttributeValue : jsonAttributeValues )
-        {
-            JSONObject json = JSONObject.fromObject( jsonAttributeValue );
-
-            AttributeValue attributeValue = new AttributeValue();
-            attributeValue.setId( json.getInt( "id" ) );
-            attributeValue.setValue( json.getString( "value" ) );
-
-            Attribute attribute = attributeService.getAttribute( attributeValue.getId() );
-
-            if ( attribute == null )
-            {
-                continue;
-            }
-
-            attributeValue.setAttribute( attribute );
-
-            for ( AttributeValue attributeValueItem : attributeValues )
-            {
-                if ( attributeValueItem.getAttribute().getId() == attribute.getId() )
-                {
-                    if ( attributeValue == null || StringUtils.isEmpty( attributeValue.getValue() ) )
-                    {
-                        attributeService.deleteAttributeValue( attributeValueItem );
-                    }
-                    else
-                    {
-                        attributeValueItem.setValue( attributeValue.getValue() );
-                        attributeService.updateAttributeValue( attributeValueItem );
-                        attributeValue = null;
-                    }
-                }
-            }
-
-            if ( attributeValue != null && attributeValue.getValue() != null && !attributeValue.getValue().isEmpty())
-            {
-                attributeService.addAttributeValue( attributeValue );
-                attributeValues.add( attributeValue );
-            }
-        }
-    }
-
-    /**
-     * @param attributeValues
-     * @return Map of <AttributeId, ValueString>
-     */
     public static Map<Integer, String> getAttributeValueMap( Set<AttributeValue> attributeValues )
     {
         Map<Integer, String> attributeValuesMap = new HashMap<>();

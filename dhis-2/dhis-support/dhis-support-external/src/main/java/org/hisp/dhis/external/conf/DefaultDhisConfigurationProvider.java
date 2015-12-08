@@ -46,6 +46,7 @@ public class DefaultDhisConfigurationProvider
     private static final Log log = LogFactory.getLog( DefaultDhisConfigurationProvider.class );
 
     private static final String CONF_FILENAME = "dhis.conf";
+    private static final String ENABLED_VALUE = "on";
     
     // -------------------------------------------------------------------------
     // Dependencies
@@ -73,7 +74,7 @@ public class DefaultDhisConfigurationProvider
         }
         catch ( LocationManagerException ex1 )
         {
-            log.debug( "Could not load dhis.conf" );
+            log.debug( "Could not load dhis.conf, looking for hibernate.properties" );
                         
             try // Deprecated
             {
@@ -123,16 +124,20 @@ public class DefaultDhisConfigurationProvider
     {
         return properties.getProperty( key.getKey(), defaultValue );
     }
+    
+    @Override
+    public boolean isEnabled( ConfigurationKey key )
+    {
+        return ENABLED_VALUE.equals( getProperty( key ) );
+    }
 
     @Override
     public boolean isLdapConfigured()
     {
         String ldapUrl = getProperty( ConfigurationKey.LDAP_URL );
         String managerDn = getProperty( ConfigurationKey.LDAP_MANAGER_DN );
-        String dnPatterns = getProperty( ConfigurationKey.LDAP_DN_PATTERNS );
         
         return !( ConfigurationKey.LDAP_URL.getDefaultValue().equals( ldapUrl ) ||
-            ConfigurationKey.LDAP_MANAGER_DN.getDefaultValue().equals( managerDn ) ||
-            ConfigurationKey.LDAP_DN_PATTERNS.getDefaultValue().equals( dnPatterns ) );
+            ldapUrl == null || managerDn == null );
     }
 }

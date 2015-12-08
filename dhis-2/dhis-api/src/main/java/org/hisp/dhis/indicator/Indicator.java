@@ -36,16 +36,14 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
-import org.hisp.dhis.attribute.AttributeValue;
+import org.hisp.dhis.common.BaseDimensionalItemObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeStrategy;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.legend.LegendSet;
 import org.hisp.dhis.schema.PropertyType;
 import org.hisp.dhis.schema.annotation.Property;
 
@@ -57,7 +55,7 @@ import java.util.Set;
  */
 @JacksonXmlRootElement( localName = "indicator", namespace = DxfNamespaces.DXF_2_0 )
 public class Indicator
-    extends BaseNameableObject
+    extends BaseDimensionalItemObject
 {
     private boolean annualized;
 
@@ -86,19 +84,8 @@ public class Indicator
 
     private Set<DataSet> dataSets = new HashSet<>();
 
-    /**
-     * Set of the dynamic attributes values that belong to this indicator.
-     */
-    private Set<AttributeValue> attributeValues = new HashSet<>();
-
-    /**
-     * The legend set for this indicator.
-     */
-    private LegendSet legendSet;
-
     public Indicator()
     {
-
     }
 
     // -------------------------------------------------------------------------
@@ -168,8 +155,7 @@ public class Indicator
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
-
-
+    
     @Override
     public boolean haveUniqueNames()
     {
@@ -334,34 +320,6 @@ public class Indicator
         this.dataSets = dataSets;
     }
 
-    @JsonProperty( "attributeValues" )
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlElementWrapper( localName = "attributeValues", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "attributeValue", namespace = DxfNamespaces.DXF_2_0 )
-    public Set<AttributeValue> getAttributeValues()
-    {
-        return attributeValues;
-    }
-
-    public void setAttributeValues( Set<AttributeValue> attributeValues )
-    {
-        this.attributeValues = attributeValues;
-    }
-
-    @JsonProperty
-    @JsonSerialize( as = BaseIdentifiableObject.class )
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public LegendSet getLegendSet()
-    {
-        return legendSet;
-    }
-
-    public void setLegendSet( LegendSet legendSet )
-    {
-        this.legendSet = legendSet;
-    }
-
     @Override
     public void mergeWith( IdentifiableObject other, MergeStrategy strategy )
     {
@@ -382,7 +340,6 @@ public class Indicator
                 explodedNumerator = indicator.getExplodedNumerator();
                 explodedDenominator = indicator.getExplodedDenominator();
                 indicatorType = indicator.getIndicatorType();
-                legendSet = indicator.getLegendSet();
             }
             else if ( strategy.isMerge() )
             {
@@ -393,14 +350,10 @@ public class Indicator
                 explodedNumerator = indicator.getExplodedNumerator() == null ? explodedNumerator : indicator.getExplodedNumerator();
                 explodedDenominator = indicator.getExplodedDenominator() == null ? explodedDenominator : indicator.getExplodedDenominator();
                 indicatorType = indicator.getIndicatorType() == null ? indicatorType : indicator.getIndicatorType();
-                legendSet = indicator.getLegendSet() == null ? legendSet : indicator.getLegendSet();
             }
 
             dataSets.clear();
             groups.clear();
-
-            removeAllAttributeValues();
-            attributeValues.addAll( indicator.getAttributeValues() );
         }
     }
 }

@@ -34,9 +34,9 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.attribute.AttributeValue;
+
+import org.hisp.dhis.common.BaseDimensionalItemObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeStrategy;
@@ -52,7 +52,7 @@ import java.util.Set;
  */
 @JacksonXmlRootElement( localName = "organisationUnitGroup", namespace = DxfNamespaces.DXF_2_0 )
 public class OrganisationUnitGroup
-    extends BaseNameableObject
+    extends BaseDimensionalItemObject
 {
     private String symbol;
 
@@ -60,12 +60,6 @@ public class OrganisationUnitGroup
     private Set<OrganisationUnit> members = new HashSet<>();
 
     private OrganisationUnitGroupSet groupSet;
-
-    /**
-     * Set of the dynamic attributes values that belong to this organisationUnit
-     * group.
-     */
-    private Set<AttributeValue> attributeValues = new HashSet<>();
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -84,7 +78,7 @@ public class OrganisationUnitGroup
     // -------------------------------------------------------------------------
     // Logic
     // -------------------------------------------------------------------------
-
+    
     public boolean addOrganisationUnit( OrganisationUnit organisationUnit )
     {
         members.add( organisationUnit );
@@ -174,20 +168,6 @@ public class OrganisationUnitGroup
         this.groupSet = groupSet;
     }
 
-    @JsonProperty( "attributeValues" )
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlElementWrapper( localName = "attributeValues", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "attributeValue", namespace = DxfNamespaces.DXF_2_0 )
-    public Set<AttributeValue> getAttributeValues()
-    {
-        return attributeValues;
-    }
-
-    public void setAttributeValues( Set<AttributeValue> attributeValues )
-    {
-        this.attributeValues = attributeValues;
-    }
-
     @Override
     public void mergeWith( IdentifiableObject other, MergeStrategy strategy )
     {
@@ -214,9 +194,6 @@ public class OrganisationUnitGroup
             {
                 addOrganisationUnit( organisationUnit );
             }
-
-            attributeValues.clear();
-            attributeValues.addAll( organisationUnitGroup.getAttributeValues() );
         }
     }
 }

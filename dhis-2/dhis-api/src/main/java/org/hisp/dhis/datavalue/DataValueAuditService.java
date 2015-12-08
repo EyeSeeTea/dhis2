@@ -28,12 +28,13 @@ package org.hisp.dhis.datavalue;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
-
+import org.hisp.dhis.common.AuditType;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
+
+import java.util.List;
 
 /**
  * @author Quang Nguyen
@@ -52,11 +53,18 @@ public interface DataValueAuditService
     void addDataValueAudit( DataValueAudit dataValueAudit );
 
     /**
+     * Deletes all data value audits for the given organisation unit.
+     * 
+     * @param organisationUnit the organisation unit.
+     */
+    void deleteDataValueAudits( OrganisationUnit organisationUnit );
+    
+    /**
      * Returns all DataValueAudits for the given DataValue.
      *
      * @param dataValue the DataValue to get DataValueAudits for.
      * @return a list of DataValueAudits which match the given DataValue,
-     *         or an empty collection if there are no matches.
+     * or an empty collection if there are no matches.
      */
     List<DataValueAudit> getDataValueAudits( DataValue dataValue );
 
@@ -64,54 +72,21 @@ public interface DataValueAuditService
      * Returns all DataValueAudits for the given DataElement, Period,
      * OrganisationUnit and DataElementCategoryOptionCombo.
      *
-     * @param dataElement the DataElement of the DataValueAudits.
-     * @param period the Period of the DataValueAudits.
-     * @param organisationUnit the OrganisationUnit of the DataValueAudits.
-     * @param categoryOptionCombo the DataElementCategoryOptionCombo of the DataValueAudits.
+     * @param dataElements         the DataElement of the DataValueAudits.
+     * @param periods              the Period of the DataValueAudits.
+     * @param organisationUnits    the OrganisationUnit of the DataValueAudits.
+     * @param categoryOptionCombo  the DataElementCategoryOptionCombo of the DataValueAudits.
      * @param attributeOptionCombo the attribute option combo.
      * @return a list of DataValueAudits which matches the given DataElement, Period,
-     *         OrganisationUnit and DataElementCategoryOptionCombo, or an empty collection if
-     *         there are not matches.
+     * OrganisationUnit and DataElementCategoryOptionCombo, or an empty collection if
+     * there are not matches.
      */
-    List<DataValueAudit> getDataValueAudits( DataElement dataElement, Period period, OrganisationUnit organisationUnit, 
-        DataElementCategoryOptionCombo categoryOptionCombo, DataElementCategoryOptionCombo attributeOptionCombo );
+    List<DataValueAudit> getDataValueAudits( List<DataElement> dataElements, List<Period> periods, List<OrganisationUnit> organisationUnits,
+        DataElementCategoryOptionCombo categoryOptionCombo, DataElementCategoryOptionCombo attributeOptionCombo, AuditType auditType );
 
-    /**
-     * Deletes a DataValueAudit.
-     *
-     * @param dataValueAudit the DataValueAudit to be deleted.
-     */
-    void deleteDataValueAudit( DataValueAudit dataValueAudit );
+    List<DataValueAudit> getDataValueAudits( List<DataElement> dataElements, List<Period> periods, List<OrganisationUnit> organisationUnits,
+        DataElementCategoryOptionCombo categoryOptionCombo, DataElementCategoryOptionCombo attributeOptionCombo, AuditType auditType, int first, int max );
 
-    /**
-     * Deletes all DataValueAudits for the given DataElement.
-     *
-     * @param dataElement the DataElement for which the DataValueAudits should be deleted.
-     * @return the number of deleted DataValueAudits.
-     */
-    int deleteDataValueAuditByDataElement( DataElement dataElement );
-
-    /**
-     * Deletes all DataValueAudits for the given Period.
-     *
-     * @param period the Period for which the DataValueAudits should be deleted.
-     * @return the number of deleted DataValueAudits.
-     */
-    int deleteDataValueAuditByPeriod( Period period );
-
-    /**
-     * Deletes all DataValues for the given OrganisationUnit.
-     *
-     * @param organisationUnit the OrganisationUnit for which the DataValueAudits should be deleted.
-     * @return the number of deleted DataValueAudits.
-     */
-    int deleteDataValueAuditByOrganisationUnit( OrganisationUnit organisationUnit );
-
-    /**
-     * Deletes all DataValues for the given DataElementCategoryOptionCombo.
-     *
-     * @param categoryOptionCombo the DataElementCategoryOptionCombo for which the DataValueAudits should be deleted.
-     * @return the number of deleted DataValueAudits.
-     */
-    int deleteDataValueAuditByCategoryOptionCombo( DataElementCategoryOptionCombo categoryOptionCombo );
+    int countDataValueAudits( List<DataElement> dataElements, List<Period> periods, List<OrganisationUnit> organisationUnits,
+        DataElementCategoryOptionCombo categoryOptionCombo, DataElementCategoryOptionCombo attributeOptionCombo, AuditType auditType );
 }

@@ -43,6 +43,7 @@ import org.hisp.dhis.dataset.DataSet;
 public interface UserService
 {
     String ID = UserService.class.getName();
+    String PW_NO_INTERNAL_LOGIN = "--[##no_internal_login##]--";
 
     // -------------------------------------------------------------------------
     // User
@@ -195,13 +196,6 @@ public interface UserService
      */
     void updateUserCredentials( UserCredentials userCredentials );
 
-    /**
-     * Retrieves the UserCredentials of the given User.
-     *
-     * @param user the User.
-     * @return the UserCredentials.
-     */
-    UserCredentials getUserCredentials( User user );
 
     /**
      * Retrieves the UserCredentials associated with the User with the given
@@ -219,7 +213,16 @@ public interface UserService
      * @param openId the openId of the User.
      * @return the UserCredentials.
      */
-    UserCredentials getUserCredentialsByOpenID( String openId );
+    UserCredentials getUserCredentialsByOpenId( String openId );
+
+    /**
+     * Retrieves the UserCredentials associated with the User with the given
+     * LDAP ID.
+     *
+     * @param ldapId the ldapId of the User.
+     * @return the UserCredentials.
+     */
+    UserCredentials getUserCredentialsByLdapId( String ldapId );
 
     /**
      * Retrieves all UserCredentials.
@@ -355,8 +358,6 @@ public interface UserService
      * @return number of UserAuthorityGroups.
      */
     int countDataSetUserAuthorityGroups( DataSet dataSet );
-
-    void assignDataSetToUserRole( DataSet dataSet );
 
     /**
      * Returns the number of UserAuthorityGroups.

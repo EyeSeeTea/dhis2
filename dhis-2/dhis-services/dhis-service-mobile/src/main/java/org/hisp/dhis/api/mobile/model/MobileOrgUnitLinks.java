@@ -555,7 +555,6 @@ public class MobileOrgUnitLinks
         dataOutputStream.writeUTF( uploadSingleEventWithoutRegistration );
         dataOutputStream.writeUTF( completeProgramInstanceUrl );
         dataOutputStream.writeUTF( registerRelativeUrl );
-
     }
 
     @Override
@@ -582,25 +581,6 @@ public class MobileOrgUnitLinks
         downloadInterpretationUrl = dataInputStream.readUTF();
         postInterpretationUrl = dataInputStream.readUTF();
         postCommentUrl = dataInputStream.readUTF();
-        updateContactUrl = dataInputStream.readUTF();
-        findPatientUrl = dataInputStream.readUTF();
-        registerPersonUrl = dataInputStream.readUTF();
-        uploadProgramStageUrl = dataInputStream.readUTF();
-        enrollProgramUrl = dataInputStream.readUTF();
-        getVariesInfoUrl = dataInputStream.readUTF();
-        addRelationshipUrl = dataInputStream.readUTF();
-        downloadAnonymousProgramUrl = dataInputStream.readUTF();
-        findProgramUrl = dataInputStream.readUTF();
-        findPatientInAdvancedUrl = dataInputStream.readUTF();
-        findPatientsUrl = dataInputStream.readUTF();
-        findVisitScheduleUrl = dataInputStream.readUTF();
-        findLostToFollowUpUrl = dataInputStream.readUTF();
-        handleLostToFollowUpUrl = dataInputStream.readUTF();
-        generateRepeatableEventUrl = dataInputStream.readUTF();
-        uploadSingleEventWithoutRegistration = dataInputStream.readUTF();
-        completeProgramInstanceUrl = dataInputStream.readUTF();
-        registerRelativeUrl = dataInputStream.readUTF();
-
     }
 
     @Override
@@ -628,22 +608,11 @@ public class MobileOrgUnitLinks
         dataOutputStream.writeUTF( this.downloadAllUrl );
         dataOutputStream.writeUTF( this.updateActivityPlanUrl );
         dataOutputStream.writeUTF( this.uploadFacilityReportUrl );
-        dataOutputStream.writeUTF( this.downloadFacilityReportUrl );
         dataOutputStream.writeUTF( this.uploadActivityReportUrl );
         dataOutputStream.writeUTF( this.updateDataSetUrl );
         dataOutputStream.writeUTF( this.changeUpdateDataSetLangUrl );
         dataOutputStream.writeUTF( this.searchUrl );
         dataOutputStream.writeUTF( this.updateNewVersionUrl );
-        dataOutputStream.writeUTF( this.sendFeedbackUrl );
-        dataOutputStream.writeUTF( this.findUserUrl );
-        dataOutputStream.writeUTF( this.sendMessageUrl );
-        dataOutputStream.writeUTF( this.downloadMessageConversationUrl );
-        dataOutputStream.writeUTF( this.getMessageUrl );
-        dataOutputStream.writeUTF( this.replyMessageUrl );
-        dataOutputStream.writeUTF( this.downloadInterpretationUrl );
-        dataOutputStream.writeUTF( this.postInterpretationUrl );
-        dataOutputStream.writeUTF( this.postCommentUrl );
-        // dataOutputStream.writeUTF( this.updateContactUrl );
     }
 
     @Override
@@ -670,23 +639,5 @@ public class MobileOrgUnitLinks
         dataOutputStream.writeUTF( downloadInterpretationUrl );
         dataOutputStream.writeUTF( postInterpretationUrl );
         dataOutputStream.writeUTF( postCommentUrl );
-        dataOutputStream.writeUTF( updateContactUrl );
-        dataOutputStream.writeUTF( findPatientUrl );
-        dataOutputStream.writeUTF( registerPersonUrl );
-        dataOutputStream.writeUTF( uploadProgramStageUrl );
-        dataOutputStream.writeUTF( enrollProgramUrl );
-        dataOutputStream.writeUTF( getVariesInfoUrl );
-        dataOutputStream.writeUTF( addRelationshipUrl );
-        dataOutputStream.writeUTF( downloadAnonymousProgramUrl );
-        dataOutputStream.writeUTF( findProgramUrl );
-        dataOutputStream.writeUTF( findPatientInAdvancedUrl );
-        dataOutputStream.writeUTF( findPatientsUrl );
-        dataOutputStream.writeUTF( findVisitScheduleUrl );
-        dataOutputStream.writeUTF( findLostToFollowUpUrl );
-        dataOutputStream.writeUTF( handleLostToFollowUpUrl );
-        dataOutputStream.writeUTF( generateRepeatableEventUrl );
-        dataOutputStream.writeUTF( uploadSingleEventWithoutRegistration );
-        dataOutputStream.writeUTF( completeProgramInstanceUrl );
-        dataOutputStream.writeUTF( registerRelativeUrl );
     }
 }

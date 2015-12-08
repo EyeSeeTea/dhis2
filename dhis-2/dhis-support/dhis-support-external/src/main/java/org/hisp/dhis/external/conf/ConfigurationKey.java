@@ -33,15 +33,24 @@ package org.hisp.dhis.external.conf;
  */
 public enum ConfigurationKey
 {
+    SYSTEM_ID( "system.id" ),
+    SYSTEM_READ_ONLY_MODE( "system.read_only_mode", "off" ),
+    CONNECTION_DIALECT( "connection.dialect" ),
+    CONNECTION_DRIVER_CLASS( "connection.driver_class" ),
+    CONNECTION_URL( "connection.url" ),
+    CONNECTION_USERNAME( "connection.username" ),
+    CONNECTION_PASSWORD( "connection.password" ),
+    CONNECTION_SCHEMA( "connection.schema" ),
     LDAP_URL( "ldap.url", "ldaps://0:1" ),
     LDAP_MANAGER_DN( "ldap.manager.dn" ),
     LDAP_MANAGER_PASSWORD( "ldap.manager.password" ),
-    LDAP_DN_PATTERNS( "ldap.dn.patterns", "" ),    
+    LDAP_SEARCH_BASE( "ldap.search.base", "" ),
+    LDAP_SEARCH_FILTER( "ldap.search.filter", "(cn={0})" ),
     FILESTORE_PROVIDER( "filestore.provider", "filesystem" ),
-    FILE_STORE_CONTAINER( "filestore.container" ),
+    FILE_STORE_CONTAINER( "filestore.container", "files" ),
     FILE_STORE_LOCATION( "filestore.location" ),
-    FILE_STORE_IDENTITY( "filestore.identity" ),
-    FILE_STORE_SECRET( "filestore.secret" );
+    FILE_STORE_IDENTITY( "filestore.identity", "" ),
+    FILE_STORE_SECRET( "filestore.secret", "" );
 
     private final String key;
     

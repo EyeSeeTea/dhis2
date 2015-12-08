@@ -28,20 +28,17 @@ package org.hisp.dhis.trackedentity.action.trackedentity;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.opensymphony.xwork2.Action;
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.attribute.AttributeService;
-import org.hisp.dhis.system.util.AttributeUtils;
 import org.hisp.dhis.trackedentity.TrackedEntity;
 import org.hisp.dhis.trackedentity.TrackedEntityService;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import com.opensymphony.xwork2.Action;
 
 import java.util.List;
 
 /**
  * @author Chau Thu Tran
- * 
  * @version $ AddTrackedEntityAction.java Feb 15, 2014 7:20:44 PM $
  */
 public class AddTrackedEntityAction
@@ -96,8 +93,7 @@ public class AddTrackedEntityAction
 
         if ( jsonAttributeValues != null )
         {
-            AttributeUtils.updateAttributeValuesFromJson( trackedEntity.getAttributeValues(), jsonAttributeValues,
-                attributeService );
+            attributeService.updateAttributeValues( trackedEntity, jsonAttributeValues );
         }
 
         trackedEntityService.addTrackedEntity( trackedEntity );

@@ -34,8 +34,9 @@ import org.apache.commons.io.input.NullInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.external.conf.ConfigurationKey;
+import org.hisp.dhis.external.conf.DhisConfigurationProvider;
 import org.hisp.dhis.external.location.LocationManager;
-import org.hisp.dhis.hibernate.HibernateConfigurationProvider;
 import org.jclouds.ContextBuilder;
 import org.jclouds.blobstore.BlobRequestSigner;
 import org.jclouds.blobstore.BlobStore;
@@ -55,14 +56,11 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.attribute.UserPrincipalNotFoundException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * @author Halvdan Hoem Grelland
@@ -88,30 +86,7 @@ public class JCloudsFileResourceContentStore
     private static final String JCLOUDS_PROVIDER_KEY_AWS_S3 = "aws-s3";
     private static final String JCLOUDS_PROVIDER_KEY_TRANSIENT = "transient";
 
-    private static final List<String> SUPPORTED_PROVIDERS = new ArrayList<String>() {{
-        addAll( Arrays.asList(
-            JCLOUDS_PROVIDER_KEY_FILESYSTEM,
-            JCLOUDS_PROVIDER_KEY_AWS_S3
-        ) );
-    }};
-
-    // -------------------------------------------------------------------------
-    // Property keys
-    // -------------------------------------------------------------------------
-
-    private static final String FILE_STORE_CONFIG_NAMESPACE = "filestore";
-
-    private static final String KEY_FILE_STORE_PROVIDER  = FILE_STORE_CONFIG_NAMESPACE + ".provider";
-    private static final String KEY_FILE_STORE_CONTAINER = FILE_STORE_CONFIG_NAMESPACE + ".container";
-    private static final String KEY_FILE_STORE_LOCATION  = FILE_STORE_CONFIG_NAMESPACE + ".location";
-    private static final String KEY_FILE_STORE_IDENTITY  = FILE_STORE_CONFIG_NAMESPACE + ".identity";
-    private static final String KEY_FILE_STORE_SECRET    = FILE_STORE_CONFIG_NAMESPACE + ".secret";
-
-    // -------------------------------------------------------------------------
-    // Defaults
-    // -------------------------------------------------------------------------
-
-    private static final String DEFAULT_CONTAINER = "files";
+    private static final List<String> SUPPORTED_PROVIDERS = Arrays.asList( JCLOUDS_PROVIDER_KEY_FILESYSTEM, JCLOUDS_PROVIDER_KEY_AWS_S3 );
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -124,9 +99,9 @@ public class JCloudsFileResourceContentStore
         this.locationManager = locationManager;
     }
 
-    private HibernateConfigurationProvider configurationProvider;
+    private DhisConfigurationProvider configurationProvider;
 
-    public void setConfigurationProvider( HibernateConfigurationProvider configurationProvider )
+    public void setConfigurationProvider( DhisConfigurationProvider configurationProvider )
     {
         this.configurationProvider = configurationProvider;
     }
@@ -137,16 +112,14 @@ public class JCloudsFileResourceContentStore
 
     public void init()
     {
-        // ---------------------------------------------------------------------
-        // Parse properties
-        // ---------------------------------------------------------------------
+        String provider = configurationProvider.getProperty( ConfigurationKey.FILESTORE_PROVIDER );
+        String location = configurationProvider.getProperty( ConfigurationKey.FILE_STORE_LOCATION );
+        String identity = configurationProvider.getProperty( ConfigurationKey.FILE_STORE_IDENTITY );
+        String secret = configurationProvider.getProperty( ConfigurationKey.FILE_STORE_SECRET );
 
-        Map<String, String> fileStoreConfiguration = getFileStorePropertiesMap();
-
-        String provider = fileStoreConfiguration.getOrDefault( KEY_FILE_STORE_PROVIDER, JCLOUDS_PROVIDER_KEY_FILESYSTEM );
         provider = validateAndSelectProvider( provider );
 
-        container = fileStoreConfiguration.get( KEY_FILE_STORE_CONTAINER );
+        container = configurationProvider.getProperty( ConfigurationKey.FILE_STORE_CONTAINER );
 
         if ( !isValidContainerName( container ) )
         {
@@ -154,13 +127,11 @@ public class JCloudsFileResourceContentStore
             {
                 log.warn( "Container name '" + container + "' is illegal." +
                     "Standard domain name naming conventions apply (and underscores are not allowed). " +
-                    "Using default container name '" + DEFAULT_CONTAINER + "'." );
+                    "Using default container name '" + ConfigurationKey.FILE_STORE_CONTAINER.getDefaultValue() + "'." );
             }
 
-            container = DEFAULT_CONTAINER;
+            container = ConfigurationKey.FILE_STORE_CONTAINER.getDefaultValue();
         }
-
-        String location = fileStoreConfiguration.get( KEY_FILE_STORE_LOCATION );
 
         Properties overrides = new Properties();
 
@@ -176,8 +147,7 @@ public class JCloudsFileResourceContentStore
         }
         else if ( provider.equals( JCLOUDS_PROVIDER_KEY_AWS_S3 ) )
         {
-            credentials = new Credentials( fileStoreConfiguration.getOrDefault(
-                KEY_FILE_STORE_IDENTITY, StringUtils.EMPTY ), fileStoreConfiguration.getOrDefault( KEY_FILE_STORE_SECRET, StringUtils.EMPTY ) );
+            credentials = new Credentials( identity, secret );
 
             if ( credentials.identity.isEmpty() || credentials.credential.isEmpty() )
             {
@@ -370,16 +340,6 @@ public class JCloudsFileResourceContentStore
             .contentType( fileResource.getContentType() )
             .contentDisposition( "filename=" + fileResource.getName() )
             .build();
-    }
-
-    private Map<String, String> getFileStorePropertiesMap()
-    {
-        return  configurationProvider.getConfiguration().getProperties().entrySet().stream()
-            .filter( p -> ((String) p.getKey()).startsWith( FILE_STORE_CONFIG_NAMESPACE ) )
-            .collect( Collectors.toMap(
-                p -> StringUtils.strip( (String) p.getKey() ),
-                p -> StringUtils.strip( (String) p.getValue() )
-            ) );
     }
 
     private String validateAndSelectProvider( String provider )

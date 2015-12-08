@@ -34,7 +34,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
+import org.hisp.dhis.attribute.Attribute;
 import org.hisp.dhis.common.CodeGenerator;
+import org.hisp.dhis.common.IdScheme;
+import org.hisp.dhis.common.IdSchemes;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.IdentifiableProperty;
 import org.hisp.dhis.common.IllegalQueryException;
@@ -48,7 +51,6 @@ import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dbms.DbmsManager;
-import org.hisp.dhis.dxf2.common.IdSchemes;
 import org.hisp.dhis.dxf2.common.ImportOptions;
 import org.hisp.dhis.dxf2.events.enrollment.EnrollmentStatus;
 import org.hisp.dhis.dxf2.events.report.EventRow;
@@ -59,6 +61,7 @@ import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
 import org.hisp.dhis.dxf2.utils.InputUtils;
 import org.hisp.dhis.event.EventStatus;
+import org.hisp.dhis.fileresource.FileResourceService;
 import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
@@ -85,6 +88,7 @@ import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValue;
 import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValueService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserCredentials;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -168,6 +172,9 @@ public abstract class AbstractEventService
     @Autowired
     protected InputUtils inputUtils;
 
+    @Autowired
+    protected FileResourceService fileResourceService;
+
     protected static final int FLUSH_FREQUENCY = 20;
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -180,7 +187,7 @@ public abstract class AbstractEventService
 
     private CachingMap<String, DataElement> dataElementCache = new CachingMap<>();
 
-    private List<Program> accessiblePrograms = new ArrayList<>();
+    private Set<Program> accessiblePrograms = new HashSet<>();
 
     // -------------------------------------------------------------------------
     // CREATE
@@ -242,16 +249,16 @@ public abstract class AbstractEventService
 
     protected ImportSummary addEvent( Event event, User user, ImportOptions importOptions )
     {
-        Program program = getProgram( event.getProgram() );
-        ProgramStage programStage = getProgramStage( event.getProgramStage() );
-
-        ProgramInstance programInstance;
-        ProgramStageInstance programStageInstance = null;
-
         if ( importOptions == null )
         {
             importOptions = new ImportOptions();
         }
+
+        Program program = getProgram( importOptions.getIdSchemes().getProgramIdScheme(), event.getProgram() );
+        ProgramStage programStage = getProgramStage( importOptions.getIdSchemes().getProgramStageIdScheme(), event.getProgramStage() );
+
+        ProgramInstance programInstance;
+        ProgramStageInstance programStageInstance = null;
 
         if ( program == null )
         {
@@ -392,7 +399,7 @@ public abstract class AbstractEventService
             }
         }
 
-        OrganisationUnit organisationUnit = getOrganisationUnit( importOptions.getOrgUnitIdScheme(), event.getOrgUnit() );
+        OrganisationUnit organisationUnit = getOrganisationUnit( importOptions.getIdSchemes().getOrgUnitIdScheme(), event.getOrgUnit() );
 
         if ( organisationUnit == null )
         {
@@ -504,6 +511,8 @@ public abstract class AbstractEventService
         OrganisationUnitSelectionMode orgUnitSelectionMode, String trackedEntityInstance, Date startDate, Date endDate,
         EventStatus status, Date lastUpdated, DataElementCategoryOptionCombo attributeCoc, IdSchemes idSchemes, Integer page, Integer pageSize, boolean totalPages, boolean skipPaging, boolean includeAttributes )
     {
+        UserCredentials userCredentials = currentUserService.getCurrentUser().getUserCredentials();
+
         EventSearchParams params = new EventSearchParams();
 
         Program pr = programService.getProgram( program );
@@ -525,6 +534,24 @@ public abstract class AbstractEventService
         if ( StringUtils.isNotEmpty( orgUnit ) && ou == null )
         {
             throw new IllegalQueryException( "Org unit is specified but does not exist: " + orgUnit );
+        }
+
+        if ( ou != null && !organisationUnitService.isInUserHierarchy( ou ) )
+        {
+            if ( !userCredentials.isSuper() && !userCredentials.isAuthorized( "F_TRACKED_ENTITY_INSTANCE_SEARCH_IN_ALL_ORGUNITS" ) )
+            {
+                throw new IllegalQueryException( "User has no access to organisation unit: " + ou.getUid() );
+            }
+        }
+
+        if ( pr != null && !userCredentials.isSuper() && userCredentials.getAllPrograms().size() == 0 )
+        {
+            throw new IllegalQueryException( "User has no access to programs" );
+        }
+
+        if ( pr != null && !userCredentials.getAllPrograms().contains( pr ) )
+        {
+            throw new IllegalQueryException( "User has no access to program: " + pr.getUid() );
         }
 
         TrackedEntityInstance tei = entityInstanceService.getTrackedEntityInstance( trackedEntityInstance );
@@ -636,7 +663,7 @@ public abstract class AbstractEventService
             importOptions = new ImportOptions();
         }
 
-        OrganisationUnit organisationUnit = getOrganisationUnit( importOptions.getOrgUnitIdScheme(), event.getOrgUnit() );
+        OrganisationUnit organisationUnit = getOrganisationUnit( importOptions.getIdSchemes().getOrgUnitIdScheme(), event.getOrgUnit() );
 
         if ( organisationUnit == null )
         {
@@ -714,7 +741,7 @@ public abstract class AbstractEventService
 
         for ( DataValue value : event.getDataValues() )
         {
-            DataElement dataElement = getDataElement( value.getDataElement() );
+            DataElement dataElement = getDataElement( importOptions.getIdSchemes().getDataElementIdScheme(), value.getDataElement() );
             TrackedEntityDataValue dataValue = dataValueService.getTrackedEntityDataValue( programStageInstance, dataElement );
 
             if ( !validateDataValue( dataElement, value.getValue(), importSummary ) )
@@ -724,6 +751,11 @@ public abstract class AbstractEventService
 
             if ( dataValue != null )
             {
+                if ( StringUtils.isEmpty( value.getValue() ) && dataElement.isFileType() && !StringUtils.isEmpty( dataValue.getValue() ) )
+                {
+                    fileResourceService.deleteFileResource( dataValue.getValue() );
+                }
+
                 dataValue.setValue( value.getValue() );
                 dataValue.setProvidedElsewhere( value.getProvidedElsewhere() );
                 dataValueService.updateTrackedEntityDataValue( dataValue );
@@ -863,13 +895,33 @@ public abstract class AbstractEventService
         event.setEventDate( DateUtils.getLongDateString( programStageInstance.getExecutionDate() ) );
         event.setDueDate( DateUtils.getLongDateString( programStageInstance.getDueDate() ) );
         event.setStoredBy( programStageInstance.getCompletedUser() );
+        event.setCompletedDate( DateUtils.getLongDateString( programStageInstance.getCompletedDate() ) );
 
-        if ( programStageInstance.getOrganisationUnit() != null )
+        UserCredentials userCredentials = currentUserService.getCurrentUser().getUserCredentials();
+
+        OrganisationUnit ou = programStageInstance.getOrganisationUnit();
+
+        if ( ou != null )
         {
-            event.setOrgUnit( programStageInstance.getOrganisationUnit().getUid() );
+            if ( !organisationUnitService.isInUserHierarchy( ou ) )
+            {
+                if ( !userCredentials.isSuper() && !userCredentials.isAuthorized( "F_TRACKED_ENTITY_INSTANCE_SEARCH_IN_ALL_ORGUNITS" ) )
+                {
+                    throw new IllegalQueryException( "User has no access to organisation unit: " + ou.getUid() );
+                }
+            }
+
+            event.setOrgUnit( ou.getUid() );
         }
 
-        event.setProgram( programStageInstance.getProgramInstance().getProgram().getUid() );
+        Program program = programStageInstance.getProgramInstance().getProgram();
+
+        if ( !userCredentials.isSuper() && !userCredentials.getAllPrograms().contains( program ) )
+        {
+            throw new IllegalQueryException( "User has no access to program: " + program.getUid() );
+        }
+
+        event.setProgram( program.getUid() );
         event.setEnrollment( programStageInstance.getProgramInstance().getUid() );
         event.setProgramStage( programStageInstance.getProgramStage().getUid() );
 
@@ -956,7 +1008,7 @@ public abstract class AbstractEventService
     {
         if ( accessiblePrograms.isEmpty() )
         {
-            accessiblePrograms = new ArrayList<>( programService.getProgramsByUser( user ) );
+            accessiblePrograms = programService.getCurrentUserPrograms();
         }
 
         return !accessiblePrograms.contains( program );
@@ -1112,7 +1164,13 @@ public abstract class AbstractEventService
 
         ImportSummary importSummary = new ImportSummary();
         importSummary.setStatus( ImportStatus.SUCCESS );
-        boolean dryRun = importOptions != null && importOptions.isDryRun();
+
+        if ( importOptions == null )
+        {
+            importOptions = new ImportOptions();
+        }
+
+        boolean dryRun = importOptions.isDryRun();
 
         Date eventDate = DateUtils.parseDate( event.getEventDate() );
 
@@ -1163,7 +1221,7 @@ public abstract class AbstractEventService
             }
             else
             {
-                dataElement = getDataElement( dataValue.getDataElement() );
+                dataElement = getDataElement( importOptions.getIdSchemes().getDataElementIdScheme(), dataValue.getDataElement() );
             }
 
             if ( dataElement != null )
@@ -1221,7 +1279,7 @@ public abstract class AbstractEventService
         }
     }
 
-    private OrganisationUnit getOrganisationUnit( IdentifiableProperty scheme, String value )
+    private OrganisationUnit getOrganisationUnit( IdScheme idScheme, String value )
     {
         OrganisationUnit organisationUnit = null;
 
@@ -1235,15 +1293,15 @@ public abstract class AbstractEventService
             return organisationUnitCache.get( value );
         }
 
-        if ( IdentifiableProperty.UUID.equals( scheme ) )
+        if ( idScheme.is( IdentifiableProperty.UUID ) )
         {
             organisationUnit = organisationUnitService.getOrganisationUnitByUuid( value );
         }
-        else if ( IdentifiableProperty.CODE.equals( scheme ) )
+        else if ( idScheme.is( IdentifiableProperty.CODE ) )
         {
             organisationUnit = organisationUnitService.getOrganisationUnitByCode( value );
         }
-        else if ( IdentifiableProperty.NAME.equals( scheme ) )
+        else if ( idScheme.is( IdentifiableProperty.NAME ) )
         {
             List<OrganisationUnit> organisationUnitByName = organisationUnitService.getOrganisationUnitByName( value );
 
@@ -1251,6 +1309,11 @@ public abstract class AbstractEventService
             {
                 organisationUnit = organisationUnitByName.get( 0 );
             }
+        }
+        else if ( idScheme.is( IdentifiableProperty.ATTRIBUTE ) )
+        {
+            Attribute attribute = manager.get( Attribute.class, idScheme.getAttribute() );
+            organisationUnit = manager.getByAttributeValue( OrganisationUnit.class, attribute, value );
         }
         else
         {
@@ -1265,18 +1328,18 @@ public abstract class AbstractEventService
         return organisationUnit;
     }
 
-    private Program getProgram( String programId )
+    private Program getProgram( IdScheme idScheme, String id )
     {
-        return programCache.get( programId, new IdentifiableObjectCallable<>( manager, Program.class, programId ) );
+        return programCache.get( id, new IdentifiableObjectCallable<>( manager, Program.class, idScheme, id ) );
     }
 
-    private ProgramStage getProgramStage( String programStageId )
+    private ProgramStage getProgramStage( IdScheme idScheme, String id )
     {
-        return programStageCache.get( programStageId, new IdentifiableObjectCallable<>( manager, ProgramStage.class, programStageId ) );
+        return programStageCache.get( id, new IdentifiableObjectCallable<>( manager, ProgramStage.class, idScheme, id ) );
     }
 
-    private DataElement getDataElement( String dataElementId )
+    private DataElement getDataElement( IdScheme idScheme, String id )
     {
-        return dataElementCache.get( dataElementId, new IdentifiableObjectCallable<>( manager, DataElement.class, dataElementId ) );
+        return dataElementCache.get( id, new IdentifiableObjectCallable<>( manager, DataElement.class, idScheme, id ) );
     }
 }

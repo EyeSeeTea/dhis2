@@ -28,15 +28,12 @@ package org.hisp.dhis.trackedentity.action.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.opensymphony.xwork2.Action;
 import org.hisp.dhis.attribute.Attribute;
 import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
+import org.hisp.dhis.dataapproval.DataApprovalWorkflow;
+import org.hisp.dhis.dataapproval.DataApprovalWorkflowService;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.program.Program;
@@ -52,7 +49,11 @@ import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.opensymphony.xwork2.Action;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -100,7 +101,10 @@ public class ShowAddProgramFormAction
 
     @Autowired
     private DataElementCategoryService categoryService;
-    
+
+    @Autowired
+    private DataApprovalWorkflowService workflowService;
+
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
@@ -153,12 +157,19 @@ public class ShowAddProgramFormAction
     {
         return attributeValues;
     }
-    
+
     private List<DataElementCategoryCombo> categoryCombos = new ArrayList<>();
-    
+
     public List<DataElementCategoryCombo> getCategoryCombos()
     {
         return categoryCombos;
+    }
+
+    private List<DataApprovalWorkflow> workflows = new ArrayList<>();
+
+    public List<DataApprovalWorkflow> getWorkflows()
+    {
+        return workflows;
     }
 
     // -------------------------------------------------------------------------
@@ -185,9 +196,12 @@ public class ShowAddProgramFormAction
         trackedEntities = trackedEntityService.getAllTrackedEntity();
         Collections.sort( trackedEntities, IdentifiableObjectNameComparator.INSTANCE );
 
-        attributes = attributeService.getProgramAttributes();
-        
+        attributes = attributeService.getAttributes( Program.class );
+
         categoryCombos = new ArrayList<>( categoryService.getAttributeCategoryCombos() );
+
+        workflows = new ArrayList<>( workflowService.getAllWorkflows() );
+        Collections.sort( workflows, IdentifiableObjectNameComparator.INSTANCE );
 
         return SUCCESS;
     }

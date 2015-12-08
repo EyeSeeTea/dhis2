@@ -169,6 +169,7 @@ trackerCapture.controller('RegistrationController',
                 
                 if( $scope.registrationMode === 'PROFILE' ){
                     reloadProfileWidget();
+                    $rootScope.$broadcast('teiupdated', {});          
                 }
                 else{
                     if( $scope.selectedProgram ){
@@ -298,7 +299,9 @@ trackerCapture.controller('RegistrationController',
                 } else if (effect.action === "SHOWWARNING") {
                     if (effect.trackedEntityAttribute) {
                         if(effect.ineffect) {
-                            $scope.warningMessages.push(effect.content + (effect.data ? effect.data : ""));
+                            var message = effect.content + (angular.isDefined(effect.data) ? effect.data : "");
+                            $scope.warningMessages.push(message);
+                            $scope.warningMessages[effect.trackedEntityAttribute.id] = message;
                         }
                     }
                     else {

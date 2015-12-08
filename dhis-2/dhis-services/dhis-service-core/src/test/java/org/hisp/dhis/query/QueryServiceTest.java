@@ -28,25 +28,25 @@ package org.hisp.dhis.query;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Collection;
-import java.util.Iterator;
-
+import com.google.common.collect.Lists;
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.query.operators.MatchMode;
 import org.hisp.dhis.schema.Schema;
 import org.hisp.dhis.schema.SchemaService;
 import org.jfree.data.time.Year;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -63,7 +63,8 @@ public class QueryServiceTest
     @Autowired
     private IdentifiableObjectManager identifiableObjectManager;
 
-    private void createDataElements()
+    @Before
+    public void createDataElements()
     {
         DataElement dataElementA = createDataElement( 'A' );
         dataElementA.setValueType( ValueType.NUMBER );
@@ -114,27 +115,20 @@ public class QueryServiceTest
     @Test
     public void getAllQuery()
     {
-        createDataElements();
         Query query = Query.from( schemaService.getDynamicSchema( DataElement.class ) );
-        Result result = queryService.query( query );
-
-        assertEquals( 6, result.size() );
+        assertEquals( 6, queryService.query( query ).size() );
     }
 
     @Test
-    public void getAllQueryUrl()
+    public void getAllQueryUrl() throws QueryParserException
     {
-        createDataElements();
         Query query = queryService.getQueryFromUrl( DataElement.class, Lists.<String>newArrayList(), Lists.<Order>newArrayList() );
-        Result result = queryService.query( query );
-
-        assertEquals( 6, result.size() );
+        assertEquals( 6, queryService.query( query ).size() );
     }
 
     @Test
     public void getMinMaxQuery()
     {
-        createDataElements();
         Query query = Query.from( schemaService.getDynamicSchema( DataElement.class ) );
         query.setFirstResult( 2 );
         query.setMaxResults( 10 );
@@ -151,352 +145,304 @@ public class QueryServiceTest
     @Test
     public void getEqQuery()
     {
-        createDataElements();
         Query query = Query.from( schemaService.getDynamicSchema( DataElement.class ) );
         query.add( Restrictions.eq( "id", "deabcdefghA" ) );
-        Result result = queryService.query( query );
+        List<? extends IdentifiableObject> objects = queryService.query( query );
 
-        assertEquals( 1, result.size() );
-        assertEquals( "deabcdefghA", result.getItems().get( 0 ).getUid() );
+        assertEquals( 1, objects.size() );
+        assertEquals( "deabcdefghA", objects.get( 0 ).getUid() );
     }
 
     @Test
-    public void getEqQueryUrl()
+    public void getEqQueryUrl() throws QueryParserException
     {
-        createDataElements();
         Query query = queryService.getQueryFromUrl( DataElement.class, Lists.newArrayList( "id:eq:deabcdefghA" ), Lists.<Order>newArrayList() );
-        Result result = queryService.query( query );
+        List<? extends IdentifiableObject> objects = queryService.query( query );
 
-        assertEquals( 1, result.size() );
-        assertEquals( "deabcdefghA", result.getItems().get( 0 ).getUid() );
+        assertEquals( 1, objects.size() );
+        assertEquals( "deabcdefghA", objects.get( 0 ).getUid() );
     }
 
     @Test
     public void getNeQuery()
     {
-        createDataElements();
         Query query = Query.from( schemaService.getDynamicSchema( DataElement.class ) );
         query.add( Restrictions.ne( "id", "deabcdefghA" ) );
-        Result result = queryService.query( query );
+        List<? extends IdentifiableObject> objects = queryService.query( query );
 
-        assertEquals( 5, result.size() );
+        assertEquals( 5, objects.size() );
 
-        assertFalse( collectionContainsUid( result.getItems(), "deabcdefghA" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghB" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghC" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghD" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghE" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghF" ) );
+        assertFalse( collectionContainsUid( objects, "deabcdefghA" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghB" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghC" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghD" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghE" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghF" ) );
     }
 
     @Test
-    public void getNeQueryUrl()
+    public void getNeQueryUrl() throws QueryParserException
     {
-        createDataElements();
         Query query = queryService.getQueryFromUrl( DataElement.class, Lists.newArrayList( "id:ne:deabcdefghA" ), Lists.<Order>newArrayList() );
-        Result result = queryService.query( query );
+        List<? extends IdentifiableObject> objects = queryService.query( query );
 
-        assertEquals( 5, result.size() );
+        assertEquals( 5, objects.size() );
 
-        assertFalse( collectionContainsUid( result.getItems(), "deabcdefghA" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghB" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghC" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghD" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghE" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghF" ) );
+        assertFalse( collectionContainsUid( objects, "deabcdefghA" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghB" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghC" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghD" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghE" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghF" ) );
     }
 
     @Test
     public void getLikeQuery()
     {
-        createDataElements();
         Query query = Query.from( schemaService.getDynamicSchema( DataElement.class ) );
-        query.add( Restrictions.like( "name", "%F" ) );
-        Result result = queryService.query( query );
+        query.add( Restrictions.like( "name", "F", MatchMode.ANYWHERE ) );
+        List<? extends IdentifiableObject> objects = queryService.query( query );
 
-        assertEquals( 1, result.size() );
-        assertEquals( "deabcdefghF", result.getItems().get( 0 ).getUid() );
+        assertEquals( 1, objects.size() );
+        assertEquals( "deabcdefghF", objects.get( 0 ).getUid() );
     }
 
     @Test
-    public void getLikeQueryUrl()
+    public void getLikeQueryUrl() throws QueryParserException
     {
-        createDataElements();
         Query query = queryService.getQueryFromUrl( DataElement.class, Lists.newArrayList( "name:like:F" ), Lists.<Order>newArrayList() );
-        Result result = queryService.query( query );
+        List<? extends IdentifiableObject> objects = queryService.query( query );
 
-        assertEquals( 1, result.size() );
-        assertEquals( "deabcdefghF", result.getItems().get( 0 ).getUid() );
+        assertEquals( 1, objects.size() );
+        assertEquals( "deabcdefghF", objects.get( 0 ).getUid() );
     }
 
     @Test
     public void getGtQuery()
     {
-        createDataElements();
         Query query = Query.from( schemaService.getDynamicSchema( DataElement.class ) );
         query.add( Restrictions.gt( "created", Year.parseYear( "2003" ).getStart() ) );
-        Result result = queryService.query( query );
+        List<? extends IdentifiableObject> objects = queryService.query( query );
 
-        assertEquals( 3, result.size() );
+        assertEquals( 3, objects.size() );
 
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghD" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghE" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghF" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghD" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghE" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghF" ) );
     }
 
     @Test
-    public void getGtQueryUrl()
+    public void getGtQueryUrl() throws QueryParserException
     {
-        createDataElements();
         Query query = queryService.getQueryFromUrl( DataElement.class, Lists.newArrayList( "created:gt:2003" ), Lists.<Order>newArrayList() );
-        Result result = queryService.query( query );
+        List<? extends IdentifiableObject> objects = queryService.query( query );
 
-        assertEquals( 3, result.size() );
+        assertEquals( 3, objects.size() );
 
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghD" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghE" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghF" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghD" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghE" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghF" ) );
     }
 
     @Test
     public void getLtQuery()
     {
-        createDataElements();
         Query query = Query.from( schemaService.getDynamicSchema( DataElement.class ) );
         query.add( Restrictions.lt( "created", Year.parseYear( "2003" ).getStart() ) );
-        Result result = queryService.query( query );
+        List<? extends IdentifiableObject> objects = queryService.query( query );
 
-        assertEquals( 2, result.size() );
+        assertEquals( 2, objects.size() );
 
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghA" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghB" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghA" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghB" ) );
     }
 
     @Test
-    public void getLtQueryUrl()
+    public void getLtQueryUrl() throws QueryParserException
     {
-        createDataElements();
         Query query = queryService.getQueryFromUrl( DataElement.class, Lists.newArrayList( "created:lt:2003" ), Lists.<Order>newArrayList() );
-        Result result = queryService.query( query );
+        List<? extends IdentifiableObject> objects = queryService.query( query );
 
-        assertEquals( 2, result.size() );
+        assertEquals( 2, objects.size() );
 
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghA" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghB" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghA" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghB" ) );
     }
 
     @Test
     public void getGeQuery()
     {
-        createDataElements();
         Query query = Query.from( schemaService.getDynamicSchema( DataElement.class ) );
         query.add( Restrictions.ge( "created", Year.parseYear( "2003" ).getStart() ) );
-        Result result = queryService.query( query );
+        List<? extends IdentifiableObject> objects = queryService.query( query );
 
-        assertEquals( 4, result.size() );
+        assertEquals( 4, objects.size() );
 
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghC" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghD" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghE" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghF" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghC" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghD" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghE" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghF" ) );
     }
 
     @Test
-    public void getGeQueryUrl()
+    public void getGeQueryUrl() throws QueryParserException
     {
-        createDataElements();
         Query query = queryService.getQueryFromUrl( DataElement.class, Lists.newArrayList( "created:ge:2003" ), Lists.<Order>newArrayList() );
-        Result result = queryService.query( query );
+        List<? extends IdentifiableObject> objects = queryService.query( query );
 
-        assertEquals( 4, result.size() );
+        assertEquals( 4, objects.size() );
 
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghC" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghD" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghE" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghF" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghC" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghD" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghE" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghF" ) );
     }
 
     @Test
     public void getLeQuery()
     {
-        createDataElements();
         Query query = Query.from( schemaService.getDynamicSchema( DataElement.class ) );
         query.add( Restrictions.le( "created", Year.parseYear( "2003" ).getStart() ) );
-        Result result = queryService.query( query );
+        List<? extends IdentifiableObject> objects = queryService.query( query );
 
-        assertEquals( 3, result.size() );
+        assertEquals( 3, objects.size() );
 
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghA" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghB" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghC" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghA" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghB" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghC" ) );
     }
 
     @Test
-    public void getLeQueryUrl()
+    public void getLeQueryUrl() throws QueryParserException
     {
-        createDataElements();
         Query query = queryService.getQueryFromUrl( DataElement.class, Lists.newArrayList( "created:le:2003" ), Lists.<Order>newArrayList() );
-        Result result = queryService.query( query );
+        List<? extends IdentifiableObject> objects = queryService.query( query );
 
-        assertEquals( 3, result.size() );
+        assertEquals( 3, objects.size() );
 
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghA" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghB" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghC" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghA" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghB" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghC" ) );
     }
 
     @Test
     public void getBetweenQuery()
     {
-        createDataElements();
         Query query = Query.from( schemaService.getDynamicSchema( DataElement.class ) );
         query.add( Restrictions.between( "created", Year.parseYear( "2003" ).getStart(), Year.parseYear( "2005" ).getStart() ) );
-        Result result = queryService.query( query );
+        List<? extends IdentifiableObject> objects = queryService.query( query );
 
-        assertEquals( 3, result.size() );
+        assertEquals( 3, objects.size() );
 
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghC" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghD" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghE" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghC" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghD" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghE" ) );
     }
 
     @Test
     public void getInQuery()
     {
-        createDataElements();
         Query query = Query.from( schemaService.getDynamicSchema( DataElement.class ) );
         query.add( Restrictions.in( "id", Lists.newArrayList( "deabcdefghD", "deabcdefghF" ) ) );
-        Result result = queryService.query( query );
+        List<? extends IdentifiableObject> objects = queryService.query( query );
 
-        assertEquals( 2, result.size() );
+        assertEquals( 2, objects.size() );
 
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghD" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghF" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghD" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghF" ) );
     }
 
     @Test
     public void resultTransformerTest()
     {
-        createDataElements();
         Query query = Query.from( schemaService.getDynamicSchema( DataElement.class ) );
 
-        Result result = queryService.query( query, result1 -> new Result() );
+        List<? extends IdentifiableObject> objects = queryService.query( query, result1 -> new ArrayList() );
+        assertEquals( 0, objects.size() );
 
-        assertEquals( 0, result.size() );
-
-        result = queryService.query( query, result1 -> new Result( result1.getItems() ) );
-
-        assertEquals( 6, result.size() );
-
-        result = queryService.query( query, result1 -> {
-            Iterator<? extends IdentifiableObject> iterator = result1.getItems().iterator();
-
-            while ( iterator.hasNext() )
-            {
-                IdentifiableObject identifiableObject = iterator.next();
-
-                if ( identifiableObject.getUid().equals( "deabcdefghD" ) )
-                {
-                    iterator.remove();
-                }
-            }
-
-            return result1;
-        } );
-
-        assertEquals( 5, result.size() );
-
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghA" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghB" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghC" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghE" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghF" ) );
+        objects = queryService.query( query, result1 -> result1 );
+        assertEquals( 6, objects.size() );
     }
 
     @Test
     public void sortNameDesc()
     {
-        createDataElements();
         Schema schema = schemaService.getDynamicSchema( DataElement.class );
 
         Query query = Query.from( schema );
         query.addOrder( new Order( schema.getProperty( "name" ), false ) );
-        Result result = queryService.query( query );
+        List<? extends IdentifiableObject> objects = queryService.query( query );
 
-        assertEquals( 6, result.size() );
+        assertEquals( 6, objects.size() );
 
-        assertEquals( "deabcdefghF", result.getItems().get( 0 ).getUid() );
-        assertEquals( "deabcdefghE", result.getItems().get( 1 ).getUid() );
-        assertEquals( "deabcdefghD", result.getItems().get( 2 ).getUid() );
-        assertEquals( "deabcdefghC", result.getItems().get( 3 ).getUid() );
-        assertEquals( "deabcdefghB", result.getItems().get( 4 ).getUid() );
-        assertEquals( "deabcdefghA", result.getItems().get( 5 ).getUid() );
+        assertEquals( "deabcdefghF", objects.get( 0 ).getUid() );
+        assertEquals( "deabcdefghE", objects.get( 1 ).getUid() );
+        assertEquals( "deabcdefghD", objects.get( 2 ).getUid() );
+        assertEquals( "deabcdefghC", objects.get( 3 ).getUid() );
+        assertEquals( "deabcdefghB", objects.get( 4 ).getUid() );
+        assertEquals( "deabcdefghA", objects.get( 5 ).getUid() );
     }
 
     @Test
     public void sortNameAsc()
     {
-        createDataElements();
         Schema schema = schemaService.getDynamicSchema( DataElement.class );
 
         Query query = Query.from( schema );
         query.addOrder( new Order( schema.getProperty( "name" ), true ) );
-        Result result = queryService.query( query );
+        List<? extends IdentifiableObject> objects = queryService.query( query );
 
-        assertEquals( 6, result.size() );
+        assertEquals( 6, objects.size() );
 
-        assertEquals( "deabcdefghA", result.getItems().get( 0 ).getUid() );
-        assertEquals( "deabcdefghB", result.getItems().get( 1 ).getUid() );
-        assertEquals( "deabcdefghC", result.getItems().get( 2 ).getUid() );
-        assertEquals( "deabcdefghD", result.getItems().get( 3 ).getUid() );
-        assertEquals( "deabcdefghE", result.getItems().get( 4 ).getUid() );
-        assertEquals( "deabcdefghF", result.getItems().get( 5 ).getUid() );
+        assertEquals( "deabcdefghA", objects.get( 0 ).getUid() );
+        assertEquals( "deabcdefghB", objects.get( 1 ).getUid() );
+        assertEquals( "deabcdefghC", objects.get( 2 ).getUid() );
+        assertEquals( "deabcdefghD", objects.get( 3 ).getUid() );
+        assertEquals( "deabcdefghE", objects.get( 4 ).getUid() );
+        assertEquals( "deabcdefghF", objects.get( 5 ).getUid() );
     }
 
     @Test
     public void sortCreatedDesc()
     {
-        createDataElements();
         Schema schema = schemaService.getDynamicSchema( DataElement.class );
 
         Query query = Query.from( schema );
         query.addOrder( new Order( schema.getProperty( "created" ), false ) );
-        Result result = queryService.query( query );
+        List<? extends IdentifiableObject> objects = queryService.query( query );
 
-        assertEquals( 6, result.size() );
+        assertEquals( 6, objects.size() );
 
-        assertEquals( "deabcdefghF", result.getItems().get( 0 ).getUid() );
-        assertEquals( "deabcdefghE", result.getItems().get( 1 ).getUid() );
-        assertEquals( "deabcdefghD", result.getItems().get( 2 ).getUid() );
-        assertEquals( "deabcdefghC", result.getItems().get( 3 ).getUid() );
-        assertEquals( "deabcdefghB", result.getItems().get( 4 ).getUid() );
-        assertEquals( "deabcdefghA", result.getItems().get( 5 ).getUid() );
+        assertEquals( "deabcdefghF", objects.get( 0 ).getUid() );
+        assertEquals( "deabcdefghE", objects.get( 1 ).getUid() );
+        assertEquals( "deabcdefghD", objects.get( 2 ).getUid() );
+        assertEquals( "deabcdefghC", objects.get( 3 ).getUid() );
+        assertEquals( "deabcdefghB", objects.get( 4 ).getUid() );
+        assertEquals( "deabcdefghA", objects.get( 5 ).getUid() );
     }
 
     @Test
     public void sortCreatedAsc()
     {
-        createDataElements();
         Schema schema = schemaService.getDynamicSchema( DataElement.class );
 
         Query query = Query.from( schema );
         query.addOrder( new Order( schema.getProperty( "created" ), true ) );
-        Result result = queryService.query( query );
+        List<? extends IdentifiableObject> objects = queryService.query( query );
 
-        assertEquals( 6, result.size() );
+        assertEquals( 6, objects.size() );
 
-        assertEquals( "deabcdefghA", result.getItems().get( 0 ).getUid() );
-        assertEquals( "deabcdefghB", result.getItems().get( 1 ).getUid() );
-        assertEquals( "deabcdefghC", result.getItems().get( 2 ).getUid() );
-        assertEquals( "deabcdefghD", result.getItems().get( 3 ).getUid() );
-        assertEquals( "deabcdefghE", result.getItems().get( 4 ).getUid() );
-        assertEquals( "deabcdefghF", result.getItems().get( 5 ).getUid() );
+        assertEquals( "deabcdefghA", objects.get( 0 ).getUid() );
+        assertEquals( "deabcdefghB", objects.get( 1 ).getUid() );
+        assertEquals( "deabcdefghC", objects.get( 2 ).getUid() );
+        assertEquals( "deabcdefghD", objects.get( 3 ).getUid() );
+        assertEquals( "deabcdefghE", objects.get( 4 ).getUid() );
+        assertEquals( "deabcdefghF", objects.get( 5 ).getUid() );
     }
 
     @Test
     public void testDoubleEqConjunction()
     {
-        createDataElements();
         Query query = Query.from( schemaService.getDynamicSchema( DataElement.class ) );
 
         Conjunction conjunction = query.conjunction();
@@ -504,15 +450,14 @@ public class QueryServiceTest
         conjunction.add( Restrictions.eq( "id", "deabcdefghF" ) );
         query.add( conjunction );
 
-        Result result = queryService.query( query );
+        List<? extends IdentifiableObject> objects = queryService.query( query );
 
-        assertEquals( 0, result.size() );
+        assertEquals( 0, objects.size() );
     }
 
     @Test
     public void testDoubleEqDisjunction()
     {
-        createDataElements();
         Query query = Query.from( schemaService.getDynamicSchema( DataElement.class ) );
 
         Disjunction disjunction = query.disjunction();
@@ -520,36 +465,34 @@ public class QueryServiceTest
         disjunction.add( Restrictions.eq( "id", "deabcdefghF" ) );
         query.add( disjunction );
 
-        Result result = queryService.query( query );
+        List<? extends IdentifiableObject> objects = queryService.query( query );
 
-        assertEquals( 2, result.size() );
+        assertEquals( 2, objects.size() );
 
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghD" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghF" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghD" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghF" ) );
     }
 
     @Test
     public void testDateRange()
     {
-        createDataElements();
         Query query = Query.from( schemaService.getDynamicSchema( DataElement.class ) );
 
         query.add( Restrictions.ge( "created", Year.parseYear( "2002" ).getStart() ) );
         query.add( Restrictions.le( "created", Year.parseYear( "2004" ).getStart() ) );
 
-        Result result = queryService.query( query );
+        List<? extends IdentifiableObject> objects = queryService.query( query );
 
-        assertEquals( 3, result.size() );
+        assertEquals( 3, objects.size() );
 
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghB" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghC" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghD" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghB" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghC" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghD" ) );
     }
 
     @Test
     public void testDateRangeWithConjunction()
     {
-        createDataElements();
         Query query = Query.from( schemaService.getDynamicSchema( DataElement.class ) );
 
         Conjunction conjunction = query.conjunction();
@@ -557,48 +500,46 @@ public class QueryServiceTest
         conjunction.add( Restrictions.le( "created", Year.parseYear( "2004" ).getStart() ) );
         query.add( conjunction );
 
-        Result result = queryService.query( query );
+        List<? extends IdentifiableObject> objects = queryService.query( query );
 
-        assertEquals( 3, result.size() );
+        assertEquals( 3, objects.size() );
 
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghB" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghC" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghD" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghB" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghC" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghD" ) );
     }
 
     @Test
     public void testIsNull()
     {
-        createDataElements();
         Query query = Query.from( schemaService.getDynamicSchema( DataElement.class ) );
         query.add( Restrictions.isNull( "categoryCombo" ) );
 
-        Result result = queryService.query( query );
+        List<? extends IdentifiableObject> objects = queryService.query( query );
 
-        assertEquals( 6, result.size() );
+        assertEquals( 6, objects.size() );
 
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghA" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghB" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghC" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghD" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghE" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghF" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghA" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghB" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghC" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghD" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghE" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghF" ) );
     }
 
     @Test
-    public void testIsNullUrl()
+    public void testIsNullUrl() throws QueryParserException
     {
-        createDataElements();
         Query query = queryService.getQueryFromUrl( DataElement.class, Lists.newArrayList( "categoryCombo:null" ), Lists.<Order>newArrayList() );
-        Result result = queryService.query( query );
+        List<? extends IdentifiableObject> objects = queryService.query( query );
 
-        assertEquals( 6, result.size() );
+        assertEquals( 6, objects.size() );
 
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghA" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghB" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghC" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghD" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghE" ) );
-        assertTrue( collectionContainsUid( result.getItems(), "deabcdefghF" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghA" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghB" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghC" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghD" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghE" ) );
+        assertTrue( collectionContainsUid( objects, "deabcdefghF" ) );
     }
 }

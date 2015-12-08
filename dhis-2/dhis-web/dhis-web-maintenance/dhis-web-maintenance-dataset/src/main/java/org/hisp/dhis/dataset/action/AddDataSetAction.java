@@ -28,12 +28,11 @@ package org.hisp.dhis.dataset.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import com.google.common.collect.Lists;
+import com.opensymphony.xwork2.Action;
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.attribute.AttributeService;
+import org.hisp.dhis.dataapproval.DataApprovalWorkflowService;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
@@ -43,12 +42,11 @@ import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.legend.LegendService;
 import org.hisp.dhis.legend.LegendSet;
 import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.system.util.AttributeUtils;
 import org.hisp.dhis.user.UserGroupService;
-import org.hisp.dhis.user.UserService;
 
-import com.google.common.collect.Lists;
-import com.opensymphony.xwork2.Action;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Kristian
@@ -88,11 +86,11 @@ public class AddDataSetAction
         this.categoryService = categoryService;
     }
 
-    private UserService userService;
+    private DataApprovalWorkflowService workflowService;
 
-    public void setUserService( UserService userService )
+    public void setWorkflowService( DataApprovalWorkflowService workflowService )
     {
-        this.userService = userService;
+        this.workflowService = workflowService;
     }
 
     private UserGroupService userGroupService;
@@ -108,7 +106,7 @@ public class AddDataSetAction
     {
         this.attributeService = attributeService;
     }
-    
+
     private LegendService legendService;
 
     public void setLegendService( LegendService legendService )
@@ -176,11 +174,11 @@ public class AddDataSetAction
         this.notifyCompletingUser = notifyCompletingUser;
     }
 
-    private boolean approveData;
+    private Integer workflowId;
 
-    public void setApproveData( boolean approveData )
+    public void setWorkflowId( Integer workflowId )
     {
-        this.approveData = approveData;
+        this.workflowId = workflowId;
     }
 
     private String frequencySelect;
@@ -280,26 +278,25 @@ public class AddDataSetAction
     {
         this.jsonAttributeValues = jsonAttributeValues;
     }
-    
+
     private boolean mobile;
-    
+
     public void setMobile( boolean mobile )
     {
         this.mobile = mobile;
     }
-    
+
     // -------------------------------------------------------------------------
     // Action
     // -------------------------------------------------------------------------
 
     @Override
-    public String execute()
-        throws Exception
+    public String execute() throws Exception
     {
         PeriodType periodType = PeriodType.getPeriodTypeByName( frequencySelect );
 
         DataSet dataSet = new DataSet();
-        
+
         dataSet.setName( StringUtils.trimToNull( name ) );
         dataSet.setShortName( StringUtils.trimToNull( shortName ) );
         dataSet.setCode( StringUtils.trimToNull( code ) );
@@ -327,6 +324,11 @@ public class AddDataSetAction
             dataSet.setCategoryCombo( categoryService.getDataElementCategoryCombo( categoryComboId ) );
         }
 
+        if ( workflowId != null && workflowId > 0 )
+        {
+            dataSet.setWorkflow( workflowService.getWorkflow( workflowId ) );
+        }
+
         dataSet.setDescription( StringUtils.trimToNull( description ) );
         dataSet.setVersion( 1 );
         dataSet.setMobile( false );
@@ -337,7 +339,6 @@ public class AddDataSetAction
         dataSet.setValidCompleteOnly( validCompleteOnly );
         dataSet.setNoValueRequiresComment( noValueRequiresComment );
         dataSet.setNotifyCompletingUser( notifyCompletingUser );
-        dataSet.setApproveData( approveData );
         dataSet.setMobile( mobile );
         dataSet.setSkipOffline( skipOffline );
         dataSet.setDataElementDecoration( dataElementDecoration );
@@ -347,13 +348,10 @@ public class AddDataSetAction
 
         if ( jsonAttributeValues != null )
         {
-            AttributeUtils.updateAttributeValuesFromJson( dataSet.getAttributeValues(), jsonAttributeValues,
-                attributeService );
+            attributeService.updateAttributeValues( dataSet, jsonAttributeValues );
         }
 
         dataSetService.addDataSet( dataSet );
-
-        userService.assignDataSetToUserRole( dataSet );
 
         return SUCCESS;
     }

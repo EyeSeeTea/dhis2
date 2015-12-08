@@ -128,7 +128,7 @@ trackerCapture.controller('DashboardController',
     
     var setWidgetsSize = function(){        
         
-        $scope.widgetSize = {smaller: "col-sm-6 col-md-4", bigger: "col-sm-6 col-md-8"};
+        $scope.widgetSize = {smaller: "col-sm-6 col-md-4 remove-one-pix", bigger: "col-sm-6 col-md-8"};
         
         if(!$scope.hasSmaller){
             $scope.widgetSize = {smaller: "col-sm-1", bigger: "col-sm-11"};
@@ -215,6 +215,14 @@ trackerCapture.controller('DashboardController',
                                         }
                                     }                                
                                 });
+                                
+                                //filter those enrollments that belong to available programs
+                                var len = enrollments.length;
+                                while(len--){
+                                    if(enrollments[len].program && !$scope.programNames[enrollments[len].program]){
+                                        enrollments.splice(len,1);
+                                    }
+                                }
                                 
                                 DHIS2EventFactory.getEventsByProgram($scope.selectedTeiId, null).then(function(events){                                        
                                     //prepare selected items for broadcast
@@ -362,6 +370,8 @@ trackerCapture.controller('DashboardController',
     };
     
     $scope.back = function(){
+        //reload OU tree
+        selection.load();
         $location.path('/').search({program: $scope.selectedProgramId});        
     };
     

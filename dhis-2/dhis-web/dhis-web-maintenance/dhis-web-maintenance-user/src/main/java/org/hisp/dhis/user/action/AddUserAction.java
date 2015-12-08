@@ -28,11 +28,8 @@ package org.hisp.dhis.user.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import com.google.common.collect.Lists;
+import com.opensymphony.xwork2.Action;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.attribute.AttributeService;
@@ -45,7 +42,6 @@ import org.hisp.dhis.oust.manager.SelectionTreeManager;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.security.RestoreOptions;
 import org.hisp.dhis.security.SecurityService;
-import org.hisp.dhis.system.util.AttributeUtils;
 import org.hisp.dhis.system.util.LocaleUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
@@ -59,8 +55,10 @@ import org.hisp.dhis.user.UserSettingService;
 import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.common.collect.Lists;
-import com.opensymphony.xwork2.Action;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Torgeir Lorange Ostby
@@ -114,7 +112,7 @@ public class AddUserAction
 
     @Autowired
     private CurrentUserService currentUserService;
-    
+
     @Autowired
     private UserSettingService userSettingService;
 
@@ -147,6 +145,13 @@ public class AddUserAction
     public void setInviteUsername( String inviteUsername )
     {
         this.inviteUsername = inviteUsername;
+    }
+
+    private boolean externalAuth;
+
+    public void setExternalAuth( boolean externalAuth )
+    {
+        this.externalAuth = externalAuth;
     }
 
     private String rawPassword;
@@ -182,6 +187,13 @@ public class AddUserAction
     public void setOpenId( String openId )
     {
         this.openId = openId;
+    }
+
+    private String ldapId;
+
+    public void setLdapId( String ldapId )
+    {
+        this.ldapId = ldapId;
     }
 
     private String inviteEmail;
@@ -289,11 +301,9 @@ public class AddUserAction
         user.setUserCredentials( userCredentials );
 
         userCredentials.setUsername( StringUtils.trimToNull( username ) );
-
-        if ( !StringUtils.isEmpty( openId ) )
-        {
-            userCredentials.setOpenId( openId );
-        }
+        userCredentials.setExternalAuth( externalAuth );
+        userCredentials.setOpenId( StringUtils.trimToNull( openId ) );
+        userCredentials.setLdapId( StringUtils.trimToNull( ldapId ) );
 
         if ( ACCOUNT_ACTION_INVITE.equals( accountAction ) )
         {
@@ -315,7 +325,7 @@ public class AddUserAction
 
         if ( jsonAttributeValues != null )
         {
-            AttributeUtils.updateAttributeValuesFromJson( user.getAttributeValues(), jsonAttributeValues, attributeService );
+            attributeService.updateAttributeValues( user, jsonAttributeValues );
         }
 
         // ---------------------------------------------------------------------

@@ -3,7 +3,7 @@ html, body {
     margin: 0;
     padding: 0;
     background-color: white;
-    font-size: 10pt;
+    overflow: auto;
 }
 
 .not-for-screen {
@@ -642,7 +642,7 @@ div#searchOuTree h4{
     display: block;
 }
 
-.filter-name {
+.red {
     color: red;
 }
 
@@ -1179,4 +1179,44 @@ input, button, select, textarea {
     font-weight: bold;
     cursor: default;
     width: 100%;
+}
+
+/* this is because bootstrap adds min-height of 1px for smaller sized columns to prevent them from collapsing when empty*/
+.remove-one-pix {
+    margin-top: -1px;
+}
+
+.row.row-striped:nth-of-type(odd) {
+    background: #ebf0f6;   
+}
+
+.row.null-margins {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.event-table-options-dropdown {
+    display: flex;
+    padding: 0px;
+}
+
+.badge.event-table-options-badge {
+    padding-top: 0.5;
+    padding-bottom: 0.5;
+    padding-right: 0;
+    padding-left: 0;
+    height: 19px;
+    width: 19px;
+}
+
+.table-striped > tbody > tr:nth-child(odd)> td.current-event-td {
+    background-color: inherit;        
+}   
+
+.wrap-text {
+    word-wrap: break-word;
+}
+
+.print-div {
+
 }

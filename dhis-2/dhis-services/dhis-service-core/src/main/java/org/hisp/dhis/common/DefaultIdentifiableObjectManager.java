@@ -28,6 +28,21 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hibernate.SessionFactory;
+import org.hisp.dhis.attribute.Attribute;
+import org.hisp.dhis.attribute.AttributeValue;
+import org.hisp.dhis.common.NameableObject.NameableProperty;
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
+import org.hisp.dhis.common.exception.InvalidIdentifierReferenceException;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.user.UserCredentials;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -38,23 +53,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hibernate.SessionFactory;
-import org.hisp.dhis.common.NameableObject.NameableProperty;
-import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
-import org.hisp.dhis.common.exception.InvalidIdentifierReferenceException;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.user.UserCredentials;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
-
 /**
  * Note that it is required for nameable object stores to have concrete implementation
- * classes, not rely on the HibernateIdentifiableObjectStore class, in order to 
+ * classes, not rely on the HibernateIdentifiableObjectStore class, in order to
  * be injected as nameable object stores.
- * 
+ *
  * @author Lars Helge Overland
  */
 @Transactional
@@ -195,20 +198,20 @@ public class DefaultIdentifiableObjectManager
     @Override
     @SuppressWarnings( "unchecked" )
     public <T extends IdentifiableObject> T get( Collection<Class<? extends IdentifiableObject>> classes, String uid )
-    {        
+    {
         for ( Class<? extends IdentifiableObject> clazz : classes )
         {
             T object = (T) get( clazz, uid );
-            
+
             if ( object != null )
             {
                 return object;
             }
         }
-        
+
         return null;
     }
-    
+
     @Override
     @SuppressWarnings( "unchecked" )
     public <T extends IdentifiableObject> T getByCode( Class<T> clazz, String code )
@@ -235,6 +238,20 @@ public class DefaultIdentifiableObjectManager
         }
 
         return (T) store.getByName( name );
+    }
+
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public <T extends IdentifiableObject> T getByAttributeValue( Class<T> clazz, Attribute attribute, String value )
+    {
+        GenericIdentifiableObjectStore<IdentifiableObject> store = getIdentifiableObjectStore( clazz );
+
+        if ( store == null )
+        {
+            return null;
+        }
+
+        return (T) store.getByAttributeValue( attribute, value );
     }
 
     @Override
@@ -661,8 +678,14 @@ public class DefaultIdentifiableObjectManager
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
     public <T extends IdentifiableObject> Map<String, T> getIdMap( Class<T> clazz, IdentifiableProperty property )
+    {
+        return getIdMap( clazz, IdScheme.from( property ) );
+    }
+
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public <T extends IdentifiableObject> Map<String, T> getIdMap( Class<T> clazz, IdScheme idScheme )
     {
         Map<String, T> map = new HashMap<>();
 
@@ -674,13 +697,19 @@ public class DefaultIdentifiableObjectManager
         }
 
         List<T> objects = store.getAll();
-        
-        return IdentifiableObjectUtils.getMap( objects, property );
+
+        return IdentifiableObjectUtils.getMap( objects, idScheme );
+    }
+
+    @Override
+    public <T extends IdentifiableObject> Map<String, T> getIdMapNoAcl( Class<T> clazz, IdentifiableProperty property )
+    {
+        return getIdMapNoAcl( clazz, IdScheme.from( property ) );
     }
 
     @Override
     @SuppressWarnings( "unchecked" )
-    public <T extends IdentifiableObject> Map<String, T> getIdMapNoAcl( Class<T> clazz, IdentifiableProperty property )
+    public <T extends IdentifiableObject> Map<String, T> getIdMapNoAcl( Class<T> clazz, IdScheme idScheme )
     {
         Map<String, T> map = new HashMap<>();
 
@@ -693,7 +722,7 @@ public class DefaultIdentifiableObjectManager
 
         List<T> objects = store.getAllNoAcl();
 
-        return IdentifiableObjectUtils.getMap( objects, property );
+        return IdentifiableObjectUtils.getMap( objects, idScheme );
     }
 
     @Override
@@ -764,11 +793,11 @@ public class DefaultIdentifiableObjectManager
             {
                 return store.getByName( identifiers );
             }
-            
+
             throw new InvalidIdentifierReferenceException( "Invalid identifiable property / class combination: " + property );
         }
 
-        return null;
+        return new ArrayList<>();
     }
 
     @Override
@@ -779,45 +808,61 @@ public class DefaultIdentifiableObjectManager
 
         if ( store == null )
         {
-            return null;
+            return new ArrayList<>();
         }
 
         return store.getById( identifiers );
     }
-    
+
+    @Override
+    public <T extends IdentifiableObject> T getObject( Class<T> clazz, IdentifiableProperty property, String value )
+    {
+        return getObject( clazz, IdScheme.from( property ), value );
+    }
+
     @Override
     @SuppressWarnings( "unchecked" )
-    public <T extends IdentifiableObject> T getObject( Class<T> clazz, IdentifiableProperty property, String id )
+    public <T extends IdentifiableObject> T getObject( Class<T> clazz, IdScheme idScheme, String value )
     {
         GenericIdentifiableObjectStore<T> store = (GenericIdentifiableObjectStore<T>) getIdentifiableObjectStore( clazz );
+        Attribute attribute = null;
 
-        if ( id != null )
+        if ( idScheme.isAttribute() )
         {
-            if ( property == null || IdentifiableProperty.ID.equals( property ) )
+            attribute = get( Attribute.class, idScheme.getAttribute() );
+        }
+
+        if ( !StringUtils.isEmpty( value ) )
+        {
+            if ( idScheme.isNull() || idScheme.is( IdentifiableProperty.UID ) )
             {
-                if ( Integer.valueOf( id ) > 0 )
+                return store.getByUid( value );
+            }
+            if ( idScheme.is( IdentifiableProperty.CODE ) )
+            {
+                return store.getByCode( value );
+            }
+            if ( idScheme.is( IdentifiableProperty.NAME ) )
+            {
+                return store.getByName( value );
+            }
+            if ( idScheme.is( IdentifiableProperty.ATTRIBUTE ) )
+            {
+                return store.getByAttributeValue( attribute, value );
+            }
+            else if ( idScheme.is( IdentifiableProperty.ID ) )
+            {
+                if ( Integer.valueOf( value ) > 0 )
                 {
-                    return store.get( Integer.valueOf( id ) );
+                    return store.get( Integer.valueOf( value ) );
                 }
             }
-            else if ( IdentifiableProperty.UID.equals( property ) )
+            else if ( idScheme.is( IdentifiableProperty.UUID ) && OrganisationUnit.class.isAssignableFrom( clazz ) )
             {
-                return store.getByUid( id );
+                return (T) organisationUnitService.getOrganisationUnitByUuid( value );
             }
-            else if ( IdentifiableProperty.UUID.equals( property ) && OrganisationUnit.class.isAssignableFrom( clazz ) )
-            {
-                return (T) organisationUnitService.getOrganisationUnitByUuid( id );
-            }
-            else if ( IdentifiableProperty.CODE.equals( property ) )
-            {
-                return store.getByCode( id );
-            }
-            else if ( IdentifiableProperty.NAME.equals( property ) )
-            {
-                return store.getByName( id );
-            }
-            
-            throw new InvalidIdentifierReferenceException( "Invalid identifiable property / class combination: " + property );
+
+            throw new InvalidIdentifierReferenceException( "Invalid identifiable property / class combination: " + idScheme );
         }
 
         return null;
@@ -876,7 +921,7 @@ public class DefaultIdentifiableObjectManager
 
         return (T) store.getByUidNoAcl( uid );
     }
-    
+
     @Override
     @SuppressWarnings( "unchecked" )
     public <T extends IdentifiableObject> T getNoAcl( Class<T> clazz, int id )
@@ -956,7 +1001,7 @@ public class DefaultIdentifiableObjectManager
 
         return (List<T>) store.getByDataDimension( true );
     }
-    
+
     @Override
     @SuppressWarnings( "unchecked" )
     public <T extends DimensionalObject> List<T> getDataDimensionsNoAcl( Class<T> clazz )
@@ -970,7 +1015,47 @@ public class DefaultIdentifiableObjectManager
 
         return (List<T>) store.getByDataDimensionNoAcl( true );
     }
-    
+
+    @Override
+    public <T extends IdentifiableObject> List<AttributeValue> getAttributeValueByAttribute( Class<T> klass, Attribute attribute )
+    {
+        GenericIdentifiableObjectStore<IdentifiableObject> store = getIdentifiableObjectStore( klass );
+
+        if ( store == null )
+        {
+            return null;
+        }
+
+        return store.getAttributeValueByAttribute( attribute );
+    }
+
+    @Override
+    public <T extends IdentifiableObject> List<AttributeValue> getAttributeValueByAttributeAndValue( Class<T> klass, Attribute attribute, String value )
+    {
+        GenericIdentifiableObjectStore<IdentifiableObject> store = getIdentifiableObjectStore( klass );
+
+        if ( store == null )
+        {
+            return null;
+        }
+
+        return store.getAttributeValueByAttributeAndValue( attribute, value );
+    }
+
+    @Override
+    public <T extends IdentifiableObject> boolean isAttributeValueUnique( Class<? extends IdentifiableObject> klass, T object, AttributeValue attributeValue )
+    {
+        GenericIdentifiableObjectStore<IdentifiableObject> store = getIdentifiableObjectStore( klass );
+        return store != null && store.isAttributeValueUnique( object, attributeValue );
+    }
+
+    @Override
+    public <T extends IdentifiableObject> boolean isAttributeValueUnique( Class<? extends IdentifiableObject> klass, T object, Attribute attribute, String value )
+    {
+        GenericIdentifiableObjectStore<IdentifiableObject> store = getIdentifiableObjectStore( klass );
+        return store != null && store.isAttributeValueUnique( object, attribute, value );
+    }
+
     //--------------------------------------------------------------------------
     // Supportive methods
     //--------------------------------------------------------------------------
@@ -1055,9 +1140,9 @@ public class DefaultIdentifiableObjectManager
         {
             nameableObjectStoreMap.put( store.getClazz(), store );
         }
-        
+
         dimensionalObjectStoreMap = new HashMap<>();
-        
+
         for ( GenericDimensionalObjectStore<? extends DimensionalObject> store : dimensionalObjectStores )
         {
             dimensionalObjectStoreMap.put( store.getClazz(), store );

@@ -30,12 +30,10 @@ package org.hisp.dhis.dd.action.indicatorgroup;
 
 import com.google.common.collect.Lists;
 import com.opensymphony.xwork2.Action;
-
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.IndicatorService;
-import org.hisp.dhis.system.util.AttributeUtils;
 
 import java.util.List;
 
@@ -100,7 +98,7 @@ public class AddIndicatorGroupAction
     // -------------------------------------------------------------------------
 
     @Override
-    public String execute()
+    public String execute() throws Exception
     {
         indicatorGroup = new IndicatorGroup( StringUtils.trimToNull( name ) );
 
@@ -113,8 +111,7 @@ public class AddIndicatorGroupAction
 
         if ( jsonAttributeValues != null )
         {
-            AttributeUtils.updateAttributeValuesFromJson( indicatorGroup.getAttributeValues(), jsonAttributeValues,
-                attributeService );
+            attributeService.updateAttributeValues( indicatorGroup, jsonAttributeValues );
         }
 
         indicatorService.updateIndicatorGroup( indicatorGroup );

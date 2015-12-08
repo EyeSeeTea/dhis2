@@ -7,6 +7,43 @@
 var d2Directives = angular.module('d2Directives', [])
 
 
+.directive('selectedOrgUnit', function ($timeout) {
+    return {
+        restrict: 'A',
+        link: function (scope, element, attrs) {
+            
+            $("#orgUnitTree").one("ouwtLoaded", function (event, ids, names) {
+                if (dhis2.tc && dhis2.tc.metaDataCached) {
+                    $timeout(function () {
+                        scope.treeLoaded = true;
+                        scope.$apply();
+                    });
+                    selection.responseReceived();
+                }
+                else {
+                    console.log('Finished loading orgunit tree');
+                    $("#orgUnitTree").addClass("disable-clicks"); //Disable ou selection until meta-data has downloaded
+                    $timeout(function () {
+                        scope.treeLoaded = true;
+                        scope.$apply();
+                    });
+                    downloadMetaData();
+                }
+            });
+
+            //listen to user selection, and inform angular         
+            selection.setListenerFunction(setSelectedOu, true);
+            function setSelectedOu(ids, names) {
+                var ou = {id: ids[0], name: names[0]};
+                $timeout(function () {
+                    scope.selectedOrgUnit = ou;
+                    scope.$apply();
+                });
+            }
+        }
+    };
+})
+
 .directive('d2SetFocus', function ($timeout) {
 
     return {        
@@ -77,22 +114,23 @@ var d2Directives = angular.module('d2Directives', [])
 
     return {
         restrict: 'EA',
-        link: function (scope, element, attrs) {
-            var content = $templateCache.get("popover.html");
-            content = $compile(content)(scope);
-            var options = {
-                content: content,
-                placement: 'bottom',
-                trigger: 'hover',
-                html: true,
-                title: scope.title
-            };
-            $(element).popover(options);
-        },
         scope: {
             content: '=',
             title: '@details',
             template: "@template"
+        },
+        link: function (scope, element, attrs) {
+            var content = $templateCache.get("popover.html");
+            content = $compile(content)(scope);
+            scope.content.heading = scope.content.value && scope.content.value.length > 20 ? scope.content.value.substring(0,20).concat('...') : scope.content.value;
+            var options = {
+                content: content,
+                placement: 'auto',
+                trigger: 'hover',
+                html: true,
+                title: scope.title
+            };
+            element.popover(options);
         }
     };
 })
@@ -159,16 +197,6 @@ var d2Directives = angular.module('d2Directives', [])
     };
 })
 
-.directive('draggableModal', function () {
-
-    return {
-        restrict: 'EA',
-        link: function (scope, element) {
-            element.draggable();
-        }
-    };
-})
-
 .directive('d2CustomForm', function ($compile) {
     return{
         restrict: 'E',
@@ -183,14 +211,15 @@ var d2Directives = angular.module('d2Directives', [])
     };
 })
 
-.directive('d2ContextMenu', function (ContextMenuSelectedItem) {
+/* TODO: this directive access an element #contextMenu somewhere in the document. Looks like it has to be rewritten */
+.directive('d2ContextMenu', function () {
 
     return {
         restrict: 'A',
         link: function (scope, element, attrs) {
             var contextMenu = $("#contextMenu");
 
-            element.click(function (e) {                
+            element.click(function (e) {
                 var menuHeight = contextMenu.height();
                 var menuWidth = contextMenu.width();
                 var winHeight = $(window).height();

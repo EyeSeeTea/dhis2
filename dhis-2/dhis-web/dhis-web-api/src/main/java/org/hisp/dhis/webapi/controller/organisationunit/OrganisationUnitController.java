@@ -31,7 +31,6 @@ package org.hisp.dhis.webapi.controller.organisationunit;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.google.common.collect.Lists;
-import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.dxf2.common.TranslateParams;
 import org.hisp.dhis.organisationunit.FeatureType;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -40,6 +39,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitByLevelComparator;
 import org.hisp.dhis.query.Order;
 import org.hisp.dhis.query.Query;
+import org.hisp.dhis.query.QueryParserException;
 import org.hisp.dhis.schema.descriptors.OrganisationUnitSchemaDescriptor;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.util.ObjectUtils;
@@ -80,10 +80,9 @@ public class OrganisationUnitController
 
     @Override
     @SuppressWarnings( "unchecked" )
-    protected List<OrganisationUnit> getEntityList( WebMetaData metaData, WebOptions options, List<String> filters, List<Order> orders )
+    protected List<OrganisationUnit> getEntityList( WebMetaData metaData, WebOptions options, List<String> filters, List<Order> orders ) throws QueryParserException
     {
         List<OrganisationUnit> entityList;
-        boolean hasFilters = !filters.isEmpty();
         Query query = queryService.getQueryFromUrl( getEntityClass(), filters, orders );
         query.setDefaultOrder();
 
@@ -125,20 +124,9 @@ public class OrganisationUnitController
             entityList = new ArrayList<>( manager.getAll( getEntityClass() ) );
             Collections.sort( entityList, OrganisationUnitByLevelComparator.INSTANCE );
         }
-        else if ( options.hasPaging() && !hasFilters )
-        {
-            int count = queryService.count( query );
-
-            Pager pager = new Pager( options.getPage(), count, options.getPageSize() );
-            metaData.setPager( pager );
-
-            query.setFirstResult( pager.getOffset() );
-            query.setMaxResults( pager.getPageSize() );
-            entityList = (List<OrganisationUnit>) queryService.query( query ).getItems();
-        }
         else
         {
-            entityList = (List<OrganisationUnit>) queryService.query( query ).getItems();
+            entityList = (List<OrganisationUnit>) queryService.query( query );
         }
 
         return entityList;
@@ -189,6 +177,23 @@ public class OrganisationUnitController
         }
 
         return organisationUnits;
+    }
+
+    @Override
+    protected void postProcessEntity( OrganisationUnit entity, WebOptions options, Map<String, String> parameters, TranslateParams translateParams )
+        throws Exception
+    {
+        if ( translateParams.isTranslate() )
+        {
+            if ( translateParams.defaultLocale() )
+            {
+                i18nService.internationalise( entity.getChildren() );
+            }
+            else
+            {
+                i18nService.internationalise( entity.getChildren(), translateParams.getLocale() );
+            }
+        }
     }
 
     @RequestMapping( value = "/{uid}/parents", method = RequestMethod.GET )

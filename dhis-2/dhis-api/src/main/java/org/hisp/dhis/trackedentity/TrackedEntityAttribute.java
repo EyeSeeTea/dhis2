@@ -31,12 +31,10 @@ package org.hisp.dhis.trackedentity;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
-import org.hisp.dhis.attribute.AttributeValue;
-import org.hisp.dhis.common.BaseDimensionalObject;
+import org.hisp.dhis.common.BaseDimensionalItemObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DimensionType;
 import org.hisp.dhis.common.DxfNamespaces;
@@ -49,15 +47,12 @@ import org.hisp.dhis.option.Option;
 import org.hisp.dhis.option.OptionSet;
 import org.hisp.dhis.schema.annotation.PropertyRange;
 
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * @author Abyot Asalefew
  */
 @JacksonXmlRootElement( localName = "trackedEntityAttribute", namespace = DxfNamespaces.DXF_2_0 )
 public class TrackedEntityAttribute
-    extends BaseDimensionalObject
+    extends BaseDimensionalItemObject
 {
     private String description;
 
@@ -91,18 +86,12 @@ public class TrackedEntityAttribute
 
     private Boolean programScope = false;
 
-    /**
-     * Set of the dynamic attributes values that belong to this data element.
-     */
-    private Set<AttributeValue> attributeValues = new HashSet<>();
-
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
 
     public TrackedEntityAttribute()
     {
-
     }
 
     public TrackedEntityAttribute( String name, String description, ValueType valueType, Boolean inherit, Boolean displayOnVisitSchedule )
@@ -171,7 +160,7 @@ public class TrackedEntityAttribute
     }
 
     // -------------------------------------------------------------------------
-    // DimensionalObject
+    // DimensionalItemObject
     // -------------------------------------------------------------------------
 
     @Override
@@ -179,7 +168,7 @@ public class TrackedEntityAttribute
     {
         return DimensionType.PROGRAM_ATTRIBUTE;
     }
-    
+
     // -------------------------------------------------------------------------
     // Helper getters
     // -------------------------------------------------------------------------
@@ -396,20 +385,6 @@ public class TrackedEntityAttribute
         this.confidential = confidential;
     }
 
-    @JsonProperty( "attributeValues" )
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlElementWrapper( localName = "attributeValues", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "attributeValue", namespace = DxfNamespaces.DXF_2_0 )
-    public Set<AttributeValue> getAttributeValues()
-    {
-        return attributeValues;
-    }
-
-    public void setAttributeValues( Set<AttributeValue> attributeValues )
-    {
-        this.attributeValues = attributeValues;
-    }
-
     @Override
     public void mergeWith( IdentifiableObject other, MergeStrategy strategy )
     {
@@ -433,7 +408,6 @@ public class TrackedEntityAttribute
                 unique = trackedEntityAttribute.isUnique();
                 orgunitScope = trackedEntityAttribute.getOrgunitScope();
                 programScope = trackedEntityAttribute.getProgramScope();
-                confidential = trackedEntityAttribute.getConfidential();
                 optionSet = trackedEntityAttribute.getOptionSet();
             }
             else if ( strategy.isMerge() )
@@ -450,12 +424,8 @@ public class TrackedEntityAttribute
                 unique = trackedEntityAttribute.isUnique() == null ? unique : trackedEntityAttribute.isUnique();
                 orgunitScope = trackedEntityAttribute.getOrgunitScope() == null ? orgunitScope : trackedEntityAttribute.getOrgunitScope();
                 programScope = trackedEntityAttribute.getProgramScope() == null ? programScope : trackedEntityAttribute.getProgramScope();
-                confidential = trackedEntityAttribute.getConfidential() == null ? confidential : trackedEntityAttribute.getConfidential();
                 optionSet = trackedEntityAttribute.getOptionSet() == null ? optionSet : trackedEntityAttribute.getOptionSet();
             }
-
-            attributeValues.clear();
-            attributeValues.addAll( trackedEntityAttribute.getAttributeValues() );
         }
     }
 }

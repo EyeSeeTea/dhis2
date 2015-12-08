@@ -28,16 +28,13 @@ package org.hisp.dhis.dataset.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.opensymphony.xwork2.Action;
 import org.hisp.dhis.attribute.Attribute;
 import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.attribute.comparator.AttributeSortOrderComparator;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
+import org.hisp.dhis.dataapproval.DataApprovalWorkflow;
+import org.hisp.dhis.dataapproval.DataApprovalWorkflowService;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
@@ -52,10 +49,14 @@ import org.hisp.dhis.system.util.AttributeUtils;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupService;
 
-import com.opensymphony.xwork2.Action;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
- * @author mortenoh
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public class EditDataSetFormAction
     implements Action
@@ -77,7 +78,7 @@ public class EditDataSetFormAction
     {
         this.dataSetService = dataSetService;
     }
-    
+
     private UserGroupService userGroupService;
 
     public void setUserGroupService( UserGroupService userGroupService )
@@ -90,6 +91,13 @@ public class EditDataSetFormAction
     public void setCategoryService( DataElementCategoryService categoryService )
     {
         this.categoryService = categoryService;
+    }
+
+    private DataApprovalWorkflowService workflowService;
+
+    public void setWorkflowService( DataApprovalWorkflowService workflowService )
+    {
+        this.workflowService = workflowService;
     }
 
     private AttributeService attributeService;
@@ -153,10 +161,17 @@ public class EditDataSetFormAction
     }
 
     private List<DataElementCategoryCombo> categoryCombos = new ArrayList<>();
-    
+
     public List<DataElementCategoryCombo> getCategoryCombos()
     {
         return categoryCombos;
+    }
+
+    private List<DataApprovalWorkflow> workflows = new ArrayList<>();
+
+    public List<DataApprovalWorkflow> getWorkflows()
+    {
+        return workflows;
     }
 
     private List<LegendSet> legendSets;
@@ -191,8 +206,9 @@ public class EditDataSetFormAction
         periodTypes = periodService.getAllPeriodTypes();
         userGroups = new ArrayList<>( userGroupService.getAllUserGroups() );
         categoryCombos = new ArrayList<>( categoryService.getAttributeCategoryCombos() );
+        workflows = new ArrayList<>( workflowService.getAllWorkflows() );
         legendSets = new ArrayList<>( legendService.getAllLegendSets() );
-        
+
         if ( dataSetId != null )
         {
             dataSet = dataSetService.getDataSet( dataSetId, true, true, false );
@@ -202,10 +218,11 @@ public class EditDataSetFormAction
             attributeValues = AttributeUtils.getAttributeValueMap( dataSet.getAttributeValues() );
         }
 
-        attributes = new ArrayList<>( attributeService.getDataSetAttributes() );
+        attributes = new ArrayList<>( attributeService.getAttributes( DataSet.class ) );
 
         Collections.sort( userGroups, IdentifiableObjectNameComparator.INSTANCE );
         Collections.sort( dataElements, IdentifiableObjectNameComparator.INSTANCE );
+        Collections.sort( workflows, IdentifiableObjectNameComparator.INSTANCE );
         Collections.sort( indicators, IdentifiableObjectNameComparator.INSTANCE );
         Collections.sort( legendSets, IdentifiableObjectNameComparator.INSTANCE );
         Collections.sort( attributes, AttributeSortOrderComparator.INSTANCE );

@@ -29,14 +29,14 @@ package org.hisp.dhis.system.deletion;
  */
 
 import javassist.util.proxy.ProxyObject;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.DeleteNotAllowedException;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -53,27 +53,28 @@ public class DefaultDeletionManager
     private static final String DELETE_METHOD_PREFIX = "delete";
     private static final String ALLOW_METHOD_PREFIX = "allowDelete";
 
-    private final List<DeletionHandler> handlers = new ArrayList<>();
+    /**
+     * Deletion handlers registered in context are subscribed to deletion 
+     * notifications through auto-wiring.
+     */
+    @Autowired(required = false)
+    private List<DeletionHandler> deletionHandlers;
 
     // -------------------------------------------------------------------------
     // DeletionManager implementation
     // -------------------------------------------------------------------------
 
     @Override
-    public void addDeletionHandler( DeletionHandler handler )
-    {
-        this.handlers.add( handler );
-    }
-
-    @Override
-    public void addDeletionHandlers( Collection<DeletionHandler> deletionHandlers )
-    {
-        this.handlers.addAll( deletionHandlers );
-    }
-
-    @Override
     public void execute( Object object )
     {
+        if ( deletionHandlers == null || deletionHandlers.isEmpty() )
+        {
+            log.info( "No deletion handlers registered, aborting deletion handling" );
+            return;
+        }
+        
+        log.debug( "Deletion handlers detected: " + deletionHandlers.size() );
+        
         Class<?> clazz = getClazz( object );
 
         String className = clazz.getSimpleName();
@@ -90,7 +91,7 @@ public class DefaultDeletionManager
         {
             Method allowMethod = DeletionHandler.class.getMethod( allowMethodName, new Class[]{ clazz } );
 
-            for ( DeletionHandler handler : handlers )
+            for ( DeletionHandler handler : deletionHandlers )
             {
                 currentHandler = handler.getClass().getSimpleName();
 
@@ -102,7 +103,7 @@ public class DefaultDeletionManager
                 {
                     String hint = String.valueOf( allow );
 
-                    String message = handler.getClassName() + (hint.isEmpty() ? "" : (" (" + hint + ")"));
+                    String message = handler.getClassName() + ( hint.isEmpty() ? hint : ( " (" + hint + ")" ) );
 
                     log.info( "Delete was not allowed by " + currentHandler + ": " + message );
                     
@@ -136,7 +137,7 @@ public class DefaultDeletionManager
         {
             Method deleteMethod = DeletionHandler.class.getMethod( deleteMethodName, new Class[]{ clazz } );
 
-            for ( DeletionHandler handler : handlers )
+            for ( DeletionHandler handler : deletionHandlers )
             {
                 currentHandler = handler.getClass().getSimpleName();
 

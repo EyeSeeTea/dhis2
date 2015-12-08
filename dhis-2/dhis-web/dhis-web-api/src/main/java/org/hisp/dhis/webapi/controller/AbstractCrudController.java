@@ -64,9 +64,9 @@ import org.hisp.dhis.node.types.CollectionNode;
 import org.hisp.dhis.node.types.ComplexNode;
 import org.hisp.dhis.node.types.RootNode;
 import org.hisp.dhis.node.types.SimpleNode;
-import org.hisp.dhis.objectfilter.ObjectFilterService;
 import org.hisp.dhis.query.Order;
 import org.hisp.dhis.query.Query;
+import org.hisp.dhis.query.QueryParserException;
 import org.hisp.dhis.query.QueryService;
 import org.hisp.dhis.schema.Property;
 import org.hisp.dhis.schema.Schema;
@@ -121,9 +121,6 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     protected CurrentUserService currentUserService;
 
     @Autowired
-    protected ObjectFilterService objectFilterService;
-
-    @Autowired
     protected FieldFilterService fieldFilterService;
 
     @Autowired
@@ -161,7 +158,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     public @ResponseBody RootNode getObjectList(
         @RequestParam Map<String, String> rpParameters,
         TranslateParams translateParams, OrderOptions orderOptions,
-        HttpServletResponse response, HttpServletRequest request )
+        HttpServletResponse response, HttpServletRequest request ) throws QueryParserException
     {
         List<String> fields = Lists.newArrayList( contextService.getParameterValues( "fields" ) );
         List<String> filters = Lists.newArrayList( contextService.getParameterValues( "filter" ) );
@@ -181,10 +178,8 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         }
 
         List<T> entities = getEntityList( metaData, options, filters, orders );
-        Pager pager = metaData.getPager();
-
-        entities = objectFilterService.filter( entities, filters );
         translate( entities, translateParams );
+        Pager pager = metaData.getPager();
 
         if ( options.hasPaging() && pager == null )
         {
@@ -193,7 +188,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         }
 
         postProcessEntities( entities );
-        postProcessEntities( entities, options, rpParameters );
+        postProcessEntities( entities, options, rpParameters, translateParams );
 
         if ( fields.contains( "access" ) )
         {
@@ -415,6 +410,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         }
     }
 
+    @SuppressWarnings( "unchecked" )
     private RootNode getObjectInternal( String uid, Map<String, String> parameters,
         List<String> filters, List<String> fields, TranslateParams translateParams ) throws Exception
     {
@@ -431,7 +427,10 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             throw new WebMessageException( WebMessageUtils.notFound( getEntityClass(), uid ) );
         }
 
-        entities = objectFilterService.filter( entities, filters );
+        Query query = queryService.getQueryFromUrl( getEntityClass(), filters, new ArrayList<>() );
+        query.setObjects( entities );
+
+        entities = (List<T>) queryService.query( query );
 
         if ( options.hasLinks() )
         {
@@ -446,7 +445,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         for ( T entity : entities )
         {
             postProcessEntity( entity );
-            postProcessEntity( entity, options, parameters );
+            postProcessEntity( entity, options, parameters, translateParams );
         }
 
         CollectionNode collectionNode = fieldFilterService.filter( getEntityClass(), entities, fields );
@@ -811,7 +810,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
      * Override to process entities after it has been retrieved from
      * storage and before it is returned to the view. Entities is null-safe.
      */
-    protected void postProcessEntities( List<T> entityList, WebOptions options, Map<String, String> parameters )
+    protected void postProcessEntities( List<T> entityList, WebOptions options, Map<String, String> parameters, TranslateParams translateParams )
     {
     }
 
@@ -835,7 +834,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
      * Override to process a single entity after it has been retrieved from
      * storage and before it is returned to the view. Entity is null-safe.
      */
-    protected void postProcessEntity( T entity, WebOptions options, Map<String, String> parameters ) throws Exception
+    protected void postProcessEntity( T entity, WebOptions options, Map<String, String> parameters, TranslateParams translateParams ) throws Exception
     {
     }
 
@@ -868,10 +867,9 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     //--------------------------------------------------------------------------
 
     @SuppressWarnings( "unchecked" )
-    protected List<T> getEntityList( WebMetaData metaData, WebOptions options, List<String> filters, List<Order> orders )
+    protected List<T> getEntityList( WebMetaData metaData, WebOptions options, List<String> filters, List<Order> orders ) throws QueryParserException
     {
         List<T> entityList;
-        boolean haveFilters = !filters.isEmpty();
         Query query = queryService.getQueryFromUrl( getEntityClass(), filters, orders );
         query.setDefaultOrder();
 
@@ -879,26 +877,15 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         {
             entityList = Lists.newArrayList( manager.filter( getEntityClass(), options.getOptions().get( "query" ) ) );
         }
-        else if ( options.hasPaging() && !haveFilters )
-        {
-            int count = queryService.count( query );
-
-            Pager pager = new Pager( options.getPage(), count, options.getPageSize() );
-            metaData.setPager( pager );
-
-            query.setFirstResult( pager.getOffset() );
-            query.setMaxResults( pager.getPageSize() );
-            entityList = (List<T>) queryService.query( query ).getItems();
-        }
         else
         {
-            entityList = (List<T>) queryService.query( query ).getItems();
+            entityList = (List<T>) queryService.query( query );
         }
 
         return entityList;
     }
 
-    private final List<T> getEntity( String uid )
+    private List<T> getEntity( String uid )
     {
         return getEntity( uid, new WebOptions( new HashMap<>() ) );
     }

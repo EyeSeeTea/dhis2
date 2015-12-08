@@ -1,12 +1,5 @@
 package org.hisp.dhis.sms.outbound;
 
-import java.util.Map;
-
-import org.hisp.dhis.sms.SmsServiceException;
-import org.hisp.dhis.sms.config.SMSGatewayStatus;
-import org.hisp.dhis.sms.config.SmsConfigurable;
-import org.hisp.dhis.sms.config.SmsConfiguration;
-
 /*
  * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
@@ -35,12 +28,19 @@ import org.hisp.dhis.sms.config.SmsConfiguration;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Map;
+
+import org.hisp.dhis.sms.SmsServiceException;
+import org.hisp.dhis.sms.config.SMSGatewayStatus;
+import org.hisp.dhis.sms.config.SmsConfigurable;
+import org.hisp.dhis.sms.config.SmsConfiguration;
+
 /**
  * Marker interface for {@code OutboundSmsService outbound sms services}
- * providing actual sms sending.
+ * providing actual SMS sending.
  */
-public interface OutboundSmsTransportService extends SmsConfigurable
-
+public interface OutboundSmsTransportService 
+    extends SmsConfigurable
 {   
     Map<String, String> getGatewayMap();
 
@@ -57,9 +57,8 @@ public interface OutboundSmsTransportService extends SmsConfigurable
 
     String getDefaultGateway();
     
- //   String getGatewayStatus(String gatewayId);
-    
     SMSServiceStatus getServiceStatusEnum();
+    
     SMSGatewayStatus getGatewayStatus();
 
     boolean isEnabled();

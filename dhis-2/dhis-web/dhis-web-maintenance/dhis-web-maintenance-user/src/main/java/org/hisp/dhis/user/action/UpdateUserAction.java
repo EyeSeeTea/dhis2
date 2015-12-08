@@ -28,11 +28,8 @@ package org.hisp.dhis.user.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import com.google.common.collect.Lists;
+import com.opensymphony.xwork2.Action;
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.common.IdentifiableObjectManager;
@@ -42,7 +39,6 @@ import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.oust.manager.SelectionTreeManager;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
-import org.hisp.dhis.system.util.AttributeUtils;
 import org.hisp.dhis.system.util.LocaleUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
@@ -54,8 +50,10 @@ import org.hisp.dhis.user.UserService;
 import org.hisp.dhis.user.UserSettingService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.common.collect.Lists;
-import com.opensymphony.xwork2.Action;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Torgeir Lorange Ostby
@@ -125,6 +123,13 @@ public class UpdateUserAction
         this.id = id;
     }
 
+    private boolean externalAuth;
+
+    public void setExternalAuth( boolean externalAuth )
+    {
+        this.externalAuth = externalAuth;
+    }
+
     private String rawPassword;
 
     public void setRawPassword( String rawPassword )
@@ -158,6 +163,13 @@ public class UpdateUserAction
     public void setOpenId( String openId )
     {
         this.openId = openId;
+    }
+
+    private String ldapId;
+
+    public void setLdapId( String ldapId )
+    {
+        this.ldapId = ldapId;
     }
 
     private String phoneNumber;
@@ -245,21 +257,15 @@ public class UpdateUserAction
         user.setEmail( StringUtils.trimToNull( email ) );
         user.setPhoneNumber( StringUtils.trimToNull( phoneNumber ) );
 
-        UserCredentials userCredentials = userService.getUserCredentials( user );
+        UserCredentials userCredentials = user.getUserCredentials();
 
-        if ( StringUtils.isNotEmpty( openId ) )
-        {
-            userCredentials.setOpenId( StringUtils.trimToNull( openId ) );
-        }
-        else
-        {
-            userCredentials.setOpenId( null );
-        }
+        userCredentials.setExternalAuth( externalAuth );
+        userCredentials.setOpenId( StringUtils.trimToNull( openId ) );
+        userCredentials.setLdapId( StringUtils.trimToNull( ldapId ) );
 
         if ( jsonAttributeValues != null )
         {
-            AttributeUtils.updateAttributeValuesFromJson( user.getAttributeValues(), jsonAttributeValues,
-                attributeService );
+            attributeService.updateAttributeValues( user, jsonAttributeValues );
         }
 
         // ---------------------------------------------------------------------
@@ -322,13 +328,10 @@ public class UpdateUserAction
         }
 
         // ---------------------------------------------------------------------
-        // Update User
+        // Set password and update user
         // ---------------------------------------------------------------------
 
-        if ( StringUtils.isNotEmpty( rawPassword ) )
-        {
-            userService.encodeAndSetPassword( userCredentials, rawPassword );
-        }
+        userService.encodeAndSetPassword( userCredentials, rawPassword );
 
         userService.updateUserCredentials( userCredentials );
         userService.updateUser( user );

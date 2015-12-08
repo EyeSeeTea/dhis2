@@ -321,6 +321,7 @@ public class MobileOrganisationUnitController
         mobileModel.setPrograms( programService.getProgramsLWUIT( unit ) );
         mobileModel.setServerCurrentDate( new Date() );
         mobileModel.setRelationshipTypes( programService.getAllRelationshipTypes() );
+        
         return mobileModel;
     }
 

@@ -28,14 +28,11 @@ package org.hisp.dhis.dataset.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.commons.util.TextUtils.equalsNullSafe;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import com.google.common.collect.Lists;
+import com.opensymphony.xwork2.Action;
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.attribute.AttributeService;
+import org.hisp.dhis.dataapproval.DataApprovalWorkflowService;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
@@ -49,11 +46,13 @@ import org.hisp.dhis.legend.LegendService;
 import org.hisp.dhis.legend.LegendSet;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.system.util.AttributeUtils;
 import org.hisp.dhis.user.UserGroupService;
 
-import com.google.common.collect.Lists;
-import com.opensymphony.xwork2.Action;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static org.hisp.dhis.commons.util.TextUtils.equalsNullSafe;
 
 /**
  * @author Kristian
@@ -98,6 +97,13 @@ public class UpdateDataSetAction
     public void setCategoryService( DataElementCategoryService categoryService )
     {
         this.categoryService = categoryService;
+    }
+
+    private DataApprovalWorkflowService workflowService;
+
+    public void setWorkflowService( DataApprovalWorkflowService workflowService )
+    {
+        this.workflowService = workflowService;
     }
 
     private SectionService sectionService;
@@ -188,11 +194,11 @@ public class UpdateDataSetAction
         this.notifyCompletingUser = notifyCompletingUser;
     }
 
-    private boolean approveData;
+    private Integer workflowId;
 
-    public void setApproveData( boolean approveData )
+    public void setWorkflowId( Integer workflowId )
     {
-        this.approveData = approveData;
+        this.workflowId = workflowId;
     }
 
     private String frequencySelect;
@@ -301,19 +307,18 @@ public class UpdateDataSetAction
     }
 
     private boolean mobile;
-    
+
     public void setMobile( boolean mobile )
     {
         this.mobile = mobile;
     }
-    
+
     // -------------------------------------------------------------------------
     // Action
     // -------------------------------------------------------------------------
 
     @Override
-    public String execute()
-        throws Exception
+    public String execute() throws Exception
     {
         Set<DataElement> dataElements = new HashSet<>();
 
@@ -338,13 +343,13 @@ public class UpdateDataSetAction
         dataSet.setExpiryDays( expiryDays );
         dataSet.setTimelyDays( timelyDays );
 
-        if ( !( equalsNullSafe( name, dataSet.getName() ) &&
+        if ( !(equalsNullSafe( name, dataSet.getName() ) &&
             periodType.equals( dataSet.getPeriodType() ) &&
             expiryDays == dataSet.getExpiryDays() &&
             openFuturePeriods == dataSet.getOpenFuturePeriods() &&
             dataElements.equals( dataSet.getDataElements() ) &&
             indicators.equals( dataSet.getIndicators() ) &&
-            renderAsTabs == dataSet.isRenderAsTabs() ) )
+            renderAsTabs == dataSet.isRenderAsTabs()) )
         {
             dataSet.increaseVersion(); // Check if version must be updated
         }
@@ -361,7 +366,6 @@ public class UpdateDataSetAction
         dataSet.setValidCompleteOnly( validCompleteOnly );
         dataSet.setNoValueRequiresComment( noValueRequiresComment );
         dataSet.setNotifyCompletingUser( notifyCompletingUser );
-        dataSet.setApproveData( approveData );
         dataSet.setMobile( mobile );
         dataSet.setSkipOffline( skipOffline );
         dataSet.setDataElementDecoration( dataElementDecoration );
@@ -375,10 +379,18 @@ public class UpdateDataSetAction
             dataSet.setCategoryCombo( categoryService.getDataElementCategoryCombo( categoryComboId ) );
         }
 
+        if ( workflowId != null && workflowId > 0 )
+        {
+            dataSet.setWorkflow( workflowService.getWorkflow( workflowId ) );
+        }
+        else
+        {
+            dataSet.setWorkflow( null );
+        }
+
         if ( jsonAttributeValues != null )
         {
-            AttributeUtils.updateAttributeValuesFromJson( dataSet.getAttributeValues(), jsonAttributeValues,
-                attributeService );
+            attributeService.updateAttributeValues( dataSet, jsonAttributeValues );
         }
 
         dataSetService.updateDataSet( dataSet );

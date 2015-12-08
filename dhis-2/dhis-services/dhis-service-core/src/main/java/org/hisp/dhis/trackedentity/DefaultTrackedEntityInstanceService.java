@@ -191,12 +191,10 @@ public class DefaultTrackedEntityInstanceService
             }
             else
             {
-                Collection<TrackedEntityAttribute> filters = attributeService.getAllTrackedEntityAttributes();
                 Collection<TrackedEntityAttribute> attributes = attributeService.getTrackedEntityAttributesDisplayInList();
-                filters.removeAll( attributes );
 
                 params.addAttributesIfNotExist( QueryItem.getQueryItems( attributes ) );
-                params.addFiltersIfNotExist( QueryItem.getQueryItems( filters ) );
+                params.addFiltersIfNotExist( QueryItem.getQueryItems( attributes ) );
             }
         }
 
@@ -534,7 +532,7 @@ public class DefaultTrackedEntityInstanceService
         for ( TrackedEntityAttributeValue pav : attributeValues )
         {
             attributeValueService.addTrackedEntityAttributeValue( pav );
-            instance.getAttributeValues().add( pav );
+            instance.getTrackedEntityAttributeValues().add( pav );
         }
 
         // ---------------------------------------------------------------------
@@ -661,9 +659,9 @@ public class DefaultTrackedEntityInstanceService
             }
         }
 
-        if ( instance.getAttributeValues() != null && instance.getAttributeValues().size() > 0 )
+        if ( instance.getTrackedEntityAttributeValues() != null && instance.getTrackedEntityAttributeValues().size() > 0 )
         {
-            for ( TrackedEntityAttributeValue attributeValue : instance.getAttributeValues() )
+            for ( TrackedEntityAttributeValue attributeValue : instance.getTrackedEntityAttributeValues() )
             {
                 String valid = trackedEntityInstanceStore.validate( instance, attributeValue, program );
 
@@ -682,7 +680,7 @@ public class DefaultTrackedEntityInstanceService
     {
         for ( ValidationCriteria criteria : program.getValidationCriteria() )
         {
-            for ( TrackedEntityAttributeValue attributeValue : instance.getAttributeValues() )
+            for ( TrackedEntityAttributeValue attributeValue : instance.getTrackedEntityAttributeValues() )
             {
                 if ( attributeValue.getAttribute().getUid().equals( criteria.getProperty() ) )
                 {

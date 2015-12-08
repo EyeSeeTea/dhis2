@@ -36,7 +36,6 @@ import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.legend.LegendService;
 import org.hisp.dhis.option.OptionService;
 import org.hisp.dhis.option.OptionSet;
-import org.hisp.dhis.system.util.AttributeUtils;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 import org.hisp.dhis.trackedentity.TrackedEntityService;
@@ -183,13 +182,6 @@ public class UpdateAttributeAction
         this.scope = scope;
     }
 
-    private Boolean confidential;
-
-    public void setConfidential( Boolean confidential )
-    {
-        this.confidential = confidential;
-    }
-
     private List<String> jsonAttributeValues;
 
     public void setJsonAttributeValues( List<String> jsonAttributeValues )
@@ -208,7 +200,7 @@ public class UpdateAttributeAction
         OptionSet optionSet = optionService.getOptionSet( optionSetId );
 
         valueType = optionSet != null && optionSet.getValueType() != null ? optionSet.getValueType() : valueType;
-        
+
         TrackedEntityAttribute trackedEntityAttribute = trackedEntityAttributeService.getTrackedEntityAttribute( id );
 
         trackedEntityAttribute.setName( StringUtils.trimToNull( name ) );
@@ -226,9 +218,6 @@ public class UpdateAttributeAction
 
         inherit = inherit != null;
         trackedEntityAttribute.setInherit( inherit );
-
-        confidential = confidential != null;
-        trackedEntityAttribute.setConfidential( confidential );
 
         if ( unique )
         {
@@ -260,8 +249,7 @@ public class UpdateAttributeAction
 
         if ( jsonAttributeValues != null )
         {
-            AttributeUtils.updateAttributeValuesFromJson( trackedEntityAttribute.getAttributeValues(), jsonAttributeValues,
-                attributeService );
+            attributeService.updateAttributeValues( trackedEntityAttribute, jsonAttributeValues );
         }
 
         trackedEntityAttributeService.updateTrackedEntityAttribute( trackedEntityAttribute );

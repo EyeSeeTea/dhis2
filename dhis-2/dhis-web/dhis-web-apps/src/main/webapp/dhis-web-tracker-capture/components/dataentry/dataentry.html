@@ -1,9 +1,7 @@
 <div class="panel panel-info" ng-controller="DataEntryController">
     <div class="panel-heading handle bold">
         {{dataentryWidget.title| translate}}        
-
-        <span class="pull-right widget-link">
-
+        <span class="pull-right widget-link print-div">
             <a href ng-click="toggleEventsTableDisplay()" title="{{showEventsAsTables ? 'toggle_table_view_off' : 'toggle_table_view_on'| translate}}" ng-show="stagesCanBeShownAsTable"><span ng-if="!showEventsAsTables"><i class="fa fa-bars vertical-center"></i></span><span ng-if="showEventsAsTables"><i class="fa fa-square vertical-center"></i></span></a>
             <a href ng-click="filterEvents = !filterEvents" title="{{filterEvents ? 'list_events' : 'filter_events'| translate}}" ng-show="eventFilteringRequired"><span ng-if="!filterEvents"><i class="fa fa-filter vertical-center"></i></span><span ng-if="filterEvents"><i class="fa fa-list vertical-center"></i></span></a>
             <a href ng-click="toggleLegend()" title="{{'event_color_legend'| translate}}" class="small-horizonal-spacing"><i class="fa fa-info-circle vertical-center"></i></a>
@@ -32,11 +30,11 @@
                 <thead>
                     <tr>
                         <th class="active" style="vertical-align:middle" ng-repeat="stage in programStages">                            
-                            {{stage.name}}  
+                            {{stage.name}}
 
                             <!-- event add/filter icon begins -->
                             <span class='pull-right'>
-
+                                
                                 <span ng-if="stageNeedsEvent(stage) && selectedEnrollment.status === 'ACTIVE'">
                                     <a href title="{{'create_new_event'| translate}}" ng-click="showCreateEvent(stage)" style="vertical-align:middle"><i class="fa fa-plus"></i></a>
                                 </span>
@@ -56,7 +54,7 @@
                                      ng-click="showDataEntry(dhis2Event, false)">
                                     {{dhis2Event.orgUnitName}}<br/>
                                     {{dhis2Event.sortingDate}}<br>
-                                    <span ng-if="eventsByStage[stage.id].length > 1 && !filterEvents">[{{$index + 1}}]</span>
+                                    <span ng-if="eventsByStage[stage.id].length > 1 && !filterEvents">[{{eventsByStage[stage.id].length - $index}}]</span>
                                 </div>
                             </div>
                             <span ng-if="eventsByStage[stage.id].length > 1 && filterEvents">
@@ -78,13 +76,13 @@
 
         <div ng-if="!selectedEnrollment || !selectedEnrollment.enrollment" class="alert alert-danger">{{notEnrolledLabel}}</div>
 
-        <form name="outerForm" novalidate>
+        <form name="outerForm" novalidate class="print-div">
             <div ng-if="currentEvent">
 
                 <!-- event dates/scheduling begin -->
                 <div class="row" ng-if="(displayCustomForm !== 'TABLE') && !currentStage.periodType">
 
-                    <div class="col-md-6">
+                    <div ng-class="{true: 'col-md-12', false: 'col-md-6'} [currentStage.hideDueDate]">
                         {{currentEvent.excecutionDateLabel}}
                         <input type="text"
                                placeholder="{{dhis2CalendarFormat.keyDateFormat}}"
@@ -99,7 +97,7 @@
                                blur-or-change="saveEventDate()"/>
                         <span ng-if="invalidDate" class="error">{{'date_required'| translate}}</span>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-6" ng-if="!currentStage.hideDueDate">
                         <span ng-if="currentEvent.eventDate || currentEvent.status === 'SKIPPED' || currentEvent.dueDate">
                             {{'due_date'| translate}}
                         </span>
@@ -162,8 +160,9 @@
 
                 <!-- data entry form ends -->
 
-                <!-- data entry/event buttons begins -->
-                <div class="form-group">
+                <!-- data entry/event buttons begins -->                
+                
+                <div class="form-group" ng-if="displayCustomForm !== 'TABLE'">
                     <div class='row'><hr></div>
                     <a href ng-click="completeIncompleteEvent()" 
                        class="btn btn-warning" 
@@ -172,7 +171,7 @@
                     <a href ng-click="completeIncompleteEvent()" 
                        class="btn btn-warning"
                        ng-disabled="currentEvent.enrollmentStatus !== 'ACTIVE' || currentEvent.editingNotAllowed && currentEvent.status !== 'COMPLETED' || currentEvent.orgUnit !== selectedOrgUnit.id"
-                       ng-if="currentEvent.eventDate && currentEvent.status === 'COMPLETED'">{{'incomplete'| translate}}</a>                       
+                       ng-if="currentEvent.eventDate && currentEvent.status === 'COMPLETED'">{{'incomplete'| translate}}</a>
                     <a href ng-click="validateEvent()" 
                        class="btn btn-info" 
                        ng-disabled="currentEvent.enrollmentStatus !== 'ACTIVE' || currentEvent.editingNotAllowed || currentEvent.orgUnit !== selectedOrgUnit.id" 
@@ -184,45 +183,48 @@
                     <a href ng-click="deleteEvent()" 
                        ng-disabled="currentEvent.enrollmentStatus === 'COMPLETED' || currentEvent.editingNotAllowed || currentEvent.orgUnit !== selectedOrgUnit.id"
                        class="btn btn-danger">{{'delete'| translate}}</a>
+                    <a href class="btn btn-primary" ng-click="printDiv('print-div');">{{'print_form'| translate}}</a>
                 </div>
                 <!-- data entry/event buttons ends -->
 
             </div>
         </form>
 
-        <div ng-show="currentEvent" class='remove-default-padding overflow-ellipsis'>
-            <div class='row'><hr></div>
-            <div class="add-default-padding">
-                <textarea class="form-control" rows="3" ng-model="note" placeholder="{{'add_new_note_here'| translate}}"></textarea> 
-                <div class="vertical-spacing">
-                    <button type="button" 
-                            class="btn btn-primary"
-                            ng-click="addNote()">
-                        {{'add'| translate}}
-                    </button>        
-                    <button type="button" 
-                            class="btn btn-default small-horizonal-spacing" 
-                            ng-click="clearNote()">
-                        {{'clear'| translate}}
-                    </button>
+        <div ng-if="displayCustomForm !== 'TABLE'">
+            <div ng-show="currentEvent" class='remove-default-padding overflow-ellipsis'>
+                <div class='row'><hr></div>
+                <div class="add-default-padding">
+                    <textarea class="form-control" rows="3" ng-model="note.value" placeholder="{{'add_new_note_here'| translate}}"></textarea> 
+                    <div class="vertical-spacing">
+                        <button type="button" 
+                                class="btn btn-primary"
+                                ng-click="addNote()">
+                            {{'add'| translate}}
+                        </button>        
+                        <button type="button" 
+                                class="btn btn-default small-horizonal-spacing" 
+                                ng-click="clearNote()">
+                            {{'clear'| translate}}
+                        </button>
+                    </div>
                 </div>
+                <table class="table table-striped dhis2-table-hover">
+                    <tr ng-repeat="note in currentEvent.notes">
+                        <td class="add-default-left-padding">
+                            <d2-pop-over content="note" template="popover.html" details="{{'details'| translate}}">
+                                <div>{{note.heading}}</div>
+                            </d2-pop-over>
+                            <script type="text/ng-template" id="popover.html">
+                                <div class="wrap-text">{{content.value}}</div>
+                                <hr>
+                                <p><strong>{{'created_by' | translate}}: </strong>{{content.storedBy}}</p>
+                                <p><strong>{{'date' | translate}}: </strong>{{content.storedDate}}</p>                           
+                            </script>
+                        </td> 
+                    </tr>
+                </table>
             </div>
-            <table class="table table-striped dhis2-table-hover">
-                <tr ng-repeat="note in currentEvent.notes">
-                    <td class="add-default-left-padding">
-                        <d2-pop-over content="note" template="popover.html" details="{{'details'| translate}}">
-                            <div>{{note.value}}</div>
-                        </d2-pop-over>
-                        <script type="text/ng-template" id="popover.html">
-                            <p>{{content.value}}</p>
-                            <hr>
-                            <p><strong>{{'created_by' | translate}}: </strong>{{content.storedBy}}</p>
-                            <p><strong>{{'date' | translate}}: </strong>{{content.storedDate}}</p>                           
-                        </script>
-                    </td> 
-                </tr>
-            </table>
+            <div ng-show="currentEvent && !currentEvent.notes" class="alert alert-warning">{{'no_notes_exist'| translate}}</div> 
         </div>
-        <div ng-show="currentEvent && !currentEvent.notes" class="alert alert-warning">{{'no_notes_exist'| translate}}</div> 
     </div>        
 </div>

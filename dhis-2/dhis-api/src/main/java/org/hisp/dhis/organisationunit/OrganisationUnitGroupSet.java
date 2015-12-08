@@ -35,14 +35,13 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
-import org.hisp.dhis.attribute.AttributeValue;
+import org.hisp.dhis.common.BaseDimensionalItemObject;
 import org.hisp.dhis.common.BaseDimensionalObject;
-import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DimensionType;
+import org.hisp.dhis.common.DimensionalItemObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeStrategy;
-import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.adapter.JacksonOrganisationUnitGroupSymbolSerializer;
 import org.hisp.dhis.common.annotation.Scanned;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
@@ -68,11 +67,6 @@ public class OrganisationUnitGroupSet
 
     @Scanned
     private Set<OrganisationUnitGroup> organisationUnitGroups = new HashSet<>();
-
-    /**
-     * Set of the dynamic attributes values that belong to this data element.
-     */
-    private Set<AttributeValue> attributeValues = new HashSet<>();
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -179,11 +173,11 @@ public class OrganisationUnitGroupSet
 
     @Override
     @JsonProperty
-    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonSerialize( contentAs = BaseDimensionalItemObject.class )
     @JsonView( { DetailedView.class, DimensionalView.class } )
     @JacksonXmlElementWrapper( localName = "items", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "item", namespace = DxfNamespaces.DXF_2_0 )
-    public List<NameableObject> getItems()
+    public List<DimensionalItemObject> getItems()
     {
         return new ArrayList<>( organisationUnitGroups );
     }
@@ -246,20 +240,6 @@ public class OrganisationUnitGroupSet
         this.organisationUnitGroups = organisationUnitGroups;
     }
 
-    @JsonProperty( "attributeValues" )
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlElementWrapper( localName = "attributeValues", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "attributeValue", namespace = DxfNamespaces.DXF_2_0 )
-    public Set<AttributeValue> getAttributeValues()
-    {
-        return attributeValues;
-    }
-
-    public void setAttributeValues( Set<AttributeValue> attributeValues )
-    {
-        this.attributeValues = attributeValues;
-    }
-
     @Override
     public void mergeWith( IdentifiableObject other, MergeStrategy strategy )
     {
@@ -286,9 +266,6 @@ public class OrganisationUnitGroupSet
             {
                 addOrganisationUnitGroup( organisationUnitGroup );
             }
-
-            attributeValues.clear();
-            attributeValues.addAll( organisationUnitGroupSet.getAttributeValues() );
         }
     }
 }

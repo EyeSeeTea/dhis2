@@ -28,12 +28,15 @@ package org.hisp.dhis.attribute;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.DhisSpringTest;
+import org.hisp.dhis.attribute.exception.NonUniqueAttributeValueException;
+import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.common.ValueType;
+import org.hisp.dhis.dataelement.DataElement;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.Assert.*;
-
-import org.hisp.dhis.DhisSpringTest;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -44,81 +47,167 @@ public class AttributeValueServiceTest
     @Autowired
     private AttributeService attributeService;
 
-    private AttributeValue attributeValue1;
+    @Autowired
+    private IdentifiableObjectManager manager;
 
-    private AttributeValue attributeValue2;
-    
+    private AttributeValue avA;
+    private AttributeValue avB;
+
     @Override
-    protected void setUpTest()
+    protected void setUpTest() throws NonUniqueAttributeValueException
     {
-        attributeValue1 = new AttributeValue( "value 1" );
-        attributeValue2 = new AttributeValue( "value 2" );
+        avA = new AttributeValue( "value 1" );
+        avB = new AttributeValue( "value 2" );
 
-        Attribute attribute1 = new Attribute( "attribute 1", "string" );
-        Attribute attribute2 = new Attribute( "attribute 2", "string" );
+        Attribute attribute1 = new Attribute( "attribute 1", ValueType.TEXT );
+        attribute1.setDataElementAttribute( true );
+        Attribute attribute2 = new Attribute( "attribute 2", ValueType.TEXT );
+        attribute2.setDataElementAttribute( true );
 
         attributeService.addAttribute( attribute1 );
         attributeService.addAttribute( attribute2 );
 
-        attributeValue1.setAttribute( attribute1 );
-        attributeValue2.setAttribute( attribute2 );
+        avA.setAttribute( attribute1 );
+        avB.setAttribute( attribute2 );
 
-        attributeService.addAttributeValue( attributeValue1 );
-        attributeService.addAttributeValue( attributeValue2 );
+        DataElement dataElementA = createDataElement( 'A' );
+        DataElement dataElementB = createDataElement( 'B' );
+
+        attributeService.addAttributeValue( dataElementA, avA );
+        attributeService.addAttributeValue( dataElementB, avB );
     }
 
     @Test
     public void testAddAttributeValue()
     {
-        attributeValue1 = attributeService.getAttributeValue( attributeValue1.getId() );
-        attributeValue2 = attributeService.getAttributeValue( attributeValue2.getId() );
+        avA = attributeService.getAttributeValue( avA.getId() );
+        avB = attributeService.getAttributeValue( avB.getId() );
 
-        assertNotNull( attributeValue1 );
-        assertNotNull( attributeValue2 );
+        assertNotNull( avA );
+        assertNotNull( avB );
     }
 
     @Test
-    public void testUpdateAttributeValue()
+    public void testUpdateAttributeValue() throws NonUniqueAttributeValueException
     {
-        attributeValue1.setValue( "updated value 1" );
-        attributeValue2.setValue( "updated value 2" );
+        avA.setValue( "updated value 1" );
+        avB.setValue( "updated value 2" );
 
-        attributeService.updateAttributeValue( attributeValue1 );
-        attributeService.updateAttributeValue( attributeValue2 );
+        DataElement dataElementA = createDataElement( 'A' );
+        DataElement dataElementB = createDataElement( 'B' );
 
-        attributeValue1 = attributeService.getAttributeValue( attributeValue1.getId() );
-        attributeValue2 = attributeService.getAttributeValue( attributeValue2.getId() );
+        attributeService.updateAttributeValue( dataElementA, avA );
+        attributeService.updateAttributeValue( dataElementB, avB );
 
-        assertNotNull( attributeValue1 );
-        assertNotNull( attributeValue2 );
+        avA = attributeService.getAttributeValue( avA.getId() );
+        avB = attributeService.getAttributeValue( avB.getId() );
 
-        assertEquals( "updated value 1", attributeValue1.getValue() );
-        assertEquals( "updated value 2", attributeValue2.getValue() );
+        assertNotNull( avA );
+        assertNotNull( avB );
+
+        assertEquals( "updated value 1", avA.getValue() );
+        assertEquals( "updated value 2", avB.getValue() );
     }
 
     @Test
     public void testDeleteAttributeValue()
     {
-        int attributeValueId1 = attributeValue1.getId();
-        int attributeValueId2 = attributeValue2.getId();
+        int attributeValueId1 = avA.getId();
+        int attributeValueId2 = avB.getId();
 
-        attributeService.deleteAttributeValue( attributeValue1 );
-        attributeService.deleteAttributeValue( attributeValue2 );
+        attributeService.deleteAttributeValue( avA );
+        attributeService.deleteAttributeValue( avB );
 
-        attributeValue1 = attributeService.getAttributeValue( attributeValueId1 );
-        attributeValue2 = attributeService.getAttributeValue( attributeValueId2 );
+        avA = attributeService.getAttributeValue( attributeValueId1 );
+        avB = attributeService.getAttributeValue( attributeValueId2 );
 
-        assertNull( attributeValue1 );
-        assertNull( attributeValue2 );
+        assertNull( avA );
+        assertNull( avB );
     }
 
     @Test
     public void testGetAttributeValue()
     {
-        attributeValue1 = attributeService.getAttributeValue( attributeValue1.getId() );
-        attributeValue2 = attributeService.getAttributeValue( attributeValue2.getId() );
+        avA = attributeService.getAttributeValue( avA.getId() );
+        avB = attributeService.getAttributeValue( avB.getId() );
 
-        assertNotNull( attributeValue1 );
-        assertNotNull( attributeValue2 );
+        assertNotNull( avA );
+        assertNotNull( avB );
+    }
+
+    @Test
+    public void testAddNonUniqueAttributeValue() throws NonUniqueAttributeValueException
+    {
+        Attribute attribute = new Attribute( "ID", ValueType.TEXT );
+        attribute.setUnique( true );
+        attribute.setDataElementAttribute( true );
+
+        attributeService.addAttribute( attribute );
+
+        DataElement dataElementA = createDataElement( 'A' );
+        DataElement dataElementB = createDataElement( 'B' );
+
+        manager.save( dataElementA );
+        manager.save( dataElementB );
+
+        AttributeValue attributeValueA = new AttributeValue( "A", attribute );
+        attributeService.addAttributeValue( dataElementA, attributeValueA );
+        manager.update( dataElementA );
+
+        AttributeValue attributeValueB = new AttributeValue( "B", attribute );
+        attributeService.addAttributeValue( dataElementB, attributeValueB );
+        manager.update( dataElementB );
+    }
+
+    @Test( expected = NonUniqueAttributeValueException.class )
+    public void testAddUniqueAttributeValue() throws NonUniqueAttributeValueException
+    {
+        Attribute attribute = new Attribute( "ID", ValueType.TEXT );
+        attribute.setUnique( true );
+        attribute.setDataElementAttribute( true );
+
+        attributeService.addAttribute( attribute );
+
+        DataElement dataElementA = createDataElement( 'A' );
+        DataElement dataElementB = createDataElement( 'B' );
+
+        manager.save( dataElementA );
+        manager.save( dataElementB );
+
+        AttributeValue attributeValueA = new AttributeValue( "A", attribute );
+        attributeService.addAttributeValue( dataElementA, attributeValueA );
+        manager.update( dataElementA );
+
+        AttributeValue attributeValueB = new AttributeValue( "A", attribute );
+        attributeService.addAttributeValue( dataElementB, attributeValueB );
+        manager.update( dataElementB );
+    }
+
+    @Test( expected = NonUniqueAttributeValueException.class )
+    public void testUpdateNonUniqueAttributeValue() throws NonUniqueAttributeValueException
+    {
+        Attribute attribute = new Attribute( "ID", ValueType.TEXT );
+        attribute.setUnique( true );
+        attribute.setDataElementAttribute( true );
+
+        attributeService.addAttribute( attribute );
+
+        DataElement dataElementA = createDataElement( 'A' );
+        DataElement dataElementB = createDataElement( 'B' );
+
+        manager.save( dataElementA );
+        manager.save( dataElementB );
+
+        AttributeValue attributeValueA = new AttributeValue( "A", attribute );
+        attributeService.addAttributeValue( dataElementA, attributeValueA );
+        manager.update( dataElementA );
+
+        AttributeValue attributeValueB = new AttributeValue( "B", attribute );
+        attributeService.addAttributeValue( dataElementB, attributeValueB );
+        manager.update( dataElementB );
+
+        attributeValueB.setValue( "A" );
+        attributeService.updateAttributeValue( dataElementB, attributeValueB );
+        manager.update( dataElementB );
     }
 }

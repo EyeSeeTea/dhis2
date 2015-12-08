@@ -28,10 +28,7 @@ package org.hisp.dhis.dd.action.indicator;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-
+import com.opensymphony.xwork2.Action;
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.indicator.Indicator;
@@ -40,9 +37,10 @@ import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.indicator.IndicatorType;
 import org.hisp.dhis.legend.LegendService;
 import org.hisp.dhis.legend.LegendSet;
-import org.hisp.dhis.system.util.AttributeUtils;
 
-import com.opensymphony.xwork2.Action;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * @author Torgeir Lorange Ostby
@@ -113,7 +111,7 @@ public class AddIndicatorAction
     {
         this.annualized = annualized;
     }
-    
+
     private Integer decimals;
 
     public void setDecimals( Integer decimals )
@@ -189,12 +187,12 @@ public class AddIndicatorAction
     // -------------------------------------------------------------------------
 
     @Override
-    public String execute()
+    public String execute() throws Exception
     {
         IndicatorType indicatorType = indicatorService.getIndicatorType( indicatorTypeId );
 
         LegendSet legendSet = legendService.getLegendSet( selectedLegendSetId );
-        
+
         Indicator indicator = new Indicator();
 
         indicator.setName( StringUtils.trimToNull( name ) );
@@ -213,10 +211,9 @@ public class AddIndicatorAction
 
         if ( jsonAttributeValues != null )
         {
-            AttributeUtils.updateAttributeValuesFromJson( indicator.getAttributeValues(), jsonAttributeValues,
-                attributeService );
+            attributeService.updateAttributeValues( indicator, jsonAttributeValues );
         }
-        
+
         indicatorService.addIndicator( indicator );
 
         for ( String id : selectedGroups )
