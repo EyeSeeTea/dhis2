@@ -44,6 +44,7 @@ import org.hisp.dhis.sms.incoming.IncomingSmsService;
 import org.hisp.dhis.sms.incoming.SmsMessageStatus;
 import org.hisp.dhis.sms.parse.ParserType;
 import org.hisp.dhis.sms.parse.SMSParserException;
+import org.hisp.dhis.system.util.SmsUtils;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserService;
@@ -72,7 +73,7 @@ public class DHISMessageAlertListener
     @Override
     public boolean accept( IncomingSms sms )
     {
-        return smsCommandService.getSMSCommand( getCommandString( sms ), ParserType.ALERT_PARSER ) != null;
+        return smsCommandService.getSMSCommand( SmsUtils.getCommandString( sms ), ParserType.ALERT_PARSER ) != null;
     }
 
     @Transactional
@@ -80,7 +81,7 @@ public class DHISMessageAlertListener
     public void receive( IncomingSms sms )
     {
         String message = sms.getText();
-        SMSCommand smsCommand = smsCommandService.getSMSCommand( getCommandString( sms ), ParserType.ALERT_PARSER );
+        SMSCommand smsCommand = smsCommandService.getSMSCommand( SmsUtils.getCommandString( sms ), ParserType.ALERT_PARSER );
         UserGroup userGroup = smsCommand.getUserGroup();
         String senderPhoneNumber = StringUtils.replace( sms.getOriginator(), "+", "" );
 
@@ -135,26 +136,6 @@ public class DHISMessageAlertListener
                     "No user associated with this phone number. Please contact your supervisor." );
             }
         }
-    }
-
-    private String getCommandString( IncomingSms sms )
-    {
-        String message = sms.getText();
-        String commandString = null;
-
-        for ( int i = 0; i < message.length(); i++ )
-        {
-            String c = String.valueOf( message.charAt( i ) );
-
-            if ( c.matches( "\\W" ) )
-            {
-                commandString = message.substring( 0, i );
-                message = message.substring( commandString.length() + 1 );
-                break;
-            }
-        }
-
-        return commandString;
     }
 
     public void setSmsCommandService( SMSCommandService smsCommandService )

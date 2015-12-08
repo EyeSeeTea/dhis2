@@ -313,24 +313,4 @@ public class TrackedEntityRegistrationSMSListener
 
         return output;
     }
-
-    private String getCommandString( IncomingSms sms )
-    {
-        String message = sms.getText();
-        String commandString = null;
-
-        for ( int i = 0; i < message.length(); i++ )
-        {
-            String c = String.valueOf( message.charAt( i ) );
-
-            if ( c.matches( "\\W" ) )
-            {
-                commandString = message.substring( 0, i );
-                message = message.substring( commandString.length() + 1 );
-                break;
-            }
-        }
-
-        return commandString;
-    }
 }

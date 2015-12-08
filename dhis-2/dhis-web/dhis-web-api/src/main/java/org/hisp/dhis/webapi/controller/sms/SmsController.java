@@ -127,7 +127,7 @@ public class SmsController
     @RequestMapping( value = "/inbound", method = RequestMethod.POST )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_MOBILE_SETTINGS')" )
     public void receiveSMSMessage( @RequestParam String originator,
-        @RequestParam( required = false ) String received_time, @RequestParam String message,
+        @RequestParam( required = false ) String receivedTime, @RequestParam String message,
         @RequestParam( defaultValue = "Unknown", required = false ) String gateway, HttpServletRequest request,
         HttpServletResponse response)
             throws WebMessageException, ParseException
@@ -142,7 +142,7 @@ public class SmsController
             throw new WebMessageException( WebMessageUtils.conflict( "Message must be specified" ) );
         }
 
-        int smsId = incomingSMSService.save( message, originator, gateway, received_time );
+        int smsId = incomingSMSService.save( message, originator, gateway, receivedTime );
         if ( smsId < 0 )
         {
             throw new WebMessageException( WebMessageUtils.conflict( "Date cannot be parsed" ) );

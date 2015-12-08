@@ -1,4 +1,4 @@
-package org.hisp.dhis.sms.outbound;
+package org.hisp.dhis.system.util;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,25 +28,31 @@ package org.hisp.dhis.sms.outbound;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
+import org.hisp.dhis.sms.incoming.IncomingSms;
 
-public interface OutboundSmsService
+/**
+ * @author Zubair <rajazubair.asghar@gmail.com>
+ */
+public class SmsUtils
 {
-    String ID = OutboundSmsService.class.getName();
 
-    List<OutboundSms> getAllOutboundSms();
+    public static String getCommandString( IncomingSms sms )
+    {
+        String message = sms.getText();
+        String commandString = null;
 
-    List<OutboundSms> getAllOutboundSms( Integer min, Integer max );
+        for ( int i = 0; i < message.length(); i++ )
+        {
+            String c = String.valueOf( message.charAt( i ) );
 
-    int saveOutboundSms( OutboundSms sms );
+            if ( c.matches( "\\W" ) )
+            {
+                commandString = message.substring( 0, i );
+                message = message.substring( commandString.length() + 1 );
+                break;
+            }
+        }
 
-    void updateOutboundSms( OutboundSms sms );
-
-    void deleteById( Integer outboundSmsId );
-
-    List<OutboundSms> getOutboundSms( OutboundSmsStatus status );
-
-    List<OutboundSms> getOutboundSms( OutboundSmsStatus status, Integer min, Integer max );
-
-    OutboundSms getOutboundSms( int id );
+        return commandString;
+    }
 }

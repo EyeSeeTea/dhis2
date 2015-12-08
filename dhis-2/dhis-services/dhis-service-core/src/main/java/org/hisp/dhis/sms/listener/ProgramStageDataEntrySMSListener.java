@@ -46,6 +46,7 @@ import org.hisp.dhis.sms.incoming.IncomingSms;
 import org.hisp.dhis.sms.incoming.IncomingSmsListener;
 import org.hisp.dhis.sms.parse.ParserType;
 import org.hisp.dhis.sms.parse.SMSParserException;
+import org.hisp.dhis.system.util.SmsUtils;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
 
@@ -79,7 +80,7 @@ public class ProgramStageDataEntrySMSListener
     @Override
     public boolean accept( IncomingSms sms )
     {
-        return smsCommandService.getSMSCommand( getCommandString( sms ),
+        return smsCommandService.getSMSCommand( SmsUtils.getCommandString( sms ),
             ParserType.PROGRAM_STAGE_DATAENTRY_PARSER ) != null;
     }
 
@@ -87,7 +88,7 @@ public class ProgramStageDataEntrySMSListener
     public void receive( IncomingSms sms )
     {
         String message = sms.getText();
-        SMSCommand smsCommand = smsCommandService.getSMSCommand( getCommandString( sms ),
+        SMSCommand smsCommand = smsCommandService.getSMSCommand(SmsUtils.getCommandString( sms ),
             ParserType.TRACKED_ENTITY_REGISTRATION_PARSER );
 
         this.parse( message, smsCommand );
@@ -187,25 +188,5 @@ public class ProgramStageDataEntrySMSListener
         }
 
         return orgUnits;
-    }
-
-    private String getCommandString( IncomingSms sms )
-    {
-        String message = sms.getText();
-        String commandString = null;
-
-        for ( int i = 0; i < message.length(); i++ )
-        {
-            String c = String.valueOf( message.charAt( i ) );
-
-            if ( c.matches( "\\W" ) )
-            {
-                commandString = message.substring( 0, i );
-                message = message.substring( commandString.length() + 1 );
-                break;
-            }
-        }
-
-        return commandString;
     }
 }
