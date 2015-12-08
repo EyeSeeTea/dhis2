@@ -52,6 +52,7 @@ import org.hisp.dhis.sms.incoming.IncomingSms;
 import org.hisp.dhis.sms.incoming.IncomingSmsListener;
 import org.hisp.dhis.sms.parse.ParserType;
 import org.hisp.dhis.sms.parse.SMSParserException;
+import org.hisp.dhis.system.util.SmsUtils;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
@@ -119,7 +120,7 @@ public class TrackedEntityRegistrationSMSListener
     @Override
     public boolean accept( IncomingSms sms )
     {
-        return smsCommandService.getSMSCommand( getCommandString( sms ),
+        return smsCommandService.getSMSCommand( SmsUtils.getCommandString( sms ),
             ParserType.TRACKED_ENTITY_REGISTRATION_PARSER ) != null;
     }
 
@@ -127,7 +128,7 @@ public class TrackedEntityRegistrationSMSListener
     public void receive( IncomingSms sms )
     {
         String message = sms.getText();
-        SMSCommand smsCommand = smsCommandService.getSMSCommand( getCommandString( sms ),
+        SMSCommand smsCommand = smsCommandService.getSMSCommand( SmsUtils.getCommandString( sms ),
             ParserType.TRACKED_ENTITY_REGISTRATION_PARSER );
 
         Map<String, String> parsedMessage = this.parse( message, smsCommand );
