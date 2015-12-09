@@ -1,4 +1,4 @@
-package org.hisp.dhis.common;
+package org.hisp.dhis.expression;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,38 +28,34 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
-
-import org.hisp.dhis.user.User;
-
 /**
- * @author Lars Helge Overland
- */
-public interface DimensionService
+* @author Lars Helge Overland
+*/
+public enum ExpressionValidationOutcome
 {
-    List<DimensionalItemObject> getCanReadDimensionItems( String uid );
+    VALID( "expression_is_empty" ), 
+    EXPRESSION_IS_EMPTY( "data_element_does_not_exist"),
+    DIMENSIONA_ITEM_OBJECT_DOES_NOT_EXIST( "dimensional_item_object_does_not_exist" ),
+    DATAELEMENT_DOES_NOT_EXIST( "data_element_does_not_exist" ),
+    CATEGORYOPTIONCOMBO_DOES_NOT_EXIST( "category_option_combo_does_not_exist"),
+    CONSTANT_DOES_NOT_EXIST( "constant_does_not_exist"),
+    ORG_UNIT_GROUP_DOES_NOT_EXIST( "org_unit_group_does_not_exist"),
+    EXPRESSION_IS_NOT_WELL_FORMED( "expression_is_not_well_formed");
     
-    <T extends IdentifiableObject> List<T> getCanReadObjects( List<T> objects );
+    private final String key;
     
-    <T extends IdentifiableObject> List<T> getCanReadObjects( User user, List<T> objects );
+    ExpressionValidationOutcome( String key )
+    {
+        this.key = key;
+    }
     
-    DimensionType getDimensionType( String uid );
+    public boolean isValid()
+    {
+        return this == VALID;
+    }
     
-    List<DimensionalObject> getAllDimensions();
-    
-    List<DimensionalObject> getDimensionConstraints();
-    
-    DimensionalObject getDimensionalObjectCopy( String uid, boolean filterCanRead );
-    
-    void mergeAnalyticalObject( BaseAnalyticalObject object );
-    
-    void mergeEventAnalyticalObject( EventAnalyticalObject object );
-
-    /**
-     * Gets a dimension item object which are among the data dimension item objects.
-     * 
-     * @param dimensionItem the dimension item identifier.
-     * @return a dimensional item object.
-     */
-    DimensionalItemObject getDataDimensionalItemObject( String dimensionItem );
+    public String getKey()
+    {
+        return key;
+    }
 }

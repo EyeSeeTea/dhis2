@@ -10,6 +10,16 @@ html, body {
     display: none;
 }
 
+@media print {
+    .not-for-screen {
+        display: block;
+    }
+}
+
+.print-section {
+    display: block;
+}
+
 h1 {    
     font-size: 1.8em;
 }
@@ -1216,3 +1226,5 @@ input, button, select, textarea {
 .wrap-text {
     word-wrap: break-word;
 }
+
+

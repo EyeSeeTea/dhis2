@@ -1,7 +1,35 @@
-<div id='printSection' class="panel panel-info" ng-controller="DataEntryController">
+<div class="panel panel-info print-section" ng-controller="DataEntryController">
+
+    <table class="table-borderless table-striped not-for-screen">
+        <tr class="col-md-12">
+            <td class="col-md-6">
+                {{'enrolling_orgunit' | translate}}
+            </td>
+            <td class="col-md-6">
+                <input type="text" class="form-control" value={{selectedEnrollment.orgUnitName}} ng-disabled="true"/>
+            </td>
+        </tr>
+        <tr class="col-md-12">
+            <td class="col-md-6">
+                {{selectedProgram.enrollmentDateLabel}}
+            </td>
+            <td class="col-md-6">
+                <input type="text" value={{selectedEnrollment.enrollmentDate}} ng-disabled="true"/>
+            </td>
+        </tr>
+        <tr class="col-md-12" ng-if="selectedProgram.displayIncidentDate">
+            <td class="col-md-6">
+                {{selectedProgram.incidentDateLabel}}
+            </td>
+            <td class="col-md-6">
+                <input type="text" value={{selectedEnrollment.incidentDate}} ng-disabled="true"/>
+            </td>
+        </tr>
+    </table>
+
     <div class="panel-heading handle bold">
         {{dataentryWidget.title| translate}}        
-        <span class="pull-right widget-link print-div">
+        <span class="pull-right widget-link">
             <a href ng-click="toggleEventsTableDisplay()" title="{{showEventsAsTables ? 'toggle_table_view_off' : 'toggle_table_view_on'| translate}}" ng-show="stagesCanBeShownAsTable"><span ng-if="!showEventsAsTables"><i class="fa fa-bars vertical-center"></i></span><span ng-if="showEventsAsTables"><i class="fa fa-square vertical-center"></i></span></a>
             <a href ng-click="filterEvents = !filterEvents" title="{{filterEvents ? 'list_events' : 'filter_events'| translate}}" ng-show="eventFilteringRequired"><span ng-if="!filterEvents"><i class="fa fa-filter vertical-center"></i></span><span ng-if="filterEvents"><i class="fa fa-list vertical-center"></i></span></a>
             <a href ng-click="toggleLegend()" title="{{'event_color_legend'| translate}}" class="small-horizonal-spacing"><i class="fa fa-info-circle vertical-center"></i></a>
@@ -76,7 +104,7 @@
 
         <div ng-if="!selectedEnrollment || !selectedEnrollment.enrollment" class="alert alert-danger">{{notEnrolledLabel}}</div>
 
-        <form name="outerForm" novalidate class="print-div">
+        <form name="outerForm" novalidate>
             <div ng-if="currentEvent">
 
                 <!-- event dates/scheduling begin -->
@@ -162,7 +190,7 @@
 
                 <!-- data entry/event buttons begins -->                
                 
-                <div class="form-group" ng-if="displayCustomForm !== 'TABLE'">
+                <div class="form-group hideInPrint" ng-if="displayCustomForm !== 'TABLE'">
                     <div class='row'><hr></div>
                     <a href ng-click="completeIncompleteEvent()" 
                        class="btn btn-warning" 
@@ -183,7 +211,7 @@
                     <a href ng-click="deleteEvent()" 
                        ng-disabled="currentEvent.enrollmentStatus === 'COMPLETED' || currentEvent.editingNotAllowed || currentEvent.orgUnit !== selectedOrgUnit.id"
                        class="btn btn-danger">{{'delete'| translate}}</a>
-                    <a href class="btn btn-primary" ng-click="print('printSection');">{{'print_form'| translate}}</a>
+                    <a href class="btn btn-primary" ng-click="print('print-section');">{{'print_form'| translate}}</a>
                 </div>
                 <!-- data entry/event buttons ends -->
 
@@ -195,14 +223,14 @@
                 <div class='row'><hr></div>
                 <div class="add-default-padding">
                     <textarea class="form-control" rows="3" ng-model="note.value" placeholder="{{'add_new_note_here'| translate}}"></textarea> 
-                    <div class="vertical-spacing">
+                    <div class="vertical-spacing hideInPrint">
                         <button type="button" 
                                 class="btn btn-primary"
                                 ng-click="addNote()">
                             {{'add'| translate}}
                         </button>        
                         <button type="button" 
-                                class="btn btn-default small-horizonal-spacing" 
+                                class="btn btn-default small-horizonal-spacing hideInPrint"
                                 ng-click="clearNote()">
                             {{'clear'| translate}}
                         </button>
