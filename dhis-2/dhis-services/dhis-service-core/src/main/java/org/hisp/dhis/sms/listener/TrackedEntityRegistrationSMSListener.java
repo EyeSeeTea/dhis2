@@ -135,7 +135,7 @@ public class TrackedEntityRegistrationSMSListener
 
         Date date = lookForDate( message );
         String senderPhoneNumber = StringUtils.replace( sms.getOriginator(), "+", "" );
-        Collection<OrganisationUnit> orgUnits = getOrganisationUnitsByPhoneNumber( senderPhoneNumber );
+        Collection<OrganisationUnit> orgUnits = SmsUtils.getOrganisationUnitsByPhoneNumber( senderPhoneNumber, userService );
 
         if ( orgUnits == null || orgUnits.size() == 0 )
         {
@@ -229,21 +229,6 @@ public class TrackedEntityRegistrationSMSListener
         }
 
         return orgUnit;
-    }
-
-    private Collection<OrganisationUnit> getOrganisationUnitsByPhoneNumber( String sender )
-    {
-        Collection<OrganisationUnit> orgUnits = new ArrayList<>();
-        Collection<User> users = userService.getUsersByPhoneNumber( sender );
-        for ( User u : users )
-        {
-            if ( u.getOrganisationUnits() != null )
-            {
-                orgUnits.addAll( u.getOrganisationUnits() );
-            }
-        }
-
-        return orgUnits;
     }
 
     private Date lookForDate( String message )

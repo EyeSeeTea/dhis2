@@ -137,13 +137,15 @@ public class J2MEDataValueSMSListener
     {
         String message = sms.getText();
 
-        SMSCommand smsCommand = smsCommandService.getSMSCommand( SmsUtils.getCommandString( sms ), ParserType.J2ME_PARSER );
+        SMSCommand smsCommand = smsCommandService.getSMSCommand( SmsUtils.getCommandString( sms ),
+            ParserType.J2ME_PARSER );
 
         String token[] = message.split( "!" );
         Map<String, String> parsedMessage = this.parse( token[1], smsCommand );
 
         String senderPhoneNumber = StringUtils.replace( sms.getOriginator(), "+", "" );
-        Collection<OrganisationUnit> orgUnits = getOrganisationUnitsByPhoneNumber( senderPhoneNumber );
+        Collection<OrganisationUnit> orgUnits = SmsUtils.getOrganisationUnitsByPhoneNumber( senderPhoneNumber,
+            userService );
 
         if ( orgUnits == null || orgUnits.size() == 0 )
         {
@@ -311,22 +313,6 @@ public class J2MEDataValueSMSListener
         }
 
         return orgUnit;
-    }
-
-    private Collection<OrganisationUnit> getOrganisationUnitsByPhoneNumber( String sender )
-    {
-        Collection<OrganisationUnit> orgUnits = new ArrayList<>();
-        Collection<User> users = userService.getUsersByPhoneNumber( sender );
-
-        for ( User u : users )
-        {
-            if ( u.getOrganisationUnits() != null )
-            {
-                orgUnits.addAll( u.getOrganisationUnits() );
-            }
-        }
-
-        return orgUnits;
     }
 
     private User getUser( String sender, SMSCommand smsCommand )

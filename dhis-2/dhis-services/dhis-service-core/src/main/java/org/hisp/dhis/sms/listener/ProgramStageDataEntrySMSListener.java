@@ -88,7 +88,7 @@ public class ProgramStageDataEntrySMSListener
     public void receive( IncomingSms sms )
     {
         String message = sms.getText();
-        SMSCommand smsCommand = smsCommandService.getSMSCommand(SmsUtils.getCommandString( sms ),
+        SMSCommand smsCommand = smsCommandService.getSMSCommand( SmsUtils.getCommandString( sms ),
             ParserType.TRACKED_ENTITY_REGISTRATION_PARSER );
 
         this.parse( message, smsCommand );
@@ -96,7 +96,8 @@ public class ProgramStageDataEntrySMSListener
         lookForDate( message );
 
         String senderPhoneNumber = StringUtils.replace( sms.getOriginator(), "+", "" );
-        Collection<OrganisationUnit> orgUnits = getOrganisationUnitsByPhoneNumber( senderPhoneNumber );
+        Collection<OrganisationUnit> orgUnits = SmsUtils.getOrganisationUnitsByPhoneNumber( senderPhoneNumber,
+            userService );
 
         if ( orgUnits == null || orgUnits.size() == 0 )
         {
@@ -172,21 +173,5 @@ public class ProgramStageDataEntrySMSListener
         }
 
         return date;
-    }
-
-    private Collection<OrganisationUnit> getOrganisationUnitsByPhoneNumber( String sender )
-    {
-        Collection<OrganisationUnit> orgUnits = new ArrayList<>();
-        Collection<User> users = userService.getUsersByPhoneNumber( sender );
-
-        for ( User u : users )
-        {
-            if ( u.getOrganisationUnits() != null )
-            {
-                orgUnits.addAll( u.getOrganisationUnits() );
-            }
-        }
-
-        return orgUnits;
     }
 }
