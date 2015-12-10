@@ -104,7 +104,8 @@ public class UnregisteredSMSListener
     @Override
     public boolean accept( IncomingSms sms )
     {
-        return smsCommandService.getSMSCommand( SmsUtils.getCommandString( sms ), ParserType.UNREGISTERED_PARSER ) != null;
+        return smsCommandService.getSMSCommand( SmsUtils.getCommandString( sms ),
+            ParserType.UNREGISTERED_PARSER ) != null;
     }
 
     @Transactional
