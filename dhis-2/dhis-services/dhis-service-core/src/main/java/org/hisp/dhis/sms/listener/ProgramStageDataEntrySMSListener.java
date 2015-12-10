@@ -97,7 +97,7 @@ public class ProgramStageDataEntrySMSListener
 
         String senderPhoneNumber = StringUtils.replace( sms.getOriginator(), "+", "" );
         Collection<OrganisationUnit> orgUnits = SmsUtils.getOrganisationUnitsByPhoneNumber( senderPhoneNumber,
-            userService );
+            userService.getUsersByPhoneNumber( senderPhoneNumber ) );
 
         if ( orgUnits == null || orgUnits.size() == 0 )
         {

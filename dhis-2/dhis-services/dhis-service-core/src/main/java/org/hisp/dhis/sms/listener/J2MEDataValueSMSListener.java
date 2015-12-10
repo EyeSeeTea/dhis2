@@ -145,7 +145,7 @@ public class J2MEDataValueSMSListener
 
         String senderPhoneNumber = StringUtils.replace( sms.getOriginator(), "+", "" );
         Collection<OrganisationUnit> orgUnits = SmsUtils.getOrganisationUnitsByPhoneNumber( senderPhoneNumber,
-            userService );
+            userService.getUsersByPhoneNumber( senderPhoneNumber ) );
 
         if ( orgUnits == null || orgUnits.size() == 0 )
         {
@@ -219,7 +219,8 @@ public class J2MEDataValueSMSListener
     {
         String upperCaseCode = code.getCode().toUpperCase();
 
-        String storedBy = getUser( sender, command ).getUsername();
+        String storedBy = SmsUtils.getUser( sender, command, userService.getUsersByPhoneNumber( sender ) )
+            .getUsername();
 
         if ( StringUtils.isBlank( storedBy ) )
         {
@@ -313,41 +314,6 @@ public class J2MEDataValueSMSListener
         }
 
         return orgUnit;
-    }
-
-    private User getUser( String sender, SMSCommand smsCommand )
-    {
-        OrganisationUnit orgunit = null;
-        User user = null;
-
-        for ( User u : userService.getUsersByPhoneNumber( sender ) )
-        {
-            OrganisationUnit ou = u.getOrganisationUnit();
-
-            // Might be undefined if the user has more than one org.units
-            // "attached"
-            if ( orgunit == null )
-            {
-                orgunit = ou;
-            }
-            else if ( orgunit.getId() == ou.getId() )
-            {
-                // same orgunit, no problem...
-            }
-            else
-            {
-                if ( StringUtils.isEmpty( smsCommand.getMoreThanOneOrgUnitMessage() ) )
-                {
-                    throw new SMSParserException( SMSCommand.MORE_THAN_ONE_ORGUNIT_MESSAGE );
-                }
-                else
-                {
-                    throw new SMSParserException( smsCommand.getMoreThanOneOrgUnitMessage() );
-                }
-            }
-            user = u;
-        }
-        return user;
     }
 
     private void registerCompleteDataSet( DataSet dataSet, Period period, OrganisationUnit organisationUnit,

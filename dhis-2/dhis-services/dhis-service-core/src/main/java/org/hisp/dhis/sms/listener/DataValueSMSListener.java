@@ -170,7 +170,7 @@ public class DataValueSMSListener
         Date date = lookForDate( message );
         String senderPhoneNumber = StringUtils.replace( sms.getOriginator(), "+", "" );
         Collection<OrganisationUnit> orgUnits = SmsUtils.getOrganisationUnitsByPhoneNumber( senderPhoneNumber,
-            userService );
+            userService.getUsersByPhoneNumber( senderPhoneNumber ) );
 
         if ( orgUnits == null || orgUnits.size() == 0 )
         {
@@ -367,7 +367,8 @@ public class DataValueSMSListener
     {
         String upperCaseCode = code.getCode().toUpperCase();
 
-        String storedBy = getUser( sender, command ).getUsername();
+        String storedBy = SmsUtils.getUser( sender, command, userService.getUsersByPhoneNumber( sender ) )
+            .getUsername();
 
         if ( StringUtils.isBlank( storedBy ) )
         {
@@ -518,51 +519,6 @@ public class DataValueSMSListener
         return true;
     }
 
-    private User getUser( String sender, SMSCommand smsCommand )
-    {
-        OrganisationUnit orgunit = null;
-        User user = null;
-
-        // Need to be edited
-        for ( User u : userService.getUsersByPhoneNumber( sender ) )
-        {
-            OrganisationUnit ou = u.getOrganisationUnit();
-
-            if ( ou != null )
-            {
-                // Might be undefined if the user has more than one org units
-                if ( orgunit == null )
-                {
-                    orgunit = ou;
-                }
-                else if ( orgunit.getId() == ou.getId() )
-                {
-                    // Same org unit
-                }
-                else
-                {
-                    if ( StringUtils.isEmpty( smsCommand.getMoreThanOneOrgUnitMessage() ) )
-                    {
-                        throw new SMSParserException( SMSCommand.MORE_THAN_ONE_ORGUNIT_MESSAGE );
-                    }
-                    else
-                    {
-                        throw new SMSParserException( smsCommand.getMoreThanOneOrgUnitMessage() );
-                    }
-                }
-            }
-
-            user = u;
-        }
-
-        if ( user == null )
-        {
-            throw new SMSParserException( "User is not associated with any orgunit. Please contact your supervisor." );
-        }
-
-        return user;
-    }
-
     private void markCompleteDataSet( String sender, OrganisationUnit orgunit, Map<String, String> parsedMessage,
         SMSCommand command, Date date )
     {
@@ -605,7 +561,8 @@ public class DataValueSMSListener
         }
 
         // Go through the complete process
-        String storedBy = getUser( sender, command ).getUsername();
+        String storedBy = SmsUtils.getUser( sender, command, userService.getUsersByPhoneNumber( sender ) )
+            .getUsername();
 
         if ( StringUtils.isBlank( storedBy ) )
         {

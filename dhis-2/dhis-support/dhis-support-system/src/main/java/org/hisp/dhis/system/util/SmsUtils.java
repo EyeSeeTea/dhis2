@@ -29,17 +29,23 @@ package org.hisp.dhis.system.util;
 */
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.sms.incoming.IncomingSms;
+import org.hisp.dhis.sms.parse.SMSParserException;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.hisp.dhis.sms.command.SMSCommand;
 
 /**
  * @author Zubair <rajazubair.asghar@gmail.com>
  */
 public class SmsUtils
 {
+
     public static String getCommandString( IncomingSms sms )
     {
         String message = sms.getText();
@@ -61,10 +67,9 @@ public class SmsUtils
     }
 
     public static Collection<OrganisationUnit> getOrganisationUnitsByPhoneNumber( String sender,
-        UserService userService )
+        Collection<User> users )
     {
         Collection<OrganisationUnit> orgUnits = new ArrayList<>();
-        Collection<User> users = userService.getUsersByPhoneNumber( sender );
         for ( User u : users )
         {
             if ( u.getOrganisationUnits() != null )
@@ -74,6 +79,51 @@ public class SmsUtils
         }
 
         return orgUnits;
+    }
+
+    public static User getUser( String sender, SMSCommand smsCommand, List<User> userList )
+    {
+        OrganisationUnit orgunit = null;
+        User user = null;
+
+        // Need to be edited
+        for ( User u : userList )
+        {
+            OrganisationUnit ou = u.getOrganisationUnit();
+
+            if ( ou != null )
+            {
+                // Might be undefined if the user has more than one org units
+                if ( orgunit == null )
+                {
+                    orgunit = ou;
+                }
+                else if ( orgunit.getId() == ou.getId() )
+                {
+                    // Same org unit
+                }
+                else
+                {
+                    if ( StringUtils.isEmpty( smsCommand.getMoreThanOneOrgUnitMessage() ) )
+                    {
+                        throw new SMSParserException( SMSCommand.MORE_THAN_ONE_ORGUNIT_MESSAGE );
+                    }
+                    else
+                    {
+                        throw new SMSParserException( smsCommand.getMoreThanOneOrgUnitMessage() );
+                    }
+                }
+            }
+
+            user = u;
+        }
+
+        if ( user == null )
+        {
+            throw new SMSParserException( "User is not associated with any orgunit. Please contact your supervisor." );
+        }
+
+        return user;
     }
 
 }

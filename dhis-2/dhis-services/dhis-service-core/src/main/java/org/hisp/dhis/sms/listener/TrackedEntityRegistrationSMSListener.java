@@ -29,7 +29,6 @@ package org.hisp.dhis.sms.listener;
  */
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -58,7 +57,6 @@ import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
 import org.hisp.dhis.trackedentity.TrackedEntityService;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
-import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
 
 public class TrackedEntityRegistrationSMSListener
@@ -135,7 +133,8 @@ public class TrackedEntityRegistrationSMSListener
 
         Date date = lookForDate( message );
         String senderPhoneNumber = StringUtils.replace( sms.getOriginator(), "+", "" );
-        Collection<OrganisationUnit> orgUnits = SmsUtils.getOrganisationUnitsByPhoneNumber( senderPhoneNumber, userService );
+        Collection<OrganisationUnit> orgUnits = SmsUtils.getOrganisationUnitsByPhoneNumber( senderPhoneNumber,
+            userService.getUsersByPhoneNumber( senderPhoneNumber ) );
 
         if ( orgUnits == null || orgUnits.size() == 0 )
         {
@@ -239,15 +238,15 @@ public class TrackedEntityRegistrationSMSListener
         }
 
         Date date = null;
-        
+
         String dateString = message.trim().split( " " )[0];
-        
+
         SimpleDateFormat format = new SimpleDateFormat( "ddMM" );
 
         try
         {
             Calendar cal = Calendar.getInstance();
-            
+
             date = format.parse( dateString );
             cal.setTime( date );
             int year = Calendar.getInstance().get( Calendar.YEAR );
