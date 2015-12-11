@@ -870,6 +870,8 @@ div#searchOuTree h4{
 .dropdown-menu {
     margin: -5px 0 0 0;
     z-index: 2000 !important;
+    word-wrap: break-word;
+    white-space: normal;
 }
 
 .btn-link {
@@ -1188,7 +1190,7 @@ input, button, select, textarea {
 
 /* this is because bootstrap adds min-height of 1px for smaller sized columns to prevent them from collapsing when empty*/
 .remove-one-pix {
-    margin-top: -1px;
+    margin-top: -2px;
 }
 
 .row.row-striped:nth-of-type(odd) {
