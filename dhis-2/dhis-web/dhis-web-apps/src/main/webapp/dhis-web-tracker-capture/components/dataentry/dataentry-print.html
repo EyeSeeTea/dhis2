@@ -59,7 +59,7 @@
     </tr>
   </table -->
 
-  <table class="table table-bordered table-compact">
+  <table class="dhis2-list-table-striped" ng-if='currentEvent && !currentStage.programStageSections.length'>
     <tr ng-repeat="prStDe in currentStage.programStageDataElements">
       <td class="bold">
         {{prStDes.dataElement.formname ? prStDe.dataElement.formname : prStDe.dataElement.name}}
@@ -68,5 +68,21 @@
         <input type="text" value={{currentEvent[prStDe.dataElement.id]}} class="form-control">
       </td>
     </tr>
-  </table
+  </table>
+
+  <div ng-if='currentEvent && currentStage.programStageSections.length'>
+     <div ng-repeat='section in currentStage.programStageSections'>
+       {{section.name}}
+       <table class="dhis2-list-table-striped">
+         <tr ng-repeat="de in section.programStageDataElements">
+           <td class="bold">
+             {{prStDes[de.dataElement.id].dataElement.formName ? prStDes[de.dataElement.id].dataElement.formName : prStDes[de.dataElement.id].dataElement.name}}
+           </td>
+           <td>
+             <input type="text" value={{currentEvent[prStDes[de.dataElement.id].dataElement.id]}} class="form-control">
+           </td>
+         </tr>
+       </table>
+     </div>
+  </div>
 </div>
