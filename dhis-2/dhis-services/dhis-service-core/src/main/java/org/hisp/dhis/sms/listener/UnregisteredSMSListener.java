@@ -49,6 +49,7 @@ import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserCredentials;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 public class UnregisteredSMSListener
@@ -61,40 +62,20 @@ public class UnregisteredSMSListener
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
     private SMSCommandService smsCommandService;
 
-    public void setSmsCommandService( SMSCommandService smsCommandService )
-    {
-        this.smsCommandService = smsCommandService;
-    }
-
+    @Autowired
     private UserService userService;
 
-    public void setUserService( UserService userService )
-    {
-        this.userService = userService;
-    }
-
+    @Autowired
     private MessageService messageService;
 
-    public void setMessageService( MessageService messageService )
-    {
-        this.messageService = messageService;
-    }
-
+    @Autowired
     private SmsMessageSender smsMessageSender;
 
-    public void setSmsMessageSender( SmsMessageSender smsMessageSender )
-    {
-        this.smsMessageSender = smsMessageSender;
-    }
-
+    @Autowired
     private IncomingSmsService incomingSmsService;
-
-    public void setIncomingSmsService( IncomingSmsService incomingSmsService )
-    {
-        this.incomingSmsService = incomingSmsService;
-    }
 
     // -------------------------------------------------------------------------
     // IncomingSmsListener implementation

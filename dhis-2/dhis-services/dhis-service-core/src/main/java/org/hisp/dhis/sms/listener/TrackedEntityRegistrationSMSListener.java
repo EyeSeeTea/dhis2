@@ -28,13 +28,10 @@ package org.hisp.dhis.sms.listener;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -58,6 +55,7 @@ import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
 import org.hisp.dhis.trackedentity.TrackedEntityService;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
 import org.hisp.dhis.user.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class TrackedEntityRegistrationSMSListener
     implements IncomingSmsListener
@@ -69,47 +67,23 @@ public class TrackedEntityRegistrationSMSListener
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
     private SMSCommandService smsCommandService;
 
-    public void setSmsCommandService( SMSCommandService smsCommandService )
-    {
-        this.smsCommandService = smsCommandService;
-    }
-
+    @Autowired
     private UserService userService;
 
-    public void setUserService( UserService userService )
-    {
-        this.userService = userService;
-    }
-
+    @Autowired
     private TrackedEntityService trackedEntityService;
 
-    public void setTrackedEntityService( TrackedEntityService trackedEntityService )
-    {
-        this.trackedEntityService = trackedEntityService;
-    }
-
+    @Autowired
     private TrackedEntityInstanceService trackedEntityInstanceService;
 
-    public void setTrackedEntityInstanceService( TrackedEntityInstanceService trackedEntityInstanceService )
-    {
-        this.trackedEntityInstanceService = trackedEntityInstanceService;
-    }
-
+    @Autowired
     private ProgramInstanceService programInstanceService;
 
-    public void setProgramInstanceService( ProgramInstanceService programInstanceService )
-    {
-        this.programInstanceService = programInstanceService;
-    }
-
+    @Autowired
     private SmsSender smsSender;
-
-    public void setSmsSender( SmsSender smsSender )
-    {
-        this.smsSender = smsSender;
-    }
 
     // -------------------------------------------------------------------------
     // IncomingSmsListener implementation
@@ -131,7 +105,7 @@ public class TrackedEntityRegistrationSMSListener
 
         Map<String, String> parsedMessage = this.parse( message, smsCommand );
 
-        Date date = lookForDate( message );
+        Date date = SmsUtils.lookForDate( message );
         String senderPhoneNumber = StringUtils.replace( sms.getOriginator(), "+", "" );
         Collection<OrganisationUnit> orgUnits = SmsUtils.getOrganisationUnitsByPhoneNumber( senderPhoneNumber,
             userService.getUsersByPhoneNumber( senderPhoneNumber ) );
@@ -148,7 +122,7 @@ public class TrackedEntityRegistrationSMSListener
             }
         }
 
-        OrganisationUnit orgUnit = this.selectOrganisationUnit( orgUnits, parsedMessage, smsCommand );
+        OrganisationUnit orgUnit = SmsUtils.selectOrganisationUnit( orgUnits, parsedMessage, smsCommand );
 
         TrackedEntityInstance trackedEntityInstance = new TrackedEntityInstance();
         trackedEntityInstance.setOrganisationUnit( orgUnit );
@@ -190,85 +164,6 @@ public class TrackedEntityRegistrationSMSListener
         trackedEntityAttributeValue.setEntityInstance( trackedEntityInstance );
         trackedEntityAttributeValue.setValue( value );
         return trackedEntityAttributeValue;
-    }
-
-    private OrganisationUnit selectOrganisationUnit( Collection<OrganisationUnit> orgUnits,
-        Map<String, String> parsedMessage, SMSCommand smsCommand )
-    {
-        OrganisationUnit orgUnit = null;
-
-        for ( OrganisationUnit o : orgUnits )
-        {
-            if ( orgUnits.size() == 1 )
-            {
-                orgUnit = o;
-            }
-            if ( parsedMessage.containsKey( "ORG" ) && o.getCode().equals( parsedMessage.get( "ORG" ) ) )
-            {
-                orgUnit = o;
-                break;
-            }
-        }
-
-        if ( orgUnit == null && orgUnits.size() > 1 )
-        {
-            String messageListingOrgUnits = smsCommand.getMoreThanOneOrgUnitMessage();
-
-            for ( Iterator<OrganisationUnit> i = orgUnits.iterator(); i.hasNext(); )
-            {
-                OrganisationUnit o = i.next();
-                messageListingOrgUnits += " " + o.getName() + ":" + o.getCode();
-                if ( i.hasNext() )
-                {
-                    messageListingOrgUnits += ",";
-                }
-            }
-
-            throw new SMSParserException( messageListingOrgUnits );
-        }
-
-        return orgUnit;
-    }
-
-    private Date lookForDate( String message )
-    {
-        if ( !message.contains( " " ) )
-        {
-            return null;
-        }
-
-        Date date = null;
-
-        String dateString = message.trim().split( " " )[0];
-
-        SimpleDateFormat format = new SimpleDateFormat( "ddMM" );
-
-        try
-        {
-            Calendar cal = Calendar.getInstance();
-
-            date = format.parse( dateString );
-            cal.setTime( date );
-            int year = Calendar.getInstance().get( Calendar.YEAR );
-            int month = Calendar.getInstance().get( Calendar.MONTH );
-
-            if ( cal.get( Calendar.MONTH ) < month )
-            {
-                cal.set( Calendar.YEAR, year );
-            }
-            else
-            {
-                cal.set( Calendar.YEAR, year - 1 );
-            }
-
-            date = cal.getTime();
-        }
-        catch ( Exception e )
-        {
-            // no date found
-        }
-
-        return date;
     }
 
     private Map<String, String> parse( String message, SMSCommand smsCommand )

@@ -55,18 +55,16 @@ import org.hisp.dhis.sms.parse.ParserType;
 import org.hisp.dhis.sms.parse.SMSParserException;
 import org.hisp.dhis.system.util.SmsUtils;
 import org.hisp.dhis.system.util.ValidationUtils;
-import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -78,47 +76,23 @@ public class J2MEDataValueSMSListener
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
     private DataValueService dataValueService;
 
-    public void setDataValueService( DataValueService dataValueService )
-    {
-        this.dataValueService = dataValueService;
-    }
-
+    @Autowired
     private DataElementCategoryService dataElementCategoryService;
 
-    public void setDataElementCategoryService( DataElementCategoryService dataElementCategoryService )
-    {
-        this.dataElementCategoryService = dataElementCategoryService;
-    }
-
+    @Autowired
     private SMSCommandService smsCommandService;
 
-    public void setSmsCommandService( SMSCommandService smsCommandService )
-    {
-        this.smsCommandService = smsCommandService;
-    }
-
+    @Autowired
     private UserService userService;
 
-    public void setUserService( UserService userService )
-    {
-        this.userService = userService;
-    }
-
+    @Autowired
     private CompleteDataSetRegistrationService registrationService;
 
-    public void setRegistrationService( CompleteDataSetRegistrationService registrationService )
-    {
-        this.registrationService = registrationService;
-    }
-
+    @Autowired
     private SmsSender smsSender;
-
-    public void setSmsSender( SmsSender smsSender )
-    {
-        this.smsSender = smsSender;
-    }
 
     // -------------------------------------------------------------------------
     // IncomingSmsListener implementation
@@ -159,7 +133,7 @@ public class J2MEDataValueSMSListener
             }
         }
 
-        OrganisationUnit orgUnit = this.selectOrganisationUnit( orgUnits, parsedMessage, smsCommand );
+        OrganisationUnit orgUnit = SmsUtils.selectOrganisationUnit( orgUnits, parsedMessage, smsCommand );
         Period period = this.getPeriod( token[0].trim(), smsCommand.getDataset().getPeriodType() );
         boolean valueStored = false;
 
@@ -277,43 +251,6 @@ public class J2MEDataValueSMSListener
                 dataValueService.updateDataValue( dv );
             }
         }
-    }
-
-    private OrganisationUnit selectOrganisationUnit( Collection<OrganisationUnit> orgUnits,
-        Map<String, String> parsedMessage, SMSCommand smsCommand )
-    {
-        OrganisationUnit orgUnit = null;
-
-        for ( OrganisationUnit o : orgUnits )
-        {
-            if ( orgUnits.size() == 1 )
-            {
-                orgUnit = o;
-            }
-            if ( parsedMessage.containsKey( "ORG" ) && o.getCode().equals( parsedMessage.get( "ORG" ) ) )
-            {
-                orgUnit = o;
-                break;
-            }
-        }
-
-        if ( orgUnit == null && orgUnits.size() > 1 )
-        {
-            String messageListingOrgUnits = smsCommand.getMoreThanOneOrgUnitMessage();
-
-            for ( Iterator<OrganisationUnit> i = orgUnits.iterator(); i.hasNext(); )
-            {
-                OrganisationUnit o = i.next();
-                messageListingOrgUnits += " " + o.getName() + ":" + o.getCode();
-                if ( i.hasNext() )
-                {
-                    messageListingOrgUnits += ",";
-                }
-            }
-            throw new SMSParserException( messageListingOrgUnits );
-        }
-
-        return orgUnit;
     }
 
     private void registerCompleteDataSet( DataSet dataSet, Period period, OrganisationUnit organisationUnit,

@@ -48,27 +48,32 @@ import org.hisp.dhis.system.util.SmsUtils;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 public class DHISMessageAlertListener
     implements IncomingSmsListener
 {
-    
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-    
+
+    @Autowired
     private SMSCommandService smsCommandService;
 
+    @Autowired
     private UserService userService;
 
+    @Autowired
     private MessageService messageService;
 
+    @Autowired
     private SmsMessageSender smsMessageSender;
 
+    @Autowired
     private IncomingSmsService incomingSmsService;
-    
-    
+
     @Transactional
     @Override
     public boolean accept( IncomingSms sms )
@@ -81,7 +86,8 @@ public class DHISMessageAlertListener
     public void receive( IncomingSms sms )
     {
         String message = sms.getText();
-        SMSCommand smsCommand = smsCommandService.getSMSCommand( SmsUtils.getCommandString( sms ), ParserType.ALERT_PARSER );
+        SMSCommand smsCommand = smsCommandService.getSMSCommand( SmsUtils.getCommandString( sms ),
+            ParserType.ALERT_PARSER );
         UserGroup userGroup = smsCommand.getUserGroup();
         String senderPhoneNumber = StringUtils.replace( sms.getOriginator(), "+", "" );
 
@@ -136,30 +142,5 @@ public class DHISMessageAlertListener
                     "No user associated with this phone number. Please contact your supervisor." );
             }
         }
-    }
-
-    public void setSmsCommandService( SMSCommandService smsCommandService )
-    {
-        this.smsCommandService = smsCommandService;
-    }
-
-    public void setUserService( UserService userService )
-    {
-        this.userService = userService;
-    }
-
-    public void setMessageService( MessageService messageService )
-    {
-        this.messageService = messageService;
-    }
-
-    public void setSmsMessageSender( SmsMessageSender smsMessageSender )
-    {
-        this.smsMessageSender = smsMessageSender;
-    }
-
-    public void setIncomingSmsService( IncomingSmsService incomingSmsService )
-    {
-        this.incomingSmsService = incomingSmsService;
     }
 }

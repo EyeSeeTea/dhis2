@@ -30,7 +30,6 @@ package org.hisp.dhis.sms.listener;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.common.ValueType;
-import org.hisp.dhis.commons.util.TextUtils;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
@@ -56,18 +55,15 @@ import org.hisp.dhis.sms.incoming.SmsMessageStatus;
 import org.hisp.dhis.sms.parse.ParserType;
 import org.hisp.dhis.sms.parse.SMSParserException;
 import org.hisp.dhis.system.util.SmsUtils;
-import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -84,68 +80,32 @@ public class DataValueSMSListener
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
     private CompleteDataSetRegistrationService registrationService;
 
-    public void setRegistrationService( CompleteDataSetRegistrationService registrationService )
-    {
-        this.registrationService = registrationService;
-    }
-
+    @Autowired
     private DataValueService dataValueService;
 
-    public void setDataValueService( DataValueService dataValueService )
-    {
-        this.dataValueService = dataValueService;
-    }
-
+    @Autowired
     private SmsSender smsSender;
 
-    public void setSmsSender( SmsSender smsSender )
-    {
-        this.smsSender = smsSender;
-    }
-
+    @Autowired
     private DataElementCategoryService dataElementCategoryService;
 
-    public void setDataElementCategoryService( DataElementCategoryService dataElementCategoryService )
-    {
-        this.dataElementCategoryService = dataElementCategoryService;
-    }
-
+    @Autowired
     private SMSCommandService smsCommandService;
 
-    public void setSmsCommandService( SMSCommandService smsCommandService )
-    {
-        this.smsCommandService = smsCommandService;
-    }
-
+    @Autowired
     private UserService userService;
 
-    public void setUserService( UserService userService )
-    {
-        this.userService = userService;
-    }
-
+    @Autowired
     private DataSetService dataSetService;
 
-    public void setDataSetService( DataSetService dataSetService )
-    {
-        this.dataSetService = dataSetService;
-    }
-
+    @Autowired
     private IncomingSmsService incomingSmsService;
 
-    public void setIncomingSmsService( IncomingSmsService incomingSmsService )
-    {
-        this.incomingSmsService = incomingSmsService;
-    }
-
+    @Autowired
     private DataElementService dataElementService;
-
-    public void setDataElementService( DataElementService dataElementService )
-    {
-        this.dataElementService = dataElementService;
-    }
 
     // -------------------------------------------------------------------------
     // IncomingSmsListener implementation
@@ -167,7 +127,7 @@ public class DataValueSMSListener
             ParserType.KEY_VALUE_PARSER );
         Map<String, String> parsedMessage = this.parse( message, smsCommand );
 
-        Date date = lookForDate( message );
+        Date date = SmsUtils.lookForDate( message );
         String senderPhoneNumber = StringUtils.replace( sms.getOriginator(), "+", "" );
         Collection<OrganisationUnit> orgUnits = SmsUtils.getOrganisationUnitsByPhoneNumber( senderPhoneNumber,
             userService.getUsersByPhoneNumber( senderPhoneNumber ) );
@@ -184,7 +144,7 @@ public class DataValueSMSListener
             }
         }
 
-        OrganisationUnit orgUnit = this.selectOrganisationUnit( orgUnits, parsedMessage, smsCommand );
+        OrganisationUnit orgUnit = SmsUtils.selectOrganisationUnit( orgUnits, parsedMessage, smsCommand );
         Period period = getPeriod( smsCommand, date );
 
         if ( dataSetService.isLocked( smsCommand.getDataset(), period, orgUnit, null, null ) )
@@ -260,83 +220,6 @@ public class DataValueSMSListener
         }
 
         return output;
-    }
-
-    private Date lookForDate( String message )
-    {
-        if ( !message.contains( " " ) )
-        {
-            return null;
-        }
-
-        Date date = null;
-        String dateString = message.trim().split( " " )[0];
-        SimpleDateFormat format = new SimpleDateFormat( "ddMM" );
-
-        try
-        {
-            Calendar cal = Calendar.getInstance();
-            date = format.parse( dateString );
-            cal.setTime( date );
-            int year = Calendar.getInstance().get( Calendar.YEAR );
-            int month = Calendar.getInstance().get( Calendar.MONTH );
-
-            if ( cal.get( Calendar.MONTH ) < month )
-            {
-                cal.set( Calendar.YEAR, year );
-            }
-            else
-            {
-                cal.set( Calendar.YEAR, year - 1 );
-            }
-
-            date = cal.getTime();
-        }
-        catch ( Exception e )
-        {
-            // no date found
-        }
-
-        return date;
-    }
-
-    private OrganisationUnit selectOrganisationUnit( Collection<OrganisationUnit> orgUnits,
-        Map<String, String> parsedMessage, SMSCommand smsCommand )
-    {
-        OrganisationUnit orgUnit = null;
-
-        for ( OrganisationUnit o : orgUnits )
-        {
-            if ( orgUnits.size() == 1 )
-            {
-                orgUnit = o;
-            }
-            if ( parsedMessage.containsKey( "ORG" ) && o.getCode().equals( parsedMessage.get( "ORG" ) ) )
-            {
-                orgUnit = o;
-                break;
-            }
-        }
-
-        if ( orgUnit == null && orgUnits.size() > 1 )
-        {
-            String messageListingOrgUnits = smsCommand.getMoreThanOneOrgUnitMessage();
-
-            for ( Iterator<OrganisationUnit> i = orgUnits.iterator(); i.hasNext(); )
-            {
-                OrganisationUnit o = i.next();
-                messageListingOrgUnits += TextUtils.SPACE + o.getName() + ":" + o.getCode();
-
-                if ( i.hasNext() )
-                {
-                    messageListingOrgUnits += ",";
-                }
-            }
-
-            throw new SMSParserException( messageListingOrgUnits );
-        }
-
-        return orgUnit;
     }
 
     private Period getPeriod( SMSCommand command, Date date )

@@ -28,11 +28,7 @@ package org.hisp.dhis.sms.listener;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -47,8 +43,8 @@ import org.hisp.dhis.sms.incoming.IncomingSmsListener;
 import org.hisp.dhis.sms.parse.ParserType;
 import org.hisp.dhis.sms.parse.SMSParserException;
 import org.hisp.dhis.system.util.SmsUtils;
-import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class ProgramStageDataEntrySMSListener
     implements IncomingSmsListener
@@ -59,19 +55,11 @@ public class ProgramStageDataEntrySMSListener
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
     private SMSCommandService smsCommandService;
 
-    public void setSmsCommandService( SMSCommandService smsCommandService )
-    {
-        this.smsCommandService = smsCommandService;
-    }
-
+    @Autowired
     private UserService userService;
-
-    public void setUserService( UserService userService )
-    {
-        this.userService = userService;
-    }
 
     // -------------------------------------------------------------------------
     // IncomingSmsListener implementation
@@ -93,7 +81,7 @@ public class ProgramStageDataEntrySMSListener
 
         this.parse( message, smsCommand );
 
-        lookForDate( message );
+        SmsUtils.lookForDate( message );
 
         String senderPhoneNumber = StringUtils.replace( sms.getOriginator(), "+", "" );
         Collection<OrganisationUnit> orgUnits = SmsUtils.getOrganisationUnitsByPhoneNumber( senderPhoneNumber,
@@ -135,43 +123,5 @@ public class ProgramStageDataEntrySMSListener
         }
 
         return output;
-    }
-
-    private Date lookForDate( String message )
-    {
-        if ( !message.contains( " " ) )
-        {
-            return null;
-        }
-
-        Date date = null;
-        String dateString = message.trim().split( " " )[0];
-        SimpleDateFormat format = new SimpleDateFormat( "ddMM" );
-
-        try
-        {
-            Calendar cal = Calendar.getInstance();
-            date = format.parse( dateString );
-            cal.setTime( date );
-            int year = Calendar.getInstance().get( Calendar.YEAR );
-            int month = Calendar.getInstance().get( Calendar.MONTH );
-
-            if ( cal.get( Calendar.MONTH ) < month )
-            {
-                cal.set( Calendar.YEAR, year );
-            }
-            else
-            {
-                cal.set( Calendar.YEAR, year - 1 );
-            }
-
-            date = cal.getTime();
-        }
-        catch ( Exception e )
-        {
-            // no date found
-        }
-
-        return date;
     }
 }

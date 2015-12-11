@@ -1,5 +1,6 @@
 package org.hisp.dhis.system.util;
 
+
 /*
 * Copyright (c) 2004-2015, University of Oslo
 * All rights reserved.
@@ -28,16 +29,21 @@ package org.hisp.dhis.system.util;
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.text.SimpleDateFormat;
 
 import org.apache.commons.lang3.StringUtils;
+
+import org.hisp.dhis.commons.util.TextUtils;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.sms.incoming.IncomingSms;
 import org.hisp.dhis.sms.parse.SMSParserException;
 import org.hisp.dhis.user.User;
-import org.hisp.dhis.user.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.hisp.dhis.sms.command.SMSCommand;
 
 /**
@@ -45,7 +51,6 @@ import org.hisp.dhis.sms.command.SMSCommand;
  */
 public class SmsUtils
 {
-
     public static String getCommandString( IncomingSms sms )
     {
         String message = sms.getText();
@@ -79,6 +84,44 @@ public class SmsUtils
         }
 
         return orgUnits;
+    }
+
+    public static Date lookForDate( String message )
+    {
+        if ( !message.contains( " " ) )
+        {
+            return null;
+        }
+
+        Date date = null;
+        String dateString = message.trim().split( " " )[0];
+        SimpleDateFormat format = new SimpleDateFormat( "ddMM" );
+
+        try
+        {
+            Calendar cal = Calendar.getInstance();
+            date = format.parse( dateString );
+            cal.setTime( date );
+            int year = Calendar.getInstance().get( Calendar.YEAR );
+            int month = Calendar.getInstance().get( Calendar.MONTH );
+
+            if ( cal.get( Calendar.MONTH ) < month )
+            {
+                cal.set( Calendar.YEAR, year );
+            }
+            else
+            {
+                cal.set( Calendar.YEAR, year - 1 );
+            }
+
+            date = cal.getTime();
+        }
+        catch ( Exception e )
+        {
+            // no date found
+        }
+
+        return date;
     }
 
     public static User getUser( String sender, SMSCommand smsCommand, List<User> userList )
@@ -126,4 +169,42 @@ public class SmsUtils
         return user;
     }
 
+    public static OrganisationUnit selectOrganisationUnit( Collection<OrganisationUnit> orgUnits,
+        Map<String, String> parsedMessage, SMSCommand smsCommand )
+    {
+        OrganisationUnit orgUnit = null;
+
+        for ( OrganisationUnit o : orgUnits )
+        {
+            if ( orgUnits.size() == 1 )
+            {
+                orgUnit = o;
+            }
+            if ( parsedMessage.containsKey( "ORG" ) && o.getCode().equals( parsedMessage.get( "ORG" ) ) )
+            {
+                orgUnit = o;
+                break;
+            }
+        }
+
+        if ( orgUnit == null && orgUnits.size() > 1 )
+        {
+            String messageListingOrgUnits = smsCommand.getMoreThanOneOrgUnitMessage();
+
+            for ( Iterator<OrganisationUnit> i = orgUnits.iterator(); i.hasNext(); )
+            {
+                OrganisationUnit o = i.next();
+                messageListingOrgUnits += TextUtils.SPACE + o.getName() + ":" + o.getCode();
+
+                if ( i.hasNext() )
+                {
+                    messageListingOrgUnits += ",";
+                }
+            }
+
+            throw new SMSParserException( messageListingOrgUnits );
+        }
+
+        return orgUnit;
+    }
 }
