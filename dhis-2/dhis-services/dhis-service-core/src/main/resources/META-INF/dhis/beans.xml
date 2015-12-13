@@ -1225,9 +1225,37 @@
 		<property name="smsStore" ref="org.hisp.dhis.sms.hibernate.IncomingSmsStore" />
 	</bean>
 
+
+	<bean id="org.hisp.dhis.sms.listener.DataValueSMSListener" class="org.hisp.dhis.sms.listener.DataValueSMSListener">
+
+	</bean>
+
+	<bean id="org.hisp.dhis.sms.listener.J2MEDataValueSMSListener"
+		class="org.hisp.dhis.sms.listener.J2MEDataValueSMSListener">
+
+	</bean>
+
+	<bean id="org.hisp.dhis.sms.listener.UnregisteredSMSListener"
+		class="org.hisp.dhis.sms.listener.UnregisteredSMSListener">
+
+	</bean>
+
+	<bean id="org.hisp.dhis.sms.listener.DHISMessageAlertListener"
+		class="org.hisp.dhis.sms.listener.DHISMessageAlertListener">
+
+	</bean>
+
+	<bean id="org.hisp.dhis.sms.listener.TrackedEntityRegistrationSMSListener"
+		class="org.hisp.dhis.sms.listener.TrackedEntityRegistrationSMSListener">
+
+	</bean>
+
 	<bean id="org.hisp.dhis.sms.SmsPublisher" class="org.hisp.dhis.sms.SmsPublisher">
 		<property name="messageQueue" ref="org.hisp.dhis.sms.MessageQueue" />
-		<property name="smsSender" ref="org.hisp.dhis.sms.SmsSender" />
+	</bean>
+
+	<bean id="org.hisp.dhis.sms.SmsConsumerThread" class="org.hisp.dhis.sms.SmsConsumerThread">
+
 	</bean>
 
 	<bean id="org.hisp.dhis.sms.config.SmsConfigurationManager" class="org.hisp.dhis.sms.config.DefaultSmsConfigurationManager" />
