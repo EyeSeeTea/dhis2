@@ -261,6 +261,20 @@ public class DimensionServiceTest
     }
     
     @Test
+    public void testGetOrAddDimensionalItemObject()
+    {
+        String idA = deA.getUid();
+        String idB = prA.getUid() + DimensionalObjectUtils.COMPOSITE_DIM_OBJECT_PLAIN_SEP + deA.getUid();
+        String idC = prA.getUid() + DimensionalObjectUtils.COMPOSITE_DIM_OBJECT_PLAIN_SEP + atA.getUid();
+        
+        assertNotNull( dimensionService.getOrAddDataDimensionalItemObject( idA ) );
+        assertNotNull( dimensionService.getOrAddDataDimensionalItemObject( idB ) );
+        assertNotNull( dimensionService.getOrAddDataDimensionalItemObject( idC ) );
+        
+        assertEquals( deA, dimensionService.getOrAddDataDimensionalItemObject( idA ) );
+    }
+
+    @Test
     public void testGetDimensionalItemObject()
     {
         String idA = deA.getUid();
