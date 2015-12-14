@@ -57,29 +57,27 @@ public class DefaultSmsSender
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
     private CurrentUserService currentUserService;
 
-    public void setCurrentUserService( CurrentUserService currentUserService )
-    {
-        this.currentUserService = currentUserService;
-    }
-
+    @Autowired
     private UserService userService;
 
-    public void setUserService( UserService userService )
-    {
-        this.userService = userService;
-    }
-
+    @Autowired
     private OutboundSmsService outboundSmsService;
-
-    public void setOutboundSmsService( OutboundSmsService outboundSmsService )
-    {
-        this.outboundSmsService = outboundSmsService;
-    }
 
     @Autowired
     private OutboundSmsTransportService transportService;
+
+    public CurrentUserService getCurrentUserService()
+    {
+        return currentUserService;
+    }
+
+    public UserService getUserService()
+    {
+        return userService;
+    }
 
     @Transactional
     @Override
@@ -325,15 +323,5 @@ public class DefaultSmsSender
         }
 
         return null;
-    }
-
-    public CurrentUserService getCurrentUserService()
-    {
-        return currentUserService;
-    }
-
-    public UserService getUserService()
-    {
-        return userService;
     }
 }

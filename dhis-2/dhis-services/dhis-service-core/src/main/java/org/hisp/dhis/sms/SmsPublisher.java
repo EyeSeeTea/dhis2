@@ -77,9 +77,4 @@ public class SmsPublisher
     {
         this.stop = true;
     }
-
-    public void setMessageQueue( MessageQueue messageQueue )
-    {
-        this.messageQueue = messageQueue;
-    }
 }

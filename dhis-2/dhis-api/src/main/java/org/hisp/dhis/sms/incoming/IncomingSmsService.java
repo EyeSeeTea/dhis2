@@ -1,8 +1,5 @@
 package org.hisp.dhis.sms.incoming;
 
-import java.text.ParseException;
-import java.util.Date;
-
 /*
  * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
@@ -32,6 +29,7 @@ import java.util.Date;
  */
 
 import java.util.List;
+import java.util.Date;
 
 import org.hisp.dhis.sms.MessageQueue;
 import org.smslib.InboundMessage;
@@ -66,8 +64,7 @@ public interface IncomingSmsService
 
     int save( IncomingSms sms );
 
-    int save( String message, String originator, String gateway, String received_time )
-        throws ParseException;
+    int save( String message, String originator, String gateway, Date receivedTime );
 
     void setIncomingSmsQueue( MessageQueue incomingSmsQueue );
 

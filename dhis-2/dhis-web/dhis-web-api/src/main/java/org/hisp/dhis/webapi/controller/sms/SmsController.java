@@ -29,6 +29,7 @@ package org.hisp.dhis.webapi.controller.sms;
  */
 
 import java.text.ParseException;
+import java.util.Date;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -39,7 +40,6 @@ import org.hisp.dhis.sms.SmsSender;
 import org.hisp.dhis.sms.incoming.IncomingSmsService;
 import org.hisp.dhis.webapi.service.WebMessageService;
 import org.hisp.dhis.webapi.utils.WebMessageUtils;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -126,10 +126,9 @@ public class SmsController
 
     @RequestMapping( value = "/inbound", method = RequestMethod.POST )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_MOBILE_SETTINGS')" )
-    public void receiveSMSMessage( @RequestParam String originator,
-        @RequestParam( required = false ) String receivedTime, @RequestParam String message,
-        @RequestParam( defaultValue = "Unknown", required = false ) String gateway, HttpServletRequest request,
-        HttpServletResponse response)
+    public void receiveSMSMessage( @RequestParam String originator, @RequestParam( required = false ) Date receivedTime,
+        @RequestParam String message, @RequestParam( defaultValue = "Unknown", required = false ) String gateway,
+        HttpServletRequest request, HttpServletResponse response)
             throws WebMessageException, ParseException
     {
         if ( originator == null || originator.length() <= 0 )
@@ -143,14 +142,8 @@ public class SmsController
         }
 
         int smsId = incomingSMSService.save( message, originator, gateway, receivedTime );
-        if ( smsId < 0 )
-        {
-            throw new WebMessageException( WebMessageUtils.conflict( "Date cannot be parsed" ) );
-        }
-        else
-        {
-            webMessageService.send( WebMessageUtils.ok( "Received: SMS ID " + smsId ), response, request );
-        }
+
+        webMessageService.send( WebMessageUtils.ok( "Received: SMS ID " + smsId ), response, request );
 
     }
 
@@ -167,15 +160,9 @@ public class SmsController
 
         int smsId = incomingSMSService.save( jsonMassage.get( "message" ).toString(),
             jsonMassage.get( "originator" ).toString(), jsonMassage.get( "gateway" ).toString(),
-            jsonMassage.get( "received_time" ).toString() );
+            (Date) jsonMassage.get( "receivedTime" ) );
 
-        if ( smsId < 0 )
-        {
-            throw new WebMessageException( WebMessageUtils.conflict( "Date cannot be parsed" ) );
-        }
-        else
-        {
-            webMessageService.send( WebMessageUtils.ok( "Received: SMS ID " + smsId ), response, request );
-        }
+        webMessageService.send( WebMessageUtils.ok( "Received: SMS ID " + smsId ), response, request );
+
     }
 }

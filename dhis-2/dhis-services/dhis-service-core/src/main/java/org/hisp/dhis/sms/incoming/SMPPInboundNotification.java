@@ -32,6 +32,7 @@ import org.smslib.AGateway;
 import org.smslib.IInboundMessageNotification;
 import org.smslib.InboundMessage;
 import org.smslib.Message.MessageTypes;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class SMPPInboundNotification
     implements IInboundMessageNotification
@@ -40,12 +41,8 @@ public class SMPPInboundNotification
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
     private IncomingSmsService incomingSmsService;
-
-    public void setIncomingSmsService( IncomingSmsService incomingSmsService )
-    {
-        this.incomingSmsService = incomingSmsService;
-    }
 
     // -------------------------------------------------------------------------
     // Implementation

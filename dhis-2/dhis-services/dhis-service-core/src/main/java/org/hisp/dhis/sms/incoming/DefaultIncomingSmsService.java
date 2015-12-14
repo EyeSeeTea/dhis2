@@ -1,8 +1,5 @@
 package org.hisp.dhis.sms.incoming;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-
 /*
  * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
@@ -38,6 +35,7 @@ import java.util.List;
 import org.hisp.dhis.sms.MessageQueue;
 import org.smslib.InboundMessage;
 import org.smslib.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class DefaultIncomingSmsService
     implements IncomingSmsService
@@ -46,12 +44,8 @@ public class DefaultIncomingSmsService
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
     private IncomingSmsStore incomingSmsStore;
-
-    public void setIncomingSmsStore( IncomingSmsStore incomingSmsStore )
-    {
-        this.incomingSmsStore = incomingSmsStore;
-    }
 
     private MessageQueue incomingSmsQueue;
 
@@ -135,31 +129,23 @@ public class DefaultIncomingSmsService
     }
 
     @Override
-    public int save( String message, String originator, String gateway, String received_time )
+    public int save( String message, String originator, String gateway, Date receivedTime )
     {
-        SimpleDateFormat simpleFormatter = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" );
+
         IncomingSms sms = new IncomingSms();
         sms.setText( message );
         sms.setOriginator( originator );
         sms.setGatewayId( gateway );
 
-        try
+        if ( receivedTime != null )
         {
-            if ( received_time != null )
-            {
-                sms.setSentDate( simpleFormatter.parse( received_time ) );
-            }
-            else
-            {
-                sms.setSentDate( new Date() );
-            }
+            sms.setSentDate( receivedTime );
         }
-        catch ( ParseException e )
+        else
         {
+            sms.setSentDate( new Date() );
 
-            return -1;
         }
-
         sms.setReceivedDate( new Date() );
         sms.setEncoding( SmsMessageEncoding.ENC7BIT );
         sms.setStatus( SmsMessageStatus.INCOMING );
