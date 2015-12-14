@@ -35,7 +35,7 @@ import org.smslib.Message.MessageTypes;
 
 public class SMPPInboundNotification
     implements IInboundMessageNotification
-{    
+{
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -55,7 +55,7 @@ public class SMPPInboundNotification
     public void process( AGateway gateway, MessageTypes msgType, InboundMessage message )
     {
         IncomingSms incomingSms = incomingSmsService.convertToIncomingSms( message );
-        
+
         incomingSmsService.save( incomingSms );
     }
 }

@@ -83,9 +83,9 @@ public class DefaultOutboundSmsTransportService
     // -------------------------------------------------------------------------
 
     private IInboundMessageNotification smppInboundMessageNotification;
-    
+
     private OutboundSmsService outboundSmsService;
-    
+
     private SmsPublisher smsPublisher;
 
     // -------------------------------------------------------------------------
@@ -578,19 +578,16 @@ public class DefaultOutboundSmsTransportService
 
         return SMSGatewayStatus.UNDEFINED;
     }
-    
+
     public void setSmppInboundMessageNotification( IInboundMessageNotification smppInboundMessageNotification )
     {
         this.smppInboundMessageNotification = smppInboundMessageNotification;
     }
 
-    
-
     public void setOutboundSmsService( OutboundSmsService outboundSmsService )
     {
         this.outboundSmsService = outboundSmsService;
     }
-
 
     public void setSmsPublisher( SmsPublisher smsPublisher )
     {

@@ -36,6 +36,7 @@ public class SmsPublisher
 {
     private static final Log log = LogFactory.getLog( SmsPublisher.class );
 
+    @Autowired
     private MessageQueue messageQueue;
 
     @Autowired
@@ -68,6 +69,7 @@ public class SmsPublisher
         };
 
         thread.start();
+
         log.info( "SMS Consumer Started" );
     }
 

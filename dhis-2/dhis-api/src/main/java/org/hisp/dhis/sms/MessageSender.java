@@ -44,5 +44,6 @@ public interface MessageSender
      * @param message the message to send.
      * @param recipients the recipients will receive the sms message.
      */
-    String sendMessage( String subject, String text, User sender, boolean isPhone, Set<?> recipients, String gatewayId );
+    String sendMessage( String subject, String text, User sender, boolean isPhone, Set<?> recipients,
+        String gatewayId );
 }

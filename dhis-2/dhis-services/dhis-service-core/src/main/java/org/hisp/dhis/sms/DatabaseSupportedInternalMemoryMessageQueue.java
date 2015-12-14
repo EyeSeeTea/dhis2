@@ -63,7 +63,7 @@ public class DatabaseSupportedInternalMemoryMessageQueue
         {
             return queue.get( 0 );
         }
-        
+
         return null;
     }
 
@@ -79,7 +79,7 @@ public class DatabaseSupportedInternalMemoryMessageQueue
     public void initialize()
     {
         Collection<IncomingSms> messages = smsStore.getAllUnparsedSmses();
-        
+
         if ( messages != null )
         {
             queue.addAll( messages );

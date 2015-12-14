@@ -73,9 +73,9 @@ public class SmsMessageSender
     @Autowired
     private OutboundSmsTransportService outboundSmsTransportService;
 
-    // @Async
     @Override
-    public String sendMessage( String subject, String text, String footer, User sender, Set<User> users, boolean forceSend )
+    public String sendMessage( String subject, String text, String footer, User sender, Set<User> users,
+        boolean forceSend )
     {
         String message = null;
 
@@ -83,11 +83,11 @@ public class SmsMessageSender
         {
             return "No gateway";
         }
-        
+
         Map<String, String> gatewayMap = outboundSmsTransportService.getGatewayMap();
 
         String gatewayId = StringUtils.trimToNull( outboundSmsTransportService.getDefaultGateway() );
-        
+
         boolean gatewayEnabled = outboundSmsTransportService.isEnabled();
 
         if ( gatewayMap == null || gatewayId == null || !gatewayEnabled )
@@ -182,7 +182,8 @@ public class SmsMessageSender
         else
         // Receiver is user
         {
-            Serializable userSetting = userSettingService.getUserSetting( UserSettingService.KEY_MESSAGE_SMS_NOTIFICATION, null, user );
+            Serializable userSetting = userSettingService
+                .getUserSetting( UserSettingService.KEY_MESSAGE_SMS_NOTIFICATION, null, user );
 
             return userSetting != null ? (Boolean) userSetting : false;
         }

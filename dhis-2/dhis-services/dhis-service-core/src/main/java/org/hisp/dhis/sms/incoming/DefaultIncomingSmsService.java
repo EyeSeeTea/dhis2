@@ -36,7 +36,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.hisp.dhis.sms.MessageQueue;
-import org.jfree.util.Log;
 import org.smslib.InboundMessage;
 import org.smslib.Service;
 

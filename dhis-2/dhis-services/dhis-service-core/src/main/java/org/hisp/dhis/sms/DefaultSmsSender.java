@@ -163,7 +163,7 @@ public class DefaultSmsSender
             }
 
             int maxChar = MAX_CHAR;
-            
+
             Set<String> phoneNumbers = null;
 
             if ( transportService != null && transportService.isEnabled() )
@@ -172,7 +172,8 @@ public class DefaultSmsSender
 
                 text = createMessage( subject, text, sender );
 
-                // Bulk is limited in sending long SMS, need to cut into small pieces
+                // Bulk is limited in sending long SMS, need to cut into small
+                // pieces
                 if ( DefaultOutboundSmsTransportService.GATEWAY_MAP.get( "bulk_gw" ) != null
                     && DefaultOutboundSmsTransportService.GATEWAY_MAP.get( "bulk_gw" ).equals( gatewayId ) )
                 {
@@ -313,7 +314,7 @@ public class DefaultSmsSender
     public String isWastedSMS( OutboundSms sms )
     {
         List<OutboundSms> listOfRecentOutboundSms = outboundSmsService.getAllOutboundSms( 0, 10 );
-        
+
         for ( OutboundSms each : listOfRecentOutboundSms )
         {
             if ( each.getRecipients().equals( sms.getRecipients() )
@@ -322,7 +323,7 @@ public class DefaultSmsSender
                 return "system is trying to send out wasted SMS";
             }
         }
-        
+
         return null;
     }
 
