@@ -48,7 +48,7 @@
     </tr>
   </table>
 
-  <!-- table class="table table-bordered table-compact">
+  <table class="table table-bordered table-compact">
     <tr ng-repeat="dataValue in currentEvent.dataValues">
       <td class="bold">
         {{prStDes[dataValue.dataElement].dataElement.formname?prStDes[dataValue.dataElement].dataElement.formname:prStDes[dataValue.dataElement].dataElement.name}}
@@ -57,7 +57,7 @@
         {{dataValue.value}}
       </td>
     </tr>
-  </table -->
+  </table>
 
   <table class="dhis2-list-table-striped" ng-if='currentEvent && !currentStage.programStageSections.length'>
     <tr ng-repeat="prStDe in currentStage.programStageDataElements">
@@ -71,18 +71,37 @@
   </table>
 
   <div ng-if='currentEvent && currentStage.programStageSections.length'>
-     <div ng-repeat='section in currentStage.programStageSections'>
-       {{section.name}}
-       <table class="dhis2-list-table-striped">
-         <tr ng-repeat="de in section.programStageDataElements">
-           <td class="bold">
-             {{prStDes[de.dataElement.id].dataElement.formName ? prStDes[de.dataElement.id].dataElement.formName : prStDes[de.dataElement.id].dataElement.name}}
-           </td>
-           <td>
-             <input type="text" value={{currentEvent[prStDes[de.dataElement.id].dataElement.id]}} class="form-control">
-           </td>
-         </tr>
-       </table>
-     </div>
+    <accordion close-others='false'>
+
+      <accordion-group heading="{{section.name}}" is-open="section.open" ng-repeat='section in currentStage.programStageSections' ng-if="!hiddenSections[section.id]" style="overflow:visible">
+
+        <div class="vertical-spacing" ng-if="!section.programStageDataElements || section.programStageDataElements.length === 0">
+          <div class="alert alert-warning">{{'section'| translate}} {{section.name}} {{'has_no_dataelements'| translate}}</div>
+        </div>
+
+        <table class="dhis2-list-table-striped" ng-if="section.programStageDataElements && section.programStageDataElements.length > 0">
+          <thead>
+          <tr>
+            <th ng-bind="dataElementLabel">
+            </th>
+            <th class="align-center" ng-bind="valueLabel">
+            </th>
+            <th class="align-center" ng-if="allowProvidedElsewhereExists[currentStage.id]" ng-bind="providedElsewhereLabel">
+            </th>
+          </tr>
+          </thead>
+          <tbody id="list">
+          <tr ng-repeat="de in section.programStageDataElements">
+            <td class="bold">
+              {{prStDes[de.dataElement.id].dataElement.formName ? prStDes[de.dataElement.id].dataElement.formName : prStDes[de.dataElement.id].dataElement.name}}
+            </td>
+            <td>
+              <input type="text" value={{currentEvent[prStDes[de.dataElement.id].dataElement.id]}} class="form-control">
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </accordion-group>
+    </accordion>
   </div>
 </div>
