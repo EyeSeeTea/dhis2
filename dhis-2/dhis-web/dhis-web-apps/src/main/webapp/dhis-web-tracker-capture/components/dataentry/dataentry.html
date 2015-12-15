@@ -1,7 +1,9 @@
 <div class="panel panel-info" ng-controller="DataEntryController">
+    <div ng-include="'components/dataentry/dataentry-print.html'">
+    </div>
     <div class="panel-heading handle bold">
         {{dataentryWidget.title| translate}}        
-        <span class="pull-right widget-link print-div">
+        <span class="pull-right widget-link">
             <a href ng-click="toggleEventsTableDisplay()" title="{{showEventsAsTables ? 'toggle_table_view_off' : 'toggle_table_view_on'| translate}}" ng-show="stagesCanBeShownAsTable"><span ng-if="!showEventsAsTables"><i class="fa fa-bars vertical-center"></i></span><span ng-if="showEventsAsTables"><i class="fa fa-square vertical-center"></i></span></a>
             <a href ng-click="filterEvents = !filterEvents" title="{{filterEvents ? 'list_events' : 'filter_events'| translate}}" ng-show="eventFilteringRequired"><span ng-if="!filterEvents"><i class="fa fa-filter vertical-center"></i></span><span ng-if="filterEvents"><i class="fa fa-list vertical-center"></i></span></a>
             <a href ng-click="toggleLegend()" title="{{'event_color_legend'| translate}}" class="small-horizonal-spacing"><i class="fa fa-info-circle vertical-center"></i></a>
@@ -25,7 +27,7 @@
             </table>
         </div>
 
-        <div class="table-responsive" ng-if="selectedEnrollment && selectedEnrollment.enrollment">
+        <div class="table-responsive hideInPrint" ng-if="selectedEnrollment && selectedEnrollment.enrollment">
             <table class="table table-bordered">
                 <thead>
                     <tr>
@@ -76,7 +78,7 @@
 
         <div ng-if="!selectedEnrollment || !selectedEnrollment.enrollment" class="alert alert-danger">{{notEnrolledLabel}}</div>
 
-        <form name="outerForm" novalidate class="print-div">
+        <form name="outerForm" novalidate>
             <div ng-if="currentEvent">
 
                 <!-- event dates/scheduling begin -->
@@ -92,7 +94,7 @@
                                max-date="0"
                                min-date=""
                                ng-model="currentEvent.eventDate"
-                               ng-disabled="currentEvent.status === 'SKIPPED' || currentEvent.enrollmentStatus !== 'ACTIVE' || currentEvent.editingNotAllowed"    
+                               ng-disabled="currentEvent.status === 'SKIPPED' || selectedEnrollment.status !== 'ACTIVE' || currentEvent.editingNotAllowed"    
                                ng-required="true"
                                blur-or-change="saveEventDate()"/>
                         <span ng-if="invalidDate" class="error">{{'date_required'| translate}}</span>
@@ -111,7 +113,7 @@
                                d2-date                                
                                ng-model="currentEvent.dueDate"
                                blur-or-change="saveDueDate()" 
-                               ng-disabled="currentEvent.eventDate || !schedulingEnabled || currentEvent.enrollmentStatus !== 'ACTIVE' || currentEvent.editingNotAllowed"/>
+                               ng-disabled="currentEvent.eventDate || !schedulingEnabled || selectedEnrollment.status !== 'ACTIVE' || currentEvent.editingNotAllowed"/>
                         <span ng-if="invalidDate" class="error">{{'date_required'| translate}}</span>
                     </div>                        
                 </div>
@@ -162,28 +164,24 @@
 
                 <!-- data entry/event buttons begins -->                
                 
-                <div class="form-group" ng-if="displayCustomForm !== 'TABLE'">
+                <div class="form-group hideInPrint" ng-if="displayCustomForm !== 'TABLE'">
                     <div class='row'><hr></div>
                     <a href ng-click="completeIncompleteEvent()" 
                        class="btn btn-warning" 
-                       ng-disabled="currentEvent.enrollmentStatus !== 'ACTIVE' || currentEvent.editingNotAllowed || currentEvent.orgUnit !== selectedOrgUnit.id"
+                       ng-disabled="selectedEnrollment.status !== 'ACTIVE' || currentEvent.editingNotAllowed || currentEvent.orgUnit !== selectedOrgUnit.id"
                        ng-if="currentEvent.eventDate && (currentEvent.status === 'SCHEDULE' || currentEvent.status === 'ACTIVE' || currentEvent.status === 'VISITED')">{{'complete'| translate}}</a>
                     <a href ng-click="completeIncompleteEvent()" 
                        class="btn btn-warning"
-                       ng-disabled="currentEvent.enrollmentStatus !== 'ACTIVE' || currentEvent.editingNotAllowed && currentEvent.status !== 'COMPLETED' || currentEvent.orgUnit !== selectedOrgUnit.id"
+                       ng-disabled="selectedEnrollment.status !== 'ACTIVE' || currentEvent.editingNotAllowed && currentEvent.status !== 'COMPLETED' || currentEvent.orgUnit !== selectedOrgUnit.id"
                        ng-if="currentEvent.eventDate && currentEvent.status === 'COMPLETED'">{{'incomplete'| translate}}</a>
-                    <a href ng-click="validateEvent()" 
-                       class="btn btn-info" 
-                       ng-disabled="currentEvent.enrollmentStatus !== 'ACTIVE' || currentEvent.editingNotAllowed || currentEvent.orgUnit !== selectedOrgUnit.id" 
-                       ng-if="currentEvent.eventDate">{{'validate'| translate}}</a>                        
                     <a href ng-click="skipUnskipEvent()" 
                        class="btn btn-warning" 
-                       ng-disabled="currentEvent.enrollmentStatus !== 'ACTIVE' || currentEvent.editingNotAllowed || currentEvent.orgUnit !== selectedOrgUnit.id"
+                       ng-disabled="selectedEnrollment.status !== 'ACTIVE' || currentEvent.editingNotAllowed || currentEvent.orgUnit !== selectedOrgUnit.id"
                        ng-if="!currentEvent.eventDate">{{currentEvent.status === 'SKIPPED' ? 'unskip' : 'skip'| translate}}</a>
                     <a href ng-click="deleteEvent()" 
-                       ng-disabled="currentEvent.enrollmentStatus === 'COMPLETED' || currentEvent.editingNotAllowed || currentEvent.orgUnit !== selectedOrgUnit.id"
+                       ng-disabled="selectedEnrollment.status === 'COMPLETED' || currentEvent.editingNotAllowed || currentEvent.orgUnit !== selectedOrgUnit.id"
                        class="btn btn-danger">{{'delete'| translate}}</a>
-                    <a href class="btn btn-primary" ng-click="printDiv('print-div');">{{'print_form'| translate}}</a>
+                    <a href class="btn btn-info" ng-click="print('print-div');">{{'print_form'| translate}}</a>
                 </div>
                 <!-- data entry/event buttons ends -->
 
@@ -195,14 +193,14 @@
                 <div class='row'><hr></div>
                 <div class="add-default-padding">
                     <textarea class="form-control" rows="3" ng-model="note.value" placeholder="{{'add_new_note_here'| translate}}"></textarea> 
-                    <div class="vertical-spacing">
+                    <div class="vertical-spacing hideInPrint">
                         <button type="button" 
                                 class="btn btn-primary"
                                 ng-click="addNote()">
                             {{'add'| translate}}
                         </button>        
                         <button type="button" 
-                                class="btn btn-default small-horizonal-spacing" 
+                                class="btn btn-default small-horizonal-spacing hideInPrint"
                                 ng-click="clearNote()">
                             {{'clear'| translate}}
                         </button>

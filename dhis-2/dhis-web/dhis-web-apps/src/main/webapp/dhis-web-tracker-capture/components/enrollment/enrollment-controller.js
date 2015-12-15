@@ -3,6 +3,7 @@
 trackerCapture.controller('EnrollmentController',
         function($rootScope,
                 $scope,  
+                $route,
                 $location,
                 $timeout,
                 DateUtils,
@@ -10,6 +11,7 @@ trackerCapture.controller('EnrollmentController',
                 CurrentSelection,
                 OrgUnitService,
                 EnrollmentService,
+                DialogService,
                 ModalService) {
     
     $scope.today = DateUtils.getToday();
@@ -41,6 +43,13 @@ trackerCapture.controller('EnrollmentController',
         $scope.programStageNames = selections.prStNames;
         $scope.attributesById = CurrentSelection.getAttributesById();
         
+        $scope.activeEnrollments =  [];
+        angular.forEach(selections.enrollments, function(en){
+            if(en.status === "ACTIVE" && $scope.selectedProgram && $scope.selectedProgram.id !== en.program){
+                $scope.activeEnrollments.push(en);                           
+            }
+        });
+        
         if($scope.selectedProgram){
             
             $scope.stagesById = [];        
@@ -49,6 +58,17 @@ trackerCapture.controller('EnrollmentController',
             });
             
             angular.forEach($scope.enrollments, function(enrollment){
+                if(enrollment.orgUnit !== $scope.selectedOrgUnit.id) {
+                    OrgUnitService.get(enrollment.orgUnit).then(function(ou){
+                        if(ou){
+                            enrollment.orgUnitName = $scope.selectedOrgUnit.name;
+                        }                                                       
+                    });
+                }
+                else{
+                    enrollment.orgUnitName = $scope.selectedOrgUnit.name;
+                }
+                
                 if(enrollment.program === $scope.selectedProgram.id ){
                     if(enrollment.status === 'ACTIVE'){
                         selectedEnrollment = enrollment;
@@ -79,17 +99,7 @@ trackerCapture.controller('EnrollmentController',
         $scope.showEnrollmentHistoryDiv = false;
         $scope.selectedEnrollment = enrollment;
         
-        if($scope.selectedEnrollment.enrollment && $scope.selectedEnrollment.orgUnit){
-            if($scope.selectedEnrollment.orgUnit !== $scope.selectedOrgUnit.id) {
-                OrgUnitService.get($scope.selectedEnrollment.orgUnit).then(function(ou){
-                    if(ou){
-                        $scope.selectedEnrollment.orgUnitName = $scope.selectedOrgUnit.name;
-                    }                                                       
-                });
-            }
-            else{
-                $scope.selectedEnrollment.orgUnitName = $scope.selectedOrgUnit.name;
-            }
+        if($scope.selectedEnrollment.enrollment && $scope.selectedEnrollment.orgUnit){            
             $scope.broadCastSelections('dashboardWidgets');
         }
     };
@@ -183,15 +193,31 @@ trackerCapture.controller('EnrollmentController',
 
         var modalOptions = {
             closeButtonText: 'cancel',
-            actionButtonText: 'complete',
-            headerText: 'complete_enrollment',
-            bodyText: 'are_you_sure_to_complete_enrollment'
+            actionButtonText: $scope.selectedEnrollment.status === 'ACTIVE' ? 'complete' : 'incomplete',
+            headerText: $scope.selectedEnrollment.status === 'ACTIVE' ? 'complete_enrollment' : 'incomplete_enrollment',
+            bodyText: $scope.selectedEnrollment.status === 'ACTIVE' ? 'are_you_sure_to_complete_enrollment' : 'are_you_sure_to_incomplete_enrollment'
         };
 
         ModalService.showModal({}, modalOptions).then(function(result){            
-            EnrollmentService.complete($scope.selectedEnrollment).then(function(data){                
-                $scope.selectedEnrollment.status = 'COMPLETED';
+            
+            var status = 'completed';            
+            
+            if($scope.selectedEnrollment.status === 'COMPLETED'){
+                status = 'incompleted';
+            }
+            
+            EnrollmentService.completeIncomplete($scope.selectedEnrollment, status).then(function(data){                                
+                $scope.selectedEnrollment.status = $scope.selectedEnrollment.status === 'ACTIVE' ? 'COMPLETED' : 'ACTIVE';
                 $scope.loadEnrollmentDetails($scope.selectedEnrollment);                
+            }, function(response){
+                if(response && response.data && response.data.status === "ERROR"){
+                    //notify user
+                    var dialogOptions = {
+                            headerText: response.data.status,
+                            bodyText: response.data.message
+                        };
+                    DialogService.showDialog({}, dialogOptions);
+                }
             });
         });
     };
@@ -200,5 +226,29 @@ trackerCapture.controller('EnrollmentController',
         $scope.selectedEnrollment.followup = !$scope.selectedEnrollment.followup; 
         EnrollmentService.update($scope.selectedEnrollment).then(function(data){         
         });
+    };
+    
+    $scope.changeProgram = function(program){
+        var pr = $location.search().program;
+        if(pr && pr === program){
+            $route.reload();            
+        }
+        else{
+            $location.path('/dashboard').search({tei: $scope.selectedTeiId, program: program});
+        }
+    };
+    
+    $scope.canUseEnrollment = function(){
+        
+        if($scope.selectedTei.inactive){
+            return false;
+        }
+        
+        if($scope.currentEnrollment && $scope.selectedEnrollment.enrollment !== $scope.currentEnrollment.enrollment){
+            if($scope.currentEnrollment.status === 'ACTIVE'){
+                return false;
+            }
+        }        
+        return true;        
     };
 });

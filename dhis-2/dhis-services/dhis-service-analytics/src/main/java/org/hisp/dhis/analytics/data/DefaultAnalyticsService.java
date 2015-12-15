@@ -33,7 +33,6 @@ import static org.hisp.dhis.analytics.AnalyticsTableManager.COMPLETENESS_TABLE_N
 import static org.hisp.dhis.analytics.AnalyticsTableManager.COMPLETENESS_TARGET_TABLE_NAME;
 import static org.hisp.dhis.analytics.AnalyticsTableManager.ORGUNIT_TARGET_TABLE_NAME;
 import static org.hisp.dhis.analytics.DataQueryParams.COMPLETENESS_DIMENSION_TYPES;
-import static org.hisp.dhis.analytics.DataQueryParams.CO_INDEX;
 import static org.hisp.dhis.analytics.DataQueryParams.DISPLAY_NAME_DATA_X;
 import static org.hisp.dhis.analytics.DataQueryParams.DX_INDEX;
 import static org.hisp.dhis.common.DimensionalObject.CATEGORYOPTIONCOMBO_DIM_ID;
@@ -42,7 +41,6 @@ import static org.hisp.dhis.common.DimensionalObject.DIMENSION_SEP;
 import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getLocalPeriodIdentifiers;
-import static org.hisp.dhis.common.DimensionalObjectUtils.asList;
 import static org.hisp.dhis.common.DimensionalObjectUtils.asTypedList;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.getParentGraphMap;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.getParentNameGraphMap;
@@ -88,7 +86,6 @@ import org.hisp.dhis.common.DimensionalObjectUtils;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
 import org.hisp.dhis.common.IdentifiableObjectUtils;
-import org.hisp.dhis.common.MapMap;
 import org.hisp.dhis.common.NameableObjectUtils;
 import org.hisp.dhis.commons.collection.ListUtils;
 import org.hisp.dhis.commons.util.DebugUtils;
@@ -106,7 +103,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.reporttable.ReportTable;
-import org.hisp.dhis.setting.Setting;
+import org.hisp.dhis.setting.SettingKey;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.grid.ListGrid;
 import org.hisp.dhis.system.util.MathUtils;
@@ -182,7 +179,18 @@ public class DefaultAnalyticsService
         queryPlanner.validate( params );
 
         params.conform();
-
+        
+        return getAggregatedDataValueGridInternal( params );
+    }
+    
+    /**
+     * Returns a grid with aggregated data.
+     * 
+     * @param params the data query parameters.
+     * @return a grid with aggregated data.
+     */
+    private Grid getAggregatedDataValueGridInternal( DataQueryParams params )
+    {
         // ---------------------------------------------------------------------
         // Headers
         // ---------------------------------------------------------------------
@@ -223,7 +231,7 @@ public class DefaultAnalyticsService
      */
     private void addHeaders( DataQueryParams params, Grid grid )
     {
-        if ( !params.isSkipData() )
+        if ( !params.isSkipData() && !params.isSkipHeaders() )
         {
             for ( DimensionalObject col : params.getDimensions() )
             {
@@ -262,7 +270,7 @@ public class DefaultAnalyticsService
 
             List<List<DimensionItem>> dimensionItemPermutations = dataSourceParams.getDimensionItemPermutations();
 
-            Map<String, Map<DataElementOperand, Double>> permutationOperandValueMap = getPermutationOperandValueMap( dataSourceParams );
+            Map<String, Map<DimensionalItemObject, Double>> permutationDimensionalItemValueMap = getPermutationDimensionalItemValueMap( dataSourceParams );
 
             for ( Indicator indicator : indicators )
             {
@@ -270,7 +278,7 @@ public class DefaultAnalyticsService
                 {
                     String permKey = DimensionItem.asItemKey( dimensionItems );
 
-                    Map<? extends DimensionalItemObject, Double> valueMap = permutationOperandValueMap.get( permKey );
+                    Map<DimensionalItemObject, Double> valueMap = permutationDimensionalItemValueMap.get( permKey );
 
                     if ( valueMap == null )
                     {
@@ -356,20 +364,13 @@ public class DefaultAnalyticsService
             dataSourceParams.addDimension( new BaseDimensionalObject( CATEGORYOPTIONCOMBO_DIM_ID, DimensionType.CATEGORY_OPTION_COMBO, categoryOptionCombos ) );
 
             Map<String, Object> aggregatedDataMap = getAggregatedDataValueMapObjectTyped( dataSourceParams );
+            
+            aggregatedDataMap = AnalyticsUtils.convertDxToOperand( aggregatedDataMap );
 
             for ( Map.Entry<String, Object> entry : aggregatedDataMap.entrySet() )
             {
-                // -------------------------------------------------------------
-                // Merge data element and option combo into operand column
-                // -------------------------------------------------------------
-                                
-                List<String> values = Lists.newArrayList( entry.getKey().split( DIMENSION_SEP ) );
-                String operand = values.get( DX_INDEX ) + DataElementOperand.SEPARATOR + values.get( CO_INDEX );
-                values.remove( CO_INDEX );
-                values.set( DX_INDEX, operand );
-                
                 grid.addRow();
-                grid.addValues( values.toArray() );
+                grid.addValues( entry.getKey().split( DIMENSION_SEP ) );
                 grid.addValue( dataSourceParams.isSkipRounding() ? entry.getValue() : getRounded( entry.getValue() ) );
             }
         }
@@ -684,7 +685,7 @@ public class DefaultAnalyticsService
     {
         Set<OrganisationUnitGroup> orgUnitGroups = expressionService.getOrganisationUnitGroupsInIndicators( indicators );
 
-        if ( orgUnitGroups == null || orgUnitGroups.isEmpty() )
+        if ( orgUnitGroups.isEmpty() )
         {
             return null;
         }
@@ -867,72 +868,42 @@ public class DefaultAnalyticsService
      * 
      * @param params the data query parameters.
      */
-    private Map<String, Map<DataElementOperand, Double>> getPermutationOperandValueMap( DataQueryParams params )
-    {
-        Map<String, Double> aggregatedDataTotalsMap = getAggregatedDataValueMapTotals( params );
-        Map<String, Double> aggregatedDataOptionCombosMap = getAggregatedDataValueMapOptionCombos( params );
-        
-        MapMap<String, DataElementOperand, Double> permOperandValueMap = new MapMap<>();
-
-        DataQueryParams.putPermutationOperandValueMap( permOperandValueMap, aggregatedDataTotalsMap, false );
-        DataQueryParams.putPermutationOperandValueMap( permOperandValueMap, aggregatedDataOptionCombosMap, true );
-        
-        return permOperandValueMap;
-    }
-    
-    /**
-     * Returns a mapping of dimension keys and aggregated values for the data
-     * element totals part of the indicators in the given query.
-     *
-     * @param params the data query parameters.
-     * @return a mapping of dimension keys and aggregated values.
-     */
-    private Map<String, Double> getAggregatedDataValueMapTotals( DataQueryParams params )
+    private Map<String, Map<DimensionalItemObject, Double>> getPermutationDimensionalItemValueMap( DataQueryParams params )
     {
         List<Indicator> indicators = asTypedList( params.getIndicators() );
-        List<DimensionalItemObject> dataElements = asList( expressionService.getDataElementTotalsInIndicators( indicators ) );
-
-        if ( !dataElements.isEmpty() )
-        {
-            DataQueryParams dataSourceParams = params.instance().removeDimension( DATA_X_DIM_ID );
-            
-            dataSourceParams.getDimensions().add( DX_INDEX, new BaseDimensionalObject( 
-                DATA_X_DIM_ID, DimensionType.DATA_X, dataElements ) );
-    
-            return getAggregatedDataValueMap( dataSourceParams );
-        }
         
-        return new HashMap<>();
+        Map<String, Double> valueMap = getAggregatedDataValueMap( params, indicators );
+        
+        return DataQueryParams.getPermutationDimensionalItemValueMap( valueMap );
     }
 
     /**
-     * Returns a mapping of dimension keys and aggregated values for the data
-     * elements with category option combinations part of the indicators in the 
-     * given query.
-     *
-     * @param params the data query parameters.
-     * @return a mapping of dimension keys and aggregated values.
+     * Returns a mapping between dimension items and values for the given data 
+     * query and list of indicators. The dimensional items part of the indicator 
+     * numerators and denominators are used as dimensional item for the aggregated
+     * values being retrieved.
+     * 
+     * @param params the query.
+     * @param indicators the list of indicators.
+     * @return a dimensional items to aggregate values map.
      */
-    private Map<String, Double> getAggregatedDataValueMapOptionCombos( DataQueryParams params )
+    private Map<String, Double> getAggregatedDataValueMap( DataQueryParams params, List<Indicator> indicators )
     {
-        List<Indicator> indicators = asTypedList( params.getIndicators() );
-        List<DimensionalItemObject> dataElements = asList( expressionService.getDataElementWithOptionCombosInIndicators( indicators ) );
+        List<DimensionalItemObject> items = Lists.newArrayList( expressionService.getDimensionalItemObjectsInIndicators( indicators ) );
 
-        if ( !dataElements.isEmpty() )
-        {
-            DataQueryParams dataSourceParams = params.instance().removeDimension( DATA_X_DIM_ID );
-            
-            dataSourceParams.getDimensions().add( DataQueryParams.DX_INDEX, new BaseDimensionalObject( 
-                DATA_X_DIM_ID, DimensionType.DATA_X, dataElements ) );
-            dataSourceParams.getDimensions().add( DataQueryParams.CO_INDEX, new BaseDimensionalObject( 
-                CATEGORYOPTIONCOMBO_DIM_ID, DimensionType.CATEGORY_OPTION_COMBO, new ArrayList<>() ) );
-    
-            return getAggregatedDataValueMap( dataSourceParams );
-        }
+        DimensionalObject dimension = new BaseDimensionalObject( DimensionalObject.DATA_X_DIM_ID, DimensionType.DATA_X, null, DISPLAY_NAME_DATA_X, items );
         
-        return new HashMap<>();
+        DataQueryParams dataSourceParams = params.instance();
+        dataSourceParams.removeDimension( DimensionalObject.DATA_X_DIM_ID );
+        dataSourceParams.addDimension( dimension );
+        dataSourceParams.setSkipHeaders( true );
+        dataSourceParams.setSkipMeta( true );
+        
+        Grid grid = getAggregatedDataValueGridInternal( dataSourceParams );
+        
+        return grid.getAsMap( grid.getWidth() - 1, DimensionalObject.DIMENSION_SEP );
     }
-
+    
     /**
      * Returns a mapping between identifiers and names for the given dimensional
      * objects.
@@ -1029,7 +1000,7 @@ public class DefaultAnalyticsService
      */
     private int getProcessNo()
     {
-        Integer cores = (Integer) systemSettingManager.getSystemSetting( Setting.DATABASE_SERVER_CPUS );
+        Integer cores = (Integer) systemSettingManager.getSystemSetting( SettingKey.DATABASE_SERVER_CPUS );
 
         return ( cores == null || cores == 0 ) ? SystemUtils.getCpuCores() : cores;
     }
@@ -1075,6 +1046,6 @@ public class DefaultAnalyticsService
      */
     private int getMaxLimit()
     {
-        return (Integer) systemSettingManager.getSystemSetting( Setting.ANALYTICS_MAX_LIMIT );
+        return (Integer) systemSettingManager.getSystemSetting( SettingKey.ANALYTICS_MAX_LIMIT );
     }
 }

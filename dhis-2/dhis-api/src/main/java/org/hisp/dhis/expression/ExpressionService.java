@@ -65,14 +65,6 @@ public interface ExpressionService
 {
     String ID = ExpressionService.class.getName();
     
-    String VALID = "valid";
-    String EXPRESSION_IS_EMPTY = "expression_is_empty";
-    String DATAELEMENT_DOES_NOT_EXIST = "data_element_does_not_exist";
-    String CATEGORYOPTIONCOMBO_DOES_NOT_EXIST = "category_option_combo_does_not_exist";
-    String CONSTANT_DOES_NOT_EXIST = "constant_does_not_exist";
-    String OU_GROUP_DOES_NOT_EXIST = "org_unit_group_does_not_exist";
-    String EXPRESSION_NOT_WELL_FORMED = "expression_not_well_formed";
-
     String DAYS_DESCRIPTION = "[Number of days]";
     String NULL_REPLACEMENT = "0";
     String SPACE = " ";
@@ -187,15 +179,8 @@ public interface ExpressionService
         Map<String, Double> constantMap, Map<String, Integer> orgUnitCountMap, Integer days, Set<DataElementOperand> incompleteValues );
     
     /**
-     * Returns the uids of the data element totals in the given expression.
-     * 
-     * @param expression the expression.
-     * @return a set of data element uids.
-     */
-    Set<String> getDataElementTotalUids( String expression );
-    
-    /**
-     * Returns all data elements included in the given expression string.
+     * Returns all data elements included in the given expression string. Returns
+     * an empty set if the given expression is null.
      * 
      * @param expression the expression string.
      * @return a set of data elements included in the expression string.
@@ -203,25 +188,9 @@ public interface ExpressionService
     Set<DataElement> getDataElementsInExpression( String expression );
 
     /**
-     * Returns all OrganisationUnitGroups in the numerator and denominator
-     * expressions in the given Indicators.
-     * 
-     * @param indicators the set of indicators.
-     * @return a Set of OrganisationUnitGroups.
-     */
-    Set<OrganisationUnitGroup> getOrganisationUnitGroupsInIndicators( Collection<Indicator> indicators );
-    
-    /**
-     * Returns all OrganisationUnitGroups in the given expression string.
-     * 
-     * @param expression the expression string.
-     * @return a Set of OrganisationUnitGroups included in the expression string.
-     */
-    Set<OrganisationUnitGroup> getOrganisationUnitGroupsInExpression( String expression );
-    
-    /**
      * Returns all CategoryOptionCombos in the given expression string. Only 
-     * operands with a category option combo will be included.
+     * operands with a category option combo will be included. Returns an empty
+     * set if the given expression is null.
      * 
      * @param expression the expression string.
      * @return a Set of CategoryOptionCombos included in the expression string.
@@ -232,7 +201,8 @@ public interface ExpressionService
      * Returns all operands included in an expression string. The operand is on
      * the form #{data-element-id.category-option combo-id}. Only operands with
      * a category option combo will be included. Requires that the expression 
-     * has been exploded in order to handle data element totals.
+     * has been exploded in order to handle data element totals. Returns an
+     * empty set if the given expression is null.
      * 
      * @param expression The expression string.
      * @return A Set of Operands.
@@ -265,6 +235,42 @@ public interface ExpressionService
      * @return a set of data elements.
      */
     Set<DataElement> getDataElementWithOptionCombosInIndicators( Collection<Indicator> indicators );
+
+    /**
+     * Returns all dimensional item objects which are present in the given expression.
+     * 
+     * @param expression the expression.
+     * @return a set of dimensional item objects.
+     */
+    Set<DimensionalItemObject> getDimensionalItemObjectsInExpression( String expression );
+
+    /**
+     * Returns all dimensional item objects which are present in numerator and
+     * denominator of the given indicators.
+     * 
+     * @param indicators the collection of indicators.
+     * @return a set of dimensional item objects.
+     */
+    Set<DimensionalItemObject> getDimensionalItemObjectsInIndicators( Collection<Indicator> indicators );
+    
+    /**
+     * Returns all OrganisationUnitGroups in the given expression string. Returns 
+     * an set list if the given indicators are null or empty.
+     * 
+     * @param expression the expression string.
+     * @return a Set of OrganisationUnitGroups included in the expression string.
+     */
+    Set<OrganisationUnitGroup> getOrganisationUnitGroupsInExpression( String expression );
+    
+    /**
+     * Returns all OrganisationUnitGroups in the numerator and denominator
+     * expressions in the given Indicators. Returns an empty set if the given
+     * indicators are null or empty.
+     * 
+     * @param indicators the set of indicators.
+     * @return a Set of OrganisationUnitGroups.
+     */
+    Set<OrganisationUnitGroup> getOrganisationUnitGroupsInIndicators( Collection<Indicator> indicators );
     
     /**
      * Filters indicators from the given collection where the numerator and /
@@ -279,29 +285,10 @@ public interface ExpressionService
      * expression is valid, or a negative value if not.
      * 
      * @param formula the expression formula.
-     * @return VALID if the expression is valid.
-     * 	       EXPRESSION_IS_EMPTY if the expression is empty.
-     * 	       DATAELEMENT_DOES_NOT_EXIST if the data element does not exist.
-     *         CATEGORYOPTIONCOMBO_DOES_NOT_EXIST if the category option combo does not exist.
-     *         CONSTANT_DOES_NOT_EXIST if the constant does not exist.
-     *         EXPRESSION_NOT_WELL_FORMED if the expression is not well-formed.
+     * @return the ExpressionValidationOutcome of the validation.
      */
-    String expressionIsValid( String formula );
+    ExpressionValidationOutcome expressionIsValid( String formula );
 
-    /**
-     * Tests whether the expression is valid. Returns a positive value if the
-     * expression is valid, or a negative value if not.
-     * 
-     * @param formula the expression formula.
-     * @return VALID if the expression is valid.
-     *         EXPRESSION_IS_EMPTY if the expression is empty.
-     *         DATAELEMENT_DOES_NOT_EXIST if the data element does not exist.
-     *         CATEGORYOPTIONCOMBO_DOES_NOT_EXIST if the category option combo does not exist.
-     *         CONSTANT_DOES_NOT_EXIST if the constant does not exist.
-     *         EXPRESSION_NOT_WELL_FORMED if the expression is not well-formed.
-     */
-    String expressionIsValid( String formula, Set<String> dataElements, Set<String> categoryOptionCombos, Set<String> constants, Set<String> orgUnitGroups );
-    
     /**
      * Creates an expression string containing DataElement names and the names of
      * the CategoryOptions in the CategoryOptionCombo from a string consisting

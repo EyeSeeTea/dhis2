@@ -54,4 +54,23 @@ public interface DimensionService
     void mergeAnalyticalObject( BaseAnalyticalObject object );
     
     void mergeEventAnalyticalObject( EventAnalyticalObject object );
+
+    /**
+     * Gets a dimension item object which are among the data dimension item 
+     * objects. The composite dimensional items will be saved if not existing.
+     * 
+     * @param dimensionItem the dimension item identifier.
+     * @return a dimensional item object.
+     */
+    DimensionalItemObject getOrAddDataDimensionalItemObject( String dimensionItem );
+
+    /**
+     * Gets a dimension item object which are among the data dimension item 
+     * objects. The composite dimensional items will be transient and the
+     * associated objects will be persistent.
+     * 
+     * @param dimensionItem the dimension item identifier.
+     * @return a dimensional item object.
+     */
+    DimensionalItemObject getDataDimensionalItemObject( String dimensionItem );
 }

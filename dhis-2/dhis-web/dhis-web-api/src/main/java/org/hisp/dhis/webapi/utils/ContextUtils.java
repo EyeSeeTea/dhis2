@@ -46,7 +46,7 @@ import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.common.cache.CacheStrategy;
-import org.hisp.dhis.setting.Setting;
+import org.hisp.dhis.setting.SettingKey;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.util.CodecUtils;
 import org.hisp.dhis.system.util.DateUtils;
@@ -68,6 +68,7 @@ public class ContextUtils
     public static final String CONTENT_TYPE_TEXT = "text/plain; charset=UTF-8";
     public static final String CONTENT_TYPE_CSS = "text/css; charset=UTF-8";
     public static final String CONTENT_TYPE_XML = "application/xml; charset=UTF-8";
+    public static final String CONTENT_TYPE_XML_ADX = "application/xml+adx; charset=UTF-8";
     public static final String CONTENT_TYPE_CSV = "application/csv; charset=UTF-8";
     public static final String CONTENT_TYPE_PNG = "image/png";
     public static final String CONTENT_TYPE_JPG = "image/jpeg";
@@ -104,7 +105,7 @@ public class ContextUtils
 
         if ( cacheStrategy.equals( CacheStrategy.RESPECT_SYSTEM_SETTING ) )
         {
-            String strategy = trimToNull( (String) systemSettingManager.getSystemSetting( Setting.CACHE_STRATEGY ) );
+            String strategy = trimToNull( (String) systemSettingManager.getSystemSetting( SettingKey.CACHE_STRATEGY ) );
 
             cacheStrategy = strategy != null ? CacheStrategy.valueOf( strategy ) : CacheStrategy.NO_CACHE;
         }

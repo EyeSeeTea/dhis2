@@ -92,9 +92,11 @@ trackerCapture.controller('DashboardController',
             $scope.stickyDisabled = selectedLayout.stickRightSide ? !selectedLayout.stickRightSide : true;
 
             angular.forEach(selectedLayout.widgets, function(widget){
-                $rootScope[widget.title +'Widget'] = widget;
-                $rootScope.dashboardWidgets.push( $rootScope[widget.title +'Widget'] );
-                $scope.dashboardStatus[widget.title] = angular.copy(widget);
+                if(widget.title !== "activePrograms"){
+                    $rootScope[widget.title +'Widget'] = widget;
+                    $rootScope.dashboardWidgets.push( $rootScope[widget.title +'Widget'] );
+                    $scope.dashboardStatus[widget.title] = angular.copy(widget);
+                }                
             });
             
             angular.forEach(defaultLayout.widgets, function(w){
@@ -413,12 +415,7 @@ trackerCapture.controller('DashboardController',
     };
     
     $scope.stickUnstick = function(){        
-        $scope.stickyDisabled = !$scope.stickyDisabled;        
-        var layout = getCurrentDashboardLayout();        
-        var layoutKey = $scope.selectedProgram && $scope.selectedProgram.id ? $scope.selectedProgram.id : 'DEFAULT';        
-        layout[layoutKey].stickRightSide = !$scope.stickyDisabled;        
-        DashboardLayoutService.saveLayout(layout, false).then(function(){
-        });        
+        $scope.stickyDisabled = !$scope.stickyDisabled;
     };
     
     $scope.showHideWidgets = function(){

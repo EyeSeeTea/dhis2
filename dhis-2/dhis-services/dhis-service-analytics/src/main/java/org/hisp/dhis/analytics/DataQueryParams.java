@@ -54,6 +54,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hisp.dhis.common.BaseDimensionalItemObject;
 import org.hisp.dhis.common.BaseDimensionalObject;
 import org.hisp.dhis.common.CombinationGenerator;
 import org.hisp.dhis.common.DataDimensionItemType;
@@ -73,7 +74,6 @@ import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementGroupSet;
-import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dxf2.common.JacksonUtils;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -151,6 +151,11 @@ public class DataQueryParams
      * Indicates if the data part of the query response should be omitted.
      */
     protected boolean skipData;
+    
+    /**
+     * Indicates if the headers of the query response should be omitted.
+     */
+    protected boolean skipHeaders;
 
     /**
      * Indicates that full precision should be provided for values.
@@ -272,6 +277,7 @@ public class DataQueryParams
         params.measureCriteria = this.measureCriteria;
         params.skipMeta = this.skipMeta;
         params.skipData = this.skipData;
+        params.skipHeaders = this.skipHeaders;
         params.skipRounding = this.skipRounding;
         params.completedOnly = this.completedOnly;
         params.hierarchyMeta = this.hierarchyMeta;
@@ -491,14 +497,6 @@ public class DataQueryParams
         this.filters.remove( new BaseDimensionalObject( filter ) );
         
         return this;
-    }
-    
-    /**
-     * Returns the index of the category option combo dimension in the dimension map.
-     */
-    public int getCategoryOptionComboDimensionIndex()
-    {
-        return getDimensionIdentifiersAsList().indexOf( CATEGORYOPTIONCOMBO_DIM_ID );
     }
     
     /**
@@ -1011,37 +1009,40 @@ public class DataQueryParams
     // -------------------------------------------------------------------------
 
     /**
-     * Populates a mapping of permutation keys and mappings of data element operands
+     * Creates a mapping of permutation keys and mappings of data element operands
      * and values based on the given mapping of dimension option keys and 
      * aggregated values. The data element dimension will be at index 0 and the
      * category option combo dimension will be at index 1, if category option
      * combinations is enabled.
      * 
-     * @param permutationMap the map to populate with permutations.
      * @param aggregatedDataMap the aggregated data map.
      * @param cocEnabled indicates whether the given aggregated data map includes
      *        a category option combination dimension.
+     * @return a mapping of permutation keys and mappings of data element operands
+     *         and values.
      */
-    public static void putPermutationOperandValueMap( MapMap<String, DataElementOperand, Double> permutationMap, 
-        Map<String, Double> aggregatedDataMap, boolean cocEnabled )
+    public static MapMap<String, DimensionalItemObject, Double> getPermutationDimensionalItemValueMap( Map<String, Double> aggregatedDataMap )
     {
+        MapMap<String, DimensionalItemObject, Double> permutationMap = new MapMap<>();
+        
         for ( String key : aggregatedDataMap.keySet() )
         {
             List<String> keys = Lists.newArrayList( key.split( DIMENSION_SEP ) );
             
-            String de = keys.get( DX_INDEX );
-            String coc = cocEnabled ? keys.get( CO_INDEX ) : null;
-
-            DataElementOperand operand = new DataElementOperand( de, coc );
+            String dimItem = keys.get( DX_INDEX );
+                        
+            keys.remove( DX_INDEX );
             
-            ListUtils.removeAll( keys, DX_INDEX, ( cocEnabled ? CO_INDEX : -1 ) );
+            BaseDimensionalItemObject dimItemObject = new BaseDimensionalItemObject( dimItem );
             
             String permKey = StringUtils.join( keys, DIMENSION_SEP );
             
             Double value = aggregatedDataMap.get( key );
             
-            permutationMap.putEntry( permKey, operand, value );            
+            permutationMap.putEntry( permKey, dimItemObject, value );            
         }
+        
+        return permutationMap;
     }
     
     /**
@@ -1290,6 +1291,16 @@ public class DataQueryParams
     public void setSkipData( boolean skipData )
     {
         this.skipData = skipData;
+    }
+
+    public boolean isSkipHeaders()
+    {
+        return skipHeaders;
+    }
+
+    public void setSkipHeaders( boolean skipHeaders )
+    {
+        this.skipHeaders = skipHeaders;
     }
 
     public boolean isSkipRounding()
@@ -1748,12 +1759,7 @@ public class DataQueryParams
     {
         setDimensionOptions( CATEGORYOPTIONCOMBO_DIM_ID, DimensionType.CATEGORY_OPTION_COMBO, null, asList( categoryOptionCombos ) );
     }
-    
-    public boolean isCategoryOptionCombosEnabled()
-    {
-        return !getDimensionOrFilterItems( CATEGORYOPTIONCOMBO_DIM_ID ).isEmpty();
-    }
-    
+        
     // -------------------------------------------------------------------------
     // Get and set helpers for filters
     // -------------------------------------------------------------------------

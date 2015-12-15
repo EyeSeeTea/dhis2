@@ -97,20 +97,29 @@ trackerCapture.controller('DataEntryController',
 
     $scope.model= {};
 
-    $scope.printDiv = function( divName ) {
-        var elements = document.getElementsByClassName(divName);
-        var printContents = elements[3].innerHTML + elements[0].innerHTML + elements[1].innerHTML + elements[2].innerHTML;
-        var popupWin = window.open('', '_blank', 'width=800,height=800');
-        //popupWin.document.open();
-        popupWin.document.write('<html><head><link rel="stylesheet" type="text/css" href="style.css" /></head><body onload="window.print()">' + printContents + '</html>');
+    $scope.print = function(divName){
+        $scope.showProgramReportDetailsDiv = false;
+        var printContents =  document.getElementById(divName).innerHTML;
+        var popupWin = window.open('', '_blank', 'fullscreen=1');
+        popupWin.document.open();
+        popupWin.document.write('<html>\n\
+                                     <head>\n\
+                                         <link rel="stylesheet" type="text/css" href="../dhis-web-commons/bootstrap/css/bootstrap.min.css" />\n\
+                                         <link rel="stylesheet" type="text/css" href="../dhis-web-commons/css/print.css" />\n\
+                                         <link rel="stylesheet" type="text/css" href="styles/style.css" />\n\
+                                         <link rel="stylesheet" type="text/css" href="styles/print.css" />\n\
+                                     </head>\n\
+                                     <body onload="window.print()">' + printContents +
+                                '</html>');
         popupWin.document.close();
-    }
+    };
 
 
     var processRuleEffect = function(event){
         //Establish which event was affected:
         var affectedEvent = $scope.currentEvent;
         //In most cases the updated effects apply to the current event. In case the affected event is not the current event, fetch the correct event to affect:
+        if(event==='registration') return;
         if (event !== affectedEvent.event) {
             angular.forEach($scope.currentStageEvents, function (searchedEvent) {
                 if (searchedEvent.event === event) {
@@ -123,7 +132,7 @@ trackerCapture.controller('DataEntryController',
         $scope.hiddenSections = [];
         $scope.warningMessages = [];
         $scope.errorMessages = [];
-        
+        $scope.hiddenFields = [];
         angular.forEach($rootScope.ruleeffects[event], function (effect) {
             if (effect.dataElement) {
                 //in the data entry controller we only care about the "hidefield", showerror and showwarning actions
@@ -144,8 +153,9 @@ trackerCapture.controller('DataEntryController',
                             affectedEvent[effect.dataElement.id] = "";
                             $scope.saveDatavalueForEvent($scope.prStDes[effect.dataElement.id], null, affectedEvent);
                         }
-
-                        $scope.hiddenFields[effect.dataElement.id] = effect.ineffect;
+                        if(effect.ineffect) {
+                            $scope.hiddenFields[effect.dataElement.id] = true;
+                        }
                     }
                     else {
                         $log.warn("ProgramRuleAction " + effect.id + " is of type HIDEFIELD, bot does not have a dataelement defined");
@@ -372,7 +382,7 @@ trackerCapture.controller('DataEntryController',
     };
 
     $scope.stageNeedsEvent = function (stage) {
-
+        
         //In case the event is a table, we sould always allow adding more events(rows)
         if (stage.displayEventsInTable) {
             return true;
@@ -657,7 +667,7 @@ trackerCapture.controller('DataEntryController',
             status: eventToSave.status === 'SCHEDULE' ? 'ACTIVE' : eventToSave.status,
             program: eventToSave.program,
             programStage: eventToSave.programStage,
-            orgUnit: eventToSave.dataValues && eventToSave.length > 0 ? eventToSave.orgUnit : $scope.selectedOrgUnit.id,
+            orgUnit: eventToSave.dataValues && eventToSave.dataValues.length > 0 ? eventToSave.orgUnit : $scope.selectedOrgUnit.id,
             eventDate: DateUtils.formatFromUserToApi(eventToSave.eventDate),
             trackedEntityInstance: eventToSave.trackedEntityInstance
         };
@@ -921,7 +931,7 @@ trackerCapture.controller('DataEntryController',
         };
 
         ModalService.showModal({}, modalOptions).then(function (result) {
-            EnrollmentService.complete($scope.selectedEnrollment).then(function (data) {
+            EnrollmentService.completeIncomplete($scope.selectedEnrollment, 'completed').then(function (data) {
                 $scope.selectedEnrollment.status = 'COMPLETED';
             });
         });
@@ -1061,9 +1071,6 @@ trackerCapture.controller('DataEntryController',
                 continueLoop = false;
             }
         }
-    };
-
-    $scope.validateEvent = function () {
     };
 
     $scope.deleteEvent = function () {

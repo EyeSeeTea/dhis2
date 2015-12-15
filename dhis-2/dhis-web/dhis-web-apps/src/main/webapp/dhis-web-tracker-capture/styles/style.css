@@ -10,6 +10,12 @@ html, body {
     display: none;
 }
 
+@media print {
+    .not-for-screen {
+        display: block;
+    }
+}
+
 h1 {    
     font-size: 1.8em;
 }
@@ -37,6 +43,12 @@ div#orgUnitTree {
 
 .top-bar {
     font-size: 16pt;
+    font-weight: normal;
+    color: #585D61;
+}
+
+.title {
+    font-size: 14pt;
     font-weight: normal;
     color: #585D61;
 }
@@ -864,6 +876,8 @@ div#searchOuTree h4{
 .dropdown-menu {
     margin: -5px 0 0 0;
     z-index: 2000 !important;
+    word-wrap: break-word;
+    white-space: normal;
 }
 
 .btn-link {
@@ -1167,7 +1181,6 @@ input, button, select, textarea {
     line-height:1.0; 
     padding: 20px 6px;
     border-radius: 4px;
-    background-color: red;
 }
 
 .select2-container .select2-choice {
@@ -1183,7 +1196,7 @@ input, button, select, textarea {
 
 /* this is because bootstrap adds min-height of 1px for smaller sized columns to prevent them from collapsing when empty*/
 .remove-one-pix {
-    margin-top: -1px;
+    margin-top: -2px;
 }
 
 .row.row-striped:nth-of-type(odd) {
@@ -1217,6 +1230,13 @@ input, button, select, textarea {
     word-wrap: break-word;
 }
 
-.print-div {
+.border-left {    
+    border-left: 1px solid #c2c2c2;
+}
 
+.equal-height-columns {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display:         flex;
 }

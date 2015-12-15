@@ -632,6 +632,8 @@
 
   <!-- Service definitions -->
 
+  <bean id="org.hisp.dhis.dimension.DimensionService" class="org.hisp.dhis.dimension.DefaultDimensionService" />
+
   <bean id="org.hisp.dhis.fileresource.FileResourceService" class="org.hisp.dhis.fileresource.DefaultFileResourceService">
     <property name="fileResourceStore" ref="org.hisp.dhis.fileresource.FileResourceStore" />
     <property name="fileResourceContentStore" ref="org.hisp.dhis.fileresource.FileResourceContentStore" />
@@ -738,6 +740,7 @@
     <property name="constantService" ref="org.hisp.dhis.constant.ConstantService" />
     <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
     <property name="organisationUnitGroupService" ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupService" />
+    <property name="dimensionService" ref="org.hisp.dhis.dimension.DimensionService" />
   </bean>
 
   <bean id="org.hisp.dhis.validation.ValidationRuleService" class="org.hisp.dhis.validation.DefaultValidationRuleService">
