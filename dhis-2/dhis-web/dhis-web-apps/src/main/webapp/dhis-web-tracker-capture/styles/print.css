@@ -12,4 +12,9 @@
   .not-for-screen {
     display: block;
   }
+  body, html, #print-div {
+    margin-top:0%;
+    display:block;
+    height:100%;
+  }
 }
