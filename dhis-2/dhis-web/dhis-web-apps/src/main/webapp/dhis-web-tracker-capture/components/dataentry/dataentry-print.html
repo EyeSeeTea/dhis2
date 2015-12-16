@@ -1,5 +1,5 @@
 <div id="print-div" class="not-for-screen">
-  <table class="table-bordered vertical-spacing">
+  <table class="table table-bordered">
     <tr class="col-md-12" ng-repeat="attribute in selectedTei.attributes" ng-show="attribute.show">
       <td class="col-md-6 bold">
         {{attribute.displayName}}
@@ -21,7 +21,7 @@
     </tr>
   </table>
 
-  <table class="table-bordered vertical-spacing">
+  <table class="table table-bordered vertical-spacing">
     <tr class="col-md-12">
       <td class="col-md-6 bold">
         {{'enrolling_orgunit' | translate}}
@@ -48,31 +48,19 @@
     </tr>
   </table>
 
-  <table class="table-bordered vertical-spacing">
-    <tr ng-repeat="dataValue in currentEvent.dataValues">
-      <td class="bold">
-        {{prStDes[dataValue.dataElement].dataElement.formname?prStDes[dataValue.dataElement].dataElement.formname:prStDes[dataValue.dataElement].dataElement.name}}
-      </td>
-      <td>
-        {{dataValue.value}}
-      </td>
-    </tr>
-  </table>
-
-  <table class="table-bordered vertical-spacing" ng-if='currentEvent && !currentStage.programStageSections.length'>
-    <tr ng-repeat="prStDe in currentStage.programStageDataElements">
-      <td class="bold">
+  <table class="table table-bordered vertical-spacing" ng-if='currentEvent && !currentStage.programStageSections.length'>
+    <tr class="col-md-12" ng-repeat="prStDe in currentStage.programStageDataElements">
+      <td class="col-md-6 bold">
         {{prStDes.dataElement.formname ? prStDe.dataElement.formname : prStDe.dataElement.name}}
       </td>
-      <td>
-        <input type="text" value={{currentEvent[prStDe.dataElement.id]}} class="form-control">
+      <td class="col-md-6">
+        {{currentEvent[prStDe.dataElement.id]}}
       </td>
     </tr>
   </table>
 
   <div ng-if='currentEvent && currentStage.programStageSections.length'>
 
-      <!-- The inline style was needed to override overflow:hidden in the css. Can possibly be replaced with a CSS update. -->
       <div class="vertical-spacing" ng-repeat='section in currentStage.programStageSections'
                        ng-if="!hiddenSections[section.id]" style="overflow:visible">
 
@@ -80,7 +68,7 @@
           <div class="alert alert-warning">{{'section'| translate}} {{section.name}} {{'has_no_dataelements'| translate}}</div>
         </div>
 
-        <table class="table-bordered" ng-if="section.programStageDataElements && section.programStageDataElements.length > 0">
+        <table class="table table-bordered vertical-spacing" ng-if="section.programStageDataElements && section.programStageDataElements.length > 0">
           <thead>
             <tr>
               <th ng-bind="dataElementLabel">
