@@ -61,14 +61,25 @@
   <!-- For Enrollment-->
 
   <table class="table table-bordered" ng-if='currentEvent && !currentStage.programStageSections.length'>
-    <tr class="col-md-12" ng-repeat="prStDe in currentStage.programStageDataElements">
-      <td class="col-md-6 bold">
-        {{prStDes.dataElement.formname ? prStDe.dataElement.formname : prStDe.dataElement.name}}
+    <thead>
+    <tr>
+      <th ng-bind="dataElementLabel">
+      </th>
+      <th class="align-center" ng-bind="valueLabel">
+      </th>
+      </th>
+    </tr>
+    </thead>
+    <tbody id="list">
+    <tr ng-repeat="prStDe in currentStage.programStageDataElements">
+      <td class="bold attritbute-name">
+        {{prStDe.dataElement.formname ? prStDe.dataElement.formname : prStDe.dataElement.name}}
       </td>
-      <td class="col-md-6">
-        {{currentEvent[prStDe.dataElement.id]}}
+      <td>
+        <input type="text" value={{currentEvent[prStDe.dataElement.id]}} class="form-control">
       </td>
     </tr>
+    </tbody>
   </table>
 
   <div ng-if='currentEvent && currentStage.programStageSections.length'>
