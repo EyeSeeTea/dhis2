@@ -197,6 +197,8 @@ div.paging a.active
     border-color: #aaa29a;
 }
 
+
+
 .stick {
     font-weight: bolder;
     color: #000000;
@@ -946,8 +948,8 @@ a:active {
 }
 
 .ui-datepicker-group .ui-datepicker-header {
-    //height: 1.5em; 
-    height: inherit;  //this is to make it play nice with bootstrap
+    /*height: 1.5em;*/
+    height: inherit;  /*this is to make it play nice with bootstrap*/
 }
 
 #ui-datepicker-div, .calendars-popup {
