@@ -92,9 +92,11 @@ trackerCapture.controller('DashboardController',
             $scope.stickyDisabled = selectedLayout.stickRightSide ? !selectedLayout.stickRightSide : true;
 
             angular.forEach(selectedLayout.widgets, function(widget){
-                $rootScope[widget.title +'Widget'] = widget;
-                $rootScope.dashboardWidgets.push( $rootScope[widget.title +'Widget'] );
-                $scope.dashboardStatus[widget.title] = angular.copy(widget);
+                if(widget.title !== "activePrograms"){
+                    $rootScope[widget.title +'Widget'] = widget;
+                    $rootScope.dashboardWidgets.push( $rootScope[widget.title +'Widget'] );
+                    $scope.dashboardStatus[widget.title] = angular.copy(widget);
+                }                
             });
             
             angular.forEach(defaultLayout.widgets, function(w){
@@ -345,7 +347,7 @@ trackerCapture.controller('DashboardController',
         CurrentSelection.set({tei: $scope.selectedTei, te: $scope.trackedEntity, prs: $scope.programs, pr: $scope.selectedProgram, prNames: $scope.programNames, prStNames: $scope.programStageNames, enrollments: selections.enrollments, selectedEnrollment: null, optionSets: $scope.optionSets});        
         $timeout(function() { 
             $rootScope.$broadcast('selectedItems', {programExists: $scope.programs.length > 0});            
-        }, 200);
+        }, 500);
     };     
     
     $scope.activiateTEI = function(){
@@ -411,11 +413,7 @@ trackerCapture.controller('DashboardController',
             return;
         });
     };
-    
-    $scope.stickUnstick = function(){        
-        $scope.stickyDisabled = !$scope.stickyDisabled;
-    };
-    
+        
     $scope.showHideWidgets = function(){
         var modalInstance = $modal.open({
             templateUrl: "components/dashboard/dashboard-widgets.html",

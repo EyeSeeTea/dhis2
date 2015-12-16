@@ -47,6 +47,12 @@ div#orgUnitTree {
     color: #585D61;
 }
 
+.title {
+    font-size: 14pt;
+    font-weight: normal;
+    color: #585D61;
+}
+
 .dashboard-top-bar {
     padding-right: 15px;
     padding-left: 15px;
@@ -577,7 +583,11 @@ div#searchOuTree h4{
 }
 
 .add-default-left-padding {
-	padding-left: 15px !important;
+    padding-left: 15px !important;
+}
+
+.add-default-right-padding {
+    padding-right: 15px !important;
 }
 
 .visit-details {
@@ -1226,4 +1236,13 @@ input, button, select, textarea {
     word-wrap: break-word;
 }
 
+.border-left {    
+    border-left: 1px solid #c2c2c2;
+}
 
+.equal-height-columns {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display:         flex;
+}

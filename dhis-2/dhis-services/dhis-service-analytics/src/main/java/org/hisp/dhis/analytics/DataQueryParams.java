@@ -151,6 +151,11 @@ public class DataQueryParams
      * Indicates if the data part of the query response should be omitted.
      */
     protected boolean skipData;
+    
+    /**
+     * Indicates if the headers of the query response should be omitted.
+     */
+    protected boolean skipHeaders;
 
     /**
      * Indicates that full precision should be provided for values.
@@ -272,6 +277,7 @@ public class DataQueryParams
         params.measureCriteria = this.measureCriteria;
         params.skipMeta = this.skipMeta;
         params.skipData = this.skipData;
+        params.skipHeaders = this.skipHeaders;
         params.skipRounding = this.skipRounding;
         params.completedOnly = this.completedOnly;
         params.hierarchyMeta = this.hierarchyMeta;
@@ -1003,20 +1009,22 @@ public class DataQueryParams
     // -------------------------------------------------------------------------
 
     /**
-     * Populates a mapping of permutation keys and mappings of data element operands
+     * Creates a mapping of permutation keys and mappings of data element operands
      * and values based on the given mapping of dimension option keys and 
      * aggregated values. The data element dimension will be at index 0 and the
      * category option combo dimension will be at index 1, if category option
      * combinations is enabled.
      * 
-     * @param permutationMap the map to populate with permutations.
      * @param aggregatedDataMap the aggregated data map.
      * @param cocEnabled indicates whether the given aggregated data map includes
      *        a category option combination dimension.
+     * @return a mapping of permutation keys and mappings of data element operands
+     *         and values.
      */
-    public static void putPermutationDimensionalItemValueMap( MapMap<String, DimensionalItemObject, Double> permutationMap, 
-        Map<String, Double> aggregatedDataMap, boolean cocEnabled )
+    public static MapMap<String, DimensionalItemObject, Double> getPermutationDimensionalItemValueMap( Map<String, Double> aggregatedDataMap )
     {
+        MapMap<String, DimensionalItemObject, Double> permutationMap = new MapMap<>();
+        
         for ( String key : aggregatedDataMap.keySet() )
         {
             List<String> keys = Lists.newArrayList( key.split( DIMENSION_SEP ) );
@@ -1033,6 +1041,8 @@ public class DataQueryParams
             
             permutationMap.putEntry( permKey, dimItemObject, value );            
         }
+        
+        return permutationMap;
     }
     
     /**
@@ -1281,6 +1291,16 @@ public class DataQueryParams
     public void setSkipData( boolean skipData )
     {
         this.skipData = skipData;
+    }
+
+    public boolean isSkipHeaders()
+    {
+        return skipHeaders;
+    }
+
+    public void setSkipHeaders( boolean skipHeaders )
+    {
+        this.skipHeaders = skipHeaders;
     }
 
     public boolean isSkipRounding()

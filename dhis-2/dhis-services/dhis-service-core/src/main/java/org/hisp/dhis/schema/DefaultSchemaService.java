@@ -33,6 +33,7 @@ import com.google.common.base.CaseFormat;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.hibernate.SessionFactory;
+import org.hisp.dhis.system.util.AnnotationUtils;
 import org.hisp.dhis.system.util.ReflectionUtils;
 import org.hisp.dhis.translation.TranslationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -152,9 +153,9 @@ public class DefaultSchemaService implements SchemaService
 
     private String getName( Class<?> klass )
     {
-        if ( klass.isAnnotationPresent( JacksonXmlRootElement.class ) )
+        if ( AnnotationUtils.isAnnotationPresent( klass, JacksonXmlRootElement.class ) )
         {
-            JacksonXmlRootElement rootElement = klass.getAnnotation( JacksonXmlRootElement.class );
+            JacksonXmlRootElement rootElement = AnnotationUtils.getAnnotation( klass, JacksonXmlRootElement.class );
 
             if ( !StringUtils.isEmpty( rootElement.localName() ) )
             {

@@ -1,5 +1,5 @@
 <form name="outerForm" novalidate>   
-    <table class="dhis2-list-table-striped" ng-if='currentEvent && !currentStage.programStageSections.length'>
+    <table class="dhis2-list-table-striped dhis2-table-hover" ng-if='currentEvent && !currentStage.programStageSections.length'>
         <thead>
             <tr>
                 <th ng-bind="dataElementLabel">
@@ -144,7 +144,7 @@
                                     ng-blur="saveDatavalue(prStDe, innerForm.foo)" 
                                     name="foo"/>                            
                         </div>
-                        <div ng-switch-when="BOOLEAN">
+                        <div ng-switch-when="BOOLEAN" class="form-control">
                             <label class="radio-inline">
                                 <input  type="radio" 
                                         ng-model="currentEvent[prStDe.dataElement.id]" 
@@ -241,7 +241,7 @@
                     <div class="alert alert-warning">{{'section'| translate}} {{section.name}} {{'has_no_dataelements'| translate}}</div>
                 </div> 
                 
-                <table class="dhis2-list-table-striped" ng-if="section.programStageDataElements && section.programStageDataElements.length > 0">                    
+                <table class="dhis2-list-table-striped dhis2-table-hover" ng-if="section.programStageDataElements && section.programStageDataElements.length > 0">                    
                     <thead>
                         <tr>
                             <th ng-bind="dataElementLabel">
@@ -366,7 +366,7 @@
                                                    ng-blur="saveDatavalue(prStDes[de.dataElement.id], innerForm.foo)" 
                                                    name="foo"/>
                                         </div>
-                                        <div ng-switch-when="BOOLEAN">
+                                        <div ng-switch-when="BOOLEAN" class="form-control">
                                             <label class="radio-inline">
                                                 <input  type="radio"
                                                         ng-model="currentEvent[prStDes[de.dataElement.id].dataElement.id]" 

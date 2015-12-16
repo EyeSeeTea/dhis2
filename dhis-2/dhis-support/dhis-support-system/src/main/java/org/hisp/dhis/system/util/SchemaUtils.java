@@ -1,4 +1,4 @@
-package org.hisp.dhis.schema;
+package org.hisp.dhis.system.util;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -30,8 +30,9 @@ package org.hisp.dhis.schema;
 
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Primitives;
-
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.schema.Property;
+import org.hisp.dhis.schema.PropertyType;
 import org.hisp.dhis.schema.annotation.PropertyRange;
 import org.springframework.util.Assert;
 
@@ -47,7 +48,7 @@ import static org.hisp.dhis.schema.PropertyType.*;
 public final class SchemaUtils
 {
     private static final Set<PropertyType> PROPS_IGNORE_MINMAX = Sets.newHashSet( REFERENCE, BOOLEAN, DATE, CONSTANT );
-    
+
     public static void updatePropertyTypes( Property property )
     {
         Assert.notNull( property );
@@ -62,14 +63,14 @@ public final class SchemaUtils
 
         if ( property.isWritable() )
         {
-            if ( property.getGetterMethod().isAnnotationPresent( org.hisp.dhis.schema.annotation.Property.class ) )
+            if ( AnnotationUtils.isAnnotationPresent( property.getGetterMethod(), org.hisp.dhis.schema.annotation.Property.class ) )
             {
-                property.setPropertyType( property.getGetterMethod().getAnnotation( org.hisp.dhis.schema.annotation.Property.class ).value() );
+                property.setPropertyType( AnnotationUtils.getAnnotation( property.getGetterMethod(), org.hisp.dhis.schema.annotation.Property.class ).value() );
             }
 
-            if ( property.getGetterMethod().isAnnotationPresent( PropertyRange.class ) )
+            if ( AnnotationUtils.isAnnotationPresent( property.getGetterMethod(), PropertyRange.class ) )
             {
-                PropertyRange propertyRange = property.getGetterMethod().getAnnotation( PropertyRange.class );
+                PropertyRange propertyRange = AnnotationUtils.getAnnotation( property.getGetterMethod(), PropertyRange.class );
 
                 if ( property.getMax() == null || propertyRange.max() <= property.getMax() )
                 {

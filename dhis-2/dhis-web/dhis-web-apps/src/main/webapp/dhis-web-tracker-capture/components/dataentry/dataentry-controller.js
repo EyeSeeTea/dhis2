@@ -26,6 +26,7 @@ trackerCapture.controller('DataEntryController',
                 TrackerRulesFactory) {
 
     $scope.maxOptionSize = 30;
+    $scope.dashboardReady = false;
     
     //Data entry form
     $scope.outerForm = {};
@@ -247,6 +248,7 @@ trackerCapture.controller('DataEntryController',
 
     //listen for the selected items
     $scope.$on('dashboardWidgets', function () {
+        $scope.dashboardReady = true;
         $scope.showDataEntryDiv = false;
         $scope.showEventCreationDiv = false;
         $scope.currentEvent = null;
@@ -302,7 +304,7 @@ trackerCapture.controller('DataEntryController',
                 }
                 
                 TrackerRulesFactory.getRules($scope.selectedProgram.id).then(function(rules){                    
-                    $scope.allProgramRules = rules;
+                    $scope.allProgramRules = rules;                    
                     $scope.getEvents();
                 });           
             });
@@ -382,7 +384,7 @@ trackerCapture.controller('DataEntryController',
     };
 
     $scope.stageNeedsEvent = function (stage) {
-
+        
         //In case the event is a table, we sould always allow adding more events(rows)
         if (stage.displayEventsInTable) {
             return true;
@@ -667,7 +669,7 @@ trackerCapture.controller('DataEntryController',
             status: eventToSave.status === 'SCHEDULE' ? 'ACTIVE' : eventToSave.status,
             program: eventToSave.program,
             programStage: eventToSave.programStage,
-            orgUnit: eventToSave.dataValues && eventToSave.length > 0 ? eventToSave.orgUnit : $scope.selectedOrgUnit.id,
+            orgUnit: eventToSave.dataValues && eventToSave.dataValues.length > 0 ? eventToSave.orgUnit : $scope.selectedOrgUnit.id,
             eventDate: DateUtils.formatFromUserToApi(eventToSave.eventDate),
             trackedEntityInstance: eventToSave.trackedEntityInstance
         };
@@ -931,7 +933,7 @@ trackerCapture.controller('DataEntryController',
         };
 
         ModalService.showModal({}, modalOptions).then(function (result) {
-            EnrollmentService.complete($scope.selectedEnrollment).then(function (data) {
+            EnrollmentService.completeIncomplete($scope.selectedEnrollment, 'completed').then(function (data) {
                 $scope.selectedEnrollment.status = 'COMPLETED';
             });
         });
@@ -1071,9 +1073,6 @@ trackerCapture.controller('DataEntryController',
                 continueLoop = false;
             }
         }
-    };
-
-    $scope.validateEvent = function () {
     };
 
     $scope.deleteEvent = function () {

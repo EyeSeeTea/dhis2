@@ -62,25 +62,31 @@ public interface EnrollmentService
 
     ImportSummaries addEnrollmentsXml( InputStream inputStream, ImportOptions importOptions ) throws IOException;
 
-    ImportSummaries addEnrollments( List<Enrollment> enrollments );
+    ImportSummaries addEnrollments( List<Enrollment> enrollments, ImportOptions importOptions );
 
-    ImportSummary addEnrollment( Enrollment enrollment );
+    ImportSummary addEnrollment( Enrollment enrollment, ImportOptions importOptions );
 
     // -------------------------------------------------------------------------
     // UPDATE
     // -------------------------------------------------------------------------
 
-    ImportSummary updateEnrollmentJson( String id, InputStream inputStream ) throws IOException;
-    
+    ImportSummary updateEnrollmentJson( String id, InputStream inputStream, ImportOptions importOptions ) throws IOException;
+
     ImportSummary updateEnrollmentForNoteJson( String id, InputStream inputStream ) throws IOException;
 
-    ImportSummary updateEnrollmentXml( String id, InputStream inputStream ) throws IOException;
+    ImportSummary updateEnrollmentXml( String id, InputStream inputStream, ImportOptions importOptions ) throws IOException;
 
-    ImportSummaries updateEnrollments( List<Enrollment> enrollments );
+    ImportSummaries updateEnrollments( List<Enrollment> enrollments, ImportOptions importOptions );
 
-    ImportSummary updateEnrollment( Enrollment enrollment );
-    
+    ImportSummary updateEnrollment( Enrollment enrollment, ImportOptions importOptions );
+
     ImportSummary updateEnrollmentForNote( Enrollment enrollment );
+
+    void cancelEnrollment( String uid );
+
+    void completeEnrollment( String uid );
+
+    void incompleteEnrollment( String uid );
 
     // -------------------------------------------------------------------------
     // DELETE
@@ -90,7 +96,4 @@ public interface EnrollmentService
 
     ImportSummaries deleteEnrollments( List<String> uids );
 
-    void cancelEnrollment( String uid );
-
-    void completeEnrollment( String uid );
 }
