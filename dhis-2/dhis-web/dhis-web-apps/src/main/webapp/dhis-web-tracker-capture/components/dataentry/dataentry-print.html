@@ -1,5 +1,5 @@
 <div id="print-div" class="not-for-screen">
-  <table class="table table-bordered table-compact">
+  <table class="table-bordered">
     <tr class="col-md-12" ng-repeat="attribute in selectedTei.attributes" ng-show="attribute.show">
       <td class="col-md-6 bold">
         {{attribute.displayName}}
@@ -21,7 +21,7 @@
     </tr>
   </table>
 
-  <table class="table table-bordered table-compact">
+  <table class="table-bordered">
     <tr class="col-md-12">
       <td class="col-md-6 bold">
         {{'enrolling_orgunit' | translate}}
@@ -48,7 +48,7 @@
     </tr>
   </table>
 
-  <table class="table table-bordered table-compact">
+  <table class="table-bordered">
     <tr ng-repeat="dataValue in currentEvent.dataValues">
       <td class="bold">
         {{prStDes[dataValue.dataElement].dataElement.formname?prStDes[dataValue.dataElement].dataElement.formname:prStDes[dataValue.dataElement].dataElement.name}}
@@ -59,7 +59,7 @@
     </tr>
   </table>
 
-  <table class="dhis2-list-table-striped" ng-if='currentEvent && !currentStage.programStageSections.length'>
+  <table class="table-bordered" ng-if='currentEvent && !currentStage.programStageSections.length'>
     <tr ng-repeat="prStDe in currentStage.programStageDataElements">
       <td class="bold">
         {{prStDes.dataElement.formname ? prStDe.dataElement.formname : prStDe.dataElement.name}}
@@ -71,37 +71,38 @@
   </table>
 
   <div ng-if='currentEvent && currentStage.programStageSections.length'>
-    <accordion close-others='false'>
+
       <!-- The inline style was needed to override overflow:hidden in the css. Can possibly be replaced with a CSS update. -->
-      <accordion-group heading="{{section.name}}" is-open="section.open" ng-repeat='section in currentStage.programStageSections' ng-if="!hiddenSections[section.id]" style="overflow:visible">
+      <div class="vertical-spacing" ng-repeat='section in currentStage.programStageSections'
+                       ng-if="!hiddenSections[section.id]" style="overflow:visible">
 
         <div class="vertical-spacing" ng-if="!section.programStageDataElements || section.programStageDataElements.length === 0">
           <div class="alert alert-warning">{{'section'| translate}} {{section.name}} {{'has_no_dataelements'| translate}}</div>
         </div>
 
-        <table class="dhis2-list-table-striped" ng-if="section.programStageDataElements && section.programStageDataElements.length > 0">
+        <table class="table-bordered" ng-if="section.programStageDataElements && section.programStageDataElements.length > 0">
           <thead>
-          <tr>
-            <th ng-bind="dataElementLabel">
-            </th>
-            <th class="align-center" ng-bind="valueLabel">
-            </th>
-            <th class="align-center" ng-if="allowProvidedElsewhereExists[currentStage.id]" ng-bind="providedElsewhereLabel">
-            </th>
-          </tr>
+            <tr>
+              <th ng-bind="dataElementLabel">
+              </th>
+              <th class="align-center" ng-bind="valueLabel">
+              </th>
+              <th class="align-center" ng-if="allowProvidedElsewhereExists[currentStage.id]" ng-bind="providedElsewhereLabel">
+              </th>
+            </tr>
           </thead>
           <tbody id="list">
-          <tr ng-repeat="de in section.programStageDataElements">
-            <td class="bold">
-              {{prStDes[de.dataElement.id].dataElement.formName ? prStDes[de.dataElement.id].dataElement.formName : prStDes[de.dataElement.id].dataElement.name}}
-            </td>
-            <td>
-              <input type="text" value={{currentEvent[prStDes[de.dataElement.id].dataElement.id]}} class="form-control">
-            </td>
-          </tr>
+            <tr ng-repeat="de in section.programStageDataElements">
+              <td class="bold">
+                {{prStDes[de.dataElement.id].dataElement.formName ? prStDes[de.dataElement.id].dataElement.formName : prStDes[de.dataElement.id].dataElement.name}}
+              </td>
+              <td>
+                <input type="text" value={{currentEvent[prStDes[de.dataElement.id].dataElement.id]}} class="form-control">
+              </td>
+            </tr>
           </tbody>
         </table>
-      </accordion-group>
-    </accordion>
+      </div>
+    </div>
   </div>
 </div>

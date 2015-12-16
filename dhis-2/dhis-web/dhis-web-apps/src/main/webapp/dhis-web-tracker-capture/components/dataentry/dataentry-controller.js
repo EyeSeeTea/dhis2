@@ -105,8 +105,8 @@ trackerCapture.controller('DataEntryController',
         popupWin.document.open();
         popupWin.document.write('<html>\n\
                                      <head>\n\
-                                         <link rel="stylesheet" type="text/css" href="../dhis-web-commons/bootstrap/css/bootstrap.min.css" />\n\
-                                         <link rel="stylesheet" type="text/css" href="../dhis-web-commons/css/print.css" media="print"/>\n\
+                                         <link rel="stylesheet" type="text/css" href="styles/bootstrap.min.css" media="print"/>\n\
+                                         <link rel="stylesheet" type="text/css" href="styles/print.css" media="print"/>\n\
                                      </head>\n\
                                      <body onload="window.print()">' + printContents +
                                 '</html>');
