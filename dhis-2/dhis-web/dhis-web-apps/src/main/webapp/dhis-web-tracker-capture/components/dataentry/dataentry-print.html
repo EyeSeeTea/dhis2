@@ -1,5 +1,5 @@
 <div id="print-div" class="not-for-screen">
-  <table class="table-bordered">
+  <table class="table-bordered vertical-spacing">
     <tr class="col-md-12" ng-repeat="attribute in selectedTei.attributes" ng-show="attribute.show">
       <td class="col-md-6 bold">
         {{attribute.displayName}}
@@ -21,7 +21,7 @@
     </tr>
   </table>
 
-  <table class="table-bordered">
+  <table class="table-bordered vertical-spacing">
     <tr class="col-md-12">
       <td class="col-md-6 bold">
         {{'enrolling_orgunit' | translate}}
@@ -48,7 +48,7 @@
     </tr>
   </table>
 
-  <table class="table-bordered">
+  <table class="table-bordered vertical-spacing">
     <tr ng-repeat="dataValue in currentEvent.dataValues">
       <td class="bold">
         {{prStDes[dataValue.dataElement].dataElement.formname?prStDes[dataValue.dataElement].dataElement.formname:prStDes[dataValue.dataElement].dataElement.name}}
@@ -59,7 +59,7 @@
     </tr>
   </table>
 
-  <table class="table-bordered" ng-if='currentEvent && !currentStage.programStageSections.length'>
+  <table class="table-bordered vertical-spacing" ng-if='currentEvent && !currentStage.programStageSections.length'>
     <tr ng-repeat="prStDe in currentStage.programStageDataElements">
       <td class="bold">
         {{prStDes.dataElement.formname ? prStDe.dataElement.formname : prStDe.dataElement.name}}
