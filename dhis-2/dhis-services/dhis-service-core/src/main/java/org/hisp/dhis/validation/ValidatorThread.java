@@ -56,7 +56,6 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.hisp.dhis.system.util.MathUtils.*;
-
 /**
  * Runs a validation task on a thread within a multi-threaded validation run.
  * <p>
@@ -129,13 +128,25 @@ public class ValidatorThread
                         {
                             if ( evaluateValidationCheck( currentValueMap, lastUpdatedMap, rule ) )
                             {
-                                Map<Integer, Double> leftSideValues = getExpressionValueMap( rule.getLeftSide(),
-                                    currentValueMap, incompleteValuesMap );
+                            	int n_years = rule.getAnnualSampleCount() == null ? 0 : rule.getAnnualSampleCount();
+                                int window = rule.getSequentialSampleCount() == null ? 0 : rule
+                                    .getSequentialSampleCount();
+
+                                Map<Integer, Double> leftSideValues = getRuleExpressionValueMap( 
+                                		rule.getLeftSide(),currentValueMap, incompleteValuesMap,
+                                		sourceX.getSource(), period, window, n_years, periodTypeX,  null, sourceDataElements );
 
                                 if ( !leftSideValues.isEmpty() || Operator.compulsory_pair.equals( rule.getOperator() ) )
                                 {
-                                    Map<Integer, Double> rightSideValues = getRightSideValue( sourceX.getSource(), periodTypeX, period, rule,
-                                        currentValueMap, sourceDataElements );
+                                    Map<Integer, Double> rightSideValues = 
+                                    		(context.getExpressionService().getAggregatesInExpression((rule.getRightSide()).getExpression()).isEmpty()) ?
+                                    					getRightSideValue( sourceX.getSource(), periodTypeX, period, rule,
+                                    							currentValueMap, sourceDataElements ) :
+                                    					getRuleExpressionValueMap( 
+                                    							rule.getRightSide(),currentValueMap, incompleteValuesMap,
+                                    							sourceX.getSource(), period, window, n_years, periodTypeX,  
+                                    							null, sourceDataElements );
+;
 
                                     if ( !rightSideValues.isEmpty() || Operator.compulsory_pair.equals( rule.getOperator() ) )
                                     {
@@ -478,7 +489,7 @@ public class ValidatorThread
         {
             Double value = context.getExpressionService().getExpressionValue( expression,
                 entry.getValue(), context.getConstantMap(), null, null,
-                incompleteValuesMap.getSet( entry.getKey() ) );
+                incompleteValuesMap.getSet( entry.getKey() ), null );
 
             if ( MathUtils.isValidDouble( value ) )
             {
@@ -651,4 +662,166 @@ public class ValidatorThread
 
         return dataValueMap;
     }
+    
+    /* Generalized surveillance rules */
+    
+    /**
+     * Returns the right-side evaluated value of the validation rule.
+     *
+     * @param source             organisation unit being evaluated
+     * @param periodTypeX        period type being evaluated
+     * @param period             period being evaluated
+     * @param rule               ValidationRule being evaluated
+     * @param currentValueMap    current values already fetched
+     * @param periodTypes        applicable period types
+     * @param sourceDataElements the data elements collected by the organisation
+     *                           unit
+     * @return the right-side values, map by attribute category combo
+     */
+    private ListMap<Integer, Double> getAggregateValueMap
+        (Expression expression,OrganisationUnit source,
+         Period period,int window, int n_years,
+         PeriodTypeExtended px,
+         Collection<PeriodType> periodTypes,
+         Collection<DataElement> sourceDataElements)
+    {
+        ListMap<Integer,Double> results = null;
+        CalendarPeriodType periodType = (CalendarPeriodType) period.getPeriodType();
+        Calendar yearly = PeriodType.createCalendarInstance( period.getStartDate() );
+        for ( int years = 0; years <= n_years; years++ )
+    	{
+    	    // Defensive copy because createPeriod mutates Calendar.
+    	    Calendar each_year = PeriodType.createCalendarInstance( yearly.getTime() );
+    	    // To track the period at the same time in preceding years.
+    	    Period base_period = periodType.createPeriod( each_year );
+
+    	    // For past years, fetch a window around the period at the
+    	    // same time of year as this period.
+    	    gatherPeriodValues(results,expression,source,base_period,window,px,
+    	    			periodTypes,sourceDataElements);
+
+    	    // Move to the previous year.
+    	    yearly.set( Calendar.YEAR, yearly.get( Calendar.YEAR ) - 1 );
+    	}
+        
+       return results;
+    }
+
+    /**
+     * Gathers the values of an expression for a given organisation unit
+     and period, accumulating a range of values around the given period.
+     * <p>
+     * Note that for a surveillance-type rule, evaluating the right side
+     * expression can result in sampling multiple periods and/or child
+     * organisation units.
+     *
+     * @param results            the ListMap into which results will be stored
+     * @param expression         the expression to be evaluated
+     * @param source             the organisation unit
+     * @param period             the main period for the validation rule evaluation
+     * @param window             how many periods (before and after) to collect
+     * @param px                 the period type extended information
+     * @param periodTypes        the period types in which the data may exist
+     * @param sourceElements     the data elements configured for this
+     *                           organisation unit
+     */
+    private void gatherPeriodValues( ListMap<Integer, Double> results,
+    				 Expression expression,
+    				 OrganisationUnit source,
+    				 Period period,int window,
+    				 PeriodTypeExtended px,
+    				 Collection<PeriodType> periodTypes,
+    				 Collection<DataElement> sourceElements)
+    {
+    	CalendarPeriodType periodType=(CalendarPeriodType) period.getPeriodType();
+    	Period periodInstance = context.getPeriodService()
+    	.getPeriod( period.getStartDate(), period.getEndDate(),periodType);
+        if ( periodInstance == null ) return;
+        Set<DataElement> dataElements = expression.getDataElementsInExpression();
+        SetMap<Integer, DataElementOperand> incompleteValuesMap = new SetMap<>();
+        MapMap<Integer, DataElementOperand, Double> dataValueMapByAttributeCombo =
+    	getValueMap( px, dataElements,
+    		     sourceElements, dataElements, periodTypes,
+    		     period, source,
+    		     null, incompleteValuesMap );
+        results.putValueMap
+    	(getExpressionValueMap( expression,
+    				dataValueMapByAttributeCombo,
+    				incompleteValuesMap ) );
+        if (window<=0) return;
+        // Fetch the sequential periods after this prior-year period.
+        Period forward = new Period( periodInstance );
+        Period backward = new Period( periodInstance );
+        for ( int fwd = 0; fwd < window; fwd++ ) {
+    	forward = periodType.getNextPeriod( forward );
+    	gatherPeriodValues(results,expression,source,period,1,
+    			   px,periodTypes,sourceElements);}
+        for ( int bkd = 0; bkd < window; bkd++ ) {
+    	backward = periodType.getNextPeriod( backward );
+    	gatherPeriodValues(results,expression,source,period,1,
+    			   px,periodTypes,sourceElements);}
+    }
+    
+    /**
+     * Evaluates an expression, returning a map of values by attribute option
+     * combo.
+     *
+     * @param expression          expression to evaluate.
+     * @param valueMap            Map of value maps, by attribute option combo.
+     * @param incompleteValuesMap map of values that were incomplete.
+     * @return map of values.
+     */
+    private Map<Integer, Double> getRuleExpressionValueMap( Expression expression,
+    		 MapMap<Integer, DataElementOperand, Double> valueMap,
+    		 SetMap<Integer, DataElementOperand> incompleteValuesMap,
+    		 OrganisationUnit source,
+			 Period period,int window,int n_years,
+			 PeriodTypeExtended px,
+			 Collection<PeriodType> periodTypes,
+			 Collection<DataElement> sourceElements)
+    {
+        Map<Integer, Double> expressionValueMap = new HashMap<>();
+        Map<Integer, ListMap<String, Double>> aggregateValuesMap = new HashMap<>();
+        Set<String> aggregates=context.getExpressionService().getAggregatesInExpression(expression.getExpression());
+        
+        if (aggregates.size()==0)
+        	return getExpressionValueMap(expression,valueMap,incompleteValuesMap);
+        
+        for (String subExpression: aggregates)
+        {	
+        	Expression subexp=new Expression(subExpression,null,null);
+        	ListMap<Integer,Double> aggregateValues=getAggregateValueMap
+        	        (subexp,source,period,window,n_years,
+        	         px,periodTypes,sourceElements);
+        	for (Integer attributeOptionCombo: aggregateValues.keySet())
+        	{
+        		ListMap<String, Double> aggmap;
+        		if (aggregateValuesMap.containsKey(attributeOptionCombo))
+        			aggmap=aggregateValuesMap.get(attributeOptionCombo);
+        		else {
+        			aggmap=new ListMap<>();
+        			aggregateValuesMap.put(attributeOptionCombo, aggmap);}
+        		
+        		aggmap.put(subExpression, aggregateValues.get(attributeOptionCombo));
+        		}
+        	}
+
+        for ( Map.Entry<Integer, Map<DataElementOperand, Double>> entry : valueMap.entrySet() )
+        {
+            Double value = context.getExpressionService().getExpressionValue( expression,
+                entry.getValue(), context.getConstantMap(), null, null,
+                incompleteValuesMap.getSet( entry.getKey() ), 
+                aggregateValuesMap.get(entry.getKey()));
+
+            if ( MathUtils.isValidDouble( value ) )
+            {
+                expressionValueMap.put( entry.getKey(), value );
+            }
+        }
+
+        return expressionValueMap;
+    }
+
+
+
 }

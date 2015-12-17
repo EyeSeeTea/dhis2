@@ -226,15 +226,17 @@ public class DefaultExpressionService
     public Double getExpressionValue( Expression expression, Map<? extends DimensionalItemObject, Double> valueMap,
         Map<String, Double> constantMap, Map<String, Integer> orgUnitCountMap, Integer days )
     {
-        return getExpressionValue( expression, valueMap, constantMap, orgUnitCountMap, days, null );
+        return getExpressionValue( expression, valueMap, constantMap, orgUnitCountMap, days, null, null );
     }
 
     @Override
     public Double getExpressionValue( Expression expression, Map<? extends DimensionalItemObject, Double> valueMap,
-        Map<String, Double> constantMap, Map<String, Integer> orgUnitCountMap, Integer days, Set<DataElementOperand> incompleteValues )
+        Map<String, Double> constantMap, Map<String, Integer> orgUnitCountMap, Integer days, 
+        Set<DataElementOperand> incompleteValues,
+        ListMap<String, Double> aggregateMap)
     {
         String expressionString = generateExpression( expression.getExplodedExpressionFallback(), valueMap, constantMap, 
-            orgUnitCountMap, days, expression.getMissingValueStrategy(), incompleteValues );
+            orgUnitCountMap, days, expression.getMissingValueStrategy(), incompleteValues, aggregateMap );
 
         Double result = expressionString != null ? calculateExpression( expressionString ) : null;
         
@@ -319,6 +321,26 @@ public class DefaultExpressionService
         }
 
         return operandsInExpression;
+    }
+    
+    @Override
+    @Transactional
+    public Set<String> getAggregatesInExpression( String expression )
+    {
+        Set<String> aggregates = new HashSet<>();
+
+        if ( expression != null )
+        {
+            final Matcher matcher = AGGREGATE_PATTERN.matcher( expression );
+
+            while ( matcher.find() )
+            {
+                String sub_expression =  matcher.group() ;
+                aggregates.add(sub_expression);
+            }
+        }
+
+        return aggregates;
     }
 
     @Override
@@ -498,6 +520,26 @@ public class DefaultExpressionService
         }
         
         expression = TextUtils.appendTail( matcher, sb );
+        
+        // ---------------------------------------------------------------------
+        // Aggregates
+        // ---------------------------------------------------------------------
+
+        matcher= AGGREGATE_PATTERN.matcher(expression);
+        sb = new StringBuffer();
+        
+        while ( matcher.find() )
+        {
+        	String aggregate=matcher.group(1);
+        	
+        	ExpressionValidationOutcome arg_valid=expressionIsValid(aggregate);
+        	if ( arg_valid != ExpressionValidationOutcome.VALID ) 
+        	{
+        		return arg_valid;
+        	}
+        	
+        	matcher.appendReplacement(sb, "[1.1]");
+        }
 
         // ---------------------------------------------------------------------
         // Constants
@@ -840,11 +882,13 @@ public class DefaultExpressionService
     public String generateExpression( String expression, Map<? extends DimensionalItemObject, Double> valueMap, 
         Map<String, Double> constantMap, Map<String, Integer> orgUnitCountMap, Integer days, MissingValueStrategy missingValueStrategy )
     {
-    	return generateExpression( expression, valueMap, constantMap, orgUnitCountMap, days, missingValueStrategy, null );
+    	return generateExpression( expression, valueMap, constantMap, orgUnitCountMap, days, missingValueStrategy, null, null );
     }
 
     private String generateExpression( String expression, Map<? extends DimensionalItemObject, Double> valueMap, 
-        Map<String, Double> constantMap, Map<String, Integer> orgUnitCountMap, Integer days, MissingValueStrategy missingValueStrategy, Set<DataElementOperand> incompleteValues )
+        Map<String, Double> constantMap, Map<String, Integer> orgUnitCountMap, Integer days, 
+        MissingValueStrategy missingValueStrategy, Set<DataElementOperand> incompleteValues,
+        Map<String, List<Double>> aggregateMap)
     {
         if ( expression == null || expression.isEmpty() )
         {
@@ -860,11 +904,34 @@ public class DefaultExpressionService
         missingValueStrategy = missingValueStrategy == null ? NEVER_SKIP : missingValueStrategy;
         
         // ---------------------------------------------------------------------
+        // Substitute aggregates
+        // ---------------------------------------------------------------------
+ 
+        StringBuffer sb = new StringBuffer();
+        Matcher matcher = AGGREGATE_PATTERN.matcher( expression );
+        
+        while (matcher.find())
+        {
+        	String sub_expression = matcher.group();
+        	List<Double> samples = (aggregateMap == null) ? (null) : aggregateMap.get( sub_expression );
+        	
+        	if ( samples == null && SKIP_IF_ANY_VALUE_MISSING.equals( missingValueStrategy ) )
+            {
+                return null;
+            }
+        	
+        	String literal = ( samples == null) ? ("[]") : (samples.toString());
+        	matcher.appendReplacement(sb, literal);
+        }
+        
+        expression = TextUtils.appendTail( matcher, sb );
+        
+        // ---------------------------------------------------------------------
         // DimensionalItemObjects
         // ---------------------------------------------------------------------
         
-        StringBuffer sb = new StringBuffer();
-        Matcher matcher = VARIABLE_PATTERN.matcher( expression );
+        sb = new StringBuffer();
+        matcher = VARIABLE_PATTERN.matcher( expression );
         
         int matchCount = 0;
         int valueCount = 0;
