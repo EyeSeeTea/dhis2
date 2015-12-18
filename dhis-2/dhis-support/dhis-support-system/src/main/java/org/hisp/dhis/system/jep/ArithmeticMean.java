@@ -1,13 +1,9 @@
 package org.hisp.dhis.system.jep;
 
-import java.lang.reflect.Array;
 import java.util.List;
 import java.util.Stack;
+import org.nfunk.jep.ParseException;
 
-import org.nfunk.jep.*;
-import org.nfunk.jep.function.*;
-
-import org.apache.commons.jexl2.parser.ParseException;
 import org.nfunk.jep.function.PostfixMathCommand;
 
 public class ArithmeticMean extends PostfixMathCommand {
@@ -15,7 +11,7 @@ public class ArithmeticMean extends PostfixMathCommand {
 		numberOfParameters = 1;
 	}
 	
-	public void run(Stack inStack) throws org.nfunk.jep.ParseException {
+	public void run(Stack inStack) throws ParseException {
 		// check the stack
 		checkStack(inStack);
 		
