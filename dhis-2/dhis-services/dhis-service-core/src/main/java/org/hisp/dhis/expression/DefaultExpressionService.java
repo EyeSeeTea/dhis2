@@ -548,6 +548,8 @@ public class DefaultExpressionService
         	
         	matcher.appendReplacement(sb, "[1.1]");
         }
+        
+        expression = TextUtils.appendTail( matcher, sb );
 
         // ---------------------------------------------------------------------
         // Constants
