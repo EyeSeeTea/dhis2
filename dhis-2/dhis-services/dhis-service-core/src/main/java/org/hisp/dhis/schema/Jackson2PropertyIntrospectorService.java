@@ -32,7 +32,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.primitives.Primitives;
@@ -41,23 +40,21 @@ import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.annotation.Description;
+import org.hisp.dhis.system.util.AnnotationUtils;
 import org.hisp.dhis.system.util.ReflectionUtils;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.hisp.dhis.system.util.SchemaUtils;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static org.springframework.util.ReflectionUtils.getUniqueDeclaredMethods;
 
 /**
  * Default PropertyIntrospectorService implementation that uses Reflection and Jackson annotations
@@ -78,11 +75,11 @@ public class Jackson2PropertyIntrospectorService
         List<String> classFieldNames = ReflectionUtils.getAllFieldNames( clazz );
 
         // TODO this is quite nasty, should find a better way of exposing properties at class-level
-        if ( AnnotationUtils.findAnnotation( clazz, JacksonXmlRootElement.class ) != null )
+        if ( AnnotationUtils.isAnnotationPresent( clazz, JacksonXmlRootElement.class ) )
         {
             Property property = new Property();
 
-            JacksonXmlRootElement jacksonXmlRootElement = AnnotationUtils.findAnnotation( clazz, JacksonXmlRootElement.class );
+            JacksonXmlRootElement jacksonXmlRootElement = AnnotationUtils.getAnnotation( clazz, JacksonXmlRootElement.class );
 
             if ( !StringUtils.isEmpty( jacksonXmlRootElement.localName() ) )
             {
@@ -102,7 +99,7 @@ public class Jackson2PropertyIntrospectorService
         for ( Property property : properties )
         {
             Method getterMethod = property.getGetterMethod();
-            JsonProperty jsonProperty = AnnotationUtils.findAnnotation( getterMethod, JsonProperty.class );
+            JsonProperty jsonProperty = AnnotationUtils.getAnnotation( getterMethod, JsonProperty.class );
 
             String fieldName = getFieldName( getterMethod );
             property.setName( !StringUtils.isEmpty( jsonProperty.value() ) ? jsonProperty.value() : fieldName );
@@ -145,15 +142,15 @@ public class Jackson2PropertyIntrospectorService
                 property.setSetterMethod( hibernateProperty.getSetterMethod() );
             }
 
-            if ( AnnotationUtils.findAnnotation( property.getGetterMethod(), Description.class ) != null )
+            if ( AnnotationUtils.isAnnotationPresent( property.getGetterMethod(), Description.class ) )
             {
-                Description description = AnnotationUtils.findAnnotation( property.getGetterMethod(), Description.class );
+                Description description = AnnotationUtils.getAnnotation( property.getGetterMethod(), Description.class );
                 property.setDescription( description.value() );
             }
 
-            if ( AnnotationUtils.findAnnotation( property.getGetterMethod(), JacksonXmlProperty.class ) != null )
+            if ( AnnotationUtils.isAnnotationPresent( property.getGetterMethod(), JacksonXmlProperty.class ) )
             {
-                JacksonXmlProperty jacksonXmlProperty = AnnotationUtils.findAnnotation( getterMethod, JacksonXmlProperty.class );
+                JacksonXmlProperty jacksonXmlProperty = AnnotationUtils.getAnnotation( getterMethod, JacksonXmlProperty.class );
 
                 if ( StringUtils.isEmpty( jacksonXmlProperty.localName() ) )
                 {
@@ -214,9 +211,9 @@ public class Jackson2PropertyIntrospectorService
 
             if ( property.isCollection() )
             {
-                if ( AnnotationUtils.findAnnotation( property.getGetterMethod(), JacksonXmlElementWrapper.class ) != null )
+                if ( AnnotationUtils.isAnnotationPresent( property.getGetterMethod(), JacksonXmlElementWrapper.class ) )
                 {
-                    JacksonXmlElementWrapper jacksonXmlElementWrapper = AnnotationUtils.findAnnotation( getterMethod, JacksonXmlElementWrapper.class );
+                    JacksonXmlElementWrapper jacksonXmlElementWrapper = AnnotationUtils.getAnnotation( getterMethod, JacksonXmlElementWrapper.class );
                     property.setCollectionWrapping( jacksonXmlElementWrapper.useWrapping() );
 
                     // TODO what if element-wrapper have different namespace?
@@ -273,22 +270,15 @@ public class Jackson2PropertyIntrospectorService
         return StringUtils.uncapitalize( name );
     }
 
-    private Multimap<String, Method> getMultimap( Class<?> klass )
-    {
-        Multimap<String, Method> methods = ArrayListMultimap.create();
-        Arrays.asList( getUniqueDeclaredMethods( klass ) ).forEach( method -> methods.put( method.getName(), method ) );
-        return methods;
-    }
-
     private List<Property> collectProperties( Class<?> klass )
     {
-        Multimap<String, Method> multimap = getMultimap( klass );
+        Multimap<String, Method> multimap = ReflectionUtils.getMethodsMultimap( klass );
         List<Property> properties = new ArrayList<>();
 
         Map<String, Method> methodMap = multimap.keySet().stream()
             .filter( key -> {
                 List<Method> methods = multimap.get( key ).stream()
-                    .filter( method -> AnnotationUtils.findAnnotation( method, JsonProperty.class ) != null && method.getParameterTypes().length == 0 )
+                    .filter( method -> AnnotationUtils.isAnnotationPresent( method, JsonProperty.class ) && method.getParameterTypes().length == 0 )
                     .collect( Collectors.toList() );
 
                 if ( methods.size() > 1 )
@@ -303,7 +293,7 @@ public class Jackson2PropertyIntrospectorService
             } )
             .collect( Collectors.toMap( Function.<String>identity(), key -> {
                 List<Method> collect = multimap.get( key ).stream()
-                    .filter( method -> AnnotationUtils.findAnnotation( method, JsonProperty.class ) != null && method.getParameterTypes().length == 0 )
+                    .filter( method -> AnnotationUtils.isAnnotationPresent( method, JsonProperty.class ) && method.getParameterTypes().length == 0 )
                     .collect( Collectors.toList() );
 
                 return collect.get( 0 );

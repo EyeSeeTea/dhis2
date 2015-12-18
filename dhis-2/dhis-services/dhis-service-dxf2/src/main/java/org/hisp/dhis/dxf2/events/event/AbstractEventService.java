@@ -34,12 +34,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
-import org.hisp.dhis.attribute.Attribute;
 import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.common.IdScheme;
 import org.hisp.dhis.common.IdSchemes;
 import org.hisp.dhis.common.IdentifiableObjectManager;
-import org.hisp.dhis.common.IdentifiableProperty;
 import org.hisp.dhis.common.IllegalQueryException;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.common.Pager;
@@ -399,7 +397,7 @@ public abstract class AbstractEventService
             }
         }
 
-        OrganisationUnit organisationUnit = getOrganisationUnit( importOptions.getIdSchemes().getOrgUnitIdScheme(), event.getOrgUnit() );
+        OrganisationUnit organisationUnit = getOrganisationUnit( importOptions.getIdSchemes(), event.getOrgUnit() );
 
         if ( organisationUnit == null )
         {
@@ -497,7 +495,6 @@ public abstract class AbstractEventService
         }
 
         EventRows eventRows = new EventRows();
-
 
         List<EventRow> eventRowList = eventStore.getEventRows( params, organisationUnits );
 
@@ -649,6 +646,11 @@ public abstract class AbstractEventService
 
     private ImportSummary updateEvent( Event event, User user, boolean singleValue, ImportOptions importOptions )
     {
+        if ( importOptions == null )
+        {
+            importOptions = new ImportOptions();
+        }
+
         ImportSummary importSummary = new ImportSummary();
         ProgramStageInstance programStageInstance = programStageInstanceService.getProgramStageInstance( event.getEvent() );
 
@@ -658,12 +660,7 @@ public abstract class AbstractEventService
             return importSummary.incrementIgnored();
         }
 
-        if ( importOptions == null )
-        {
-            importOptions = new ImportOptions();
-        }
-
-        OrganisationUnit organisationUnit = getOrganisationUnit( importOptions.getIdSchemes().getOrgUnitIdScheme(), event.getOrgUnit() );
+        OrganisationUnit organisationUnit = getOrganisationUnit( importOptions.getIdSchemes(), event.getOrgUnit() );
 
         if ( organisationUnit == null )
         {
@@ -819,8 +816,8 @@ public abstract class AbstractEventService
         }
 
         ImportOptions importOptions = new ImportOptions();
-        
-        OrganisationUnit organisationUnit = getOrganisationUnit( importOptions.getIdSchemes().getOrgUnitIdScheme(), event.getOrgUnit() );
+
+        OrganisationUnit organisationUnit = getOrganisationUnit( importOptions.getIdSchemes(), event.getOrgUnit() );
 
         if ( organisationUnit == null )
         {
@@ -966,6 +963,8 @@ public abstract class AbstractEventService
         for ( TrackedEntityDataValue dataValue : dataValues )
         {
             DataValue value = new DataValue();
+            value.setCreated( DateUtils.getLongGmtDateString( dataValue.getCreated() ) );
+            value.setLastUpdated( DateUtils.getLongGmtDateString( dataValue.getLastUpdated() ) );
             value.setDataElement( dataValue.getDataElement().getUid() );
             value.setValue( dataValue.getValue() );
             value.setProvidedElsewhere( dataValue.getProvidedElsewhere() );
@@ -1064,7 +1063,7 @@ public abstract class AbstractEventService
         {
             if ( dataValue == null )
             {
-                dataValue = new TrackedEntityDataValue( programStageInstance, dataElement, new Date(), value );
+                dataValue = new TrackedEntityDataValue( programStageInstance, dataElement, value );
                 dataValue.setStoredBy( storedBy );
                 dataValue.setProvidedElsewhere( providedElsewhere );
 
@@ -1078,7 +1077,6 @@ public abstract class AbstractEventService
             else
             {
                 dataValue.setValue( value );
-                dataValue.setTimestamp( new Date() );
                 dataValue.setStoredBy( storedBy );
                 dataValue.setProvidedElsewhere( providedElsewhere );
 
@@ -1281,53 +1279,9 @@ public abstract class AbstractEventService
         }
     }
 
-    private OrganisationUnit getOrganisationUnit( IdScheme idScheme, String value )
+    private OrganisationUnit getOrganisationUnit( IdSchemes idSchemes, String id )
     {
-        OrganisationUnit organisationUnit = null;
-
-        if ( StringUtils.isEmpty( value ) )
-        {
-            return null;
-        }
-
-        if ( organisationUnitCache.containsKey( value ) )
-        {
-            return organisationUnitCache.get( value );
-        }
-
-        if ( idScheme.is( IdentifiableProperty.UUID ) )
-        {
-            organisationUnit = organisationUnitService.getOrganisationUnitByUuid( value );
-        }
-        else if ( idScheme.is( IdentifiableProperty.CODE ) )
-        {
-            organisationUnit = organisationUnitService.getOrganisationUnitByCode( value );
-        }
-        else if ( idScheme.is( IdentifiableProperty.NAME ) )
-        {
-            List<OrganisationUnit> organisationUnitByName = organisationUnitService.getOrganisationUnitByName( value );
-
-            if ( organisationUnitByName.size() == 1 )
-            {
-                organisationUnit = organisationUnitByName.get( 0 );
-            }
-        }
-        else if ( idScheme.is( IdentifiableProperty.ATTRIBUTE ) )
-        {
-            Attribute attribute = manager.get( Attribute.class, idScheme.getAttribute() );
-            organisationUnit = manager.getByAttributeValue( OrganisationUnit.class, attribute, value );
-        }
-        else
-        {
-            organisationUnit = organisationUnitService.getOrganisationUnit( value );
-        }
-
-        if ( organisationUnit != null )
-        {
-            organisationUnitCache.put( value, organisationUnit );
-        }
-
-        return organisationUnit;
+        return organisationUnitCache.get( id, new IdentifiableObjectCallable<>( manager, OrganisationUnit.class, idSchemes.getOrgUnitIdScheme(), id ) );
     }
 
     private Program getProgram( IdScheme idScheme, String id )

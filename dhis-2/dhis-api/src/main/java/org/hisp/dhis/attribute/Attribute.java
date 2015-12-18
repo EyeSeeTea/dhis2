@@ -48,6 +48,7 @@ import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.document.Document;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
+import org.hisp.dhis.option.Option;
 import org.hisp.dhis.option.OptionSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
@@ -106,6 +107,10 @@ public class Attribute
 
     private boolean documentAttribute;
 
+    private boolean optionAttribute;
+
+    private boolean optionSetAttribute;
+
     private boolean mandatory;
 
     private boolean unique;
@@ -128,9 +133,10 @@ public class Attribute
     @Override
     public int hashCode()
     {
-        return 31 * super.hashCode() + Objects.hash( valueType, dataElementAttribute, dataElementGroupAttribute, indicatorAttribute, indicatorGroupAttribute, dataSetAttribute, organisationUnitAttribute, organisationUnitGroupAttribute,
-            organisationUnitGroupSetAttribute, userAttribute, userGroupAttribute, programAttribute, programStageAttribute, trackedEntityAttribute, trackedEntityAttributeAttribute, categoryOptionAttribute, categoryOptionGroupAttribute, mandatory, unique,
-            sortOrder, optionSet );
+        return 31 * super.hashCode() + Objects.hash( valueType, dataElementAttribute, dataElementGroupAttribute, indicatorAttribute, indicatorGroupAttribute,
+            dataSetAttribute, organisationUnitAttribute, organisationUnitGroupAttribute, organisationUnitGroupSetAttribute, userAttribute, userGroupAttribute,
+            programAttribute, programStageAttribute, trackedEntityAttribute, trackedEntityAttributeAttribute, categoryOptionAttribute, categoryOptionGroupAttribute,
+            mandatory, unique, optionSet, optionAttribute );
     }
 
     @Override
@@ -166,9 +172,9 @@ public class Attribute
             && Objects.equals( this.trackedEntityAttributeAttribute, other.trackedEntityAttributeAttribute )
             && Objects.equals( this.categoryOptionAttribute, other.categoryOptionAttribute )
             && Objects.equals( this.categoryOptionGroupAttribute, other.categoryOptionGroupAttribute )
+            && Objects.equals( this.optionAttribute, other.optionAttribute )
             && Objects.equals( this.mandatory, other.mandatory )
             && Objects.equals( this.unique, other.unique )
-            && Objects.equals( this.sortOrder, other.sortOrder )
             && Objects.equals( this.optionSet, other.optionSet );
     }
 
@@ -435,6 +441,32 @@ public class Attribute
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isOptionAttribute()
+    {
+        return optionAttribute;
+    }
+
+    public void setOptionAttribute( boolean optionAttribute )
+    {
+        this.optionAttribute = optionAttribute;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isOptionSetAttribute()
+    {
+        return optionSetAttribute;
+    }
+
+    public void setOptionSetAttribute( boolean optionSetAttribute )
+    {
+        this.optionSetAttribute = optionSetAttribute;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public OptionSet getOptionSet()
     {
         return optionSet;
@@ -479,6 +511,8 @@ public class Attribute
         if ( trackedEntityAttribute ) klasses.add( TrackedEntity.class );
         if ( trackedEntityAttributeAttribute ) klasses.add( TrackedEntityAttribute.class );
         if ( documentAttribute ) klasses.add( Document.class );
+        if ( optionAttribute ) klasses.add( Option.class );
+        if ( optionSetAttribute ) klasses.add( OptionSet.class );
 
         return klasses;
     }
@@ -509,6 +543,9 @@ public class Attribute
             trackedEntityAttributeAttribute = attribute.isTrackedEntityAttributeAttribute();
             categoryOptionAttribute = attribute.isCategoryOptionAttribute();
             categoryOptionGroupAttribute = attribute.isCategoryOptionGroupAttribute();
+            documentAttribute = attribute.isDocumentAttribute();
+            optionAttribute = attribute.isOptionAttribute();
+            optionSetAttribute = attribute.isOptionSetAttribute();
             mandatory = attribute.isMandatory();
 
             if ( strategy.isReplace() )

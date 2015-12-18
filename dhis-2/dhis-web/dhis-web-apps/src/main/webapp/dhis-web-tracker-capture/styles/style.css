@@ -80,6 +80,10 @@ textarea {
     width: 264px;
 }
 
+#bootstrapSelectForm .selectContainer .form-control-feedback {
+    /* Adjust feedback icon position */
+    right: -15px;
+}
 
 /*----------------------------------------------------------------------------*/
 /* Program-stage-instances
@@ -143,18 +147,29 @@ textarea {
 }
 
 .event-container {
+    display: inline-block;
     cursor: pointer;
     opacity: 1.0;
     text-align: center;
-    margin: 2px;
+    margin: 5px;
     padding: 5px;
     border: 2px dotted;
-    border-radius: 4px;    
+    border-radius: 4px;  
+    width: 130px;
+    height: 70px;
+    overflow: hidden;
+    float: left;
 }
 
 .event-container:hover {
     border: 2px solid;
     font-weight: bold;
+}
+
+.arrow-container {
+    display: inline-block;
+    float: left;
+    padding-top: 30px;
 }
 
 .stage-completed {
@@ -178,6 +193,15 @@ textarea {
 /* App - specific
 /*----------------------------------------------------------------------------*/
 
+div.ui-select-dropdown.select2-drop.select2-with-searchbox.select2-drop-active{
+    min-width: 200px;
+}
+ul.select2-choices {
+    /*overflow: visible !important;*/
+}
+span.form-control-ui-select.ui-select-match {
+    padding:1px;
+}
 .container-heading {
     color: white;
 }
@@ -202,6 +226,8 @@ div.paging a.active
     background-color: #D5CBC1;
     border-color: #aaa29a;
 }
+
+
 
 .stick {
     font-weight: bolder;
@@ -581,7 +607,11 @@ div#searchOuTree h4{
 }
 
 .add-default-left-padding {
-	padding-left: 15px !important;
+    padding-left: 15px !important;
+}
+
+.add-default-right-padding {
+    padding-right: 15px !important;
 }
 
 .visit-details {
@@ -952,15 +982,19 @@ a:active {
 }
 
 .ui-datepicker-group .ui-datepicker-header {
-    //height: 1.5em; 
-    height: inherit;  //this is to make it play nice with bootstrap
+    /*height: 1.5em;*/
+    height: inherit;  /*this is to make it play nice with bootstrap*/
 }
 
 #ui-datepicker-div, .calendars-popup {
-    z-index: 2000; //has to be greater than bootsrap's modal z-index
+    z-index: 2000; /* has to be greater than bootsrap's modal z-index */
 }
 
-//Necessary to override the .panel-group .panel { overflow: hidden; } in bootstrap.
+.no-padding {
+    padding:0px;
+}
+
+/*Necessary to override the .panel-group .panel { overflow: hidden; } in bootstrap.*/
 .panel-group .panel {
     overflow: visible;
 }
@@ -1117,52 +1151,6 @@ ul.tree ul li:last-child:before {
     vertical-align: middle;
 }
 
-div.event-paging 
-{ 
-    width:100%;
-    background-color: #ebf0f6;
-    float:left;
-    text-align: left;
-    height:16px; 
-    margin-top: 5px;
-    border-radius: 4px;
-}
-
-div.event-paging span, div.event-paging a 
-{
-    font-weight: bold;
-    padding: 0 5px;
-    font-size: 12px;
-}
-
-div.event-paging a
-{
-    text-decoration: none; 
-    color: #FF9900;
-}
-
-div.event-paging a.active
-{
-    text-decoration: none; 
-    color: #000;
-    cursor: default;
-}
-
-div.event-paging a:hover
-{
-    color: #000;
-}
-
-div.event-paging span.page 
-{
-    color:#000;
-}
-
-div.event-paging span.seperator 
-{
-    display:none;
-}
-
 input, button, select, textarea {
     color: #444;
 }
@@ -1203,6 +1191,10 @@ input, button, select, textarea {
     background: #ebf0f6;   
 }
 
+.default-form-table > tbody > tr {
+    height: 40px;
+}
+
 .row.null-margins {
     margin-left: 0;
     margin-right: 0;
@@ -1212,6 +1204,76 @@ input, button, select, textarea {
     display: flex;
     padding: 0px;
 }
+
+.event-table-custom > thead{
+    background-color: #FFFFFF;
+    padding-top: 10px;
+}
+
+.event-table-custom > tbody > tr {
+    height: 40px;
+}
+
+.event-table-custom > thead > tr > th {    
+    padding-left: 7px;
+    padding-right: 7px;
+    margin: 0;
+}
+
+.event-table-custom > tbody > tr > td {
+    vertical-align: top; 
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 2px;
+    padding-right: 2px;    
+    margin: 0;
+}
+
+.event-table-custom > tbody > tr > td .event-table-inactive {
+    padding-right: 5px;
+    padding-left: 5px;
+}
+
+.event-table-custom > tbody > tr > td.optionset {
+    vertical-align: top; 
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 2px;
+    padding-right: 2px; 
+    margin: 0;
+}
+
+.event-table-custom > tbody > tr > td input {    
+    padding: 5px;
+    margin: 0;
+}
+
+.event-table-custom > tbody > tr > td textarea {    
+    padding: 5px;
+    margin: 0;
+}
+
+.event-table-custom > tbody > tr > td select {    
+    padding: 5px;
+    margin: 0;
+}
+
+.event-table-custom > tbody > tr > td button {    
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin: 0;
+}
+
+.event-table-custom > tbody > tr > td a {    
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.event-table-custom > tbody > tr > td .statuscol {
+    padding-right: 4px;
+}    
+
+
 
 .badge.event-table-options-badge {
     padding-top: 0.5;
@@ -1226,8 +1288,101 @@ input, button, select, textarea {
     background-color: inherit;        
 }   
 
+.table.table-event-overview > tbody > tr > td {
+    border: none;
+    vertical-align: middle;
+}
+
+.table.table-event-overview > thead > tr > th {
+    border: none;
+}
+
+.min-possible-width {
+        width: 1px;
+}
+
+.radio-display-none {
+    display: none;
+}
+
+.fa-stack > .fa.fa-stack-1x.fa-circle.radio-save-success {
+    color: #b9ffb9 !important;     
+}
+
+.fa-stack > .fa.fa-stack-1x.fa-circle.radio-save-error {
+    color: #ff8a8a !important;
+}
+
+.fa-stack > .fa.fa-stack-1x.fa-circle.radio-white {
+    color: #FFFFFF !important;
+}
+
+.fa-stack > .radio-default{
+    color: #FFFFFF;
+}
+
+.error-text {
+    color: red;
+}
+
+.warning-text {
+    color: #C7C728;
+}
+
+.custom-radio-group {
+    margin-left: -8px;
+}
+
+.custom-radio-text {
+    display: inline-block;
+    margin-left: -5px;
+}
+
+.custom-radio-error{
+    margin-left: 5px; 
+    width:100px; 
+    text-align: center;
+}
+
+.custom-dropdown-menu {
+    min-width: 0 !important;
+}
+
+.dropdown-menu.custom-dropdown-menu > li > a {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.fa-stack-custom-large {
+    font-size: 20px;
+}
+
+.fa-stack-custom-small {
+    font-size: 10px;
+}
+
 .wrap-text {
     word-wrap: break-word;
+}
+
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.fa-icon-width {
+    width: 15px;
+}
+
+.prevent-text-selection-on-double-click{
+    -webkit-user-select: none; /* webkit (safari, chrome) browsers */
+    -moz-user-select: none; /* mozilla browsers */
+    -khtml-user-select: none; /* webkit (konqueror) browsers */
+    -ms-user-select: none; /* IE10+ */
+}
+
+.icon-padding {
+    padding: 2px;
 }
 
 .border-left {    
@@ -1240,3 +1395,8 @@ input, button, select, textarea {
     display: -ms-flexbox;
     display:         flex;
 }
+
+.findview-padding {
+    padding-top: 16px;
+}
+

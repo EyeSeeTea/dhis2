@@ -30,9 +30,13 @@ package org.hisp.dhis.dataadmin.action.option;
 
 import com.opensymphony.xwork2.Action;
 import org.apache.commons.lang3.StringUtils;
+import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.option.OptionService;
 import org.hisp.dhis.option.OptionSet;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
 
 /**
  * @author Chau Thu Tran
@@ -50,6 +54,9 @@ public class AddOptionSetAction
     {
         this.optionService = optionService;
     }
+
+    @Autowired
+    private AttributeService attributeService;
 
     // -------------------------------------------------------------------------------------------------
     // Input
@@ -76,6 +83,13 @@ public class AddOptionSetAction
         this.valueType = valueType;
     }
 
+    private List<String> jsonAttributeValues;
+
+    public void setJsonAttributeValues( List<String> jsonAttributeValues )
+    {
+        this.jsonAttributeValues = jsonAttributeValues;
+    }
+
     // -------------------------------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------------------------------
@@ -88,6 +102,11 @@ public class AddOptionSetAction
         optionSet.setCode( StringUtils.trimToNull( code ) );
         optionSet.setValueType( ValueType.valueOf( valueType ) );
         optionSet.setVersion( 1 );
+
+        if ( jsonAttributeValues != null )
+        {
+            attributeService.updateAttributeValues( optionSet, jsonAttributeValues );
+        }
 
         optionService.saveOptionSet( optionSet );
 

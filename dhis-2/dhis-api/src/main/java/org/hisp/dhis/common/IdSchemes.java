@@ -47,6 +47,10 @@ public class IdSchemes
 
     private IdScheme programStageIdScheme = IdScheme.UID;
 
+    private IdScheme trackedEntityIdScheme = IdScheme.UID;
+
+    private IdScheme trackedEntityAttributeIdScheme = IdScheme.UID;
+
     public IdSchemes()
     {
     }
@@ -120,6 +124,28 @@ public class IdSchemes
     {
         this.programStageIdScheme = IdScheme.from( idScheme );
         return this;
+    }
+
+    public IdSchemes setTrackedEntityIdScheme( String idScheme )
+    {
+        this.trackedEntityIdScheme = IdScheme.from( idScheme );
+        return this;
+    }
+
+    public IdScheme getTrackedEntityIdScheme()
+    {
+        return trackedEntityIdScheme;
+    }
+
+    public IdSchemes setTrackedEntityAttributeIdScheme( String idScheme )
+    {
+        this.trackedEntityAttributeIdScheme = IdScheme.from( idScheme );
+        return this;
+    }
+
+    public IdScheme getTrackedEntityAttributeIdScheme()
+    {
+        return trackedEntityAttributeIdScheme;
     }
 
     public static String getValue( String uid, String code, IdentifiableProperty identifiableProperty )

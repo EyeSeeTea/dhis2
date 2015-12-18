@@ -228,6 +228,14 @@ public class DefaultExpressionService
     {
         return getExpressionValue( expression, valueMap, constantMap, orgUnitCountMap, days, null, null );
     }
+    
+    @Override
+    public Double getExpressionValue( Expression expression, Map<? extends DimensionalItemObject, Double> valueMap,
+        Map<String, Double> constantMap, Map<String, Integer> orgUnitCountMap, Integer days,
+        Set<DataElementOperand> incompleteValues)
+    {
+        return getExpressionValue( expression, valueMap, constantMap, orgUnitCountMap, days, incompleteValues, null );
+    }
 
     @Override
     public Double getExpressionValue( Expression expression, Map<? extends DimensionalItemObject, Double> valueMap,
