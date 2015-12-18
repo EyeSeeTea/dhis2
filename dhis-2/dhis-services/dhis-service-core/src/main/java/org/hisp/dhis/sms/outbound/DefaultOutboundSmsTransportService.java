@@ -84,24 +84,9 @@ public class DefaultOutboundSmsTransportService
 
     private IInboundMessageNotification smppInboundMessageNotification;
 
-    public void setSmppInboundMessageNotification( IInboundMessageNotification smppInboundMessageNotification )
-    {
-        this.smppInboundMessageNotification = smppInboundMessageNotification;
-    }
-
     private OutboundSmsService outboundSmsService;
 
-    public void setOutboundSmsService( OutboundSmsService outboundSmsService )
-    {
-        this.outboundSmsService = outboundSmsService;
-    }
-
     private SmsPublisher smsPublisher;
-
-    public void setSmsPublisher( SmsPublisher smsPublisher )
-    {
-        this.smsPublisher = smsPublisher;
-    }
 
     // -------------------------------------------------------------------------
     // OutboundSmsTransportService implementation
@@ -472,7 +457,7 @@ public class DefaultOutboundSmsTransportService
             if ( recipients.size() > 1 )
             {
                 removeGroup( recipient );
-            }            
+            }
         }
 
         if ( outboundMessage.getMessageStatus() == MessageStatuses.SENT )
@@ -592,5 +577,20 @@ public class DefaultOutboundSmsTransportService
         }
 
         return SMSGatewayStatus.UNDEFINED;
+    }
+
+    public void setSmppInboundMessageNotification( IInboundMessageNotification smppInboundMessageNotification )
+    {
+        this.smppInboundMessageNotification = smppInboundMessageNotification;
+    }
+
+    public void setOutboundSmsService( OutboundSmsService outboundSmsService )
+    {
+        this.outboundSmsService = outboundSmsService;
+    }
+
+    public void setSmsPublisher( SmsPublisher smsPublisher )
+    {
+        this.smsPublisher = smsPublisher;
     }
 }

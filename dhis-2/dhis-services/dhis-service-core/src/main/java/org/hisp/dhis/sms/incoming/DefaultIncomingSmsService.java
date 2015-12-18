@@ -35,6 +35,7 @@ import java.util.List;
 import org.hisp.dhis.sms.MessageQueue;
 import org.smslib.InboundMessage;
 import org.smslib.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class DefaultIncomingSmsService
     implements IncomingSmsService
@@ -43,12 +44,8 @@ public class DefaultIncomingSmsService
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
     private IncomingSmsStore incomingSmsStore;
-
-    public void setIncomingSmsStore( IncomingSmsStore incomingSmsStore )
-    {
-        this.incomingSmsStore = incomingSmsStore;
-    }
 
     private MessageQueue incomingSmsQueue;
 
@@ -124,25 +121,35 @@ public class DefaultIncomingSmsService
     }
 
     @Override
-    public void save( IncomingSms incomingSms )
+    public int save( IncomingSms incomingSms )
     {
-        incomingSmsStore.save( incomingSms );
+        int smsId = incomingSmsStore.save( incomingSms );
         incomingSmsQueue.put( incomingSms );
+        return smsId;
     }
 
     @Override
-    public void save( String message, String originator, String gateway )
+    public int save( String message, String originator, String gateway, Date receivedTime )
     {
+
         IncomingSms sms = new IncomingSms();
         sms.setText( message );
         sms.setOriginator( originator );
         sms.setGatewayId( gateway );
-        sms.setSentDate( new Date() );
+
+        if ( receivedTime != null )
+        {
+            sms.setSentDate( receivedTime );
+        }
+        else
+        {
+            sms.setSentDate( new Date() );
+
+        }
         sms.setReceivedDate( new Date() );
         sms.setEncoding( SmsMessageEncoding.ENC7BIT );
         sms.setStatus( SmsMessageStatus.INCOMING );
-        save( sms );
-
+        return save( sms );
     }
 
     @Override
@@ -201,7 +208,6 @@ public class DefaultIncomingSmsService
     public IncomingSms convertToIncomingSms( InboundMessage message )
     {
         IncomingSms incomingSms = new IncomingSms();
-
         incomingSms.setOriginator( message.getOriginator() );
         incomingSms.setEncoding( SmsMessageEncoding.ENC7BIT );
         incomingSms.setSentDate( message.getDate() );
@@ -210,7 +216,6 @@ public class DefaultIncomingSmsService
         incomingSms.setGatewayId( message.getGatewayId() );
         incomingSms.setStatus( SmsMessageStatus.PROCESSED );
         incomingSms.setStatusMessage( "imported" );
-
         return incomingSms;
     }
 
