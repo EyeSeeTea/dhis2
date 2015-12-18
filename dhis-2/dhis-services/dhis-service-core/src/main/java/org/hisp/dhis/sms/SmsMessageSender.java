@@ -41,6 +41,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.message.MessageSender;
 import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.sms.outbound.OutboundSmsTransportService;
+import org.hisp.dhis.system.util.SmsUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserSettingService;
@@ -119,9 +120,9 @@ public class SmsMessageSender
 
         Set<String> phoneNumbers = null;
 
-        phoneNumbers = getRecipientsPhoneNumber( toSendList );
+        phoneNumbers = SmsUtils.getRecipientsPhoneNumber( toSendList );
 
-        text = createMessage( subject, text, sender );
+        text = SmsUtils.createMessage( subject, text, sender );
 
         // Bulk is limited in sending long SMS, need to split in pieces
 
@@ -140,7 +141,7 @@ public class SmsMessageSender
             if ( text.length() > MAX_CHAR )
             {
                 List<String> splitTextList = new ArrayList<>();
-                splitTextList = splitLongUnicodeString( text, splitTextList );
+                splitTextList = SmsUtils.splitLongUnicodeString( text, splitTextList );
 
                 for ( String each : splitTextList )
                 {
@@ -189,47 +190,6 @@ public class SmsMessageSender
         }
     }
 
-    private String createMessage( String subject, String text, User sender )
-    {
-        String name = "DHIS";
-
-        if ( sender != null )
-        {
-            name = sender.getUsername();
-        }
-
-        if ( subject == null || subject.isEmpty() )
-        {
-            subject = "";
-        }
-        else
-        {
-            subject = " - " + subject;
-        }
-
-        text = name + subject + ": " + text;
-
-        int length = text.length(); // Simplistic cut off 160 characters
-
-        return (length > 160) ? text.substring( 0, 157 ) + "..." : text;
-    }
-
-    private Set<String> getRecipientsPhoneNumber( Set<User> users )
-    {
-        Set<String> recipients = new HashSet<>();
-
-        for ( User user : users )
-        {
-            String phoneNumber = user.getPhoneNumber();
-
-            if ( StringUtils.trimToNull( phoneNumber ) != null )
-            {
-                recipients.add( phoneNumber );
-            }
-        }
-        return recipients;
-    }
-
     private String sendMessage( String text, Set<String> recipients, String gateWayId )
     {
         String message = null;
@@ -250,33 +210,5 @@ public class SmsMessageSender
         }
 
         return message;
-    }
-
-    public List<String> splitLongUnicodeString( String message, List<String> result )
-    {
-        String firstTempString = null;
-        String secondTempString = null;
-        int indexToCut = 0;
-
-        firstTempString = message.substring( 0, MAX_CHAR );
-
-        indexToCut = firstTempString.lastIndexOf( " " );
-
-        firstTempString = firstTempString.substring( 0, indexToCut );
-
-        result.add( firstTempString );
-
-        secondTempString = message.substring( indexToCut + 1, message.length() );
-
-        if ( secondTempString.length() <= MAX_CHAR )
-        {
-            result.add( secondTempString );
-
-            return result;
-        }
-        else
-        {
-            return splitLongUnicodeString( secondTempString, result );
-        }
     }
 }

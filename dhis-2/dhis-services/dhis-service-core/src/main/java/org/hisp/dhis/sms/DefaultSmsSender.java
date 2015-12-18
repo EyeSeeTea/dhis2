@@ -30,7 +30,6 @@ package org.hisp.dhis.sms;
 
 import java.lang.Character.UnicodeBlock;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -40,6 +39,7 @@ import org.hisp.dhis.sms.outbound.DefaultOutboundSmsTransportService;
 import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.sms.outbound.OutboundSmsService;
 import org.hisp.dhis.sms.outbound.OutboundSmsTransportService;
+import org.hisp.dhis.system.util.SmsUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
@@ -115,7 +115,7 @@ public class DefaultSmsSender
             throw new SmsServiceNotEnabledException();
         }
 
-        message = createMessage( null, message, currentUserService.getCurrentUser() );
+        message = SmsUtils.createMessage( null, message, currentUserService.getCurrentUser() );
         OutboundSms sms = new OutboundSms( message, phoneNumber );
         return sendMessage( sms );
     }
@@ -166,9 +166,9 @@ public class DefaultSmsSender
 
             if ( transportService != null && transportService.isEnabled() )
             {
-                phoneNumbers = getRecipientsPhoneNumber( toSendList );
+                phoneNumbers = SmsUtils.getRecipientsPhoneNumber( toSendList );
 
-                text = createMessage( subject, text, sender );
+                text = SmsUtils.createMessage( subject, text, sender );
 
                 // Bulk is limited in sending long SMS, need to cut into small
                 // pieces
@@ -187,7 +187,7 @@ public class DefaultSmsSender
                     if ( text.length() > maxChar )
                     {
                         List<String> splitTextList = new ArrayList<>();
-                        splitTextList = splitLongUnicodeString( text, splitTextList );
+                        splitTextList = SmsUtils.splitLongUnicodeString( text, splitTextList );
                         for ( String each : splitTextList )
                         {
                             if ( !phoneNumbers.isEmpty() && phoneNumbers.size() > 0 )
@@ -221,47 +221,6 @@ public class DefaultSmsSender
     // Supportive methods
     // -------------------------------------------------------------------------
 
-    private String createMessage( String subject, String text, User sender )
-    {
-        String name = "DHIS";
-
-        if ( sender != null )
-        {
-            name = sender.getUsername();
-        }
-
-        if ( subject == null || subject.isEmpty() )
-        {
-            subject = "";
-        }
-        else
-        {
-            subject = " - " + subject;
-        }
-
-        text = name + subject + ": " + text;
-
-        int length = text.length(); // Simplistic cut off 160 characters
-
-        return (length > 160) ? text.substring( 0, 157 ) + "..." : text;
-    }
-
-    private Set<String> getRecipientsPhoneNumber( List<User> users )
-    {
-        Set<String> recipients = new HashSet<>();
-
-        for ( User user : users )
-        {
-            String phoneNumber = user.getPhoneNumber();
-
-            if ( phoneNumber != null && !phoneNumber.trim().isEmpty() )
-            {
-                recipients.add( phoneNumber );
-            }
-        }
-        return recipients;
-    }
-
     private String sendMessage( String text, Set<String> recipients, String gateWayId )
     {
         String message = null;
@@ -280,33 +239,6 @@ public class DefaultSmsSender
         }
 
         return message;
-    }
-
-    public List<String> splitLongUnicodeString( String message, List<String> result )
-    {
-        String firstTempString = null;
-        String secondTempString = null;
-        int indexToCut = 0;
-
-        firstTempString = message.substring( 0, MAX_CHAR );
-
-        indexToCut = firstTempString.lastIndexOf( " " );
-
-        firstTempString = firstTempString.substring( 0, indexToCut );
-
-        result.add( firstTempString );
-
-        secondTempString = message.substring( indexToCut + 1, message.length() );
-
-        if ( secondTempString.length() <= MAX_CHAR )
-        {
-            result.add( secondTempString );
-            return result;
-        }
-        else
-        {
-            return splitLongUnicodeString( secondTempString, result );
-        }
     }
 
     public String isWastedSMS( OutboundSms sms )

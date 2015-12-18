@@ -1,6 +1,5 @@
 package org.hisp.dhis.system.util;
 
-
 /*
 * Copyright (c) 2004-2015, University of Oslo
 * All rights reserved.
@@ -32,9 +31,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.text.SimpleDateFormat;
 
 import org.apache.commons.lang3.StringUtils;
@@ -51,6 +52,8 @@ import org.hisp.dhis.sms.command.SMSCommand;
  */
 public class SmsUtils
 {
+    private static int MAX_CHAR = 160;
+
     public static String getCommandString( IncomingSms sms )
     {
         String message = sms.getText();
@@ -167,6 +170,74 @@ public class SmsUtils
         }
 
         return user;
+    }
+
+    public static List<String> splitLongUnicodeString( String message, List<String> result )
+    {
+        String firstTempString = null;
+        String secondTempString = null;
+        int indexToCut = 0;
+
+        firstTempString = message.substring( 0, MAX_CHAR );
+
+        indexToCut = firstTempString.lastIndexOf( " " );
+
+        firstTempString = firstTempString.substring( 0, indexToCut );
+
+        result.add( firstTempString );
+
+        secondTempString = message.substring( indexToCut + 1, message.length() );
+
+        if ( secondTempString.length() <= MAX_CHAR )
+        {
+            result.add( secondTempString );
+            return result;
+        }
+        else
+        {
+            return splitLongUnicodeString( secondTempString, result );
+        }
+    }
+
+    public static String createMessage( String subject, String text, User sender )
+    {
+        String name = "DHIS";
+
+        if ( sender != null )
+        {
+            name = sender.getUsername();
+        }
+
+        if ( subject == null || subject.isEmpty() )
+        {
+            subject = "";
+        }
+        else
+        {
+            subject = " - " + subject;
+        }
+
+        text = name + subject + ": " + text;
+
+        int length = text.length(); // Simplistic cut off 160 characters
+
+        return (length > 160) ? text.substring( 0, 157 ) + "..." : text;
+    }
+
+    public static Set<String> getRecipientsPhoneNumber( Collection<User> users )
+    {
+        Set<String> recipients = new HashSet<>();
+
+        for ( User user : users )
+        {
+            String phoneNumber = user.getPhoneNumber();
+
+            if ( StringUtils.trimToNull( phoneNumber ) != null )
+            {
+                recipients.add( phoneNumber );
+            }
+        }
+        return recipients;
     }
 
     public static OrganisationUnit selectOrganisationUnit( Collection<OrganisationUnit> orgUnits,
