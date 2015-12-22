@@ -15,6 +15,8 @@ public class Count extends PostfixMathCommand
 	numberOfParameters = 1;
     }
 
+	// nFunk's JEP run() method uses the raw Stack type
+	@SuppressWarnings({ "rawtypes", "unchecked" })
     public void run(Stack inStack) throws ParseException {
 	// check the stack
 	checkStack(inStack);

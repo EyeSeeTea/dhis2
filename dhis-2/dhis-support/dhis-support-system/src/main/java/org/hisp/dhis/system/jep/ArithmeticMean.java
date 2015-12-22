@@ -15,14 +15,18 @@ implements PostfixMathCommandI
 		numberOfParameters = 1;
 	}
 
+	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void run(Stack inStack) throws ParseException {
+		
 		// check the stack
 		checkStack(inStack);
 
 		Object param= inStack.pop();
 		if (param instanceof List) {
-			List<Double> vals=((List<Double>) param);
+			List<Double> vals=CustomFunctions.checkVector(param);
 			int n=vals.size();
+
 			if (n==0) {
 				inStack.push(new Double(0));
 			} else {

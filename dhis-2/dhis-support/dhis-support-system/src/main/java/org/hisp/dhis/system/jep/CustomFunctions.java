@@ -9,18 +9,20 @@ import org.nfunk.jep.ParseException;
 public class CustomFunctions {
 	public static void addFunctions(JEP parser)
 	{
-        parser.addFunction("mean",new ArithmeticMean());
-        parser.addFunction("stdev",new StandardDeviation());
-        parser.addFunction("median",new MedianValue());
-        parser.addFunction("maxval",new MaxValue());
-        parser.addFunction("minval",new MinValue());
-        parser.addFunction("count",new Count());
+        parser.addFunction("AVG",new ArithmeticMean());
+        parser.addFunction("STDDEV",new StandardDeviation());
+        parser.addFunction("MEDIAN",new MedianValue());
+        parser.addFunction("MAX",new MaxValue());
+        parser.addFunction("MIN",new MinValue());
+        parser.addFunction("COUNT",new Count());
+        parser.addFunction("VSUM", new VectorSum());
 	}
 	
+	@SuppressWarnings("unchecked") 
 	public static List<Double> checkVector(Object param) throws ParseException
 	{
 		if (param instanceof List) {
-			List<Object> vals=(List<Object>) param;
+			List<?> vals=(List<?>) param;
 			for (Object val: vals) {
 				if (!(val instanceof Double))
 					throw new ParseException("Non numeric vector");

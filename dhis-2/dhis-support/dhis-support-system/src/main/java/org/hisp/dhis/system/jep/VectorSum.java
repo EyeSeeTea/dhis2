@@ -8,8 +8,10 @@ import org.nfunk.jep.ParseException;
 import org.nfunk.jep.function.PostfixMathCommand;
 import org.nfunk.jep.function.PostfixMathCommandI;
 
-public class MinValue extends PostfixMathCommand implements PostfixMathCommandI {
-	public MinValue() {
+public class VectorSum extends PostfixMathCommand 
+implements PostfixMathCommandI 
+{
+	public VectorSum() {
 		numberOfParameters = 1;
 	}
 
@@ -19,15 +21,19 @@ public class MinValue extends PostfixMathCommand implements PostfixMathCommandI 
 		// check the stack
 		checkStack(inStack);
 
-		Object param = inStack.pop();
-		List<Double> vals = CustomFunctions.checkVector(param);
-		Double min = null;
-		for (Double v : vals) {
-			if (min == null)
-				min = v;
-			else if (v < min)
-				min = v;
+		Object param= inStack.pop();
+		if (param instanceof List) {
+			List<Double> vals=CustomFunctions.checkVector(param);
+			int n=vals.size();
+			if (n==0) {
+				inStack.push(new Double(0));
+			} else {
+				double sum=0; for (Double v: vals) {
+					sum=sum+v;}
+				inStack.push(new Double(sum));
+			}
 		}
-		inStack.push(new Double(min));
+		else throw new ParseException("Invalid aggregate value in expression");
 	}
 }
+
