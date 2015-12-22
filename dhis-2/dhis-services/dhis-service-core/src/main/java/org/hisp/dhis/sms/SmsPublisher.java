@@ -57,6 +57,7 @@ public class SmsPublisher
                 while ( !stop )
                 {
                     smsConsumer.spawnSmsConsumer();
+                    
                     try
                     {
                         Thread.sleep( 1000 );

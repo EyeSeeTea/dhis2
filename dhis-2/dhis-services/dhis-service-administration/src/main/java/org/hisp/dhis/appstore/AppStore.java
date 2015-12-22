@@ -1,4 +1,4 @@
-package org.hisp.dhis.sms;
+package org.hisp.dhis.appstore;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,21 +28,56 @@ package org.hisp.dhis.sms;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.hisp.dhis.user.User;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * @author Dang Duy Hieu
+ * @author Lars Helge Overland
  */
-public interface MessageSender
+public class AppStore
 {
-    /**
-     * Sends a message. The given message will be sent to the given set of
-     * phones.
-     * 
-     * @param message the message to send.
-     * @param recipients the recipients will receive the sms message.
-     */
-    String sendMessage( String subject, String text, User sender, boolean isPhone, Set<?> recipients, String gatewayId );
+    private String name;
+    
+    private String description;
+    
+    private List<WebApp> apps = new ArrayList<>();
+
+    public AppStore()
+    {
+    }
+
+    @JsonProperty
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName( String name )
+    {
+        this.name = name;
+    }
+
+    @JsonProperty
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public void setDescription( String description )
+    {
+        this.description = description;
+    }
+
+    @JsonProperty
+    public List<WebApp> getApps()
+    {
+        return apps;
+    }
+
+    public void setApps( List<WebApp> apps )
+    {
+        this.apps = apps;
+    }    
 }

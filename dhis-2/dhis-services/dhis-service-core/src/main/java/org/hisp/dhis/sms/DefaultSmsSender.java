@@ -42,7 +42,6 @@ import org.hisp.dhis.sms.outbound.OutboundSmsTransportService;
 import org.hisp.dhis.system.util.SmsUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
-import org.hisp.dhis.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,23 +60,10 @@ public class DefaultSmsSender
     private CurrentUserService currentUserService;
 
     @Autowired
-    private UserService userService;
-
-    @Autowired
     private OutboundSmsService outboundSmsService;
 
     @Autowired
     private OutboundSmsTransportService transportService;
-
-    public CurrentUserService getCurrentUserService()
-    {
-        return currentUserService;
-    }
-
-    public UserService getUserService()
-    {
-        return userService;
-    }
 
     @Transactional
     @Override

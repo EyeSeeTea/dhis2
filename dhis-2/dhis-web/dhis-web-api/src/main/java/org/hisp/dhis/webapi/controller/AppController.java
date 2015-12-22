@@ -33,6 +33,9 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.appmanager.App;
 import org.hisp.dhis.appmanager.AppManager;
+import org.hisp.dhis.appmanager.AppStatus;
+import org.hisp.dhis.appstore.AppStore;
+import org.hisp.dhis.appstore.AppStoreManager;
 import org.hisp.dhis.dxf2.render.DefaultRenderService;
 import org.hisp.dhis.dxf2.render.RenderService;
 import org.hisp.dhis.dxf2.webmessage.WebMessageException;
@@ -51,7 +54,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -75,17 +77,21 @@ public class AppController
 
     @Autowired
     private AppManager appManager;
+    
+    @Autowired
+    private AppStoreManager appStoreManager;
 
     @Autowired
     private RenderService renderService;
 
     @Autowired
     private LocationManager locationManager;
-    
-    @Autowired
-    private RestTemplate restTemplate;
-
+        
     private final ResourceLoader resourceLoader = new DefaultResourceLoader();
+
+    // -------------------------------------------------------------------------
+    // Resources
+    // -------------------------------------------------------------------------
 
     @RequestMapping( method = RequestMethod.GET, produces = ContextUtils.CONTENT_TYPE_JSON )
     public void getApps( @RequestParam( required = false ) String key, HttpServletResponse response )
@@ -125,22 +131,11 @@ public class AppController
 
         String contextPath = ContextUtils.getContextPath( request );
 
-        switch ( appManager.installApp( tempFile, file.getOriginalFilename(), contextPath ) )
+        AppStatus status = appManager.installApp( tempFile, file.getOriginalFilename(), contextPath );
+        
+        if ( !status.ok() )
         {
-        case OK:
-            break;
-        case NAMESPACE_TAKEN:
-            throw new WebMessageException(
-                WebMessageUtils.conflict( "The namespace defined in manifest.webapp is already protected." ) );
-        case INVALID_ZIP_FORMAT:
-            throw new WebMessageException(
-                WebMessageUtils.unprocessableEntity( "Zip-file could not be read." ) );
-        case INVALID_MANIFEST_JSON:
-            throw new WebMessageException(
-                WebMessageUtils.conflict( "Invalid JSON in app manifest file." ) );
-        case INSTALLATION_FAILED:
-            throw new WebMessageException(
-                WebMessageUtils.conflict( "App could not be installed on file system, check permissions." ) );
+            throw new WebMessageException( WebMessageUtils.conflict( status.getMessage() ) );
         }
     }
 
@@ -283,9 +278,10 @@ public class AppController
     }
 
     @RequestMapping( value = "/appStore", method = RequestMethod.GET, produces = "application/json" )
-    public @ResponseBody String getAppStoreUrl()
+    public @ResponseBody AppStore getAppStore( HttpServletResponse response )
+        throws IOException
     {
-        return restTemplate.getForObject( SettingKey.APP_STORE_INDEX_URL.getDefaultValue().toString(), String.class );
+        return appStoreManager.getAppStore();
     }
     
     //--------------------------------------------------------------------------

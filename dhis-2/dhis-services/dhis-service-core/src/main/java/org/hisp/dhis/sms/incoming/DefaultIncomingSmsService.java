@@ -35,7 +35,6 @@ import java.util.List;
 import org.hisp.dhis.sms.MessageQueue;
 import org.smslib.InboundMessage;
 import org.smslib.Service;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class DefaultIncomingSmsService
     implements IncomingSmsService
@@ -44,12 +43,15 @@ public class DefaultIncomingSmsService
     // Dependencies
     // -------------------------------------------------------------------------
 
-    @Autowired
     private IncomingSmsStore incomingSmsStore;
+
+    public void setIncomingSmsStore( IncomingSmsStore incomingSmsStore )
+    {
+        this.incomingSmsStore = incomingSmsStore;
+    }
 
     private MessageQueue incomingSmsQueue;
 
-    @Override
     public void setIncomingSmsQueue( MessageQueue incomingSmsQueue )
     {
         this.incomingSmsQueue = incomingSmsQueue;

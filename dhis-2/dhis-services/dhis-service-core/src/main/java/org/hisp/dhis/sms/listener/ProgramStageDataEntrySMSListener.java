@@ -104,13 +104,16 @@ public class ProgramStageDataEntrySMSListener
     {
         HashMap<String, String> output = new HashMap<>();
         Pattern pattern = Pattern.compile( defaultPattern );
+        
         if ( !StringUtils.isBlank( smsCommand.getSeparator() ) )
         {
             String x = "(\\w+)\\s*\\" + smsCommand.getSeparator().trim() + "\\s*([\\w ]+)\\s*(\\"
                 + smsCommand.getSeparator().trim() + "|$)*\\s*";
             pattern = Pattern.compile( x );
         }
+        
         Matcher matcher = pattern.matcher( message );
+        
         while ( matcher.find() )
         {
             String key = matcher.group( 1 );

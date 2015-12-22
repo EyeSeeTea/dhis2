@@ -1,4 +1,4 @@
-package org.hisp.dhis.sms;
+package org.hisp.dhis.appstore;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,21 +28,13 @@ package org.hisp.dhis.sms;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Set;
-
-import org.hisp.dhis.user.User;
+import java.io.IOException;
 
 /**
- * @author Dang Duy Hieu
+ * @author Lars Helge Overland
  */
-public interface MessageSender
+public interface AppStoreManager
 {
-    /**
-     * Sends a message. The given message will be sent to the given set of
-     * phones.
-     * 
-     * @param message the message to send.
-     * @param recipients the recipients will receive the sms message.
-     */
-    String sendMessage( String subject, String text, User sender, boolean isPhone, Set<?> recipients, String gatewayId );
+    AppStore getAppStore()
+        throws IOException;
 }
