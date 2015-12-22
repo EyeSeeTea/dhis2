@@ -1,4 +1,4 @@
-package org.hisp.dhis.node.presets;
+package org.hisp.dhis.webapi.controller;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,27 +28,47 @@ package org.hisp.dhis.node.presets;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.collect.Lists;
-import org.hisp.dhis.common.PresetProvider;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
-import java.util.List;
+import java.io.IOException;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.hisp.dhis.appstore.AppStore;
+import org.hisp.dhis.appstore.AppStoreManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Lars Helge Overland
  */
-@Component
-public class NameablePresetProvider implements PresetProvider
+@Controller
+@RequestMapping( AppStoreController.RESOURCE_PATH )
+public class AppStoreController
 {
-    @Override
-    public String name()
-    {
-        return "nameable";
-    }
+    public static final String RESOURCE_PATH = "/appStore";
+    
+    @Autowired
+    private AppStoreManager appStoreManager;
 
-    @Override
-    public List<String> provide()
+    @RequestMapping( method = RequestMethod.GET, produces = "application/json" )
+    public @ResponseBody AppStore getAppStore( HttpServletResponse response )
+        throws IOException
     {
-        return Lists.newArrayList( "id", "name", "shortName", "description", "code", "created", "lastUpdated", "href" );
+        return appStoreManager.getAppStore();
+    }
+    
+    @ResponseStatus( value = HttpStatus.OK )
+    @RequestMapping( value = "/{versionId}", method = RequestMethod.POST )
+    @PreAuthorize( "hasRole('ALL') or hasRole('M_dhis-web-maintenance-appmanager')" )
+    public void installAppFromAppStore( @PathVariable String versionId )
+    {
+        appStoreManager.installAppFromAppStore( versionId );
     }
 }

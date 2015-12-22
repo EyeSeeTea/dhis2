@@ -34,8 +34,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.appmanager.App;
 import org.hisp.dhis.appmanager.AppManager;
 import org.hisp.dhis.appmanager.AppStatus;
-import org.hisp.dhis.appstore.AppStore;
-import org.hisp.dhis.appstore.AppStoreManager;
 import org.hisp.dhis.dxf2.render.DefaultRenderService;
 import org.hisp.dhis.dxf2.render.RenderService;
 import org.hisp.dhis.dxf2.webmessage.WebMessageException;
@@ -79,9 +77,6 @@ public class AppController
     private AppManager appManager;
     
     @Autowired
-    private AppStoreManager appStoreManager;
-
-    @Autowired
     private RenderService renderService;
 
     @Autowired
@@ -94,7 +89,8 @@ public class AppController
     // -------------------------------------------------------------------------
 
     @RequestMapping( method = RequestMethod.GET, produces = ContextUtils.CONTENT_TYPE_JSON )
-    public void getApps( @RequestParam( required = false ) String key, HttpServletResponse response )
+    public void getApps( @RequestParam( required = false ) String key, 
+        HttpServletResponse response )
         throws IOException
     {
         List<App> apps = new ArrayList<>();
@@ -129,9 +125,7 @@ public class AppController
         File tempFile = File.createTempFile( "IMPORT_", "_ZIP" );
         file.transferTo( tempFile );
 
-        String contextPath = ContextUtils.getContextPath( request );
-
-        AppStatus status = appManager.installApp( tempFile, file.getOriginalFilename(), contextPath );
+        AppStatus status = appManager.installApp( tempFile, file.getOriginalFilename() );
         
         if ( !status.ok() )
         {
@@ -148,7 +142,8 @@ public class AppController
     }
 
     @RequestMapping( value = "/{app}/**", method = RequestMethod.GET )
-    public void renderApp( @PathVariable( "app" ) String app, HttpServletRequest request, HttpServletResponse response )
+    public void renderApp( @PathVariable( "app" ) String app, 
+        HttpServletRequest request, HttpServletResponse response )
         throws IOException
     {
         Iterable<Resource> locations = Lists.newArrayList(
@@ -216,7 +211,7 @@ public class AppController
     @RequestMapping( value = "/{app}", method = RequestMethod.DELETE )
     @PreAuthorize( "hasRole('ALL') or hasRole('M_dhis-web-maintenance-appmanager')" )
     public void deleteApp( @PathVariable( "app" ) String app,
-        @RequestParam( value = "deleteappdata", required = false, defaultValue = "false" ) boolean deleteAppData,
+        @RequestParam( required = false ) boolean deleteAppData,
         HttpServletRequest request, HttpServletResponse response )
         throws WebMessageException
     {
@@ -277,13 +272,6 @@ public class AppController
         appManager.setAppBaseUrl( appBaseUrl );
     }
 
-    @RequestMapping( value = "/appStore", method = RequestMethod.GET, produces = "application/json" )
-    public @ResponseBody AppStore getAppStore( HttpServletResponse response )
-        throws IOException
-    {
-        return appStoreManager.getAppStore();
-    }
-    
     //--------------------------------------------------------------------------
     // Helpers
     //--------------------------------------------------------------------------
