@@ -37,9 +37,11 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
 
+
 /**
  * Serializable configuration object for Sms.
  */
+
 @XmlRootElement( name = "smsConfiguration" )
 public class SmsConfiguration
     implements Serializable
