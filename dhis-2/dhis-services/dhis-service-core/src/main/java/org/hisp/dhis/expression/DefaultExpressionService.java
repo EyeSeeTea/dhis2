@@ -343,8 +343,7 @@ public class DefaultExpressionService
 
             while ( matcher.find() )
             {
-                String sub_expression =  matcher.group() ;
-                aggregates.add(sub_expression);
+                aggregates.add(matcher.group(1));
             }
         }
 
@@ -539,8 +538,8 @@ public class DefaultExpressionService
         while ( matcher.find() )
         {
         	String aggregate=matcher.group(1);
-        	
         	ExpressionValidationOutcome arg_valid=expressionIsValid(aggregate);
+
         	if ( arg_valid != ExpressionValidationOutcome.VALID ) 
         	{
         		return arg_valid;
@@ -551,6 +550,7 @@ public class DefaultExpressionService
         
         expression = TextUtils.appendTail( matcher, sb );
 
+        
         // ---------------------------------------------------------------------
         // Constants
         // ---------------------------------------------------------------------
