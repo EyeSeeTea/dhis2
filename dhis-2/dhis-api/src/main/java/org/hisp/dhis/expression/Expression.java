@@ -258,7 +258,7 @@ public class Expression
     @JacksonXmlProperty(localName = "dataElement", namespace = DxfNamespaces.DXF_2_0)
     public Set<DataElement> getDataElementsInExpression()
     {
-        return dataElementsInExpression;
+    	return dataElementsInExpression;
     }
 
     public void setDataElementsInExpression( Set<DataElement> dataElementsInExpression )
