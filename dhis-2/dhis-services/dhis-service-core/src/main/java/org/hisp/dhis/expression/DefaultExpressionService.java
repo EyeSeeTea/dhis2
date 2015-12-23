@@ -922,7 +922,7 @@ public class DefaultExpressionService
         
         while (matcher.find())
         {
-        	String sub_expression = matcher.group();
+        	String sub_expression = matcher.group(1);
         	List<Double> samples = (aggregateMap == null) ? (null) : aggregateMap.get( sub_expression );
         	
         	if ( samples == null && SKIP_IF_ANY_VALUE_MISSING.equals( missingValueStrategy ) )
