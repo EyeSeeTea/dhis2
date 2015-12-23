@@ -39,6 +39,7 @@ import org.hisp.dhis.dxf2.webmessage.WebMessageException;
 import org.hisp.dhis.node.AbstractNode;
 import org.hisp.dhis.node.Node;
 import org.hisp.dhis.node.NodeUtils;
+import org.hisp.dhis.node.Preset;
 import org.hisp.dhis.node.types.CollectionNode;
 import org.hisp.dhis.node.types.RootNode;
 import org.hisp.dhis.query.Order;
@@ -87,9 +88,16 @@ public class DimensionController
     // -------------------------------------------------------------------------
 
     @Override
-    protected List<DimensionalObject> getEntityList( WebMetaData metaData, WebOptions options, List<String> filters, List<Order> orders )
+    @SuppressWarnings( "unchecked" )
+    protected List<DimensionalObject> getEntityList( WebMetaData metaData, WebOptions options, List<String> filters, List<Order> orders ) throws QueryParserException
     {
-        return dimensionService.getAllDimensions();
+        List<DimensionalObject> dimensionalObjects;
+        Query query = queryService.getQueryFromUrl( DimensionalObject.class, filters, orders );
+        query.setDefaultOrder();
+        query.setObjects( dimensionService.getAllDimensions() );
+        dimensionalObjects = (List<DimensionalObject>) queryService.query( query );
+
+        return dimensionalObjects;
     }
 
     @Override
@@ -107,7 +115,7 @@ public class DimensionController
 
         if ( fields.isEmpty() )
         {
-            fields.add( ":identifiable" );
+            fields.addAll( Preset.defaultPreset().getFields() );
         }
 
         List<DimensionalItemObject> items = dimensionService.getCanReadDimensionItems( uid );

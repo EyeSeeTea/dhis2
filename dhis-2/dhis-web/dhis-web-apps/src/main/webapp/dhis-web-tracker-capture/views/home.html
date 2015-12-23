@@ -1,14 +1,4 @@
 <script>
-    $(".select-dropdown-button").on('click', function (e) {
-        $("#selectDropDown").width($("#selectDropDownParent").width());
-        e.stopPropagation();
-        $("#selectDropDown").dropdown('toggle');
-    });
-    $(".select-dropdown-caret").on('click', function (e) {
-        $("#selectDropDown").width($("#selectDropDownParent").width());
-        e.stopPropagation();
-        $("#selectDropDown").dropdown('toggle');
-    });
     $(".search-dropdown-button").on('click', function () {
         $("#searchDropDown").width($("#searchDropDownParent").width());
     });
@@ -22,7 +12,6 @@
     });
 
     $(window).resize(function () {
-        $("#selectDropDown").width($("#selectDropDownParent").width());
         $("#searchDropDown").width($("#searchDropDownParent").width());
     });
 </script>
@@ -60,17 +49,7 @@
         <!-- top bar begins -->
         <div class="row top-bar">        
             <div class="col-sm-12">                
-                {{trackerCaptureLabel}}
-                <div class="pull-right hideInPrint">
-                    <div class="btn-group" dropdown is-open="status.isopen">
-                        <button type="button" class="btn btn-default dropdown-toggle" dropdown-toggle ng-disabled="trackedEntityList.rows.length <= 0">
-                            <i class="fa fa-cog" title="{{settingsLabel}}"></i>
-                        </button>
-                        <ul class="dropdown-menu pull-right" role="menu">
-                            <li><a href ng-click="showDisplayMode()">{{displayModeLabel}}</a></li>
-                        </ul>
-                    </div>
-                </div>            
+                {{trackerCaptureLabel}}                
             </div>        
         </div>
         <!-- top bar ends -->
@@ -133,10 +112,10 @@
                         ng-click="showRegistration()">                    
                     {{registerLabel}}
                 </button>
-                <button type="button" 
+                <button type="button"
                         class="btn btn-info"
                         ng-if="teiCount > 0"
-                        onclick="javascript:window.print()">                    
+                        onclick="javascript:window.print()">
                     {{printLabel}}
                 </button>
             </div>
@@ -152,9 +131,7 @@
         <!--- Error display for search ends -->
 
         <!--registration form begins -->
-        <div class="row" ng-if="showRegistrationDiv">
-            <div class="col-sm-12" ng-include="'components/registration/registration.html'"></div>
-        </div>
+        <div class="col-sm-8 bordered-div" ng-if="showRegistrationDiv" ng-include="'components/registration/registration.html'"></div>
         <!-- registration form ends -->        
 
         <!-- entity grid begins -->
@@ -162,7 +139,7 @@
         <div class="row">
             <div class="col-sm-12">
                 <span ng-if='!showRegistrationDiv'>
-                    <span class="btn-group" ng-if="selectedProgram && trackedEntityList.rows.length > 0 ">
+                    <span class="btn-group" ng-if="selectedProgram && teiFetched">
                         <label class="btn btn-default" ng-model="enrollmentStatus" btn-radio="'ALL'" title="{{allEnrollmentsLabel}}" ng-click='filterByEnrollmentStatus("ALL")'><i class="fa fa-list mouse-pointer"></i></label>
                         <label class="btn btn-default" ng-model="enrollmentStatus" btn-radio="'ACTIVE'" title="{{activeEnrollmentsLabel}}" ng-click='filterByEnrollmentStatus("ACTIVE")'><i class="fa fa-circle-o mouse-pointer"></i></label>
                         <label class="btn btn-default" ng-model="enrollmentStatus" btn-radio="'COMPLETED'" title="{{completedEnrollmentsLabel}}" ng-click='filterByEnrollmentStatus("COMPLETED")'><i class="fa fa-check mouse-pointer"></i></label>

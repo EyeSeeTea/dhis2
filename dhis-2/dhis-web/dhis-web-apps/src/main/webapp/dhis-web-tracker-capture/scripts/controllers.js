@@ -26,17 +26,18 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
                 CurrentSelection,
                 TEIGridService,
                 TEIService) {  
-    
+
+
     $scope.maxOptionSize = 30;
     $scope.model = {};
     
     //Selection
     $scope.ouModes = [{name: 'SELECTED'}, {name: 'CHILDREN'}, {name: 'DESCENDANTS'}, {name: 'ACCESSIBLE'}];         
-    $scope.selectedOuMode = $scope.ouModes[0];    
+    $scope.selectedOuMode = $scope.ouModes[2];    
     $scope.dashboardProgramId = ($location.search()).program;
     $scope.selectedOrgUnitId = ($location.search()).ou;
     $scope.treeLoaded = false;
-    $scope.searchOuTree = false;
+    $scope.searchOuTree = {open: true};
     $scope.teiListMode = {onlyActive: false};
     $scope.enrollmentStatus = 'ALL';    
        
@@ -62,6 +63,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
         $scope.teiFetched = false;        
         $scope.queryUrl = null;
         $scope.programUrl = null;
+        $scope.enrollmentStatus = 'ALL'; 
         $scope.attributeUrl = {url: null, hasValue: false};
         $scope.pager = {pageSize: 50, page: 1, toolBarDisplay: 5};
     }
@@ -75,7 +77,8 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
             
             SessionStorageService.set('SELECTED_OU', $scope.selectedOrgUnit);
             
-            $scope.trackedEntityList = null;
+            $scope.trackedEntityList = null;            
+            $scope.searchText = null;
             
             $scope.optionSets = CurrentSelection.getOptionSets();
             
@@ -170,6 +173,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
         resetParams();
         $scope.selectedProgram = program;
         $scope.trackedEntityList = null;
+        $scope.searchText = null;
         $scope.processAttributes();              
     };
     
@@ -211,8 +215,8 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
     };
    
     //$scope.searchParam = {bools: []};
-    $scope.search = function(mode){  
-        resetParams()
+    $scope.search = function(mode){
+        resetParams();
         var grid = TEIGridService.generateGridColumns($scope.attributes, $scope.selectedOuMode.name);
         $scope.gridColumns = grid.columns;
             
@@ -223,22 +227,26 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
         }        
         
         //check search mode
-        if( $scope.selectedSearchMode === $scope.searchMode.freeText ){     
-
-            if(!$scope.searchText){                
-                $scope.emptySearchText = true;
-                $scope.teiFetched = false;
-                return;
-            }       
+        if( $scope.selectedSearchMode === $scope.searchMode.freeText ){
             
-            $scope.queryUrl = 'query=LIKE:' + $scope.searchText;            
+            if($scope.searchText){
+                $scope.queryUrl = 'query=LIKE:' + $scope.searchText;
+            }
+            else{
+                if(!$scope.selectedProgram || !$scope.selectedProgram.displayFrontPageList){
+                    $scope.emptySearchText = true;
+                    $scope.teiFetched = false;
+                    return;
+                }
+            }            
+            
             $scope.attributes = EntityQueryFactory.resetAttributesQuery($scope.attributes, $scope.enrollment);
-            $scope.searchingOrgUnit = $scope.selectedOrgUnit;
+            $scope.searchingOrgUnit = $scope.selectedSearchingOrgUnit && $scope.selectedSearchingOrgUnit.id ? $scope.selectedSearchingOrgUnit : $scope.selectedOrgUnit;
         }
         
         if( $scope.selectedSearchMode === $scope.searchMode.attributeBased ){
             
-            $scope.searchText = '';
+            $scope.searchText = null;
             
             $scope.attributeUrl = EntityQueryFactory.getAttributesQuery($scope.attributes, $scope.enrollment);
             
@@ -252,9 +260,9 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
         }
         
         if( $scope.selectedSearchMode === $scope.searchMode.listAll ){
-            $scope.searchText = '';            
+            $scope.searchText = null;            
             $scope.attributes = EntityQueryFactory.resetAttributesQuery($scope.attributes, $scope.enrollment);
-            $scope.searchingOrgUnit = $scope.selectedOrgUnit;
+            $scope.searchingOrgUnit = $scope.selectedSearchingOrgUnit && $scope.selectedSearchingOrgUnit.id ? $scope.selectedSearchingOrgUnit : $scope.selectedOrgUnit;
         }
         
         $scope.doSearch = false;
@@ -401,6 +409,8 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
                 o.hasChildren = o.children && o.children.length > 0 ? true : false;
             });            
         });
+        
+        $scope.selectedSearchingOrgUnit = $scope.orgUnits[0] ? $scope.orgUnits[0] : null; 
     });
     
     //expand/collapse of search orgunit tree

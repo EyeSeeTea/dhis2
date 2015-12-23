@@ -272,8 +272,12 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                     obj.valueType === 'INTEGER_POSITIVE' ||
                     obj.valueType === 'INTEGER_NEGATIVE' ||
                     obj.valueType === 'INTEGER_ZERO_OR_POSITIVE'){
-                if( dhis2.validation.isNumber(val)  ){                            
-                    val = parseInt(val);
+                if( dhis2.validation.isNumber(val)){
+                    if(obj.valueType === 'NUMBER'){
+                        val = parseFloat(val);
+                    }else{
+                        val = parseInt(val);
+                    }
                 }
             }
             if(val && obj.optionSetValue && obj.optionSet && obj.optionSet.id && optionSets[obj.optionSet.id].options  ){
@@ -1707,7 +1711,17 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 
                             //In case the rule is of type CREATEEVENT, run event creation:
                             if($rootScope.ruleeffects[ruleEffectKey][action.id].action === "CREATEEVENT" && $rootScope.ruleeffects[ruleEffectKey][action.id].ineffect){
-                                eventsCreated += performCreateEventAction($rootScope.ruleeffects[ruleEffectKey][action.id], selectedEntity, selectedEnrollment, evs.byStage[$rootScope.ruleeffects[ruleEffectKey][action.id].programStage.id]);
+                                if(evs && evs.byStage && evs.byStage[$rootScope.ruleeffects[ruleEffectKey]] && evs.byStage[$rootScope.ruleeffects[ruleEffectKey][action.id]])
+                                {
+                                    if(evs.byStage[$rootScope.ruleeffects[ruleEffectKey][action.id].programStage]) {
+                                        eventsCreated += performCreateEventAction($rootScope.ruleeffects[ruleEffectKey][action.id], selectedEntity, selectedEnrollment, evs.byStage[$rootScope.ruleeffects[ruleEffectKey][action.id].programStage.id]);
+                                    } else {
+                                        $log.warn("No programstage defined for CREATEEVENT action: " + action.id);
+                                    }
+                                } else {
+                                    $log.warn("Events to evaluate for CREATEEVENT action: " + action.id + ". Could it have been triggered at the wrong time or during registration?");
+                                }
+                                    
                             }
                             //In case the rule is of type "assign variable" and the rule is effective,
                             //the variable data result needs to be applied to the correct variable:

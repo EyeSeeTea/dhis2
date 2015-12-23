@@ -1,7 +1,5 @@
 package org.hisp.dhis.webapi.controller;
 
-import org.hisp.dhis.dxf2.adx.AdxDataService;
-
 /*
  * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
@@ -30,7 +28,7 @@ import org.hisp.dhis.dxf2.adx.AdxDataService;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dxf2.common.IdSchemes;
+import org.hisp.dhis.common.IdSchemes;
 import org.hisp.dhis.dxf2.common.ImportOptions;
 import org.hisp.dhis.dxf2.datavalueset.DataExportParams;
 import org.hisp.dhis.dxf2.datavalueset.DataValueSetService;
@@ -50,6 +48,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import org.hisp.dhis.dxf2.adx.AdxDataService;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -63,6 +63,7 @@ import java.util.Date;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
+import org.hibernate.SessionFactory;
 
 import static org.hisp.dhis.webapi.utils.ContextUtils.*;
 
@@ -89,6 +90,9 @@ public class DataValueSetController
     
     @Autowired
     private Scheduler scheduler;
+    
+    @Autowired
+    private SessionFactory sessionFactory;
 
     // -------------------------------------------------------------------------
     // Get
@@ -112,6 +116,26 @@ public class DataValueSetController
             startDate, endDate, orgUnit, children, lastUpdated, limit, idSchemes );
 
         dataValueSetService.writeDataValueSetXml( params, response.getOutputStream() );
+    }
+
+    @RequestMapping( method = RequestMethod.GET, produces = CONTENT_TYPE_XML_ADX )
+    public void getDataValueSetXmlAdx(
+        @RequestParam Set<String> dataSet,
+        @RequestParam( required = false ) Set<String> period,
+        @RequestParam( required = false ) Date startDate,
+        @RequestParam( required = false ) Date endDate,
+        @RequestParam Set<String> orgUnit,
+        @RequestParam( required = false ) boolean children,
+        @RequestParam( required = false ) Date lastUpdated,
+        @RequestParam( required = false ) Integer limit,
+        IdSchemes idSchemes, HttpServletResponse response ) throws IOException
+    {
+        response.setContentType( CONTENT_TYPE_XML_ADX );
+
+        DataExportParams params = dataValueSetService.getFromUrl( dataSet, period,
+            startDate, endDate, orgUnit, children, lastUpdated, limit, idSchemes );
+
+        adxDataService.writeDataValueSet( params, response.getOutputStream() );
     }
 
     @RequestMapping( method = RequestMethod.GET, produces = CONTENT_TYPE_JSON )
@@ -177,7 +201,7 @@ public class DataValueSetController
         }
     }
 
-    @RequestMapping( method = RequestMethod.POST, consumes = "application/xml+adx" )
+    @RequestMapping( method = RequestMethod.POST, consumes = CONTENT_TYPE_XML_ADX )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_DATAVALUE_ADD')" )
     public void postAdxDataValueSet( ImportOptions importOptions,
         HttpServletRequest request, HttpServletResponse response ) throws IOException
@@ -250,7 +274,7 @@ public class DataValueSetController
         InputStream inputStream = saveTmp( request.getInputStream() );
 
         TaskId taskId = new TaskId( TaskCategory.DATAVALUE_IMPORT, currentUserService.getCurrentUser() );
-        scheduler.executeTask( new ImportDataValueTask( dataValueSetService, adxDataService, inputStream, importOptions, taskId, format ) );
+        scheduler.executeTask( new ImportDataValueTask( dataValueSetService, adxDataService, sessionFactory, inputStream, importOptions, taskId, format ) );
 
         response.setHeader( "Location", ContextUtils.getRootPath( request ) + "/system/tasks/" + TaskCategory.DATAVALUE_IMPORT );
         response.setStatus( HttpServletResponse.SC_ACCEPTED );

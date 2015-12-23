@@ -67,7 +67,7 @@ public interface IdentifiableObjectManager
 
     <T extends IdentifiableObject> T getByName( Class<T> clazz, String name );
 
-    <T extends IdentifiableObject> T getByAttributeValue( Class<T> clazz, Attribute attribute, String value );
+    <T extends IdentifiableObject> T getByUniqueAttributeValue( Class<T> clazz, Attribute attribute, String value );
 
     <T extends IdentifiableObject> T search( Class<T> clazz, String query );
 
@@ -115,7 +115,11 @@ public interface IdentifiableObjectManager
 
     <T extends IdentifiableObject> Map<String, T> getIdMap( Class<T> clazz, IdentifiableProperty property );
 
+    <T extends IdentifiableObject> Map<String, T> getIdMap( Class<T> clazz, IdScheme idScheme );
+
     <T extends IdentifiableObject> Map<String, T> getIdMapNoAcl( Class<T> clazz, IdentifiableProperty property );
+
+    <T extends IdentifiableObject> Map<String, T> getIdMapNoAcl( Class<T> clazz, IdScheme idScheme );
 
     <T extends NameableObject> Map<String, T> getIdMap( Class<T> clazz, NameableProperty property );
 
@@ -127,7 +131,7 @@ public interface IdentifiableObjectManager
 
     <T extends IdentifiableObject> T getObject( Class<T> clazz, IdentifiableProperty property, String value );
 
-    <T extends IdentifiableObject> T getObject( Class<T> clazz, IdentifiableProperty property, String aid, String value );
+    <T extends IdentifiableObject> T getObject( Class<T> clazz, IdScheme idScheme, String value );
 
     IdentifiableObject getObject( String uid, String simpleClassName );
 

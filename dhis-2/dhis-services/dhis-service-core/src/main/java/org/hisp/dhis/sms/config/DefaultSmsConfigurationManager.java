@@ -35,7 +35,7 @@ import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.hisp.dhis.setting.Setting;
+import org.hisp.dhis.setting.SettingKey;
 import org.hisp.dhis.setting.SystemSettingManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,13 +102,13 @@ public class DefaultSmsConfigurationManager
     @Override
     public SmsConfiguration getSmsConfiguration()
     {
-        return (SmsConfiguration) systemSettingManager.getSystemSetting( Setting.SMS_CONFIG );
+        return (SmsConfiguration) systemSettingManager.getSystemSetting( SettingKey.SMS_CONFIG );
     }
 
     @Override
     public void updateSmsConfiguration( SmsConfiguration config )
     {
-        systemSettingManager.saveSystemSetting( Setting.SMS_CONFIG, config );
+        systemSettingManager.saveSystemSetting( SettingKey.SMS_CONFIG, config );
 
         initializeSmsConfigurables();
     }
@@ -121,7 +121,7 @@ public class DefaultSmsConfigurationManager
             SmsConfiguration smsConfig = new SmsConfiguration( true );
             updateSmsConfiguration( smsConfig );
         }
-        
+
         for ( SmsGatewayConfig gateway : getSmsConfiguration().getGateways() )
         {
             if ( gateway.getClass().equals( clazz ) )
@@ -129,7 +129,7 @@ public class DefaultSmsConfigurationManager
                 return gateway;
             }
         }
-        
+
         return null;
     }
 
@@ -137,15 +137,15 @@ public class DefaultSmsConfigurationManager
     public boolean setDefaultSMSGateway( String gatewayId )
     {
         boolean result = false;
-        
+
         SmsConfiguration config = getSmsConfiguration();
-        
+
         if ( config == null )
         {
             return result;
         }
-        
-        List <SmsGatewayConfig> smsGatewayList = config.getGateways();
+
+        List<SmsGatewayConfig> smsGatewayList = config.getGateways();
 
         for ( SmsGatewayConfig gw : smsGatewayList )
         {
@@ -163,7 +163,7 @@ public class DefaultSmsConfigurationManager
         }
 
         updateSmsConfiguration( config );
-        
+
         return result;
     }
 
@@ -172,7 +172,7 @@ public class DefaultSmsConfigurationManager
     {
         SmsConfiguration config = getSmsConfiguration();
         List<SmsGatewayConfig> gatewayList = config.getGateways();
-        
+
         for ( SmsGatewayConfig gw : gatewayList )
         {
             if ( gw.getName().equals( gatewayId ) )
@@ -194,5 +194,5 @@ public class DefaultSmsConfigurationManager
     public String addSMSGateway()
     {
         throw new NotImplementedException();
-    } 
+    }
 }

@@ -93,6 +93,7 @@ public class Program
 
     private Boolean ignoreOverdueEvents = false;
 
+    @Scanned
     private List<ProgramTrackedEntityAttribute> programAttributes = new ArrayList<>();
 
     @Scanned
@@ -504,6 +505,7 @@ public class Program
     }
 
     @JsonProperty( "trackedEntityInstanceReminders" )
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlElementWrapper( localName = "trackedEntityInstanceReminders", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "trackedEntityInstanceReminder", namespace = DxfNamespaces.DXF_2_0 )
@@ -611,6 +613,7 @@ public class Program
     }
 
     @JsonProperty( "programTrackedEntityAttributes" )
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlElementWrapper( localName = "programTrackedEntityAttributes", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "programTrackedEntityAttribute", namespace = DxfNamespaces.DXF_2_0 )

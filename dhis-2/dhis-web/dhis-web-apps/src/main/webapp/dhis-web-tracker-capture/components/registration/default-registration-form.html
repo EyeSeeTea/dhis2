@@ -1,6 +1,6 @@
 <h3 ng-if="widget !== 'PROFILE'">{{'profile'| translate}}</h3>
 <table class="dhis2-list-table-striped dhis2-table-hover">
-    <tr ng-repeat="attribute in attributes" ng-if="!hiddenFields[attribute.id]">
+    <tr ng-repeat="attribute in attributes | filter: {attribute: 'true'} " ng-if="!hiddenFields[attribute.id] && ((editingDisabled  && attribute.show) || !editingDisabled)">
         <td>
             <span ng-bind="attribute.name"></span><span ng-if="attribute.mandatory || attribute.unique" class="required">*</span>
         </td>
@@ -33,7 +33,7 @@
                                d2-date
                                d2-date-validator 
                                max-date="attribute.allowFutureDate ? '' : 0"
-                               ng-model="selectedTei[attribute.id]"
+                               ng-model="selectedTei[attribute.id]"                               
                                ng-model-options="{ updateOn: 'default blur', allowInvalid: true }"
                                d2-attribute-validator 
                                attribute-data={{attribute}}
@@ -57,7 +57,7 @@
                                ng-change="teiValueUpdated(selectedTei, attribute.id)"
                                ng-required="attribute.mandatory || attribute.unique"/>
                     </span>
-                    <span ng-switch-when="BOOLEAN">
+                    <span ng-switch-when="BOOLEAN" class="form-control">
                         <label class="radio-inline">
                             <input  type="radio"
                                     ng-model="selectedTei[attribute.id]" 
@@ -102,8 +102,8 @@
                         <input type="number" 
                                name="foo" 
                                class="form-control" 
-                               ng-model="selectedTei[attribute.id]" 
-                               ng-model-options="{ updateOn: 'blur', allowInvalid: true }" 
+                               ng-model="selectedTei[attribute.id]"
+                               ng-model-options="{ updateOn: 'blur', allowInvalid: true }"
                                d2-attribute-validator 
                                attribute-data={{attribute}}
                                selected-program-id={{selectedProgram.id}}  
@@ -118,8 +118,8 @@
                         <input type="email" 
                                name="foo" 
                                class="form-control" 
-                               ng-model="selectedTei[attribute.id]" 
-                               ng-model-options="{ updateOn: 'blur', allowInvalid: true }" 
+                               ng-model="selectedTei[attribute.id]"
+                               ng-model-options="{ updateOn: 'blur', allowInvalid: true }"
                                d2-attribute-validator 
                                attribute-data={{attribute}}
                                selected-program-id={{selectedProgram.id}}  
@@ -148,7 +148,7 @@
                                name="foo" 
                                class="form-control-trimmed" 
                                ng-model="selectedTei[attribute.id]" 
-                               ng-model-options="{ updateOn: 'blur', allowInvalid: true }" 
+                               ng-model-options="{ updateOn: 'blur', allowInvalid: true }"
                                d2-attribute-validator 
                                attribute-data={{attribute}}
                                selected-program-id={{selectedProgram.id}}  
@@ -170,8 +170,8 @@
                                name="foo" 
                                class="form-control" 
                                ng-model="selectedTei[attribute.id]" 
-                               ng-model-options="{ updateOn: 'blur', allowInvalid: true }" 
-                               d2-attribute-validator 
+                               ng-model-options="{ updateOn: 'blur', allowInvalid: true }"
+                               d2-attribute-validator
                                attribute-data={{attribute}}
                                selected-program-id={{selectedProgram.id}}  
                                selected-tei-id={{selectedTei.trackedEntityInstance}}  
@@ -180,7 +180,7 @@
                                ng-required="attribute.mandatory || attribute.unique"/>                                    
                     </span>
                 </span>
-                <div ng-messages="innerForm.foo.$error" ng-if="interacted(innerForm.foo)" class="required" ng-messages-include="../dhis-web-commons/angular-forms/error-messages.html">                                         
+                <div ng-messages="innerForm.foo.$error" ng-if="interacted(innerForm.foo)" class="required hideInPrint" ng-messages-include="../dhis-web-commons/angular-forms/error-messages.html">
                     <div class="alert alert-warning alert-dismissible" role="alert" ng-if="warningMessages[attribute.id]">
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                         {{warningMessages[attribute.id]}}

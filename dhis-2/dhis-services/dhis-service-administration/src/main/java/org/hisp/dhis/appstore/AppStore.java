@@ -1,4 +1,4 @@
-package org.hisp.dhis.node.presets;
+package org.hisp.dhis.appstore;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,27 +28,56 @@ package org.hisp.dhis.node.presets;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.collect.Lists;
-import org.hisp.dhis.common.PresetProvider;
-import org.springframework.stereotype.Component;
-
+import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Lars Helge Overland
  */
-@Component
-public class AllPresetProvider implements PresetProvider
+public class AppStore
 {
-    @Override
-    public String name()
+    private String name;
+    
+    private String description;
+    
+    private List<WebApp> apps = new ArrayList<>();
+
+    public AppStore()
     {
-        return "all";
     }
 
-    @Override
-    public List<String> provide()
+    @JsonProperty
+    public String getName()
     {
-        return Lists.newArrayList( "*" );
+        return name;
     }
+
+    public void setName( String name )
+    {
+        this.name = name;
+    }
+
+    @JsonProperty
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public void setDescription( String description )
+    {
+        this.description = description;
+    }
+
+    @JsonProperty
+    public List<WebApp> getApps()
+    {
+        return apps;
+    }
+
+    public void setApps( List<WebApp> apps )
+    {
+        this.apps = apps;
+    }    
 }

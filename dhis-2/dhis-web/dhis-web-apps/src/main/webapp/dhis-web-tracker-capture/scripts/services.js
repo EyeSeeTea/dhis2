@@ -20,7 +20,8 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 /* Service to fetch/store dasboard widgets */
 .service('DashboardLayoutService', function($http) {
     
-    
+    var ButtonIds = { Complete: "Complete", Incomplete: "Incomplete", Validate: "Validate", Delete: "Delete", Skip: "Skip", Unskip: "Unskip", Note: "Note" };
+      
     var w = {};
     w.enrollmentWidget = {title: 'enrollment', view: "components/enrollment/enrollment.html", show: true, expand: true, parent: 'biggerWidget', order: 0};
     w.indicatorWidget = {title: 'indicators', view: "components/rulebound/rulebound.html", show: true, expand: true, parent: 'biggerWidget', order: 1};
@@ -28,8 +29,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     w.reportWidget = {title: 'report', view: "components/report/tei-report.html", show: true, expand: true, parent: 'biggerWidget', order: 3};
     w.selectedWidget = {title: 'current_selections', view: "components/selected/selected.html", show: false, expand: true, parent: 'smallerWidget', order: 0};
     w.feedbackWidget = {title: 'feedback', view: "components/rulebound/rulebound.html", show: true, expand: true, parent: 'smallerWidget', order: 1};
-    w.profileWidget = {title: 'profile', view: "components/profile/profile.html", show: true, expand: true, parent: 'smallerWidget', order: 2};
-    w.activeProgramsWidget = {title: 'activePrograms', view: "components/activeprograms/active-programs.html", show: false, expand: true, parent: 'smallerWidget', order: 3};
+    w.profileWidget = {title: 'profile', view: "components/profile/profile.html", show: true, expand: true, parent: 'smallerWidget', order: 2};    
     w.relationshipWidget = {title: 'relationships', view: "components/relationship/relationship.html", show: true, expand: true, parent: 'smallerWidget', order: 4};
     w.notesWidget = {title: 'notes', view: "components/notes/notes.html", show: true, expand: true, parent: 'smallerWidget', order: 5};            
     var defaultLayout = new Object();
@@ -472,8 +472,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 
 /* Factory for fetching OrgUnit */
 .factory('OrgUnitFactory', function($http, SessionStorageService) {    
-    var orgUnit, orgUnitPromise, rootOrgUnitPromise;
-    var roles = SessionStorageService.get('USER_ROLES');
+    var orgUnit, orgUnitPromise, rootOrgUnitPromise, orgUnitWithGroupsPromise, orgUnitWithParent;
     return {
         get: function(uid){            
             if( orgUnit !== uid ){
@@ -483,26 +482,41 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 });
             }
             return orgUnitPromise;
-        },    
+        },
+        getWithGroups: function(uid){
+            orgUnitWithGroupsPromise = $http.get( '../api/organisationUnits.json?filter=id:eq:' + uid + '&fields=id,name,children[id,name,organisationUnitGroups[shortName],children[id,name, organisationUnitGroups[shortName]],organisationUnitGroups[shortName]]&paging=false' ).then(function(response){
+                orgUnit = response.data.id;
+                return response.data;
+            });
+            return orgUnitWithGroupsPromise;
+        },
+        getWithParents: function(uid){
+            orgUnitWithParent = $http.get( '../api/organisationUnits.json?filter=id:eq:' + uid + '&fields=id,name,parent[id,name,parent[id,name,parent[id,name,parent[id,name]]]&paging=false' ).then(function(response){
+                orgUnit = response.data.id;
+                return response.data;
+            });
+            return orgUnitWithParent;
+        },
         getSearchTreeRoot: function(){
-           if(!rootOrgUnitPromise){
-               var url = '../api/me.json?fields=organisationUnits[id,name,children[id,name,children[id,name]]]&paging=false';
-               if( roles && roles.userCredentials && roles.userCredentials.userRoles){
-                   var userRoles = roles.userCredentials.userRoles;
-                   for(var i=0; i<userRoles.length; i++){
-                       if(userRoles[i].authorities.indexOf('ALL') !== -1 || 
-                         userRoles[i].authorities.indexOf('F_TRACKED_ENTITY_INSTANCE_SEARCH_IN_ALL_ORGUNITS') !== -1 ){                        
-                         url = '../api/organisationUnits.json?filter=level:eq:1&fields=id,name,children[id,name,children[id,name]]&paging=false';
-                         i=userRoles.length;
-                       }
-                   }  
-               }             
-               rootOrgUnitPromise = $http.get( url ).then(function(response){
-                   return response.data;
-               });
-           }
-           return rootOrgUnitPromise;
-       }
+            //var roles = SessionStorageService.get('USER_ROLES');
+            if(!rootOrgUnitPromise){
+                var url = '../api/me.json?fields=organisationUnits[id,name,children[id,name,children[id,name]]]&paging=false';
+                /*if( roles && roles.userCredentials && roles.userCredentials.userRoles){
+                    var userRoles = roles.userCredentials.userRoles;
+                    for(var i=0; i<userRoles.length; i++){
+                        if(userRoles[i].authorities.indexOf('ALL') !== -1 || 
+                          userRoles[i].authorities.indexOf('F_TRACKED_ENTITY_INSTANCE_SEARCH_IN_ALL_ORGUNITS') !== -1 ){                        
+                          url = '../api/organisationUnits.json?filter=level:eq:1&fields=id,name,children[id,name,children[id,name]]&paging=false';
+                          i=userRoles.length;
+                        }
+                    }  
+                }*/
+                rootOrgUnitPromise = $http.get( url ).then(function(response){
+                    return response.data;
+                });
+            }
+            return rootOrgUnitPromise;
+        }
     }; 
 })
 
@@ -625,11 +639,11 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             });
             return promise;           
         },
-        complete: function(enrollment){
-            var promise = $http.put('../api/enrollments/' + enrollment.enrollment + '/completed').then(function(response){
+        completeIncomplete: function(enrollment, status){
+            var promise = $http.put('../api/enrollments/' + enrollment.enrollment + '/' + status).then(function(response){
                 return response.data;               
             });
-            return promise;           
+            return promise; 
         }
     };   
 })
@@ -984,6 +998,16 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             });            
             return promise;
         },
+        getEventsByProgramStage: function(entity, programStage){
+          var url = '../api/events.json?ouMode=ACCESSIBLE&' + 'trackedEntityInstance=' + entity + '&paging=false'; 
+          if(programStage){
+              url += '&programStage='+programStage;
+          }
+          var promise = $http.get(url).then(function(response){
+             return response.data.events;
+          });
+          return promise;
+        },
         getByOrgUnitAndProgram: function(orgUnit, ouMode, program, startDate, endDate){
             var url;
             if(startDate && endDate){
@@ -1094,10 +1118,10 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     };    
 })
 
-.factory('OperatorFactory', function(){
+.factory('OperatorFactory', function($translate){
     
-    var defaultOperators = ['IS', 'RANGE' ];
-    var boolOperators = ['yes', 'no'];
+    var defaultOperators = [$translate.instant('IS'), $translate.instant('RANGE') ];
+    var boolOperators = [$translate.instant('yes'), $translate.instant('no')];
     return{
         defaultOperators: defaultOperators,
         boolOperators: boolOperators
@@ -1445,6 +1469,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     this.sortedTeiIds = [];
     this.selectedTeiEvents = null;
     this.relationshipOwner = {};
+    this.selectedTeiEvents = [];
     
     this.set = function(currentSelection){  
         this.currentSelection = currentSelection;        
@@ -1511,7 +1536,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             invalidTeis = !invalidTeis ? [] : invalidTeis;
             if(!grid || !grid.rows){
                 return;
-            }
+            }            
             
             //grid.headers[0-5] = Instance, Created, Last updated, Org unit, Tracked entity, Inactive
             //grid.headers[6..] = Attribute, Attribute,.... 
@@ -1531,6 +1556,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 
                     entity.id = row[0];
                     entity.created = DateUtils.formatFromApiToUser( row[1] );
+                    
                     entity.orgUnit = row[3];                              
                     entity.type = row[4];
                     entity.inactive = row[5] !== "" ? row[5] : false;
@@ -1577,22 +1603,26 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         },
         generateGridColumns: function(attributes, ouMode){
             
+            if( ouMode === null ){
+                ouMode = 'SELECTED';
+            }
             var filterTypes = {}, filterText = {};
             var columns = [];
        
             //also add extra columns which are not part of attributes (orgunit for example)
-            columns.push({id: 'orgUnitName', name: $translate.instant('registering_unit'), valueType: 'TEXT', displayInListNoProgram: false});
-            columns.push({id: 'created', name: $translate.instant('registration_date'), valueType: 'DATE', displayInListNoProgram: false});
-            columns.push({id: 'inactive', name: $translate.instant('inactive'), valueType: 'BOOLEAN', displayInListNoProgram: false});
+            columns.push({id: 'orgUnitName', name: $translate.instant('registering_unit'), valueType: 'TEXT', displayInListNoProgram: false, attribute: false});
+            columns.push({id: 'created', name: $translate.instant('registration_date'), valueType: 'DATE', displayInListNoProgram: false, attribute: false});
+            columns.push({id: 'inactive', name: $translate.instant('inactive'), valueType: 'BOOLEAN', displayInListNoProgram: false, attribute: false});
             columns = columns.concat(attributes ? angular.copy(attributes) : []);
             
             //generate grid column for the selected program/attributes
             angular.forEach(columns, function(column){
-                column.show = false;                
+                column.attribute = angular.isUndefined(column.attribute) ? true : false;
+                column.show = false;                    
                 if( (column.id === 'orgUnitName' && ouMode !== 'SELECTED') ||
                     column.displayInListNoProgram || 
                     column.displayInList){
-                    column.show = true;    
+                    column.show = true;
                 }                
                 column.showFilter = false;                
                 filterTypes[column.id] = column.valueType;
@@ -1859,4 +1889,31 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         }
     };
     
+})
+
+.service('EventCreationService', function($modal){
+            
+        this.showModal = function(stage, dummyEvent,eventCreationAction, autoCreate){
+            var modalInstance = $modal.open({
+                templateUrl: 'components/dataentry/new-event.html',
+                controller: 'EventCreationController',
+                resolve: {                    
+                    dummyEvent: function () {
+                        return dummyEvent;
+                    },
+                    autoCreate: function () {
+                        //In case the programstage is a table, autocreate
+                        return autoCreate;
+                    },
+                    eventCreationAction: function() {
+                        return eventCreationAction;
+                    },                    
+                    stage: function(){
+                        return stage;
+                    }
+                }
+            });
+            return modalInstance;
+        };
+        this.eventCreationActions = { add: 'ADD',  schedule: 'SCHEDULE', referral: 'REFERRAL'};
 });

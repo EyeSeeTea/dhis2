@@ -92,9 +92,11 @@ trackerCapture.controller('DashboardController',
             $scope.stickyDisabled = selectedLayout.stickRightSide ? !selectedLayout.stickRightSide : true;
 
             angular.forEach(selectedLayout.widgets, function(widget){
-                $rootScope[widget.title +'Widget'] = widget;
-                $rootScope.dashboardWidgets.push( $rootScope[widget.title +'Widget'] );
-                $scope.dashboardStatus[widget.title] = angular.copy(widget);
+                if(widget.title !== "activePrograms"){
+                    $rootScope[widget.title +'Widget'] = widget;
+                    $rootScope.dashboardWidgets.push( $rootScope[widget.title +'Widget'] );
+                    $scope.dashboardStatus[widget.title] = angular.copy(widget);
+                }                
             });
             
             angular.forEach(defaultLayout.widgets, function(w){
@@ -215,6 +217,14 @@ trackerCapture.controller('DashboardController',
                                         }
                                     }                                
                                 });
+                                
+                                //filter those enrollments that belong to available programs
+                                var len = enrollments.length;
+                                while(len--){
+                                    if(enrollments[len].program && !$scope.programNames[enrollments[len].program]){
+                                        enrollments.splice(len,1);
+                                    }
+                                }
                                 
                                 DHIS2EventFactory.getEventsByProgram($scope.selectedTeiId, null).then(function(events){                                        
                                     //prepare selected items for broadcast
@@ -337,7 +347,7 @@ trackerCapture.controller('DashboardController',
         CurrentSelection.set({tei: $scope.selectedTei, te: $scope.trackedEntity, prs: $scope.programs, pr: $scope.selectedProgram, prNames: $scope.programNames, prStNames: $scope.programStageNames, enrollments: selections.enrollments, selectedEnrollment: null, optionSets: $scope.optionSets});        
         $timeout(function() { 
             $rootScope.$broadcast('selectedItems', {programExists: $scope.programs.length > 0});            
-        }, 200);
+        }, 500);
     };     
     
     $scope.activiateTEI = function(){
@@ -403,16 +413,7 @@ trackerCapture.controller('DashboardController',
             return;
         });
     };
-    
-    $scope.stickUnstick = function(){        
-        $scope.stickyDisabled = !$scope.stickyDisabled;        
-        var layout = getCurrentDashboardLayout();        
-        var layoutKey = $scope.selectedProgram && $scope.selectedProgram.id ? $scope.selectedProgram.id : 'DEFAULT';        
-        layout[layoutKey].stickRightSide = !$scope.stickyDisabled;        
-        DashboardLayoutService.saveLayout(layout, false).then(function(){
-        });        
-    };
-    
+        
     $scope.showHideWidgets = function(){
         var modalInstance = $modal.open({
             templateUrl: "components/dashboard/dashboard-widgets.html",

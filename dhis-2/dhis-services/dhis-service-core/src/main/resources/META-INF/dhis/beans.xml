@@ -632,6 +632,8 @@
 
   <!-- Service definitions -->
 
+  <bean id="org.hisp.dhis.dimension.DimensionService" class="org.hisp.dhis.dimension.DefaultDimensionService" />
+
   <bean id="org.hisp.dhis.fileresource.FileResourceService" class="org.hisp.dhis.fileresource.DefaultFileResourceService">
     <property name="fileResourceStore" ref="org.hisp.dhis.fileresource.FileResourceStore" />
     <property name="fileResourceContentStore" ref="org.hisp.dhis.fileresource.FileResourceContentStore" />
@@ -738,6 +740,7 @@
     <property name="constantService" ref="org.hisp.dhis.constant.ConstantService" />
     <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
     <property name="organisationUnitGroupService" ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupService" />
+    <property name="dimensionService" ref="org.hisp.dhis.dimension.DimensionService" />
   </bean>
 
   <bean id="org.hisp.dhis.validation.ValidationRuleService" class="org.hisp.dhis.validation.DefaultValidationRuleService">
@@ -1092,14 +1095,9 @@
 
   <!-- SMS Services -->
 
-  <bean id="org.hisp.dhis.sms.MessageQueue" class="org.hisp.dhis.sms.DatabaseSupportedInternalMemoryMessageQueue">
-    <property name="smsStore" ref="org.hisp.dhis.sms.hibernate.IncomingSmsStore" />
-  </bean>
+  <bean id="org.hisp.dhis.sms.MessageQueue" class="org.hisp.dhis.sms.DatabaseSupportedInternalMemoryMessageQueue" />
 
-  <bean id="org.hisp.dhis.sms.SmsPublisher" class="org.hisp.dhis.sms.SmsPublisher">
-    <property name="messageQueue" ref="org.hisp.dhis.sms.MessageQueue" />
-    <property name="smsSender" ref="org.hisp.dhis.sms.SmsSender" />
-  </bean>
+  <bean id="org.hisp.dhis.sms.SmsPublisher" class="org.hisp.dhis.sms.SmsPublisher" />
 
   <bean id="org.hisp.dhis.sms.config.SmsConfigurationManager" class="org.hisp.dhis.sms.config.DefaultSmsConfigurationManager" />
 
@@ -1108,9 +1106,7 @@
     <property name="incomingSmsQueue" ref="org.hisp.dhis.sms.MessageQueue" />
   </bean>
 
-  <bean id="org.smslib.IInboundMessageNotification" class="org.hisp.dhis.sms.incoming.SMPPInboundNotification">
-    <property name="incomingSmsService" ref="org.hisp.dhis.sms.incoming.IncomingSmsService" />
-  </bean>
+  <bean id="org.smslib.IInboundMessageNotification" class="org.hisp.dhis.sms.incoming.SMPPInboundNotification" />
 
   <bean id="org.hisp.dhis.sms.outbound.OutboundSmsService" class="org.hisp.dhis.sms.outbound.DefaultOutboundSmsService">
     <property name="outboundSmsStore" ref="org.hisp.dhis.sms.hibernate.OutboundSmsStore" />
@@ -1122,15 +1118,13 @@
     <property name="smsPublisher" ref="org.hisp.dhis.sms.SmsPublisher" />
   </bean>
 
-  <bean id="org.hisp.dhis.sms.SmsSender" class="org.hisp.dhis.sms.DefaultSmsSender">
-    <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
-    <property name="userService" ref="org.hisp.dhis.user.UserService" />
-    <property name="outboundSmsService" ref="org.hisp.dhis.sms.outbound.OutboundSmsService" />
-  </bean>
+  <bean id="org.hisp.dhis.sms.SmsSender" class="org.hisp.dhis.sms.DefaultSmsSender" />
 
   <bean id="org.hisp.dhis.sms.SmsMessageSender" class="org.hisp.dhis.sms.SmsMessageSender" />
 
   <bean id="org.hisp.dhis.sms.task.SendSmsTask" class="org.hisp.dhis.sms.task.SendSmsTask" scope="prototype" />
+  
+  <bean id="org.hisp.dhis.sms.SmsConsumerThread" class="org.hisp.dhis.sms.SmsConsumerThread" />
 
   <!-- I18nService -->
 
@@ -1304,55 +1298,19 @@
     <property name="smsCommandStore" ref="org.hisp.dhis.sms.command.hibernate.SMSCommandStore" />
   </bean>
 
-  <bean id="org.hisp.dhis.sms.listener.DataValueSMSListener" class="org.hisp.dhis.sms.listener.DataValueSMSListener">
-    <property name="registrationService" ref="org.hisp.dhis.dataset.CompleteDataSetRegistrationService" />
-    <property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
-    <property name="smsSender" ref="org.hisp.dhis.sms.SmsSender" />
-    <property name="dataElementCategoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
-    <property name="smsCommandService" ref="org.hisp.dhis.sms.command.SMSCommandService" />
-    <property name="userService" ref="org.hisp.dhis.user.UserService" />
-    <property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
-    <property name="incomingSmsService" ref="org.hisp.dhis.sms.incoming.IncomingSmsService" />
-    <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
-  </bean>
+  <bean id="org.hisp.dhis.sms.listener.DataValueSMSListener" class="org.hisp.dhis.sms.listener.DataValueSMSListener" />
 
   <bean id="org.hisp.dhis.sms.listener.J2MEDataValueSMSListener"
-    class="org.hisp.dhis.sms.listener.J2MEDataValueSMSListener">
-    <property name="registrationService" ref="org.hisp.dhis.dataset.CompleteDataSetRegistrationService" />
-    <property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
-    <property name="smsSender" ref="org.hisp.dhis.sms.SmsSender" />
-    <property name="dataElementCategoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
-    <property name="smsCommandService" ref="org.hisp.dhis.sms.command.SMSCommandService" />
-    <property name="userService" ref="org.hisp.dhis.user.UserService" />
-  </bean>
+    class="org.hisp.dhis.sms.listener.J2MEDataValueSMSListener" />
 
   <bean id="org.hisp.dhis.sms.listener.UnregisteredSMSListener"
-    class="org.hisp.dhis.sms.listener.UnregisteredSMSListener">
-    <property name="smsCommandService" ref="org.hisp.dhis.sms.command.SMSCommandService" />
-    <property name="messageService" ref="org.hisp.dhis.message.MessageService" />
-    <property name="smsMessageSender" ref="org.hisp.dhis.sms.SmsMessageSender" />
-    <property name="userService" ref="org.hisp.dhis.user.UserService" />
-    <property name="incomingSmsService" ref="org.hisp.dhis.sms.incoming.IncomingSmsService" />
-  </bean>
+    class="org.hisp.dhis.sms.listener.UnregisteredSMSListener" />
 
   <bean id="org.hisp.dhis.sms.listener.DHISMessageAlertListener"
-    class="org.hisp.dhis.sms.listener.DHISMessageAlertListener">
-    <property name="smsCommandService" ref="org.hisp.dhis.sms.command.SMSCommandService" />
-    <property name="messageService" ref="org.hisp.dhis.message.MessageService" />
-    <property name="smsMessageSender" ref="org.hisp.dhis.sms.SmsMessageSender" />
-    <property name="userService" ref="org.hisp.dhis.user.UserService" />
-    <property name="incomingSmsService" ref="org.hisp.dhis.sms.incoming.IncomingSmsService" />
-  </bean>
+    class="org.hisp.dhis.sms.listener.DHISMessageAlertListener" />
 
   <bean id="org.hisp.dhis.sms.listener.TrackedEntityRegistrationSMSListener"
-    class="org.hisp.dhis.sms.listener.TrackedEntityRegistrationSMSListener">
-    <property name="smsCommandService" ref="org.hisp.dhis.sms.command.SMSCommandService" />
-    <property name="userService" ref="org.hisp.dhis.user.UserService" />
-    <property name="trackedEntityService" ref="org.hisp.dhis.trackedentity.TrackedEntityService" />
-    <property name="trackedEntityInstanceService" ref="org.hisp.dhis.trackedentity.TrackedEntityInstanceService" />
-    <property name="programInstanceService" ref="org.hisp.dhis.program.ProgramInstanceService" />
-    <property name="smsSender" ref="org.hisp.dhis.sms.SmsSender" />
-  </bean>
+    class="org.hisp.dhis.sms.listener.TrackedEntityRegistrationSMSListener" />
 
   <!-- I18n UI -->
 
@@ -1606,10 +1564,6 @@
   <bean id="org.hisp.dhis.organisationunit.OrganisationUnitGroupSetDeletionHandler"
     class="org.hisp.dhis.organisationunit.OrganisationUnitGroupSetDeletionHandler" />
 
-  <bean id="org.hisp.dhis.datavalue.DataValueAuditDeletionHandler" class="org.hisp.dhis.datavalue.DataValueAuditDeletionHandler">
-    <property name="dataValueAuditService" ref="org.hisp.dhis.datavalue.DataValueAuditService" />
-  </bean>
-
   <bean id="org.hisp.dhis.user.UserDeletionHandler" class="org.hisp.dhis.user.UserDeletionHandler" />
 
   <bean id="org.hisp.dhis.user.UserGroupDeletionHandler" class="org.hisp.dhis.user.UserGroupDeletionHandler" />
@@ -1747,75 +1701,6 @@
 
   <bean id="org.hisp.dhis.sms.command.code.SMSCodesDeletionHandler"
     class="org.hisp.dhis.sms.command.code.SMSCodesDeletionHandler" />
-
-  <!-- DeletionManager -->
-
-  <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-    <property name="targetObject" ref="deletionManager" />
-    <property name="targetMethod" value="addDeletionHandlers" />
-    <property name="arguments">
-      <list>
-        <list>
-          <ref bean="org.hisp.dhis.dataapproval.DataApprovalDeletionHandler" />
-          <ref bean="org.hisp.dhis.dataelement.DataElementDeletionHandler" />
-          <ref bean="org.hisp.dhis.dataelement.DataElementGroupDeletionHandler" />
-          <ref bean="org.hisp.dhis.dataelement.DataElementCategoryOptionDeletionHandler" />
-          <ref bean="org.hisp.dhis.dataelement.DataElementCategoryOptionComboDeletionHandler" />
-          <ref bean="org.hisp.dhis.dataelement.DataElementCategoryComboDeletionHandler" />
-          <ref bean="org.hisp.dhis.dataelement.DataElementCategoryDimensionDeletionHandler" />
-          <ref bean="org.hisp.dhis.dataset.DataSetDeletionHandler" />
-          <ref bean="org.hisp.dhis.dataset.CompleteDataSetRegistrationDeletionHandler" />
-          <ref bean="org.hisp.dhis.dataset.SectionDeletionHandler" />
-          <ref bean="org.hisp.dhis.expression.ExpressionDeletionHandler" />
-          <ref bean="org.hisp.dhis.indicator.IndicatorDeletionHandler" />
-          <ref bean="org.hisp.dhis.indicator.IndicatorGroupDeletionHandler" />
-          <ref bean="org.hisp.dhis.indicator.IndicatorGroupSetDeletionHandler" />
-          <ref bean="org.hisp.dhis.minmax.MinMaxDataElementDeletionHandler" />
-          <ref bean="org.hisp.dhis.validation.ValidationRuleDeletionHandler" />
-          <ref bean="org.hisp.dhis.validation.ValidationRuleGroupDeletionHandler" />
-          <ref bean="org.hisp.dhis.datavalue.DataValueDeletionHandler" />
-          <ref bean="org.hisp.dhis.datavalue.DataValueAuditDeletionHandler" />
-          <ref bean="org.hisp.dhis.organisationunit.OrganisationUnitDeletionHandler" />
-          <ref bean="org.hisp.dhis.organisationunit.OrganisationUnitGroupDeletionHandler" />
-          <ref bean="org.hisp.dhis.organisationunit.OrganisationUnitGroupSetDeletionHandler" />
-          <ref bean="org.hisp.dhis.user.UserDeletionHandler" />
-          <ref bean="org.hisp.dhis.user.UserGroupDeletionHandler" />
-          <ref bean="org.hisp.dhis.user.UserAuthorityGroupDeletionHandler" />
-          <ref bean="org.hisp.dhis.user.UserSettingDeletionHandler" />
-          <ref bean="org.hisp.dhis.dataelement.DataElementCategoryDeletionHandler" />
-          <ref bean="org.hisp.dhis.dataelement.DataElementGroupSetDeletionHandler" />
-          <ref bean="org.hisp.dhis.dataelement.CategoryOptionGroupDeletionHandler" />
-          <ref bean="org.hisp.dhis.dataelement.CategoryOptionGroupSetDeletionHandler" />
-          <ref bean="org.hisp.dhis.configuration.ConfigurationDeletionHandler" />
-          <ref bean="org.hisp.dhis.message.MessageConversationDeletionHandler" />
-          <ref bean="org.hisp.dhis.translation.TranslationDeletionHandler" />
-          <ref bean="org.hisp.dhis.attribute.AttributeValueDeletionHandler" />
-          <ref bean="org.hisp.dhis.legend.LegendSetDeletionHandler" />
-          <ref bean="org.hisp.dhis.mapping.MapViewDeletionHandler" />
-          <ref bean="org.hisp.dhis.trackedentity.TrackedEntityInstanceDeletionHandler" />
-          <ref bean="org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueDeletionHandler" />
-          <ref bean="org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValueDeletionHandler" />
-          <ref bean="org.hisp.dhis.relationship.RelationshipDeletionHandler" />
-          <ref bean="org.hisp.dhis.program.ProgramDeletionHandler" />
-          <ref bean="org.hisp.dhis.program.ProgramStageDeletionHandler" />
-          <ref bean="org.hisp.dhis.program.ProgramStageSectionDeletionHandler" />
-          <ref bean="org.hisp.dhis.program.ProgramInstanceDeletionHandler" />
-          <ref bean="org.hisp.dhis.program.ProgramStageInstanceDeletionHandler" />
-          <ref bean="org.hisp.dhis.program.ProgramStageDataElementDeletionHandler" />
-          <ref bean="org.hisp.dhis.program.ProgramValidationDeletionHandler" />
-          <ref bean="org.hisp.dhis.program.ProgramDataEntryFormDeletionHandler" />
-          <ref bean="org.hisp.dhis.program.ProgramIndicatorDeletionHandler" />
-          <ref bean="org.hisp.dhis.programrule.ProgramRuleDeletionHandler" />
-          <ref bean="org.hisp.dhis.programrule.ProgramRuleVariableDeletionHandler" />
-          <ref bean="org.hisp.dhis.programrule.ProgramRuleActionDeletionHandler" />
-          <ref bean="org.hisp.dhis.eventchart.EventChartDeletionHandler" />
-          <ref bean="org.hisp.dhis.eventreport.EventReportDeletionHandler" />
-          <ref bean="org.hisp.dhis.sms.command.SMSCommandDeletionHandler" />
-          <ref bean="org.hisp.dhis.sms.command.code.SMSCodesDeletionHandler" />
-        </list>
-      </list>
-    </property>
-  </bean>
 
   <!-- AOP definitions -->
 

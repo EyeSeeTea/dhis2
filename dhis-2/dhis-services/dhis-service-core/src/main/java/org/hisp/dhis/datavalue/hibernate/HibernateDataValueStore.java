@@ -133,6 +133,15 @@ public class HibernateDataValueStore
     }
 
     @Override
+    public void deleteDataValues( OrganisationUnit organisationUnit )
+    {
+        String hql = "delete from DataValue d where d.source = :source";
+        
+        sessionFactory.getCurrentSession().createQuery( hql ).
+            setEntity( "source", organisationUnit ).executeUpdate();
+    }
+    
+    @Override
     public DataValue getDataValue( DataElement dataElement, Period period, OrganisationUnit source,
         DataElementCategoryOptionCombo categoryOptionCombo, DataElementCategoryOptionCombo attributeOptionCombo )
     {

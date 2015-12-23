@@ -44,7 +44,7 @@ import org.hisp.dhis.external.conf.DhisConfigurationProvider;
 import org.hisp.dhis.message.MessageService;
 import org.hisp.dhis.scheduling.TaskId;
 import org.hisp.dhis.security.NoSecurityContextRunnable;
-import org.hisp.dhis.setting.Setting;
+import org.hisp.dhis.setting.SettingKey;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.notification.Notifier;
 import org.hisp.dhis.system.util.Clock;
@@ -168,21 +168,21 @@ public class AnalyticsTableTask
         }
         catch ( RuntimeException ex )
         {
-            String systemId = config.getProperty( ConfigurationKey.SYSTEM_ID );
+            String baseUrl = config.getProperty( ConfigurationKey.SYSTEM_BASE_URL );
 
             notifier.notify( taskId, ERROR, "Process failed: " + ex.getMessage(), true );
 
             messageService.sendSystemNotification(
                 "Analytics table process failed",
                 "Analytics table process failed, please check the logs. Time: " + new DateTime().toString() + ". " +
-                    "System: " + systemId + " " +
+                    "System: " + baseUrl + " " +
                     "Message: " + ex.getMessage() + " " +
                     "Cause: " + DebugUtils.getStackTrace( ex.getCause() ) );
 
             throw ex;
         }
 
-        systemSettingManager.saveSystemSetting( Setting.LAST_SUCCESSFUL_ANALYTICS_TABLES_UPDATE, startTime );
-        systemSettingManager.saveSystemSetting( Setting.LAST_SUCCESSFUL_ANALYTICS_TABLES_RUNTIME, DateUtils.getPrettyInterval( clock.getSplitTime() ) );
+        systemSettingManager.saveSystemSetting( SettingKey.LAST_SUCCESSFUL_ANALYTICS_TABLES_UPDATE, startTime );
+        systemSettingManager.saveSystemSetting( SettingKey.LAST_SUCCESSFUL_ANALYTICS_TABLES_RUNTIME, DateUtils.getPrettyInterval( clock.getSplitTime() ) );
     }
 }

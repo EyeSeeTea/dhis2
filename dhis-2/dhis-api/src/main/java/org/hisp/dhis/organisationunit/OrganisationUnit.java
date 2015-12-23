@@ -208,7 +208,7 @@ public class OrganisationUnit
     // -------------------------------------------------------------------------
     // Logic
     // -------------------------------------------------------------------------
-    
+
     public void addOrganisationUnitGroup( OrganisationUnitGroup organisationUnitGroup )
     {
         groups.add( organisationUnitGroup );

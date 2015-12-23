@@ -159,7 +159,18 @@ public class DataElementOperand
     @Override
     public String getDimensionItem()
     {
-        return dataElement.getUid() + SEPARATOR + categoryOptionCombo.getUid();
+        String item = null;
+
+        if ( dataElement != null )
+        {
+            item = dataElement.getUid() + ( categoryOptionCombo != null ? ( SEPARATOR + categoryOptionCombo.getUid() ) : StringUtils.EMPTY );
+        }
+        else if ( dataElementId != null )
+        {
+            item = dataElementId + ( optionComboId != null ? ( SEPARATOR + optionComboId ) : StringUtils.EMPTY );
+        }
+        
+        return item;
     }
     
     // -------------------------------------------------------------------------
@@ -187,7 +198,7 @@ public class DataElementOperand
             name = dataElement.getName();
         }
 
-        if ( categoryOptionCombo != null )
+        if ( categoryOptionCombo != null && !categoryOptionCombo.isDefault() )
         {
             name += SPACE + categoryOptionCombo.getName();
         }
@@ -567,19 +578,17 @@ public class DataElementOperand
     @Override
     public String toString()
     {
-        return "DataElementOperand{" +
-            "id=" + id +
-            ", uid=" + uid +
-            ", dataElement=" + dataElement +
-            ", categoryOptionCombo=" + categoryOptionCombo +
-            ", dataElementId=" + dataElementId +
-            ", optionComboId=" + optionComboId +
-            ", operandId='" + operandId + '\'' +
-            ", operandName='" + operandName + '\'' +
-            ", aggregationType='" + aggregationType + '\'' +
-            ", aggregationLevels=" + aggregationLevels +
-            ", frequencyOrder=" + frequencyOrder +
-            ", operandType='" + operandType + '\'' +
+        return "{" +
+            "\"class\":\"" + getClass() + "\", " +
+            "\"id\":\"" + id + "\", " +
+            "\"uid\":\"" + uid + "\", " +
+            "\"dataElement\":" + dataElement + ", " +
+            "\"categoryOptionCombo\":" + categoryOptionCombo + ", " +
+            "\"dataElementId\":\"" + dataElementId + "\", " +
+            "\"optionComboId\":\"" + optionComboId + "\", " +
+            "\"operandId\":\"" + operandId + "\", " +
+            "\"operandName\":\"" + operandName + "\", " +
+            "\"operandType\":\"" + operandType + "\" " +
             '}';
     }
 

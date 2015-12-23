@@ -30,9 +30,11 @@ package org.hisp.dhis.dxf2.events.trackedentity;
 
 import com.google.common.collect.Lists;
 import org.hisp.dhis.common.CodeGenerator;
+import org.hisp.dhis.common.IdSchemes;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.commons.collection.CachingMap;
 import org.hisp.dhis.dbms.DbmsManager;
+import org.hisp.dhis.dxf2.common.ImportOptions;
 import org.hisp.dhis.dxf2.importsummary.ImportConflict;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
@@ -41,7 +43,8 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.relationship.Relationship;
 import org.hisp.dhis.relationship.RelationshipService;
 import org.hisp.dhis.relationship.RelationshipType;
-import org.hisp.dhis.system.callable.IdentifiableObjectSearchCallable;
+import org.hisp.dhis.system.callable.IdentifiableObjectCallable;
+import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.trackedentity.TrackedEntity;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
@@ -178,6 +181,8 @@ public abstract class AbstractTrackedEntityInstanceService
         {
             Attribute attribute = new Attribute();
 
+            attribute.setCreated( DateUtils.getLongGmtDateString( attributeValue.getCreated() ) );
+            attribute.setLastUpdated( DateUtils.getLongGmtDateString( attributeValue.getLastUpdated() ) );
             attribute.setDisplayName( attributeValue.getAttribute().getDisplayName() );
             attribute.setAttribute( attributeValue.getAttribute().getUid() );
             attribute.setValueType( attributeValue.getAttribute().getValueType() );
@@ -190,17 +195,17 @@ public abstract class AbstractTrackedEntityInstanceService
         return trackedEntityInstance;
     }
 
-    public org.hisp.dhis.trackedentity.TrackedEntityInstance getTrackedEntityInstance( TrackedEntityInstance trackedEntityInstance )
+    public org.hisp.dhis.trackedentity.TrackedEntityInstance getTrackedEntityInstance( TrackedEntityInstance trackedEntityInstance, ImportOptions importOptions )
     {
         Assert.hasText( trackedEntityInstance.getOrgUnit() );
 
         org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance = new org.hisp.dhis.trackedentity.TrackedEntityInstance();
 
-        OrganisationUnit organisationUnit = getOrganisationUnit( trackedEntityInstance.getOrgUnit() );
+        OrganisationUnit organisationUnit = getOrganisationUnit( importOptions.getIdSchemes(), trackedEntityInstance.getOrgUnit() );
         Assert.notNull( organisationUnit );
         entityInstance.setOrganisationUnit( organisationUnit );
 
-        TrackedEntity trackedEntity = getTrackedEntity( trackedEntityInstance.getTrackedEntity() );
+        TrackedEntity trackedEntity = getTrackedEntity( importOptions.getIdSchemes(), trackedEntityInstance.getTrackedEntity() );
         entityInstance.setTrackedEntity( trackedEntity );
         entityInstance.setUid( CodeGenerator.isValidCode( trackedEntityInstance.getTrackedEntityInstance() ) ?
             trackedEntityInstance.getTrackedEntityInstance() : CodeGenerator.generateCode() );
@@ -213,14 +218,19 @@ public abstract class AbstractTrackedEntityInstanceService
     // -------------------------------------------------------------------------
 
     @Override
-    public ImportSummaries addTrackedEntityInstances( List<TrackedEntityInstance> trackedEntityInstances )
+    public ImportSummaries addTrackedEntityInstances( List<TrackedEntityInstance> trackedEntityInstances, ImportOptions importOptions )
     {
+        if ( importOptions == null )
+        {
+            importOptions = new ImportOptions();
+        }
+
         ImportSummaries importSummaries = new ImportSummaries();
         int counter = 0;
 
         for ( TrackedEntityInstance trackedEntityInstance : trackedEntityInstances )
         {
-            importSummaries.addImportSummary( addTrackedEntityInstance( trackedEntityInstance ) );
+            importSummaries.addImportSummary( addTrackedEntityInstance( trackedEntityInstance, importOptions ) );
 
             if ( counter % FLUSH_FREQUENCY == 0 )
             {
@@ -234,15 +244,20 @@ public abstract class AbstractTrackedEntityInstanceService
     }
 
     @Override
-    public ImportSummary addTrackedEntityInstance( TrackedEntityInstance trackedEntityInstance )
+    public ImportSummary addTrackedEntityInstance( TrackedEntityInstance trackedEntityInstance, ImportOptions importOptions )
     {
+        if ( importOptions == null )
+        {
+            importOptions = new ImportOptions();
+        }
+
         ImportSummary importSummary = new ImportSummary();
 
         trackedEntityInstance.trimValuesToNull();
 
         Set<ImportConflict> importConflicts = new HashSet<>();
-        importConflicts.addAll( checkTrackedEntity( trackedEntityInstance ) );
-        importConflicts.addAll( checkAttributes( trackedEntityInstance ) );
+        importConflicts.addAll( checkTrackedEntity( trackedEntityInstance, importOptions ) );
+        importConflicts.addAll( checkAttributes( trackedEntityInstance, importOptions ) );
 
         importSummary.setConflicts( importConflicts );
 
@@ -253,7 +268,7 @@ public abstract class AbstractTrackedEntityInstanceService
             return importSummary;
         }
 
-        org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance = getTrackedEntityInstance( trackedEntityInstance );
+        org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance = getTrackedEntityInstance( trackedEntityInstance, importOptions );
 
         teiService.addTrackedEntityInstance( entityInstance );
 
@@ -272,14 +287,19 @@ public abstract class AbstractTrackedEntityInstanceService
     // -------------------------------------------------------------------------
 
     @Override
-    public ImportSummaries updateTrackedEntityInstances( List<TrackedEntityInstance> trackedEntityInstances )
+    public ImportSummaries updateTrackedEntityInstances( List<TrackedEntityInstance> trackedEntityInstances, ImportOptions importOptions )
     {
+        if ( importOptions == null )
+        {
+            importOptions = new ImportOptions();
+        }
+
         ImportSummaries importSummaries = new ImportSummaries();
         int counter = 0;
 
         for ( TrackedEntityInstance trackedEntityInstance : trackedEntityInstances )
         {
-            importSummaries.addImportSummary( updateTrackedEntityInstance( trackedEntityInstance ) );
+            importSummaries.addImportSummary( updateTrackedEntityInstance( trackedEntityInstance, importOptions ) );
 
             if ( counter % FLUSH_FREQUENCY == 0 )
             {
@@ -293,17 +313,23 @@ public abstract class AbstractTrackedEntityInstanceService
     }
 
     @Override
-    public ImportSummary updateTrackedEntityInstance( TrackedEntityInstance trackedEntityInstance )
+    public ImportSummary updateTrackedEntityInstance( TrackedEntityInstance trackedEntityInstance, ImportOptions importOptions )
     {
+        if ( importOptions == null )
+        {
+            importOptions = new ImportOptions();
+        }
+
         ImportSummary importSummary = new ImportSummary();
 
         trackedEntityInstance.trimValuesToNull();
 
         Set<ImportConflict> importConflicts = new HashSet<>();
         importConflicts.addAll( checkRelationships( trackedEntityInstance ) );
-        importConflicts.addAll( checkAttributes( trackedEntityInstance ) );
+        importConflicts.addAll( checkAttributes( trackedEntityInstance, importOptions ) );
 
-        org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance = manager.get( org.hisp.dhis.trackedentity.TrackedEntityInstance.class, trackedEntityInstance.getTrackedEntityInstance() );
+        org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance = manager.get( org.hisp.dhis.trackedentity.TrackedEntityInstance.class,
+            trackedEntityInstance.getTrackedEntityInstance() );
 
         if ( entityInstance == null )
         {
@@ -438,26 +464,26 @@ public abstract class AbstractTrackedEntityInstanceService
         teiService.updateTrackedEntityInstance( entityInstance );
     }
 
-    private OrganisationUnit getOrganisationUnit( String id )
+    private OrganisationUnit getOrganisationUnit( IdSchemes idSchemes, String id )
     {
-        return organisationUnitCache.get( id, new IdentifiableObjectSearchCallable<>( manager, OrganisationUnit.class, id ) );
+        return organisationUnitCache.get( id, new IdentifiableObjectCallable<>( manager, OrganisationUnit.class, idSchemes.getOrgUnitIdScheme(), id ) );
     }
 
-    private TrackedEntity getTrackedEntity( String id )
+    private TrackedEntity getTrackedEntity( IdSchemes idSchemes, String id )
     {
-        return trackedEntityCache.get( id, new IdentifiableObjectSearchCallable<>( manager, TrackedEntity.class, id ) );
+        return trackedEntityCache.get( id, new IdentifiableObjectCallable<>( manager, TrackedEntity.class, idSchemes.getTrackedEntityIdScheme(), id ) );
     }
 
-    private TrackedEntityAttribute getTrackedEntityAttribute( String id )
+    private TrackedEntityAttribute getTrackedEntityAttribute( IdSchemes idSchemes, String id )
     {
-        return trackedEntityAttributeCache.get( id, new IdentifiableObjectSearchCallable<>( manager, TrackedEntityAttribute.class, id ) );
+        return trackedEntityAttributeCache.get( id, new IdentifiableObjectCallable<>( manager, TrackedEntityAttribute.class, idSchemes.getTrackedEntityAttributeIdScheme(), id ) );
     }
 
     //--------------------------------------------------------------------------
     // VALIDATION
     //--------------------------------------------------------------------------
 
-    private List<ImportConflict> validateAttributeType( Attribute attribute )
+    private List<ImportConflict> validateAttributeType( Attribute attribute, ImportOptions importOptions )
     {
         List<ImportConflict> importConflicts = Lists.newArrayList();
 
@@ -466,7 +492,7 @@ public abstract class AbstractTrackedEntityInstanceService
             return importConflicts;
         }
 
-        TrackedEntityAttribute trackedEntityAttribute = getTrackedEntityAttribute( attribute.getAttribute() );
+        TrackedEntityAttribute trackedEntityAttribute = getTrackedEntityAttribute( importOptions.getIdSchemes(), attribute.getAttribute() );
 
         if ( trackedEntityAttribute == null )
         {
@@ -538,13 +564,13 @@ public abstract class AbstractTrackedEntityInstanceService
         return importConflicts;
     }
 
-    private List<ImportConflict> checkAttributes( TrackedEntityInstance trackedEntityInstance )
+    private List<ImportConflict> checkAttributes( TrackedEntityInstance trackedEntityInstance, ImportOptions importOptions )
     {
         List<ImportConflict> importConflicts = new ArrayList<>();
 
         for ( Attribute attribute : trackedEntityInstance.getAttributes() )
         {
-            TrackedEntityAttribute entityAttribute = getTrackedEntityAttribute( attribute.getAttribute() );
+            TrackedEntityAttribute entityAttribute = getTrackedEntityAttribute( importOptions.getIdSchemes(), attribute.getAttribute() );
 
             if ( entityAttribute == null )
             {
@@ -554,18 +580,18 @@ public abstract class AbstractTrackedEntityInstanceService
 
             if ( entityAttribute.isUnique() )
             {
-                OrganisationUnit organisationUnit = getOrganisationUnit( trackedEntityInstance.getOrgUnit() );
+                OrganisationUnit organisationUnit = getOrganisationUnit( importOptions.getIdSchemes(), trackedEntityInstance.getOrgUnit() );
                 org.hisp.dhis.trackedentity.TrackedEntityInstance tei = teiService.getTrackedEntityInstance( trackedEntityInstance.getTrackedEntityInstance() );
                 importConflicts.addAll( checkScope( tei, entityAttribute, attribute.getValue(), organisationUnit ) );
             }
 
-            importConflicts.addAll( validateAttributeType( attribute ) );
+            importConflicts.addAll( validateAttributeType( attribute, importOptions ) );
         }
 
         return importConflicts;
     }
 
-    private List<ImportConflict> checkTrackedEntity( TrackedEntityInstance trackedEntityInstance )
+    private List<ImportConflict> checkTrackedEntity( TrackedEntityInstance trackedEntityInstance, ImportOptions importOptions )
     {
         List<ImportConflict> importConflicts = new ArrayList<>();
 
@@ -575,7 +601,7 @@ public abstract class AbstractTrackedEntityInstanceService
             return importConflicts;
         }
 
-        TrackedEntity trackedEntity = getTrackedEntity( trackedEntityInstance.getTrackedEntity() );
+        TrackedEntity trackedEntity = getTrackedEntity( importOptions.getIdSchemes(), trackedEntityInstance.getTrackedEntity() );
 
         if ( trackedEntity == null )
         {

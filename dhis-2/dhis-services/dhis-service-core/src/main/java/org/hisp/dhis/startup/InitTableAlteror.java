@@ -87,6 +87,7 @@ public class InitTableAlteror
         updateValidationRuleEnums();
         updateProgramStatus();
         updateSmtpPasswordColumn();
+        updateTimestamps();
 
         executeSql( "ALTER TABLE program ALTER COLUMN \"type\" TYPE varchar(255);" );
         executeSql( "update program set \"type\"='WITH_REGISTRATION' where type='1' or type='2'" );
@@ -101,7 +102,6 @@ public class InitTableAlteror
     {
         try
         {
-
             executeSql( "UPDATE configuration SET smtppassword = smptpassword" );
             executeSql( "ALTER TABLE configuration DROP COLUMN smptpassword" );
 
@@ -112,6 +112,19 @@ public class InitTableAlteror
         }
     }
 
+    private void updateTimestamps()
+    {
+        executeSql( "alter table datavalueaudit rename column timestamp to created" );
+        executeSql( "alter table trackedentitydatavalueaudit rename column timestamp to created" );
+
+        executeSql( "update trackedentitydatavalue set created=timestamp where created is null" );
+        executeSql( "update trackedentitydatavalue set lastupdated=timestamp where lastupdated is null" );
+        executeSql( "alter table trackedentitydatavalue drop column timestamp" );
+
+        executeSql( "alter table trackedentityattributevalueaudit rename column timestamp to created" );
+        executeSql( "update trackedentityattributevalue set created=now() where created is null" );
+        executeSql( "update trackedentityattributevalue set lastupdated=now() where lastupdated is null" );
+    }
     private void updateProgramStatus()
     {
         executeSql( "alter table programinstance alter column status type varchar(50)" );
@@ -223,11 +236,11 @@ public class InitTableAlteror
         {
             String autoIncr = statementBuilder.getAutoIncrementValue();
 
-            String insertSql = "insert into programstagedataelement(programstagedataelementid,programstageid,dataelementid,compulsory,allowprovidedelsewhere,sort_order,displayinreports,programstagesectionid,allowfuturedate,section_sort_order) "
-                + "select "
-                + autoIncr
-                + ",programstageid,dataelementid,compulsory,allowprovidedelsewhere,sort_order,displayinreports,programstagesectionid,allowfuturedate,section_sort_order "
-                + "from programstage_dataelements";
+            String insertSql =
+                "insert into programstagedataelement(programstagedataelementid,programstageid,dataelementid,compulsory,allowprovidedelsewhere," +
+                    "sort_order,displayinreports,programstagesectionid,allowfuturedate,section_sort_order) " + "select " + autoIncr +
+                    ",programstageid,dataelementid,compulsory,allowprovidedelsewhere,sort_order,displayinreports,programstagesectionid,allowfuturedate,section_sort_order from programstage_dataelements";
+
 
             executeSql( insertSql );
 

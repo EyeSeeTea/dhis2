@@ -59,6 +59,11 @@ public interface AppManager
      */
     App getApp( String key );
 
+    /**
+     * Returns apps which are accessible to the current user.
+     * 
+     * @return apps which are accessible to the current user.
+     */
     List<App> getAccessibleApps();
 
     /**
@@ -66,10 +71,9 @@ public interface AppManager
      *
      * @param file     the app file.
      * @param fileName the name of the app file.
-     * @param rootPath the root path of the instance.
      * @throws IOException if the app manifest file could not be read.
      */
-    AppStatus installApp( File file, String fileName, String rootPath )
+    AppStatus installApp( File file, String fileName )
         throws IOException;
 
     /**
@@ -138,8 +142,21 @@ public interface AppManager
      */
     void setAppStoreUrl( String appStoreUrl );
 
+    /**
+     * Indicates whether the given app is accessible to the current user.
+     * 
+     * @param app the app.
+     * @return true if app is accessible.
+     */
     boolean isAccessible( App app );
 
+    /**
+     * Indicates whether the given app is accessible to the given user.
+     * 
+     * @param app the app.
+     * @param user the user.
+     * @return true if app is accessible.
+     */
     boolean isAccessible( App app, User user );
 
     /**
@@ -148,5 +165,4 @@ public interface AppManager
      * @return App or null
      */
     App getAppByNamespace( String namespace);
-
 }

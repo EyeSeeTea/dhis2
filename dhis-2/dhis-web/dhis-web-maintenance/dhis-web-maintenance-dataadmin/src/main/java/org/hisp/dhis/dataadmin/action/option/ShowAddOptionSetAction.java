@@ -1,4 +1,4 @@
-package org.hisp.dhis.datavalue;
+package org.hisp.dhis.dataadmin.action.option;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,32 +28,52 @@ package org.hisp.dhis.datavalue;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.system.deletion.DeletionHandler;
+import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.attribute.Attribute;
+import org.hisp.dhis.attribute.AttributeService;
+import org.hisp.dhis.attribute.comparator.AttributeSortOrderComparator;
+import org.hisp.dhis.option.OptionSet;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
- * @author Quang Nguyen
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class DataValueAuditDeletionHandler
-    extends DeletionHandler
+public class ShowAddOptionSetAction
+    implements Action
 {
-    // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------------------------------
     // Dependencies
-    // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------------------------------
 
-    private DataValueAuditService dataValueAuditService;
+    @Autowired
+    private AttributeService attributeService;
 
-    public void setDataValueAuditService( DataValueAuditService dataValueAuditService )
+    // -------------------------------------------------------------------------------------------------
+    // Input/Output
+    // -------------------------------------------------------------------------------------------------
+
+    private List<Attribute> attributes;
+
+    public List<Attribute> getAttributes()
     {
-        this.dataValueAuditService = dataValueAuditService;
+        return attributes;
     }
 
-    // -------------------------------------------------------------------------
-    // DeletionHandler implementation
-    // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------------------------------
 
     @Override
-    public String getClassName()
+    public String execute()
+        throws Exception
     {
-        return DataValueAudit.class.getSimpleName();
+        attributes = new ArrayList<>( attributeService.getAttributes( OptionSet.class ) );
+        Collections.sort( attributes, AttributeSortOrderComparator.INSTANCE );
+
+        return SUCCESS;
     }
 }

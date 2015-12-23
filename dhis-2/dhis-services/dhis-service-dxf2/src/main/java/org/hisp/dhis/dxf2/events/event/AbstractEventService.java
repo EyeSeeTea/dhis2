@@ -35,8 +35,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
 import org.hisp.dhis.common.CodeGenerator;
+import org.hisp.dhis.common.IdScheme;
+import org.hisp.dhis.common.IdSchemes;
 import org.hisp.dhis.common.IdentifiableObjectManager;
-import org.hisp.dhis.common.IdentifiableProperty;
 import org.hisp.dhis.common.IllegalQueryException;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.common.Pager;
@@ -48,7 +49,6 @@ import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dbms.DbmsManager;
-import org.hisp.dhis.dxf2.common.IdSchemes;
 import org.hisp.dhis.dxf2.common.ImportOptions;
 import org.hisp.dhis.dxf2.events.enrollment.EnrollmentStatus;
 import org.hisp.dhis.dxf2.events.report.EventRow;
@@ -247,16 +247,16 @@ public abstract class AbstractEventService
 
     protected ImportSummary addEvent( Event event, User user, ImportOptions importOptions )
     {
-        Program program = getProgram( event.getProgram() );
-        ProgramStage programStage = getProgramStage( event.getProgramStage() );
-
-        ProgramInstance programInstance;
-        ProgramStageInstance programStageInstance = null;
-
         if ( importOptions == null )
         {
             importOptions = new ImportOptions();
         }
+
+        Program program = getProgram( importOptions.getIdSchemes().getProgramIdScheme(), event.getProgram() );
+        ProgramStage programStage = getProgramStage( importOptions.getIdSchemes().getProgramStageIdScheme(), event.getProgramStage() );
+
+        ProgramInstance programInstance;
+        ProgramStageInstance programStageInstance = null;
 
         if ( program == null )
         {
@@ -397,7 +397,7 @@ public abstract class AbstractEventService
             }
         }
 
-        OrganisationUnit organisationUnit = getOrganisationUnit( importOptions.getIdSchemes().getOrgUnitIdScheme(), event.getOrgUnit() );
+        OrganisationUnit organisationUnit = getOrganisationUnit( importOptions.getIdSchemes(), event.getOrgUnit() );
 
         if ( organisationUnit == null )
         {
@@ -495,7 +495,6 @@ public abstract class AbstractEventService
         }
 
         EventRows eventRows = new EventRows();
-
 
         List<EventRow> eventRowList = eventStore.getEventRows( params, organisationUnits );
 
@@ -647,6 +646,11 @@ public abstract class AbstractEventService
 
     private ImportSummary updateEvent( Event event, User user, boolean singleValue, ImportOptions importOptions )
     {
+        if ( importOptions == null )
+        {
+            importOptions = new ImportOptions();
+        }
+
         ImportSummary importSummary = new ImportSummary();
         ProgramStageInstance programStageInstance = programStageInstanceService.getProgramStageInstance( event.getEvent() );
 
@@ -656,12 +660,7 @@ public abstract class AbstractEventService
             return importSummary.incrementIgnored();
         }
 
-        if ( importOptions == null )
-        {
-            importOptions = new ImportOptions();
-        }
-
-        OrganisationUnit organisationUnit = getOrganisationUnit( importOptions.getIdSchemes().getOrgUnitIdScheme(), event.getOrgUnit() );
+        OrganisationUnit organisationUnit = getOrganisationUnit( importOptions.getIdSchemes(), event.getOrgUnit() );
 
         if ( organisationUnit == null )
         {
@@ -739,7 +738,7 @@ public abstract class AbstractEventService
 
         for ( DataValue value : event.getDataValues() )
         {
-            DataElement dataElement = getDataElement( value.getDataElement() );
+            DataElement dataElement = getDataElement( importOptions.getIdSchemes().getDataElementIdScheme(), value.getDataElement() );
             TrackedEntityDataValue dataValue = dataValueService.getTrackedEntityDataValue( programStageInstance, dataElement );
 
             if ( !validateDataValue( dataElement, value.getValue(), importSummary ) )
@@ -816,7 +815,9 @@ public abstract class AbstractEventService
             programStageInstance.setStatus( EventStatus.VISITED );
         }
 
-        OrganisationUnit organisationUnit = getOrganisationUnit( null, event.getOrgUnit() );
+        ImportOptions importOptions = new ImportOptions();
+
+        OrganisationUnit organisationUnit = getOrganisationUnit( importOptions.getIdSchemes(), event.getOrgUnit() );
 
         if ( organisationUnit == null )
         {
@@ -962,6 +963,8 @@ public abstract class AbstractEventService
         for ( TrackedEntityDataValue dataValue : dataValues )
         {
             DataValue value = new DataValue();
+            value.setCreated( DateUtils.getLongGmtDateString( dataValue.getCreated() ) );
+            value.setLastUpdated( DateUtils.getLongGmtDateString( dataValue.getLastUpdated() ) );
             value.setDataElement( dataValue.getDataElement().getUid() );
             value.setValue( dataValue.getValue() );
             value.setProvidedElsewhere( dataValue.getProvidedElsewhere() );
@@ -1060,7 +1063,7 @@ public abstract class AbstractEventService
         {
             if ( dataValue == null )
             {
-                dataValue = new TrackedEntityDataValue( programStageInstance, dataElement, new Date(), value );
+                dataValue = new TrackedEntityDataValue( programStageInstance, dataElement, value );
                 dataValue.setStoredBy( storedBy );
                 dataValue.setProvidedElsewhere( providedElsewhere );
 
@@ -1074,7 +1077,6 @@ public abstract class AbstractEventService
             else
             {
                 dataValue.setValue( value );
-                dataValue.setTimestamp( new Date() );
                 dataValue.setStoredBy( storedBy );
                 dataValue.setProvidedElsewhere( providedElsewhere );
 
@@ -1162,7 +1164,13 @@ public abstract class AbstractEventService
 
         ImportSummary importSummary = new ImportSummary();
         importSummary.setStatus( ImportStatus.SUCCESS );
-        boolean dryRun = importOptions != null && importOptions.isDryRun();
+
+        if ( importOptions == null )
+        {
+            importOptions = new ImportOptions();
+        }
+
+        boolean dryRun = importOptions.isDryRun();
 
         Date eventDate = DateUtils.parseDate( event.getEventDate() );
 
@@ -1213,7 +1221,7 @@ public abstract class AbstractEventService
             }
             else
             {
-                dataElement = getDataElement( dataValue.getDataElement() );
+                dataElement = getDataElement( importOptions.getIdSchemes().getDataElementIdScheme(), dataValue.getDataElement() );
             }
 
             if ( dataElement != null )
@@ -1271,62 +1279,23 @@ public abstract class AbstractEventService
         }
     }
 
-    private OrganisationUnit getOrganisationUnit( IdentifiableProperty scheme, String value )
+    private OrganisationUnit getOrganisationUnit( IdSchemes idSchemes, String id )
     {
-        OrganisationUnit organisationUnit = null;
-
-        if ( StringUtils.isEmpty( value ) )
-        {
-            return null;
-        }
-
-        if ( organisationUnitCache.containsKey( value ) )
-        {
-            return organisationUnitCache.get( value );
-        }
-
-        if ( IdentifiableProperty.UUID.equals( scheme ) )
-        {
-            organisationUnit = organisationUnitService.getOrganisationUnitByUuid( value );
-        }
-        else if ( IdentifiableProperty.CODE.equals( scheme ) )
-        {
-            organisationUnit = organisationUnitService.getOrganisationUnitByCode( value );
-        }
-        else if ( IdentifiableProperty.NAME.equals( scheme ) )
-        {
-            List<OrganisationUnit> organisationUnitByName = organisationUnitService.getOrganisationUnitByName( value );
-
-            if ( organisationUnitByName.size() == 1 )
-            {
-                organisationUnit = organisationUnitByName.get( 0 );
-            }
-        }
-        else
-        {
-            organisationUnit = organisationUnitService.getOrganisationUnit( value );
-        }
-
-        if ( organisationUnit != null )
-        {
-            organisationUnitCache.put( value, organisationUnit );
-        }
-
-        return organisationUnit;
+        return organisationUnitCache.get( id, new IdentifiableObjectCallable<>( manager, OrganisationUnit.class, idSchemes.getOrgUnitIdScheme(), id ) );
     }
 
-    private Program getProgram( String programId )
+    private Program getProgram( IdScheme idScheme, String id )
     {
-        return programCache.get( programId, new IdentifiableObjectCallable<>( manager, Program.class, programId ) );
+        return programCache.get( id, new IdentifiableObjectCallable<>( manager, Program.class, idScheme, id ) );
     }
 
-    private ProgramStage getProgramStage( String programStageId )
+    private ProgramStage getProgramStage( IdScheme idScheme, String id )
     {
-        return programStageCache.get( programStageId, new IdentifiableObjectCallable<>( manager, ProgramStage.class, programStageId ) );
+        return programStageCache.get( id, new IdentifiableObjectCallable<>( manager, ProgramStage.class, idScheme, id ) );
     }
 
-    private DataElement getDataElement( String dataElementId )
+    private DataElement getDataElement( IdScheme idScheme, String id )
     {
-        return dataElementCache.get( dataElementId, new IdentifiableObjectCallable<>( manager, DataElement.class, dataElementId ) );
+        return dataElementCache.get( id, new IdentifiableObjectCallable<>( manager, DataElement.class, idScheme, id ) );
     }
 }
