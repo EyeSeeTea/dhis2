@@ -1,5 +1,7 @@
 package org.hisp.dhis.webapi.controller.sms;
 
+import java.io.IOException;
+
 /*
  * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
@@ -31,7 +33,10 @@ package org.hisp.dhis.webapi.controller.sms;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.hisp.dhis.dxf2.render.RenderService;
 import org.hisp.dhis.dxf2.webmessage.WebMessageException;
+import org.hisp.dhis.sms.config.SmsConfiguration;
+import org.hisp.dhis.sms.config.SmsConfigurationManager;
 import org.hisp.dhis.sms.outbound.OutboundSmsTransportService;
 import org.hisp.dhis.webapi.service.WebMessageService;
 import org.hisp.dhis.webapi.utils.WebMessageUtils;
@@ -40,6 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -61,6 +67,12 @@ public class SmsGatewayController
     @Autowired
     private OutboundSmsTransportService outboundSmsTransportService;
 
+    @Autowired
+    private SmsConfigurationManager smsConfigMgr;
+
+    @Autowired
+    private RenderService renderService;
+
     // -------------------------------------------------------------------------
     // GET
     // -------------------------------------------------------------------------
@@ -78,5 +90,42 @@ public class SmsGatewayController
         String defaultGateway = outboundSmsTransportService.getDefaultGateway();
 
         webMessageService.send( WebMessageUtils.ok( "Default Gateway " + defaultGateway ), response, request );
+    }
+
+    @PreAuthorize( "hasRole('ALL') or hasRole(' F_MOBILE_SENDSMS')" )
+    @RequestMapping( value = "/setdefault", method = RequestMethod.GET )
+    public void setDefault( @RequestParam( required = false ) String Name, @RequestParam Integer indexId,
+        HttpServletRequest request, HttpServletResponse response)
+    {
+        SmsConfiguration smsConfig = smsConfigMgr.getSmsConfiguration();
+        if ( smsConfig.setDefaultGateway( indexId.intValue() ) )
+        {
+            smsConfigMgr.updateSmsConfiguration( smsConfig );
+            webMessageService.send(
+                WebMessageUtils.ok( smsConfig.getGateways().get( indexId.intValue() ).getName() + " is set to default" ),
+                response, request );
+        }
+        else
+        {
+            webMessageService.send( WebMessageUtils.error( "No gateway against this ID" ), response, request );
+        }
+
+    }
+
+    @PreAuthorize( "hasRole('ALL') or hasRole(' F_MOBILE_SENDSMS')" )
+    @RequestMapping( method = RequestMethod.GET, produces = "application/json" )
+    public void listAll( HttpServletRequest request, HttpServletResponse response )
+        throws WebMessageException, IOException
+    {
+        SmsConfiguration smsConfig = smsConfigMgr.getSmsConfiguration();
+        if ( smsConfig.getGateways().size() > 0 )
+        {
+            renderService.toJson( response.getOutputStream(), smsConfig.listGateways() );
+        }
+        else
+        {
+            webMessageService.send( WebMessageUtils.ok( "No gateway configured" ), response, request );
+        }
+
     }
 }

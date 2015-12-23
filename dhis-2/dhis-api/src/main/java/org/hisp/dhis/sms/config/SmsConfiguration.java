@@ -30,13 +30,14 @@ package org.hisp.dhis.sms.config;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
-
 
 /**
  * Serializable configuration object for Sms.
@@ -88,6 +89,47 @@ public class SmsConfiguration
     public String getLongNumber()
     {
         return longNumber;
+    }
+
+    public List<Map<Integer, String>> listGateways()
+    {
+        List<Map<Integer, String>> gatewayList = new ArrayList<Map<Integer, String>>();
+        Map<Integer, String> gatewayMap = new HashMap<Integer, String>();
+        int key = 1;
+        for ( SmsGatewayConfig gw : gateways )
+        {
+            gatewayMap.put( key, gw.getName() );
+            key++;
+        }
+
+        gatewayList.add( gatewayMap );
+        return gatewayList;
+    }
+
+    public boolean setDefaultGateway( int index )
+    {
+
+        int trackIndex = 0;
+        if ( gateways.size() > index && gateways.get( index ) != null )
+        {
+            for ( SmsGatewayConfig gw : gateways )
+            {
+                if ( index == trackIndex )
+                {
+                    gw.setDefault( true );
+                }
+                else
+                {
+                    gw.setDefault( false );
+                }
+                getGateways().set( trackIndex++, gw );
+            }
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     public void setLongNumber( String longNumber )
