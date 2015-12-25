@@ -417,7 +417,7 @@ extends DhisTest
 		// Compare dataElementB with 1.5 times itself for two sequential and two annual previous periods.
 		monitoringRuleH = createMonitoringRule( 'H', less_than_or_equal_to, expressionD, expressionE, periodTypeMonthly, 1, 2, 2 );
 
-		// Compare dataElements B/E with 1.5 * B/E for one annual period, no outlier discarding.
+		// Compare dataElements B/E with 1.5 * B/E for one annual period
 		monitoringRuleL = createMonitoringRule( 'I', less_than_or_equal_to, expressionF, expressionG, periodTypeMonthly, 1, 0, 1 );
 
 		group = createValidationRuleGroup( 'A' );
