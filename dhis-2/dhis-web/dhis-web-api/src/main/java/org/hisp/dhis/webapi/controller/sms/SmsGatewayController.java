@@ -1,6 +1,8 @@
 package org.hisp.dhis.webapi.controller.sms;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -35,8 +37,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.hisp.dhis.dxf2.render.RenderService;
 import org.hisp.dhis.dxf2.webmessage.WebMessageException;
-import org.hisp.dhis.sms.config.SmsConfiguration;
-import org.hisp.dhis.sms.config.SmsConfigurationManager;
+import org.hisp.dhis.sms.config.GatewayAdministratonService;
 import org.hisp.dhis.sms.outbound.OutboundSmsTransportService;
 import org.hisp.dhis.webapi.service.WebMessageService;
 import org.hisp.dhis.webapi.utils.WebMessageUtils;
@@ -68,10 +69,10 @@ public class SmsGatewayController
     private OutboundSmsTransportService outboundSmsTransportService;
 
     @Autowired
-    private SmsConfigurationManager smsConfigMgr;
+    private RenderService renderService;
 
     @Autowired
-    private RenderService renderService;
+    private GatewayAdministratonService gatewayAdminService;
 
     // -------------------------------------------------------------------------
     // GET
@@ -97,13 +98,13 @@ public class SmsGatewayController
     public void setDefault( @RequestParam( required = false ) String Name, @RequestParam Integer indexId,
         HttpServletRequest request, HttpServletResponse response)
     {
-        SmsConfiguration smsConfig = smsConfigMgr.getSmsConfiguration();
-        if ( smsConfig.setDefaultGateway( indexId.intValue() ) )
+
+        if ( gatewayAdminService.setDefault( indexId.intValue() ) )
         {
-            smsConfigMgr.updateSmsConfiguration( smsConfig );
+
             webMessageService.send(
-                WebMessageUtils.ok( smsConfig.getGateways().get( indexId.intValue() ).getName() + " is set to default" ),
-                response, request );
+                WebMessageUtils.ok( " Gateway with ID " + indexId.intValue() + " is set to default" ), response,
+                request );
         }
         else
         {
@@ -117,10 +118,12 @@ public class SmsGatewayController
     public void listAll( HttpServletRequest request, HttpServletResponse response )
         throws WebMessageException, IOException
     {
-        SmsConfiguration smsConfig = smsConfigMgr.getSmsConfiguration();
-        if ( smsConfig.getGateways().size() > 0 )
+
+        List<Map<Integer, String>> gwList = gatewayAdminService.listAll();
+
+        if ( gwList.size() > 0 )
         {
-            renderService.toJson( response.getOutputStream(), smsConfig.listGateways() );
+            renderService.toJson( response.getOutputStream(), gwList );
         }
         else
         {
