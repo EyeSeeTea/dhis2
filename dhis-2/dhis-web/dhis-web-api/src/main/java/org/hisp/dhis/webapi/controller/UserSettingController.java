@@ -29,7 +29,8 @@ package org.hisp.dhis.webapi.controller;
  */
 
 import org.hisp.dhis.dxf2.webmessage.WebMessageException;
-import org.hisp.dhis.system.util.LocaleUtils;
+import org.hisp.dhis.user.UserCredentials;
+import org.hisp.dhis.user.UserService;
 import org.hisp.dhis.user.UserSettingKey;
 import org.hisp.dhis.user.UserSettingService;
 import org.hisp.dhis.util.ObjectUtils;
@@ -48,10 +49,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Locale;
 import java.util.Optional;
-
-import static org.hisp.dhis.user.UserSettingService.*;
 
 /**
  * @author Lars Helge Overland
@@ -62,6 +60,9 @@ public class UserSettingController
 {
     @Autowired
     private UserSettingService userSettingService;
+    
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private WebMessageService webMessageService;
@@ -100,38 +101,53 @@ public class UserSettingController
         
         if ( username == null )
         {
-            userSettingService.saveUserSetting( key, valueToSet( key, value ) );
+            userSettingService.saveUserSetting( keyEnum.get(), valueObject );
         }
         else
         {
-            userSettingService.saveUserSetting( key, valueToSet( key, value ), username );
+            userSettingService.saveUserSetting( keyEnum.get(), valueObject, username );
         }
 
         webMessageService.send( WebMessageUtils.ok( "User setting saved" ), response, request );
     }
 
     @RequestMapping( value = "/{key}", method = RequestMethod.GET )
-    public void getUserSetting( @PathVariable( "key" ) String key,
+    public void getUserSetting( 
+        @PathVariable( "key" ) String key,
         @RequestParam( value = "user", required = false ) String username,
         HttpServletRequest request, HttpServletResponse response ) throws IOException, WebMessageException
     {
+        Optional<UserSettingKey> keyEnum = UserSettingKey.getByName( key );
+        
+        if ( !keyEnum.isPresent() )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "Key is not supported: " + key ) );
+        }
+        
+        UserCredentials credentials = userService.getUserCredentialsByUsername( username );
+        
+        if ( credentials == null )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "User does not exist: " + username ) );
+        }
+        
         Serializable value;
 
         if ( username == null )
         {
-            value = userSettingService.getUserSetting( key );
+            value = userSettingService.getUserSetting( keyEnum.get() );
         }
         else
         {
-            value = userSettingService.getUserSetting( key, username );
+            value = userSettingService.getUserSetting( keyEnum.get(), credentials.getUser() );
         }
 
         if ( value == null )
         {
-            throw new WebMessageException( WebMessageUtils.notFound( "User setting not found." ) );
+            throw new WebMessageException( WebMessageUtils.notFound( "User setting not found for key: " + key ) );
         }
 
-        String stringVal = getStringValue( key, value );
+        String stringVal = String.valueOf( value );
         
         String contentType = null;
 
@@ -150,31 +166,15 @@ public class UserSettingController
 
     @RequestMapping( value = "/{key}", method = RequestMethod.DELETE )
     public void removeSystemSetting( @PathVariable( "key" ) String key )
+        throws WebMessageException
     {
-        userSettingService.deleteUserSetting( key );
-    }
-
-    private Serializable valueToSet( String key, String value )
-    {
-        if ( KEY_UI_LOCALE.equals( key ) || KEY_DB_LOCALE.equals( key ) )
+        Optional<UserSettingKey> keyEnum = UserSettingKey.getByName( key );
+        
+        if ( !keyEnum.isPresent() )
         {
-            return LocaleUtils.getLocale( value );
+            throw new WebMessageException( WebMessageUtils.conflict( "Key is not supported: " + key ) );
         }
-        else
-        {
-            return value;
-        }
-    }
-
-    private String getStringValue( String key, Serializable value )
-    {
-        if ( KEY_UI_LOCALE.equals( key ) || KEY_DB_LOCALE.equals( key ) )
-        {
-            return ((Locale) value).getLanguage();
-        }
-        else
-        {
-            return String.valueOf( value );
-        }
+        
+        userSettingService.deleteUserSetting( keyEnum.get() );
     }
 }

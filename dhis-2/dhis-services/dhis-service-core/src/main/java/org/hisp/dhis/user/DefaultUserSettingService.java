@@ -92,39 +92,39 @@ public class DefaultUserSettingService
     // -------------------------------------------------------------------------
 
     @Override
-    public void saveUserSetting( String name, Serializable value, String username )
+    public void saveUserSetting( UserSettingKey key, Serializable value, String username )
     {
         UserCredentials credentials = userService.getUserCredentialsByUsername( username );
         
         if ( credentials != null )
         {        
-            saveUserSetting( name, value, credentials.getUserInfo() );
+            saveUserSetting( key, value, credentials.getUserInfo() );
         }
     }
 
     @Override
-    public void saveUserSetting( String name, Serializable value )
+    public void saveUserSetting( UserSettingKey key, Serializable value )
     {
         User currentUser = currentUserService.getCurrentUser();
         
-        saveUserSetting( name, value, currentUser );
+        saveUserSetting( key, value, currentUser );
     }
     
     @Override
-    public void saveUserSetting( String name, Serializable value, User user )
+    public void saveUserSetting( UserSettingKey key, Serializable value, User user )
     {
         if ( user == null )
         {
             return;
         }
 
-        SETTING_CACHE.invalidate( getCacheKey( name, user.getUsername() ) );
+        SETTING_CACHE.invalidate( getCacheKey( key.getName(), user.getUsername() ) );
         
-        UserSetting userSetting = userSettingStore.getUserSetting( user, name );
+        UserSetting userSetting = userSettingStore.getUserSetting( user, key.getName() );
 
         if ( userSetting == null )
         {
-            userSetting = new UserSetting( user, name, value );
+            userSetting = new UserSetting( user, key.getName(), value );
 
             userSettingStore.addUserSetting( userSetting );
         }
@@ -145,13 +145,13 @@ public class DefaultUserSettingService
     }
     
     @Override
-    public void deleteUserSetting( String name )
+    public void deleteUserSetting( UserSettingKey key )
     {
         User currentUser = currentUserService.getCurrentUser();
 
         if ( currentUser != null )
         {
-            UserSetting setting = userSettingStore.getUserSetting( currentUser, name );
+            UserSetting setting = userSettingStore.getUserSetting( currentUser, key.getName() );
             
             if ( setting != null )
             {
@@ -161,9 +161,9 @@ public class DefaultUserSettingService
     }
     
     @Override
-    public void deleteUserSetting( String name, User user )
+    public void deleteUserSetting( UserSettingKey key, User user )
     {
-        UserSetting setting = userSettingStore.getUserSetting( user, name );
+        UserSetting setting = userSettingStore.getUserSetting( user, key.getName() );
         
         if ( setting != null )
         {
@@ -172,26 +172,20 @@ public class DefaultUserSettingService
     }
 
     @Override
-    public Serializable getUserSetting( String name )
+    public Serializable getUserSetting( UserSettingKey key )
     {
-        return getUserSetting( name, Optional.empty() ).orElse( null );
+        return getUserSetting( key, Optional.empty() ).orElse( null );
     }
 
     @Override
-    public Serializable getUserSetting( String name, Serializable defaultValue )
+    public Serializable getUserSetting( UserSettingKey key, User user )
     {
-        return getUserSetting( name, Optional.empty() ).orElse( defaultValue );
+        return getUserSetting( key, Optional.of( user ) ).orElse( null );
     }
 
-    @Override
-    public Serializable getUserSetting( String name, Serializable defaultValue, User user )
+    private Optional<Serializable> getUserSetting( UserSettingKey key, Optional<User> user )
     {
-        return getUserSetting( name, Optional.ofNullable( user ) ).orElse( defaultValue );
-    }
-
-    private Optional<Serializable> getUserSetting( String name, Optional<User> user )
-    {
-        if ( name == null )
+        if ( key == null )
         {
             return Optional.empty();
         }
@@ -200,9 +194,9 @@ public class DefaultUserSettingService
 
         try
         {
-            String cacheKey = getCacheKey( name, username );
+            String cacheKey = getCacheKey( key.getName(), username );
             
-            return SETTING_CACHE.get( cacheKey, () -> getUserSettingOptional( username, name ) );
+            return SETTING_CACHE.get( cacheKey, () -> getUserSettingOptional( key, username ) );
         }
         catch ( ExecutionException ignored )
         {
@@ -210,7 +204,7 @@ public class DefaultUserSettingService
         }
     }
 
-    private Optional<Serializable> getUserSettingOptional( String username, String settingName )
+    private Optional<Serializable> getUserSettingOptional( UserSettingKey key, String username )
     {
         UserCredentials userCredentials = userService.getUserCredentialsByUsername( username );
 
@@ -219,9 +213,9 @@ public class DefaultUserSettingService
             return Optional.empty();
         }
         
-        UserSetting setting = userSettingStore.getUserSetting( userCredentials.getUserInfo(), settingName );
+        UserSetting setting = userSettingStore.getUserSetting( userCredentials.getUserInfo(), key.getName() );
         
-        return setting != null ? Optional.ofNullable( setting.getValue() ) : Optional.empty();
+        return setting != null && setting.hasValue() ? Optional.of( setting.getValue() ) : Optional.ofNullable( key.getDefaultValue() );
     }
     
     @Override
