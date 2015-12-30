@@ -34,8 +34,11 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import javax.xml.bind.annotation.XmlElements;
 
 /**
  * Serializable configuration object for Sms.
@@ -94,6 +97,7 @@ public class SmsConfiguration
         this.longNumber = longNumber;
     }
 
+    @JsonProperty (value = "gateways")
     @XmlElementWrapper( name = "gateways" )
     @XmlElements( { @XmlElement( name = "bulksms", type = BulkSmsGatewayConfig.class ),
         @XmlElement( name = "clickatell", type = ClickatellGatewayConfig.class ),

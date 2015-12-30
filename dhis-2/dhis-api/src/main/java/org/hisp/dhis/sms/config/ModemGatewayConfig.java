@@ -1,5 +1,7 @@
 package org.hisp.dhis.sms.config;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /*
  * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
@@ -51,6 +53,7 @@ public class ModemGatewayConfig
 
     private boolean outbound;
 
+    @JsonProperty (value = "port")
     public String getPort()
     {
         return port;
@@ -61,6 +64,13 @@ public class ModemGatewayConfig
         this.port = port;
     }
 
+    @JsonProperty (value = "name")
+    public String getName()
+    {
+        return super.getName();
+    }
+
+    @JsonProperty (value = "baudrate")
     public int getBaudRate()
     {
         return baudRate;
@@ -71,6 +81,7 @@ public class ModemGatewayConfig
         this.baudRate = baudRate;
     }
 
+    @JsonProperty (value = "manufacturer")
     public String getManufacturer()
     {
         return manufacturer;
@@ -81,6 +92,7 @@ public class ModemGatewayConfig
         this.manufacturer = manufacturer;
     }
 
+    @JsonProperty (value = "model")
     public String getModel()
     {
         return model;

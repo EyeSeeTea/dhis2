@@ -34,6 +34,9 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.hisp.dhis.common.adapter.ParametersMapXmlAdapter;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+
 public class GenericHttpGatewayConfig
     extends SmsGatewayConfig
 {
@@ -53,6 +56,13 @@ public class GenericHttpGatewayConfig
         this.parameters = parameters;
     }
 
+    @JsonProperty (value = "name")
+    public String getName()
+    {
+        return super.getName();
+    }
+
+    @JsonProperty (value = "urltemplate")
     public String getUrlTemplate()
     {
         return urlTemplate;
@@ -63,6 +73,7 @@ public class GenericHttpGatewayConfig
         this.urlTemplate = urlTemplate;
     }
 
+    @JsonProperty (value = "parameters")
     @XmlJavaTypeAdapter( ParametersMapXmlAdapter.class )
     public Map<String, String> getParameters()
     {

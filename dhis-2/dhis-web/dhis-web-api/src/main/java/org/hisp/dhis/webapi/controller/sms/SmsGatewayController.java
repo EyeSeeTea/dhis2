@@ -1,9 +1,5 @@
 package org.hisp.dhis.webapi.controller.sms;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
 /*
  * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
@@ -42,8 +38,13 @@ import org.hisp.dhis.sms.outbound.OutboundSmsTransportService;
 import org.hisp.dhis.webapi.service.WebMessageService;
 import org.hisp.dhis.webapi.utils.WebMessageUtils;
 
+import java.io.IOException;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -94,10 +95,49 @@ public class SmsGatewayController
     }
 
     @PreAuthorize( "hasRole('ALL') or hasRole(' F_MOBILE_SENDSMS')" )
-    @RequestMapping( value = "/setdefault", method = RequestMethod.GET )
+    @RequestMapping( method = RequestMethod.GET, produces = { "application/json" } )
+    public void toList( HttpServletRequest request, HttpServletResponse response )
+        throws WebMessageException, IOException
+    {
+
+        if ( gatewayAdminService == null )
+        {
+            throw new WebMessageException( WebMessageUtils.error( "Gateway Admin service is not available" ) );
+        }
+
+        renderService.toJson( response.getOutputStream(), gatewayAdminService.toList() );
+
+    }
+
+    @PreAuthorize( "hasRole('ALL') or hasRole(' F_MOBILE_SENDSMS')" )
+    @RequestMapping( value = "/{key}", method = RequestMethod.GET, produces = "application/json" )
+    public void gatewayConfiguration( @PathVariable String key, HttpServletRequest request,
+        HttpServletResponse response )
+            throws WebMessageException, IOException
+    {
+
+        if ( gatewayAdminService == null )
+        {
+            throw new WebMessageException( WebMessageUtils.error( "Gateway Admin service is not available" ) );
+        }
+
+    }
+
+    // -------------------------------------------------------------------------
+    // PUT,POST
+    // -------------------------------------------------------------------------
+
+    @PreAuthorize( "hasRole('ALL') or hasRole(' F_MOBILE_SENDSMS')" )
+    @RequestMapping( value = "/default", method = RequestMethod.PUT )
     public void setDefault( @RequestParam( required = false ) String Name, @RequestParam Integer indexId,
         HttpServletRequest request, HttpServletResponse response)
+            throws WebMessageException
     {
+
+        if ( gatewayAdminService == null )
+        {
+            throw new WebMessageException( WebMessageUtils.error( "Gateway Admin service is not available" ) );
+        }
 
         if ( gatewayAdminService.setDefault( indexId.intValue() ) )
         {
@@ -108,27 +148,29 @@ public class SmsGatewayController
         }
         else
         {
-            webMessageService.send( WebMessageUtils.error( "No gateway against this ID" ), response, request );
+            webMessageService.send( WebMessageUtils.conflict( "No gateway against this ID" ), response, request );
         }
 
     }
 
     @PreAuthorize( "hasRole('ALL') or hasRole(' F_MOBILE_SENDSMS')" )
-    @RequestMapping( method = RequestMethod.GET, produces = "application/json" )
-    public void listAll( HttpServletRequest request, HttpServletResponse response )
-        throws WebMessageException, IOException
+    @RequestMapping( method = RequestMethod.POST, consumes = "application/json" )
+    public void addGateway( @RequestBody Map<String, Object> config, HttpServletRequest request,
+        HttpServletResponse response )
+            throws WebMessageException
     {
-
-        List<Map<Integer, String>> gwList = gatewayAdminService.listAll();
-
-        if ( gwList.size() > 0 )
+        if ( gatewayAdminService == null )
         {
-            renderService.toJson( response.getOutputStream(), gwList );
+            throw new WebMessageException( WebMessageUtils.error( "Gateway Admin service is not available" ) );
         }
-        else
+
+        if ( !gatewayAdminService.validateJSON( config ) )
         {
-            webMessageService.send( WebMessageUtils.ok( "No gateway configured" ), response, request );
+            throw new WebMessageException( WebMessageUtils.error( "Invalid JSON" ) );
         }
+
+        String result = gatewayAdminService.addGateway( config );
+        webMessageService.send( WebMessageUtils.ok( result ), response, request );
 
     }
 }

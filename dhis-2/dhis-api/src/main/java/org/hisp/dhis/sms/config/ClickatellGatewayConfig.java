@@ -1,5 +1,7 @@
 package org.hisp.dhis.sms.config;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /*
  * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
@@ -39,6 +41,7 @@ public class ClickatellGatewayConfig
 
     private String apiId;
 
+    @JsonProperty (value = "username")
     public String getUsername()
     {
         return username;
@@ -59,9 +62,16 @@ public class ClickatellGatewayConfig
         this.password = password;
     }
 
+    @JsonProperty (value = "apiid")
     public String getApiId()
     {
         return apiId;
+    }
+
+    @JsonProperty (value = "name")
+    public String getName()
+    {
+        return super.getName();
     }
 
     public void setApiId( String apiId )

@@ -28,7 +28,6 @@
  */
 package org.hisp.dhis.sms.config;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -37,10 +36,12 @@ import java.util.Map;
  */
 public interface GatewayAdministratonService
 {
-    List<Map<Integer, String>> listAll();
+    SmsConfiguration toList();
 
     boolean setDefault( int index );
 
-    String addGateway();
+    String addGateway( Map<String, Object> config );
+
+    boolean validateJSON( Map<String, Object> config );
 
 }

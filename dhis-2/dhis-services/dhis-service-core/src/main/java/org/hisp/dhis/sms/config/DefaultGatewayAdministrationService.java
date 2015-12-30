@@ -28,8 +28,6 @@
  */
 package org.hisp.dhis.sms.config;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -51,29 +49,29 @@ public class DefaultGatewayAdministrationService
     private SmsConfigurationManager smsConfigMgr;
 
     @Override
-    public List<Map<Integer, String>> listAll()
+    public SmsConfiguration toList()
     {
         SmsConfiguration smsConfig = getSmsConfiguration();
-        List<SmsGatewayConfig> gateways = smsConfig.getGateways();
 
-        List<Map<Integer, String>> gatewayList = new ArrayList<Map<Integer, String>>();
-        Map<Integer, String> gatewayMap = new HashMap<Integer, String>();
-        int key = 1;
-        for ( SmsGatewayConfig gw : gateways )
-        {
-            gatewayMap.put( key, gw.getName() );
-            key++;
-        }
-
-        gatewayList.add( gatewayMap );
-        return gatewayList;
+        return smsConfig != null ? smsConfig : null;
     }
 
     @Override
-    public String addGateway()
+    public String addGateway( Map<String, Object> config )
     {
+        int gatewayType = Integer.parseInt( config.get( "type" ).toString() );
+        if ( gatewayType == 1 )
+        {
+            return addClickatel( config );
 
-        return null;
+        }
+        if ( gatewayType == 2 )
+        {
+            return addBulkSms( config );
+
+        }
+
+        return "No Gateway against this ID";
     }
 
     @Override
@@ -109,8 +107,74 @@ public class DefaultGatewayAdministrationService
         }
     }
 
+    @Override
+    public boolean validateJSON( Map<String, Object> config )
+    {
+
+        if ( config.containsKey( "type" ) && config.containsKey( "name" ) && config.containsKey( "username" )
+            && config.containsKey( "password" ) && config.containsKey( "region" ) )
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     private SmsConfiguration getSmsConfiguration()
     {
         return smsConfigMgr.getSmsConfiguration();
+    }
+
+    private String addClickatel( Map<String, Object> config )
+    {
+        return null;
+    }
+
+    private String addBulkSms( Map<String, Object> config )
+    {
+        SmsConfiguration smsConfig = smsConfigMgr.getSmsConfiguration();
+
+        if ( smsConfig != null )
+        {
+            BulkSmsGatewayConfig bulkGatewayConfig = (BulkSmsGatewayConfig) smsConfigMgr
+                .checkInstanceOfGateway( BulkSmsGatewayConfig.class );
+
+            int index = -1;
+
+            if ( bulkGatewayConfig == null )
+            {
+                bulkGatewayConfig = new BulkSmsGatewayConfig();
+            }
+            else
+            {
+                index = smsConfig.getGateways().indexOf( bulkGatewayConfig );
+            }
+
+            bulkGatewayConfig.setName( config.get( "name" ).toString() );
+            bulkGatewayConfig.setPassword( config.get( "password" ).toString() );
+            bulkGatewayConfig.setUsername( config.get( "username" ).toString() );
+            bulkGatewayConfig.setRegion( config.get( "region" ).toString() );
+
+            if ( smsConfig.getGateways() == null || smsConfig.getGateways().isEmpty() )
+            {
+                bulkGatewayConfig.setDefault( true );
+            }
+
+            if ( index >= 0 )
+            {
+                smsConfig.getGateways().set( index, bulkGatewayConfig );
+            }
+            else
+            {
+                smsConfig.getGateways().add( bulkGatewayConfig );
+            }
+
+            smsConfigMgr.updateSmsConfiguration( smsConfig );
+
+            return "BulkSms Gateway Added";
+        }
+        return "No Sms Configuraiton";
     }
 }

@@ -63,7 +63,22 @@ public class SmsServiceController
     private OutboundSmsTransportService outboundSmsTransportService;
 
     @PreAuthorize( "hasRole('ALL') or hasRole(' F_MOBILE_SENDSMS')" )
-    @RequestMapping( value = "/start", method = RequestMethod.GET )
+    @RequestMapping( method = RequestMethod.GET )
+    public void getSmsServiceStatus( HttpServletRequest request, HttpServletResponse response )
+        throws WebMessageException
+    {
+        if ( outboundSmsTransportService == null )
+        {
+            throw new WebMessageException( WebMessageUtils.error( "Transport service is not available" ) );
+        }
+
+        SMSServiceStatus status = outboundSmsTransportService.getServiceStatusEnum();
+
+        webMessageService.send( WebMessageUtils.ok( status.toString() ), response, request );
+    }
+
+    @PreAuthorize( "hasRole('ALL') or hasRole(' F_MOBILE_SENDSMS')" )
+    @RequestMapping( method = RequestMethod.POST )
     public void startSmsService( HttpServletRequest request, HttpServletResponse response )
         throws WebMessageException
     {
@@ -84,7 +99,7 @@ public class SmsServiceController
     }
 
     @PreAuthorize( "hasRole('ALL') or hasRole(' F_MOBILE_SENDSMS')" )
-    @RequestMapping( value = "/stop", method = RequestMethod.GET )
+    @RequestMapping( method = RequestMethod.DELETE )
     public void stopSmsService( HttpServletRequest request, HttpServletResponse response )
         throws WebMessageException
     {
