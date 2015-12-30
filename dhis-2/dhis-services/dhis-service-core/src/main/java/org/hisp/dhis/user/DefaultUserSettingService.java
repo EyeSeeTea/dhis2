@@ -92,14 +92,6 @@ public class DefaultUserSettingService
     // -------------------------------------------------------------------------
 
     @Override
-    public void addUserSetting( UserSetting userSetting )
-    {
-        SETTING_CACHE.invalidate( getCacheKey( userSetting.getName(), userSetting.getUser().getUsername() ) );
-        
-        userSettingStore.addUserSetting( userSetting );
-    }
-
-    @Override
     public void saveUserSetting( String name, Serializable value, String username )
     {
         UserCredentials credentials = userService.getUserCredentialsByUsername( username );
@@ -134,7 +126,7 @@ public class DefaultUserSettingService
         {
             userSetting = new UserSetting( user, name, value );
 
-            addUserSetting( userSetting );
+            userSettingStore.addUserSetting( userSetting );
         }
         else
         {

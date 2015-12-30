@@ -30,7 +30,9 @@ package org.hisp.dhis.webapi.controller;
 
 import org.hisp.dhis.dxf2.webmessage.WebMessageException;
 import org.hisp.dhis.system.util.LocaleUtils;
+import org.hisp.dhis.user.UserSettingKey;
 import org.hisp.dhis.user.UserSettingService;
+import org.hisp.dhis.util.ObjectUtils;
 import org.hisp.dhis.webapi.service.WebMessageService;
 import org.hisp.dhis.webapi.utils.WebMessageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +49,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Locale;
+import java.util.Optional;
 
 import static org.hisp.dhis.user.UserSettingService.*;
 
@@ -65,13 +68,14 @@ public class UserSettingController
 
     @RequestMapping( value = "/{key}", method = RequestMethod.POST )
     public void setUserSetting(
-        @PathVariable String key,
+        @PathVariable( value = "key" ) String key,
+        @RequestParam( required = false, value = "key" ) String keyParam,
         @RequestParam( value = "user", required = false ) String username,
         @RequestParam( value = "value", required = false ) String value,
         @RequestBody( required = false ) String valuePayload,
         HttpServletResponse response, HttpServletRequest request ) throws WebMessageException
     {
-        if ( key == null )
+        if ( key == null && keyParam == null )
         {
             throw new WebMessageException( WebMessageUtils.conflict( "Key must be specified" ) );
         }
@@ -81,12 +85,22 @@ public class UserSettingController
             throw new WebMessageException( WebMessageUtils.conflict( "Value must be specified as query param or as payload" ) );
         }
 
-        value = value != null ? value : valuePayload;
+        key = ObjectUtils.firstNonNull( key, keyParam );
 
+        value = ObjectUtils.firstNonNull( value, valuePayload );
+
+        Optional<UserSettingKey> keyEnum = UserSettingKey.getByName( key );
+        
+        if ( !keyEnum.isPresent() )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "Key is not supported: " + key ) );
+        }
+        
+        Serializable valueObject = UserSettingKey.getAsRealClass( key, value );
+        
         if ( username == null )
         {
             userSettingService.saveUserSetting( key, valueToSet( key, value ) );
-
         }
         else
         {

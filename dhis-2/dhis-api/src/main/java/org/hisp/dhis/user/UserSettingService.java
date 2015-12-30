@@ -62,13 +62,6 @@ public interface UserSettingService
     // -------------------------------------------------------------------------
 
     /**
-     * Adds a UserSetting.
-     *
-     * @param userSetting the UserSetting to add.
-     */
-    void addUserSetting( UserSetting userSetting );
-    
-    /**
      * Saves the name/value pair as a user setting connected to the currently
      * logged in user.
      * 
