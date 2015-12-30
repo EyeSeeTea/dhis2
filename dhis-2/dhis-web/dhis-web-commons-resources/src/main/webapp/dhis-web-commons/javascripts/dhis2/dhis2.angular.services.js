@@ -362,7 +362,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                 attributes['name'] = fieldId;
                             }
 
-                            newInputField = '<input type="text" ' +
+                            newInputField = '<span class="hideInPrint"><input type="text" ' +
                                     this.getAttributesAsString(attributes) +
                                     ' ng-model="currentEvent.' + fieldId + '"' +
                                     ' input-field-id="' + fieldId + '"' +
@@ -372,7 +372,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                     ' placeholder="{{dhis2CalendarFormat.keyDateFormat}}" ' +
                                     ' ng-class="getInputNotifcationClass(prStDes.' + fieldId + '.dataElement.id,true)"' +
                                     ' blur-or-change="saveDatavalue(prStDes.' + fieldId + ')"' +
-                                    ' ng-required="{{true}}">';
+                                    ' ng-required="{{true}}"></span><span class="not-for-screen"><input type="text" value={{currentEvent.' + fieldId + '}}></span>';
                         }
                         else {
                             fieldId = attributes['id'].substring(4, attributes['id'].length - 1).split("-")[1];
@@ -395,13 +395,13 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                 //check if dataelement has optionset								
                                 if (prStDe.dataElement.optionSetValue) {
                                     var optionSetId = prStDe.dataElement.optionSet.id;                 
-                                    newInputField = '<ui-select style="width:100%;" theme="select2" ' + commonInputFieldProperty + ' on-select="saveDatavalue(prStDes.' + fieldId + ', outerForm.' + fieldId + ')" >' +
+                                    newInputField = '<span class="hideInPrint"><ui-select style="width:100%;" theme="select2" ' + commonInputFieldProperty + ' on-select="saveDatavalue(prStDes.' + fieldId + ', outerForm.' + fieldId + ')" >' +
                                             '<ui-select-match style="width:100%;" ng-class="getInputNotifcationClass(prStDes.' + fieldId + '.dataElement.id, true)" allow-clear="true" placeholder="' + $translate.instant('select_or_search') + '">{{$select.selected.name || $select.selected}}</ui-select-match>' +
                                             '<ui-select-choices ' +
                                             ' repeat="option.name as option in optionSets.' + optionSetId + '.options | filter: $select.search | limitTo:maxOptionSize">' +
                                             '<span ng-bind-html="option.name | highlight: $select.search"></span>' +
                                             '</ui-select-choices>' +
-                                            '</ui-select>';
+                                            '</ui-select></span><span class="not-for-screen"><input type="text" value={{currentEvent.' + fieldId + '}}></span>';
                                 }
                                 else {
                                     //check data element type and generate corresponding angular input field
@@ -410,46 +410,72 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                     		prStDe.dataElement.valueType === "INTEGER_POSITIVE" ||
                                     		prStDe.dataElement.valueType === "INTEGER_NEGATIVE" ||
                                     		prStDe.dataElement.valueType === "INTEGER_ZERO_OR_POSITIVE") {
-                                        newInputField = '<input type="number" ' +
+                                        newInputField = '<span class="hideInPrint"><input type="number" ' +
                                                 ' d2-number-validator ' +
                                                 ' ng-class="{{getInputNotifcationClass(prStDes.' + fieldId + '.dataElement.id, true)}}" ' +
                                                 ' number-type="' + prStDe.dataElement.valueType + '" ' +
                                                 ' ng-blur="saveDatavalue(prStDes.' + fieldId + ', outerForm.' + fieldId + ')"' +
-                                                commonInputFieldProperty + ' >';
+                                                commonInputFieldProperty + '></span><span class="not-for-screen"><input type="text" value={{currentEvent.' + fieldId + '}}></span>';
                                     }
                                     else if (prStDe.dataElement.valueType === "BOOLEAN") {                                    	
-                                    	newInputField = '<label class="radio-inline"><input type="radio" ng-change="saveDatavalue()" ' + commonInputFieldProperty + ' value="">{{\'no_value\'| translate}}</label>' + 
-                                    					'<label class="radio-inline"><input type="radio" ng-change="saveDatavalue()" ' + commonInputFieldProperty + ' value="true">{{\'yes\'| translate}}</label>' +
-                                    					'<label class="radio-inline"><input type="radio" ng-change="saveDatavalue()" ' + commonInputFieldProperty + ' value="false">{{\'no\'| translate}}</label>';                                   					
+                                    	newInputField = '<span class="hideInPrint"><label class="radio-inline"><input type="radio" ng-change="saveDatavalue()" ' + commonInputFieldProperty + ' value="">{{\'no_value\'| translate}}</label>' + 
+                                    					'<label class="radio-inline"><input type="radio" ng-change="saveDatavalue(prStDes.' + fieldId + ', outerForm.' + fieldId + ')" ' + commonInputFieldProperty + ' value="true">{{\'yes\'| translate}}</label>' +
+                                    					'<label class="radio-inline"><input type="radio" ng-change="saveDatavalue(prStDes.' + fieldId + ', outerForm.' + fieldId + ')" ' + commonInputFieldProperty + ' value="false">{{\'no\'| translate}}</label></span>' +
+                                    					'<span class="not-for-screen"><label class="radio-inline"><input type="radio" ng-checked="{{\'true\' === currentEvent.' + fieldId + '}}">{{\'yes\'| translate}}</label>' +
+                                    					'<label class="radio-inline"><input type="radio" ng-checked="{{\'false\' === currentEvent.' + fieldId + '}}">{{\'no\'| translate}}</label></span>';                                   					
                                     }
                                     else if (prStDe.dataElement.valueType === "DATE") {
                                         var maxDate = prStDe.allowFutureDate ? '' : 0;
-                                        newInputField = '<input type="text" ' +
+                                        newInputField = '<span class="hideInPrint"><input type="text" ' +
                                                 ' placeholder="{{dhis2CalendarFormat.keyDateFormat}}" ' +
                                                 ' ng-class="{{getInputNotifcationClass(prStDes.' + fieldId + '.dataElement.id, true)}}" ' +
                                                 ' d2-date ' +
                                                 ' d2-date-validator ' +
                                                 ' max-date="' + maxDate + '"' +
                                                 ' blur-or-change="saveDatavalue(prStDes.' + fieldId + ', outerForm.' + fieldId + ')"' +
-                                                commonInputFieldProperty + ' >';
+                                                commonInputFieldProperty + ' ></span><span class="not-for-screen"><input type="text" value={{currentEvent.' + fieldId + '}}></span>';
                                     }
                                     else if (prStDe.dataElement.valueType === "TRUE_ONLY") {
-                                        newInputField = '<input type="checkbox" ' +
+                                        newInputField = '<span class="hideInPrint"><input type="checkbox" ' +
                                                 ' ng-class="{{getInputNotifcationClass(prStDes.' + fieldId + '.dataElement.id, true)}}" ' +
                                                 ' ng-change="saveDatavalue(prStDes.' + fieldId + ', outerForm.' + fieldId + ')"' +
-                                                commonInputFieldProperty + ' >';
+                                                commonInputFieldProperty + ' ></span><span class="not-for-screen"><input type="checkbox" ng-checked={{currentEvent.' + fieldId + '}}></span>';
                                     }
                                     else if (prStDe.dataElement.valueType === "LONG_TEXT") {
-                                        newInputField = '<textarea row ="3" ' +
+                                        newInputField = '<span class="hideInPrint"><textarea row="3" ' +
                                                 ' ng-class="{{getInputNotifcationClass(prStDes.' + fieldId + '.dataElement.id, true)}}" ' +
                                                 ' ng-blur="saveDatavalue(prStDes.' + fieldId + ', outerForm.' + fieldId + ')"' +
-                                                commonInputFieldProperty + '></textarea>';
+                                                commonInputFieldProperty + '></textarea></span><span class="not-for-screen"><textarea row="3" value={{currentEvent.' + fieldId + '}}></textarea></span>';
+                                    }
+                                    else if (prStDe.dataElement.valueType === "FILE_RESOURCE") {
+                                        newInputField = '<span class="input-group">\n\
+                                                            <span ng-if="currentEvent.' + fieldId + '">\n\
+                                                                <a href ng-click="downloadFile(null, \'' + fieldId + '\', null)">{{fileNames[currentEvent.event][' + fieldId + ']}}</a>\n\
+                                                            </span>\n\
+                                                            <span class="input-group-btn">\n\
+                                                                <span class="btn btn-primary btn-file">\n\
+                                                                    <span ng-if="currentEvent.' + fieldId + '" title="{{\'delete\' | translate}}" d2-file-input-name="fileNames[currentEvent.event][' + fieldId + ']" d2-file-input-delete="currentEvent.' + fieldId + '">\n\
+                                                                        <a href ng-click="deleteFile(\'' + fieldId + '\')"><i class="fa fa-trash alert-danger"></i></a>\n\
+                                                                    </span>\n\
+                                                                    <span ng-if="!currentEvent.' + fieldId + '" title="{{\'upload\' | translate}}" >\n\
+                                                                        <i class="fa fa-upload"></i>\n\
+                                                                        <input  type="file" \n\
+                                                                                ' + this.getAttributesAsString(attributes) + '\n\
+                                                                                input-field-id="' + fieldId + '"\n\
+                                                                                d2-file-input-ps="currentStage"\n\
+                                                                                d2-file-input="currentEvent"\n\
+                                                                                d2-file-input-current-name="currentFileNames"\n\
+                                                                                d2-file-input-name="fileNames">\n\
+                                                                    </span>\n\
+                                                                </span>\n\
+                                                            </span>\n\
+                                                        </span>';
                                     }
                                     else {
-                                        newInputField = '<input type="text" ' +
+                                        newInputField = '<span class="hideInPrint"><input type="text" ' +
                                                 ' ng-class="{{getInputNotifcationClass(prStDes.' + fieldId + '.dataElement.id, true)}}" ' +
                                                 ' ng-blur="saveDatavalue(prStDes.' + fieldId + ', outerForm.' + fieldId + ')"' +
-                                                commonInputFieldProperty + ' >';
+                                                commonInputFieldProperty + ' ></span><span class="not-for-screen"><input type="text" value={{currentEvent.' + fieldId + '}}></span>';
                                     }
                                 }
                             }
@@ -1194,7 +1220,9 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                 {name:"d2:ceil",parameters:1},
                                 {name:"d2:round",parameters:1},
                                 {name:"d2:hasValue",parameters:1},
-                                {name:"d2:lastEventDate",parameters:1}];
+                                {name:"d2:lastEventDate",parameters:1},
+                                {name:"d2:addControlDigits",parameters:1},
+                                {name:"d2:checkControlDigits",parameters:1}];
             var continueLooping = true;
             //Safety harness on 10 loops, in case of unanticipated syntax causing unintencontinued looping
             for(var i = 0; i < 10 && continueLooping; i++ ) { 
@@ -1465,6 +1493,70 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                             //Replace the end evaluation of the dhis function:
                             expression = expression.replace(callToThisFunction, valueFound);
                             successfulExecution = true;
+                        }
+                        else if(dhisFunction.name === "d2:addControlDigits") {
+                            
+                            var baseNumber = parameters[0];
+                            var baseDigits = baseNumber.split('');
+                            var error = false;
+                            
+                            
+                            var firstDigit = 0;
+                            var secondDigit = 0;
+                            
+                            if(baseDigits && baseDigits.length < 10 ) {
+                                var firstSum = 0;
+                                var baseNumberLength = baseDigits.length;
+                                //weights support up to 9 base digits:
+                                var firstWeights = [3,7,6,1,8,9,4,5,2];
+                                for(var i = 0; i < baseNumberLength && !error; i++) {
+                                    firstSum += parseInt(baseDigits[i]) * firstWeights[i];
+                                }
+                                firstDigit = firstSum % 11;
+                                
+                                //Push the first digit to the array before continuing, as the second digit is a result of the 
+                                //base digits and the first control digit.
+                                baseDigits.push(firstDigit);
+                                //Weights support up to 9 base digits plus first control digit:
+                                var secondWeights = [5,4,3,2,7,6,5,4,3,2];
+                                var secondSum = 0;
+                                for(var i = 0; i < baseNumberLength + 1 && !error; i++) {
+                                    secondSum += parseInt(baseDigits[i]) * secondWeights[i]; 
+                                }
+                                secondDigit = secondSum % 11;
+                                
+                                if(firstDigit === 10) {
+                                    $log.warn("First control digit became 10, replacing with 0");
+                                    firstDigit = 0;
+                                }
+                                if(secondDigit === 10) {
+                                    $log.warn("Second control digit became 10, replacing with 0");
+                                    secondDigit = 0;
+                                }
+                            }
+                            else
+                            {
+                                $log.warn("Base nuber not well formed(" + baseNumberLength + " digits): " + baseNumber);
+                            }
+                            
+                            if(!error) {
+                                //Replace the end evaluation of the dhis function:
+                                expression = expression.replace(callToThisFunction, baseNumber + firstDigit + secondDigit);
+                                successfulExecution = true;
+                            }
+                            else
+                            {
+                                //Replace the end evaluation of the dhis function:
+                                expression = expression.replace(callToThisFunction, baseNumber);
+                                successfulExecution = false;
+                            }
+                        }
+                        else if(dhisFunction.name === "d2:checkControlDigits") {
+                            $log.warn("checkControlDigits not implemented yet");
+                            
+                            //Replace the end evaluation of the dhis function:
+                            expression = expression.replace(callToThisFunction, parameters[0]);
+                            successfulExecution = false;
                         }
                     });
                 });
