@@ -41,7 +41,7 @@ public class ClickatellGatewayConfig
 
     private String apiId;
 
-    @JsonProperty (value = "username")
+    @JsonProperty( value = "username" )
     public String getUsername()
     {
         return username;
@@ -52,9 +52,16 @@ public class ClickatellGatewayConfig
         this.username = username;
     }
 
+    @JsonProperty( value = "password" )
     public String getPassword()
     {
         return password;
+    }
+
+    @JsonProperty( value = "default" )
+    public boolean getStatus()
+    {
+        return super.isDefault();
     }
 
     public void setPassword( String password )
@@ -62,13 +69,13 @@ public class ClickatellGatewayConfig
         this.password = password;
     }
 
-    @JsonProperty (value = "apiid")
+    @JsonProperty( value = "apiid" )
     public String getApiId()
     {
         return apiId;
     }
 
-    @JsonProperty (value = "name")
+    @JsonProperty( value = "name" )
     public String getName()
     {
         return super.getName();

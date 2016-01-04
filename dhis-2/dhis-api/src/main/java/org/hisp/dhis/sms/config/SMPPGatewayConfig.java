@@ -43,6 +43,7 @@ public class SMPPGatewayConfig
 
     private String password;
 
+    @JsonProperty( value = "username" )
     public String getUsername()
     {
         return username;
@@ -53,12 +54,19 @@ public class SMPPGatewayConfig
         this.username = username;
     }
 
-    @JsonProperty (value = "name")
+    @JsonProperty( value = "name" )
     public String getName()
     {
         return super.getName();
     }
 
+    @JsonProperty( value = "default" )
+    public boolean getStatus()
+    {
+        return super.isDefault();
+    }
+
+    @JsonProperty( value = "password" )
     public String getPassword()
     {
         return password;
@@ -81,7 +89,7 @@ public class SMPPGatewayConfig
         return true;
     }
 
-    @JsonProperty (value = "port")
+    @JsonProperty( value = "port" )
     public int getPort()
     {
         return port;
@@ -92,7 +100,7 @@ public class SMPPGatewayConfig
         this.port = port;
     }
 
-    @JsonProperty (value = "address")
+    @JsonProperty( value = "address" )
     public String getAddress()
     {
         return address;

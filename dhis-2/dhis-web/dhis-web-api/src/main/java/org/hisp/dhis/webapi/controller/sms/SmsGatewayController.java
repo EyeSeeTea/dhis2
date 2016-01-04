@@ -47,7 +47,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -106,12 +105,11 @@ public class SmsGatewayController
         }
 
         renderService.toJson( response.getOutputStream(), gatewayAdminService.toList() );
-
     }
 
     @PreAuthorize( "hasRole('ALL') or hasRole(' F_MOBILE_SENDSMS')" )
-    @RequestMapping( value = "/{key}", method = RequestMethod.GET, produces = "application/json" )
-    public void gatewayConfiguration( @PathVariable String key, HttpServletRequest request,
+    @RequestMapping( value = "/{id}", method = RequestMethod.GET, produces = "application/json" )
+    public void gatewayConfiguration( @PathVariable Integer id, HttpServletRequest request,
         HttpServletResponse response )
             throws WebMessageException, IOException
     {
@@ -121,6 +119,7 @@ public class SmsGatewayController
             throw new WebMessageException( WebMessageUtils.error( "Gateway Admin service is not available" ) );
         }
 
+        renderService.toJson( response.getOutputStream(), gatewayAdminService.getGatewayByIndex( id ) );
     }
 
     // -------------------------------------------------------------------------
@@ -128,10 +127,9 @@ public class SmsGatewayController
     // -------------------------------------------------------------------------
 
     @PreAuthorize( "hasRole('ALL') or hasRole(' F_MOBILE_SENDSMS')" )
-    @RequestMapping( value = "/default", method = RequestMethod.PUT )
-    public void setDefault( @RequestParam( required = false ) String Name, @RequestParam Integer indexId,
-        HttpServletRequest request, HttpServletResponse response)
-            throws WebMessageException
+    @RequestMapping( value = "/default/{id}", method = RequestMethod.PUT )
+    public void setDefault( @PathVariable Integer id, HttpServletRequest request, HttpServletResponse response )
+        throws WebMessageException
     {
 
         if ( gatewayAdminService == null )
@@ -139,23 +137,21 @@ public class SmsGatewayController
             throw new WebMessageException( WebMessageUtils.error( "Gateway Admin service is not available" ) );
         }
 
-        if ( gatewayAdminService.setDefault( indexId.intValue() ) )
+        if ( gatewayAdminService.setDefault( id.intValue() ) )
         {
 
-            webMessageService.send(
-                WebMessageUtils.ok( " Gateway with ID " + indexId.intValue() + " is set to default" ), response,
-                request );
+            webMessageService.send( WebMessageUtils.ok( " Gateway with ID " + id.intValue() + " is set to default" ),
+                response, request );
         }
         else
         {
             webMessageService.send( WebMessageUtils.conflict( "No gateway against this ID" ), response, request );
         }
-
     }
 
     @PreAuthorize( "hasRole('ALL') or hasRole(' F_MOBILE_SENDSMS')" )
     @RequestMapping( method = RequestMethod.POST, consumes = "application/json" )
-    public void addGateway( @RequestBody Map<String, Object> config, HttpServletRequest request,
+    public void addOrUpdateGateway( @RequestBody Map<String, Object> config, HttpServletRequest request,
         HttpServletResponse response )
             throws WebMessageException
     {
@@ -164,13 +160,31 @@ public class SmsGatewayController
             throw new WebMessageException( WebMessageUtils.error( "Gateway Admin service is not available" ) );
         }
 
-        if ( !gatewayAdminService.validateJSON( config ) )
+        String result = gatewayAdminService.addOrUpdateGateway( config );
+        webMessageService.send( WebMessageUtils.ok( result ), response, request );
+    }
+
+    // -------------------------------------------------------------------------
+    // DELETE
+    // -------------------------------------------------------------------------
+
+    @PreAuthorize( "hasRole('ALL') or hasRole(' F_MOBILE_SENDSMS')" )
+    @RequestMapping( value = "{id}", method = RequestMethod.DELETE )
+    public void removeGateway( @PathVariable Integer id, HttpServletRequest request, HttpServletResponse response )
+        throws WebMessageException
+    {
+        if ( gatewayAdminService == null )
         {
-            throw new WebMessageException( WebMessageUtils.error( "Invalid JSON" ) );
+            throw new WebMessageException( WebMessageUtils.error( "Gateway Admin service is not available" ) );
         }
 
-        String result = gatewayAdminService.addGateway( config );
-        webMessageService.send( WebMessageUtils.ok( result ), response, request );
-
+        if ( gatewayAdminService.removeGateway( id.intValue() ) )
+        {
+            webMessageService.send( WebMessageUtils.ok( "Gateway removed successfully" ), response, request );
+        }
+        else
+        {
+            webMessageService.send( WebMessageUtils.conflict( "Gateway cannot be removed" ), response, request );
+        }
     }
 }

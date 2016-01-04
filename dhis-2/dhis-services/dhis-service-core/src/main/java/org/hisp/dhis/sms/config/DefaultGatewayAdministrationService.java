@@ -28,9 +28,13 @@
  */
 package org.hisp.dhis.sms.config;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.hisp.dhis.sms.outbound.OutboundSmsTransportService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -41,6 +45,16 @@ public class DefaultGatewayAdministrationService
     implements GatewayAdministratonService
 {
 
+    private final String BULK_GATEWAY = "bulk_gw";
+
+    private final String CLICKATELL_GATEWAY = "clickatell_gw";
+
+    private final String HTTP_GATEWAY = "generic_http_gw";
+
+    private final String MODEM_GATEWAY = "modem_gw";
+
+    private final String SMPP_GATEWAY = "smpp_gw";
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -48,27 +62,64 @@ public class DefaultGatewayAdministrationService
     @Autowired
     private SmsConfigurationManager smsConfigMgr;
 
+    @Autowired
+    private OutboundSmsTransportService transportService;
+
     @Override
-    public SmsConfiguration toList()
+    public List<Map<String, Object>> toList()
     {
         SmsConfiguration smsConfig = getSmsConfiguration();
+        List<SmsGatewayConfig> gatewayList = smsConfig.getGateways();
 
-        return smsConfig != null ? smsConfig : null;
+        List<Map<String, Object>> listOfMap = new ArrayList<Map<String, Object>>();
+
+        Map<String, Object> configMap;
+
+        int index = 0;
+
+        if ( !gatewayList.isEmpty() )
+        {
+            for ( SmsGatewayConfig gw : gatewayList )
+            {
+                configMap = new HashMap<String, Object>();
+                configMap.put( "name", gw.getName() );
+                configMap.put( "id", index );
+                listOfMap.add( configMap );
+
+                index++;
+            }
+
+            return listOfMap;
+        }
+        else
+        {
+            return null;
+        }
     }
 
     @Override
-    public String addGateway( Map<String, Object> config )
+    public String addOrUpdateGateway( Map<String, Object> config )
     {
         int gatewayType = Integer.parseInt( config.get( "type" ).toString() );
         if ( gatewayType == 1 )
         {
-            return addClickatel( config );
-
+            return addOrUpdateClickatel( config );
         }
         if ( gatewayType == 2 )
         {
-            return addBulkSms( config );
-
+            return addOrUpdateBulkSms( config );
+        }
+        if ( gatewayType == 3 )
+        {
+            return addOrUpdateGenericHttp( config );
+        }
+        if ( gatewayType == 4 )
+        {
+            return addOrUpdateModem( config );
+        }
+        if ( gatewayType == 5 )
+        {
+            return addOrUpdateSmpp( config );
         }
 
         return "No Gateway against this ID";
@@ -110,7 +161,6 @@ public class DefaultGatewayAdministrationService
     @Override
     public boolean validateJSON( Map<String, Object> config )
     {
-
         if ( config.containsKey( "type" ) && config.containsKey( "name" ) && config.containsKey( "username" )
             && config.containsKey( "password" ) && config.containsKey( "region" ) )
         {
@@ -127,14 +177,55 @@ public class DefaultGatewayAdministrationService
         return smsConfigMgr.getSmsConfiguration();
     }
 
-    private String addClickatel( Map<String, Object> config )
+    private String addOrUpdateClickatel( Map<String, Object> payLoad )
     {
-        return null;
+        SmsConfiguration smsConfig = getSmsConfiguration();
+
+        if ( smsConfig != null )
+        {
+            ClickatellGatewayConfig gatewayConfig = (ClickatellGatewayConfig) smsConfigMgr
+                .checkInstanceOfGateway( ClickatellGatewayConfig.class );
+
+            int index = -1;
+
+            if ( gatewayConfig == null )
+            {
+                gatewayConfig = new ClickatellGatewayConfig();
+            }
+            else
+            {
+                index = smsConfig.getGateways().indexOf( gatewayConfig );
+            }
+
+            gatewayConfig.setName( payLoad.get( "name" ).toString() );
+            gatewayConfig.setPassword( payLoad.get( "password" ).toString() );
+            gatewayConfig.setUsername( payLoad.get( "username" ).toString() );
+            gatewayConfig.setApiId( payLoad.get( "apiId" ).toString() );
+
+            if ( smsConfig.getGateways() == null || smsConfig.getGateways().isEmpty() )
+            {
+                gatewayConfig.setDefault( true );
+            }
+
+            if ( index >= 0 )
+            {
+                smsConfig.getGateways().set( index, gatewayConfig );
+            }
+            else
+            {
+                smsConfig.getGateways().add( gatewayConfig );
+            }
+
+            smsConfigMgr.updateSmsConfiguration( smsConfig );
+
+            return "Clickatel Gateway Added";
+        }
+        return "No sms configuration found";
     }
 
-    private String addBulkSms( Map<String, Object> config )
+    private String addOrUpdateBulkSms( Map<String, Object> payLoad )
     {
-        SmsConfiguration smsConfig = smsConfigMgr.getSmsConfiguration();
+        SmsConfiguration smsConfig = getSmsConfiguration();
 
         if ( smsConfig != null )
         {
@@ -152,10 +243,10 @@ public class DefaultGatewayAdministrationService
                 index = smsConfig.getGateways().indexOf( bulkGatewayConfig );
             }
 
-            bulkGatewayConfig.setName( config.get( "name" ).toString() );
-            bulkGatewayConfig.setPassword( config.get( "password" ).toString() );
-            bulkGatewayConfig.setUsername( config.get( "username" ).toString() );
-            bulkGatewayConfig.setRegion( config.get( "region" ).toString() );
+            bulkGatewayConfig.setName( payLoad.get( "name" ).toString() );
+            bulkGatewayConfig.setPassword( payLoad.get( "password" ).toString() );
+            bulkGatewayConfig.setUsername( payLoad.get( "username" ).toString() );
+            bulkGatewayConfig.setRegion( payLoad.get( "region" ).toString() );
 
             if ( smsConfig.getGateways() == null || smsConfig.getGateways().isEmpty() )
             {
@@ -176,5 +267,218 @@ public class DefaultGatewayAdministrationService
             return "BulkSms Gateway Added";
         }
         return "No Sms Configuraiton";
+    }
+
+    private String addOrUpdateSmpp( Map<String, Object> payLoad )
+    {
+        SmsConfiguration smsConfig = getSmsConfiguration();
+
+        if ( smsConfig != null )
+        {
+            SMPPGatewayConfig gatewayConfig = (SMPPGatewayConfig) smsConfigMgr
+                .checkInstanceOfGateway( SMPPGatewayConfig.class );
+
+            int index = -1;
+
+            if ( gatewayConfig == null )
+            {
+                gatewayConfig = new SMPPGatewayConfig();
+            }
+            else
+            {
+                index = smsConfig.getGateways().indexOf( gatewayConfig );
+            }
+
+            gatewayConfig.setName( payLoad.get( "name" ).toString() );
+            gatewayConfig.setPassword( payLoad.get( "password" ).toString() );
+            gatewayConfig.setUsername( payLoad.get( "username" ).toString() );
+            gatewayConfig.setAddress( payLoad.get( "address" ).toString() );
+            gatewayConfig.setPort( (Integer) payLoad.get( "port" ) );
+
+            if ( smsConfig.getGateways() == null || smsConfig.getGateways().isEmpty() )
+            {
+                gatewayConfig.setDefault( true );
+            }
+
+            if ( index >= 0 )
+            {
+                smsConfig.getGateways().set( index, gatewayConfig );
+            }
+            else
+            {
+                smsConfig.getGateways().add( gatewayConfig );
+            }
+
+            smsConfigMgr.updateSmsConfiguration( smsConfig );
+
+            return "SMPP Gateway Added";
+        }
+        return "No sms configuration found";
+    }
+
+    private String addOrUpdateModem( Map<String, Object> payLoad )
+    {
+        SmsConfiguration smsConfig = getSmsConfiguration();
+
+        if ( smsConfig != null )
+        {
+            ModemGatewayConfig gatewayConfig = (ModemGatewayConfig) smsConfigMgr
+                .checkInstanceOfGateway( ModemGatewayConfig.class );
+
+            int index = -1;
+
+            if ( gatewayConfig == null )
+            {
+                gatewayConfig = new ModemGatewayConfig();
+            }
+            else
+            {
+                index = smsConfig.getGateways().indexOf( gatewayConfig );
+            }
+
+            gatewayConfig.setName( payLoad.get( "name" ).toString() );
+            gatewayConfig.setPort( payLoad.get( "port" ).toString() );
+            gatewayConfig.setBaudRate( (Integer) payLoad.get( "naudRate" ) );
+            gatewayConfig.setPollingInterval( (Integer) payLoad.get( "pollinginterval" ) );
+            gatewayConfig.setManufacturer( payLoad.get( "manufacturer" ).toString() );
+            gatewayConfig.setModel( payLoad.get( "model" ).toString() );
+            gatewayConfig.setPin( payLoad.get( "pin" ).toString() );
+            gatewayConfig.setInbound( (boolean) payLoad.get( "inbound" ) );
+            gatewayConfig.setOutbound( (boolean) payLoad.get( "outbound" ) );
+
+            if ( smsConfig.getGateways() == null || smsConfig.getGateways().isEmpty() )
+            {
+                gatewayConfig.setDefault( true );
+            }
+
+            if ( index >= 0 )
+            {
+                smsConfig.getGateways().set( index, gatewayConfig );
+            }
+            else
+            {
+                smsConfig.getGateways().add( gatewayConfig );
+            }
+
+            smsConfigMgr.updateSmsConfiguration( smsConfig );
+
+            return "Modem Gateway Added";
+        }
+        return "No sms configuration found";
+    }
+
+    private String addOrUpdateGenericHttp( Map<String, Object> payLoad )
+    {
+        SmsConfiguration smsConfig = getSmsConfiguration();
+
+        if ( payLoad != null )
+        {
+            GenericHttpGatewayConfig gatewayConfig = (GenericHttpGatewayConfig) smsConfigMgr
+                .checkInstanceOfGateway( GenericHttpGatewayConfig.class );
+
+            int index = -1;
+
+            if ( gatewayConfig == null )
+            {
+                gatewayConfig = new GenericHttpGatewayConfig();
+            }
+            else
+            {
+                index = smsConfig.getGateways().indexOf( gatewayConfig );
+            }
+
+            Map<String, String> map = new HashMap<>();
+
+            map.put( "username", payLoad.get( "username" ).toString() );
+            map.put( "password", payLoad.get( "password" ).toString() );
+
+            gatewayConfig.setParameters( map );
+            gatewayConfig.setName( payLoad.get( "name" ).toString() );
+            gatewayConfig.setUrlTemplate( payLoad.get( "urlTemplate" ).toString() );
+
+            if ( smsConfig.getGateways() == null || smsConfig.getGateways().isEmpty() )
+            {
+                gatewayConfig.setDefault( true );
+            }
+
+            if ( index >= 0 )
+            {
+                smsConfig.getGateways().set( index, gatewayConfig );
+            }
+            else
+            {
+                smsConfig.getGateways().add( gatewayConfig );
+            }
+
+            smsConfigMgr.updateSmsConfiguration( smsConfig );
+
+            return "Generic Http Gateway Added";
+        }
+        return "No Sms configuration found";
+    }
+
+    @Override
+    public boolean removeGateway( int id )
+    {
+        SmsConfiguration smsConfig = getSmsConfiguration();
+
+        Iterator<SmsGatewayConfig> it = smsConfig.getGateways().iterator();
+
+        while ( it.hasNext() )
+        {
+            if ( smsConfig.getGateways().indexOf( it.next() ) == id )
+            {
+                SmsGatewayConfig gatewayConfig = smsConfig.getGateways().get( id );
+
+                it.remove();
+
+                smsConfigMgr.updateSmsConfiguration( smsConfig );
+
+                if ( gatewayConfig instanceof BulkSmsGatewayConfig )
+                {
+                    transportService.getGatewayMap().remove( BULK_GATEWAY );
+                    return true;
+                }
+
+                if ( gatewayConfig instanceof ClickatellGatewayConfig )
+                {
+                    transportService.getGatewayMap().remove( CLICKATELL_GATEWAY );
+                    return true;
+                }
+
+                if ( gatewayConfig instanceof ModemGatewayConfig )
+                {
+                    transportService.getGatewayMap().remove( MODEM_GATEWAY );
+                    return true;
+                }
+
+                if ( gatewayConfig instanceof GenericHttpGatewayConfig )
+                {
+                    transportService.getGatewayMap().remove( HTTP_GATEWAY );
+                    return true;
+                }
+
+                if ( gatewayConfig instanceof SMPPGatewayConfig )
+                {
+                    transportService.getGatewayMap().remove( SMPP_GATEWAY );
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public SmsGatewayConfig getGatewayByIndex( int index )
+    {
+        SmsConfiguration smsConfig = getSmsConfiguration();
+        if ( smsConfig.getGateways().size() > index )
+        {
+            return smsConfig.getGateways().get( index );
+        }
+        else
+        {
+            return null;
+        }
     }
 }

@@ -62,6 +62,10 @@ public class SmsServiceController
     @Autowired
     private OutboundSmsTransportService outboundSmsTransportService;
 
+    // -------------------------------------------------------------------------
+    // GET
+    // -------------------------------------------------------------------------
+
     @PreAuthorize( "hasRole('ALL') or hasRole(' F_MOBILE_SENDSMS')" )
     @RequestMapping( method = RequestMethod.GET )
     public void getSmsServiceStatus( HttpServletRequest request, HttpServletResponse response )
@@ -76,6 +80,10 @@ public class SmsServiceController
 
         webMessageService.send( WebMessageUtils.ok( status.toString() ), response, request );
     }
+
+    // -------------------------------------------------------------------------
+    // POST,PUT
+    // -------------------------------------------------------------------------
 
     @PreAuthorize( "hasRole('ALL') or hasRole(' F_MOBILE_SENDSMS')" )
     @RequestMapping( method = RequestMethod.POST )
@@ -97,6 +105,25 @@ public class SmsServiceController
 
         webMessageService.send( WebMessageUtils.ok( "Service started" ), response, request );
     }
+
+    @PreAuthorize( "hasRole('ALL') or hasRole(' F_MOBILE_SENDSMS')" )
+    @RequestMapping( method = RequestMethod.PUT )
+    public void reloadSmsService( HttpServletRequest request, HttpServletResponse response )
+        throws WebMessageException
+    {
+        if ( outboundSmsTransportService == null )
+        {
+            throw new WebMessageException( WebMessageUtils.error( "Transport service is not available" ) );
+        }
+
+        outboundSmsTransportService.reloadConfig();
+
+        webMessageService.send( WebMessageUtils.ok( "Sms configuration reloaded" ), response, request );
+    }
+
+    // -------------------------------------------------------------------------
+    // DELETE
+    // -------------------------------------------------------------------------
 
     @PreAuthorize( "hasRole('ALL') or hasRole(' F_MOBILE_SENDSMS')" )
     @RequestMapping( method = RequestMethod.DELETE )

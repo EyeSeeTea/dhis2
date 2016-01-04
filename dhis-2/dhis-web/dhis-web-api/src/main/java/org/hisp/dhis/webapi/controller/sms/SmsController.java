@@ -1,5 +1,7 @@
 package org.hisp.dhis.webapi.controller.sms;
 
+import java.io.IOException;
+
 /*
  * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
@@ -35,11 +37,14 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.hisp.dhis.dxf2.render.RenderService;
 import org.hisp.dhis.dxf2.webmessage.WebMessageException;
 import org.hisp.dhis.sms.SmsSender;
 import org.hisp.dhis.sms.incoming.IncomingSmsService;
+import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.webapi.service.WebMessageService;
 import org.hisp.dhis.webapi.utils.WebMessageUtils;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -67,6 +72,9 @@ public class SmsController
 
     @Autowired
     private IncomingSmsService incomingSMSService;
+
+    @Autowired
+    private RenderService renderService;
 
     // -------------------------------------------------------------------------
     // POST
@@ -102,26 +110,22 @@ public class SmsController
 
     @PreAuthorize( "hasRole('ALL') or hasRole(' F_MOBILE_SENDSMS')" )
     @RequestMapping( value = "/outbound", method = RequestMethod.POST, consumes = "application/json" )
-    public void sendSMSMessage( @RequestBody Map<String, Object> jsonMessage, HttpServletResponse response,
-        HttpServletRequest request )
-            throws WebMessageException
+    public void sendSMSMessage( HttpServletResponse response, HttpServletRequest request )
+        throws WebMessageException, IOException
     {
-        if ( jsonMessage == null )
-        {
-            throw new WebMessageException( WebMessageUtils.conflict( "Request body must be specified" ) );
-        }
 
-        String result = smsSender.sendMessage( jsonMessage.get( "message" ).toString(),
-            jsonMessage.get( "recipient" ).toString() );
+        OutboundSms sms = renderService.fromJson( request.getInputStream(), OutboundSms.class );
 
+        String result = smsSender.sendMessage( sms );
         if ( result.equals( "success" ) )
         {
             webMessageService.send( WebMessageUtils.ok( "Message Sent" ), response, request );
         }
         else
         {
-            throw new WebMessageException( WebMessageUtils.error( "Message seding failed" ) );
+            webMessageService.send( WebMessageUtils.error( "Message sending failed" ), response, request );
         }
+
     }
 
     @RequestMapping( value = "/inbound", method = RequestMethod.POST )
