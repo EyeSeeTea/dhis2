@@ -1,7 +1,7 @@
 package org.hisp.dhis.user;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,7 @@ import com.google.common.base.MoreObjects;
 public class UserQueryParams
 {
     private String query;
-        
+    
     private String phoneNumber;
     
     private User user;

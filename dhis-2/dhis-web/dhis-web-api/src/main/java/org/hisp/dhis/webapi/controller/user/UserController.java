@@ -1,7 +1,7 @@
 package org.hisp.dhis.webapi.controller.user;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -285,7 +285,7 @@ public class UserController
     }
 
     @SuppressWarnings( "unchecked" )
-    @PreAuthorize( "hasRole('ALL')" )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_REPLICATE_USER')" )
     @RequestMapping( value = "/{uid}/replica", method = RequestMethod.POST )
     public void replicateUser( @PathVariable String uid,
         HttpServletRequest request, HttpServletResponse response ) throws IOException, WebMessageException

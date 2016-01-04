@@ -1,7 +1,7 @@
 package org.hisp.dhis.dataelement;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -690,6 +690,12 @@ public class DefaultDataElementCategoryService
     @Override
     public void updateOptionCombos( DataElementCategoryCombo categoryCombo )
     {
+        if ( categoryCombo == null || !categoryCombo.isValid() )
+        {
+            log.warn( "Category combo is null or invalid, could not update option combos: " + categoryCombo );
+            return;
+        }
+        
         List<DataElementCategoryOptionCombo> generatedOptionCombos = categoryCombo.generateOptionCombosList();
         Set<DataElementCategoryOptionCombo> persistedOptionCombos = categoryCombo.getOptionCombos();
 

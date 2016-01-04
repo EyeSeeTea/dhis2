@@ -1,7 +1,7 @@
 package org.hisp.dhis.sms;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@ import org.hisp.dhis.sms.outbound.OutboundSmsTransportService;
 import org.hisp.dhis.system.util.SmsUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserSettingKey;
 import org.hisp.dhis.user.UserSettingService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -184,7 +185,7 @@ public class SmsMessageSender
         // Receiver is user
         {
             Serializable userSetting = userSettingService
-                .getUserSetting( UserSettingService.KEY_MESSAGE_SMS_NOTIFICATION, null, user );
+                .getUserSetting( UserSettingKey.MESSAGE_SMS_NOTIFICATION, user );
 
             return userSetting != null ? (Boolean) userSetting : false;
         }
