@@ -584,5 +584,12 @@ var trackerCaptureDirectives = angular.module('trackerCaptureDirectives', [])
             }],
         link: function (scope, element, attrs) {}
     };
-})        
+})
+.directive('d2Audit', function ($document) {
+    return {
+        restrict: 'E',
+        template: '<i class="fa fa-history audit-icon"></i>'
+    };
+})
+
 ;

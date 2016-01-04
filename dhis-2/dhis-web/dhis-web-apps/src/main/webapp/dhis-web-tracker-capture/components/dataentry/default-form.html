@@ -352,7 +352,7 @@
                                                       <span ng-bind-html="option.name | highlight: $select.search"></span>
                                                     </ui-select-choices>
                                                 </ui-select>
-                                                <i class="fa fa-history audit-icon"></i>
+                                                <d2-audit></d2-audit>
                                             </div>
                                             <div ng-if="selectedProgram.dataEntryMethod && optionSets[prStDes[de.dataElement.id].dataElement.optionSet.id].options.length < 7">
                                                 <label>
@@ -366,7 +366,7 @@
                                                             ng-model="currentEvent[prStDes[de.dataElement.id].dataElement.id]"
                                                             ng-change="saveDatavalue(prStDes[de.dataElement.id])"
                                                             value=""> {{'no_value' | translate}}<br>
-                                                        <i class="fa fa-history audit-icon"></i>
+                                                        <d2-audit></d2-audit>
                                                     </span>
 
                                                 </label><br>
@@ -381,7 +381,7 @@
                                                             ng-model="currentEvent[prStDes[de.dataElement.id].dataElement.id]"
                                                             ng-change="saveDatavalue(prStDes[de.dataElement.id])"
                                                             value={{option.name}}> {{option.name}}
-                                                        <i class="fa fa-history audit-icon"></i>
+                                                        <d2-audit></d2-audit>
                                                     </label><br>
                                                 </span>
                                             </div>
@@ -403,9 +403,9 @@
                                                         ng-required={{prStDes[de.dataElement.id].compulsory}}
                                                         ng-disabled="selectedEnrollment.status !== 'ACTIVE' || currentEvent.editingNotAllowed || assignedFields[currentEvent.event][de.dataElement.id]"
                                                         ng-blur="saveDatavalue(prStDes[de.dataElement.id], innerForm.foo)"
-                                                        name="foo"/>
-                                                    <i class="fa fa-history audit-icon"></i>
-
+                                                        name="foo"
+                                                        />
+                                                        <d2-audit></d2-audit>
                                                 </span>
                                             </div>
                                             <div class="not-for-screen">
@@ -424,7 +424,7 @@
                                                    ng-disabled="selectedEnrollment.status !== 'ACTIVE' || currentEvent.editingNotAllowed || assignedFields[currentEvent.event][de.dataElement.id]"
                                                    ng-blur="saveDatavalue(prStDes[de.dataElement.id], innerForm.foo)"
                                                    name="foo"/>
-                                                <i class="fa fa-history audit-icon"></i>
+                                                <d2-audit></d2-audit>
                                             </div>
                                             <div class="not-for-screen">
                                                 <input type="text" class="form-control" value={{currentEvent[prStDes[de.dataElement.id].dataElement.id]}}>
@@ -442,7 +442,7 @@
                                                    ng-disabled="selectedEnrollment.status !== 'ACTIVE' || currentEvent.editingNotAllowed || assignedFields[currentEvent.event][de.dataElement.id]"
                                                    ng-blur="saveDatavalue(prStDes[de.dataElement.id], innerForm.foo)"
                                                    name="foo"/>
-                                                <i class="fa fa-history audit-icon"></i>
+                                                <d2-audit></d2-audit>
                                             </div>
                                             <div class="not-for-screen">
                                                 <input type="text" class="form-control" value={{currentEvent[prStDes[de.dataElement.id].dataElement.id]}}>
@@ -460,7 +460,7 @@
                                                    ng-disabled="selectedEnrollment.status !== 'ACTIVE' || currentEvent.editingNotAllowed || assignedFields[currentEvent.event][de.dataElement.id]"
                                                    ng-blur="saveDatavalue(prStDes[de.dataElement.id], innerForm.foo)"
                                                    name="foo"/>
-                                                <i class="fa fa-history audit-icon"></i>
+                                                <d2-audit></d2-audit>
                                             </div>
                                             <div class="not-for-screen">
                                                 <input type="text" class="form-control" value={{currentEvent[prStDes[de.dataElement.id].dataElement.id]}}>
@@ -478,7 +478,7 @@
                                                    ng-disabled="selectedEnrollment.status !== 'ACTIVE' || currentEvent.editingNotAllowed || assignedFields[currentEvent.event][de.dataElement.id]"
                                                    ng-blur="saveDatavalue(prStDes[de.dataElement.id], innerForm.foo)"
                                                    name="foo"/>
-                                                <i class="fa fa-history audit-icon"></i>
+                                                <d2-audit></d2-audit>
                                             </div>
                                             <div class="not-for-screen">
                                                 <input type="text" class="form-control input-with-audit" value={{currentEvent[prStDes[de.dataElement.id].dataElement.id]}}>
@@ -514,7 +514,7 @@
                                                    ng-disabled="selectedEnrollment.status !== 'ACTIVE' || currentEvent.editingNotAllowed || assignedFields[currentEvent.event][de.dataElement.id]"
                                                    blur-or-change="saveDatavalue(prStDes[de.dataElement.id])"
                                                    name="foo"/>
-                                                <i class="fa fa-history audit-icon"></i>
+                                                <d2-audit></d2-audit>
                                             </div>
                                             <div class="not-for-screen">
                                                 <input type="text" class="form-control" value={{currentEvent[prStDes[de.dataElement.id].dataElement.id]}}>
@@ -530,7 +530,7 @@
                                                    ng-disabled="selectedEnrollment.status !== 'ACTIVE' || currentEvent.editingNotAllowed || assignedFields[currentEvent.event][de.dataElement.id]"
                                                    ng-change="saveDatavalue(prStDes[de.dataElement.id], innerForm.foo)"
                                                    name="foo"/>
-                                                <i class="fa fa-history audit-icon"></i>
+                                                <d2-audit></d2-audit>
                                             </div>
                                             <div class="not-for-screen">
                                                 <input type="checkbox" class="form-control" ng-checked={{currentEvent[prStDes[de.dataElement.id].dataElement.id]}}>
@@ -546,7 +546,7 @@
                                                     ng-disabled="selectedEnrollment.status !== 'ACTIVE' || currentEvent.editingNotAllowed || assignedFields[currentEvent.event][de.dataElement.id]"
                                                     ng-blur="saveDatavalue(prStDes[de.dataElement.id], innerForm.foo)"
                                                     name="foo"></textarea>
-                                                <i class="fa fa-history audit-icon"></i>
+                                                <d2-audit></d2-audit>
                                             </div>
                                             <div class="not-for-screen">
                                                 <textarea rows="3" class="form-control" value={{currentEvent[prStDes[de.dataElement.id].dataElement.id]}}></textarea>
@@ -562,7 +562,7 @@
                                                     ng-disabled="selectedEnrollment.status !== 'ACTIVE' || currentEvent.editingNotAllowed || assignedFields[currentEvent.event][de.dataElement.id]"
                                                     ng-blur="saveDatavalue(prStDes[de.dataElement.id], innerForm.foo)"
                                                     name="foo"/>
-                                                <i class="fa fa-history audit-icon"></i>
+                                                <d2-audit></d2-audit>
                                             </div>
                                             <div class="not-for-screen">
                                                 <input type="text" class="form-control" value={{currentEvent[prStDes[de.dataElement.id].dataElement.id]}}>
@@ -578,7 +578,7 @@
                                                     ng-disabled="selectedEnrollment.status !== 'ACTIVE' || currentEvent.editingNotAllowed || assignedFields[currentEvent.event][de.dataElement.id]"
                                                     ng-blur="saveDatavalue(prStDes[de.dataElement.id])"
                                                     name="foo"/>
-                                                <i class="fa fa-history audit-icon"></i>
+                                                <d2-audit></d2-audit>
                                             </div>
                                             <div class="not-for-screen">
                                                 <input type="text" class="form-control" value={{currentEvent[prStDes[de.dataElement.id].dataElement.id]}}>
@@ -604,7 +604,7 @@
                                            ng-model="currentEvent.providedElsewhere[prStDes[de.dataElement.id].dataElement.id]"
                                            ng-disabled="selectedEnrollment.status !== 'ACTIVE' || currentEvent.editingNotAllowed"
                                            ng-change="saveDatavalueLocation(prStDes[de.dataElement.id])"/>
-                                    <i class="fa fa-history audit-icon"></i>
+                                    <d2-audit></d2-audit>
                                 </div>
                             </td>
                         </tr>
