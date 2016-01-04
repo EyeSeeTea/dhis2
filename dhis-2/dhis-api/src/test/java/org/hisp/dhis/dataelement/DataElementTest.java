@@ -1,7 +1,7 @@
 package org.hisp.dhis.dataelement;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@ import org.junit.Test;
 public class DataElementTest
 {
     @Test
-    public void getPeriodType()
+    public void testGetPeriodType()
     {
         PeriodType periodType = new MonthlyPeriodType();
         
@@ -63,7 +63,7 @@ public class DataElementTest
     }
 
     @Test
-    public void periodTypeIsValid()
+    public void testPeriodTypeIsValid()
     {
         DataElement element = new DataElement();
         
@@ -79,5 +79,27 @@ public class DataElementTest
         element.getDataSets().add( dataSetC );
         
         assertFalse( element.periodTypeIsValid() );
+    }
+    
+    @Test
+    public void testGetOpenFuturePeriods()
+    {
+        DataElement deA = new DataElement( "A" );
+        
+        assertEquals( 0, deA.getOpenFuturePeriods() );
+        
+        DataSet dsA = new DataSet( "A" );
+        DataSet dsB = new DataSet( "B" );
+        
+        dsA.setOpenFuturePeriods( 0 );
+        dsB.setOpenFuturePeriods( 3 );
+        
+        dsA.addDataElement( deA );        
+        
+        assertEquals( 0, deA.getOpenFuturePeriods() );
+        
+        dsB.addDataElement( deA );
+        
+        assertEquals( 3, deA.getOpenFuturePeriods() );
     }
 }

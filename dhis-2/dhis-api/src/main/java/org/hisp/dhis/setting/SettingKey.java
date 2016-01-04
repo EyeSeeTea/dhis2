@@ -1,7 +1,7 @@
 package org.hisp.dhis.setting;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,9 +30,11 @@ package org.hisp.dhis.setting;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.lang3.LocaleUtils;
 import org.hisp.dhis.common.ListMap;
 import org.hisp.dhis.configuration.Configuration;
 import org.hisp.dhis.sms.config.SmsConfiguration;
@@ -179,6 +181,10 @@ public enum SettingKey
             else if ( Boolean.class.isAssignableFrom( settingClazz ) )
             {
                 return Boolean.valueOf( value );
+            }
+            else if ( Locale.class.isAssignableFrom( settingClazz ) )
+            {
+                return LocaleUtils.toLocale( value );
             }
             
             //TODO handle Dates

@@ -1,7 +1,7 @@
 package org.hisp.dhis.dataelement;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,7 +58,6 @@ import org.hisp.dhis.period.YearlyPeriodType;
 import org.hisp.dhis.schema.PropertyType;
 import org.hisp.dhis.schema.annotation.Property;
 import org.hisp.dhis.schema.annotation.PropertyRange;
-import org.hisp.dhis.util.ObjectUtils;
 import org.joda.time.DateTime;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -331,14 +330,14 @@ public class DataElement
      */
     public int getOpenFuturePeriods()
     {
-        Set<Integer> openPeriods = new HashSet<>();
+        int maxOpenPeriods = 0;
 
         for ( DataSet dataSet : dataSets )
-        {
-            openPeriods.add( dataSet.getOpenFuturePeriods() );
+        {            
+            maxOpenPeriods = Math.max( maxOpenPeriods, dataSet.getOpenFuturePeriods() );
         }
 
-        return ObjectUtils.firstNonNull( Collections.max( openPeriods ), 0 );
+        return maxOpenPeriods;
     }
 
     /**

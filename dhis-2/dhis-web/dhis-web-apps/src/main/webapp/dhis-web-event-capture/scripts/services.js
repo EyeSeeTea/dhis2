@@ -17,40 +17,6 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
     };
 })
 
-/* Service for uploading/downloading file */
-.service('FileService', function ($http) {
-
-    return {
-        get: function (uid) {
-            var promise = $http.get('../api/fileResources/' + uid).then(function (response) {
-                return response.data;
-            });
-            return promise;
-        },
-        delete: function (uid) {
-            var promise = $http.get('../api/fileResources/' + uid).then(function (response) {
-                return response.data;
-            });
-            return promise;
-        },
-        download: function (fileName) {
-            var promise = $http.get(fileName).then(function (response) {
-                return response.data;
-            });
-            return promise;
-        },
-        upload: function(file){
-            var formData = new FormData();
-            formData.append('file', file);
-            var headers = {transformRequest: angular.identity, headers: {'Content-Type': undefined}};
-            var promise = $http.post('../api/fileResources', formData, headers).then(function(response){
-                return response.data;
-            });
-            return promise;
-        }
-    };
-})
-
 .factory('OfflineECStorageService', function($http, $q, $rootScope, ECStorageService){
     return {        
         hasLocalData: function() {
@@ -603,6 +569,9 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
             return e;
         },
         refreshList: function(eventList, currentEvent){
+            if(!eventList || !eventList.length){
+                return;
+            }
             var continueLoop = true;
             for(var i=0; i< eventList.length && continueLoop; i++){
                 if(eventList[i].event === currentEvent.event ){

@@ -1,7 +1,7 @@
 package org.hisp.dhis.query;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,6 +73,16 @@ public class Order
         return property;
     }
 
+    public boolean isPersisted()
+    {
+        return property.isPersisted() && property.isSimple();
+    }
+
+    public boolean isNonPersisted()
+    {
+        return !property.isPersisted() && property.isSimple();
+    }
+
     public int compare( Object lside, Object rside )
     {
         Object o1 = ReflectionUtils.invokeMethod( lside, property.getGetterMethod() );
@@ -85,7 +95,10 @@ public class Order
 
         if ( String.class.isInstance( o1 ) && String.class.isInstance( o2 ) )
         {
-            return ascending ? ((String) o1).compareTo( (String) o2 ) : ((String) o2).compareTo( (String) o1 );
+            String value1 = ignoreCase ? ((String) o1).toLowerCase() : (String) o1;
+            String value2 = ignoreCase ? ((String) o2).toLowerCase() : (String) o2;
+
+            return ascending ? value1.compareTo( value2 ) : value2.compareTo( value1 );
         }
         if ( Boolean.class.isInstance( o1 ) && Boolean.class.isInstance( o2 ) )
         {

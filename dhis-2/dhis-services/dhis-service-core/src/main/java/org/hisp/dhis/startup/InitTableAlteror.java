@@ -1,7 +1,7 @@
 package org.hisp.dhis.startup;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,12 +33,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.system.startup.AbstractStartupRoutine;
-import org.jasypt.encryption.pbe.PBEStringEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.annotation.Resource;
-
 
 /**
  * @author Lars Helge Overland
@@ -54,12 +50,6 @@ public class InitTableAlteror
     @Autowired
     private StatementBuilder statementBuilder;
 
-    @Resource( name = "stringEncryptor" )
-    PBEStringEncryptor oldPBEStringEncryptor;
-
-    @Resource( name = "strongStringEncryptor" )
-    PBEStringEncryptor newPBEStringEncryptor;
-
     // -------------------------------------------------------------------------
     // Execute
     // -------------------------------------------------------------------------
@@ -68,10 +58,12 @@ public class InitTableAlteror
     @Transactional
     public void execute()
     {
-        executeSql(
-            "update dataelement set domaintype='AGGREGATE' where domaintype='aggregate' or domaintype is null;" );
+        executeSql( "update dataelement set domaintype='AGGREGATE' where domaintype='aggregate' or domaintype is null;" );
         executeSql( "update dataelement set domaintype='TRACKER' where domaintype='patient';" );
         executeSql( "update users set invitation = false where invitation is null" );
+        executeSql( "update users set selfregistered = false where selfregistered is null" );
+        executeSql( "update users set externalauth = false where externalauth is null" );
+        executeSql( "update users set disabled = false where disabled is null" );
         executeSql( "alter table dataelement alter column domaintype set not null;" );
         executeSql( "alter table programstageinstance alter column  status  type varchar(25);" );
         executeSql( "UPDATE programstageinstance SET status='ACTIVE' WHERE status='0';" );

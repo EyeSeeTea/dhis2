@@ -1,9 +1,7 @@
 package org.hisp.dhis.trackedentity;
 
-import static org.hisp.dhis.common.OrganisationUnitSelectionMode.CHILDREN;
-
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +28,8 @@ import static org.hisp.dhis.common.OrganisationUnitSelectionMode.CHILDREN;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.common.OrganisationUnitSelectionMode.CHILDREN;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -55,6 +55,7 @@ public class TrackedEntityInstanceQueryParams
     public static final String CREATED_ID = "created";
     public static final String LAST_UPDATED_ID = "lastupdated";
     public static final String ORG_UNIT_ID = "ou";
+    public static final String ORG_UNIT_NAME = "ouname";
     public static final String TRACKED_ENTITY_ID = "te";
     public static final String TRACKED_ENTITY_ATTRIBUTE_ID = "teattribute";
     public static final String TRACKED_ENTITY_ATTRIBUTE_VALUE_ID = "tevalue";

@@ -1,7 +1,7 @@
 package org.hisp.dhis.startup;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -565,8 +565,6 @@ public class TableAlteror
         executeSql( "update chart_filters set filter = 'pe' where filter = 'period'" );
         executeSql( "update chart_filters set filter = 'ou' where filter = 'organisationunit'" );
 
-        executeSql( "update users set selfregistered = false where selfregistered is null" );
-        executeSql( "update users set disabled = false where disabled is null" );
         executeSql( "update dataentryform set format = 1 where format is null" );
 
         executeSql( "update dataelementgroup set shortname=name where shortname is null and length(name)<=50" );
@@ -687,12 +685,6 @@ public class TableAlteror
         executeSql( "ALTER TABLE reporttable DROP CONSTRAINT reporttable_name_key" );
         executeSql( "ALTER TABLE report DROP CONSTRAINT report_name_key" );
         executeSql( "ALTER TABLE usergroup DROP CONSTRAINT usergroup_name_key" );
-
-        // clear out sharing of de-group/de-group-set for now
-        executeSql( "UPDATE dataelementgroup SET userid=NULL WHERE userid IS NOT NULL" );
-        executeSql( "UPDATE dataelementgroup SET publicaccess=NULL WHERE userid IS NOT NULL" );
-        executeSql( "UPDATE dataelementgroupset SET userid=NULL WHERE userid IS NOT NULL" );
-        executeSql( "UPDATE dataelementgroupset SET publicaccess=NULL WHERE userid IS NOT NULL" );
 
         executeSql( "ALTER TABLE dataelementcategory DROP COLUMN conceptid" );
         executeSql( "ALTER TABLE dataelementcategoryoption DROP COLUMN conceptid" );
@@ -873,6 +865,7 @@ public class TableAlteror
         executeSql( "update keyjsonvalue set namespacekey = key where namespacekey is null" );
         executeSql( "alter table keyjsonvalue alter column namespacekey set not null" );
         executeSql( "alter table keyjsonvalue drop column key" );
+        executeSql( "alter table trackedentityattributevalue drop column encrypted_value" );
 
         // Remove data mart
         executeSql( "drop table aggregateddatasetcompleteness" );
