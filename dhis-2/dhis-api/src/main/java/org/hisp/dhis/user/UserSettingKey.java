@@ -1,7 +1,7 @@
 package org.hisp.dhis.user;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,22 +32,24 @@ import java.io.Serializable;
 import java.util.Locale;
 import java.util.Optional;
 
+import org.apache.commons.lang3.LocaleUtils;
+
 /**
  * @author Lars Helge Overland
  */
 public enum UserSettingKey
 {
-    STYLE( "stylesheet" ),
-    STYLE_DIRECTORY( "stylesheetDirectory" ),
+    STYLE( "currentStyle" ),
     MESSAGE_EMAIL_NOTIFICATION( "keyMessageEmailNotification", Boolean.FALSE, Boolean.class ),
     MESSAGE_SMS_NOTIFICATION( "keyMessageSmsNotification", Boolean.FALSE, Boolean.class ),
     UI_LOCALE( "keyUiLocale", Locale.class ),
     DB_LOCALE( "keyDbLocale", Locale.class ),
     ANALYSIS_DISPLAY_PROPERTY( "keyAnalysisDisplayProperty", "name", String.class ),
-    KEY_CURRENT_DOMAIN_TYPE( "currentDomainType" ),
+    CURRENT_DOMAIN_TYPE( "currentDomainType" ),
     AUTO_SAVE_CASE_ENTRY_FORM( "autoSaveCaseEntryForm", Boolean.FALSE, Boolean.class ),
     AUTO_SAVE_TRACKED_ENTITY_REGISTRATION_ENTRY_FORM( "autoSavetTrackedEntityForm", Boolean.FALSE, Boolean.class ),
-    AUTO_SAVE_DATA_ENTRY_FORM( "autoSaveDataEntryForm", Boolean.FALSE, Boolean.class );    
+    AUTO_SAVE_DATA_ENTRY_FORM( "autoSaveDataEntryForm", Boolean.FALSE, Boolean.class ),
+    TRACKER_DASHBOARD_LAYOUT( "keyTrackerDashboardLayout" );
     
     private final String name;
     
@@ -116,6 +118,10 @@ public enum UserSettingKey
             else if ( Boolean.class.isAssignableFrom( settingClazz ) )
             {
                 return Boolean.valueOf( value );
+            }
+            else if ( Locale.class.isAssignableFrom( settingClazz ) )
+            {
+                return LocaleUtils.toLocale( value );
             }
             
             //TODO handle Dates

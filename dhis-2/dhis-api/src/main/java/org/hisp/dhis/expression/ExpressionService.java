@@ -1,7 +1,7 @@
 package org.hisp.dhis.expression;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -303,12 +303,6 @@ public interface ExpressionService
     String getExpressionDescription( String expression );
 
     /**
-     * Substitutes potential constant and days in the numerator and denominator
-     * on all indicators in the given collection.
-     */
-    void substituteExpressions( Collection<Indicator> indicators, Integer days );
-    
-    /**
      * Populates the explodedExpression property on the Expression object of all
      * validation rules in the given collection. This method uses
      * explodeExpression( String ) internally to generate the exploded expressions.
@@ -327,16 +321,12 @@ public interface ExpressionService
      * @return the exploded expression string.
      */
     String explodeExpression( String expression );
-    
+
     /**
-     * Substitutes potential constants and days in the given expression.
-     * 
-     * @param expression the expression to operate on.
-     * @param days the number of days to substitute for potential days in the
-     *        expression, 0 if null
-     * @return the substituted expression.
+     * Substitutes potential constant and days in the numerator and denominator
+     * on all indicators in the given collection.
      */
-    String substituteExpression( String expression, Integer days );
+    void substituteExpressions( Collection<Indicator> indicators, Integer days );
     
     /**
      * Generates an expression where the Operand identifiers, consisting of 

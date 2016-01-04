@@ -1,7 +1,7 @@
 package org.hisp.dhis.trackedentity.action.dataentryform;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,8 @@ package org.hisp.dhis.trackedentity.action.dataentryform;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+import org.hisp.dhis.user.UserSettingKey;
 
 import org.hisp.dhis.user.UserSettingService;
 
@@ -70,7 +72,7 @@ public class SetAutoSaveProgramEntryFormSettingAction
     public String execute()
         throws Exception
     {
-        userSettingService.saveUserSetting( UserSettingService.AUTO_SAVE_TRACKED_ENTITY_REGISTRATION_ENTRY_FORM, autoSave );
+        userSettingService.saveUserSetting( UserSettingKey.AUTO_SAVE_TRACKED_ENTITY_REGISTRATION_ENTRY_FORM, autoSave );
 
         return SUCCESS;
     }

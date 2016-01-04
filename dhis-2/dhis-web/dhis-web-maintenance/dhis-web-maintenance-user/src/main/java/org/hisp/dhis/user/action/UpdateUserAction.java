@@ -1,7 +1,7 @@
 package org.hisp.dhis.user.action;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@ import org.hisp.dhis.user.UserCredentials;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupService;
 import org.hisp.dhis.user.UserService;
+import org.hisp.dhis.user.UserSettingKey;
 import org.hisp.dhis.user.UserSettingService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -369,8 +370,8 @@ public class UpdateUserAction
         // User settings
         // ---------------------------------------------------------------------
 
-        userSettingService.saveUserSetting( UserSettingService.KEY_UI_LOCALE, LocaleUtils.getLocale( localeUi ), user );
-        userSettingService.saveUserSetting( UserSettingService.KEY_DB_LOCALE, LocaleUtils.getLocale( localeDb ), user );
+        userSettingService.saveUserSetting( UserSettingKey.UI_LOCALE, LocaleUtils.getLocale( localeUi ), user );
+        userSettingService.saveUserSetting( UserSettingKey.DB_LOCALE, LocaleUtils.getLocale( localeDb ), user );
 
         // ---------------------------------------------------------------------
         // User groups

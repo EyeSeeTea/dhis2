@@ -1,7 +1,7 @@
 package org.hisp.dhis.dataset;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -271,8 +271,8 @@ public class DataSet
         Set<OrganisationUnit> toRemove = Sets.difference( sources, updates );
         Set<OrganisationUnit> toAdd = Sets.difference( updates, sources );
 
-        toRemove.parallelStream().forEach( u -> u.getDataSets().remove( this ) );
-        toAdd.parallelStream().forEach( u -> u.getDataSets().add( this ) );
+        toRemove.stream().forEach( u -> u.getDataSets().remove( this ) );
+        toAdd.stream().forEach( u -> u.getDataSets().add( this ) );
 
         sources.clear();
         sources.addAll( updates );
@@ -295,8 +295,8 @@ public class DataSet
         Set<DataElement> toRemove = Sets.difference( dataElements, updates );
         Set<DataElement> toAdd = Sets.difference( updates, dataElements );
 
-        toRemove.parallelStream().forEach( d -> d.getDataSets().remove( this ) );
-        toAdd.parallelStream().forEach( d -> d.getDataSets().add( this ) );
+        toRemove.stream().forEach( d -> d.getDataSets().remove( this ) );
+        toAdd.stream().forEach( d -> d.getDataSets().add( this ) );
 
         dataElements.clear();
         dataElements.addAll( updates );

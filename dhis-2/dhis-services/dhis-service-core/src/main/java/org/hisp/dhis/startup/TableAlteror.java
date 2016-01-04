@@ -1,7 +1,7 @@
 package org.hisp.dhis.startup;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -716,7 +716,6 @@ public class TableAlteror
         executeSql( "update program set categorycomboid = " + defaultCategoryComboId + " where categorycomboid is null" );
         executeSql( "update programstageinstance set attributeoptioncomboid = " + defaultOptionComboId + " where attributeoptioncomboid is null" );
 
-
         executeSql( "ALTER TABLE datavalue ALTER COLUMN lastupdated TYPE timestamp" );
         executeSql( "ALTER TABLE completedatasetregistration ALTER COLUMN date TYPE timestamp" );
         executeSql( "ALTER TABLE message ALTER COLUMN userid DROP NOT NULL" );
@@ -865,6 +864,7 @@ public class TableAlteror
         executeSql( "update keyjsonvalue set namespacekey = key where namespacekey is null" );
         executeSql( "alter table keyjsonvalue alter column namespacekey set not null" );
         executeSql( "alter table keyjsonvalue drop column key" );
+        executeSql( "alter table trackedentityattributevalue drop column encrypted_value" );
 
         // Remove data mart
         executeSql( "drop table aggregateddatasetcompleteness" );
