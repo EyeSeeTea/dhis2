@@ -1424,7 +1424,7 @@ input, button, select, textarea {
 
 /*Audit icon specific*/
 .input-with-audit {
-    width:90%;
+    width:85%;
     display: inline-block;
 }
 

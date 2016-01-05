@@ -34,7 +34,7 @@
                                             ng-disabled="selectedEnrollment.status !== 'ACTIVE' || currentEvent.editingNotAllowed || assignedFields[currentEvent.event][prStDe.dataElement.id]" 
                                             name="foo" 
                                             on-select="saveDatavalue(prStDe, innerForm.foo)"
-                                            style="width:90%;">
+                                            style="width:85%;">
                                     <ui-select-match allow-clear="true" ng-class="getInputNotifcationClass(prStDe.dataElement.id, true)"  class="form-control-ui-select"  placeholder="{{'select_or_search' | translate}}">{{$select.selected.name  || $select.selected}}</ui-select-match>
                                     <ui-select-choices  repeat="option.name as option in optionSets[prStDe.dataElement.optionSet.id].options | filter: $select.search | limitTo:maxOptionSize">
                                       <span ng-bind-html="option.name | highlight: $select.search"></span>
