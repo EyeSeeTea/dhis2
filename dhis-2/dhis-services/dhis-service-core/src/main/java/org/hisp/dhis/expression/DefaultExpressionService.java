@@ -70,6 +70,7 @@ import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.period.Period;
+import org.hisp.dhis.system.jep.CustomFunctions;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.MathUtils;
 import org.hisp.dhis.commons.collection.CachingMap;
@@ -342,19 +343,25 @@ public class DefaultExpressionService
     @Transactional
     public Set<String> getAggregatesInExpression( String expression )
     {
-        Set<String> aggregates = new HashSet<>();
+    	Pattern prefix=CustomFunctions.aggregate_prefix;
+    	Set<String> aggregates = new HashSet<>();
 
-        if ( expression != null )
-        {
-            final Matcher matcher = AGGREGATE_PATTERN.matcher( expression );
+    	if ( expression != null )
+    	{
+    		final Matcher matcher = prefix.matcher(expression);
+    		int start=0;
 
-            while ( matcher.find() )
-            {
-                aggregates.add(matcher.group(1));
-            }
-        }
+    		while ( matcher.find(start) )
+    		{
+    			start=matcher.start();
+    			int end=Expression.matchExpression(expression,start);
+    			if (end>0) {
+    				aggregates.add(expression.substring(start,end));
+    				start=end+1;}
+    		}
+    	}
 
-        return aggregates;
+    	return aggregates;
     }
 
     @Override
@@ -534,30 +541,7 @@ public class DefaultExpressionService
         }
         
         expression = TextUtils.appendTail( matcher, sb );
-        
-        // ---------------------------------------------------------------------
-        // Aggregates
-        // ---------------------------------------------------------------------
-
-        matcher= AGGREGATE_PATTERN.matcher(expression);
-        sb = new StringBuffer();
-        
-        while ( matcher.find() )
-        {
-        	String aggregate=matcher.group(1);
-        	ExpressionValidationOutcome arg_valid=expressionIsValid(aggregate);
-
-        	if ( arg_valid != ExpressionValidationOutcome.VALID ) 
-        	{
-        		return arg_valid;
-        	}
-        	
-        	matcher.appendReplacement(sb, "[1.1]");
-        }
-        
-        expression = TextUtils.appendTail( matcher, sb );
-
-        
+       
         // ---------------------------------------------------------------------
         // Constants
         // ---------------------------------------------------------------------

@@ -224,6 +224,19 @@ public class Expression
             "}";
     }
 
+    /* Parsing expressions */
+    public static int matchExpression(String s,int start){
+    	int i=start, depth=0, len=s.length(); char c=s.charAt(i++);
+    	while (i<len) {
+    		if (c==')') {
+    			if (depth==0) return i-1; else depth--;}
+    		else if (c=='(') depth++;
+    		else if (c==',') {
+    			if (depth==0) return i-1;}
+    		else {}
+    		c=s.charAt(i++);}
+    	return -1;}
+
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
