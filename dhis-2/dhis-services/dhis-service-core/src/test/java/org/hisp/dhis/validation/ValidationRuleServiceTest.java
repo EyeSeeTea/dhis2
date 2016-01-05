@@ -282,10 +282,10 @@ extends DhisTest
 				"descriptionB", dataElementsB );
 		expressionC = new Expression( "#{" + dataElementB.getUid() + suffix + "} * 2", "descriptionC", dataElementsC );
 		expressionD = new Expression( "#{" + dataElementB.getUid() + suffix + "}", "descriptionD", dataElementsC );
-		expressionE = new Expression( "AVG(#[#{" + dataElementB.getUid() + suffix + "} * 1.5])", "descriptionE", dataElementsC );
+		expressionE = new Expression( "AVG(#{" + dataElementB.getUid() + suffix + "} * 1.5)", "descriptionE", dataElementsC );
 		expressionF = new Expression( "#{" + dataElementB.getUid() + suffix + "} / #{" + dataElementE.getUid() + suffix + "}",
 				"descriptionF", dataElementsD );
-		expressionG = new Expression( "AVG(#[#{" + dataElementB.getUid() + suffix + "} * 1.5 / #{" + dataElementE.getUid() + suffix + "}])",
+		expressionG = new Expression( "AVG(#{" + dataElementB.getUid() + suffix + "} * 1.5 / #{" + dataElementE.getUid() + suffix + "})",
 				"descriptionG", dataElementsD );
 
 		expressionService.addExpression( expressionA );

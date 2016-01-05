@@ -264,7 +264,7 @@ public class ExpressionServiceTest
         expressionI = "#{" + opA.getDimensionItem() + "}*" + "#{" + deB.getDimensionItem() + "}+" + "C{" + constantA.getUid() + "}+5-" +
             "D{" + pdeA.getDimensionItem() + "}+" + "A{" + pteaA.getDimensionItem() + "}-10+" + "I{" + piA.getDimensionItem() + "}";
         expressionJ0 = "#{" + opA.getDimensionItem() + "}+#{" + opB.getDimensionItem() + "}";
-        expressionJ = "1.5*AVG(#["+expressionJ0+"])";
+        expressionJ = "1.5*AVG("+expressionJ0+")";
 
         descriptionA = "Expression A";
         descriptionB = "Expression B";
@@ -500,7 +500,7 @@ public class ExpressionServiceTest
 
         assertEquals( ExpressionValidationOutcome.EXPRESSION_IS_NOT_WELL_FORMED, expressionService.expressionIsValid( expressionA ) );
         
-        expressionA=expressionJ.replace("]", "");
+        expressionA=expressionJ.replace(")", "");
 
         assertEquals( ExpressionValidationOutcome.EXPRESSION_IS_NOT_WELL_FORMED, expressionService.expressionIsValid( expressionA ) );
         

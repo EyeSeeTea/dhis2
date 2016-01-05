@@ -40,7 +40,14 @@ import java.util.regex.Pattern;
 import org.apache.commons.validator.routines.DoubleValidator;
 import org.apache.commons.validator.routines.IntegerValidator;
 import org.hisp.dhis.expression.Operator;
+import org.hisp.dhis.system.jep.ArithmeticMean;
+import org.hisp.dhis.system.jep.Count;
 import org.hisp.dhis.system.jep.CustomFunctions;
+import org.hisp.dhis.system.jep.MaxValue;
+import org.hisp.dhis.system.jep.MedianValue;
+import org.hisp.dhis.system.jep.MinValue;
+import org.hisp.dhis.system.jep.StandardDeviation;
+import org.hisp.dhis.system.jep.VectorSum;
 import org.nfunk.jep.JEP;
 
 import com.google.common.cache.Cache;
@@ -760,4 +767,6 @@ public class MathUtils
         
         return result.intValue();
     }
+
+    
 }
