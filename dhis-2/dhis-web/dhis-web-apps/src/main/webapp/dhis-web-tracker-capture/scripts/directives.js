@@ -588,7 +588,15 @@ var trackerCaptureDirectives = angular.module('trackerCaptureDirectives', [])
 .directive('d2Audit', function ($document) {
     return {
         restrict: 'E',
-        template: '<i class="fa fa-history audit-icon"></i>'
+        template: '<i class="fa fa-history audit-icon" data-ng-click="showAuditHistory()"></i>',
+        controller:function ($scope, $element, $attrs, $modal) {
+            $scope.showAuditHistory = function() {
+                var modalInstance = $modal.open({
+                    templateUrl: "components/audit/audit-history.html",
+                    controller: "AuditHistoryController"
+                });
+            }
+        }
     };
 })
 
