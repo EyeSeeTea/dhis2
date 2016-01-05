@@ -37,7 +37,6 @@ import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.trackedentitycomment.TrackedEntityComment;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -50,6 +49,8 @@ public class ProgramStageInstance
     private ProgramInstance programInstance;
 
     private ProgramStage programStage;
+
+    private String storedBy;
 
     private Date dueDate;
 
@@ -71,10 +72,10 @@ public class ProgramStageInstance
 
     private Double latitude;
 
-    private String completedUser;
+    private String completedBy;
 
     private Date completedDate;
-    
+
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -114,14 +115,24 @@ public class ProgramStageInstance
         this.programStage = programStage;
     }
 
-    public String getCompletedUser()
+    public String getStoredBy()
     {
-        return completedUser;
+        return storedBy;
     }
 
-    public void setCompletedUser( String completedUser )
+    public void setStoredBy( String storedBy )
     {
-        this.completedUser = completedUser;
+        this.storedBy = storedBy;
+    }
+
+    public String getCompletedBy()
+    {
+        return completedBy;
+    }
+
+    public void setCompletedBy( String completedBy )
+    {
+        this.completedBy = completedBy;
     }
 
     public Date getDueDate()
@@ -158,7 +169,7 @@ public class ProgramStageInstance
     {
         this.organisationUnit = organisationUnit;
     }
-    
+
     public DataElementCategoryOptionCombo getAttributeOptionCombo()
     {
         return attributeOptionCombo;
@@ -236,37 +247,6 @@ public class ProgramStageInstance
 
     public EventStatus getStatus()
     {
-       return status;
-    }
-
-    public EventStatus getEventStatus()
-    {
-        if ( status == EventStatus.COMPLETED )
-        {
-            return status;
-        }
-        else if ( this.getExecutionDate() != null )
-        {
-            return EventStatus.VISITED;
-        }
-        else
-        {
-            // -------------------------------------------------------------
-            // If a program stage is not provided even a day after its due
-            // date, then that service is alerted red - because we are
-            // getting late
-            // -------------------------------------------------------------
-
-            Calendar dueDateCalendar = Calendar.getInstance();
-            dueDateCalendar.setTime( this.getDueDate() );
-            dueDateCalendar.add( Calendar.DATE, 1 );
-
-            if ( dueDateCalendar.getTime().before( new Date() ) )
-            {
-                return EventStatus.OVERDUE;
-            }
-
-            return EventStatus.SCHEDULE;
-        }
+        return status;
     }
 }

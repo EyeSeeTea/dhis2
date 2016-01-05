@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.common;
+package org.hisp.dhis.query;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -28,41 +28,10 @@ package org.hisp.dhis.dxf2.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.IdentifiableObject;
-
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class ImportUtils
+public enum Direction
 {
-    /**
-     * @param object Object to get display name for
-     * @return A usable display name
-     */
-    public static String getDisplayName( Object object )
-    {
-        if ( object == null )
-        {
-            return "[ object is null ]";
-        }
-        else if ( IdentifiableObject.class.isInstance( object ) )
-        {
-            IdentifiableObject identifiableObject = (IdentifiableObject) object;
-
-            if ( identifiableObject.getName() != null && identifiableObject.getName().length() > 0 )
-            {
-                return identifiableObject.getName();
-            }
-            else if ( identifiableObject.getUid() != null && identifiableObject.getUid().length() > 0 )
-            {
-                return identifiableObject.getUid();
-            }
-            else if ( identifiableObject.getCode() != null && identifiableObject.getCode().length() > 0 )
-            {
-                return identifiableObject.getCode();
-            }
-        }
-
-        return object.getClass().getName();
-    }
+    ASCENDING, DESCENDING
 }

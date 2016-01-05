@@ -78,27 +78,41 @@ public class InitTableAlteror
         updateFeatureTypes();
         updateValidationRuleEnums();
         updateProgramStatus();
-        updateSmtpPasswordColumn();
+        removeDeprecatedConfigurationColumns();
         updateTimestamps();
+        updateCompletedBy();
 
         executeSql( "ALTER TABLE program ALTER COLUMN \"type\" TYPE varchar(255);" );
         executeSql( "update program set \"type\"='WITH_REGISTRATION' where type='1' or type='2'" );
         executeSql( "update program set \"type\"='WITHOUT_REGISTRATION' where type='3'" );
     }
 
+    private void updateCompletedBy()
+    {
+        executeSql( "update programinstance set completedby=completeduser where completedby is null" );
+        executeSql( "update programstageinstance set completedby=completeduser where completedby is null" );
+
+        executeSql( "alter table programinstance drop column completeduser" );
+        executeSql( "alter table programstageinstance drop column completeduser" );
+    }
+
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
 
-    private void updateSmtpPasswordColumn()
+    private void removeDeprecatedConfigurationColumns()
     {
         try
         {
-            executeSql( "UPDATE configuration SET smtppassword = smptpassword" );
             executeSql( "ALTER TABLE configuration DROP COLUMN smptpassword" );
+            executeSql( "ALTER TABLE configuration DROP COLUMN smtppassword" );
+            executeSql( "ALTER TABLE configuration DROP COLUMN remoteserverurl" );
+            executeSql( "ALTER TABLE configuration DROP COLUMN remoteserverusername" );
+            executeSql( "ALTER TABLE configuration DROP COLUMN remotepassword" );
+            executeSql( "ALTER TABLE configuration DROP COLUMN remoteserverpassword" );
 
         }
-        catch(Exception ex)
+        catch ( Exception ex )
         {
             log.debug( ex );
         }
@@ -117,6 +131,7 @@ public class InitTableAlteror
         executeSql( "update trackedentityattributevalue set created=now() where created is null" );
         executeSql( "update trackedentityattributevalue set lastupdated=now() where lastupdated is null" );
     }
+
     private void updateProgramStatus()
     {
         executeSql( "alter table programinstance alter column status type varchar(50)" );
