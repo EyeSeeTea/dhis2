@@ -1,7 +1,7 @@
 package org.hisp.dhis.program;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,6 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import com.google.common.base.MoreObjects;
 import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.common.BaseDimensionalItemObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
@@ -71,10 +70,12 @@ public class ProgramTrackedEntityAttribute
 
     public ProgramTrackedEntityAttribute()
     {
+        setAutoFields();
     }
 
     public ProgramTrackedEntityAttribute( Program program, TrackedEntityAttribute attribute )
     {
+        this();
         this.program = program;
         this.attribute = attribute;
     }
@@ -82,8 +83,7 @@ public class ProgramTrackedEntityAttribute
     public ProgramTrackedEntityAttribute( Program program, TrackedEntityAttribute attribute, boolean displayInList,
         Boolean mandatory )
     {
-        this.program = program;
-        this.attribute = attribute;
+        this( program, attribute );
         this.displayInList = displayInList;
         this.mandatory = mandatory;
     }
@@ -91,10 +91,7 @@ public class ProgramTrackedEntityAttribute
     public ProgramTrackedEntityAttribute( Program program, TrackedEntityAttribute attribute, boolean displayInList,
         Boolean mandatory, Boolean allowFutureDate )
     {
-        this.program = program;
-        this.attribute = attribute;
-        this.displayInList = displayInList;
-        this.mandatory = mandatory;
+        this( program, attribute, displayInList, mandatory );
         this.allowFutureDate = allowFutureDate;
     }
 
@@ -126,6 +123,20 @@ public class ProgramTrackedEntityAttribute
     public ValueType getValueType()
     {
         return attribute.getValueType();
+    }
+
+    @Override
+    public String toString()
+    {
+        return "{" +
+            "\"class\":\"" + getClass() + "\", " +
+            "\"id\":\"" + id + "\", " +
+            "\"uid\":\"" + uid + "\", " +
+            "\"program\":" + program + ", " +
+            "\"attribute\":" + attribute + ", " +
+            "\"created\":\"" + created + "\", " +
+            "\"lastUpdated\":\"" + lastUpdated + "\" " +
+            "}";
     }
 
     // -------------------------------------------------------------------------
@@ -219,18 +230,6 @@ public class ProgramTrackedEntityAttribute
     public void setAllowFutureDate( Boolean allowFutureDate )
     {
         this.allowFutureDate = allowFutureDate;
-    }
-
-    @Override
-    public String toString()
-    {
-        return MoreObjects.toStringHelper( this )
-            .add( "id", id )
-            .add( "attribute", attribute )
-            .add( "displayInList", displayInList )
-            .add( "mandatory", mandatory )
-            .add( "allowFutureDate", allowFutureDate )
-            .toString();
     }
 
     @Override

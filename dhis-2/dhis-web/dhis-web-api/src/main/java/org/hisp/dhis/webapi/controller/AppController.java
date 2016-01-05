@@ -1,7 +1,7 @@
 package org.hisp.dhis.webapi.controller;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,11 +33,13 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.appmanager.App;
 import org.hisp.dhis.appmanager.AppManager;
+import org.hisp.dhis.appmanager.AppStatus;
 import org.hisp.dhis.dxf2.render.DefaultRenderService;
 import org.hisp.dhis.dxf2.render.RenderService;
 import org.hisp.dhis.dxf2.webmessage.WebMessageException;
 import org.hisp.dhis.external.location.LocationManager;
 import org.hisp.dhis.hibernate.exception.ReadAccessDeniedException;
+import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.setting.SettingKey;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.webapi.utils.ContextUtils;
@@ -51,7 +53,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -75,7 +76,7 @@ public class AppController
 
     @Autowired
     private AppManager appManager;
-
+    
     @Autowired
     private RenderService renderService;
 
@@ -83,12 +84,17 @@ public class AppController
     private LocationManager locationManager;
     
     @Autowired
-    private RestTemplate restTemplate;
-
+    private I18nManager i18nManager;
+    
     private final ResourceLoader resourceLoader = new DefaultResourceLoader();
 
+    // -------------------------------------------------------------------------
+    // Resources
+    // -------------------------------------------------------------------------
+
     @RequestMapping( method = RequestMethod.GET, produces = ContextUtils.CONTENT_TYPE_JSON )
-    public void getApps( @RequestParam( required = false ) String key, HttpServletResponse response )
+    public void getApps( @RequestParam( required = false ) String key, 
+        HttpServletResponse response )
         throws IOException
     {
         List<App> apps = new ArrayList<>();
@@ -123,24 +129,13 @@ public class AppController
         File tempFile = File.createTempFile( "IMPORT_", "_ZIP" );
         file.transferTo( tempFile );
 
-        String contextPath = ContextUtils.getContextPath( request );
-
-        switch ( appManager.installApp( tempFile, file.getOriginalFilename(), contextPath ) )
+        AppStatus status = appManager.installApp( tempFile, file.getOriginalFilename() );
+        
+        if ( !status.ok() )
         {
-        case OK:
-            break;
-        case NAMESPACE_TAKEN:
-            throw new WebMessageException(
-                WebMessageUtils.conflict( "The namespace defined in manifest.webapp is already protected." ) );
-        case INVALID_ZIP_FORMAT:
-            throw new WebMessageException(
-                WebMessageUtils.unprocessableEntity( "Zip-file could not be read." ) );
-        case INVALID_MANIFEST_JSON:
-            throw new WebMessageException(
-                WebMessageUtils.conflict( "Invalid JSON in app manifest file." ) );
-        case INSTALLATION_FAILED:
-            throw new WebMessageException(
-                WebMessageUtils.conflict( "App could not be installed on file system, check permissions." ) );
+            String message = i18nManager.getI18n().getString( status.getMessage() );
+            
+            throw new WebMessageException( WebMessageUtils.conflict( message ) );
         }
     }
 
@@ -153,7 +148,8 @@ public class AppController
     }
 
     @RequestMapping( value = "/{app}/**", method = RequestMethod.GET )
-    public void renderApp( @PathVariable( "app" ) String app, HttpServletRequest request, HttpServletResponse response )
+    public void renderApp( @PathVariable( "app" ) String app, 
+        HttpServletRequest request, HttpServletResponse response )
         throws IOException
     {
         Iterable<Resource> locations = Lists.newArrayList(
@@ -221,7 +217,7 @@ public class AppController
     @RequestMapping( value = "/{app}", method = RequestMethod.DELETE )
     @PreAuthorize( "hasRole('ALL') or hasRole('M_dhis-web-maintenance-appmanager')" )
     public void deleteApp( @PathVariable( "app" ) String app,
-        @RequestParam( value = "deleteappdata", required = false, defaultValue = "false" ) boolean deleteAppData,
+        @RequestParam( required = false ) boolean deleteAppData,
         HttpServletRequest request, HttpServletResponse response )
         throws WebMessageException
     {
@@ -282,12 +278,6 @@ public class AppController
         appManager.setAppBaseUrl( appBaseUrl );
     }
 
-    @RequestMapping( value = "/appStore", method = RequestMethod.GET, produces = "application/json" )
-    public @ResponseBody String getAppStoreUrl()
-    {
-        return restTemplate.getForObject( SettingKey.APP_STORE_INDEX_URL.getDefaultValue().toString(), String.class );
-    }
-    
     //--------------------------------------------------------------------------
     // Helpers
     //--------------------------------------------------------------------------

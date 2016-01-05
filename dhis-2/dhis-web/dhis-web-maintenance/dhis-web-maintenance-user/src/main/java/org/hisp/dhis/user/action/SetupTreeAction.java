@@ -1,7 +1,7 @@
 package org.hisp.dhis.user.action;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@ import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserCredentials;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserService;
+import org.hisp.dhis.user.UserSettingKey;
 import org.hisp.dhis.user.UserSettingService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -53,9 +54,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
-import static org.hisp.dhis.user.UserSettingService.KEY_DB_LOCALE;
-import static org.hisp.dhis.user.UserSettingService.KEY_UI_LOCALE;
 
 /**
  * @author Nguyen Hong Duc
@@ -255,9 +253,9 @@ public class SetupTreeAction
 
             attributeValues = AttributeUtils.getAttributeValueMap( user.getAttributeValues() );
 
-            currentLocale = (Locale) userSettingService.getUserSetting( KEY_UI_LOCALE, LocaleManager.DEFAULT_LOCALE, user );
+            currentLocale = (Locale) userSettingService.getUserSetting( UserSettingKey.UI_LOCALE, user );
 
-            currentLocaleDb = (Locale) userSettingService.getUserSetting( KEY_DB_LOCALE, null, user );
+            currentLocaleDb = (Locale) userSettingService.getUserSetting( UserSettingKey.DB_LOCALE, user );
         }
         else
         {

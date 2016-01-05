@@ -1,7 +1,7 @@
 package org.hisp.dhis.sms.incoming;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,20 +32,17 @@ import org.smslib.AGateway;
 import org.smslib.IInboundMessageNotification;
 import org.smslib.InboundMessage;
 import org.smslib.Message.MessageTypes;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class SMPPInboundNotification
     implements IInboundMessageNotification
-{    
+{
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
     private IncomingSmsService incomingSmsService;
-
-    public void setIncomingSmsService( IncomingSmsService incomingSmsService )
-    {
-        this.incomingSmsService = incomingSmsService;
-    }
 
     // -------------------------------------------------------------------------
     // Implementation
@@ -55,7 +52,7 @@ public class SMPPInboundNotification
     public void process( AGateway gateway, MessageTypes msgType, InboundMessage message )
     {
         IncomingSms incomingSms = incomingSmsService.convertToIncomingSms( message );
-        
+
         incomingSmsService.save( incomingSms );
     }
 }

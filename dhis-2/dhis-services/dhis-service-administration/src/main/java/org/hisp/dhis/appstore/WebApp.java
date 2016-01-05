@@ -1,7 +1,7 @@
-package org.hisp.dhis.node.presets;
+package org.hisp.dhis.appstore;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,27 +28,82 @@ package org.hisp.dhis.node.presets;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.collect.Lists;
-import org.hisp.dhis.common.PresetProvider;
-import org.springframework.stereotype.Component;
-
+import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Lars Helge Overland
  */
-@Component
-public class NameablePresetProvider implements PresetProvider
+public class WebApp
 {
-    @Override
-    public String name()
+    private String name;
+    
+    private String description;
+    
+    private String imgLarge;
+    
+    private String developer;
+    
+    private List<WebAppVersion> versions = new ArrayList<>();
+    
+    public WebApp()
     {
-        return "nameable";
     }
 
-    @Override
-    public List<String> provide()
+    @JsonProperty
+    public String getName()
     {
-        return Lists.newArrayList( "id", "name", "shortName", "description", "code", "created", "lastUpdated", "href" );
+        return name;
+    }
+
+    public void setName( String name )
+    {
+        this.name = name;
+    }
+
+    @JsonProperty
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public void setDescription( String description )
+    {
+        this.description = description;
+    }
+
+    @JsonProperty( value = "img_large" )
+    public String getImgLarge()
+    {
+        return imgLarge;
+    }
+
+    public void setImgLarge( String imgLarge )
+    {
+        this.imgLarge = imgLarge;
+    }
+
+    @JsonProperty
+    public String getDeveloper()
+    {
+        return developer;
+    }
+
+    public void setDeveloper( String developer )
+    {
+        this.developer = developer;
+    }
+
+    @JsonProperty
+    public List<WebAppVersion> getVersions()
+    {
+        return versions;
+    }
+
+    public void setVersions( List<WebAppVersion> versions )
+    {
+        this.versions = versions;
     }
 }

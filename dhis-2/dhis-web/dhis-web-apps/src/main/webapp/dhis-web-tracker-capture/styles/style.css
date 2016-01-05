@@ -7,12 +7,43 @@ html, body {
 }
 
 .not-for-screen {
-    display: none;
+    display: none !important;
 }
 
 @media print {
+    
+    body, html {
+        width: 100% !important;
+        height: auto !important;
+    }
+
     .not-for-screen {
         display: block;
+    }
+
+    ::-webkit-input-placeholder { /* WebKit browsers */
+        color: white !important;
+    }
+    :-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+        color: white !important;
+    }
+    ::-moz-placeholder { /* Mozilla Firefox 19+ */
+        color: white !important;
+    }
+    :-ms-input-placeholder { /* Internet Explorer 10+ */
+        color: white !important;
+    }
+
+    #header, #leftBar, .hideInPrint {
+        display: none !important;
+    }
+
+    span.select2-chosen.ng-binding.ng-hide {
+        display: none !important;
+    }
+    
+    .select2-arrow, .ui-select-toggle, .select2-chosen {
+        display: none !important;
     }
 }
 
@@ -196,12 +227,7 @@ textarea {
 div.ui-select-dropdown.select2-drop.select2-with-searchbox.select2-drop-active{
     min-width: 200px;
 }
-ul.select2-choices {
-    /*overflow: visible !important;*/
-}
-span.form-control-ui-select.ui-select-match {
-    padding:1px;
-}
+
 .container-heading {
     color: white;
 }
@@ -211,6 +237,10 @@ div.paging a.active
     text-decoration: none; 
     color: #000;
     cursor: default;
+}
+
+.input-pending {
+    background-color: #fffe8c !important;
 }
 
 .input-error {
@@ -226,8 +256,6 @@ div.paging a.active
     background-color: #D5CBC1;
     border-color: #aaa29a;
 }
-
-
 
 .stick {
     font-weight: bolder;
@@ -1023,12 +1051,6 @@ input.typeahead::-ms-input-placeholder {
     color: #555;
 }
 
-@media print {
-    #header, #leftBar, .hideInPrint {
-        display: none;
-    }
-}
-
 .org-unit-tree {
     margin-left: -5px;
     color: #000;
@@ -1172,7 +1194,7 @@ input, button, select, textarea {
 }
 
 .select2-container .select2-choice {
-    padding: 5px !important;
+    padding: 8px 6px !important;
     color: #555 !important;
 }
 

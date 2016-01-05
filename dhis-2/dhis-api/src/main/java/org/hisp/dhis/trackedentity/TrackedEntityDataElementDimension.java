@@ -1,7 +1,7 @@
 package org.hisp.dhis.trackedentity;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -94,11 +94,17 @@ public class TrackedEntityDataElementDimension
     {
         return dataElement != null ? dataElement.getDisplayName() : null;
     }
-    
+
     @Override
     public String toString()
     {
-        return "[Id: " + id + ", data element: " + dataElement + ", legend set: " + legendSet + ", filter: " + filter + "]";
+        return "{" +
+            "\"class\":\"" + getClass() + "\", " +
+            "\"id\":\"" + id + "\", " +
+            "\"dataElement\":" + dataElement + ", " +
+            "\"legendSet\":" + legendSet + ", " +
+            "\"filter\":\"" + filter + "\" " +
+            "}";
     }
 
     @Override

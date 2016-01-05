@@ -1,7 +1,7 @@
 package org.hisp.dhis.sms.config;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,6 @@ package org.hisp.dhis.sms.config;
  */
 public enum SMSGatewayStatus
 {
-    STOPPED,STOPPING, STARTING, STARTED, UNDEFINED
+    STOPPED, STOPPING, STARTING, STARTED, UNDEFINED
 
 }

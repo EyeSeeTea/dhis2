@@ -1,7 +1,7 @@
 package org.hisp.dhis.i18n;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,10 @@ import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.translation.Translation;
 import org.hisp.dhis.translation.TranslationService;
+import org.hisp.dhis.user.UserSettingKey;
 import org.hisp.dhis.user.UserSettingService;
+
+import com.google.common.collect.Multimaps;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -88,11 +91,12 @@ public class DefaultI18nService
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void internationalise( Object object, Locale locale )
     {
         if ( isCollection( object ) )
         {
-            internationaliseCollection( (Collection<?>) object, locale );
+            internationaliseCollection( (Collection<Object>) object, locale );
         }
         else
         {
@@ -125,30 +129,35 @@ public class DefaultI18nService
         }
     }
 
-    private void internationaliseCollection( Collection<?> objects, Locale locale )
+    private void internationaliseCollection( Collection<Object> objects, Locale locale )
     {
         if ( locale == null || objects == null || objects.size() == 0 )
         {
             return;
         }
 
-        Object peek = objects.iterator().next();
-
-        List<String> properties = getObjectPropertyNames( peek );
-
-        Collection<Translation> translations = translationService.getTranslations( getClassName( peek ), locale );
-
-        for ( Object object : objects )
+        Map<String, List<Object>> classNameObjectMap = Multimaps.asMap( Multimaps.index( objects, o -> getClassName( o ) ) );
+        
+        for ( String className : classNameObjectMap.keySet() )
         {
-            Map<String, String> translationMap = getTranslationsForObject( translations, getProperty( object, "uid" ) );
-
-            for ( String property : properties )
+            List<?> list = classNameObjectMap.get( className );
+                
+            List<String> properties = getObjectPropertyNames( list.iterator().next() );
+    
+            Collection<Translation> translations = translationService.getTranslations( className, locale );
+    
+            for ( Object object : list )
             {
-                String value = translationMap.get( property );
-
-                if ( value != null && !value.isEmpty() )
+                Map<String, String> translationMap = getTranslationsForObject( translations, getProperty( object, "uid" ) );
+    
+                for ( String property : properties )
                 {
-                    setProperty( object, "display", property, value );
+                    String value = translationMap.get( property );
+    
+                    if ( value != null && !value.isEmpty() )
+                    {
+                        setProperty( object, "display", property, value );
+                    }
                 }
             }
         }
@@ -269,7 +278,7 @@ public class DefaultI18nService
     @Override
     public Locale getCurrentLocale()
     {
-        return (Locale) userSettingService.getUserSetting( UserSettingService.KEY_DB_LOCALE );
+        return (Locale) userSettingService.getUserSetting( UserSettingKey.DB_LOCALE );
     }
 
     @Override

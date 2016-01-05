@@ -1,7 +1,7 @@
 package org.hisp.dhis.user;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -678,26 +678,29 @@ public class User
     @Override
     public String toString()
     {
-        return "User{" +
-            "surname='" + surname + '\'' +
-            ", firstName='" + firstName + '\'' +
-            ", email='" + email + '\'' +
-            ", phoneNumber='" + phoneNumber + '\'' +
-            ", jobTitle='" + jobTitle + '\'' +
-            ", introduction='" + introduction + '\'' +
-            ", gender='" + gender + '\'' +
-            ", birthday=" + birthday +
-            ", nationality='" + nationality + '\'' +
-            ", employer='" + employer + '\'' +
-            ", education='" + education + '\'' +
-            ", interests='" + interests + '\'' +
-            ", languages='" + languages + '\'' +
-            ", lastCheckedInterpretations=" + lastCheckedInterpretations +
-            ", userCredentials=" + userCredentials +
-            ", groups=" + groups +
-            ", organisationUnits=" + organisationUnits +
-            ", dataViewOrganisationUnits=" + dataViewOrganisationUnits +
-            ", apps=" + apps +
-            '}';
+        return "{" +
+            "\"id\":\"" + id + "\", " +
+            "\"uid\":\"" + uid + "\", " +
+            "\"created\":\"" + created + "\", " +
+            "\"lastUpdated\":\"" + lastUpdated + "\", " +
+            "\"surname\":\"" + surname + "\", " +
+            "\"firstName\":\"" + firstName + "\", " +
+            "\"email\":\"" + email + "\", " +
+            "\"phoneNumber\":\"" + phoneNumber + "\", " +
+            "\"jobTitle\":\"" + jobTitle + "\", " +
+            "\"introduction\":\"" + introduction + "\", " +
+            "\"gender\":\"" + gender + "\", " +
+            "\"birthday\":\"" + birthday + "\", " +
+            "\"nationality\":\"" + nationality + "\", " +
+            "\"employer\":\"" + employer + "\", " +
+            "\"education\":\"" + education + "\", " +
+            "\"interests\":\"" + interests + "\", " +
+            "\"languages\":\"" + languages + "\", " +
+            "\"lastCheckedInterpretations\":\"" + lastCheckedInterpretations + "\", " +
+            "\"userCredentials\":\"" + userCredentials + "\", " +
+            "\"groups\":\"" + groups + "\", " +
+            "\"organisationUnits\":\"" + organisationUnits + "\", " +
+            "\"dataViewOrganisationUnits\":\"" + dataViewOrganisationUnits + "\" " +
+            "}";
     }
 }

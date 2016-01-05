@@ -1,7 +1,7 @@
 package org.hisp.dhis.sms.hibernate;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -85,9 +85,9 @@ public class HibernateOutboundSmsStore
     public List<OutboundSms> get( OutboundSmsStatus status )
     {
         Session session = sessionFactory.getCurrentSession();
-        
+
         Criteria criteria = session.createCriteria( OutboundSms.class ).addOrder( Order.desc( "date" ) );
-        
+
         if ( status != null )
         {
             criteria.add( Restrictions.eq( "status", status ) );
@@ -112,15 +112,15 @@ public class HibernateOutboundSmsStore
     public List<OutboundSms> get( OutboundSmsStatus status, Integer min, Integer max )
     {
         Session session = sessionFactory.getCurrentSession();
-        
+
         Criteria criteria = session.createCriteria( OutboundSms.class ).addOrder( Order.desc( "date" ) );
-        
+
         if ( status != null )
         {
             criteria.add( Restrictions.eq( "status", status ) );
         }
-        
-        if ( min != null && max != null)
+
+        if ( min != null && max != null )
         {
             criteria.setFirstResult( min ).setMaxResults( max );
         }
@@ -132,10 +132,10 @@ public class HibernateOutboundSmsStore
     public List<OutboundSms> getAllOutboundSms( Integer min, Integer max )
     {
         Session session = sessionFactory.getCurrentSession();
-        
+
         Criteria criteria = session.createCriteria( OutboundSms.class ).addOrder( Order.desc( "date" ) );
-        
-        if ( min != null && max != null)
+
+        if ( min != null && max != null )
         {
             criteria.setFirstResult( min ).setMaxResults( max );
         }

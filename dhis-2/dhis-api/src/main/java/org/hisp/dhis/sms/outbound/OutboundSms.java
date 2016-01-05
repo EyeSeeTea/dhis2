@@ -1,7 +1,7 @@
 package org.hisp.dhis.sms.outbound;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,13 +35,13 @@ import java.util.Set;
 
 import org.hisp.dhis.common.BaseIdentifiableObject;
 
-public class OutboundSms 
+public class OutboundSms
     extends BaseIdentifiableObject
 {
     public static final String DHIS_SYSTEM_SENDER = "DHIS-System";
 
     private String sender;
-    
+
     private Set<String> recipients;
 
     private Date date;

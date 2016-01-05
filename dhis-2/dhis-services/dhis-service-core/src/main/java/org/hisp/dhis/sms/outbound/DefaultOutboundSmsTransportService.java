@@ -1,7 +1,7 @@
 package org.hisp.dhis.sms.outbound;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -102,7 +102,7 @@ public class DefaultOutboundSmsTransportService
     {
         this.smsPublisher = smsPublisher;
     }
-
+    
     // -------------------------------------------------------------------------
     // OutboundSmsTransportService implementation
     // -------------------------------------------------------------------------
@@ -472,7 +472,7 @@ public class DefaultOutboundSmsTransportService
             if ( recipients.size() > 1 )
             {
                 removeGroup( recipient );
-            }            
+            }
         }
 
         if ( outboundMessage.getMessageStatus() == MessageStatuses.SENT )

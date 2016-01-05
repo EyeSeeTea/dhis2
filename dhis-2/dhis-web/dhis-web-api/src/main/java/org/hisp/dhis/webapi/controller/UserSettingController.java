@@ -1,7 +1,7 @@
 package org.hisp.dhis.webapi.controller;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,10 +28,19 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.dxf2.render.RenderService;
+
 import org.hisp.dhis.dxf2.webmessage.WebMessageException;
-import org.hisp.dhis.system.util.LocaleUtils;
+import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserCredentials;
+import org.hisp.dhis.user.UserService;
+import org.hisp.dhis.user.UserSetting;
+import org.hisp.dhis.user.UserSettingKey;
 import org.hisp.dhis.user.UserSettingService;
+import org.hisp.dhis.util.ObjectUtils;
 import org.hisp.dhis.webapi.service.WebMessageService;
+import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.hisp.dhis.webapi.utils.WebMessageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -44,11 +53,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Locale;
-
-import static org.hisp.dhis.user.UserSettingService.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author Lars Helge Overland
@@ -59,13 +70,26 @@ public class UserSettingController
 {
     @Autowired
     private UserSettingService userSettingService;
+    
+    @Autowired
+    private UserService userService;
+    
+    @Autowired
+    private CurrentUserService currentUserService;
 
     @Autowired
     private WebMessageService webMessageService;
+    
+    @Autowired
+    private RenderService renderService;
+
+    // -------------------------------------------------------------------------
+    // Resources
+    // -------------------------------------------------------------------------
 
     @RequestMapping( value = "/{key}", method = RequestMethod.POST )
     public void setUserSetting(
-        @PathVariable String key,
+        @PathVariable( value = "key" ) String key,
         @RequestParam( value = "user", required = false ) String username,
         @RequestParam( value = "value", required = false ) String value,
         @RequestBody( required = false ) String valuePayload,
@@ -81,43 +105,66 @@ public class UserSettingController
             throw new WebMessageException( WebMessageUtils.conflict( "Value must be specified as query param or as payload" ) );
         }
 
-        value = value != null ? value : valuePayload;
+        value = ObjectUtils.firstNonNull( value, valuePayload );
 
+        Optional<UserSettingKey> keyEnum = UserSettingKey.getByName( key );
+        
+        if ( !keyEnum.isPresent() )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "Key is not supported: " + key ) );
+        }
+        
+        Serializable valueObject = UserSettingKey.getAsRealClass( key, value );
+        
         if ( username == null )
         {
-            userSettingService.saveUserSetting( key, valueToSet( key, value ) );
-
+            userSettingService.saveUserSetting( keyEnum.get(), valueObject );
         }
         else
         {
-            userSettingService.saveUserSetting( key, valueToSet( key, value ), username );
+            userSettingService.saveUserSetting( keyEnum.get(), valueObject, username );
         }
 
         webMessageService.send( WebMessageUtils.ok( "User setting saved" ), response, request );
     }
 
     @RequestMapping( value = "/{key}", method = RequestMethod.GET )
-    public void getUserSetting( @PathVariable( "key" ) String key,
+    public void getUserSetting( 
+        @PathVariable( "key" ) String key,
         @RequestParam( value = "user", required = false ) String username,
         HttpServletRequest request, HttpServletResponse response ) throws IOException, WebMessageException
     {
-        Serializable value;
-
-        if ( username == null )
+        Optional<UserSettingKey> keyEnum = UserSettingKey.getByName( key );
+        
+        if ( !keyEnum.isPresent() )
         {
-            value = userSettingService.getUserSetting( key );
+            throw new WebMessageException( WebMessageUtils.conflict( "Key is not supported: " + key ) );
         }
-        else
+        
+        User user = null;
+        
+        if ( username != null )
         {
-            value = userSettingService.getUserSetting( key, username );
+            UserCredentials credentials = userService.getUserCredentialsByUsername( username );
+            
+            if ( credentials != null )
+            {
+                user = credentials.getUser();
+            }
+            else
+            {
+                throw new WebMessageException( WebMessageUtils.conflict( "User does not exist: " + username ) );
+            }
         }
+        
+        Serializable value = userSettingService.getUserSetting( keyEnum.get(), user );
 
         if ( value == null )
         {
-            throw new WebMessageException( WebMessageUtils.notFound( "User setting not found." ) );
+            throw new WebMessageException( WebMessageUtils.notFound( "User setting not found for key: " + key ) );
         }
 
-        String stringVal = getStringValue( key, value );
+        String stringVal = String.valueOf( value );
         
         String contentType = null;
 
@@ -133,34 +180,50 @@ public class UserSettingController
         response.setContentType( contentType );
         response.getWriter().println( stringVal );
     }
+    
+    @RequestMapping( method = RequestMethod.GET, produces = ContextUtils.CONTENT_TYPE_JSON )
+    public void getUserSettingsByUser( @RequestParam( required = false ) String user, 
+        HttpServletRequest request, HttpServletResponse response )
+            throws WebMessageException, IOException
+    {
+        UserCredentials credentials = userService.getUserCredentialsByUsername( user );
 
+        User us = credentials != null ? credentials.getUser() : null;
+        
+        if ( us == null )
+        {
+            us = currentUserService.getCurrentUser();
+        }
+        
+        List<UserSetting> settings = userSettingService.getUserSettings( us );
+        
+        Map<String, Serializable> map = asMap( settings );
+        
+        renderService.toJson( response.getOutputStream(), map );
+    }
+    
     @RequestMapping( value = "/{key}", method = RequestMethod.DELETE )
     public void removeSystemSetting( @PathVariable( "key" ) String key )
+        throws WebMessageException
     {
-        userSettingService.deleteUserSetting( key );
+        Optional<UserSettingKey> keyEnum = UserSettingKey.getByName( key );
+        
+        if ( !keyEnum.isPresent() )
+        {
+            throw new WebMessageException( WebMessageUtils.conflict( "Key is not supported: " + key ) );
+        }
+        
+        userSettingService.deleteUserSetting( keyEnum.get() );
     }
 
-    private Serializable valueToSet( String key, String value )
-    {
-        if ( KEY_UI_LOCALE.equals( key ) || KEY_DB_LOCALE.equals( key ) )
-        {
-            return LocaleUtils.getLocale( value );
-        }
-        else
-        {
-            return value;
-        }
-    }
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
 
-    private String getStringValue( String key, Serializable value )
+    private Map<String, Serializable> asMap( List<UserSetting> settings )
     {
-        if ( KEY_UI_LOCALE.equals( key ) || KEY_DB_LOCALE.equals( key ) )
-        {
-            return ((Locale) value).getLanguage();
-        }
-        else
-        {
-            return String.valueOf( value );
-        }
+        return settings.stream().
+            filter( s -> s.getName() != null && s.getValue() != null ).
+            collect( Collectors.toMap( UserSetting::getName, UserSetting::getValue ) );
     }
 }

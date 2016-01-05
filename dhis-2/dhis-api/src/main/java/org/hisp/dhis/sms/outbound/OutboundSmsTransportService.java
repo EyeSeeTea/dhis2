@@ -1,7 +1,7 @@
 package org.hisp.dhis.sms.outbound;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,9 +39,9 @@ import org.hisp.dhis.sms.config.SmsConfiguration;
  * Marker interface for {@code OutboundSmsService outbound sms services}
  * providing actual SMS sending.
  */
-public interface OutboundSmsTransportService 
+public interface OutboundSmsTransportService
     extends SmsConfigurable
-{   
+{
     Map<String, String> getGatewayMap();
 
     void stopService();
@@ -56,9 +56,9 @@ public interface OutboundSmsTransportService
     String getMessageStatus();
 
     String getDefaultGateway();
-    
+
     SMSServiceStatus getServiceStatusEnum();
-    
+
     SMSGatewayStatus getGatewayStatus();
 
     boolean isEnabled();

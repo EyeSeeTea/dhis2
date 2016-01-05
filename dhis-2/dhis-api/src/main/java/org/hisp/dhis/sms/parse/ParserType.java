@@ -1,7 +1,7 @@
 package org.hisp.dhis.sms.parse;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,11 +30,5 @@ package org.hisp.dhis.sms.parse;
 
 public enum ParserType
 {
-    KEY_VALUE_PARSER,
-    J2ME_PARSER,
-    ALERT_PARSER,
-    UNREGISTERED_PARSER,
-    ANONYMOUS_PROGRAM_PARSER,
-    TRACKED_ENTITY_REGISTRATION_PARSER,
-    PROGRAM_STAGE_DATAENTRY_PARSER
+    KEY_VALUE_PARSER, J2ME_PARSER, ALERT_PARSER, UNREGISTERED_PARSER, ANONYMOUS_PROGRAM_PARSER, TRACKED_ENTITY_REGISTRATION_PARSER, PROGRAM_STAGE_DATAENTRY_PARSER
 }

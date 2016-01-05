@@ -1,7 +1,7 @@
 package org.hisp.dhis.sms.config;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@ public class BulkSmsGatewayConfig
     private String username;
 
     private String password;
-    
+
     private String region;
 
     public String getUsername()
@@ -58,7 +58,7 @@ public class BulkSmsGatewayConfig
     {
         this.password = password;
     }
-    
+
     public String getRegion()
     {
         return region;

@@ -1,7 +1,7 @@
 package org.hisp.dhis.appmanager;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,5 +30,28 @@ package org.hisp.dhis.appmanager;
 
 public enum AppStatus
 {
-    OK, NAMESPACE_TAKEN, INVALID_ZIP_FORMAT, INVALID_MANIFEST_JSON, INSTALLATION_FAILED
+    OK( "ok" ), 
+    NAMESPACE_TAKEN( "namespace_defined_in_manifest_is_in_use" ), 
+    INVALID_ZIP_FORMAT( "zip_file_could_not_be_read" ), 
+    INVALID_MANIFEST_JSON( "invalid_json_in_app_manifest_file" ), 
+    INSTALLATION_FAILED( "app_could_not_be_installed_on_file_system" ),
+    NOT_FOUND( "app_could_not_be_found" ),
+    MISSING_SYSTEM_BASE_URL( "system_base_url_is_not_defined" );
+    
+    private String message;
+    
+    AppStatus( String message )
+    {
+        this.message = message;
+    }
+
+    public boolean ok()
+    {
+        return this == OK;
+    }
+    
+    public String getMessage()
+    {
+        return message;
+    }
 }

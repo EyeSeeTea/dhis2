@@ -1,7 +1,7 @@
 package org.hisp.dhis.expression;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@ package org.hisp.dhis.expression;
 */
 public enum ExpressionValidationOutcome
 {
-    VALID( "expression_is_empty" ), 
-    EXPRESSION_IS_EMPTY( "data_element_does_not_exist"),
+    VALID( "valid" ), 
+    EXPRESSION_IS_EMPTY( "expression_is_empty"),
     DIMENSIONAL_ITEM_OBJECT_DOES_NOT_EXIST( "dimensional_item_object_does_not_exist" ),
     CONSTANT_DOES_NOT_EXIST( "constant_does_not_exist"),
     ORG_UNIT_GROUP_DOES_NOT_EXIST( "org_unit_group_does_not_exist"),

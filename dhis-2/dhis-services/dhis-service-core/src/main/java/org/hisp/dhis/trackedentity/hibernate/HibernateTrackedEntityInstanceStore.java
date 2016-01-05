@@ -1,7 +1,7 @@
 package org.hisp.dhis.trackedentity.hibernate;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,10 +55,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getIdentifiers;
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
@@ -97,6 +95,7 @@ public class HibernateTrackedEntityInstanceStore
     public int countTrackedEntityInstances( TrackedEntityInstanceQueryParams params )
     {
         String hql = buildTrackedEntityInstanceHql( params );
+        
         Query query = getQuery( hql );
 
         return ((Number) query.iterate().next()).intValue();
@@ -107,6 +106,7 @@ public class HibernateTrackedEntityInstanceStore
     public List<TrackedEntityInstance> getTrackedEntityInstances( TrackedEntityInstanceQueryParams params )
     {
         String hql = buildTrackedEntityInstanceHql( params );
+        
         Query query = getQuery( hql );
 
         if ( params.isPaging() )
@@ -130,9 +130,12 @@ public class HibernateTrackedEntityInstanceStore
 
         if ( params.hasOrganisationUnits() )
         {
+            params.handleOrganisationUnits();
+            
             if ( params.isOrganisationUnitMode( OrganisationUnitSelectionMode.DESCENDANTS ) )
             {
                 String ouClause = "(";
+                
                 SqlHelper orHlp = new SqlHelper( true );
 
                 for ( OrganisationUnit organisationUnit : params.getOrganisationUnits() )
@@ -159,6 +162,7 @@ public class HibernateTrackedEntityInstanceStore
                     String filter = queryFilter.getSqlFilter( StringUtils.lowerCase( queryFilter.getFilter() ) );
 
                     hql += hlp.whereAnd() + " exists (from TrackedEntityAttributeValue teav where teav.entityInstance=tei";
+                    
                     hql += " and teav.attribute.uid='" + queryItem.getItemId() + "'";
 
                     if ( queryItem.isNumeric() )
@@ -177,6 +181,7 @@ public class HibernateTrackedEntityInstanceStore
         if ( params.hasProgram() )
         {
             hql += hlp.whereAnd() + "exists (from ProgramInstance pi where pi.entityInstance=tei";
+            
             hql += " and pi.program.uid = '" + params.getProgram().getUid() + "'";
 
             if ( params.hasProgramStatus() )
@@ -214,9 +219,14 @@ public class HibernateTrackedEntityInstanceStore
         // Select clause
         // ---------------------------------------------------------------------
 
-        String sql = "select tei.uid as " + TRACKED_ENTITY_INSTANCE_ID + ", " + "tei.created as " + CREATED_ID + ", "
-            + "tei.lastupdated as " + LAST_UPDATED_ID + ", " + "ou.uid as " + ORG_UNIT_ID + ", " + "te.uid as "
-            + TRACKED_ENTITY_ID + ", " + "tei.inactive as " + INACTIVE_ID + ", ";
+        String sql = 
+            "select tei.uid as " + TRACKED_ENTITY_INSTANCE_ID + ", " + 
+            "tei.created as " + CREATED_ID + ", " + 
+            "tei.lastupdated as " + LAST_UPDATED_ID + ", " + 
+            "ou.uid as " + ORG_UNIT_ID + ", " +
+            "ou.name as " + ORG_UNIT_NAME + ", " +
+            "te.uid as " + TRACKED_ENTITY_ID + ", " + 
+            "tei.inactive as " + INACTIVE_ID + ", ";
 
         for ( QueryItem item : params.getAttributes() )
         {
@@ -260,6 +270,7 @@ public class HibernateTrackedEntityInstanceStore
             map.put( CREATED_ID, rowSet.getString( CREATED_ID ) );
             map.put( LAST_UPDATED_ID, rowSet.getString( LAST_UPDATED_ID ) );
             map.put( ORG_UNIT_ID, rowSet.getString( ORG_UNIT_ID ) );
+            map.put( ORG_UNIT_NAME, rowSet.getString( ORG_UNIT_NAME ) );
             map.put( TRACKED_ENTITY_ID, rowSet.getString( TRACKED_ENTITY_ID ) );
             map.put( INACTIVE_ID, rowSet.getString( INACTIVE_ID ) );
 
@@ -346,6 +357,8 @@ public class HibernateTrackedEntityInstanceStore
             sql += hlp.whereAnd() + " tei.trackedentityid = " + params.getTrackedEntity().getId() + " ";
         }
 
+        params.handleOrganisationUnits();
+        
         if ( params.isOrganisationUnitMode( OrganisationUnitSelectionMode.ALL ) )
         {
             // No restriction
@@ -358,19 +371,6 @@ public class HibernateTrackedEntityInstanceStore
             }
 
             sql = removeLastOr( sql );
-        }
-        else if ( params.isOrganisationUnitMode( OrganisationUnitSelectionMode.CHILDREN ) )
-        {
-            Set<OrganisationUnit> orgUnits = new HashSet<>();
-
-            for ( OrganisationUnit orgUnit : params.getOrganisationUnits() )
-            {
-                orgUnits.add( orgUnit );
-                orgUnits.addAll( orgUnit.getChildren() );
-            }
-
-            sql += hlp.whereAnd() + " tei.organisationunitid in ("
-                + getCommaDelimitedString( getIdentifiers( orgUnits ) ) + ") ";
         }
         else // SELECTED (default)        
         {

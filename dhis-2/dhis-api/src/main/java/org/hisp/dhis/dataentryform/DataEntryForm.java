@@ -1,7 +1,7 @@
 package org.hisp.dhis.dataentryform;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -134,12 +134,6 @@ public class DataEntryForm
             && Objects.equals( this.style, other.style )
             && Objects.equals( this.htmlCode, other.htmlCode )
             && Objects.equals( this.format, other.format );
-    }
-
-    @Override
-    public String toString()
-    {
-        return "[" + name + "]";
     }
 
     // -------------------------------------------------------------------------

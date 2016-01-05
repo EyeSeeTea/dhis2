@@ -1,7 +1,7 @@
 package org.hisp.dhis.dxf2.importsummary;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.DxfNamespaces;
 
-@JacksonXmlRootElement(localName = "count", namespace = DxfNamespaces.DXF_2_0)
+@JacksonXmlRootElement( localName = "count", namespace = DxfNamespaces.DXF_2_0 )
 public class ImportCount
 {
     private int imported;
@@ -57,7 +57,7 @@ public class ImportCount
     }
 
     @JsonProperty
-    @JacksonXmlProperty(isAttribute = true)
+    @JacksonXmlProperty( isAttribute = true )
     public int getImported()
     {
         return imported;
@@ -69,7 +69,7 @@ public class ImportCount
     }
 
     @JsonProperty
-    @JacksonXmlProperty(isAttribute = true)
+    @JacksonXmlProperty( isAttribute = true )
     public int getUpdated()
     {
         return updated;
@@ -81,7 +81,7 @@ public class ImportCount
     }
 
     @JsonProperty
-    @JacksonXmlProperty(isAttribute = true)
+    @JacksonXmlProperty( isAttribute = true )
     public int getIgnored()
     {
         return ignored;
@@ -93,7 +93,7 @@ public class ImportCount
     }
 
     @JsonProperty
-    @JacksonXmlProperty(isAttribute = true)
+    @JacksonXmlProperty( isAttribute = true )
     public int getDeleted()
     {
         return deleted;

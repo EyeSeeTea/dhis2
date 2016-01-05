@@ -1,7 +1,7 @@
 package org.hisp.dhis.trackedentity;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -121,30 +121,8 @@ public class DefaultTrackedEntityInstanceService
         decideAccess( params );
         validate( params );
 
-        // ---------------------------------------------------------------------
-        // Verify params
-        // ---------------------------------------------------------------------
-
-        User user = currentUserService.getCurrentUser();
-
-        if ( user != null && params.isOrganisationUnitMode( OrganisationUnitSelectionMode.ACCESSIBLE ) )
-        {
-            params.setOrganisationUnits( user.getDataViewOrganisationUnitsWithFallback() );
-            params.setOrganisationUnitMode( OrganisationUnitSelectionMode.DESCENDANTS );
-        }
-        else if ( params.isOrganisationUnitMode( CHILDREN ) )
-        {
-            Set<OrganisationUnit> organisationUnits = new HashSet<>();
-            organisationUnits.addAll( params.getOrganisationUnits() );
-
-            for ( OrganisationUnit organisationUnit : params.getOrganisationUnits() )
-            {
-                organisationUnits.addAll( organisationUnit.getChildren() );
-            }
-
-            params.setOrganisationUnits( organisationUnits );
-        }
-
+        params.setUser( currentUserService.getCurrentUser() );
+        
         if ( !params.isPaging() && !params.isSkipPaging() )
         {
             params.setDefaultPaging();
@@ -160,23 +138,8 @@ public class DefaultTrackedEntityInstanceService
         decideAccess( params );
         validate( params );
 
-        // ---------------------------------------------------------------------
-        // Verify params
-        // ---------------------------------------------------------------------
-
-        User user = currentUserService.getCurrentUser();
-
-        if ( user != null && params.isOrganisationUnitMode( OrganisationUnitSelectionMode.ACCESSIBLE ) )
-        {
-            params.setOrganisationUnits( user.getDataViewOrganisationUnitsWithFallback() );
-            params.setOrganisationUnitMode( OrganisationUnitSelectionMode.DESCENDANTS );
-        }
-
-        if ( !params.isPaging() && !params.isSkipPaging() )
-        {
-            params.setDefaultPaging();
-        }
-
+        params.setUser( currentUserService.getCurrentUser() );
+        
         // ---------------------------------------------------------------------
         // If params of type query and no attributes or filters defined, use
         // attributes from program if program is defined, if not, use 
@@ -213,7 +176,8 @@ public class DefaultTrackedEntityInstanceService
         grid.addHeader( new GridHeader( TRACKED_ENTITY_INSTANCE_ID, "Instance" ) );
         grid.addHeader( new GridHeader( CREATED_ID, "Created" ) );
         grid.addHeader( new GridHeader( LAST_UPDATED_ID, "Last updated" ) );
-        grid.addHeader( new GridHeader( ORG_UNIT_ID, "Org unit" ) );
+        grid.addHeader( new GridHeader( ORG_UNIT_ID, "Organisation unit" ) );
+        grid.addHeader( new GridHeader( ORG_UNIT_NAME, "Organisation unit name" ) );
         grid.addHeader( new GridHeader( TRACKED_ENTITY_ID, "Tracked entity" ) );
         grid.addHeader( new GridHeader( INACTIVE_ID, "Inactive" ) );
 
@@ -237,6 +201,7 @@ public class DefaultTrackedEntityInstanceService
             grid.addValue( entity.get( CREATED_ID ) );
             grid.addValue( entity.get( LAST_UPDATED_ID ) );
             grid.addValue( entity.get( ORG_UNIT_ID ) );
+            grid.addValue( entity.get( ORG_UNIT_NAME ) );
             grid.addValue( entity.get( TRACKED_ENTITY_ID ) );
             grid.addValue( entity.get( INACTIVE_ID ) );
 
@@ -304,7 +269,7 @@ public class DefaultTrackedEntityInstanceService
 
         User user = currentUserService.getCurrentUser();
 
-        if ( !params.hasOrganisationUnits() && !(params.isOrganisationUnitMode( ALL ) || params.isOrganisationUnitMode( ACCESSIBLE )) )
+        if ( !params.hasOrganisationUnits() && !( params.isOrganisationUnitMode( ALL ) || params.isOrganisationUnitMode( ACCESSIBLE ) ) )
         {
             violation = "At least one organisation unit must be specified";
         }

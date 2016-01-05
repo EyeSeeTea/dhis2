@@ -10,44 +10,10 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
     var store = new dhis2.storage.Store({
         name: 'dhis2ec',
         adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
-        objectStores: ['programs', 'programStages', 'categories', 'geoJsons', 'optionSets', 'events', 'programValidations', 'programRules', 'programRuleVariables', 'programIndicators', 'ouLevels', 'constants']
+        objectStores: ['programs', 'optionSets', 'events', 'programValidations', 'programRules', 'programRuleVariables', 'programIndicators', 'ouLevels', 'constants']
     });
     return{
         currentStore: store
-    };
-})
-
-/* Service for uploading/downloading file */
-.service('FileService', function ($http) {
-
-    return {
-        get: function (uid) {
-            var promise = $http.get('../api/fileResources/' + uid).then(function (response) {
-                return response.data;
-            });
-            return promise;
-        },
-        delete: function (uid) {
-            var promise = $http.get('../api/fileResources/' + uid).then(function (response) {
-                return response.data;
-            });
-            return promise;
-        },
-        download: function (fileName) {
-            var promise = $http.get(fileName).then(function (response) {
-                return response.data;
-            });
-            return promise;
-        },
-        upload: function(file){
-            var formData = new FormData();
-            formData.append('file', file);
-            var headers = {transformRequest: angular.identity, headers: {'Content-Type': undefined}};
-            var promise = $http.post('../api/fileResources', formData, headers).then(function(response){
-                return response.data;
-            });
-            return promise;
-        }
     };
 })
 
@@ -603,6 +569,9 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
             return e;
         },
         refreshList: function(eventList, currentEvent){
+            if(!eventList || !eventList.length){
+                return;
+            }
             var continueLoop = true;
             for(var i=0; i< eventList.length && continueLoop; i++){
                 if(eventList[i].event === currentEvent.event ){

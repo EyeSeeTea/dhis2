@@ -1,7 +1,7 @@
 package org.hisp.dhis.sms.config;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,14 +36,14 @@ public interface SmsConfigurationManager
     SmsConfiguration getSmsConfiguration();
 
     void updateSmsConfiguration( SmsConfiguration config );
-    
+
     SmsGatewayConfig checkInstanceOfGateway( Class<?> clazz );
-    
-    boolean setDefaultSMSGateway(String gatewayId);
-    
-    boolean gatewayExists (String gatewayId);
-    
-    boolean removeSMSGatewayById(String gatewayId);
-    
+
+    boolean setDefaultSMSGateway( String gatewayId );
+
+    boolean gatewayExists( String gatewayId );
+
+    boolean removeSMSGatewayById( String gatewayId );
+
     String addSMSGateway();
 }

@@ -1,7 +1,7 @@
-package org.hisp.dhis.node.presets;
+package org.hisp.dhis.query;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,27 +28,10 @@ package org.hisp.dhis.node.presets;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.collect.Lists;
-import org.hisp.dhis.common.PresetProvider;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
-
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@Component
-public class AllPresetProvider implements PresetProvider
+public enum Direction
 {
-    @Override
-    public String name()
-    {
-        return "all";
-    }
-
-    @Override
-    public List<String> provide()
-    {
-        return Lists.newArrayList( "*" );
-    }
+    ASCENDING, DESCENDING
 }

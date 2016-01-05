@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.common;
+package org.hisp.dhis.commons.collection;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,41 +28,50 @@ package org.hisp.dhis.dxf2.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.IdentifiableObject;
+import java.util.HashSet;
+import java.util.Set;
 
-/**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
- */
-public class ImportUtils
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
+public class CachingMapTest
 {
-    /**
-     * @param object Object to get display name for
-     * @return A usable display name
-     */
-    public static String getDisplayName( Object object )
+    @Test
+    public void testLoad()
     {
-        if ( object == null )
-        {
-            return "[ object is null ]";
-        }
-        else if ( IdentifiableObject.class.isInstance( object ) )
-        {
-            IdentifiableObject identifiableObject = (IdentifiableObject) object;
+        Set<Animal> animals = new HashSet<>();
+        animals.add( new Animal( 1, "horse" ) );
+        animals.add( new Animal( 2, "dog" ) );
+        animals.add( new Animal( 3, "cat" ) );
 
-            if ( identifiableObject.getName() != null && identifiableObject.getName().length() > 0 )
-            {
-                return identifiableObject.getName();
-            }
-            else if ( identifiableObject.getUid() != null && identifiableObject.getUid().length() > 0 )
-            {
-                return identifiableObject.getUid();
-            }
-            else if ( identifiableObject.getCode() != null && identifiableObject.getCode().length() > 0 )
-            {
-                return identifiableObject.getCode();
-            }
+        CachingMap<Integer, Animal> cache = new CachingMap<Integer, Animal>().load( animals, a -> a.getId() );
+        
+        assertEquals( "horse", cache.get( 1 ).getName() );
+        assertEquals( "dog", cache.get( 2 ).getName() );
+        assertEquals( "cat", cache.get( 3 ).getName() );        
+        assertFalse( cache.containsKey( "deer" ) );
+    }
+    
+    private class Animal
+    {
+        private int id;
+        private String name;
+        
+        public Animal( int id, String name )
+        {
+            this.id = id;
+            this.name = name;
+        }
+        
+        public int getId()
+        {
+            return id;
         }
 
-        return object.getClass().getName();
+        public String getName()
+        {
+            return name;
+        }
     }
 }

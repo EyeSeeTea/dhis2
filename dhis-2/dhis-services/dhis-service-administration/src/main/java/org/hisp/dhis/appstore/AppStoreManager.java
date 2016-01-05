@@ -1,7 +1,7 @@
-package org.hisp.dhis.node.presets;
+package org.hisp.dhis.appstore;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,27 +28,17 @@ package org.hisp.dhis.node.presets;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.collect.Lists;
-import org.hisp.dhis.common.PresetProvider;
-import org.springframework.stereotype.Component;
+import java.io.IOException;
 
-import java.util.List;
+import org.hisp.dhis.appmanager.AppStatus;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Lars Helge Overland
  */
-@Component
-public class IdentifiablePresetProvider implements PresetProvider
+public interface AppStoreManager
 {
-    @Override
-    public String name()
-    {
-        return "identifiable";
-    }
-
-    @Override
-    public List<String> provide()
-    {
-        return Lists.newArrayList( "id", "name", "code", "created", "lastUpdated", "href" );
-    }
+    AppStore getAppStore()
+        throws IOException;
+    
+    AppStatus installAppFromAppStore( String id );
 }

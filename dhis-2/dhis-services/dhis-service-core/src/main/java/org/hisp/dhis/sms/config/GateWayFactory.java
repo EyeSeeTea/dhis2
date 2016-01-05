@@ -1,7 +1,7 @@
 package org.hisp.dhis.sms.config;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -147,8 +147,8 @@ public class GateWayFactory
 
     public AGateway createSimplisticHttpGetGateway( GenericHttpGatewayConfig c )
     {
-        SimplisticHttpGetGateWay gateway = new SimplisticHttpGetGateWay( 
-            c.getName(), c.getUrlTemplate(), c.getParameters() );
+        SimplisticHttpGetGateWay gateway = new SimplisticHttpGetGateWay( c.getName(), c.getUrlTemplate(),
+            c.getParameters() );
         gateway.setOutbound( true );
         gateway.setInbound( false );
         return gateway;

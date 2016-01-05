@@ -1,7 +1,7 @@
-package org.hisp.dhis.sms.command.code;
+package org.hisp.dhis.appstore;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,98 +28,102 @@ package org.hisp.dhis.sms.command.code;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
+import org.apache.commons.io.FilenameUtils;
 
-public class SMSCode
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+/**
+ * @author Lars Helge Overland
+ */
+public class WebAppVersion
 {
-    private int id;
-
-    private String code;
-
-    private DataElement dataElement;
+    private String id;
     
-    private TrackedEntityAttribute trackedEntityAttribute;
-
-    private int optionId;
+    private String version;
     
-    private String formula;
-
-    public SMSCode( String code, DataElement dataElement, int optionId )
+    private String minPlatformVersion;
+    
+    private String maxPlatformVersion;
+    
+    private String downloadUrl;
+    
+    private String demoUrl;
+    
+    public WebAppVersion()
     {
-        this.code = code;
-        this.dataElement = dataElement;
-        this.optionId = optionId;
-    }
-    
-    public SMSCode( String code, TrackedEntityAttribute trackedEntityAttribute)
-    {
-        this.code = code;
-        this.trackedEntityAttribute = trackedEntityAttribute;
     }
 
-    public SMSCode()
+    @JsonIgnore
+    public String getFilename()
     {
-
+        return FilenameUtils.getName( downloadUrl );
     }
-
-    public int getId()
+    
+    @JsonProperty
+    public String getId()
     {
         return id;
     }
 
-    public void setId( int id )
+    public void setId( String id )
     {
         this.id = id;
     }
 
-    public String getCode()
+    @JsonProperty
+    public String getVersion()
     {
-        return code;
+        return version;
     }
 
-    public void setCode( String code )
+    public void setVersion( String version )
     {
-        this.code = code;
+        this.version = version;
     }
 
-    public DataElement getDataElement()
+    @JsonProperty( value = "min_platform_version" )
+    public String getMinPlatformVersion()
     {
-        return dataElement;
+        return minPlatformVersion;
     }
 
-    public void setDataElement( DataElement dataElement )
+    public void setMinPlatformVersion( String minPlatformVersion )
     {
-        this.dataElement = dataElement;
+        this.minPlatformVersion = minPlatformVersion;
     }
 
-    public int getOptionId()
+    @JsonProperty( value = "max_platform_version" )
+    public String getMaxPlatformVersion()
     {
-        return optionId;
+        return maxPlatformVersion;
     }
 
-    public void setOptionId( int optionId )
+    public void setMaxPlatformVersion( String maxPlatformVersion )
     {
-        this.optionId = optionId;
+        this.maxPlatformVersion = maxPlatformVersion;
     }
 
-    public TrackedEntityAttribute getTrackedEntityAttribute()
+    @JsonProperty( value = "download_url" )
+    public String getDownloadUrl()
     {
-        return trackedEntityAttribute;
+        return downloadUrl;
     }
 
-    public void setTrackedEntityAttribute( TrackedEntityAttribute trackedEntityAttribute )
+    public void setDownloadUrl( String downloadUrl )
     {
-        this.trackedEntityAttribute = trackedEntityAttribute;
+        this.downloadUrl = downloadUrl;
     }
 
-    public String getFormula()
+    @JsonProperty( value = "demo_url" )
+    public String getDemoUrl()
     {
-        return formula;
+        return demoUrl;
     }
 
-    public void setFormula( String formula )
+    public void setDemoUrl( String demoUrl )
     {
-        this.formula = formula;
+        this.demoUrl = demoUrl;
     }
 }

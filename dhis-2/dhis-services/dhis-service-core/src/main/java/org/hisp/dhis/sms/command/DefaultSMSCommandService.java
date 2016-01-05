@@ -1,7 +1,7 @@
 package org.hisp.dhis.sms.command;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,7 +75,7 @@ public class DefaultSMSCommandService
     {
         return smsCommandStore.getSMSCommand( name );
     }
-    
+
     @Override
     public void save( Set<SMSCode> codes )
     {
@@ -109,18 +109,18 @@ public class DefaultSMSCommandService
     @Override
     public void deleteCodeSet( Set<SMSCode> codes )
     {
-        smsCommandStore.deleteCodeSet( codes );        
+        smsCommandStore.deleteCodeSet( codes );
     }
 
     @Override
     public int countDataSetSmsCommands( DataSet dataSet )
     {
-        return smsCommandStore.countDataSetSmsCommands(dataSet);
+        return smsCommandStore.countDataSetSmsCommands( dataSet );
     }
 
     @Override
     public void deleteSpecialCharacterSet( Set<SMSSpecialCharacter> specialCharacters )
     {
-        smsCommandStore.deleteSpecialCharacterSet( specialCharacters );        
+        smsCommandStore.deleteSpecialCharacterSet( specialCharacters );
     }
 }

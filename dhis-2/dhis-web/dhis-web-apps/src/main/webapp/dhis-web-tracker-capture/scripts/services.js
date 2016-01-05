@@ -498,10 +498,10 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             return orgUnitWithParent;
         },
         getSearchTreeRoot: function(){
-            var roles = SessionStorageService.get('USER_ROLES');
+            //var roles = SessionStorageService.get('USER_ROLES');
             if(!rootOrgUnitPromise){
                 var url = '../api/me.json?fields=organisationUnits[id,name,children[id,name,children[id,name]]]&paging=false';
-                if( roles && roles.userCredentials && roles.userCredentials.userRoles){
+                /*if( roles && roles.userCredentials && roles.userCredentials.userRoles){
                     var userRoles = roles.userCredentials.userRoles;
                     for(var i=0; i<userRoles.length; i++){
                         if(userRoles[i].authorities.indexOf('ALL') !== -1 || 
@@ -510,7 +510,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                           i=userRoles.length;
                         }
                     }  
-                }             
+                }*/
                 rootOrgUnitPromise = $http.get( url ).then(function(response){
                     return response.data;
                 });
@@ -628,7 +628,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             return promise;
         },
         updateForNote: function( enrollment ){
-            var promise = $http.put('../api/enrollments/' + enrollment.enrollment + '/addNote', enrollment).then(function(response){
+            var promise = $http.post('../api/enrollments/' + enrollment.enrollment + '/note', enrollment).then(function(response){
                 return response.data;         
             });
             return promise;
@@ -1060,13 +1060,13 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             return promise;
         },
         updateForNote: function(dhis2Event){   
-            var promise = $http.put('../api/events/' + dhis2Event.event + '/addNote', dhis2Event).then(function(response){
+            var promise = $http.post('../api/events/' + dhis2Event.event + '/note', dhis2Event).then(function(response){
                 return response.data;         
             });
             return promise;
         },
         updateForEventDate: function(dhis2Event){
-            var promise = $http.put('../api/events/' + dhis2Event.event + '/updateEventDate', dhis2Event).then(function(response){
+            var promise = $http.put('../api/events/' + dhis2Event.event + '/eventDate', dhis2Event).then(function(response){
                 return response.data;         
             });
             return promise;
@@ -1528,27 +1528,88 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     };
 })
 
-.service('TEIGridService', function(OrgUnitService, OptionSetService, CurrentSelection, DateUtils, $translate){
+/*Orgunit service for local db */
+.service('OuService', function($window, $q){
+    
+    var indexedDB = $window.indexedDB;
+    var db = null;
+    
+    var open = function(){
+        var deferred = $q.defer();
+        
+        var request = indexedDB.open("dhis2ou");
+        
+        request.onsuccess = function(e) {
+          db = e.target.result;
+          deferred.resolve();
+        };
+
+        request.onerror = function(){
+          deferred.reject();
+        };
+
+        return deferred.promise;
+    };
+    
+    var get = function(uid){
+        
+        var deferred = $q.defer();
+        
+        if( db === null){
+            deferred.reject("DB not opened");
+        }
+        else{
+            var tx = db.transaction(["ou"]);
+            var store = tx.objectStore("ou");
+            var query = store.get(uid);
+                
+            query.onsuccess = function(e){
+                if(e.target.result){
+                    deferred.resolve(e.target.result);
+                }
+                else{
+                    var t = db.transaction(["ouPartial"]);
+                    var s = t.objectStore("ouPartial");
+                    var q = s.get(uid);
+                    q.onsuccess = function(e){
+                        deferred.resolve(e.target.result);
+                    };
+                }            
+            };
+        }
+        return deferred.promise;
+    };
+    
+    return {
+        open: open,
+        get: get
+    };    
+})
+
+.service('TEIGridService', function(OptionSetService, CurrentSelection, DateUtils, $translate, $filter, SessionStorageService){
     
     return {
         format: function(grid, map, optionSets, invalidTeis){
+            
+            var ou = SessionStorageService.get('SELECTED_OU');
             
             invalidTeis = !invalidTeis ? [] : invalidTeis;
             if(!grid || !grid.rows){
                 return;
             }            
             
-            //grid.headers[0-5] = Instance, Created, Last updated, Org unit, Tracked entity, Inactive
-            //grid.headers[6..] = Attribute, Attribute,.... 
+            //grid.headers[0-6] = Instance, Created, Last updated, OU ID, Ou Name, Tracked entity, Inactive
+            //grid.headers[7..] = Attribute, Attribute,.... 
             var attributes = [];
             for(var i=6; i<grid.headers.length; i++){
                 attributes.push({id: grid.headers[i].name, name: grid.headers[i].column, type: grid.headers[i].type});
             }
 
-            var entityList = [];
+            var entityList = {own: [], other: []};
             
             var attributes = CurrentSelection.getAttributesById();
-
+            
+            
             angular.forEach(grid.rows, function(row){
                 if(invalidTeis.indexOf(row[0]) === -1 ){
                     var entity = {};
@@ -1556,18 +1617,13 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 
                     entity.id = row[0];
                     entity.created = DateUtils.formatFromApiToUser( row[1] );
-                    
-                    entity.orgUnit = row[3];                              
-                    entity.type = row[4];
-                    entity.inactive = row[5] !== "" ? row[5] : false;
 
-                    OrgUnitService.get(row[3]).then(function(ou){
-                        if(ou && ou.name){
-                            entity.orgUnitName = ou.name;
-                        }                                                       
-                    });
+                    entity.orgUnit = row[3];
+                    entity.orgUnitName = row[4];
+                    entity.type = row[5];
+                    entity.inactive = row[6] !== "" ? row[6] : false;
 
-                    for(var i=6; i<row.length; i++){
+                    for(var i=7; i<row.length; i++){
                         if(row[i] && row[i] !== ''){
                             isEmpty = false;
                             var val = row[i];
@@ -1592,13 +1648,19 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                             entityList[entity.id] = entity;
                         }
                         else{
-                            entityList.push(entity);
+                            if(entity.orgUnit === ou.id){
+                                entityList.own.push(entity);
+                            }
+                            else{
+                                entityList.other.push(entity);
+                            }
                         }
                     }
                 }
             });
-
-            return {headers: attributes, rows: entityList, pager: grid.metaData.pager};
+            
+            var len = entityList.own.length + entityList.other.length;
+            return {headers: attributes, rows: entityList, pager: grid.metaData.pager, length: len};
             
         },
         generateGridColumns: function(attributes, ouMode){

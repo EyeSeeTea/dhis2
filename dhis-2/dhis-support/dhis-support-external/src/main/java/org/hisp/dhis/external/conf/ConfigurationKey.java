@@ -1,7 +1,7 @@
 package org.hisp.dhis.external.conf;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@ package org.hisp.dhis.external.conf;
  */
 public enum ConfigurationKey
 {
-    SYSTEM_ID( "system.id" ),
+    SYSTEM_BASE_URL( "system.base_url" ),
     SYSTEM_READ_ONLY_MODE( "system.read_only_mode", "off" ),
     CONNECTION_DIALECT( "connection.dialect" ),
     CONNECTION_DRIVER_CLASS( "connection.driver_class" ),

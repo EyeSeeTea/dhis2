@@ -1,7 +1,7 @@
 package org.hisp.dhis.program;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -294,7 +294,7 @@ public class DefaultProgramInstanceService
 
         User user = currentUserService.getCurrentUser();
 
-        if ( !params.hasOrganisationUnits() && !(params.isOrganisationUnitMode( ALL ) || params.isOrganisationUnitMode( ACCESSIBLE )) )
+        if ( !params.hasOrganisationUnits() && !( params.isOrganisationUnitMode( ALL ) || params.isOrganisationUnitMode( ACCESSIBLE ) ) )
         {
             violation = "At least one organisation unit must be specified";
         }
@@ -570,7 +570,7 @@ public class DefaultProgramInstanceService
 
         programInstance.setStatus( ProgramStatus.COMPLETED );
         programInstance.setEndDate( new Date() );
-        programInstance.setCompletedUser( currentUserService.getCurrentUsername() );
+        programInstance.setCompletedBy( currentUserService.getCurrentUsername() );
 
         updateProgramInstance( programInstance );
     }
