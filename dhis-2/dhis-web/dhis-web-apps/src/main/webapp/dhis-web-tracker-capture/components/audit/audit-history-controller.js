@@ -7,4 +7,5 @@ trackerCapture.controller('AuditHistoryController', function ($scope, $modalInst
    $scope.close = function () {
       $modalInstance.close();
   };
+
 });

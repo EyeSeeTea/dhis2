@@ -210,7 +210,7 @@ var trackerCaptureDirectives = angular.module('trackerCaptureDirectives', [])
                         for(var key in $scope.eventTableOptions){
                             var show = false;
                             
-                            for(i = 0; i < $scope.applicableButtons.length; i++){
+                            for(var i = 0; i < $scope.applicableButtons.length; i++){
                                 if($scope.applicableButtons[i] === key){
                                     show = true;
                                     break;
@@ -247,7 +247,7 @@ var trackerCaptureDirectives = angular.module('trackerCaptureDirectives', [])
                     
                     var bodyList = [];
                     if($scope.event.notes) {
-                        for(i = 0; i < $scope.event.notes.length; i++){
+                        for(var i = 0; i < $scope.event.notes.length; i++){
                             var currentNote = $scope.event.notes[i];            
                             bodyList.push({value1: currentNote.storedDate, value2: currentNote.value});
                         }
@@ -337,7 +337,7 @@ var trackerCaptureDirectives = angular.module('trackerCaptureDirectives', [])
                         
                         var foundIndex = -1;
                         //find index
-                        for(i = 0; i < $scope.allEvents.length; i++){
+                        for(var i = 0; i < $scope.allEvents.length; i++){
                             if($scope.allEvents[i] === $scope.event){
                                 foundIndex = i;
                                 break;
@@ -590,22 +590,24 @@ var trackerCaptureDirectives = angular.module('trackerCaptureDirectives', [])
         restrict: 'E',
         template: '<i class="fa fa-history audit-icon" data-ng-click="showAuditHistory(dataElementId)"></i>',
         scope:{
-            dataElementId: '@elem'
+            dataElementId: '@dataelementId'
         },
         controller:function($scope, $modal, AuditHistoryData) {
             $scope.showAuditHistory = function(dataElementId) {
+                if (!dataElementId) {}
                 alert(dataElementId);
                 var modalInstance = $modal.open({
-                    templateUrl: "components/audit/audit-history.html",
-                    controller: "AuditHistoryController"
+                    templateUrl: "components/audit/audit-history.html"
+                    //controller: "AuditHistoryController"
                 });
-                AuditHistoryData.getAuditHistoryData('../api/audits/trackedEntityDataValue.json?de='+dataElementId).then(function(data){
+                AuditHistoryData.getAuditHistoryData(dataElementId).then(function(data){
                     if(data.trackedEntityDataValueAudits) {
                         $scope.itemList=[];
-                        $scope.trackedEntity="Entity 1"
+                        $scope.trackedEntity="Entity 1";
                         angular.forEach(data.trackedEntityDataValueAudits, function(dataValue) {
                             $scope.itemList.push({date:dataValue.created, value:dataValue.value});
                         });
+                        $scope.$digest();
                     }
                 });
             }
