@@ -592,24 +592,19 @@ var trackerCaptureDirectives = angular.module('trackerCaptureDirectives', [])
         scope:{
             dataElementId: '@dataelementId'
         },
-        controller:function($scope, $modal, AuditHistoryData) {
+        controller:function($scope, $modal) {
             $scope.showAuditHistory = function(dataElementId) {
-                if (!dataElementId) {}
-                alert(dataElementId);
+                if (!dataElementId) { return;}
                 var modalInstance = $modal.open({
-                    templateUrl: "components/audit/audit-history.html"
-                    //controller: "AuditHistoryController"
-                });
-                AuditHistoryData.getAuditHistoryData(dataElementId).then(function(data){
-                    if(data.trackedEntityDataValueAudits) {
-                        $scope.itemList=[];
-                        $scope.trackedEntity="Entity 1";
-                        angular.forEach(data.trackedEntityDataValueAudits, function(dataValue) {
-                            $scope.itemList.push({date:dataValue.created, value:dataValue.value});
-                        });
-                        $scope.$digest();
+                    templateUrl: "components/audit/audit-history.html",
+                    controller: "AuditHistoryController",
+                    resolve: {
+                        dataElementId: function () {
+                            return dataElementId;
+                        }
                     }
-                });
+                })
+
             }
 
         }

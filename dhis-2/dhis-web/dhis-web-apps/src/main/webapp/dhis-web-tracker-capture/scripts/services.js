@@ -1979,21 +1979,19 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         };
         this.eventCreationActions = { add: 'ADD',  schedule: 'SCHEDULE', referral: 'REFERRAL'};
 })
-
-.service('AuditHistoryData', function($http, DialogService){
-    this.getAuditHistoryData =  function(dataElementID) {
-        var promise = $http.get('../api/audits/trackedEntityDataValue.json?de='+dataElementID).then(function( response ) {
+.service('AuditHistoryDataService', function( $http, DialogService ) {
+    this.getAuditHistoryData = function( dataElementID ) {
+        dataElementID = "Dv7iIitX44Y";
+        var promise = $http.get('../api/audits/trackedEntityDataValue.json?de=' + dataElementID).then(function( response ) {
             return response.data;
         }, function( response ) {
             if( response && response.data && response.data.status === 'ERROR' ) {
-                alert("Error");
                 var dialogOptions = {
                     headerText: response.data.status,
                     bodyText: response.data.message ? response.data.message : $translate.instant('unable_to_fetch_data_from_server')
                 };
                 DialogService.showDialog({}, dialogOptions);
             }
-
         });
         return promise;
     }
