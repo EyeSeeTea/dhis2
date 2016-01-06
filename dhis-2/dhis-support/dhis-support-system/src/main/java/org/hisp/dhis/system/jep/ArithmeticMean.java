@@ -21,7 +21,7 @@ implements PostfixMathCommandI
 		
 		// check the stack
 		checkStack(inStack);
-
+		
 		Object param= inStack.pop();
 		if (param instanceof List) {
 			List<Double> vals=CustomFunctions.checkVector(param);

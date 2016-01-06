@@ -23,12 +23,9 @@ public class CustomFunctions {
 		if (!(init_done)) initCustomFunctions();
 		for (Entry<String,PostfixMathCommandI> e: 
 			aggregate_functions.entrySet()) {
-			PostfixMathCommandI cmd=e.getValue(), clone=null;
-			Class<PostfixMathCommandI> cmd_class=
-						(Class<PostfixMathCommandI>) cmd.getClass();
-			try { clone=cmd_class.newInstance(); }
-			catch (Exception ex) {clone=null;}
-			if (clone!=null) parser.addFunction(e.getKey(),clone);}
+			PostfixMathCommandI cmd=e.getValue();
+			parser.addFunction(e.getKey(),cmd);
+			}
 	}
 
 	private static Pattern aggregate_prefix=Pattern.compile("");

@@ -134,7 +134,6 @@ implements Runnable
 
 								log.debug("Rule "+rule.getName()+" @"+period.getDisplayShortName()+" & "+sourceX.getSource()+
 										" window="+window+", years="+n_years);
-
 								Map<Integer, Double> leftSideValues = getRuleExpressionValueMap
 										( rule.getLeftSide(),currentValueMap, incompleteValuesMap,
 												sourceX.getSource(), period, window, n_years, periodTypeX,
@@ -147,7 +146,6 @@ implements Runnable
 											( rule.getRightSide(),currentValueMap, incompleteValuesMap,
 													sourceX.getSource(), period, window, n_years, periodTypeX,
 													periodTypes, lastUpdatedMap, sourceDataElements );
-									;
 
 									if ( !rightSideValues.isEmpty() || Operator.compulsory_pair.equals( rule.getOperator() ) )
 									{
@@ -190,6 +188,7 @@ implements Runnable
 											+ (violation ? "violation" : "OK") + " " + (leftSide == null ? "(null)" : leftSide.toString())
 											+ " " + rule.getOperator() + " " + (rightSide == null ? "(null)" : rightSide.toString())
 											+ " (" + context.getValidationResults().size() + " results)" );
+
 										}
 									}
 								}
@@ -627,7 +626,7 @@ implements Runnable
 		Map<Integer, Double> expressionValueMap = new HashMap<>();
 		Map<Integer, ListMap<String, Double>> aggregateValuesMap = new HashMap<>();
 		Set<String> aggregates=context.getExpressionService().getAggregatesInExpression(expression.getExpression());
-
+		
 		if (aggregates.size()==0)
 			return getExpressionValueMap(expression,valueMap,incompleteValuesMap);
 
@@ -650,7 +649,7 @@ implements Runnable
 				aggmap.put(subExpression, aggregateValues.get(attributeOptionCombo));
 			}
 		}
-
+		
 		for ( Map.Entry<Integer, Map<DataElementOperand, Double>> entry : valueMap.entrySet() )
 		{
 			Double value = context.getExpressionService().getExpressionValue( expression,
@@ -663,7 +662,7 @@ implements Runnable
 				expressionValueMap.put( entry.getKey(), value );
 			}
 		}
-
+		
 		return expressionValueMap;
 	}
 

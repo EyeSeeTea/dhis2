@@ -257,7 +257,7 @@ implements ExpressionService
 				orgUnitCountMap, days, expression.getMissingValueStrategy(), incompleteValues, aggregateMap );
 		
 		Double result = expressionString != null ? calculateExpression( expressionString ) : null;
-
+		
 		return result;
 	}
 
@@ -356,7 +356,7 @@ implements ExpressionService
 				int start=matcher.end();
 				int end=Expression.matchExpression(expression,start);
 				if (end<0) {
-					System.out.println("Bad expression starting at "+start+" in "+expression);}
+					log.warn("Bad expression starting at "+start+" in "+expression);}
 				if (end>0) {
 					aggregates.add(expression.substring(start,end));
 					scan=end+1;}
@@ -920,7 +920,7 @@ implements ExpressionService
 				Pattern prefix=CustomFunctions.getAggregatePrefixPattern();
 				Matcher matcher = prefix.matcher( expression );
 
-				int scan=0, len=expression.length();
+				int scan=0, len=expression.length(), tail=0;
 				while ((scan<len)&&(matcher.find(scan)))
 				{
 					int start=matcher.end();
@@ -938,14 +938,13 @@ implements ExpressionService
 							String literal = ( samples == null) ? ("[]") : (samples.toString());
 							sb.append(expression.substring(scan,start));
 							sb.append(literal);}
-						scan=end+1;
-						matcher.find(scan);
+						scan=end+1; tail=end;
 					}
 				}
 
-				expression = TextUtils.appendTail( matcher, sb );
+				sb.append(expression.substring(tail));
+				expression = sb.toString();
 				
-
 				// ---------------------------------------------------------------------
 				// DimensionalItemObjects
 				// ---------------------------------------------------------------------
