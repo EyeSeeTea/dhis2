@@ -588,14 +588,28 @@ var trackerCaptureDirectives = angular.module('trackerCaptureDirectives', [])
 .directive('d2Audit', function ($document) {
     return {
         restrict: 'E',
-        template: '<i class="fa fa-history audit-icon" data-ng-click="showAuditHistory()"></i>',
-        controller:function ($scope, $element, $attrs, $modal) {
-            $scope.showAuditHistory = function() {
+        template: '<i class="fa fa-history audit-icon" data-ng-click="showAuditHistory(dataElementId)"></i>',
+        scope:{
+            dataElementId: '@elem'
+        },
+        controller:function($scope, $modal, AuditHistoryData) {
+            $scope.showAuditHistory = function(dataElementId) {
+                alert(dataElementId);
                 var modalInstance = $modal.open({
                     templateUrl: "components/audit/audit-history.html",
                     controller: "AuditHistoryController"
                 });
+                AuditHistoryData.getAuditHistoryData('../api/audits/trackedEntityDataValue.json?de='+dataElementId).then(function(data){
+                    if(data.trackedEntityDataValueAudits) {
+                        $scope.itemList=[];
+                        $scope.trackedEntity="Entity 1"
+                        angular.forEach(data.trackedEntityDataValueAudits, function(dataValue) {
+                            $scope.itemList.push({date:dataValue.created, value:dataValue.value});
+                        });
+                    }
+                });
             }
+
         }
     };
 })
