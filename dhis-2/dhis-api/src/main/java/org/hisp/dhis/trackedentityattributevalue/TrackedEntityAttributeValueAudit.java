@@ -73,7 +73,8 @@ public class TrackedEntityAttributeValueAudit
     {
     }
 
-    public TrackedEntityAttributeValueAudit( TrackedEntityAttributeValue trackedEntityAttributeValue, String value, String modifiedBy, AuditType auditType )
+    public TrackedEntityAttributeValueAudit( TrackedEntityAttributeValue trackedEntityAttributeValue, String value,
+        String modifiedBy, AuditType auditType )
     {
         this.attribute = trackedEntityAttributeValue.getAttribute();
         this.entityInstance = trackedEntityAttributeValue.getEntityInstance();
