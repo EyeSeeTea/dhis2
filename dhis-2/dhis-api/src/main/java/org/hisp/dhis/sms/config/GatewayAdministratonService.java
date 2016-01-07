@@ -28,25 +28,20 @@
  */
 package org.hisp.dhis.sms.config;
 
-import java.util.List;
-import java.util.Map;
-
 /**
  * @author Zubair <rajazubair.asghar@gmail.com>
  *
  */
 public interface GatewayAdministratonService
 {
-    List<Map<String, Object>> toList();
+    String setDefault( String uid );
 
-    boolean setDefault( int index );
+    boolean removeGateway( String uid );
 
-    String addOrUpdateGateway( Map<String, Object> config );
+    SmsConfiguration listGateways();
 
-    boolean validateJSON( Map<String, Object> config );
+    SmsGatewayConfig getGatewayConfiguration( String uid );
 
-    boolean removeGateway( int id );
-
-    SmsGatewayConfig getGatewayByIndex( int index );
+    String addOrUpdateGateway( SmsGatewayConfig config, Class<?> klass );
 
 }

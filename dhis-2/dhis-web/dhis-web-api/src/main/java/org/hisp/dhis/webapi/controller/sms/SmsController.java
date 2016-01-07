@@ -32,7 +32,6 @@ import java.io.IOException;
 
 import java.text.ParseException;
 import java.util.Date;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -40,6 +39,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.hisp.dhis.dxf2.render.RenderService;
 import org.hisp.dhis.dxf2.webmessage.WebMessageException;
 import org.hisp.dhis.sms.SmsSender;
+import org.hisp.dhis.sms.incoming.IncomingSms;
 import org.hisp.dhis.sms.incoming.IncomingSmsService;
 import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.webapi.service.WebMessageService;
@@ -47,7 +47,6 @@ import org.hisp.dhis.webapi.utils.WebMessageUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -153,18 +152,17 @@ public class SmsController
 
     @RequestMapping( value = "/inbound", method = RequestMethod.POST, consumes = "application/json" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_MOBILE_SETTINGS')" )
-    public void receiveSMSMessage( @RequestBody Map<String, Object> jsonMassage, HttpServletRequest request,
-        HttpServletResponse response )
-            throws WebMessageException, ParseException
+    public void receiveSMSMessage( HttpServletRequest request, HttpServletResponse response )
+        throws WebMessageException, ParseException, IOException
     {
-        if ( jsonMassage == null )
+        if ( incomingSMSService == null )
         {
-            throw new WebMessageException( WebMessageUtils.conflict( "RequestBody must not be empty" ) );
+            throw new WebMessageException( WebMessageUtils.error( "Service Unavailable" ) );
         }
 
-        int smsId = incomingSMSService.save( jsonMassage.get( "message" ).toString(),
-            jsonMassage.get( "originator" ).toString(), jsonMassage.get( "gateway" ).toString(),
-            (Date) jsonMassage.get( "receivedTime" ) );
+        IncomingSms sms = renderService.fromJson( request.getInputStream(), IncomingSms.class );
+
+        int smsId = incomingSMSService.save( sms );
 
         webMessageService.send( WebMessageUtils.ok( "Received: SMS ID " + smsId ), response, request );
 
