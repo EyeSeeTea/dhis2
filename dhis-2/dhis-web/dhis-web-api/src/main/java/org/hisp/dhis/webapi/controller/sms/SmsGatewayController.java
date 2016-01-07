@@ -131,7 +131,8 @@ public class SmsGatewayController
     // -------------------------------------------------------------------------
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_MOBILE_SENDSMS')" )
-    @RequestMapping( value = "/clickatell", method = RequestMethod.POST, produces = "application/json" )
+    @RequestMapping( value = "/clickatell", method = { RequestMethod.POST,
+        RequestMethod.PUT }, produces = "application/json" )
     public void addOrUpdateClickatellConfiguration( HttpServletRequest request, HttpServletResponse response )
         throws WebMessageException, IOException
     {
@@ -148,7 +149,8 @@ public class SmsGatewayController
     }
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_MOBILE_SENDSMS')" )
-    @RequestMapping( value = "/bulksms", method = RequestMethod.POST, produces = "application/json" )
+    @RequestMapping( value = "/bulksms", method = { RequestMethod.POST,
+        RequestMethod.PUT }, produces = "application/json" )
     public void addOrUpdatebulksmsConfiguration( HttpServletRequest request, HttpServletResponse response )
         throws WebMessageException, IOException
     {
@@ -165,7 +167,8 @@ public class SmsGatewayController
     }
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_MOBILE_SENDSMS')" )
-    @RequestMapping( value = "/smpp", method = RequestMethod.POST, produces = "application/json" )
+    @RequestMapping( value = "/smpp", method = { RequestMethod.POST,
+        RequestMethod.PUT }, produces = "application/json" )
     public void addOrUpdateSmppConfiguration( HttpServletRequest request, HttpServletResponse response )
         throws WebMessageException, IOException
     {
@@ -182,7 +185,8 @@ public class SmsGatewayController
     }
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_MOBILE_SENDSMS')" )
-    @RequestMapping( value = "/generichttp", method = RequestMethod.POST, produces = "application/json" )
+    @RequestMapping( value = "/generichttp", method = { RequestMethod.POST,
+        RequestMethod.PUT }, produces = "application/json" )
     public void addOrUpdateGenericConfiguration( HttpServletRequest request, HttpServletResponse response )
         throws WebMessageException, IOException
     {
@@ -200,7 +204,8 @@ public class SmsGatewayController
     }
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_MOBILE_SENDSMS')" )
-    @RequestMapping( value = "/modem", method = RequestMethod.POST, produces = "application/json" )
+    @RequestMapping( value = "/modem", method = { RequestMethod.POST,
+        RequestMethod.PUT }, produces = "application/json" )
     public void addOrUpdateModemConfiguration( HttpServletRequest request, HttpServletResponse response )
         throws WebMessageException, IOException
     {
