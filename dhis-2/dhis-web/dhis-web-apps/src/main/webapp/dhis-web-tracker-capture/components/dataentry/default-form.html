@@ -263,7 +263,7 @@
                                             multiple
                                             on-remove="saveMultiSelectState($item,currentEvent,prStDe,false)"
                                             on-select="saveMultiSelectState($item,currentEvent,prStDe,true)"
-                                            style="width:90%; overflow:visible">
+                                            style="width:85%; overflow:visible">
                                     <ui-select-match allow-clear="true" ng-class={{getInputNotifcationClass(prStDe.dataElement.id,false)}}  class="form-control-ui-select"  placeholder="{{'select_or_search' | translate}}" >{{$item.dataElement.formName ? $item.dataElement.formName : $item.dataElement.name }}</ui-select-match>
                                     <ui-select-choices repeat="prStDe.dataElement as prStDe in currentStage.multiSelectGroups[prStDe.dataElement.id].dataElements | filter: $select.search | limitTo:maxOptionSize">
                                         <span ng-bind-html="prStDe.dataElement.formName ? prStDe.dataElement.formName : prStDe.dataElement.name | highlight: $select.search"></span>
@@ -362,7 +362,7 @@
                                                             ng-disabled="selectedEnrollment.status !== 'ACTIVE' || currentEvent.editingNotAllowed || assignedFields[currentEvent.event][de.dataElement.id]" 
                                                             name="foo" 
                                                             on-select="saveDatavalue(prStDes[de.dataElement.id], innerForm.foo)"  
-                                                            style="width:90%;">
+                                                            style="width:85%;">
                                                     <ui-select-match allow-clear="true" ng-class="getInputNotifcationClass(prStDes[de.dataElement.id].dataElement.id,true, currentEvent)"  class="form-control-ui-select"  placeholder="{{'select_or_search' | translate}}">{{$select.selected.name  || $select.selected}}</ui-select-match>
                                                     <ui-select-choices  repeat="option.name as option in optionSets[prStDes[de.dataElement.id].dataElement.optionSet.id].options | filter: $select.search | limitTo:maxOptionSize">
                                                       <span ng-bind-html="option.name | highlight: $select.search"></span>
