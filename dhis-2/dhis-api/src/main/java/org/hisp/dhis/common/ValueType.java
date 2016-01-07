@@ -51,6 +51,7 @@ public enum ValueType
     TRUE_ONLY( Boolean.class ),
     DATE( Date.class ),
     DATETIME( Date.class ),
+    TIME( Date.class ),
     NUMBER( Double.class ),
     UNIT_INTERVAL( Double.class ),
     PERCENTAGE( Double.class ),
@@ -76,7 +77,7 @@ public enum ValueType
         TEXT, LONG_TEXT, LETTER, COORDINATE );
     
     public static final Set<ValueType> DATE_TYPES = Sets.newHashSet(
-        DATE, DATETIME );
+        DATE, DATETIME, TIME );
     
     private final Class<?> javaClass;
 
