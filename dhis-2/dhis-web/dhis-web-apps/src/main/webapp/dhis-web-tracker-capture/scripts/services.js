@@ -1981,8 +1981,8 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 })
 .service('AuditHistoryDataService', function( $http, DialogService ) {
     this.getAuditHistoryData = function( dataElementID ) {
-        dataElementID = "Dv7iIitX44Y";
         var promise = $http.get('../api/audits/trackedEntityDataValue.json?de=' + dataElementID).then(function( response ) {
+
             return response.data;
         }, function( response ) {
             if( response && response.data && response.data.status === 'ERROR' ) {

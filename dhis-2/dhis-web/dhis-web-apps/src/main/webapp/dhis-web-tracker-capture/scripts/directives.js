@@ -588,19 +588,23 @@ var trackerCaptureDirectives = angular.module('trackerCaptureDirectives', [])
 .directive('d2Audit', function ($document) {
     return {
         restrict: 'E',
-        template: '<i class="fa fa-history audit-icon" data-ng-click="showAuditHistory(dataElementId)"></i>',
+        template: '<i class="fa fa-history audit-icon" data-ng-click="showAuditHistory(dataElementId, dataElementName)"></i>',
         scope:{
-            dataElementId: '@dataelementId'
+            dataElementId: '@dataelementId',
+            dataElementName: '@dataelementName'
         },
         controller:function($scope, $modal) {
-            $scope.showAuditHistory = function(dataElementId) {
-                if (!dataElementId) { return;}
+            $scope.showAuditHistory = function(dataElementId, dataElementName) {
+                if (!dataElementId) { return; }
                 var modalInstance = $modal.open({
                     templateUrl: "components/audit/audit-history.html",
                     controller: "AuditHistoryController",
                     resolve: {
                         dataElementId: function () {
                             return dataElementId;
+                        },
+                        dataElementName: function () {
+                            return dataElementName;
                         }
                     }
                 })

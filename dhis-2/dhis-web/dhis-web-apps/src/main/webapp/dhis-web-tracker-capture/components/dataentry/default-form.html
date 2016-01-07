@@ -421,7 +421,7 @@
                                                         ng-blur="saveDatavalue(prStDes[de.dataElement.id], innerForm.foo)"
                                                         name="foo"
                                                         />
-                                                        <d2-audit dataelement-id="{{de.dataElement.id}}"></d2-audit>
+                                                        <d2-audit dataelement-id="{{de.dataElement.id}}" dataelement-name="{{prStDes[de.dataElement.id].dataElement.name}}"></d2-audit>
                                                 </span>
                                             </div>
                                             <div class="not-for-screen">
@@ -440,7 +440,8 @@
                                                    ng-disabled="selectedEnrollment.status !== 'ACTIVE' || currentEvent.editingNotAllowed || assignedFields[currentEvent.event][de.dataElement.id]"
                                                    ng-blur="saveDatavalue(prStDes[de.dataElement.id], innerForm.foo)"
                                                    name="foo"/>
-                                                <d2-audit></d2-audit>
+                                                <pre>{{currentEvent[prStDes[de.dataElement.id].dataElement.id]}}</pre>
+                                                <d2-audit dataelement-id="{{de.dataElement.id}}"></d2-audit>
                                             </div>
                                             <div class="not-for-screen">
                                                 <input type="text" class="form-control" value={{currentEvent[prStDes[de.dataElement.id].dataElement.id]}}>
