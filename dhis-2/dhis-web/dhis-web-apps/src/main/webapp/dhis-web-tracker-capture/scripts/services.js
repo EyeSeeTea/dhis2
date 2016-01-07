@@ -1663,19 +1663,29 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             return {headers: attributes, rows: entityList, pager: grid.metaData.pager, length: len};
             
         },
-        generateGridColumns: function(attributes, ouMode){
+        generateGridColumns: function(attributes, ouMode, nonConfidential){
             
             if( ouMode === null ){
                 ouMode = 'SELECTED';
             }
             var filterTypes = {}, filterText = {};
             var columns = [];
+            
+            var returnAttributes = [];
+            if(nonConfidential) {
+                //Filter out attributes that is confidential, so they will not be part of any grid:
+                returnAttributes = angular.copy($filter('nonConfidential')(attributes));
+            }
+            else
+            {
+                returnAttributes = angular.copy(attributes);
+            }
        
             //also add extra columns which are not part of attributes (orgunit for example)
             columns.push({id: 'orgUnitName', name: $translate.instant('registering_unit'), valueType: 'TEXT', displayInListNoProgram: false, attribute: false});
             columns.push({id: 'created', name: $translate.instant('registration_date'), valueType: 'DATE', displayInListNoProgram: false, attribute: false});
             columns.push({id: 'inactive', name: $translate.instant('inactive'), valueType: 'BOOLEAN', displayInListNoProgram: false, attribute: false});
-            columns = columns.concat(attributes ? angular.copy(attributes) : []);
+            columns = columns.concat(returnAttributes ? returnAttributes : []);
             
             //generate grid column for the selected program/attributes
             angular.forEach(columns, function(column){

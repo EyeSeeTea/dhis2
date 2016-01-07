@@ -1,6 +1,4 @@
-package org.hisp.dhis.common;
-
-import java.util.List;
+package org.hisp.dhis.system.util;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -30,45 +28,55 @@ import java.util.List;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dataelement.CategoryOptionGroup;
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.indicator.Indicator;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.period.Period;
-import org.hisp.dhis.program.ProgramIndicator;
+import org.hibernate.Hibernate;
+import org.hibernate.collection.internal.PersistentSet;
+import org.hibernate.collection.spi.PersistentCollection;
+import org.hibernate.proxy.HibernateProxy;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface AnalyticalObjectStore<T extends AnalyticalObject>
-    extends GenericIdentifiableObjectStore<T>
+public class HibernateUtils
 {
-    List<T> getAnalyticalObjects( Indicator indicator );
-    
-    List<T> getAnalyticalObjects( DataElement dataElement );
-    
-    List<T> getAnalyticalObjects( DataSet dataSet );
+    public static boolean isProxy( Object object )
+    {
+        return object != null && ((object instanceof HibernateProxy) || (object instanceof PersistentCollection));
+    }
 
-    List<T> getAnalyticalObjects( ProgramIndicator programIndicator );
+    /**
+     * If object is proxy, get unwrapped non-proxy object.
+     *
+     * @param proxy Object to check and unwrap
+     * @return Unwrapped object if proxyied, if not just returns same object
+     */
+    @SuppressWarnings( "unchecked" )
+    public static <T> T unwrap( T proxy )
+    {
+        if ( !isProxy( proxy ) )
+        {
+            return proxy;
+        }
 
-    List<T> getAnalyticalObjects( Period period );
+        Hibernate.initialize( proxy );
 
-    List<T> getAnalyticalObjects( OrganisationUnit organisationUnit );
+        if ( HibernateProxy.class.isInstance( proxy ) )
+        {
+            return (T) ((HibernateProxy) proxy).getHibernateLazyInitializer().getImplementation();
+        }
 
-    List<T> getAnalyticalObjects( CategoryOptionGroup categoryOptionGroup );
-    
-    int countAnalyticalObjects( Indicator indicator );
+        if ( PersistentCollection.class.isInstance( proxy ) )
+        {
+            PersistentCollection persistentCollection = (PersistentCollection) proxy;
 
-    int countAnalyticalObjects( DataElement dataElement );
+            if ( !PersistentSet.class.isInstance( persistentCollection ) )
+            {
+                return (T) persistentCollection.getStoredSnapshot();
+            }
 
-    int countAnalyticalObjects( DataSet dataSet );
+            // for now just return same as for non-sets, but PersistentSets might require a bit of extra work.
+            return (T) persistentCollection.getStoredSnapshot();
+        }
 
-    int countAnalyticalObjects( ProgramIndicator programIndicator );
-    
-    int countAnalyticalObjects( Period period );
-    
-    int countAnalyticalObjects( OrganisationUnit organisationUnit );
-    
-    int countAnalyticalObjects( CategoryOptionGroup categoryOptionGroup );
+        return proxy;
+    }
 }

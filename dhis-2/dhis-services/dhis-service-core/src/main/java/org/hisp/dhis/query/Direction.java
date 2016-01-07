@@ -1,6 +1,4 @@
-package org.hisp.dhis.common;
-
-import java.util.List;
+package org.hisp.dhis.query;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -30,45 +28,10 @@ import java.util.List;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dataelement.CategoryOptionGroup;
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.indicator.Indicator;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.period.Period;
-import org.hisp.dhis.program.ProgramIndicator;
-
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface AnalyticalObjectStore<T extends AnalyticalObject>
-    extends GenericIdentifiableObjectStore<T>
+public enum Direction
 {
-    List<T> getAnalyticalObjects( Indicator indicator );
-    
-    List<T> getAnalyticalObjects( DataElement dataElement );
-    
-    List<T> getAnalyticalObjects( DataSet dataSet );
-
-    List<T> getAnalyticalObjects( ProgramIndicator programIndicator );
-
-    List<T> getAnalyticalObjects( Period period );
-
-    List<T> getAnalyticalObjects( OrganisationUnit organisationUnit );
-
-    List<T> getAnalyticalObjects( CategoryOptionGroup categoryOptionGroup );
-    
-    int countAnalyticalObjects( Indicator indicator );
-
-    int countAnalyticalObjects( DataElement dataElement );
-
-    int countAnalyticalObjects( DataSet dataSet );
-
-    int countAnalyticalObjects( ProgramIndicator programIndicator );
-    
-    int countAnalyticalObjects( Period period );
-    
-    int countAnalyticalObjects( OrganisationUnit organisationUnit );
-    
-    int countAnalyticalObjects( CategoryOptionGroup categoryOptionGroup );
+    ASCENDING, DESCENDING
 }

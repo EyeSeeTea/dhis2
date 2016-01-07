@@ -44,11 +44,11 @@ import java.util.Set;
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class OrderOptions
+public class OrderParams
 {
     private Set<String> order = new HashSet<>();
 
-    public OrderOptions()
+    public OrderParams()
     {
     }
 
@@ -70,24 +70,17 @@ public class OrderOptions
                 continue;
             }
 
-            if ( orders.containsKey( split[0] ) || !schema.haveProperty( split[0] )
-                || !validProperty( schema.getProperty( split[0] ) ) || !validDirection( split[1] ) )
+            String propertyName = split[0];
+            Property property = schema.getProperty( propertyName );
+            String direction = split[1].toLowerCase();
+
+            if ( orders.containsKey( propertyName ) || !schema.haveProperty( propertyName )
+                || !validProperty( property ) || !validDirection( direction ) )
             {
                 continue;
             }
 
-            Order newOrder;
-
-            if ( "asc".equals( split[1] ) )
-            {
-                newOrder = Order.asc( schema.getProperty( split[0] ) );
-            }
-            else
-            {
-                newOrder = Order.desc( schema.getProperty( split[0] ) );
-            }
-
-            orders.put( split[0], newOrder.ignoreCase() );
+            orders.put( propertyName, Order.from( direction, property ) );
         }
 
         return new ArrayList<>( orders.values() );
@@ -100,7 +93,8 @@ public class OrderOptions
 
     private boolean validDirection( String direction )
     {
-        return "asc".equals( direction ) || "desc".equals( direction );
+        return "asc".equals( direction ) || "desc".equals( direction )
+            || "iasc".equals( direction ) || "idesc".equals( direction );
     }
 
     @Override
@@ -122,11 +116,10 @@ public class OrderOptions
             return false;
         }
 
-        final OrderOptions other = (OrderOptions) obj;
+        final OrderParams other = (OrderParams) obj;
 
         return Objects.equals( this.order, other.order );
     }
-
 
     @Override
     public String toString()

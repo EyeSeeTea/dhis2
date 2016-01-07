@@ -1,7 +1,5 @@
 package org.hisp.dhis.common;
 
-import java.util.List;
-
 /*
  * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
@@ -30,6 +28,8 @@ import java.util.List;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.List;
+
 import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataset.DataSet;
@@ -39,11 +39,12 @@ import org.hisp.dhis.period.Period;
 import org.hisp.dhis.program.ProgramIndicator;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Lars Helge Overland
  */
-public interface AnalyticalObjectStore<T extends AnalyticalObject>
-    extends GenericIdentifiableObjectStore<T>
+public interface AnalyticalObjectService<T extends AnalyticalObject>
 {
+    void update( T object );
+    
     List<T> getAnalyticalObjects( Indicator indicator );
     
     List<T> getAnalyticalObjects( DataElement dataElement );

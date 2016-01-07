@@ -76,7 +76,16 @@ public class JdbcResourceTableStore
         final List<String> createIndexSql = resourceTable.getCreateIndexStatements();
 
         // ---------------------------------------------------------------------
-        // Create table
+        // Drop temporary table if it exists
+        // ---------------------------------------------------------------------
+
+        if ( dbmsManager.tableExists( resourceTable.getTempTableName() ) )
+        {
+            jdbcTemplate.execute( resourceTable.getDropTempTableStatement() );
+        }
+                
+        // ---------------------------------------------------------------------
+        // Create temporary table
         // ---------------------------------------------------------------------
 
         log.info( "Create table SQL: " + createTableSql );
@@ -84,7 +93,7 @@ public class JdbcResourceTableStore
         jdbcTemplate.execute( createTableSql );
 
         // ---------------------------------------------------------------------
-        // Populate table through SQL or object batch update
+        // Populate temporary table through SQL or object batch update
         // ---------------------------------------------------------------------
 
         if ( populateTableSql.isPresent() )
