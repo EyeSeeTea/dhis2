@@ -12,7 +12,7 @@ trackerCapture.controller('AuditHistoryController', function( $scope, $modalInst
   AuditHistoryDataService.getAuditHistoryData(dataElementId).then(function( data ) {
 
     if( data.trackedEntityDataValueAudits ) {
-      scope.itemList = [];
+      $scope.itemList = [];
         angular.forEach(data.trackedEntityDataValueAudits, function( dataValue ) {
             $scope.itemList.push({date: dataValue.created, value: dataValue.value});
         });
