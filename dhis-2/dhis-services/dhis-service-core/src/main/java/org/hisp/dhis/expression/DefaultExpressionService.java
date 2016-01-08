@@ -927,10 +927,15 @@ implements ExpressionService
 				{
 					int start=matcher.end();
 					int end=Expression.matchExpression(expression, start);
-					if ((end<0)||(aggregateMap==null)||(expression.charAt(start)=='<')) {
+					if (end<0) {
 						sb.append(expression.substring(scan,start));
-						scan=start+1; tail=start;
-						}
+						scan=start+1; 
+						tail=start;
+					}
+					else if ((aggregateMap==null)||(expression.charAt(start)=='<')) {
+						sb.append(expression.substring(scan,end));
+						scan=end+1; tail=end;
+					}
 					else {
 						String sub_expression=expression.substring(start,end);
 						List<Double> samples = aggregateMap.get( sub_expression );
@@ -943,7 +948,7 @@ implements ExpressionService
 							String literal = ( samples == null) ? ("[]") : (samples.toString());
 							sb.append(expression.substring(scan,start));
 							sb.append(literal);}
-						scan=end+1; tail=end;
+						scan=end; tail=end;
 					}
 				}
 
