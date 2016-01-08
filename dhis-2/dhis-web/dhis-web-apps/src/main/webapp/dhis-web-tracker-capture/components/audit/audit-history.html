@@ -5,12 +5,24 @@
 
     <div class="modal-body">
         <table class="listTable dhis2-table-striped-border">
+            <tr>
+                <th colspan="4">Date</th>
+                <th colspan="2">Value</th>
+                <th colspan="2">Audit Type</th>
+                <th colspan="2">Modified By</th>
+            </tr>
             <tr ng-repeat="item in itemList">
-                <td>
-                    {{item.date}}
+                <td colspan="4">
+                    {{item.created}}
                 </td>
-                <td>
+                <td colspan="2">
                     {{item.value}}
+                </td>
+                <td colspan="2">
+                    {{item.auditType}}
+                </td>
+                <td colspan="2">
+                    {{item.modifiedBy}}
                 </td>
             </tr>
         </table>

@@ -1980,9 +1980,16 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         this.eventCreationActions = { add: 'ADD',  schedule: 'SCHEDULE', referral: 'REFERRAL'};
 })
 .service('AuditHistoryDataService', function( $http, DialogService ) {
-    this.getAuditHistoryData = function( dataElementID ) {
-        var promise = $http.get('../api/audits/trackedEntityDataValue.json?de=' + dataElementID).then(function( response ) {
+    this.getAuditHistoryData = function( dataElementID, dataType ) {
+        var url="";
 
+        if (dataType === "attribute") {
+            url = '../api/audits/trackedEntityAttributeValue.json?tea=' + dataElementID;
+        } else {
+            url = '../api/audits/trackedEntityDataValue.json?de=' + dataElementID;
+        }
+
+        var promise = $http.get(url).then(function( response ) {
             return response.data;
         }, function( response ) {
             if( response && response.data && response.data.status === 'ERROR' ) {
@@ -1993,6 +2000,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 DialogService.showDialog({}, dialogOptions);
             }
         });
+
         return promise;
     }
 });

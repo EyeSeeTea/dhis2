@@ -24,12 +24,13 @@
                         </ui-select-choices>
                     </ui-select>
                 </span>
+
                 <span ng-if="!attribute.optionSetValue" ng-switch="attribute.valueType">
                     <span ng-switch-when="DATE">
                         <input type="text" 
                                placeholder="{{dhis2CalendarFormat.keyDateFormat}}" 
                                name="foo" 
-                               class="form-control" 
+                               class="form-control input-with-audit"
                                d2-date
                                d2-date-validator 
                                max-date="attribute.allowFutureDate ? '' : 0"
@@ -42,11 +43,12 @@
                                ng-disabled="editingDisabled" 
                                blur-or-change="teiValueUpdated(selectedTei, attribute.id)"
                                ng-required="attribute.mandatory || attribute.unique"/>
+                        <d2-audit dataelement-id="{{prStDe.dataElement.id}}" dataelement-name="{{prStDe.dataElement.name}}"></d2-audit>
                     </span>
                     <span ng-switch-when="TRUE_ONLY">
                         <input type="checkbox" 
                                name="foo" 
-                               class="form-control" 
+                               class="form-control input-with-audit"
                                ng-model="selectedTei[attribute.id]" 
                                ng-model-options="{ updateOn: 'blur', allowInvalid: true }"
                                d2-attribute-validator 
@@ -56,10 +58,12 @@
                                ng-disabled="editingDisabled" 
                                ng-change="teiValueUpdated(selectedTei, attribute.id)"
                                ng-required="attribute.mandatory || attribute.unique"/>
+                        <d2-audit dataelement-id="{{prStDe.dataElement.id}}" dataelement-name="{{prStDe.dataElement.name}}"></d2-audit>
                     </span>
                     <span ng-switch-when="BOOLEAN" class="form-control">
                         <label class="radio-inline">
                             <input  type="radio"
+                                    class="input-with-audit"
                                     ng-model="selectedTei[attribute.id]" 
                                     d2-attribute-validator 
                                     attribute-data={{attribute}}
@@ -70,9 +74,11 @@
                                     ng-required="attribute.mandatory || attribute.unique" 
                                     value=""> 
                             {{'no_value'| translate}}
+                            <d2-audit dataelement-id="{{prStDe.dataElement.id}}" dataelement-name="{{prStDe.dataElement.name}}"></d2-audit>
                         </label>
                         <label class="radio-inline">
                             <input  type="radio"
+                                    class="input-with-audit"
                                     ng-model="selectedTei[attribute.id]" 
                                     d2-attribute-validator 
                                     attribute-data={{attribute}}
@@ -83,10 +89,12 @@
                                     ng-required="attribute.mandatory || attribute.unique" 
                                     value="true"> 
                             {{'yes'| translate}}
+                            <d2-audit dataelement-id="{{prStDe.dataElement.id}}" dataelement-name="{{prStDe.dataElement.name}}"></d2-audit>
                         </label>
                         <label class="radio-inline">
                             <input  type="radio"                                                         
-                                    ng-model="selectedTei[attribute.id]" 
+                                    ng-model="selectedTei[attribute.id]"
+                                    class="input-with-audit"
                                     d2-attribute-validator 
                                     attribute-data={{attribute}}
                                     selected-program-id={{selectedProgram.id}}  
@@ -96,12 +104,13 @@
                                     ng-required="attribute.mandatory || attribute.unique" 
                                     value="false"> 
                             {{'no'| translate}}
+                            <d2-audit dataelement-id="{{prStDe.dataElement.id}}" dataelement-name="{{prStDe.dataElement.name}}"></d2-audit>
                         </label>                        
                     </span>                    
                     <span ng-switch-when="NUMBER">
                         <input type="number" 
                                name="foo" 
-                               class="form-control" 
+                               class="form-control input-with-audit"
                                ng-model="selectedTei[attribute.id]"
                                ng-model-options="{ updateOn: 'blur', allowInvalid: true }"
                                d2-attribute-validator 
@@ -113,11 +122,12 @@
                                ng-disabled="editingDisabled" 
                                ng-blur="teiValueUpdated(selectedTei, attribute.id)"
                                ng-required="attribute.mandatory || attribute.unique"/>
+                        <d2-audit dataelement-id="{{prStDe.dataElement.id}}" dataelement-name="{{prStDe.dataElement.name}}"></d2-audit>
                     </span>
                     <span ng-switch-when="EMAIL">
                         <input type="email" 
                                name="foo" 
-                               class="form-control" 
+                               class="form-control input-with-audit"
                                ng-model="selectedTei[attribute.id]"
                                ng-model-options="{ updateOn: 'blur', allowInvalid: true }"
                                d2-attribute-validator 
@@ -127,11 +137,12 @@
                                ng-disabled="editingDisabled" 
                                ng-blur="teiValueUpdated(selectedTei, attribute.id)"
                                ng-required="attribute.mandatory || attribute.unique"/>
+                        <d2-audit dataelement-id="{{prStDe.dataElement.id}}" dataelement-name="{{prStDe.dataElement.name}}"></d2-audit>
                     </span>
                     <span ng-switch-when="LONG_TEXT">
                         <textarea row="3"
                                name="foo" 
-                               class="form-control" 
+                               class="form-control input-with-audit"
                                ng-model="selectedTei[attribute.id]" 
                                ng-model-options="{ updateOn: 'blur', allowInvalid: true }" 
                                d2-attribute-validator 
@@ -141,12 +152,13 @@
                                ng-disabled="editingDisabled" 
                                ng-blur="teiValueUpdated(selectedTei, attribute.id)"
                                ng-required="attribute.mandatory || attribute.unique">                                   
-                        </textarea>                                    
+                        </textarea>
+                        <d2-audit dataelement-id="{{prStDe.dataElement.id}}" dataelement-name="{{prStDe.dataElement.name}}"></d2-audit>
                     </span>
                     <span ng-switch-when="TRACKER_ASSOCIATE">
-                        <input type="text" 
+                        <input type="text"
                                name="foo" 
-                               class="form-control-trimmed" 
+                               class="form-control-trimmed input-with-audit"
                                ng-model="selectedTei[attribute.id]" 
                                ng-model-options="{ updateOn: 'blur', allowInvalid: true }"
                                d2-attribute-validator 
@@ -158,6 +170,7 @@
                                ng-blur="teiValueUpdated(selectedTei, attribute.id)"
                                style="width:75%;"
                                ng-required="attribute.mandatory || attribute.unique"/>
+                        <d2-audit dataelement-id="{{prStDe.dataElement.id}}" dataelement-name="{{prStDe.dataElement.name}}"></d2-audit>
                         <span class="hideInPrint">
                             <a href ng-class="{true: 'disable-clicks', false: ''} [editingDisabled]" ng-click="getTrackerAssociate(attribute, selectedTei[attribute.id])" title="{{'add'| translate}} {{attribute.name}}">
                                 <i class="fa fa-external-link fa-2x vertical-center"></i>
@@ -168,9 +181,9 @@
                         </span>
                     </span>
                     <span ng-switch-default>
-                        <input type="text" 
+                        <input type="text"
                                name="foo" 
-                               class="form-control" 
+                               class="form-control input-with-audit"
                                ng-model="selectedTei[attribute.id]" 
                                ng-model-options="{ updateOn: 'blur', allowInvalid: true }"
                                d2-attribute-validator
@@ -179,7 +192,8 @@
                                selected-tei-id={{selectedTei.trackedEntityInstance}}  
                                ng-disabled="editingDisabled" 
                                ng-blur="teiValueUpdated(selectedTei, attribute.id)"
-                               ng-required="attribute.mandatory || attribute.unique"/>                                    
+                               ng-required="attribute.mandatory || attribute.unique"/>
+                        <d2-audit dataelement-id="{{attribute.id}}" dataelement-name="{{attribute.name}}" data-type="attribute"></d2-audit>
                     </span>
                 </span>
                 <div ng-messages="innerForm.foo.$error" ng-if="interacted(innerForm.foo)" class="required hideInPrint" ng-messages-include="../dhis-web-commons/angular-forms/error-messages.html">
