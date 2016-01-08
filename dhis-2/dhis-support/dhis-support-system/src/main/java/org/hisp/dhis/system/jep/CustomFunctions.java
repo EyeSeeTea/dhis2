@@ -23,8 +23,9 @@ public class CustomFunctions {
 		if (!(init_done)) initCustomFunctions();
 		for (Entry<String,PostfixMathCommandI> e: 
 			aggregate_functions.entrySet()) {
+			String fname=e.getKey();
 			PostfixMathCommandI cmd=e.getValue();
-			parser.addFunction(e.getKey(),cmd);
+			parser.addFunction(fname,cmd);
 			}
 	}
 
