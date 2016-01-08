@@ -1,4 +1,4 @@
-package org.hisp.dhis.appmanager.action;
+package org.hisp.dhis.common;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -28,17 +28,48 @@ package org.hisp.dhis.appmanager.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.opensymphony.xwork2.Action;
+import java.util.List;
+
+import org.hisp.dhis.dataelement.CategoryOptionGroup;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.period.Period;
+import org.hisp.dhis.program.ProgramIndicator;
 
 /**
- * @author Saptarshi Purkayastha
+ * @author Lars Helge Overland
  */
-public class NoAction
-    implements Action
+public interface AnalyticalObjectService<T extends AnalyticalObject>
 {
-    @Override
-    public String execute()
-    {
-        return SUCCESS;
-    }
+    void update( T object );
+    
+    List<T> getAnalyticalObjects( Indicator indicator );
+    
+    List<T> getAnalyticalObjects( DataElement dataElement );
+    
+    List<T> getAnalyticalObjects( DataSet dataSet );
+
+    List<T> getAnalyticalObjects( ProgramIndicator programIndicator );
+
+    List<T> getAnalyticalObjects( Period period );
+
+    List<T> getAnalyticalObjects( OrganisationUnit organisationUnit );
+
+    List<T> getAnalyticalObjects( CategoryOptionGroup categoryOptionGroup );
+    
+    int countAnalyticalObjects( Indicator indicator );
+
+    int countAnalyticalObjects( DataElement dataElement );
+
+    int countAnalyticalObjects( DataSet dataSet );
+
+    int countAnalyticalObjects( ProgramIndicator programIndicator );
+    
+    int countAnalyticalObjects( Period period );
+    
+    int countAnalyticalObjects( OrganisationUnit organisationUnit );
+    
+    int countAnalyticalObjects( CategoryOptionGroup categoryOptionGroup );
 }

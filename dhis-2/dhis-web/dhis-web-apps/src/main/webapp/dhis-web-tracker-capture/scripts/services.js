@@ -693,6 +693,21 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                     att.value = AttributesFactory.formatAttributeValue(att, attributesById, optionSets, 'USER');
                 });
                 return tei;
+            }, function(error){
+                if(error){
+                    var dialogOptions = {
+                        headerText: 'error',
+                        bodyText: 'access_denied'
+                    };
+                    if(error.statusText) {
+                        dialogOptions.headerText = error.statusText;
+                    }
+                    if(error.data && error.data.message) {
+                        dialogOptions.bodyText = error.data.message;
+                    }
+                    
+                    DialogService.showDialog({}, dialogOptions);
+                }
             });
             
             return promise;
@@ -1663,24 +1678,35 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             return {headers: attributes, rows: entityList, pager: grid.metaData.pager, length: len};
             
         },
-        generateGridColumns: function(attributes, ouMode){
+        generateGridColumns: function(attributes, ouMode, nonConfidential){
             
             if( ouMode === null ){
                 ouMode = 'SELECTED';
             }
             var filterTypes = {}, filterText = {};
             var columns = [];
+            
+            var returnAttributes = [];
+            if(nonConfidential) {
+                //Filter out attributes that is confidential, so they will not be part of any grid:
+                returnAttributes = angular.copy($filter('nonConfidential')(attributes));
+            }
+            else
+            {
+                returnAttributes = angular.copy(attributes);
+            }
        
             //also add extra columns which are not part of attributes (orgunit for example)
             columns.push({id: 'orgUnitName', name: $translate.instant('registering_unit'), valueType: 'TEXT', displayInListNoProgram: false, attribute: false});
             columns.push({id: 'created', name: $translate.instant('registration_date'), valueType: 'DATE', displayInListNoProgram: false, attribute: false});
             columns.push({id: 'inactive', name: $translate.instant('inactive'), valueType: 'BOOLEAN', displayInListNoProgram: false, attribute: false});
-            columns = columns.concat(attributes ? angular.copy(attributes) : []);
+            columns = columns.concat(returnAttributes ? returnAttributes : []);
             
             //generate grid column for the selected program/attributes
             angular.forEach(columns, function(column){
                 column.attribute = angular.isUndefined(column.attribute) ? true : false;
-                column.show = false;                    
+                column.show = false;
+
                 if( (column.id === 'orgUnitName' && ouMode !== 'SELECTED') ||
                     column.displayInListNoProgram || 
                     column.displayInList){
@@ -1845,7 +1871,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         },
         autoGenerateEvents: function(teiId, program, orgUnit, enrollment){
             var dhis2Events = {events: []};
-            if(teiId && program && orgUnit && enrollment){                
+            if(teiId && program && orgUnit && enrollment){
                 angular.forEach(program.programStages, function(stage){
                     if(stage.autoGenerateEvent){
                         var newEvent = {
@@ -1881,7 +1907,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             }
             
            return dhis2Events;
-        },        
+        },
         reconstruct: function(dhis2Event, programStage, optionSets){
             
             var e = {dataValues: [], 
@@ -1955,26 +1981,49 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 
 .service('EventCreationService', function($modal){
             
-        this.showModal = function(stage, dummyEvent,eventCreationAction, autoCreate){
+        this.showModal = function(eventsByStage, stage, availableStages,programStages,selectedEntity,selectedProgram,selectedOrgUnit,selectedEnrollment, autoCreate, eventCreationAction,allEventsSorted, suggestedStage){
             var modalInstance = $modal.open({
                 templateUrl: 'components/dataentry/new-event.html',
                 controller: 'EventCreationController',
                 resolve: {                    
-                    dummyEvent: function () {
-                        return dummyEvent;
+                    eventsByStage: function () {
+                        return eventsByStage;
+                    },
+                    stage: function () {
+                        return stage;
+                    },                
+                    stages: function(){
+                        return availableStages;
+                    },
+                    allStages: function(){
+                        return programStages;
+                    },
+                    tei: function(){
+                        return selectedEntity;
+                    },
+                    program: function(){
+                        return selectedProgram;
+                    },
+                    orgUnit: function(){
+                        return selectedOrgUnit;
+                    },
+                    enrollment: function(){
+                        return selectedEnrollment;
                     },
                     autoCreate: function () {
-                        //In case the programstage is a table, autocreate
                         return autoCreate;
                     },
-                    eventCreationAction: function() {
+                    eventCreationAction: function(){
                         return eventCreationAction;
-                    },                    
-                    stage: function(){
-                        return stage;
+                    },
+                    events: function(){
+                        return allEventsSorted;
+                    },
+                    suggestedStage: function(){
+                        return suggestedStage;
                     }
                 }
-            });
+            }).result;
             return modalInstance;
         };
         this.eventCreationActions = { add: 'ADD',  schedule: 'SCHEDULE', referral: 'REFERRAL'};

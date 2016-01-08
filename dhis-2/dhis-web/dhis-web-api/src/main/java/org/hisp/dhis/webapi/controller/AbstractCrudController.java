@@ -191,12 +191,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         postProcessEntities( entities );
         postProcessEntities( entities, options, rpParameters, translateParams );
 
-        if ( fields.contains( "access" ) )
-        {
-            options.getOptions().put( "viewClass", "sharing" );
-        }
-
-        handleLinksAndAccess( options, entities );
+        handleLinksAndAccess( entities, fields, false );
 
         linkService.generatePagerLinks( pager, getEntityClass() );
 
@@ -433,15 +428,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         entities = (List<T>) queryService.query( query );
 
-        if ( options.hasLinks() )
-        {
-            linkService.generateLinks( entities, true );
-        }
-
-        if ( aclService.isSupported( getEntityClass() ) )
-        {
-            addAccessProperties( entities );
-        }
+        handleLinksAndAccess( entities, fields, true );
 
         for ( T entity : entities )
         {
@@ -931,14 +918,41 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         }
     }
 
-    protected void handleLinksAndAccess( WebOptions options, List<T> entityList )
+    private boolean fieldsContains( String match, List<String> fields )
     {
-        if ( options != null && options.hasLinks() )
+        for ( String field : fields )
         {
-            linkService.generateLinks( entityList, false );
+            // for now assume href/access if * or preset is requested
+            if ( field.contains( match ) || field.equals( "*" ) || field.startsWith( ":" ) )
+            {
+                return true;
+            }
         }
 
-        if ( entityList != null && aclService.isSupported( getEntityClass() ) )
+        return false;
+    }
+
+    protected boolean hasHref( List<String> fields )
+    {
+        return fieldsContains( "href", fields );
+    }
+
+    protected boolean hasAccess( List<String> fields )
+    {
+        return fieldsContains( "access", fields );
+    }
+
+    protected void handleLinksAndAccess( List<T> entityList, List<String> fields, boolean deep )
+    {
+        boolean generateLinks = hasHref( fields );
+        boolean generateAccess = hasAccess( fields );
+
+        if ( generateLinks )
+        {
+            linkService.generateLinks( entityList, deep );
+        }
+
+        if ( generateAccess && aclService.isSupported( getEntityClass() ) )
         {
             addAccessProperties( entityList );
         }

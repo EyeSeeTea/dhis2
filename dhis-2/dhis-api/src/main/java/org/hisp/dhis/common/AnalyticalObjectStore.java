@@ -1,5 +1,7 @@
 package org.hisp.dhis.common;
 
+import java.util.List;
+
 /*
  * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
@@ -39,20 +41,34 @@ import org.hisp.dhis.program.ProgramIndicator;
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface AnalyticalObjectStore<T extends BaseAnalyticalObject>
+public interface AnalyticalObjectStore<T extends AnalyticalObject>
     extends GenericIdentifiableObjectStore<T>
 {
-    int countDataSetAnalyticalObject( DataSet dataSet );
+    List<T> getAnalyticalObjects( Indicator indicator );
+    
+    List<T> getAnalyticalObjects( DataElement dataElement );
+    
+    List<T> getAnalyticalObjects( DataSet dataSet );
 
-    int countIndicatorAnalyticalObject( Indicator indicator );
+    List<T> getAnalyticalObjects( ProgramIndicator programIndicator );
 
-    int countDataElementAnalyticalObject( DataElement dataElement );
+    List<T> getAnalyticalObjects( Period period );
+
+    List<T> getAnalyticalObjects( OrganisationUnit organisationUnit );
+
+    List<T> getAnalyticalObjects( CategoryOptionGroup categoryOptionGroup );
     
-    int countProgramIndicatorAnalyticalObject( ProgramIndicator programIndicator );
+    int countAnalyticalObjects( Indicator indicator );
+
+    int countAnalyticalObjects( DataElement dataElement );
+
+    int countAnalyticalObjects( DataSet dataSet );
+
+    int countAnalyticalObjects( ProgramIndicator programIndicator );
     
-    int countPeriodAnalyticalObject( Period period );
+    int countAnalyticalObjects( Period period );
     
-    int countOrganisationUnitAnalyticalObject( OrganisationUnit organisationUnit );
+    int countAnalyticalObjects( OrganisationUnit organisationUnit );
     
-    int countCategoryOptionGroupAnalyticalObject( CategoryOptionGroup categoryOptionGroup );
+    int countAnalyticalObjects( CategoryOptionGroup categoryOptionGroup );
 }

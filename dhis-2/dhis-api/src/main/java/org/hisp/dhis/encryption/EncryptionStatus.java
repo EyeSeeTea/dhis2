@@ -1,4 +1,4 @@
-package org.hisp.dhis.appmanager.action;
+package org.hisp.dhis.encryption;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -28,59 +28,31 @@ package org.hisp.dhis.appmanager.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.appmanager.AppManager;
-import org.hisp.dhis.i18n.I18n;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.opensymphony.xwork2.Action;
-
 /**
- * @author Saptarshi Purkayastha
+ * @author Stian Sandvold
  */
-public class DeleteAppAction
-    implements Action
+public enum EncryptionStatus
 {
-    private I18n i18n;
+    OK( "Encryption is available" ),
+    MISSING_JCE_POLICY( "Missing the required JCE policy files for strong encryption." ),
+    MISSING_ENCRYPTION_PASSWORD( "Missing encryption.password in dhis.conf." ),
+    ENCRYPTION_PASSWORD_TOO_SHORT(
+        "encryption.password in dhis.conf is too short. Minimum 24 characters is required." );
 
-    public void setI18n( I18n i18n )
+    private final String key;
+
+    EncryptionStatus( String key )
     {
-        this.i18n = i18n;
+        this.key = key;
     }
 
-    @Autowired
-    private AppManager appManager;
-
-    // -------------------------------------------------------------------------
-    // Input & Output
-    // -------------------------------------------------------------------------
-
-    private String appName;
-    
-    public void setAppName( String appName )
+    public boolean isOk()
     {
-        this.appName = appName;
+        return this == OK;
     }
 
-    private String message;
-
-    public String getMessage()
+    public String getKey()
     {
-        return message;
-    }
-    
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
-    @Override
-    public String execute()
-        throws Exception
-    {
-        if ( appName != null && appManager.deleteApp( appName, false ) )
-        {
-            message = i18n.getString( "appmanager_delete_success" );
-        }
-
-        return SUCCESS;
+        return key;
     }
 }
