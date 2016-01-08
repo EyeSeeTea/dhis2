@@ -1207,6 +1207,9 @@ public class TableAlteror
         
         log.info( "Added explicit AVG calls to olid-style implicit average surveillance rules");
     }
+    /* For testing purposes, this will undo the wrapping functionality above:
+     * update expression set expression=regexp_replace(regexp_replace(expression,'[)]$',''),'^AVG[(]','') from validationrule where ruletype='SURVEILLANCE' AND rightexpressionid=expressionid;
+     */
     
     private List<Integer> getDistinctIdList( String table, String col1 )
     {
