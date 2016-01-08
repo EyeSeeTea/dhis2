@@ -32,6 +32,10 @@ import org.hibernate.Hibernate;
 import org.hibernate.collection.internal.PersistentSet;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.hibernate.proxy.HibernateProxy;
+import org.hibernate.proxy.pojo.javassist.SerializableProxy;
+
+import java.util.LinkedHashSet;
+import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -61,19 +65,24 @@ public class HibernateUtils
 
         if ( HibernateProxy.class.isInstance( proxy ) )
         {
-            return (T) ((HibernateProxy) proxy).getHibernateLazyInitializer().getImplementation();
+            Object result = ((HibernateProxy) proxy).writeReplace();
+
+            if ( !SerializableProxy.class.isInstance( result ) )
+            {
+                return (T) result;
+            }
         }
 
         if ( PersistentCollection.class.isInstance( proxy ) )
         {
             PersistentCollection persistentCollection = (PersistentCollection) proxy;
 
-            if ( !PersistentSet.class.isInstance( persistentCollection ) )
+            if ( PersistentSet.class.isInstance( persistentCollection ) )
             {
-                return (T) persistentCollection.getStoredSnapshot();
+                Map<?, ?> map = (Map<?, ?>) persistentCollection.getStoredSnapshot();
+                return (T) new LinkedHashSet<>( map.keySet() );
             }
 
-            // for now just return same as for non-sets, but PersistentSets might require a bit of extra work.
             return (T) persistentCollection.getStoredSnapshot();
         }
 

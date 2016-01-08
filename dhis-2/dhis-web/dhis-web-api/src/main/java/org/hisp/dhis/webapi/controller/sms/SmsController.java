@@ -154,6 +154,7 @@ public class SmsController
     @PreAuthorize( "hasRole('ALL') or hasRole('F_MOBILE_SETTINGS')" )
     public void receiveSMSMessage( HttpServletRequest request, HttpServletResponse response )
         throws WebMessageException, ParseException, IOException
+
     {
         if ( incomingSMSService == null )
         {

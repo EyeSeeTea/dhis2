@@ -1,4 +1,4 @@
-package org.hisp.dhis.appmanager.action;
+package org.hisp.dhis.webapi.controller.event;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -28,59 +28,48 @@ package org.hisp.dhis.appmanager.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.appmanager.AppManager;
-import org.hisp.dhis.i18n.I18n;
+import org.hisp.dhis.program.ProgramDataElement;
+import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.query.Order;
+import org.hisp.dhis.query.Query;
+import org.hisp.dhis.query.QueryParserException;
+import org.hisp.dhis.webapi.controller.AbstractCrudController;
+import org.hisp.dhis.webapi.webdomain.WebMetaData;
+import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.opensymphony.xwork2.Action;
+import java.util.List;
 
 /**
- * @author Saptarshi Purkayastha
+ * @author Lars Helge Overland
  */
-public class DeleteAppAction
-    implements Action
+@Controller
+@RequestMapping( value = "/programDataElements" )
+public class ProgramDataElementController
+    extends AbstractCrudController<ProgramDataElement>
 {
-    private I18n i18n;
-
-    public void setI18n( I18n i18n )
-    {
-        this.i18n = i18n;
-    }
-
     @Autowired
-    private AppManager appManager;
-
-    // -------------------------------------------------------------------------
-    // Input & Output
-    // -------------------------------------------------------------------------
-
-    private String appName;
-    
-    public void setAppName( String appName )
-    {
-        this.appName = appName;
-    }
-
-    private String message;
-
-    public String getMessage()
-    {
-        return message;
-    }
-    
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
+    private ProgramService programService;
 
     @Override
-    public String execute()
-        throws Exception
+    @SuppressWarnings( "unchecked" )
+    protected List<ProgramDataElement> getEntityList( WebMetaData metaData, WebOptions options, List<String> filters, List<Order> orders ) throws QueryParserException
     {
-        if ( appName != null && appManager.deleteApp( appName, false ) )
+        List<ProgramDataElement> programDataElements;
+        Query query = queryService.getQueryFromUrl( ProgramDataElement.class, filters, orders );
+        query.setDefaultOrder();
+
+        if ( options.contains( "program" ) )
         {
-            message = i18n.getString( "appmanager_delete_success" );
+            String programUid = options.get( "program" );
+            programDataElements = programService.getGeneratedProgramDataElements( programUid );
+            query.setObjects( programDataElements );
         }
 
-        return SUCCESS;
+        programDataElements = (List<ProgramDataElement>) queryService.query( query );
+
+        return programDataElements;
     }
 }
