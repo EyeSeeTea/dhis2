@@ -131,10 +131,12 @@ extends DhisTest
 	private Expression expressionD;
 
 	private Expression expressionE;
-
+	
 	private Expression expressionF;
 
 	private Expression expressionG;
+	
+	private Expression expressionH;
 
 	private DataSet dataSetWeekly;
 
@@ -216,7 +218,15 @@ extends DhisTest
 
 	private ValidationRule monitoringRuleH;
 
+	private ValidationRule monitoringRuleI;
+
+	private ValidationRule monitoringRuleJ;
+
+	private ValidationRule monitoringRuleK;
+
 	private ValidationRule monitoringRuleL;
+
+	private ValidationRule monitoringRuleM;
 
 	private ValidationRuleGroup group;
 
@@ -287,7 +297,9 @@ extends DhisTest
 				"descriptionF", dataElementsD );
 		expressionG = new Expression( "AVG(#{" + dataElementB.getUid() + suffix + "} * 1.5 / #{" + dataElementE.getUid() + suffix + "})",
 				"descriptionG", dataElementsD );
-
+		expressionH = new Expression( "AVG(#{" + dataElementB.getUid() + suffix + "}) + 1.5*STDDEV(#{" + dataElementB.getUid() + suffix + "})", 
+				"descriptionE1", dataElementsC );
+		
 		expressionService.addExpression( expressionA );
 		expressionService.addExpression( expressionB );
 		expressionService.addExpression( expressionC );
@@ -295,6 +307,7 @@ extends DhisTest
 		expressionService.addExpression( expressionE );
 		expressionService.addExpression( expressionF );
 		expressionService.addExpression( expressionG );
+		expressionService.addExpression( expressionH );
 
 		periodA = createPeriod( periodTypeMonthly, getDate( 2000, 3, 1 ), getDate( 2000, 3, 31 ) );
 		periodB = createPeriod( periodTypeMonthly, getDate( 2000, 4, 1 ), getDate( 2000, 4, 30 ) );
@@ -417,8 +430,19 @@ extends DhisTest
 		// Compare dataElementB with 1.5 times itself for two sequential and two annual previous periods.
 		monitoringRuleH = createMonitoringRule( 'H', less_than_or_equal_to, expressionD, expressionE, periodTypeMonthly, 1, 2, 2 );
 
-		// Compare dataElements B/E with 1.5 * B/E for one annual period
-		monitoringRuleL = createMonitoringRule( 'I', less_than_or_equal_to, expressionF, expressionG, periodTypeMonthly, 1, 0, 1 );
+		// Compare dataElementB with 1.5 times itself for one sequential previous period.
+		monitoringRuleI = createMonitoringRule( 'I', less_than_or_equal_to, expressionD, expressionH, periodTypeMonthly, 1, 1, 0 );
+
+		// Compare dataElementB with 1.5 times itself for one annual previous period.
+		monitoringRuleJ = createMonitoringRule( 'J', less_than_or_equal_to, expressionD, expressionH, periodTypeMonthly, 1, 0, 1 );
+
+		// Compare dataElementB with 1.5 times itself for one sequential and two annual previous periods.
+		monitoringRuleK = createMonitoringRule( 'K', less_than_or_equal_to, expressionD, expressionH, periodTypeMonthly, 1, 1, 2 );
+
+		// Compare dataElementB with 1.5 times itself for two sequential and two annual previous periods.
+		monitoringRuleL = createMonitoringRule( 'L', less_than_or_equal_to, expressionD, expressionH, periodTypeMonthly, 1, 2, 2 );
+
+        monitoringRuleM = createMonitoringRule( 'M', less_than_or_equal_to, expressionF, expressionG, periodTypeMonthly, 1, 0, 1 );
 
 		group = createValidationRuleGroup( 'A' );
 
@@ -663,15 +687,24 @@ extends DhisTest
 		dataValueService.addDataValue( createDataValue( dataElementB, periodO, sourceA, "800", optionCombo, optionCombo ) ); // Jul 2002
 
 		validationRuleService.saveValidationRule( monitoringRuleE );
+		validationRuleService.saveValidationRule( monitoringRuleI );
 
 		Collection<ValidationResult> results = validationRuleService.validate(
 				getDate( 2002, 1, 15 ), getDate( 2002, 8, 15 ), sourceA );
-
+		
 		Collection<ValidationResult> reference = new HashSet<>();
 
 		reference.add( new ValidationResult( periodL, sourceA, defaultCombo, monitoringRuleE, 200.0, 150.0 /* 1.5 * 100 */ ) );
 		reference.add( new ValidationResult( periodM, sourceA, defaultCombo, monitoringRuleE, 400.0, 300.0 /* 1.5 * 200 */ ) );
 		reference.add( new ValidationResult( periodN, sourceA, defaultCombo, monitoringRuleE, 700.0, 600.0 /* 1.5 * 400 */ ) );
+		
+		// Note that when using AVG+1.5*SD with a single period (MonitoringRuleI), it just compares the previous period 
+		// to the current one since the sample size is one, the average is the sample value and the standard deviation //
+		// is zero.
+		reference.add( new ValidationResult( periodL, sourceA, defaultCombo, monitoringRuleI, 200.0, 100.0 ) );
+		reference.add( new ValidationResult( periodM, sourceA, defaultCombo, monitoringRuleI, 400.0, 200.0 ) );
+		reference.add( new ValidationResult( periodN, sourceA, defaultCombo, monitoringRuleI, 700.0, 400.0 ) );
+		reference.add( new ValidationResult( periodO, sourceA, defaultCombo, monitoringRuleI, 800.0, 700.0 ) );
 
 		for ( ValidationResult result : results )
 		{
@@ -679,7 +712,7 @@ extends DhisTest
 					.getOperator(), result.getRightsideValue() ) );
 		}
 
-		assertEquals( 3, results.size() );
+		assertEquals( 7, results.size() );
 		assertEquals( orderedList( reference ), orderedList( results ) );
 	}
 
@@ -705,15 +738,25 @@ extends DhisTest
 		dataValueService.addDataValue( createDataValue( dataElementB, periodO, sourceA, "800", optionCombo, optionCombo ) ); // Jul 2002
 
 		validationRuleService.saveValidationRule( monitoringRuleF );
+		validationRuleService.saveValidationRule( monitoringRuleJ );
 
 		Collection<ValidationResult> results = validationRuleService.validate(
 				getDate( 2002, 1, 15 ), getDate( 2002, 8, 15 ), sourceA );
 
 		Collection<ValidationResult> reference = new HashSet<>();
-
+		
 		reference.add( new ValidationResult( periodK, sourceA, defaultCombo, monitoringRuleF, 100.0, 75.0 /* 1.5 * 50 */ ) );
 		reference.add( new ValidationResult( periodM, sourceA, defaultCombo, monitoringRuleF, 400.0, 300.0 /* 1.5 * 200 */ ) );
 		reference.add( new ValidationResult( periodO, sourceA, defaultCombo, monitoringRuleF, 800.0, 600.0 /* 1.5 * 400 */ ) );
+		
+		// Note that when using AVG+1.5*SD with just a past year value (monitoringRuleJ), it simply compares the previous year 
+		// to the current one since the sample size is one, the average is the one sample value and the standard deviation
+		// is zero.
+		reference.add( new ValidationResult( periodK, sourceA, defaultCombo, monitoringRuleJ, 100.0, 50.0 ) );
+		reference.add( new ValidationResult( periodL, sourceA, defaultCombo, monitoringRuleJ, 200.0, 150.0 ) );
+		reference.add( new ValidationResult( periodM, sourceA, defaultCombo, monitoringRuleJ, 400.0, 200.0 ) );
+		reference.add( new ValidationResult( periodN, sourceA, defaultCombo, monitoringRuleJ, 700.0, 600.0) );
+		reference.add( new ValidationResult( periodO, sourceA, defaultCombo, monitoringRuleJ, 800.0, 400.0) );
 
 		for ( ValidationResult result : results )
 		{
@@ -721,7 +764,7 @@ extends DhisTest
 					.getOperator(), result.getRightsideValue() ) );
 		}
 
-		assertEquals( 3, results.size() );
+		assertEquals( 8, results.size() );
 		assertEquals( orderedList( reference ), orderedList( results ) );
 	}
 
@@ -747,17 +790,26 @@ extends DhisTest
 		dataValueService.addDataValue( createDataValue( dataElementB, periodO, sourceA, "800", optionCombo, optionCombo ) ); // Jul 2002
 
 		validationRuleService.saveValidationRule( monitoringRuleG ); // 1 sequential and 2 annual periods
+		validationRuleService.saveValidationRule( monitoringRuleK ); // 1 sequential and 2 annual periods
 
 		Collection<ValidationResult> results = validationRuleService.validate(
 				getDate( 2002, 1, 15 ), getDate( 2002, 8, 15 ), sourceA );
 
 		Collection<ValidationResult> reference = new HashSet<>();
-
+		
+		// Samples = 
 		reference.add( new ValidationResult( periodK, sourceA, defaultCombo, monitoringRuleG, 100.0, 83.6 /* 1.5 * ( 11 + 12 + 50 + 150 ) / 4 */  ) );
 		reference.add( new ValidationResult( periodL, sourceA, defaultCombo, monitoringRuleG, 200.0, 114.9 /* 1.5 * ( 11 + 12 + 13 + 50 + 150 + 200 + 100 ) / 7 */  ) );
 		reference.add( new ValidationResult( periodM, sourceA, defaultCombo, monitoringRuleG, 400.0, 254.8 /* 1.5 * ( 12 + 13 + 14 + 150 + 200 + 600 + 200 ) / 7 */  ) );
 		reference.add( new ValidationResult( periodN, sourceA, defaultCombo, monitoringRuleG, 700.0, 351.9 /* 1.5 * ( 13 + 14 + 15 + 200 + 600 + 400 + 400 ) / 7 */  ) );
 		reference.add( new ValidationResult( periodO, sourceA, defaultCombo, monitoringRuleG, 800.0, 518.7 /* 1.5 * ( 14 + 15 + 600 + 400 + 700 ) / 5 */  ) );
+		
+		// Samples=[14,15,600,400,700], AVG=345.8, SD=287.24, AVG+SD*1.5=776.66 
+		reference.add( new ValidationResult( periodO, sourceA, defaultCombo, monitoringRuleK, 800.0, 776.7 ) );
+		// Samples=[11,12,13,50,150,200,100], AVG=76.57, SD=70.09, AVG+SD*1.5=181.71 
+		reference.add( new ValidationResult( periodL, sourceA, defaultCombo, monitoringRuleK, 200.0, 181.7 ) );
+		// Samples=[13,14,15,200,600,400,400], AVG=234.57, SD=218.90, AVG+SD*1.5=562.92 
+		reference.add( new ValidationResult( periodN, sourceA, defaultCombo, monitoringRuleK, 700.0, 562.9 ) );
 
 		for ( ValidationResult result : results )
 		{
@@ -765,7 +817,7 @@ extends DhisTest
 					.getOperator(), result.getRightsideValue() ) );
 		}
 
-		assertEquals( 5, results.size() );
+		assertEquals( 8, results.size() );
 		assertEquals( orderedList( reference ), orderedList( results ) );
 	}
 
@@ -791,25 +843,30 @@ extends DhisTest
 		dataValueService.addDataValue( createDataValue( dataElementB, periodO, sourceA, "800", optionCombo, optionCombo ) ); // Jul 2002
 
 		validationRuleService.saveValidationRule( monitoringRuleH ); // 2 sequential and 2 annual periods
+		validationRuleService.saveValidationRule( monitoringRuleL ); // 2 sequential and 2 annual periods
 
 		Collection<ValidationResult> results = validationRuleService.validate(
 				getDate( 2002, 1, 15 ), getDate( 2002, 8, 15 ), sourceA );
 
 		Collection<ValidationResult> reference = new HashSet<>();
 
-		// Not in results: reference.add( new ValidationResult( periodK, sourceA, monitoringRuleH, 100.0, 109.0 /* 1.5 * ( 11 + 12 + 13 + 50 + 150 + 200 ) / 6 */  ) );
 		reference.add( new ValidationResult( periodL, sourceA, defaultCombo, monitoringRuleH, 200.0, 191.7 /* 1.5 * ( 11 + 12 + 13 + 14 + 50 + 150 + 200 + 600 + 100 ) / 9 */  ) );
 		reference.add( new ValidationResult( periodM, sourceA, defaultCombo, monitoringRuleH, 400.0, 220.6 /* 1.5 * ( 11 + 12 + 13 + 14 + 15 + 50 + 150 + 200 + 600 + 400 + 100 + 200 ) / 12 */  ) );
 		reference.add( new ValidationResult( periodN, sourceA, defaultCombo, monitoringRuleH, 700.0, 300.6 /* 1.5 * ( 12 + 13 + 14 + 15 + 150 + 200 + 600 + 400 + 200 + 400 ) / 10 */  ) );
 		reference.add( new ValidationResult( periodO, sourceA, defaultCombo, monitoringRuleH, 800.0, 439.1 /* 1.5 * ( 13 + 14 + 15 + 200 + 600 + 400 + 400 + 700 ) / 8 */  ) );
+		
+		// Samples=(13,14,15,200,600,400,400,700), AVG=292.75, SD=256.17, AVG+SD*1.5=677.00
+		reference.add( new ValidationResult( periodN, sourceA, defaultCombo, monitoringRuleL, 700.0, 677.0 ) );
+		// Samples=(12,13,14,15,150,200,600,400,200,400), AVG=200.4, SD=195.35, AVG+SD*1.5=493.43 
+		reference.add( new ValidationResult( periodO, sourceA, defaultCombo, monitoringRuleL, 800.0, 493.4 ) );
 
 		for ( ValidationResult result : results )
 		{
 			assertFalse( MathUtils.expressionIsTrue( result.getLeftsideValue(), result.getValidationRule()
 					.getOperator(), result.getRightsideValue() ) );
 		}
-
-		assertEquals( 4, results.size() );
+		
+		assertEquals( 6, results.size() );
 		assertEquals( orderedList( reference ), orderedList( results ) );
 	}
 
@@ -841,18 +898,18 @@ extends DhisTest
 		dataValueService.addDataValue( createDataValue( dataElementE, periodY, sourceB, "50", optionCombo, optionCombo ) ); // Year: 2001
 		dataValueService.addDataValue( createDataValue( dataElementE, periodZ, sourceB, "10", optionCombo, optionCombo ) ); // Year: 2002
 
-		validationRuleService.saveValidationRule( monitoringRuleL );
+		validationRuleService.saveValidationRule( monitoringRuleM );
 
 		Collection<ValidationResult> results = validationRuleService.validate(
 				getDate( 2002, 1, 15 ), getDate( 2002, 8, 15 ), sourceB );
 
 		Collection<ValidationResult> reference = new HashSet<>();
 
-		reference.add( new ValidationResult( periodK, sourceB, defaultCombo, monitoringRuleL, 10.0 /* 100 / 10 */, 1.5 /* 1.5 * 50 / 50 */ ) );
-		reference.add( new ValidationResult( periodL, sourceB, defaultCombo, monitoringRuleL, 20.0 /* 200 / 10 */, 4.5 /* 1.5 * 150 / 50 */ ) );
-		reference.add( new ValidationResult( periodM, sourceB, defaultCombo, monitoringRuleL, 40.0 /* 400 / 10 */, 6.0 /* 1.5 * 200 / 50 */ ) );
-		reference.add( new ValidationResult( periodN, sourceB, defaultCombo, monitoringRuleL, 70.0 /* 700 / 10 */, 18.0 /* 1.5 * 600 / 50 */ ) );
-		reference.add( new ValidationResult( periodO, sourceB, defaultCombo, monitoringRuleL, 80.0 /* 800 / 10 */, 12.0 /* 1.5 * 400 / 50 */ ) );
+		reference.add( new ValidationResult( periodK, sourceB, defaultCombo, monitoringRuleM, 10.0 /* 100 / 10 */, 1.5 /* 1.5 * 50 / 50 */ ) );
+		reference.add( new ValidationResult( periodL, sourceB, defaultCombo, monitoringRuleM, 20.0 /* 200 / 10 */, 4.5 /* 1.5 * 150 / 50 */ ) );
+		reference.add( new ValidationResult( periodM, sourceB, defaultCombo, monitoringRuleM, 40.0 /* 400 / 10 */, 6.0 /* 1.5 * 200 / 50 */ ) );
+		reference.add( new ValidationResult( periodN, sourceB, defaultCombo, monitoringRuleM, 70.0 /* 700 / 10 */, 18.0 /* 1.5 * 600 / 50 */ ) );
+		reference.add( new ValidationResult( periodO, sourceB, defaultCombo, monitoringRuleM, 80.0 /* 800 / 10 */, 12.0 /* 1.5 * 400 / 50 */ ) );
 
 		for ( ValidationResult result : results )
 		{

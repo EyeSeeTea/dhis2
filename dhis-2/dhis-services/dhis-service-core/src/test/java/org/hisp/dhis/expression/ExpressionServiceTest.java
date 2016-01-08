@@ -151,6 +151,7 @@ public class ExpressionServiceTest
     private String expressionI;
     private String expressionJ;
     private String expressionJ0;
+    private String expressionJ1;
 
     private String descriptionA;
     private String descriptionB;
@@ -265,6 +266,7 @@ public class ExpressionServiceTest
             "D{" + pdeA.getDimensionItem() + "}+" + "A{" + pteaA.getDimensionItem() + "}-10+" + "I{" + piA.getDimensionItem() + "}";
         expressionJ0 = "#{" + opA.getDimensionItem() + "}+#{" + opB.getDimensionItem() + "}";
         expressionJ = "1.5*AVG("+expressionJ0+")";
+        expressionJ1 = "AVG("+expressionJ0+")+1.5*STDDEV("+expressionJ0+")";
 
         descriptionA = "Expression A";
         descriptionB = "Expression B";
@@ -365,7 +367,20 @@ public class ExpressionServiceTest
   
         assertEquals( 1, aggregates.size() );
         for (String subexp: aggregates) assertEquals(expressionJ0,subexp);
-        assertTrue( aggregates.contains( expressionJ0 ) );    
+        assertTrue( aggregates.contains( expressionJ0 ) );
+        
+        dataElements=expressionService.getDataElementsInExpression( expressionJ );
+        aggregates=expressionService.getAggregatesInExpression(expressionJ.toString());
+        
+        assertTrue( dataElements.size() == 2 );
+        assertTrue( dataElements.contains( deA ) );
+        assertTrue( dataElements.contains( deB ) );
+  
+        assertEquals( 1, aggregates.size() );
+        for (String subexp: aggregates) assertEquals(expressionJ0,subexp);
+        assertTrue( aggregates.contains( expressionJ0 ) );
+
+        
     }
     
     private Object calcExpression(String expstring)
@@ -482,6 +497,7 @@ public class ExpressionServiceTest
         assertTrue( expressionService.expressionIsValid( expressionE ).isValid() );
         assertTrue( expressionService.expressionIsValid( expressionH ).isValid() );
         assertTrue( expressionService.expressionIsValid( expressionJ ).isValid() );
+        assertTrue( expressionService.expressionIsValid( expressionJ1 ).isValid() );
 
         expressionA = "#{nonExisting" + SEPARATOR + coc.getUid() + "} + 12";
 
