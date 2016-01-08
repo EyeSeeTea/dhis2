@@ -2,7 +2,7 @@
 
 //Controller for audit history
 trackerCapture.controller('AuditHistoryController', function( $scope, $modalInstance, $modal, AuditHistoryDataService,
-                                                              dataElementId, dataElementName, dataType ) {
+                                                              dataElementId, dataElementName, dataType, DateUtils ) {
 
   $scope.close = function() {
     $modalInstance.close();
@@ -17,10 +17,10 @@ trackerCapture.controller('AuditHistoryController', function( $scope, $modalInst
     var reponseData = data.trackedEntityDataValueAudits ? data.trackedEntityDataValueAudits : data.trackedEntityAttributeValueAudits;
     if( reponseData ) {
         angular.forEach(reponseData, function( dataValue ) {
-          $scope.itemList.push({created: dataValue.created, value: dataValue.value, auditType: dataValue.auditType,
+          $scope.itemList.push({created: DateUtils.formatToHrsMinsSecs(dataValue.created), value: dataValue.value, auditType: dataValue.auditType,
             modifiedBy:dataValue.modifiedBy});
         });
-    }
+      }
   });
 
 });

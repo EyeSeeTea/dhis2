@@ -187,6 +187,15 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             }
             return moment(dateValue).format(dateFormat);
         },
+        formatToHrsMinsSecs: function (dateValue) {
+            var calendarSetting = CalendarService.getSetting();
+            var dateFormat = 'YYYY-MM-DD @ hh:mm:ss A';
+            if (calendarSetting.keyDateFormat === 'dd-MM-yyyy') {
+                dateFormat = 'DD-MM-YYYY @ hh:mm:ss A';
+            }
+            return moment(dateValue).format(dateFormat);
+        },
+
         getToday: function () {
             var calendarSetting = CalendarService.getSetting();
             var tdy = $.calendars.instance(calendarSetting.keyCalendar).newDate();
