@@ -258,6 +258,8 @@ implements ExpressionService
 		
 		Double result = expressionString != null ? calculateExpression( expressionString ) : null;
 		
+		log.debug("getExpressionValue("+expression.getExpression()+") ==> '"+expressionString+"' ==> "+result);
+		
 		return result;
 	}
 
@@ -925,10 +927,13 @@ implements ExpressionService
 				{
 					int start=matcher.end();
 					int end=Expression.matchExpression(expression, start);
-					if (end<0) scan=start+1;
+					if ((end<0)||(aggregateMap==null)||(expression.charAt(start)=='<')) {
+						sb.append(expression.substring(scan,start));
+						scan=start+1; tail=start;
+						}
 					else {
 						String sub_expression=expression.substring(start,end);
-						List<Double> samples = (aggregateMap == null) ? (null) : aggregateMap.get( sub_expression );
+						List<Double> samples = aggregateMap.get( sub_expression );
 
 						if (samples == null) {
 							if (SKIP_IF_ANY_VALUE_MISSING.equals( missingValueStrategy )) {
