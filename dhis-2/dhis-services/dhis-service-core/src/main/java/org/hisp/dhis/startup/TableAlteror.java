@@ -1200,6 +1200,7 @@ public class TableAlteror
         }
 
         // Just to be extra sure, we don't modify any expressions which already contain a call to AVG or STDDEV
+        executeSql( "update expression set expression="+statementBuilder.concatenate("'AVG('","expression","')'")+" from  validationrule where ruletype='SURVEILLANCE' AND rightexpressionid=expressionid AND expression NOT LIKE '%AVG%' and expression NOT LIKE '%STDDEV%';");
         executeSql( "update expression set expression=FORMAT('AVG(%s)',expression) from  validationrule where ruletype='SURVEILLANCE' AND rightexpressionid=expressionid AND expression NOT LIKE '%AVG%' and expression NOT LIKE '%STDDEV%';");
 
         executeSql("ALTER TABLE validationrules DROP COLUMN highoutliers");
