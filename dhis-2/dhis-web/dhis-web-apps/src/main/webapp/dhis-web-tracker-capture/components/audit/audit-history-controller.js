@@ -14,7 +14,7 @@ trackerCapture.controller('AuditHistoryController', function( $scope, $modalInst
 
     $scope.itemList = [];
 
-    var reponseData = data.trackedEntityDataValueAudits ? data.trackedEntityDataValueAudits : data.trackedEntityAttributeValueAudits
+    var reponseData = data.trackedEntityDataValueAudits ? data.trackedEntityDataValueAudits : data.trackedEntityAttributeValueAudits;
     if( reponseData ) {
         angular.forEach(reponseData, function( dataValue ) {
           $scope.itemList.push({created: dataValue.created, value: dataValue.value, auditType: dataValue.auditType,
