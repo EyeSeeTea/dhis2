@@ -1194,17 +1194,17 @@ public class TableAlteror
      */
     private void upgradeImplicitAverageMonitoringRules()
     {
-        if ( executeSql( "update validationrules set lowoutliers = lowoutliers where validationruleid < 0" ) < 0 )
+        if ( executeSql( "update validationrule set lowoutliers = lowoutliers where validationruleid < 0" ) < 0 )
         {
-            return; // Already converted because 
+            return; // Already converted because lowoutliers fields are gone
         }
 
         // Just to be extra sure, we don't modify any expressions which already contain a call to AVG or STDDEV
         executeSql( "update expression set expression="+statementBuilder.concatenate("'AVG('","expression","')'")+" from  validationrule where ruletype='SURVEILLANCE' AND rightexpressionid=expressionid AND expression NOT LIKE '%AVG%' and expression NOT LIKE '%STDDEV%';");
         executeSql( "update expression set expression=FORMAT('AVG(%s)',expression) from  validationrule where ruletype='SURVEILLANCE' AND rightexpressionid=expressionid AND expression NOT LIKE '%AVG%' and expression NOT LIKE '%STDDEV%';");
 
-        executeSql("ALTER TABLE validationrules DROP COLUMN highoutliers");
-        executeSql("ALTER TABLE validationrules DROP COLUMN lowoutliers");
+        executeSql("ALTER TABLE validationrule DROP COLUMN highoutliers");
+        executeSql("ALTER TABLE validationrule DROP COLUMN lowoutliers");
         
         log.info( "Added explicit AVG calls to olid-style implicit average surveillance rules");
     }
