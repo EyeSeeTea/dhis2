@@ -1,5 +1,5 @@
 <div ng-controller="RegistrationController">
-    
+
     <!--registration form starts -->
     <form name="outerForm" novalidate>
 
@@ -25,7 +25,6 @@
 
         <!--custom registration form begins -->
         <div class="vertical-spacing" ng-if="customFormExists">
-
             <!-- enrollment and incidence dates begin -->
             <div ng-if="selectedProgram && !customForm.hasProgramDate && registrationMode !== 'PROFILE'">
                 <div ng-include="'components/registration/enrollment-dates-form.html'"></div>
