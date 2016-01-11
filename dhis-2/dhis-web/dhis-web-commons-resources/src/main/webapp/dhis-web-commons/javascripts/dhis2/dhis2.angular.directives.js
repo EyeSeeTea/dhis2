@@ -400,7 +400,7 @@ var d2Directives = angular.module('d2Directives', [])
             $scope.showAuditHistory = function() {
 
                 $modal.open({
-                    templateUrl: "components/audit/audit-history.html",
+                    templateUrl: "../dhis-web-commons/angular-forms/audit-history.html",
                     controller: "AuditHistoryController",
                     resolve: {
                         dataElementId: function () {
