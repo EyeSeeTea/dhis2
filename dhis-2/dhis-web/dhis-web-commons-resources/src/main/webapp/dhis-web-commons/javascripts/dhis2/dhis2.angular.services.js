@@ -2056,4 +2056,35 @@ var d2Services = angular.module('d2Services', ['ngResource'])
     this.getFileNames = function(){
         return this.fileNames;
     };
-});
+})
+.service('AuditHistoryDataService', function( $http, DialogService ) {
+    this.getAuditHistoryData = function( dataElementID, dataType, dataElementName, currentEvent, selectedTeiId ) {
+        var url="";
+        if (dataType === "attribute") {
+            url = '../api/audits/trackedEntityAttributeValue.json?tea=' + dataElementID+'&te='+selectedTeiId;
+            if (!selectedTeiId) {
+                    /*TODO : The alerts should be removed after testing*/
+                    alert("selectedTeiId is missing "+selectedTeiId);
+                }
+        } else {
+            if (!currentEvent) {
+                    alert("current Event is missing "+currentEvent);
+                }
+
+            url = '../api/audits/trackedEntityDataValue.json?de=' + dataElementID+'&ps='+currentEvent;
+        }
+
+        var promise = $http.get(url).then(function( response ) {
+            return response.data;
+        }, function( response ) {
+                if( response && response.data && response.data.status === 'ERROR' ) {
+                    var dialogOptions = {
+                        headerText: response.data.status,
+                        bodyText: response.data.message ? response.data.message : $translate.instant('unable_to_fetch_data_from_server')
+                    };
+                    DialogService.showDialog({}, dialogOptions);
+                }
+            });
+            return promise;
+        }
+ });
