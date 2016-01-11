@@ -43,7 +43,7 @@
                                ng-disabled="editingDisabled" 
                                blur-or-change="teiValueUpdated(selectedTei, attribute.id)"
                                ng-required="attribute.mandatory || attribute.unique"/>
-                        <d2-audit dataelement-id="{{attribute.id}}" dataelement-name="{{attribute.name}}" data-type="attribute"></d2-audit>
+                        <d2-audit dataelement-id="{{attribute.id}}" dataelement-name="{{attribute.name}}" data-type="attribute" selected-tei-id={{selectedTei.trackedEntityInstance}} ></d2-audit>
                     </span>
                     <span ng-switch-when="TRUE_ONLY">
                         <input type="checkbox" 
@@ -58,7 +58,7 @@
                                ng-disabled="editingDisabled" 
                                ng-change="teiValueUpdated(selectedTei, attribute.id)"
                                ng-required="attribute.mandatory || attribute.unique"/>
-                        <d2-audit dataelement-id="{{attribute.id}}" dataelement-name="{{attribute.name}}" data-type="attribute"></d2-audit>
+                        <d2-audit dataelement-id="{{attribute.id}}" dataelement-name="{{attribute.name}}" data-type="attribute" selected-tei-id={{selectedTei.trackedEntityInstance}}></d2-audit>
                     </span>
                     <span ng-switch-when="BOOLEAN" class="form-control">
                         <label class="radio-inline">
@@ -74,7 +74,7 @@
                                     ng-required="attribute.mandatory || attribute.unique" 
                                     value=""> 
                             {{'no_value'| translate}}
-                            <d2-audit dataelement-id="{{attribute.id}}" dataelement-name="{{attribute.name}}" data-type="attribute"></d2-audit>
+                            <d2-audit dataelement-id="{{attribute.id}}" dataelement-name="{{attribute.name}}" data-type="attribute" selected-tei-id={{selectedTei.trackedEntityInstance}}></d2-audit>
                         </label>
                         <label class="radio-inline">
                             <input  type="radio"
@@ -89,7 +89,7 @@
                                     ng-required="attribute.mandatory || attribute.unique" 
                                     value="true"> 
                             {{'yes'| translate}}
-                            <d2-audit dataelement-id="{{attribute.id}}" dataelement-name="{{attribute.name}}" data-type="attribute"></d2-audit>
+                            <d2-audit dataelement-id="{{attribute.id}}" dataelement-name="{{attribute.name}}" data-type="attribute" selected-tei-id={{selectedTei.trackedEntityInstance}}></d2-audit>
                         </label>
                         <label class="radio-inline">
                             <input  type="radio"                                                         
@@ -104,7 +104,7 @@
                                     ng-required="attribute.mandatory || attribute.unique" 
                                     value="false"> 
                             {{'no'| translate}}
-                            <d2-audit dataelement-id="{{attribute.id}}" dataelement-name="{{attribute.name}}" data-type="attribute"></d2-audit>
+                            <d2-audit dataelement-id="{{attribute.id}}" dataelement-name="{{attribute.name}}" data-type="attribute" selected-tei-id={{selectedTei.trackedEntityInstance}}></d2-audit>
                         </label>                        
                     </span>                    
                     <span ng-switch-when="NUMBER">
@@ -122,7 +122,7 @@
                                ng-disabled="editingDisabled" 
                                ng-blur="teiValueUpdated(selectedTei, attribute.id)"
                                ng-required="attribute.mandatory || attribute.unique"/>
-                        <d2-audit dataelement-id="{{attribute.id}}" dataelement-name="{{attribute.name}}" data-type="attribute"></d2-audit>
+                        <d2-audit dataelement-id="{{attribute.id}}" dataelement-name="{{attribute.name}}" data-type="attribute" selected-tei-id={{selectedTei.trackedEntityInstance}}></d2-audit>
                     </span>
                     <span ng-switch-when="EMAIL">
                         <input type="email" 
@@ -137,7 +137,7 @@
                                ng-disabled="editingDisabled" 
                                ng-blur="teiValueUpdated(selectedTei, attribute.id)"
                                ng-required="attribute.mandatory || attribute.unique"/>
-                        <d2-audit dataelement-id="{{attribute.id}}" dataelement-name="{{attribute.name}}" data-type="attribute"></d2-audit>
+                        <d2-audit dataelement-id="{{attribute.id}}" dataelement-name="{{attribute.name}}" data-type="attribute" selected-tei-id={{selectedTei.trackedEntityInstance}}></d2-audit>
                     </span>
                     <span ng-switch-when="LONG_TEXT">
                         <textarea row="3"
@@ -153,7 +153,7 @@
                                ng-blur="teiValueUpdated(selectedTei, attribute.id)"
                                ng-required="attribute.mandatory || attribute.unique">                                   
                         </textarea>
-                        <d2-audit dataelement-id="{{attribute.id}}" dataelement-name="{{attribute.name}}" data-type="attribute"></d2-audit>
+                        <d2-audit dataelement-id="{{attribute.id}}" dataelement-name="{{attribute.name}}" data-type="attribute" selected-tei-id={{selectedTei.trackedEntityInstance}}></d2-audit>
                     </span>
                     <span ng-switch-when="TRACKER_ASSOCIATE">
                         <input type="text"
@@ -170,7 +170,7 @@
                                ng-blur="teiValueUpdated(selectedTei, attribute.id)"
                                style="width:75%;"
                                ng-required="attribute.mandatory || attribute.unique"/>
-                        <d2-audit dataelement-id="{{attribute.id}}" dataelement-name="{{attribute.name}}" data-type="attribute"></d2-audit>
+                        <d2-audit dataelement-id="{{attribute.id}}" dataelement-name="{{attribute.name}}" data-type="attribute" selected-tei-id={{selectedTei.trackedEntityInstance}}></d2-audit>
                         <span class="hideInPrint">
                             <a href ng-class="{true: 'disable-clicks', false: ''} [editingDisabled]" ng-click="getTrackerAssociate(attribute, selectedTei[attribute.id])" title="{{'add'| translate}} {{attribute.name}}">
                                 <i class="fa fa-external-link fa-2x vertical-center"></i>
@@ -193,7 +193,7 @@
                                ng-disabled="editingDisabled" 
                                ng-blur="teiValueUpdated(selectedTei, attribute.id)"
                                ng-required="attribute.mandatory || attribute.unique"/>
-                        <d2-audit dataelement-id="{{attribute.id}}" dataelement-name="{{attribute.name}}" data-type="attribute"></d2-audit>
+                        <d2-audit dataelement-id="{{attribute.id}}" dataelement-name="{{attribute.name}}" data-type="attribute" selected-tei-id={{selectedTei.trackedEntityInstance}}></d2-audit>
                     </span>
                 </span>
                 <div ng-messages="innerForm.foo.$error" ng-if="interacted(innerForm.foo)" class="required hideInPrint" ng-messages-include="../dhis-web-commons/angular-forms/error-messages.html">

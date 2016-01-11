@@ -2,7 +2,8 @@
 
 //Controller for audit history
 trackerCapture.controller('AuditHistoryController', function( $scope, $modalInstance, $modal, AuditHistoryDataService,
-                                                              dataElementId, dataElementName, currentEvent, dataType, DateUtils ) {
+                                                              dataElementId, dataElementName, currentEvent, dataType, selectedTeiId,
+                                                              DateUtils ) {
 
   $scope.close = function() {
     $modalInstance.close();
@@ -10,7 +11,7 @@ trackerCapture.controller('AuditHistoryController', function( $scope, $modalInst
 
   $scope.trackedEntity = dataElementName;
 
-  AuditHistoryDataService.getAuditHistoryData(dataElementId, dataType, dataElementName, currentEvent).then(function( data ) {
+  AuditHistoryDataService.getAuditHistoryData(dataElementId, dataType, dataElementName, currentEvent, selectedTeiId).then(function( data ) {
 
     $scope.itemList = [];
 

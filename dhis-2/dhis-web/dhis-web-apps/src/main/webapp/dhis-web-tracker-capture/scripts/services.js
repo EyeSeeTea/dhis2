@@ -1980,15 +1980,19 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         this.eventCreationActions = { add: 'ADD',  schedule: 'SCHEDULE', referral: 'REFERRAL'};
 })
 .service('AuditHistoryDataService', function( $http, DialogService ) {
-    this.getAuditHistoryData = function( dataElementID, dataType, dataElementName, currentEvent ) {
+    this.getAuditHistoryData = function( dataElementID, dataType, dataElementName, currentEvent, selectedTeiId ) {
         var url="";
 
         if (dataType === "attribute") {
-            url = '../api/audits/trackedEntityAttributeValue.json?tea=' + dataElementID
+            url = '../api/audits/trackedEntityAttributeValue.json?tea=' + dataElementID+'&te='+selectedTeiId;
+            if (!selectedTeiId) {
+                /*TODO : The alerts should be removed after testing*/
+                alert("selectedTeiId is missing "+selectedTeiId);
+            }
         } else {
-            //if (!currentEvent) {
-            //    alert(currentEvent);
-            //}
+            if (!currentEvent) {
+                alert("current Event is missing "+currentEvent);
+            }
 
             url = '../api/audits/trackedEntityDataValue.json?de=' + dataElementID+'&ps='+currentEvent;
         }

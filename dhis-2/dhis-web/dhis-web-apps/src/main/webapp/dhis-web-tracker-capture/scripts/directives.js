@@ -585,15 +585,16 @@ var trackerCaptureDirectives = angular.module('trackerCaptureDirectives', [])
         link: function (scope, element, attrs) {}
     };
 })
-.directive('d2Audit', function ($document) {
+.directive('d2Audit', function () {
     return {
         restrict: 'E',
         template: '<i class="fa fa-history audit-icon" data-ng-click="showAuditHistory()"></i>',
         scope:{
             dataElementId: '@dataelementId',
             dataElementName: '@dataelementName',
-            currentEvent:'@currentEvent',
-            type:'@type'
+            currentEvent:'@',
+            type:'@',
+            selectedTeiId:'@'
         },
         controller:function($scope, $modal) {
             if (!$scope.dataElementId) {
@@ -617,6 +618,9 @@ var trackerCaptureDirectives = angular.module('trackerCaptureDirectives', [])
                         },
                         currentEvent: function() {
                             return $scope.currentEvent;
+                        },
+                        selectedTeiId: function() {
+                            return $scope.selectedTeiId;
                         }
                     }
                 })
