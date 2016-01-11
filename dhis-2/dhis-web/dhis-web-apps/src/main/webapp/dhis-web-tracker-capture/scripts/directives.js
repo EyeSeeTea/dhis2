@@ -588,29 +588,35 @@ var trackerCaptureDirectives = angular.module('trackerCaptureDirectives', [])
 .directive('d2Audit', function ($document) {
     return {
         restrict: 'E',
-        template: '<i class="fa fa-history audit-icon" data-ng-click="showAuditHistory(dataElementId, dataElementName, type)"></i>',
+        template: '<i class="fa fa-history audit-icon" data-ng-click="showAuditHistory()"></i>',
         scope:{
             dataElementId: '@dataelementId',
             dataElementName: '@dataelementName',
+            currentEvent:'@currentEvent',
             type:'@type'
         },
         controller:function($scope, $modal) {
-            $scope.showAuditHistory = function(dataElementId, dataElementName, type) {
-                if (!dataElementId) {
-                    return;
-                }
-                var modalInstance = $modal.open({
+            if (!$scope.dataElementId) {
+                return;
+            }
+
+            $scope.showAuditHistory = function() {
+
+               $modal.open({
                     templateUrl: "components/audit/audit-history.html",
                     controller: "AuditHistoryController",
                     resolve: {
                         dataElementId: function () {
-                            return dataElementId;
+                            return $scope.dataElementId;
                         },
                         dataElementName: function () {
-                            return dataElementName;
+                            return $scope.dataElementName;
                         },
                         dataType: function() {
-                            return type;
+                            return $scope.type;
+                        },
+                        currentEvent: function() {
+                            return $scope.currentEvent;
                         }
                     }
                 })

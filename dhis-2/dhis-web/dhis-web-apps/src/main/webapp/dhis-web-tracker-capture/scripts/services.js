@@ -1980,13 +1980,17 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         this.eventCreationActions = { add: 'ADD',  schedule: 'SCHEDULE', referral: 'REFERRAL'};
 })
 .service('AuditHistoryDataService', function( $http, DialogService ) {
-    this.getAuditHistoryData = function( dataElementID, dataType ) {
+    this.getAuditHistoryData = function( dataElementID, dataType, dataElementName, currentEvent ) {
         var url="";
 
         if (dataType === "attribute") {
-            url = '../api/audits/trackedEntityAttributeValue.json?tea=' + dataElementID;
+            url = '../api/audits/trackedEntityAttributeValue.json?tea=' + dataElementID
         } else {
-            url = '../api/audits/trackedEntityDataValue.json?de=' + dataElementID;
+            //if (!currentEvent) {
+            //    alert(currentEvent);
+            //}
+
+            url = '../api/audits/trackedEntityDataValue.json?de=' + dataElementID+'&ps='+currentEvent;
         }
 
         var promise = $http.get(url).then(function( response ) {
