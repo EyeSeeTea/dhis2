@@ -30,8 +30,12 @@ package org.hisp.dhis.startup;
 
 import java.util.UUID;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.configuration.Configuration;
 import org.hisp.dhis.configuration.ConfigurationService;
+import org.hisp.dhis.encryption.EncryptionStatus;
+import org.hisp.dhis.external.conf.DhisConfigurationProvider;
 import org.hisp.dhis.system.startup.AbstractStartupRoutine;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -41,16 +45,33 @@ public class ConfigurationPopulator
     @Autowired
     private ConfigurationService configurationService;
 
+    @Autowired
+    private DhisConfigurationProvider dhisConfigurationProvider;
+
+    private static final Log log = LogFactory.getLog( ConfigurationPopulator.class );
+
     @Override
     public void execute()
         throws Exception
     {
+        checkSecurityConfiguration();
+
         Configuration config = configurationService.getConfiguration();
-        
+
         if ( config != null && config.getSystemId() == null )
         {
             config.setSystemId( UUID.randomUUID().toString() );
             configurationService.setConfiguration( config );
+        }
+    }
+
+    private void checkSecurityConfiguration()
+    {
+        EncryptionStatus status = dhisConfigurationProvider.isEncryptionConfigured();
+
+        if ( !status.isOk() )
+        {
+            log.warn( "Encryption not configured: " + status.getKey() );
         }
     }
 }

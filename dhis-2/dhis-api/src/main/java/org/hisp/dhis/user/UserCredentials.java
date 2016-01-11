@@ -806,18 +806,18 @@ public class UserCredentials
     @Override
     public String toString()
     {
-        return "UserCredentials{" +
-            "username='" + username + '\'' +
-            ", openId='" + openId + '\'' +
-            ", password='" + password + '\'' +
-            ", passwordLastUpdated=" + passwordLastUpdated +
-            ", userAuthorityGroups=" + userAuthorityGroups +
-            ", lastLogin=" + lastLogin +
-            ", restoreToken='" + restoreToken + '\'' +
-            ", restoreCode='" + restoreCode + '\'' +
-            ", restoreExpiry=" + restoreExpiry +
-            ", selfRegistered=" + selfRegistered +
-            ", disabled=" + disabled +
-            '}';
+        return "{" +
+            "\"username\":\"" + username + "\", " +
+            "\"openId\":\"" + openId + "\", " +
+            "\"password\":\"" + password + "\", " +
+            "\"passwordLastUpdated\":\"" + passwordLastUpdated + "\", " +
+            "\"userAuthorityGroups\":\"" + userAuthorityGroups + "\", " +
+            "\"lastLogin\":\"" + lastLogin + "\", " +
+            "\"restoreToken\":\"" + restoreToken + "\", " +
+            "\"restoreCode\":\"" + restoreCode + "\", " +
+            "\"restoreExpiry\":\"" + restoreExpiry + "\", " +
+            "\"selfRegistered\":\"" + selfRegistered + "\", " +
+            "\"disabled\":\"" + disabled + "\" " +
+            "}";
     }
 }
