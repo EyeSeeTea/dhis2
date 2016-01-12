@@ -60,9 +60,17 @@ public class Translation
 
     public Translation()
     {
-
     }
 
+    /**
+     * TODO find some consistent order across object, service, HBM.
+     * 
+     * @param className the class name of the translated object.
+     * @param locale the locale.
+     * @param property the property name.
+     * @param value the translation.
+     * @param objectUid the UID of the translated object.
+     */
     public Translation( String className, String locale, String property, String value, String objectUid )
     {
         this.className = className;
@@ -85,6 +93,19 @@ public class Translation
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
+
+    @JsonProperty( value = "objectId" )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getObjectUid()
+    {
+        return objectUid;
+    }
+
+    public void setObjectUid( String objectUid )
+    {
+        this.objectUid = objectUid;
+    }
+
     @JsonProperty
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getClassName()
@@ -131,18 +152,6 @@ public class Translation
     public void setValue( String value )
     {
         this.value = value;
-    }
-
-    @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String getObjectUid()
-    {
-        return objectUid;
-    }
-
-    public void setObjectUid( String objectUid )
-    {
-        this.objectUid = objectUid;
     }
 
     // -------------------------------------------------------------------------

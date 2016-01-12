@@ -44,12 +44,8 @@ import org.hisp.dhis.dataelement.CategoryComboMap.CategoryComboMapException;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryService;
-import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.dxf2.common.ImportOptions;
@@ -103,23 +99,13 @@ public class DefaultAdxDataService
     // -------------------------------------------------------------------------
 
     @Autowired
-    protected DataValueSetService dataValueSetService;
+    private DataValueSetService dataValueSetService;
 
     @Autowired
-    protected DataValueService dataValueService;
+    private DataValueService dataValueService;
 
-    @Autowired
-    protected DataElementService dataElementService;
-
-    @Autowired
-    protected DataElementCategoryService categoryService;
-
-    @Autowired
-    protected DataSetService dataSetService;
-    
     @Autowired
     private PeriodService periodService;
-
 
     @Autowired
     private IdentifiableObjectManager identifiableObjectManager;
@@ -193,12 +179,8 @@ public class DefaultAdxDataService
 
             DataElementCategoryCombo categoryCombo = dataSet.getCategoryCombo();
 
-            List<DataElementCategory> categories = categoryCombo.getCategories();
-
             for ( DataElementCategoryOptionCombo aoc : categoryCombo.getOptionCombos() )
-            {
-                Set<DataElementCategoryOption> catopts = aoc.getCategoryOptions();
-                
+            {                
                 Map<String, String> attributeDimensions = metadata.getExplodedCategoryAttributes(aoc.getId());
                 
                 for ( OrganisationUnit orgUnit : params.getOrganisationUnits() )
@@ -578,27 +560,5 @@ public class DefaultAdxDataService
         attributes.put( optionComboName, catOptCombo.getUid() );
 
         log.debug( "DXF attributes: " + attributes );
-    }
-
-    private Map<Integer, Map<String, String>> createCatOptMap()
-    {
-        Map<Integer, Map<String, String>> catOptMap = new HashMap<>();
-
-        for ( DataElementCategoryOptionCombo coc : categoryService.getAllDataElementCategoryOptionCombos() )
-        {
-            int id = coc.getId();
-            
-            Map<String, String> categoryCodes = new HashMap<>();
-            DataElementCategoryCombo catCombo = coc.getCategoryCombo();
-            Set<DataElementCategoryOption> catOptions = coc.getCategoryOptions();
-            
-            for ( DataElementCategory category : catCombo.getCategories() )
-            {
-                categoryCodes.put( category.getCode(), category.getCategoryOption( coc ).getCode() );
-            }
-            catOptMap.put( id, categoryCodes );
-        }
-        
-        return catOptMap;
     }
 }
