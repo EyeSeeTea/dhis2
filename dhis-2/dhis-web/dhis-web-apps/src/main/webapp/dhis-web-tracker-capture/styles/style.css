@@ -1502,6 +1502,11 @@ a.disable-link-effects:focus {
     display: inline-block;
 }
 
+.checkbox-with-audit {
+    width:50%;
+    display: inline-block;
+}
+
 .audit-icon {
     margin-left: 5%;
     display: inline-block;
