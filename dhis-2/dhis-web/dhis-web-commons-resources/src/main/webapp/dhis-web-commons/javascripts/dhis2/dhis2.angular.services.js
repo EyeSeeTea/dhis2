@@ -577,50 +577,60 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                 //check if attribute has optionset
                                 if (att.optionSetValue) {
                                     var optionSetId = att.optionSet.id;
-                                    newInputField = '<ui-select style="width:100%;" theme="select2" ' + commonInputFieldProperty + '  on-select="teiValueUpdated(selectedTei,\'' + attId + '\')" >' +
+                                    newInputField = '<span><ui-select style="width:85%;" theme="select2" ' + commonInputFieldProperty + '  on-select="teiValueUpdated(selectedTei,\'' + attId + '\')" >' +
                                         '<ui-select-match style="width:100%;" allow-clear="true" placeholder="' + $translate.instant('select_or_search') + '">{{$select.selected.name || $select.selected}}</ui-select-match>' +
                                         '<ui-select-choices ' +
                                         'repeat="option.name as option in optionSets.' + optionSetId + '.options | filter: $select.search | limitTo:maxOptionSize">' +
                                         '<span ng-bind-html="option.name | highlight: $select.search"></span>' +
                                         '</ui-select-choices>' +
-                                        '</ui-select>';
+                                        '</ui-select><d2-audit dataelement-id="'+att.id+'" dataelement-name="'+att.name+'" data-type="attribute" selected-tei-id={{selectedTei.trackedEntityInstance}}></d2-audit></span>';
                                 }
                                 else {
                                     //check attribute type and generate corresponding angular input field
                                     if (att.valueType === "NUMBER" ) {
-                                        newInputField = '<input type="number" ' +
+                                        newInputField = '<span><input type="number" class="input-with-audit"' +
                                             ' d2-number-validator ' +
                                             ' number-type="' + att.valueType + '" ' +
                                             ' ng-blur="teiValueUpdated(selectedTei,\'' + attId + '\')" ' +
-                                            commonInputFieldProperty + ' >';
+                                            commonInputFieldProperty + ' >' +
+                                            '<d2-audit dataelement-id="'+att.id+'" dataelement-name="'+att.name+'" data-type="attribute" selected-tei-id={{selectedTei.trackedEntityInstance}}></d2-audit>' +
+                                            '</span>';
                                     }
                                     else if (att.valueType === "BOOLEAN") {
-                                        newInputField = '<label class="radio-inline"><input type="radio" ng-change="teiValueUpdated(selectedTei,\'' + attId + '\')" ' + commonInputFieldProperty + ' value="">{{\'no_value\'| translate}}</label>' +
-                                            '<label class="radio-inline"><input type="radio" ng-change="teiValueUpdated(selectedTei,\'' + attId + '\')" ' + commonInputFieldProperty + ' value="true">{{\'yes\'| translate}}</label>' +
-                                            '<label class="radio-inline"><input type="radio" ng-change="teiValueUpdated(selectedTei,\'' + attId + '\')" ' + commonInputFieldProperty + ' value="false">{{\'no\'| translate}}</label>';
+                                        newInputField = '<label class="radio-inline"><span><input type="radio" ng-change="teiValueUpdated(selectedTei,\'' + attId + '\')" ' + commonInputFieldProperty + ' value="">{{\'no_value\'| translate}}' +
+                                            '<d2-audit dataelement-id="'+att.id+'" dataelement-name="'+att.name+'" data-type="attribute" selected-tei-id={{selectedTei.trackedEntityInstance}}></d2-audit>'+
+                                            '</span></label>' +
+                                            '<label class="radio-inline"><span><input type="radio" ng-change="teiValueUpdated(selectedTei,\'' + attId + '\')" ' + commonInputFieldProperty + ' value="true">{{\'yes\'| translate}}' +
+                                            '<d2-audit dataelement-id="'+att.id+'" dataelement-name="'+att.name+'" data-type="attribute" selected-tei-id={{selectedTei.trackedEntityInstance}}></d2-audit>'+
+                                            '</span></label>' +
+                                            '<label class="radio-inline"><input type="radio" ng-change="teiValueUpdated(selectedTei,\'' + attId + '\')" ' + commonInputFieldProperty + ' value="false">{{\'no\'| translate}}' +
+                                            '<d2-audit dataelement-id="'+att.id+'" dataelement-name="'+att.name+'" data-type="attribute" selected-tei-id={{selectedTei.trackedEntityInstance}} ></d2-audit>'+
+                                            '</span></label>';
                                     }
                                     else if (att.valueType === "DATE") {
-                                        newInputField = '<input  type="text" ' +
+                                        newInputField = '<span><input  type="text" class="input-with-audit"' +
                                             ' placeholder="{{dhis2CalendarFormat.keyDateFormat}}" ' +
                                             ' max-date="' + attMaxDate + '"' + '\'' +
                                             ' d2-date' +
                                             ' blur-or-change="teiValueUpdated(selectedTei,\'' + attId + '\')" ' +
-                                            commonInputFieldProperty + ' >';
+                                            commonInputFieldProperty + ' >'+
+                                            '<d2-audit dataelement-id="'+att.id+'" dataelement-name="'+att.name+'" data-type="attribute" selected-tei-id={{selectedTei.trackedEntityInstance}} ></d2-audit>'+
+                                            '</span>';
                                     }
                                     else if (att.valueType === "TRUE_ONLY") {
-                                        newInputField = '<input type="checkbox" ' +
+                                        newInputField = '<span><input type="checkbox" ' +
                                             ' ng-change="teiValueUpdated(selectedTei,\'' + attId + '\')" ' +
-                                            commonInputFieldProperty + ' >';
+                                            commonInputFieldProperty + ' ><d2-audit dataelement-id="'+att.id+'" dataelement-name="'+att.name+'" data-type="attribute" selected-tei-id={{selectedTei.trackedEntityInstance}} ></d2-audit></span>';
                                     }
                                     else if (att.valueType === "EMAIL") {
-                                        newInputField = '<input type="email" ' +
+                                        newInputField = '<span><input type="email" class="input-with-audit"' +
                                             ' ng-blur="teiValueUpdated(selectedTei,\'' + attId + '\')" ' +
-                                            commonInputFieldProperty + ' >';
+                                            commonInputFieldProperty + ' ><d2-audit dataelement-id="'+att.id+'" dataelement-name="'+att.name+'" data-type="attribute" selected-tei-id={{selectedTei.trackedEntityInstance}} ></d2-audit></span>';
                                     }
                                     else if (att.valueType === "TRACKER_ASSOCIATE") {
-                                        newInputField = '<input type="text" ' +
+                                        newInputField = '<span><input type="text" class="input-with-audit"' +
                                             ' ng-blur="teiValueUpdated(selectedTei,\'' + attId + '\')" ' +
-                                            commonInputFieldProperty + ' >' +
+                                            commonInputFieldProperty + ' ><d2-audit dataelement-id="'+att.id+'" dataelement-name="'+att.name+'" data-type="attribute" selected-tei-id={{selectedTei.trackedEntityInstance}} ></d2-audit></span>' +
                                             '<span class="hideInPrint"><a href ng-class="{true: \'disable-clicks\', false: \'\'} [editingDisabled]" ng-click="getTrackerAssociate(attributesById.' + attId + ', selectedTei.' + attId + ')" title="{{\'add\' | translate}} {{attributesById.' + attId + '.name}}" ' +
                                             '<i class="fa fa-external-link fa-2x vertical-center"></i> ' +
                                             '</a> ' +
@@ -629,14 +639,14 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                             '</a></span>';
                                     }
                                     else if (att.valueType === "LONG_TEXT") {
-                                        newInputField = '<textarea row ="3" ' +
+                                        newInputField = '<span><textarea row ="3" ' +
                                             ' ng-blur="teiValueUpdated(selectedTei,\'' + attId + '\')" ' +
-                                            commonInputFieldProperty + ' >';
+                                            commonInputFieldProperty + ' ></textarea><d2-audit dataelement-id="'+att.id+'" dataelement-name="'+att.name+'" data-type="attribute" selected-tei-id={{selectedTei.trackedEntityInstance}} ></d2-audit></span>';
                                     }
                                     else {
-                                        newInputField = '<input type="text" ' +
+                                        newInputField = '<span><input class="input-with-audit" type="text" ' +
                                             ' ng-blur="teiValueUpdated(selectedTei,\'' + attId + '\')" ' +
-                                            commonInputFieldProperty + ' >';
+                                            commonInputFieldProperty + '><d2-audit dataelement-id="'+att.id+'" dataelement-name="'+att.name+'" data-type="attribute" selected-tei-id={{selectedTei.trackedEntityInstance}} ></d2-audit></span>';
                                     }
                                 }
                             }
@@ -656,7 +666,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                             if (programId === 'enrollmentDate') {
                                 fieldName = 'dateOfEnrollment';
                                 var enMaxDate = trackedEntityForm.selectEnrollmentDatesInFuture ? '' : 0;
-                                newInputField = '<input type="text" ' +
+                                newInputField = '<span><input type="text" class="input-with-audit"' +
                                     ' name="' + fieldName + '"' +
                                     ' element-id="' + i + '"' +
                                     this.getAttributesAsString(attributes) +
@@ -666,12 +676,12 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                     ' ng-disabled="\'' + target + '\' === \'PROFILE\'"' +
                                     ' d2-date' +
                                     ' max-date="' + enMaxDate + '"' +
-                                    ' ng-required="true"> ';
+                                    ' ng-required="true"><d2-audit dataelement-id="'+att.id+'" dataelement-name="'+att.name+'" data-type="attribute" selected-tei-id={{selectedTei.trackedEntityInstance}} ></d2-audit></span>';
                             }
                             if (programId === 'dateOfIncident' && trackedEntityForm.displayIncidentDate) {
                                 fieldName = 'dateOfIncident';
                                 var inMaxDate = trackedEntityForm.selectIncidentDatesInFuture ? '' : 0;
-                                newInputField = '<input type="text" ' +
+                                newInputField = '<span><input type="text" class="input-with-audit"' +
                                     ' name="' + fieldName + '"' +
                                     ' element-id="' + i + '"' +
                                     this.getAttributesAsString(attributes) +
@@ -680,7 +690,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                     ' ng-model="selectedEnrollment.dateOfIncident" ' +
                                     ' ng-disabled="\'' + target + '\' === \'PROFILE\'"' +
                                     ' d2-date ' +
-                                    ' max-date="' + inMaxDate + '"> ';
+                                    ' max-date="' + inMaxDate + '"><d2-audit dataelement-id="'+att.id+'" dataelement-name="'+att.name+'" data-type="attribute" selected-tei-id={{selectedTei.trackedEntityInstance}} ></d2-audit></span>';
                             }
                         }
 
@@ -2064,23 +2074,17 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         this.getAuditHistoryData = function( dataElementID, dataType, dataElementName, currentEvent, selectedTeiId ) {
             var url="";
             if (dataType === "attribute") {
-
                 if (!selectedTeiId) {
-                    /*TODO : The alerts should be removed after testing*/
-                    alert("selectedTeiId is missing "+selectedTeiId);
                     url = '../api/audits/trackedEntityAttributeValue.json?tea=' + dataElementID;
                 } else {
                     url = '../api/audits/trackedEntityAttributeValue.json?tea=' + dataElementID+'&tei='+selectedTeiId;
                 }
             } else {
                 if (!currentEvent) {
-                    alert("current Event is missing "+currentEvent);
                     url = '../api/audits/trackedEntityDataValue.json?de=' + dataElementID;
                 } else {
                     url = '../api/audits/trackedEntityDataValue.json?de=' + dataElementID+'&psi='+currentEvent;
                 }
-
-
             }
 
             var promise = $http.get(url).then(function( response ) {
