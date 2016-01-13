@@ -7,7 +7,12 @@
             {{'is_event_complete'| translate}}
         </td>
         <td>
-            <input type="checkbox" ng-model="currentEvent['status']">
+            <span>
+                <input class="input-with-audit" type="checkbox" ng-model="currentEvent['status']">
+                <d2-audit dataelement-id="{{prStDes.' + fieldId + '.dataElement.id}}"
+                          dataelement-name="{{prStDes[prStDes.' + fieldId + '.dataElement.id].dataElement.name}}">
+                </d2-audit>
+            </span>
         </td>
     </tr>
 </table>
