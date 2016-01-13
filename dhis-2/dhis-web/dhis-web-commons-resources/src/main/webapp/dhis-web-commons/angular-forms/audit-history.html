@@ -10,7 +10,7 @@
                 <tr>
                     <th colspan="4">{{'audit_date'| translate}}</th>
                     <th colspan="3">{{'audit_value'| translate}}</th>
-                    <th colspan="2">{{'audit_type'| translate}}</th>
+                    <!--<th colspan="2">{{'audit_type'| translate}}</th>-->
                     <th colspan="2">{{'audit_modified'| translate}}</th>
                 </tr>
                 <tr ng-repeat="item in itemList">
@@ -20,9 +20,9 @@
                     <td colspan="3">
                         {{item.value}}
                     </td>
-                    <td colspan="2">
-                        {{item.auditType}}
-                    </td>
+                    <!--<td colspan="2">-->
+                        <!--{{item.auditType}}-->
+                    <!--</td>-->
                     <td colspan="2">
                         {{item.modifiedBy}}
                     </td>
