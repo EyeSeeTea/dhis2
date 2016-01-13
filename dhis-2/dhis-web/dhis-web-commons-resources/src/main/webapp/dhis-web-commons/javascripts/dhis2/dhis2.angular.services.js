@@ -2063,18 +2063,25 @@ var d2Services = angular.module('d2Services', ['ngResource'])
     .service('AuditHistoryDataService', function( $http, DialogService ) {
         this.getAuditHistoryData = function( dataElementID, dataType, dataElementName, currentEvent, selectedTeiId ) {
             var url="";
+
             if (dataType === "attribute") {
-                url = '../api/audits/trackedEntityAttributeValue.json?tea=' + dataElementID+'&te='+selectedTeiId;
+
                 if (!selectedTeiId) {
                     /*TODO : The alerts should be removed after testing*/
-                    alert("selectedTeiId is missing "+selectedTeiId);
+                    //alert("selectedTeiId is missing "+selectedTeiId);
+                    url = '../api/audits/trackedEntityAttributeValue.json?tea=' + dataElementID;
+                } else {
+                    url = '../api/audits/trackedEntityAttributeValue.json?tea=' + dataElementID+'&tei='+selectedTeiId;
                 }
             } else {
                 if (!currentEvent) {
-                    alert("current Event is missing "+currentEvent);
+                    //alert("current Event is missing "+currentEvent);
+                    url = '../api/audits/trackedEntityDataValue.json?de=' + dataElementID;
+                } else {
+                    url = '../api/audits/trackedEntityDataValue.json?de=' + dataElementID+'&psi='+currentEvent;
                 }
 
-                url = '../api/audits/trackedEntityDataValue.json?de=' + dataElementID+'&ps='+currentEvent;
+
             }
 
             var promise = $http.get(url).then(function( response ) {
