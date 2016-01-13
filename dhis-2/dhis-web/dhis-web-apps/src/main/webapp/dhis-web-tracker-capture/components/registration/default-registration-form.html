@@ -8,7 +8,7 @@
             <ng-form name="innerForm">
                 <span ng-if="attribute.optionSetValue">
                     <ui-select  ng-model="selectedTei[attribute.id]"
-                                theme="select2" 
+                                theme="select2"
                                 ng-required="attribute.mandatory || attribute.unique"                                 
                                 name="foo" 
                                 d2-attribute-validator
@@ -17,12 +17,13 @@
                                 selected-tei-id={{selectedTei.trackedEntityInstance}}  
                                 ng-disabled="editingDisabled" 
                                 on-select="teiValueUpdated(selectedTei, attribute.id)"
-                                style="width:100%;">
+                                style="width:85%;">
                         <ui-select-match allow-clear="true"  class="form-control-ui-select"  placeholder="{{'select_or_search' | translate}}">{{$select.selected.name  || $select.selected}}</ui-select-match>
                         <ui-select-choices  repeat="option.name as option in optionSets[attributesById[attribute.id].optionSet.id].options | filter: $select.search | limitTo:maxOptionSize">
                           <span ng-bind-html="option.name | highlight: $select.search"></span>
                         </ui-select-choices>
                     </ui-select>
+                    <d2-audit dataelement-id="{{attribute.id}}" dataelement-name="{{attribute.name}}" data-type="attribute" selected-tei-id={{selectedTei.trackedEntityInstance}} ></d2-audit>
                 </span>
 
                 <span ng-if="!attribute.optionSetValue" ng-switch="attribute.valueType">
