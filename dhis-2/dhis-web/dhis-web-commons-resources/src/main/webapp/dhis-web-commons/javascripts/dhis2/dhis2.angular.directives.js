@@ -384,7 +384,7 @@ var d2Directives = angular.module('d2Directives', [])
 .directive('d2Audit', function () {
     return {
         restrict: 'E',
-        template: '<i class="fa fa-history audit-icon" data-ng-click="showAuditHistory()"></i>',
+        template: '<i class="glyphicon glyphicon-user audit-icon" data-ng-click="showAuditHistory()"></i>',
         scope:{
             dataElementId: '@dataelementId',
             dataElementName: '@dataelementName',
