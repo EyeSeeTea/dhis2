@@ -38,6 +38,7 @@ import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
+import org.hisp.dhis.setting.SystemSetting;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 
@@ -75,6 +76,16 @@ public class TrackedEntityAttributeValue
      * if attribute is set or not.
      */
     private String value;
+
+    // -------------------------------------------------------------------------
+    // Transient properties
+    // -------------------------------------------------------------------------
+
+    private transient boolean auditValueIsSet = false;
+
+    private transient boolean valueIsSet = false;
+
+    private transient String auditValue;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -235,6 +246,12 @@ public class TrackedEntityAttributeValue
     public void setEncryptedValue( String encryptedValue )
     {
         this.encryptedValue = encryptedValue;
+
+        if ( getAttribute().getConfidential() )
+        {
+            auditValue = encryptedValue;
+            auditValueIsSet = true;
+        }
     }
 
     /**
@@ -253,6 +270,12 @@ public class TrackedEntityAttributeValue
     public void setPlainValue( String plainValue )
     {
         this.plainValue = plainValue;
+
+        if ( !getAttribute().getConfidential() )
+        {
+            auditValue = plainValue;
+            auditValueIsSet = true;
+        }
     }
 
     /**
@@ -278,6 +301,14 @@ public class TrackedEntityAttributeValue
      */
     public void setValue( String value )
     {
+        if ( !auditValueIsSet )
+        {
+            this.auditValue = valueIsSet ? this.value : value;
+            auditValueIsSet = true;
+        }
+
+        valueIsSet = true;
+
         this.value = value;
     }
 
@@ -307,5 +338,10 @@ public class TrackedEntityAttributeValue
     public void setEntityInstance( TrackedEntityInstance entityInstance )
     {
         this.entityInstance = entityInstance;
+    }
+
+    public String getAuditValue()
+    {
+        return auditValue;
     }
 }
