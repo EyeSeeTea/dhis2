@@ -1,7 +1,7 @@
 package org.hisp.dhis.datastatistics.hibernate;
 
-import org.hisp.dhis.dataStatistics.DataStatistics;
-import org.hisp.dhis.dataStatistics.DataStatisticsStore;
+import org.hisp.dhis.datastatistics.DataStatistics;
+import org.hisp.dhis.datastatistics.DataStatisticsStore;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
 
 /**
