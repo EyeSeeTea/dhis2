@@ -28,12 +28,21 @@ package org.hisp.dhis.datastatistics;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Date;
+
 /**
  * @author Yrjan A. F. Fraschetti
  * @author Julie Hill Roa
  */
 public interface DataStatisticsStore
 {
+    void addDataStatistics(DataStatistics dataStatistics);
 
+    void updateDataStatistics(DataStatistics dataStatistics);
 
+    void deleteDataStatistics(DataStatistics dataStatistics);
+
+    void getDataStatisticsInterval(Date startIterval, Date endInterval);
+
+    void getDataSatisticsById(int id);
 }
