@@ -2465,11 +2465,6 @@ Ext.onReady( function() {
                     }
 				}
 
-                // TODO program
-                if (xLayout.program && xLayout.program.id) {
-                    paramString += '&program=' + xLayout.program.id;
-                }
-
                 // relative period date
                 if (xLayout.relativePeriodDate) {
                     paramString += '&relativePeriodDate=' + xLayout.relativePeriodDate;
@@ -2821,10 +2816,7 @@ Ext.onReady( function() {
                         fields: store.numericFields,
                         minimum: minimum < 0 ? minimum : 0,
                         label: {
-                            //renderer: Ext.util.Format.numberRenderer(renderer),
-                            renderer: function(v) {
-                                return support.prototype.number.prettyPrint(v);
-                            },
+                            renderer: Ext.util.Format.numberRenderer(renderer),
                             style: {},
                             rotate: {}
                         },

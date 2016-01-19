@@ -57,7 +57,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
     $scope.attributesById = null;
     $scope.doSearch = true;    
        
-    function resetParams(){
+    function resetParams(goToPage){
         $scope.trackedEntityList = null;
         $scope.sortColumn = {};
         $scope.emptySearchText = false;
@@ -68,7 +68,10 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
         $scope.queryUrl = null;
         $scope.programUrl = null;
         $scope.attributeUrl = {url: null, hasValue: false};
-        $scope.pager = {pageSize: 50, page: 1, toolBarDisplay: 5};
+        if(!goToPage){
+            $scope.pager = {pageSize: 50, page: 1, toolBarDisplay: 5};           
+        }
+
     }
     
     //watch for selection of org unit from tree
@@ -127,7 +130,9 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
             $scope.listProgramsLabel = $translate.instant('list_programs');
             $scope.settingsLabel = $translate.instant('settings');
             $scope.todayLabel = $translate.instant('events_today_persons');
-
+            angular.forEach($scope.eventsTodayFilters, function(filter){
+               filter.name = $translate.instant(filter.name); 
+            });
             $scope.displayModeLabel = $translate.instant('display_mode');
             
             resetParams();
@@ -229,8 +234,8 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
     };
    
     //$scope.searchParam = {bools: []};
-    $scope.search = function(mode){
-        resetParams();
+    $scope.search = function(mode,goToPage){
+        resetParams(goToPage);
         var grid = TEIGridService.generateGridColumns($scope.attributes, $scope.selectedOuMode.name, true);
         $scope.gridColumns = grid.columns;
             
@@ -303,7 +308,15 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
                 if(result.eventRows){
                     angular.forEach(result.eventRows, function(eventRow){
                         if(ids.indexOf(eventRow.trackedEntityInstance) === -1){
-                            var row = { id: eventRow.trackedEntityInstance};
+                            
+                            var row = { 
+                                id: eventRow.trackedEntityInstance,
+                                created: DateUtils.formatFromApiToUser(eventRow.trackedEntityInstanceCreated),
+                                orgUnit: eventRow.trackedEntityInstanceOrgUnit,
+                                orgUnitName: eventRow.trackedEntityInstanceOrgUnitName,
+                                inactive: eventRow.trackedEntityInstanceInactive
+                                };
+                            
                             angular.forEach(eventRow.attributes, function(attr){
                                 row[attr.attribute] = attr.value;                            
                             });
@@ -363,17 +376,17 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
         if($scope.pager && $scope.pager.page && $scope.pager.pageCount && $scope.pager.page > $scope.pager.pageCount){
             $scope.pager.page = $scope.pager.pageCount;
         }
-        $scope.search();
+        $scope.search(null,true);
     };
     
     $scope.resetPageSize = function(){
         $scope.pager.page = 1;        
-        $scope.search();
+        $scope.search(null,true);
     };
     
     $scope.getPage = function(page){    
         $scope.pager.page = page;
-        $scope.search();
+        $scope.search(null,true);
     };
     
     $scope.clearEntities = function(){

@@ -380,4 +380,62 @@ var d2Directives = angular.module('d2Directives', [])
             }
         }
     };    
-});
+})
+
+.directive('d2Audit', function () {
+        return {
+            restrict: 'E',
+            template: '<i class="glyphicon glyphicon-user audit-icon" data-ng-click="showAuditHistory()" ng-if="showAuditIcon()"></i>',
+            scope:{
+                dataElementId: '@dataelementId',
+                dataElementName: '@dataelementName',
+                currentEvent:'@',
+                type:'@',
+                selectedTeiId:'@'
+            },
+            controller:function($scope, $modal) {
+                if (!$scope.dataElementId) {
+                    return;
+                }
+
+                $scope.showAuditIcon = function() {
+                    if ($scope.currentEvent && $scope.currentEvent !== 'SINGLE_EVENT') {
+                        return true;
+                    }
+                    if ($scope.type === "attribute" && $scope.selectedTeiId) {
+                        return true;
+                    }
+                    return false;
+                }
+
+                $scope.showAuditHistory = function() {
+
+                    $modal.open({
+                        templateUrl: "../dhis-web-commons/angular-forms/audit-history.html",
+                        controller: "AuditHistoryController",
+                        resolve: {
+                            dataElementId: function () {
+                                return $scope.dataElementId;
+                            },
+                            dataElementName: function () {
+                                return $scope.dataElementName;
+                            },
+                            dataType: function() {
+                                return $scope.type;
+                            },
+                            currentEvent: function() {
+                                return $scope.currentEvent;
+                            },
+                            selectedTeiId: function() {
+                                return $scope.selectedTeiId;
+                            }
+                        }
+                    })
+
+                }
+
+            }
+        };
+    });
+
+

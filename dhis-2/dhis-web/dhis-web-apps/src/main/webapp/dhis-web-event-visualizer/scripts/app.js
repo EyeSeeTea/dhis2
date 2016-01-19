@@ -2284,7 +2284,8 @@ Ext.onReady( function() {
 			fieldLabel: 'Range axis decimals',
 			labelStyle: 'color:#333',
 			labelWidth: 125,
-			minValue: 0
+			minValue: 0,
+            maxValue: 20
 		});
 
         // general
@@ -4455,7 +4456,7 @@ Ext.onReady( function() {
 				allElements = [],
                 aggWindow = ns.app.aggregateLayoutWindow,
                 //queryWindow = ns.app.queryLayoutWindow,
-                includeKeys = ns.core.conf.valueType.aggregateTypes,
+                includeKeys = ns.core.conf.valueType.tAggregateTypes,
                 ignoreKeys = ['pe', 'ou'],
                 recordMap = {
 					'pe': {id: 'pe', name: 'Periods'},

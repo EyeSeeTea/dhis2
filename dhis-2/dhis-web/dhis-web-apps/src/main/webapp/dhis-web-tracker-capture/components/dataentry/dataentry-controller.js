@@ -13,6 +13,7 @@ trackerCapture.controller('DataEntryController',
                 DateUtils,
                 EventUtils,
                 orderByFilter,
+                dateFilter,
                 SessionStorageService,
                 EnrollmentService,
                 ProgramStageFactory,
@@ -26,7 +27,6 @@ trackerCapture.controller('DataEntryController',
                 TrackerRulesFactory,
                 EventCreationService,
                 $q,$location) {
-
     $scope.printForm = false;
     $scope.printEmptyForm = false;
     $scope.eventPageSize = 4;
@@ -52,7 +52,7 @@ trackerCapture.controller('DataEntryController',
     $scope.errorMessages = {};
     $scope.warningMessages = {};
     $scope.hiddenSections = {};
-    $scope.tableMaxNumberOfDataElements = 7;
+    $scope.tableMaxNumberOfDataElements = 15;
     $scope.xVisitScheduleDataElement = false;
     $scope.reSortStageEvents = true;
     $scope.eventsLoaded = false;
@@ -345,7 +345,7 @@ trackerCapture.controller('DataEntryController',
                         $scope.stagesCanBeShownAsTable = true;
                     }
                 });
-
+                var s = dateFilter(new Date(), 'YYYY-MM-dd');
                 $scope.programStages = orderByFilter($scope.programStages, '-sortOrder').reverse();
                 if (!$scope.currentStage) {
                     $scope.currentStage = $scope.programStages[0];
@@ -378,7 +378,6 @@ trackerCapture.controller('DataEntryController',
                             note.storedDate = DateUtils.formatToHrsMins(note.storedDate);
                         });
                     }
-
                     var eventStage = $scope.stagesById[dhis2Event.programStage];
                     if (angular.isObject(eventStage)) {
                         dhis2Event.name = eventStage.name;
@@ -442,7 +441,7 @@ trackerCapture.controller('DataEntryController',
     $scope.stageCanBeShownAsTable = function (stage) {
         if (stage.programStageDataElements 
                 && stage.programStageDataElements.length < $scope.tableMaxNumberOfDataElements
-                && !stage.repeatable) {
+                && stage.repeatable) {
             return true;
         }
         return false;
@@ -559,9 +558,11 @@ trackerCapture.controller('DataEntryController',
             }
             else{
                 angular.forEach($scope.programStages, function(stage){
-                    if($scope.stageNeedsEvent(stage)){
-                        availableStages.push(stage);
-                    }
+                    if(eventCreationAction !== $scope.eventCreationActions.schedule || stage.hideDueDate !== true){
+                        if($scope.stageNeedsEvent(stage)){
+                            availableStages.push(stage);
+                        }
+                    }                    
                 });
             }           
             if(availableStages.length === 0) {
@@ -1473,7 +1474,14 @@ trackerCapture.controller('DataEntryController',
                 setStatusColor();
 
                 setEventEditing($scope.currentEvent, $scope.currentStage);
-
+                
+                for(var i=0;i<$scope.allEventsSorted.length;i++){
+                    if($scope.allEventsSorted[i].event === $scope.currentEvent.event){
+                        $scope.allEventsSorted[i] = $scope.currentEvent;
+                        i=$scope.allEventsSorted.length;
+                    }
+                }
+                
                 if ($scope.currentEvent.status === 'COMPLETED') {
 
                     if ($scope.currentStage.remindCompleted) {
@@ -1625,7 +1633,15 @@ trackerCapture.controller('DataEntryController',
                     $scope.currentEvent = null;
                 }
                 
-            }, function(error){               
+            }, function(error){   
+                
+                //temporarily error message because of new audit functionality
+                var dialogOptions = {
+                    headerText: 'error',
+                    bodyText: 'delete_error_audit'                    
+                };
+                DialogService.showDialog({}, dialogOptions);
+                
                 return $q.reject(error);
             });        
     };
@@ -1876,7 +1892,7 @@ trackerCapture.controller('DataEntryController',
         }
     };
     
-    $scope.deleteFile = function(dataElement){
+    $scope.deleteFile = function(ev, dataElement){
         
         if( !dataElement ){            
             var dialogOptions = {
@@ -1897,6 +1913,7 @@ trackerCapture.controller('DataEntryController',
         ModalService.showModal({}, modalOptions).then(function(result){            
             $scope.fileNames[$scope.currentEvent.event][dataElement] = null;
             $scope.currentEvent[dataElement] = null;
+            ev[dataElement] = null;
             $scope.saveDatavalue($scope.prStDes[dataElement], null);
             //$scope.updateEventDataValue($scope.currentEvent, dataElement);
         });
