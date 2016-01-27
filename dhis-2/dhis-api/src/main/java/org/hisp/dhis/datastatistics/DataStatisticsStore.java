@@ -44,5 +44,7 @@ public interface DataStatisticsStore
 
     void getDataStatisticsInterval(Date startIterval, Date endInterval);
 
-    void getDataSatisticsById(int id);
+    DataStatistics getDataStatisticsById(int id);
+
+    void getAllDataStatistics();
 }

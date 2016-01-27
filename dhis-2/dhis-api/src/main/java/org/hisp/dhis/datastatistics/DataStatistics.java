@@ -35,11 +35,24 @@ import org.hisp.dhis.common.BaseIdentifiableObject;
  */
 public class DataStatistics extends BaseIdentifiableObject
 {
-    String text;
+    private int id;
+    private String text;
 
+    public DataStatistics(){}
     public DataStatistics(String text)
     {
         super();
         this.text = text;
+    }
+
+    public int getId(){
+        return id;
+    }
+    public void setText(String s){
+        text = s;
+    }
+
+    public String getText(){
+        return text;
     }
 }
