@@ -1,4 +1,4 @@
-package org.hisp.dhis.query;
+package org.hisp.dhis.dxf2.metadata2;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -28,51 +28,65 @@ package org.hisp.dhis.query;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.schema.Schema;
+import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.query.Query;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public abstract class Criteria
+public class MetadataExportParams
 {
-    protected List<Criterion> criterions = new ArrayList<>();
+    private Set<Class<? extends IdentifiableObject>> classes = new HashSet<>();
 
-    protected final Schema schema;
+    private Map<Class<? extends IdentifiableObject>, Query> queries = new HashMap<>();
 
-    public Criteria( Schema schema )
+    public MetadataExportParams()
     {
-        this.schema = schema;
     }
 
-    public List<Criterion> getCriterions()
+    public Set<Class<? extends IdentifiableObject>> getClasses()
     {
-        return criterions;
+        return classes;
     }
 
-    public Criteria add( Criterion... criterions )
+    public void setClasses( Set<Class<? extends IdentifiableObject>> classes )
     {
-        for ( Criterion criterion : criterions )
+        this.classes = classes;
+    }
+
+    public MetadataExportParams addClass( Class<? extends IdentifiableObject> klass )
+    {
+        classes.add( klass );
+        return this;
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public MetadataExportParams addQuery( Query query )
+    {
+        if ( !query.getSchema().isIdentifiableObject() )
         {
-            if ( !Restriction.class.isInstance( criterion ) )
-            {
-                this.criterions.add( criterion ); // if conjunction/disjunction just add it and move forward
-                continue;
-            }
-
-            Restriction restriction = (Restriction) criterion;
-            this.criterions.add( restriction );
+            return this;
         }
 
+        Class<? extends IdentifiableObject> klass = (Class<? extends IdentifiableObject>) query.getSchema().getKlass();
+        classes.add( klass );
+        queries.put( klass, query );
+
         return this;
     }
 
-    public Criteria add( Collection<Criterion> criterions )
+    public boolean hasQuery( Class<? extends IdentifiableObject> klass )
     {
-        this.criterions.addAll( criterions );
-        return this;
+        return queries.containsKey( klass );
+    }
+
+    public Query getQuery( Class<? extends IdentifiableObject> klass )
+    {
+        return queries.containsKey( klass ) ? queries.get( klass ) : null;
     }
 }

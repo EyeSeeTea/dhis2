@@ -1,4 +1,4 @@
-package org.hisp.dhis.query;
+package org.hisp.dhis.schema;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -28,51 +28,28 @@ package org.hisp.dhis.query;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.schema.Schema;
+import org.hisp.dhis.DhisSpringTest;
+import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import static org.junit.Assert.assertFalse;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public abstract class Criteria
+public class SchemaServiceTest
+    extends DhisSpringTest
 {
-    protected List<Criterion> criterions = new ArrayList<>();
+    private SchemaService schemaService;
 
-    protected final Schema schema;
-
-    public Criteria( Schema schema )
+    @Override
+    protected void setUpTest() throws Exception
     {
-        this.schema = schema;
+        schemaService = (SchemaService) getBean( SchemaService.class.getName() );
     }
 
-    public List<Criterion> getCriterions()
+    @Test
+    public void testHaveSchemas()
     {
-        return criterions;
-    }
-
-    public Criteria add( Criterion... criterions )
-    {
-        for ( Criterion criterion : criterions )
-        {
-            if ( !Restriction.class.isInstance( criterion ) )
-            {
-                this.criterions.add( criterion ); // if conjunction/disjunction just add it and move forward
-                continue;
-            }
-
-            Restriction restriction = (Restriction) criterion;
-            this.criterions.add( restriction );
-        }
-
-        return this;
-    }
-
-    public Criteria add( Collection<Criterion> criterions )
-    {
-        this.criterions.addAll( criterions );
-        return this;
+        assertFalse( schemaService.getSchemas().isEmpty() );
     }
 }

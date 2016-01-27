@@ -28,11 +28,24 @@ package org.hisp.dhis.preheat;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.collect.Sets;
+import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.schema.Property;
+import org.hisp.dhis.schema.PropertyType;
+import org.hisp.dhis.schema.Schema;
+import org.hisp.dhis.schema.SchemaService;
+import org.hisp.dhis.system.util.ReflectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.springframework.transaction.annotation.Transactional;
+import java.util.stream.Collectors;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -40,20 +53,152 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class DefaultPreheatService implements PreheatService
 {
+    @Autowired
+    private SchemaService schemaService;
+
+    @Autowired
+    private IdentifiableObjectManager manager;
+
     @Override
-    public void preheat( Set<Class<?>> classes )
+    @SuppressWarnings( "unchecked" )
+    public Preheat preheat( PreheatParams params )
     {
-        reset();
+        Preheat preheat = new Preheat();
+
+        if ( PreheatMode.ALL == params.getPreheatMode() )
+        {
+            if ( params.getClasses().isEmpty() )
+            {
+                schemaService.getMetadataSchemas().stream().filter( Schema::isIdentifiableObject )
+                    .forEach( schema -> params.getClasses().add( (Class<? extends IdentifiableObject>) schema.getKlass() ) );
+            }
+
+            for ( Class<? extends IdentifiableObject> klass : params.getClasses() )
+            {
+                List<? extends IdentifiableObject> objects = manager.getAllNoAcl( klass ); // should we use getAll here? are we allowed to reference unshared objects?
+                preheat.put( params.getPreheatIdentifier(), objects );
+            }
+        }
+        else if ( PreheatMode.REFERENCE == params.getPreheatMode() )
+        {
+            for ( Class<? extends IdentifiableObject> klass : params.getReferences().keySet() )
+            {
+                Collection<String> identifiers = params.getReferences().get( klass );
+
+                if ( PreheatIdentifier.UID == params.getPreheatIdentifier() )
+                {
+                    List<? extends IdentifiableObject> objects = manager.getByUid( klass, identifiers );
+                    preheat.put( params.getPreheatIdentifier(), objects );
+                }
+                else if ( PreheatIdentifier.CODE == params.getPreheatIdentifier() )
+                {
+                    List<? extends IdentifiableObject> objects = manager.getByCode( klass, identifiers );
+                    preheat.put( params.getPreheatIdentifier(), objects );
+                }
+            }
+        }
+
+        return preheat;
     }
 
     @Override
-    public void preheat( Map<Class<?>, Collection<String>> classes )
+    public void validate( PreheatParams params ) throws PreheatException
     {
-        reset();
+        if ( PreheatMode.ALL == params.getPreheatMode() )
+        {
+            // nothing to validate for now, if classes is empty it will get all metadata classes
+        }
+        else if ( PreheatMode.REFERENCE == params.getPreheatMode() )
+        {
+            if ( params.getReferences().isEmpty() )
+            {
+                throw new PreheatException( "PreheatMode.REFERENCE, but no references was provided." );
+            }
+        }
+        else
+        {
+            throw new PreheatException( "Invalid preheat mode." );
+        }
     }
 
-    private void reset()
+    @Override
+    public Map<Class<? extends IdentifiableObject>, Set<String>> scanObjectForReferences( Object object, PreheatIdentifier identifier )
     {
+        return scanObjectsForReferences( Sets.newHashSet( object ), identifier );
+    }
 
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public Map<Class<? extends IdentifiableObject>, Set<String>> scanObjectsForReferences( Set<Object> objects, PreheatIdentifier identifier )
+    {
+        Map<Class<? extends IdentifiableObject>, Set<String>> map = new HashMap<>();
+
+        if ( objects.isEmpty() )
+        {
+            return map;
+        }
+
+        Schema schema = schemaService.getDynamicSchema( objects.iterator().next().getClass() );
+        List<Property> properties = schema.getProperties().stream()
+            .filter( p -> p.isPersisted() && p.isOwner() && (PropertyType.REFERENCE == p.getPropertyType() || PropertyType.REFERENCE == p.getItemPropertyType()) )
+            .collect( Collectors.toList() );
+
+        properties.forEach( p -> {
+            for ( Object object : objects )
+            {
+                if ( !p.isCollection() )
+                {
+                    Class<? extends IdentifiableObject> klass = (Class<? extends IdentifiableObject>) p.getKlass();
+                    if ( !map.containsKey( klass ) ) map.put( klass, new HashSet<>() );
+                    Object reference = ReflectionUtils.invokeMethod( object, p.getGetterMethod() );
+
+                    if ( reference != null )
+                    {
+                        IdentifiableObject identifiableObject = (IdentifiableObject) reference;
+
+                        if ( PreheatIdentifier.UID == identifier )
+                        {
+                            if ( identifiableObject.getUid() != null )
+                            {
+                                map.get( klass ).add( identifiableObject.getUid() );
+                            }
+                        }
+                        else if ( PreheatIdentifier.CODE == identifier )
+                        {
+                            if ( identifiableObject.getCode() != null )
+                            {
+                                map.get( klass ).add( identifiableObject.getCode() );
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    Class<? extends IdentifiableObject> klass = (Class<? extends IdentifiableObject>) p.getItemKlass();
+                    if ( !map.containsKey( klass ) ) map.put( klass, new HashSet<>() );
+                    Collection<IdentifiableObject> reference = ReflectionUtils.invokeMethod( object, p.getGetterMethod() );
+
+                    for ( IdentifiableObject identifiableObject : reference )
+                    {
+                        if ( PreheatIdentifier.UID == identifier )
+                        {
+                            if ( identifiableObject.getUid() != null )
+                            {
+                                map.get( klass ).add( identifiableObject.getUid() );
+                            }
+                        }
+                        else if ( PreheatIdentifier.CODE == identifier )
+                        {
+                            if ( identifiableObject.getCode() != null )
+                            {
+                                map.get( klass ).add( identifiableObject.getCode() );
+                            }
+                        }
+                    }
+                }
+            }
+        } );
+
+        return map;
     }
 }

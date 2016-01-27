@@ -129,6 +129,10 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
             return;
         }
     }
+
+    $scope.completeEnrollment = function() {
+        $scope.currentEvent.status = !$scope.currentEvent.status;
+    }
     
     //load programs associated with the selected org unit.
     $scope.loadPrograms = function() {
@@ -891,7 +895,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         ModalService.showModal({}, modalOptions).then(function(result){
             
             DHIS2EventFactory.delete(dhis2Event).then(function(data){
-                
+
                 $scope.currentFileNames = [];
                 delete $scope.fileNames[$scope.currentEvent.event];
                 var continueLoop = true, index = -1;
@@ -905,6 +909,16 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                 $scope.dhis2Events.splice(index,1);                
                 $scope.currentEvent = {}; 
                 $scope.fileNames['SINGLE_EVENT'] = [];
+            }, function(error){
+
+                //temporarily error message because of new audit functionality
+                var dialogOptions = {
+                    headerText: 'error',
+                    bodyText: 'delete_error_audit'
+                };
+                DialogService.showDialog({}, dialogOptions);
+
+                return $q.reject(error);
             });
         });        
     };
@@ -1115,6 +1129,19 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
     $scope.formatNumberResult = function(val){        
         return dhis2.validation.isNumber(val) ? val : '';
     };
+    
+    //check if field is hidden
+    $scope.isHidden = function(id) {
+        //In case the field contains a value, we cant hide it. 
+        //If we hid a field with a value, it would falsely seem the user was aware that the value was entered in the UI.
+        if($scope.currentEvent[id]) {
+           return false; 
+        }
+        else {
+            return $scope.hiddenFields[id];
+        }
+    }; 
+    
     
     $scope.saveDatavalue = function(){        
         $scope.executeRules();

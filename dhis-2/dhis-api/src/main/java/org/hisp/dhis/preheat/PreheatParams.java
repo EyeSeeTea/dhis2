@@ -1,4 +1,4 @@
-package org.hisp.dhis.query;
+package org.hisp.dhis.preheat;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -28,51 +28,71 @@ package org.hisp.dhis.query;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.schema.Schema;
+import org.hisp.dhis.common.IdentifiableObject;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public abstract class Criteria
+public class PreheatParams
 {
-    protected List<Criterion> criterions = new ArrayList<>();
+    private PreheatMode preheatMode = PreheatMode.ALL;
 
-    protected final Schema schema;
+    private PreheatIdentifier preheatIdentifier = PreheatIdentifier.UID;
 
-    public Criteria( Schema schema )
+    private Set<Class<? extends IdentifiableObject>> classes = new HashSet<>();
+
+    private Map<Class<? extends IdentifiableObject>, Set<String>> references = new HashMap<>();
+
+    public PreheatParams()
     {
-        this.schema = schema;
     }
 
-    public List<Criterion> getCriterions()
+    public PreheatMode getPreheatMode()
     {
-        return criterions;
+        return preheatMode;
     }
 
-    public Criteria add( Criterion... criterions )
+    public PreheatParams setPreheatMode( PreheatMode preheatMode )
     {
-        for ( Criterion criterion : criterions )
-        {
-            if ( !Restriction.class.isInstance( criterion ) )
-            {
-                this.criterions.add( criterion ); // if conjunction/disjunction just add it and move forward
-                continue;
-            }
-
-            Restriction restriction = (Restriction) criterion;
-            this.criterions.add( restriction );
-        }
-
+        this.preheatMode = preheatMode;
         return this;
     }
 
-    public Criteria add( Collection<Criterion> criterions )
+    public PreheatIdentifier getPreheatIdentifier()
     {
-        this.criterions.addAll( criterions );
+        return preheatIdentifier;
+    }
+
+    public PreheatParams setPreheatIdentifier( PreheatIdentifier preheatIdentifier )
+    {
+        this.preheatIdentifier = preheatIdentifier;
+        return this;
+    }
+
+    public Set<Class<? extends IdentifiableObject>> getClasses()
+    {
+        return classes;
+    }
+
+    public PreheatParams setClasses( Set<Class<? extends IdentifiableObject>> classes )
+    {
+        this.classes = classes;
+        return this;
+    }
+
+    public Map<Class<? extends IdentifiableObject>, Set<String>> getReferences()
+    {
+        return references;
+    }
+
+    public PreheatParams setReferences( Map<Class<? extends IdentifiableObject>, Set<String>> references )
+    {
+        this.references = references;
         return this;
     }
 }

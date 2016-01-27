@@ -1,4 +1,4 @@
-package org.hisp.dhis.query;
+package org.hisp.dhis.preheat;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -28,51 +28,13 @@ package org.hisp.dhis.query;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.schema.Schema;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public abstract class Criteria
+public class PreheatException extends RuntimeException
 {
-    protected List<Criterion> criterions = new ArrayList<>();
-
-    protected final Schema schema;
-
-    public Criteria( Schema schema )
+    public PreheatException( String message )
     {
-        this.schema = schema;
-    }
-
-    public List<Criterion> getCriterions()
-    {
-        return criterions;
-    }
-
-    public Criteria add( Criterion... criterions )
-    {
-        for ( Criterion criterion : criterions )
-        {
-            if ( !Restriction.class.isInstance( criterion ) )
-            {
-                this.criterions.add( criterion ); // if conjunction/disjunction just add it and move forward
-                continue;
-            }
-
-            Restriction restriction = (Restriction) criterion;
-            this.criterions.add( restriction );
-        }
-
-        return this;
-    }
-
-    public Criteria add( Collection<Criterion> criterions )
-    {
-        this.criterions.addAll( criterions );
-        return this;
+        super( message );
     }
 }

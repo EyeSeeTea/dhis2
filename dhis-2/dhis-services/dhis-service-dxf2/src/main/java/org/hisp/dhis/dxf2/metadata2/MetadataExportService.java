@@ -1,4 +1,4 @@
-package org.hisp.dhis.query;
+package org.hisp.dhis.dxf2.metadata2;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -28,51 +28,19 @@ package org.hisp.dhis.query;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.schema.Schema;
+import org.hisp.dhis.common.IdentifiableObject;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public abstract class Criteria
+public interface MetadataExportService
 {
-    protected List<Criterion> criterions = new ArrayList<>();
+    Map<Class<? extends IdentifiableObject>, List<? extends IdentifiableObject>> getMetadata( MetadataExportParams params );
 
-    protected final Schema schema;
+    void validate( MetadataExportParams params ) throws MetadataExportException;
 
-    public Criteria( Schema schema )
-    {
-        this.schema = schema;
-    }
-
-    public List<Criterion> getCriterions()
-    {
-        return criterions;
-    }
-
-    public Criteria add( Criterion... criterions )
-    {
-        for ( Criterion criterion : criterions )
-        {
-            if ( !Restriction.class.isInstance( criterion ) )
-            {
-                this.criterions.add( criterion ); // if conjunction/disjunction just add it and move forward
-                continue;
-            }
-
-            Restriction restriction = (Restriction) criterion;
-            this.criterions.add( restriction );
-        }
-
-        return this;
-    }
-
-    public Criteria add( Collection<Criterion> criterions )
-    {
-        this.criterions.addAll( criterions );
-        return this;
-    }
+    MetadataExportParams getParamsFromMap( Map<String, String> parameters );
 }

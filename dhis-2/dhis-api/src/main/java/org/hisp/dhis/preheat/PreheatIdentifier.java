@@ -1,4 +1,4 @@
-package org.hisp.dhis.query;
+package org.hisp.dhis.preheat;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -28,51 +28,33 @@ package org.hisp.dhis.query;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.schema.Schema;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import org.hisp.dhis.common.IdentifiableObject;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public abstract class Criteria
+public enum PreheatIdentifier
 {
-    protected List<Criterion> criterions = new ArrayList<>();
+    /**
+     * Preheat using UID identifiers.
+     */
+    UID,
 
-    protected final Schema schema;
+    /**
+     * Preheat using CODE identifiers.
+     */
+    CODE;
 
-    public Criteria( Schema schema )
+    <T extends IdentifiableObject> String getIdentifier( T object )
     {
-        this.schema = schema;
-    }
-
-    public List<Criterion> getCriterions()
-    {
-        return criterions;
-    }
-
-    public Criteria add( Criterion... criterions )
-    {
-        for ( Criterion criterion : criterions )
+        switch ( this )
         {
-            if ( !Restriction.class.isInstance( criterion ) )
-            {
-                this.criterions.add( criterion ); // if conjunction/disjunction just add it and move forward
-                continue;
-            }
-
-            Restriction restriction = (Restriction) criterion;
-            this.criterions.add( restriction );
+            case UID:
+                return object.getUid();
+            case CODE:
+                return object.getCode();
         }
 
-        return this;
-    }
-
-    public Criteria add( Collection<Criterion> criterions )
-    {
-        this.criterions.addAll( criterions );
-        return this;
+        throw new RuntimeException( "Unhandled identifier type." );
     }
 }
