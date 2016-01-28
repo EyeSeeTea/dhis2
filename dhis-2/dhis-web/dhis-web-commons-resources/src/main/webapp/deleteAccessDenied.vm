@@ -1,18 +1,16 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-	<title>DHIS 2</title>
-	<style>
-	*
-	{
-		font-family: tahoma, sans-serif;
-	}
+  <title>DHIS 2</title>
+  <style>
+    * {
+      font-family : tahoma, sans-serif;
+    }
 
-	p
-	{
-		font-size: 10pt;
-	}
-	</style>
+    p {
+      font-size : 10pt;
+    }
+  </style>
 </head>
 <body>
 

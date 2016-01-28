@@ -2,11 +2,11 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-   <parent>
+  <parent>
     <groupId>org.hisp.dhis</groupId>
     <artifactId>dhis-web-maintenance</artifactId>
     <version>2.23-SNAPSHOT</version>
-  </parent>  
+  </parent>
 
   <artifactId>dhis-web-maintenance-mobile</artifactId>
   <packaging>war</packaging>
@@ -15,7 +15,7 @@
   <dependencies>
 
     <!-- DHIS -->
-    
+
     <dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-api</artifactId>
@@ -38,12 +38,12 @@
     <dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-service-core</artifactId>
-    </dependency>    
+    </dependency>
     <dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-service-mobile</artifactId>
-    </dependency>    
-    
+    </dependency>
+
   </dependencies>
 
   <properties>

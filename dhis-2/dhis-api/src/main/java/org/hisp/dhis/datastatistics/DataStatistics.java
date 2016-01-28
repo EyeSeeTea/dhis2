@@ -29,30 +29,58 @@ package org.hisp.dhis.datastatistics;
 
 import org.hisp.dhis.common.BaseIdentifiableObject;
 
+import java.util.Date;
+
 /**
  * @author Julie Hill Roa
  * @author Yrjan A. F. Fraschetti
  */
 public class DataStatistics extends BaseIdentifiableObject
 {
-    private int id;
+    //private int id;
     private String text;
 
     public DataStatistics(){}
     public DataStatistics(String text)
     {
+        this.text = text;
+    }
+    public DataStatistics(String text, String uid, String code,
+        Date created, Date lastUpdated)
+    {
         super();
         this.text = text;
+
+        super.setUid( uid );
+        super.setCode( code );
+        super.setCreated( created );
+        super.setLastUpdated( lastUpdated );
     }
 
     public int getId(){
         return id;
     }
+
+    public String getText(){
+        return text;
+    }
+
     public void setText(String s){
         text = s;
     }
 
-    public String getText(){
-        return text;
+    @Override
+    public String toString()
+    {
+        return "{" +
+            "\"class\":\"" + getClass() + "\", " +
+            "\"id\":\"" + id + "\", " +
+            "\"text\":\"" + text + "\", " +
+            "\"uid\":\"" + uid + "\", " +
+            "\"code\":\"" + code + "\", " +
+            "\"name\":\"" + name + "\", " +
+            "\"created\":\"" + created + "\", " +
+            "\"lastUpdated\":\"" + lastUpdated + "\" " +
+            "}";
     }
 }

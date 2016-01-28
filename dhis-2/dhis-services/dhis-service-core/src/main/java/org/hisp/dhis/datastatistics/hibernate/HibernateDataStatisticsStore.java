@@ -1,8 +1,10 @@
 package org.hisp.dhis.datastatistics.hibernate;
 
+import org.hibernate.SessionFactory;
 import org.hisp.dhis.datastatistics.DataStatistics;
 import org.hisp.dhis.datastatistics.DataStatisticsStore;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 import javax.mail.Session;

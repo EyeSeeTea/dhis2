@@ -1,4 +1,3 @@
-
 #if( $dataSet.alternativeName )
     #set( $dataSetName = $dataSet.alternativeName )
 #else
@@ -6,59 +5,61 @@
 #end
 
 <div class="header-box" align="center">
-    <h3 style="text-align: left; background-color: #719953; border-color: #719953; color: white;">$organisationUnit.name</h3>
-    <p style="text-align: left;">
-        $dataSetName <br />
-        $period.name
-    </p>
+  <h3 style="text-align: left; background-color: #719953; border-color: #719953; color: white;">$organisationUnit.name</h3>
+  <p style="text-align: left;">
+      $dataSetName <br/>
+      $period.name
+  </p>
 </div>
 
 #if( $validated == true )
 <div class="header-box" align="center">
-    <h3 style="text-align: left; background-color: #719953; border-color: #719953; color: white;">$i18n.getString( "saved_section" )</h3>
-    <p style="text-align: left;">
-        $sectionName
-    </p>
+  <h3 style="text-align: left; background-color: #719953; border-color: #719953; color: white;">$i18n.getString( "saved_section" )</h3>
+  <p style="text-align: left;">
+      $sectionName
+  </p>
 </div>
 #end
 
 <h2>$i18n.getString( "sections" )</h2>
 
 <p>
-    <ul>
+<ul>
     #if( $dataSet.sections.size() > 0 )
         #foreach( $section in $dataSet.sections )
-            <li>
-                <a href="dataEntrySection.action?organisationUnitId=$organisationUnitId&dataSetId=$dataSetId&periodId=$periodId&sectionId=$section.id">$i18n.getString( $section.displayName )</a>
-            </li>
+          <li>
+            <a href="dataEntrySection.action?organisationUnitId=$organisationUnitId&dataSetId=$dataSetId&periodId=$periodId&sectionId=$section.id">$i18n.getString( $section.displayName )</a>
+          </li>
         #end
     #else
-        <a href="dataEntrySection.action?organisationUnitId=$organisationUnitId&dataSetId=$dataSetId&periodId=$periodId">$i18n.getString( "Default" )</a>
+      <a href="dataEntrySection.action?organisationUnitId=$organisationUnitId&dataSetId=$dataSetId&periodId=$periodId">$i18n.getString(
+          "Default" )</a>
     #end
-    </ul>
+</ul>
 </p>
 
 <form method="GET" action="markComplete.action">
 
-<input type="hidden" id="organisationUnitId" name="organisationUnitId" value="$organisationUnitId" />
-<input type="hidden" id="dataSetId" name="dataSetId" value="$dataSetId" />
-<input type="hidden" id="periodId" name="periodId" value="$periodId" />
+  <input type="hidden" id="organisationUnitId" name="organisationUnitId" value="$organisationUnitId"/>
+  <input type="hidden" id="dataSetId" name="dataSetId" value="$dataSetId"/>
+  <input type="hidden" id="periodId" name="periodId" value="$periodId"/>
 
-<div class="header-box" align="center">
+  <div class="header-box" align="center">
     <p>
-        <input type="hidden" name="formComplete" value="true" />
-        <input type="submit" style="width: 100%;" value="$i18n.getString("form_complete")" />
+      <input type="hidden" name="formComplete" value="true"/>
+      <input type="submit" style="width: 100%;" value="$i18n.getString("form_complete")"/>
     </p>
-</div>
+  </div>
 
 </form>
 
 <div id="footer">
-    <h2>$i18n.getString( "navigate_to" )</h2>
-    <ul>
-        <li><a href="selectPeriod.action?organisationUnitId=$organisationUnitId&dataSetId=$dataSetId&periodId=$periodId">$i18n.getString("available_periods")</a></li>
-        <li><a href="index.action">$i18n.getString("home")</a></li>
-    </ul>
+  <h2>$i18n.getString( "navigate_to" )</h2>
+  <ul>
+    <li><a href="selectPeriod.action?organisationUnitId=$organisationUnitId&dataSetId=$dataSetId&periodId=$periodId">$i18n.getString(
+        "available_periods")</a></li>
+    <li><a href="index.action">$i18n.getString("home")</a></li>
+  </ul>
 </div>
 
 

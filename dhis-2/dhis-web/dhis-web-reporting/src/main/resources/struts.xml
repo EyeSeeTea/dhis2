@@ -13,7 +13,7 @@
       <param name="page">/dhis-web-reporting/index.vm</param>
       <param name="menu">/dhis-web-reporting/menu.vm</param>
     </action>
-    
+
     <!-- Document -->
 
     <action name="saveDocument" class="org.hisp.dhis.reporting.document.action.SaveDocumentAction">
@@ -96,7 +96,7 @@
     <action name="getReportTemplate" class="org.hisp.dhis.reporting.reportviewer.action.GetReportTemplateAction">
       <result name="success" type="outputStreamResult" />
     </action>
-    
+
     <action name="generateHtmlReport" class="org.hisp.dhis.reporting.reportviewer.action.GetReportAndParamsAction">
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-reporting/renderHtmlReport.vm</param>
@@ -187,7 +187,7 @@
       <result name="xls" type="gridXlsResult" />
       <result name="pdf" type="gridPdfResult" />
     </action>
-    
+
     <!-- Data Approval -->
 
     <action name="showDataApprovalForm" class="org.hisp.dhis.reporting.dataapproval.action.GetDataApprovalOptionsAction">
@@ -197,7 +197,7 @@
       <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/dataSetReport.js,javascript/dataApproval.js</param>
       <param name="stylesheets">style/dhis-web-reporting.css</param>
     </action>
-    
+
     <!-- Organisation Unit Distribution -->
 
     <action name="getOrgUnitDistribution" class="org.hisp.dhis.reporting.orgunitdistribution.action.GetOrgUnitDistributionAction">

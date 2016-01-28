@@ -21,8 +21,8 @@
       <result name="success" type="velocity">/dhis-web-sms/smssuccess.vm</result>
       <!--<result name="error" type="velocity">/dhis-web-sms/smserror.vm</result>-->
       <result name="error" type="httpheader">
-      	 <param name="error">500</param>
-  		 <param name="errorMessage">Unable to save sms</param>
+        <param name="error">500</param>
+        <param name="errorMessage">Unable to save sms</param>
       </result>
     </action>
 

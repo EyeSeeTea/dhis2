@@ -390,9 +390,9 @@
           <textKeys>
             <param>.title.</param>
           </textKeys>
-          <customPatterns/>
+          <customPatterns />
           <formatter>messageFormat</formatter>
-          <innerResourceRegex/>
+          <innerResourceRegex />
         </configuration>
         <reportSets>
           <reportSet>

@@ -2,12 +2,12 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-   <parent>
+  <parent>
     <groupId>org.hisp.dhis</groupId>
     <artifactId>dhis-web</artifactId>
     <version>2.23-SNAPSHOT</version>
   </parent>
-  
+
   <artifactId>dhis-web-api-mobile</artifactId>
   <packaging>jar</packaging>
   <name>DHIS Mobile API</name>
@@ -17,10 +17,10 @@
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
-    </dependency>	
+    </dependency>
 
     <!-- DHIS -->
-    
+
     <dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-service-mobile</artifactId>
@@ -37,15 +37,15 @@
       <groupId>com.jcraft</groupId>
       <artifactId>jzlib</artifactId>
     </dependency>
-    
+
     <!-- Test -->
-    
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
-    
+
   </dependencies>
 
   <properties>
