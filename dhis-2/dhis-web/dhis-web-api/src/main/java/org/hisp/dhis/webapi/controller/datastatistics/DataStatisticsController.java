@@ -16,7 +16,8 @@ import java.lang.System;
 
 
 /**
- * @Author yrjanaf
+ * @author Yrjan A. F. Fraschetti
+ * @author Julie Hill Roa
  */
 
 @Controller
@@ -29,18 +30,30 @@ public class DataStatisticsController
 
     @RequestMapping(value = "/datastatistics/{id}", method = RequestMethod.GET)
     public @ResponseBody DataStatistics helloworld(@PathVariable int id){
-        System.out.println("\n\n\n\nid inn: " + id);
         DataStatistics ds = hibernateDataStatisticsStore.getDataStatisticsById(id);
-        System.out.println("\n\n\n\nhentet ut:  " + ds + " text: "+ds.getText());
         return ds;
     }
 
-    @RequestMapping(value = "/datastatistics/text", method = RequestMethod.POST)
-    public @ResponseBody String setText(@RequestParam String text){
-        System.out.println("\n\n\n\n" + text+ "\n\n\n\n");
+    @RequestMapping(value = "/datastatistics/text", method = RequestMethod.GET)
+    public @ResponseBody String createObject(@RequestParam String text){
+
         DataStatistics dataStatistics = new DataStatistics(text);
-        System.out.println("\n\n\n\n" + dataStatistics.getText() + "\n\n\n\n");
         hibernateDataStatisticsStore.addDataStatistics(dataStatistics);
         return "Hello World! Det funka!";
     }
+
+
+    @RequestMapping(value = "/datastatistics/update", method = RequestMethod.GET)
+    public @ResponseBody String updateText(@RequestParam String text){
+        hibernateDataStatisticsStore.updateDataStatisticsTest(text);
+        return "Hello World! Det funka å oppdtere!";
+    }
+
+    @RequestMapping(value = "/datastatistics/delete/{id}", method = RequestMethod.GET)
+    public @ResponseBody String delete(@PathVariable int id){
+        DataStatistics ds =  hibernateDataStatisticsStore.getDataStatisticsById(id);
+        hibernateDataStatisticsStore.deleteDataStatistics(ds);
+        return "Hello World! Det funka å slette!";
+    }
+
 }

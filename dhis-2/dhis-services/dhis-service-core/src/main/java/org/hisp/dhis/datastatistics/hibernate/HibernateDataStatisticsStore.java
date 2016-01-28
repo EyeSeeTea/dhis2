@@ -1,17 +1,17 @@
 package org.hisp.dhis.datastatistics.hibernate;
 
-import org.hibernate.SessionFactory;
+import org.hibernate.Session;
 import org.hisp.dhis.datastatistics.DataStatistics;
 import org.hisp.dhis.datastatistics.DataStatisticsStore;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
-import org.springframework.beans.factory.annotation.Autowired;
 
 
-import javax.mail.Session;
+
 import java.util.Date;
 
 /**
- * Created by yrjanaff on 19.01.2016.
+ * @author Yrjan A. F. Fraschetti
+ * @author Julie Hill Roa
  */
 public class HibernateDataStatisticsStore extends HibernateGenericStore<DataStatistics> implements DataStatisticsStore
 {
@@ -19,27 +19,34 @@ public class HibernateDataStatisticsStore extends HibernateGenericStore<DataStat
     @Override
     public void addDataStatistics( DataStatistics dataStatistics )
     {
-        sessionFactory.getCurrentSession().beginTransaction();
-        System.out.println("\n\n\n\n i hibernatestore: " + dataStatistics.getText());
-        System.out.println("Er det no SessionFactory?:" + sessionFactory);
-        System.out.println("Er det no currentSession?:" + sessionFactory.getCurrentSession());
-        int id = (Integer)sessionFactory.getCurrentSession().save(dataStatistics);
-        sessionFactory.getCurrentSession().getTransaction().commit();
-
-        System.out.println("Etter save: " + id);
-
+        Session session = sessionFactory.openSession();
+        session.save(dataStatistics);
+        session.flush();
     }
 
     @Override
     public void updateDataStatistics( DataStatistics dataStatistics )
     {
-
+        Session session = sessionFactory.openSession();
+        session.update(dataStatistics);
+        session.flush();
+    }
+    @Override
+    public void updateDataStatisticsTest( String text )
+    {
+        Session session = sessionFactory.openSession();
+        DataStatistics ds = (DataStatistics)session.get(DataStatistics.class, 1);
+        ds.setText(text);
+        session.update(ds);
+        session.flush();
     }
 
     @Override
     public void deleteDataStatistics( DataStatistics dataStatistics )
     {
-
+        Session session = sessionFactory.openSession();
+        session.delete(dataStatistics);
+        session.flush();
     }
 
     @Override
@@ -51,7 +58,6 @@ public class HibernateDataStatisticsStore extends HibernateGenericStore<DataStat
     @Override
     public DataStatistics getDataStatisticsById( int id )
     {
-        System.out.println("\n\n\n\n i hibernatestore for å hente ut: " + id);
        return (DataStatistics) sessionFactory.getCurrentSession().get(DataStatistics.class,id);
     }
 

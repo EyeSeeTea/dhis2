@@ -37,7 +37,6 @@ import java.util.Date;
  */
 public class DataStatistics extends BaseIdentifiableObject
 {
-    //private int id;
     private String text;
 
     public DataStatistics(){}
@@ -57,13 +56,10 @@ public class DataStatistics extends BaseIdentifiableObject
         super.setLastUpdated( lastUpdated );
     }
 
-    public int getId(){
-        return id;
-    }
-
     public String getText(){
         return text;
     }
+
 
     public void setText(String s){
         text = s;
