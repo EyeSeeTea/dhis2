@@ -1,7 +1,8 @@
 package org.hisp.dhis.datastatistics;
 
 /**
- * Created by yrjanaff on 19.01.2016.
+ * @author Yrjan A. F. Fraschetti
+ * @author Julie Hill Roa
  */
 public class DataStatisticsEvent {
 }

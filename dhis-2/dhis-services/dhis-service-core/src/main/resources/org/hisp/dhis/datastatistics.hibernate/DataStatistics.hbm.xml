@@ -7,12 +7,13 @@
 
 <hibernate-mapping>
     <class name="org.hisp.dhis.datastatistics.DataStatistics" table="datastatistics">
-
+        <cache usage="read-write" />
         <id name="id" column="statisticsid">
             <generator class="native" />
         </id>
+        <property name="text" column="stattext" type="string" />
         &identifiableProperties;
-        <property name="text" column="stattext" type="text" />
+
 
     </class>
 </hibernate-mapping>
