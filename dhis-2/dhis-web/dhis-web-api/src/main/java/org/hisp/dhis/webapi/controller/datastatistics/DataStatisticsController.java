@@ -31,7 +31,7 @@ public class DataStatisticsController
     @RequestMapping(value = "/datastatistics/{id}", method = RequestMethod.GET)
     public @ResponseBody DataStatistics helloworld(@PathVariable int id){
         DataStatistics ds = hibernateDataStatisticsStore.getDataStatisticsById(id);
-        return ds;
+        return ds.;
     }
 
     @RequestMapping(value = "/datastatistics/text", method = RequestMethod.GET)

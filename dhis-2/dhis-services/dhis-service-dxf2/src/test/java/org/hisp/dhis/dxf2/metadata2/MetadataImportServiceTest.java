@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.render;
+package org.hisp.dhis.dxf2.metadata2;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -28,34 +28,42 @@ package org.hisp.dhis.dxf2.render;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import org.hisp.dhis.DhisSpringTest;
+import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.constant.Constant;
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface RenderService
+public class MetadataImportServiceTest
+    extends DhisSpringTest
 {
-    void toJson( OutputStream output, Object value ) throws IOException;
+    @Autowired
+    private MetadataImportService metadataImportService;
 
-    void toJson( OutputStream output, Object value, Class<?> klass ) throws IOException;
+    @Autowired
+    private IdentifiableObjectManager manager;
 
-    void toJsonP( OutputStream output, Object value, String callback ) throws IOException;
+    @Test
+    public void testConstantImport()
+    {
+        Constant constant1 = fromJson( "dxf2/constant1.json", Constant.class );
+        Constant constant2 = fromJson( "dxf2/constant2.json", Constant.class );
 
-    void toJsonP( OutputStream output, Object value, Class<?> klass, String callback ) throws IOException;
+        MetadataImportParams params = new MetadataImportParams();
+        params.addObject( constant1 );
+        params.addObject( constant2 );
 
-    <T> T fromJson( InputStream input, Class<T> klass ) throws IOException;
+        metadataImportService.importMetadata( params );
 
-    <T> T fromJson( String input, Class<T> klass ) throws IOException;
+        constant1 = manager.get( Constant.class, "abcdefghijA" );
+        constant2 = manager.get( Constant.class, "abcdefghijB" );
 
-    <T> void toXml( OutputStream output, T value ) throws IOException;
-
-    <T> void toXml( OutputStream output, T value, Class<?> klass ) throws IOException;
-
-    <T> T fromXml( InputStream input, Class<T> klass ) throws IOException;
-
-    <T> T fromXml( String input, Class<T> klass ) throws IOException;
-
-    boolean isValidJson(String json) throws IOException;
+        assertNotNull( constant1 );
+        assertNotNull( constant2 );
+    }
 }

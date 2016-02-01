@@ -104,7 +104,7 @@ public class DefaultPreheatService implements PreheatService
     @Override
     public void validate( PreheatParams params ) throws PreheatException
     {
-        if ( PreheatMode.ALL == params.getPreheatMode() )
+        if ( PreheatMode.ALL == params.getPreheatMode() || PreheatMode.NONE == params.getPreheatMode() )
         {
             // nothing to validate for now, if classes is empty it will get all metadata classes
         }
@@ -122,14 +122,14 @@ public class DefaultPreheatService implements PreheatService
     }
 
     @Override
-    public Map<Class<? extends IdentifiableObject>, Set<String>> scanObjectForReferences( Object object, PreheatIdentifier identifier )
+    public Map<Class<? extends IdentifiableObject>, Set<String>> collectReferences( Object object, PreheatIdentifier identifier )
     {
-        return scanObjectsForReferences( Sets.newHashSet( object ), identifier );
+        return collectReferences( Sets.newHashSet( object ), identifier );
     }
 
     @Override
     @SuppressWarnings( "unchecked" )
-    public Map<Class<? extends IdentifiableObject>, Set<String>> scanObjectsForReferences( Set<Object> objects, PreheatIdentifier identifier )
+    public Map<Class<? extends IdentifiableObject>, Set<String>> collectReferences( Set<Object> objects, PreheatIdentifier identifier )
     {
         Map<Class<? extends IdentifiableObject>, Set<String>> map = new HashMap<>();
 
@@ -156,19 +156,16 @@ public class DefaultPreheatService implements PreheatService
                     {
                         IdentifiableObject identifiableObject = (IdentifiableObject) reference;
 
+                        String uid = identifiableObject.getUid();
+                        String code = identifiableObject.getCode();
+
                         if ( PreheatIdentifier.UID == identifier )
                         {
-                            if ( identifiableObject.getUid() != null )
-                            {
-                                map.get( klass ).add( identifiableObject.getUid() );
-                            }
+                            if ( uid != null ) map.get( klass ).add( uid );
                         }
                         else if ( PreheatIdentifier.CODE == identifier )
                         {
-                            if ( identifiableObject.getCode() != null )
-                            {
-                                map.get( klass ).add( identifiableObject.getCode() );
-                            }
+                            if ( code != null ) map.get( klass ).add( code );
                         }
                     }
                 }
@@ -180,19 +177,16 @@ public class DefaultPreheatService implements PreheatService
 
                     for ( IdentifiableObject identifiableObject : reference )
                     {
+                        String uid = identifiableObject.getUid();
+                        String code = identifiableObject.getCode();
+
                         if ( PreheatIdentifier.UID == identifier )
                         {
-                            if ( identifiableObject.getUid() != null )
-                            {
-                                map.get( klass ).add( identifiableObject.getUid() );
-                            }
+                            if ( uid != null ) map.get( klass ).add( uid );
                         }
                         else if ( PreheatIdentifier.CODE == identifier )
                         {
-                            if ( identifiableObject.getCode() != null )
-                            {
-                                map.get( klass ).add( identifiableObject.getCode() );
-                            }
+                            if ( code != null ) map.get( klass ).add( code );
                         }
                     }
                 }
@@ -200,5 +194,40 @@ public class DefaultPreheatService implements PreheatService
         } );
 
         return map;
+    }
+
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public <T extends IdentifiableObject> void connectReferences( T object, Preheat preheat, PreheatIdentifier identifier )
+    {
+        if ( object == null )
+        {
+            return;
+        }
+
+        Schema schema = schemaService.getDynamicSchema( object.getClass() );
+        schema.getProperties().stream()
+            .filter( p -> p.isPersisted() && p.isOwner() && (PropertyType.REFERENCE == p.getPropertyType() || PropertyType.REFERENCE == p.getItemPropertyType()) )
+            .forEach( p -> {
+                if ( !p.isCollection() )
+                {
+                    T refObject = ReflectionUtils.invokeMethod( object, p.getGetterMethod() );
+                    T ref = preheat.get( identifier, refObject );
+                    ReflectionUtils.invokeMethod( object, p.getSetterMethod(), ref );
+                }
+                else
+                {
+                    Collection<T> objects = ReflectionUtils.newCollectionInstance( p.getKlass() );
+                    Collection<IdentifiableObject> refObjects = ReflectionUtils.invokeMethod( object, p.getGetterMethod() );
+
+                    for ( IdentifiableObject reference : refObjects )
+                    {
+                        T ref = preheat.get( identifier, (T) reference );
+                        if ( ref != null ) objects.add( ref );
+                    }
+
+                    ReflectionUtils.invokeMethod( object, p.getSetterMethod(), objects );
+                }
+            } );
     }
 }

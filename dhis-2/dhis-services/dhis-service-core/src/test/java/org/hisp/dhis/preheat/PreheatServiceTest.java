@@ -42,7 +42,9 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -94,10 +96,10 @@ public class PreheatServiceTest
     }
 
     @Test
-    public void testScanNoObjectsDE()
+    public void testCollectNoObjectsDE()
     {
         DataElement dataElement = createDataElement( 'A' );
-        Map<Class<? extends IdentifiableObject>, Set<String>> references = preheatService.scanObjectForReferences( dataElement, PreheatIdentifier.UID );
+        Map<Class<? extends IdentifiableObject>, Set<String>> references = preheatService.collectReferences( dataElement, PreheatIdentifier.UID );
 
         assertTrue( references.containsKey( OptionSet.class ) );
         assertTrue( references.containsKey( LegendSet.class ) );
@@ -106,17 +108,17 @@ public class PreheatServiceTest
     }
 
     @Test
-    public void testScanNoObjectsDEG()
+    public void testCollectNoObjectsDEG()
     {
         DataElementGroup dataElementGroup = createDataElementGroup( 'A' );
-        Map<Class<? extends IdentifiableObject>, Set<String>> references = preheatService.scanObjectForReferences( dataElementGroup, PreheatIdentifier.UID );
+        Map<Class<? extends IdentifiableObject>, Set<String>> references = preheatService.collectReferences( dataElementGroup, PreheatIdentifier.UID );
 
         assertTrue( references.containsKey( DataElement.class ) );
         assertTrue( references.containsKey( User.class ) );
     }
 
     @Test
-    public void testScanObjectReferenceUidDEG()
+    public void testCollectReferenceUidDEG1()
     {
         DataElementGroup deg1 = createDataElementGroup( 'A' );
 
@@ -132,7 +134,7 @@ public class PreheatServiceTest
 
         deg1.setUser( user );
 
-        Map<Class<? extends IdentifiableObject>, Set<String>> references = preheatService.scanObjectForReferences( deg1, PreheatIdentifier.UID );
+        Map<Class<? extends IdentifiableObject>, Set<String>> references = preheatService.collectReferences( deg1, PreheatIdentifier.UID );
 
         assertTrue( references.containsKey( DataElement.class ) );
         assertTrue( references.containsKey( User.class ) );
@@ -148,7 +150,7 @@ public class PreheatServiceTest
     }
 
     @Test
-    public void testScanObjectsReferenceUidDEG()
+    public void testCollectReferenceUidDEG2()
     {
         DataElementGroup deg1 = createDataElementGroup( 'A' );
         DataElementGroup deg2 = createDataElementGroup( 'B' );
@@ -161,7 +163,7 @@ public class PreheatServiceTest
         deg1.addDataElement( de2 );
         deg2.addDataElement( de3 );
 
-        Map<Class<? extends IdentifiableObject>, Set<String>> references = preheatService.scanObjectsForReferences(
+        Map<Class<? extends IdentifiableObject>, Set<String>> references = preheatService.collectReferences(
             Sets.newHashSet( deg1, deg2 ), PreheatIdentifier.UID );
 
         assertTrue( references.containsKey( DataElement.class ) );
@@ -173,7 +175,7 @@ public class PreheatServiceTest
     }
 
     @Test
-    public void testScanObjectReferenceCodeDEG()
+    public void testCollectReferenceCodeDEG1()
     {
         DataElementGroup dataElementGroup = createDataElementGroup( 'A' );
 
@@ -189,7 +191,7 @@ public class PreheatServiceTest
 
         dataElementGroup.setUser( user );
 
-        Map<Class<? extends IdentifiableObject>, Set<String>> references = preheatService.scanObjectForReferences( dataElementGroup, PreheatIdentifier.CODE );
+        Map<Class<? extends IdentifiableObject>, Set<String>> references = preheatService.collectReferences( dataElementGroup, PreheatIdentifier.CODE );
 
         assertTrue( references.containsKey( DataElement.class ) );
         assertTrue( references.containsKey( User.class ) );
@@ -205,7 +207,7 @@ public class PreheatServiceTest
     }
 
     @Test
-    public void testScanObjectsReferenceCodeDEG()
+    public void testCollectReferenceCodeDEG2()
     {
         DataElementGroup deg1 = createDataElementGroup( 'A' );
         DataElementGroup deg2 = createDataElementGroup( 'B' );
@@ -218,7 +220,7 @@ public class PreheatServiceTest
         deg1.addDataElement( de2 );
         deg2.addDataElement( de3 );
 
-        Map<Class<? extends IdentifiableObject>, Set<String>> references = preheatService.scanObjectsForReferences(
+        Map<Class<? extends IdentifiableObject>, Set<String>> references = preheatService.collectReferences(
             Sets.newHashSet( deg1, deg2 ), PreheatIdentifier.CODE );
 
         assertTrue( references.containsKey( DataElement.class ) );
@@ -421,28 +423,10 @@ public class PreheatServiceTest
     @SuppressWarnings( "unchecked" )
     public void testPreheatReferenceWithScanUID()
     {
-        DataElementGroup dataElementGroup = new DataElementGroup( "DataElementGroupA" );
-        dataElementGroup.setAutoFields();
+        DataElementGroup dataElementGroup = fromJson( "preheat/degAUidRef.json", DataElementGroup.class );
+        defaultSetup();
 
-        DataElement de1 = createDataElement( 'A' );
-        DataElement de2 = createDataElement( 'B' );
-        DataElement de3 = createDataElement( 'C' );
-
-        manager.save( de1 );
-        manager.save( de2 );
-        manager.save( de3 );
-
-        User user = createUser( 'A' );
-        manager.save( user );
-
-        dataElementGroup.addDataElement( de1 );
-        dataElementGroup.addDataElement( de2 );
-        dataElementGroup.addDataElement( de3 );
-
-        dataElementGroup.setUser( user );
-        manager.save( dataElementGroup );
-
-        Map<Class<? extends IdentifiableObject>, Set<String>> references = preheatService.scanObjectForReferences( dataElementGroup, PreheatIdentifier.UID );
+        Map<Class<? extends IdentifiableObject>, Set<String>> references = preheatService.collectReferences( dataElementGroup, PreheatIdentifier.UID );
 
         PreheatParams params = new PreheatParams();
         params.setPreheatMode( PreheatMode.REFERENCE );
@@ -457,10 +441,152 @@ public class PreheatServiceTest
         assertTrue( preheat.isEmpty( PreheatIdentifier.UID, DataElementGroup.class ) );
         assertFalse( preheat.isEmpty( PreheatIdentifier.UID, User.class ) );
 
-        assertTrue( preheat.containsKey( PreheatIdentifier.UID, DataElement.class, de1.getUid() ) );
-        assertTrue( preheat.containsKey( PreheatIdentifier.UID, DataElement.class, de2.getUid() ) );
-        assertTrue( preheat.containsKey( PreheatIdentifier.UID, DataElement.class, de3.getUid() ) );
-        assertFalse( preheat.containsKey( PreheatIdentifier.UID, DataElementGroup.class, dataElementGroup.getUid() ) );
-        assertTrue( preheat.containsKey( PreheatIdentifier.UID, User.class, user.getUid() ) );
+        assertTrue( preheat.containsKey( PreheatIdentifier.UID, DataElement.class, "deabcdefghA" ) );
+        assertTrue( preheat.containsKey( PreheatIdentifier.UID, DataElement.class, "deabcdefghB" ) );
+        assertTrue( preheat.containsKey( PreheatIdentifier.UID, DataElement.class, "deabcdefghC" ) );
+        assertTrue( preheat.containsKey( PreheatIdentifier.UID, User.class, "userabcdefA" ) );
+    }
+
+    @Test
+    @SuppressWarnings( "unchecked" )
+    public void testPreheatReferenceWithScanCODE()
+    {
+        DataElementGroup dataElementGroup = fromJson( "preheat/degACodeRef.json", DataElementGroup.class );
+        defaultSetup();
+
+        Map<Class<? extends IdentifiableObject>, Set<String>> references = preheatService.collectReferences( dataElementGroup, PreheatIdentifier.CODE );
+
+        PreheatParams params = new PreheatParams();
+        params.setPreheatIdentifier( PreheatIdentifier.CODE );
+        params.setPreheatMode( PreheatMode.REFERENCE );
+        params.setReferences( references );
+
+        preheatService.validate( params );
+        Preheat preheat = preheatService.preheat( params );
+
+        assertFalse( preheat.isEmpty() );
+        assertFalse( preheat.isEmpty( PreheatIdentifier.CODE ) );
+        assertFalse( preheat.isEmpty( PreheatIdentifier.CODE, DataElement.class ) );
+        assertTrue( preheat.isEmpty( PreheatIdentifier.CODE, DataElementGroup.class ) );
+        assertFalse( preheat.isEmpty( PreheatIdentifier.CODE, User.class ) );
+
+        assertTrue( preheat.containsKey( PreheatIdentifier.CODE, DataElement.class, "DataElementCodeA" ) );
+        assertTrue( preheat.containsKey( PreheatIdentifier.CODE, DataElement.class, "DataElementCodeB" ) );
+        assertTrue( preheat.containsKey( PreheatIdentifier.CODE, DataElement.class, "DataElementCodeC" ) );
+        assertTrue( preheat.containsKey( PreheatIdentifier.CODE, User.class, "UserCodeA" ) );
+    }
+
+    @Test
+    @SuppressWarnings( "unchecked" )
+    public void testPreheatReferenceConnectUID()
+    {
+        DataElementGroup dataElementGroup = fromJson( "preheat/degAUidRef.json", DataElementGroup.class );
+        defaultSetup();
+
+        Map<Class<? extends IdentifiableObject>, Set<String>> references = preheatService.collectReferences( dataElementGroup, PreheatIdentifier.UID );
+
+        PreheatParams params = new PreheatParams();
+        params.setPreheatMode( PreheatMode.REFERENCE );
+        params.setReferences( references );
+
+        preheatService.validate( params );
+        Preheat preheat = preheatService.preheat( params );
+        preheatService.connectReferences( dataElementGroup, preheat, PreheatIdentifier.UID );
+
+        List<DataElement> members = new ArrayList<>( dataElementGroup.getMembers() );
+
+        assertEquals( "DataElementA", members.get( 0 ).getName() );
+        assertEquals( "DataElementCodeA", members.get( 0 ).getCode() );
+        assertEquals( "DataElementB", members.get( 1 ).getName() );
+        assertEquals( "DataElementCodeB", members.get( 1 ).getCode() );
+        assertEquals( "DataElementC", members.get( 2 ).getName() );
+        assertEquals( "DataElementCodeC", members.get( 2 ).getCode() );
+
+        assertEquals( "FirstNameA", dataElementGroup.getUser().getFirstName() );
+        assertEquals( "SurnameA", dataElementGroup.getUser().getSurname() );
+        assertEquals( "UserCodeA", dataElementGroup.getUser().getCode() );
+    }
+
+    @Test
+    @SuppressWarnings( "unchecked" )
+    public void testPreheatReferenceConnectCODE()
+    {
+        DataElementGroup dataElementGroup = fromJson( "preheat/degACodeRef.json", DataElementGroup.class );
+        defaultSetup();
+
+        Map<Class<? extends IdentifiableObject>, Set<String>> references = preheatService.collectReferences( dataElementGroup, PreheatIdentifier.CODE );
+
+        PreheatParams params = new PreheatParams();
+        params.setPreheatIdentifier( PreheatIdentifier.CODE );
+        params.setPreheatMode( PreheatMode.REFERENCE );
+        params.setReferences( references );
+
+        preheatService.validate( params );
+        Preheat preheat = preheatService.preheat( params );
+        preheatService.connectReferences( dataElementGroup, preheat, PreheatIdentifier.CODE );
+
+        manager.update( dataElementGroup );
+
+        List<DataElement> members = new ArrayList<>( dataElementGroup.getMembers() );
+
+        assertEquals( "DataElementA", members.get( 0 ).getName() );
+        assertEquals( "DataElementCodeA", members.get( 0 ).getCode() );
+        assertEquals( "DataElementB", members.get( 1 ).getName() );
+        assertEquals( "DataElementCodeB", members.get( 1 ).getCode() );
+        assertEquals( "DataElementC", members.get( 2 ).getName() );
+        assertEquals( "DataElementCodeC", members.get( 2 ).getCode() );
+
+        assertEquals( "FirstNameA", dataElementGroup.getUser().getFirstName() );
+        assertEquals( "SurnameA", dataElementGroup.getUser().getSurname() );
+        assertEquals( "UserCodeA", dataElementGroup.getUser().getCode() );
+    }
+
+    @Test
+    @SuppressWarnings( "unchecked" )
+    @Ignore
+    public void testPreheatReferenceConnectAUTO()
+    {
+        DataElementGroup dataElementGroup = fromJson( "preheat/degAAutoRef.json", DataElementGroup.class );
+        defaultSetup();
+
+        Map<Class<? extends IdentifiableObject>, Set<String>> references = preheatService.collectReferences( dataElementGroup, PreheatIdentifier.UID );
+
+        PreheatParams params = new PreheatParams();
+        params.setPreheatIdentifier( PreheatIdentifier.CODE );
+        params.setPreheatMode( PreheatMode.REFERENCE );
+        params.setReferences( references );
+
+        preheatService.validate( params );
+        Preheat preheat = preheatService.preheat( params );
+        preheatService.connectReferences( dataElementGroup, preheat, PreheatIdentifier.CODE );
+
+        manager.update( dataElementGroup );
+
+        List<DataElement> members = new ArrayList<>( dataElementGroup.getMembers() );
+
+        assertEquals( "DataElementA", members.get( 0 ).getName() );
+        assertEquals( "DataElementCodeA", members.get( 0 ).getCode() );
+        assertEquals( "DataElementB", members.get( 1 ).getName() );
+        assertEquals( "DataElementCodeB", members.get( 1 ).getCode() );
+        assertEquals( "DataElementC", members.get( 2 ).getName() );
+        assertEquals( "DataElementCodeC", members.get( 2 ).getCode() );
+
+        assertEquals( "FirstNameA", dataElementGroup.getUser().getFirstName() );
+        assertEquals( "SurnameA", dataElementGroup.getUser().getSurname() );
+        assertEquals( "UserCodeA", dataElementGroup.getUser().getCode() );
+    }
+
+    private void defaultSetup()
+    {
+        DataElement de1 = createDataElement( 'A' );
+        DataElement de2 = createDataElement( 'B' );
+        DataElement de3 = createDataElement( 'C' );
+
+        manager.save( de1 );
+        manager.save( de2 );
+        manager.save( de3 );
+
+        User user = createUser( 'A' );
+        manager.save( user );
     }
 }

@@ -28,8 +28,17 @@ package org.hisp.dhis.dxf2.metadata2;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.preheat.PreheatService;
+import org.hisp.dhis.schema.SchemaService;
+import org.hisp.dhis.user.CurrentUserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -38,10 +47,33 @@ import java.util.Map;
 @Component
 public class DefaultMetadataImportService implements MetadataImportService
 {
+    private static final Log log = LogFactory.getLog( MetadataImportService.class );
+
+    @Autowired
+    private SchemaService schemaService;
+
+    @Autowired
+    private PreheatService preheatService;
+
+    @Autowired
+    private CurrentUserService currentUserService;
+
+    @Autowired
+    private IdentifiableObjectManager manager;
+
     @Override
     public void importMetadata( MetadataImportParams params )
     {
+        if ( params.getUser() == null )
+        {
+            params.setUser( currentUserService.getCurrentUser() );
+        }
 
+        for ( Class<? extends IdentifiableObject> klass : params.getClasses() )
+        {
+            List<? extends IdentifiableObject> objects = params.getObjects( klass );
+            objects.forEach( this::importObject );
+        }
     }
 
     @Override
@@ -55,5 +87,14 @@ public class DefaultMetadataImportService implements MetadataImportService
     {
         MetadataImportParams params = new MetadataImportParams();
         return params;
+    }
+
+    //------------------------------------------------------------------------------------------------
+    // Helpers
+    //------------------------------------------------------------------------------------------------
+
+    private void importObject( IdentifiableObject object )
+    {
+        manager.save( object );
     }
 }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.preheat;
+package org.hisp.dhis.render;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -28,47 +28,34 @@ package org.hisp.dhis.preheat;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.IdentifiableObject;
-
-import java.util.Map;
-import java.util.Set;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface PreheatService
+public interface RenderService
 {
-    /**
-     * Preheat a set of pre-defined classes. If size == 0, then preheat all metadata classes automatically.
-     *
-     * @param params Params for preheating
-     */
-    Preheat preheat( PreheatParams params );
+    void toJson( OutputStream output, Object value ) throws IOException;
 
-    /**
-     * Validate PreheatParams.
-     *
-     * @param params PreheatParams
-     */
-    void validate( PreheatParams params ) throws PreheatException;
+    void toJson( OutputStream output, Object value, Class<?> klass ) throws IOException;
 
-    /**
-     * Scan object and collect all references (both id object and collections with id objects).
-     *
-     * @param object     Object to scan
-     * @param identifier Identifier to collect
-     * @return Maps classes to collections of identifiers
-     */
-    Map<Class<? extends IdentifiableObject>, Set<String>> collectReferences( Object object, PreheatIdentifier identifier );
+    void toJsonP( OutputStream output, Object value, String callback ) throws IOException;
 
-    /**
-     * Scan objects and collect all references (both id object and collections with id objects).
-     *
-     * @param objects    Objects to scan
-     * @param identifier Identifier to collect
-     * @return Maps classes to collections of identifiers
-     */
-    Map<Class<? extends IdentifiableObject>, Set<String>> collectReferences( Set<Object> objects, PreheatIdentifier identifier );
+    void toJsonP( OutputStream output, Object value, Class<?> klass, String callback ) throws IOException;
 
-    <T extends IdentifiableObject> void connectReferences( T object, Preheat preheat, PreheatIdentifier identifier );
+    <T> T fromJson( InputStream input, Class<T> klass ) throws IOException;
+
+    <T> T fromJson( String input, Class<T> klass ) throws IOException;
+
+    <T> void toXml( OutputStream output, T value ) throws IOException;
+
+    <T> void toXml( OutputStream output, T value, Class<?> klass ) throws IOException;
+
+    <T> T fromXml( InputStream input, Class<T> klass ) throws IOException;
+
+    <T> T fromXml( String input, Class<T> klass ) throws IOException;
+
+    boolean isValidJson(String json) throws IOException;
 }
