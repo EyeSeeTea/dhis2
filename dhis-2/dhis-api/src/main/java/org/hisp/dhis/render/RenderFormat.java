@@ -1,4 +1,4 @@
-package org.hisp.dhis.webapi.webdomain;
+package org.hisp.dhis.render;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -28,52 +28,11 @@ package org.hisp.dhis.webapi.webdomain;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import org.hisp.dhis.common.DxfNamespaces;
-import org.hisp.dhis.common.LinkableObject;
-import org.hisp.dhis.common.Pager;
-import org.hisp.dhis.dxf2.metadata.MetaData;
-
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class WebMetaData
-    extends MetaData
+public enum RenderFormat
 {
-    private Pager pager;
-
-    private LinkableObject linkableObject;
-
-    @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public Pager getPager()
-    {
-        return pager;
-    }
-
-    public void setPager( Pager pager )
-    {
-        this.pager = pager;
-    }
-
-    @JsonProperty
-    @JacksonXmlProperty( isAttribute = true )
-    public String getLink()
-    {
-        if ( linkableObject == null )
-        {
-            return null;
-        }
-
-        return linkableObject.getHref();
-    }
-
-    public void setLink( String link )
-    {
-        if ( linkableObject != null )
-        {
-            linkableObject.setHref( link );
-        }
-    }
+    JSON,
+    XML;
 }

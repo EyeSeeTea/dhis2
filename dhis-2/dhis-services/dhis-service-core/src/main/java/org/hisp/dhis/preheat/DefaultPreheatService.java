@@ -30,7 +30,9 @@ package org.hisp.dhis.preheat;
 
 import com.google.common.collect.Sets;
 import org.hisp.dhis.common.IdentifiableObject;
-import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.query.Query;
+import org.hisp.dhis.query.QueryService;
+import org.hisp.dhis.query.Restrictions;
 import org.hisp.dhis.schema.Property;
 import org.hisp.dhis.schema.PropertyType;
 import org.hisp.dhis.schema.Schema;
@@ -57,7 +59,7 @@ public class DefaultPreheatService implements PreheatService
     private SchemaService schemaService;
 
     @Autowired
-    private IdentifiableObjectManager manager;
+    private QueryService queryService;
 
     @Override
     @SuppressWarnings( "unchecked" )
@@ -75,25 +77,46 @@ public class DefaultPreheatService implements PreheatService
 
             for ( Class<? extends IdentifiableObject> klass : params.getClasses() )
             {
-                List<? extends IdentifiableObject> objects = manager.getAllNoAcl( klass ); // should we use getAll here? are we allowed to reference unshared objects?
-                preheat.put( params.getPreheatIdentifier(), objects );
+                Query query = Query.from( schemaService.getDynamicSchema( klass ) );
+                List<? extends IdentifiableObject> objects = queryService.query( query );
+
+                if ( PreheatIdentifier.UID == params.getPreheatIdentifier() || PreheatIdentifier.AUTO == params.getPreheatIdentifier() )
+                {
+                    preheat.put( PreheatIdentifier.UID, objects );
+                }
+
+                if ( PreheatIdentifier.CODE == params.getPreheatIdentifier() || PreheatIdentifier.AUTO == params.getPreheatIdentifier() )
+                {
+                    preheat.put( PreheatIdentifier.CODE, objects );
+                }
             }
         }
         else if ( PreheatMode.REFERENCE == params.getPreheatMode() )
         {
-            for ( Class<? extends IdentifiableObject> klass : params.getReferences().keySet() )
-            {
-                Collection<String> identifiers = params.getReferences().get( klass );
+            Map<Class<? extends IdentifiableObject>, Set<String>> uidMap = params.getReferences().get( PreheatIdentifier.UID );
+            Map<Class<? extends IdentifiableObject>, Set<String>> codeMap = params.getReferences().get( PreheatIdentifier.CODE );
 
-                if ( PreheatIdentifier.UID == params.getPreheatIdentifier() )
+            if ( uidMap != null && (PreheatIdentifier.UID == params.getPreheatIdentifier() || PreheatIdentifier.AUTO == params.getPreheatIdentifier()) )
+            {
+                for ( Class<? extends IdentifiableObject> klass : uidMap.keySet() )
                 {
-                    List<? extends IdentifiableObject> objects = manager.getByUid( klass, identifiers );
-                    preheat.put( params.getPreheatIdentifier(), objects );
+                    Collection<String> identifiers = uidMap.get( klass );
+                    Query query = Query.from( schemaService.getDynamicSchema( klass ) );
+                    query.add( Restrictions.in( "id", identifiers ) );
+                    List<? extends IdentifiableObject> objects = queryService.query( query );
+                    preheat.put( PreheatIdentifier.UID, objects );
                 }
-                else if ( PreheatIdentifier.CODE == params.getPreheatIdentifier() )
+            }
+
+            if ( codeMap != null && (PreheatIdentifier.CODE == params.getPreheatIdentifier() || PreheatIdentifier.AUTO == params.getPreheatIdentifier()) )
+            {
+                for ( Class<? extends IdentifiableObject> klass : codeMap.keySet() )
                 {
-                    List<? extends IdentifiableObject> objects = manager.getByCode( klass, identifiers );
-                    preheat.put( params.getPreheatIdentifier(), objects );
+                    Collection<String> identifiers = codeMap.get( klass );
+                    Query query = Query.from( schemaService.getDynamicSchema( klass ) );
+                    query.add( Restrictions.in( "code", identifiers ) );
+                    List<? extends IdentifiableObject> objects = queryService.query( query );
+                    preheat.put( PreheatIdentifier.CODE, objects );
                 }
             }
         }
@@ -122,16 +145,22 @@ public class DefaultPreheatService implements PreheatService
     }
 
     @Override
-    public Map<Class<? extends IdentifiableObject>, Set<String>> collectReferences( Object object, PreheatIdentifier identifier )
+    public Map<PreheatIdentifier, Map<Class<? extends IdentifiableObject>, Set<String>>> collectReferences( Object object )
     {
-        return collectReferences( Sets.newHashSet( object ), identifier );
+        return collectReferences( Sets.newHashSet( object ) );
     }
 
     @Override
     @SuppressWarnings( "unchecked" )
-    public Map<Class<? extends IdentifiableObject>, Set<String>> collectReferences( Set<Object> objects, PreheatIdentifier identifier )
+    public Map<PreheatIdentifier, Map<Class<? extends IdentifiableObject>, Set<String>>> collectReferences( Set<Object> objects )
     {
-        Map<Class<? extends IdentifiableObject>, Set<String>> map = new HashMap<>();
+        Map<PreheatIdentifier, Map<Class<? extends IdentifiableObject>, Set<String>>> map = new HashMap<>();
+
+        map.put( PreheatIdentifier.UID, new HashMap<>() );
+        map.put( PreheatIdentifier.CODE, new HashMap<>() );
+
+        Map<Class<? extends IdentifiableObject>, Set<String>> uidMap = map.get( PreheatIdentifier.UID );
+        Map<Class<? extends IdentifiableObject>, Set<String>> codeMap = map.get( PreheatIdentifier.CODE );
 
         if ( objects.isEmpty() )
         {
@@ -149,7 +178,10 @@ public class DefaultPreheatService implements PreheatService
                 if ( !p.isCollection() )
                 {
                     Class<? extends IdentifiableObject> klass = (Class<? extends IdentifiableObject>) p.getKlass();
-                    if ( !map.containsKey( klass ) ) map.put( klass, new HashSet<>() );
+
+                    if ( !uidMap.containsKey( klass ) ) uidMap.put( klass, new HashSet<>() );
+                    if ( !codeMap.containsKey( klass ) ) codeMap.put( klass, new HashSet<>() );
+
                     Object reference = ReflectionUtils.invokeMethod( object, p.getGetterMethod() );
 
                     if ( reference != null )
@@ -159,20 +191,17 @@ public class DefaultPreheatService implements PreheatService
                         String uid = identifiableObject.getUid();
                         String code = identifiableObject.getCode();
 
-                        if ( PreheatIdentifier.UID == identifier )
-                        {
-                            if ( uid != null ) map.get( klass ).add( uid );
-                        }
-                        else if ( PreheatIdentifier.CODE == identifier )
-                        {
-                            if ( code != null ) map.get( klass ).add( code );
-                        }
+                        if ( uid != null ) uidMap.get( klass ).add( uid );
+                        if ( code != null ) codeMap.get( klass ).add( code );
                     }
                 }
                 else
                 {
                     Class<? extends IdentifiableObject> klass = (Class<? extends IdentifiableObject>) p.getItemKlass();
-                    if ( !map.containsKey( klass ) ) map.put( klass, new HashSet<>() );
+
+                    if ( !uidMap.containsKey( klass ) ) uidMap.put( klass, new HashSet<>() );
+                    if ( !codeMap.containsKey( klass ) ) codeMap.put( klass, new HashSet<>() );
+
                     Collection<IdentifiableObject> reference = ReflectionUtils.invokeMethod( object, p.getGetterMethod() );
 
                     for ( IdentifiableObject identifiableObject : reference )
@@ -180,14 +209,8 @@ public class DefaultPreheatService implements PreheatService
                         String uid = identifiableObject.getUid();
                         String code = identifiableObject.getCode();
 
-                        if ( PreheatIdentifier.UID == identifier )
-                        {
-                            if ( uid != null ) map.get( klass ).add( uid );
-                        }
-                        else if ( PreheatIdentifier.CODE == identifier )
-                        {
-                            if ( code != null ) map.get( klass ).add( code );
-                        }
+                        if ( uid != null ) uidMap.get( klass ).add( uid );
+                        if ( code != null ) codeMap.get( klass ).add( code );
                     }
                 }
             }
