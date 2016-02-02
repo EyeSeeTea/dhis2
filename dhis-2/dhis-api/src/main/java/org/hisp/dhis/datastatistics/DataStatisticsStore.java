@@ -45,7 +45,6 @@ public interface DataStatisticsStore
     void getDataStatisticsInterval(Date startIterval, Date endInterval);
 
     DataStatistics getDataStatisticsById(int id);
-    void updateDataStatisticsTest( String text );
 
     void getAllDataStatistics();
 }

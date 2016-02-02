@@ -627,6 +627,10 @@
     <property name="clazz" value="org.hisp.dhis.datastatistics.DataStatistics" />
     <property name="sessionFactory" ref="sessionFactory" />
   </bean>
+
+  <bean id="org.hisp.dhis.datastatistics.DataStatisticsEvent" class="org.hisp.dhis.datastatistics.DefaultDataStatisticsEvent">
+  </bean>
+
   <!-- File resource tasks -->
 
   <bean id="org.hisp.dhis.fileresource.FileResourceUploadCallback" class="org.hisp.dhis.fileresource.FileResourceUploadCallback" />

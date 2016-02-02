@@ -31,15 +31,6 @@ public class HibernateDataStatisticsStore extends HibernateGenericStore<DataStat
         session.update(dataStatistics);
         session.flush();
     }
-    @Override
-    public void updateDataStatisticsTest( String text )
-    {
-        Session session = sessionFactory.openSession();
-        DataStatistics ds = (DataStatistics)session.get(DataStatistics.class, 1);
-        ds.setText(text);
-        session.update(ds);
-        session.flush();
-    }
 
     @Override
     public void deleteDataStatistics( DataStatistics dataStatistics )

@@ -27,6 +27,7 @@ package org.hisp.dhis.datastatistics;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 
 import java.util.Date;
@@ -37,13 +38,76 @@ import java.util.Date;
  */
 public class DataStatistics extends BaseIdentifiableObject
 {
-    private String text;
+    private int favorites;
+    private int reportTables;
+    private int charts;
+    private int maps;
+    private int eventReports;
+    private int eventCharts;
+
+    public int getFavorites()
+    {
+        return favorites;
+    }
+
+    public void setFavorites( int favorites )
+    {
+        this.favorites = favorites;
+    }
+
+    public int getReportTables()
+    {
+        return reportTables;
+    }
+
+    public void setReportTables( int reportTables )
+    {
+        this.reportTables = reportTables;
+    }
+
+    public int getCharts()
+    {
+        return charts;
+    }
+
+    public void setCharts( int charts )
+    {
+        this.charts = charts;
+    }
+
+    public int getMaps()
+    {
+        return maps;
+    }
+
+    public void setMaps( int maps )
+    {
+        this.maps = maps;
+    }
+
+    public int getEventReports()
+    {
+        return eventReports;
+    }
+
+    public void setEventReports( int eventReports )
+    {
+        this.eventReports = eventReports;
+    }
+
+    public int getEventCharts()
+    {
+        return eventCharts;
+    }
+
+    public void setEventCharts( int eventCharts )
+    {
+        this.eventCharts = eventCharts;
+    }
 
     public DataStatistics(){}
-    public DataStatistics(String text)
-    {
-        this.text = text;
-    }
+    /*public DataStatistics()
+
     public DataStatistics(String text, String uid, String code,
         Date created, Date lastUpdated)
     {
@@ -54,29 +118,13 @@ public class DataStatistics extends BaseIdentifiableObject
         super.setCode( code );
         super.setCreated( created );
         super.setLastUpdated( lastUpdated );
-    }
-
-    public String getText(){
-        return text;
-    }
+    }*/
 
 
-    public void setText(String s){
-        text = s;
-    }
 
     @Override
     public String toString()
     {
-        return "{" +
-            "\"class\":\"" + getClass() + "\", " +
-            "\"id\":\"" + id + "\", " +
-            "\"text\":\"" + text + "\", " +
-            "\"uid\":\"" + uid + "\", " +
-            "\"code\":\"" + code + "\", " +
-            "\"name\":\"" + name + "\", " +
-            "\"created\":\"" + created + "\", " +
-            "\"lastUpdated\":\"" + lastUpdated + "\" " +
-            "}";
+        return super.toString() + "\nFavorites: " + favorites;
     }
 }

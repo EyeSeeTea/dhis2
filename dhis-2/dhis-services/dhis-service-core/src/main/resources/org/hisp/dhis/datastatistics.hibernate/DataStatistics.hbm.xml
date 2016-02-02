@@ -11,7 +11,6 @@
         <id name="id" column="statisticsid">
             <generator class="native" />
         </id>
-        <property name="text" column="stattext" type="string" />
         &identifiableProperties;
 
 
