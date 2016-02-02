@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.metadata.tasks;
+package org.hisp.dhis.webapi.webdomain;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -28,41 +28,29 @@ package org.hisp.dhis.dxf2.metadata.tasks;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.security.SecurityContextRunnable;
-import org.hisp.dhis.dxf2.common.ImportOptions;
-import org.hisp.dhis.dxf2.metadata.ImportService;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.dxf2.metadata.Metadata;
-import org.hisp.dhis.scheduling.TaskId;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class ImportMetaDataTask
-    extends SecurityContextRunnable
+public class WebMetadata
+    extends Metadata
 {
-    private String userUid;
+    private Pager pager;
 
-    private final ImportService importService;
-
-    private final ImportOptions importOptions;
-
-    private final TaskId taskId;
-
-    private final Metadata metadata;
-
-    public ImportMetaDataTask( String userUid, ImportService importService, ImportOptions importOptions, TaskId taskId, Metadata metadata )
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Pager getPager()
     {
-        super();
-        this.userUid = userUid;
-        this.importService = importService;
-        this.importOptions = importOptions;
-        this.taskId = taskId;
-        this.metadata = metadata;
+        return pager;
     }
 
-    @Override
-    public void call()
+    public void setPager( Pager pager )
     {
-        importService.importMetaData( userUid, metadata, importOptions, taskId );
+        this.pager = pager;
     }
 }

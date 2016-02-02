@@ -33,17 +33,30 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.schema.Schema;
+import org.hisp.dhis.schema.SchemaService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Default implementation that uses Jackson to serialize/deserialize
@@ -53,14 +66,14 @@ import java.io.OutputStream;
 public class DefaultRenderService
     implements RenderService
 {
+    private static final Log log = LogFactory.getLog( RenderService.class );
+
+    @Autowired
+    private SchemaService schemaService;
+
     private final ObjectMapper jsonMapper = new ObjectMapper();
 
     private final XmlMapper xmlMapper = new XmlMapper();
-
-    public DefaultRenderService()
-    {
-        configureObjectMappers();
-    }
 
     //--------------------------------------------------------------------------
     // RenderService
@@ -162,6 +175,57 @@ public class DefaultRenderService
         return true;
     }
 
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public Map<Class<? extends IdentifiableObject>, List<? extends IdentifiableObject>> fromMetadata( InputStream inputStream, RenderFormat format ) throws IOException
+    {
+        Map<Class<? extends IdentifiableObject>, List<? extends IdentifiableObject>> map = new HashMap<>();
+
+        ObjectMapper mapper;
+
+        if ( RenderFormat.JSON == format )
+        {
+            mapper = jsonMapper;
+        }
+        else if ( RenderFormat.XML == format )
+        {
+            // mapper = xmlMapper;
+            throw new IllegalArgumentException( "XML format is not supported." );
+        }
+        else
+        {
+            return map;
+        }
+
+        JsonNode rootNode = mapper.readTree( inputStream );
+        Iterator<String> fieldNames = rootNode.fieldNames();
+
+        while ( fieldNames.hasNext() )
+        {
+            String fieldName = fieldNames.next();
+            JsonNode node = rootNode.get( fieldName );
+            Schema schema = schemaService.getSchemaByPluralName( fieldName );
+
+            if ( schema == null || !schema.isIdentifiableObject() )
+            {
+                log.info( "Skipping unknown property '" + fieldName + "'." );
+                continue;
+            }
+
+            List<IdentifiableObject> collection = new ArrayList<>();
+
+            for ( JsonNode item : node )
+            {
+                IdentifiableObject value = mapper.treeToValue( item, (Class<? extends IdentifiableObject>) schema.getKlass() );
+                if ( value != null ) collection.add( value );
+            }
+
+            map.put( (Class<? extends IdentifiableObject>) schema.getKlass(), collection );
+        }
+
+        return map;
+    }
+
     //--------------------------------------------------------------------------
     // Helpers
     //--------------------------------------------------------------------------
@@ -176,6 +240,7 @@ public class DefaultRenderService
         return xmlMapper;
     }
 
+    @PostConstruct
     private void configureObjectMappers()
     {
         ObjectMapper[] objectMappers = new ObjectMapper[]{ jsonMapper, xmlMapper };
