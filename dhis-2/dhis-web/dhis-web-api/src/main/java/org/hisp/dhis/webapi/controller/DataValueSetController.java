@@ -1,7 +1,7 @@
 package org.hisp.dhis.webapi.controller;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,7 @@ import org.hisp.dhis.dxf2.datavalueset.DataValueSetService;
 import org.hisp.dhis.dxf2.datavalueset.tasks.ImportDataValueTask;
 import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
-import org.hisp.dhis.dxf2.render.RenderService;
+import org.hisp.dhis.render.RenderService;
 import org.hisp.dhis.scheduling.TaskCategory;
 import org.hisp.dhis.scheduling.TaskId;
 import org.hisp.dhis.system.scheduling.Scheduler;
@@ -132,7 +132,7 @@ public class DataValueSetController
     {
         response.setContentType( CONTENT_TYPE_XML_ADX );
 
-        DataExportParams params = dataValueSetService.getFromUrl( dataSet, period,
+        DataExportParams params = adxDataService.getFromUrl( dataSet, period,
             startDate, endDate, orgUnit, children, lastUpdated, limit, idSchemes );
 
         adxDataService.writeDataValueSet( params, response.getOutputStream() );

@@ -20,7 +20,8 @@ trackerCapture.controller('RegistrationController',
                 SessionStorageService,
                 TEIGridService,
                 TrackerRulesFactory,
-                TrackerRulesExecutionService) {
+                TrackerRulesExecutionService,
+                ModalService) {
     
     $scope.maxOptionSize = 30;
     
@@ -31,6 +32,12 @@ trackerCapture.controller('RegistrationController',
     $scope.tei = {};
     $scope.registrationMode = 'REGISTRATION';    
     $scope.hiddenFields = {};
+    
+    $scope.helpTexts = {};
+    
+    $scope.showHelpText = function(attributeId){
+        $scope.helpTexts[attributeId] = $scope.helpTexts[attributeId] ? false : true;
+    }
     
     $scope.attributesById = CurrentSelection.getAttributesById();
     if(!$scope.attributesById){
@@ -51,7 +58,6 @@ trackerCapture.controller('RegistrationController',
             angular.forEach(optionSets, function(optionSet){                        
                 $scope.optionSets[optionSet.id] = optionSet;
             });
-
             CurrentSelection.setOptionSets($scope.optionSets);
         });
     }
@@ -114,7 +120,7 @@ trackerCapture.controller('RegistrationController',
     $scope.getAttributes = function(_mode){        
         var mode = _mode ? _mode : 'ENROLLMENT';
         AttributesFactory.getByProgram($scope.selectedProgram).then(function(atts){            
-            $scope.attributes = TEIGridService.generateGridColumns(atts, null).columns;
+            $scope.attributes = TEIGridService.generateGridColumns(atts, null,false).columns;
             $scope.customFormExists = false;
             if($scope.selectedProgram && $scope.selectedProgram.id && $scope.selectedProgram.dataEntryForm && $scope.selectedProgram.dataEntryForm.htmlCode){
                 $scope.customFormExists = true;
@@ -403,5 +409,17 @@ trackerCapture.controller('RegistrationController',
                 $scope.selectedTei[selectedAttribute.id] = res.id;
             }
         });
-    };    
+    };
+    $scope.cancelRegistrationWarning = function(cancelFunction){
+        
+        var modalOptions = {
+            closeButtonText: 'no',
+            actionButtonText: 'yes',
+            headerText: 'cancel',
+            bodyText: 'are_you_sure_to_cancel_registration'
+        }
+        ModalService.showModal({}, modalOptions).then(function(){
+            cancelFunction();
+        });
+    }
 });

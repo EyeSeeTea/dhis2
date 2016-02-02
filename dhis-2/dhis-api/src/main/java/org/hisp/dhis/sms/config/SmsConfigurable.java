@@ -1,7 +1,7 @@
 package org.hisp.dhis.sms.config;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,8 @@ import org.hisp.dhis.sms.SmsServiceException;
 public interface SmsConfigurable
 {
     /**
-     * Initialize the service with the provided configuration. Services 
-     * implementing this interface are also expected to be able to reinitialize 
+     * Initialize the service with the provided configuration. Services
+     * implementing this interface are also expected to be able to reinitialize
      * based on these setting in a safe way when running.
      * 
      * @param smsConfiguration The SMS configuration

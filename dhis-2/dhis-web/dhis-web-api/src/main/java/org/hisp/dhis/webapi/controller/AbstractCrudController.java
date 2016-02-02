@@ -1,7 +1,7 @@
 package org.hisp.dhis.webapi.controller;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,13 +42,13 @@ import org.hisp.dhis.common.MergeStrategy;
 import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.common.PagerUtils;
 import org.hisp.dhis.dxf2.common.ImportOptions;
-import org.hisp.dhis.dxf2.common.OrderOptions;
+import org.hisp.dhis.dxf2.common.OrderParams;
 import org.hisp.dhis.dxf2.common.TranslateParams;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.metadata.ImportService;
 import org.hisp.dhis.dxf2.metadata.ImportTypeSummary;
-import org.hisp.dhis.dxf2.render.DefaultRenderService;
-import org.hisp.dhis.dxf2.render.RenderService;
+import org.hisp.dhis.render.DefaultRenderService;
+import org.hisp.dhis.render.RenderService;
 import org.hisp.dhis.dxf2.webmessage.WebMessageException;
 import org.hisp.dhis.fieldfilter.FieldFilterService;
 import org.hisp.dhis.hibernate.exception.CreateAccessDeniedException;
@@ -59,6 +59,7 @@ import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.importexport.ImportStrategy;
 import org.hisp.dhis.node.Node;
 import org.hisp.dhis.node.NodeUtils;
+import org.hisp.dhis.node.Preset;
 import org.hisp.dhis.node.config.InclusionStrategy;
 import org.hisp.dhis.node.types.CollectionNode;
 import org.hisp.dhis.node.types.ComplexNode;
@@ -78,7 +79,7 @@ import org.hisp.dhis.webapi.service.ContextService;
 import org.hisp.dhis.webapi.service.LinkService;
 import org.hisp.dhis.webapi.service.WebMessageService;
 import org.hisp.dhis.webapi.utils.WebMessageUtils;
-import org.hisp.dhis.webapi.webdomain.WebMetaData;
+import org.hisp.dhis.webapi.webdomain.WebMetadata;
 import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -157,15 +158,15 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     @RequestMapping( method = RequestMethod.GET )
     public @ResponseBody RootNode getObjectList(
         @RequestParam Map<String, String> rpParameters,
-        TranslateParams translateParams, OrderOptions orderOptions,
+        TranslateParams translateParams, OrderParams orderParams,
         HttpServletResponse response, HttpServletRequest request ) throws QueryParserException
     {
         List<String> fields = Lists.newArrayList( contextService.getParameterValues( "fields" ) );
         List<String> filters = Lists.newArrayList( contextService.getParameterValues( "filter" ) );
-        List<Order> orders = orderOptions.getOrders( getSchema() );
+        List<Order> orders = orderParams.getOrders( getSchema() );
 
         WebOptions options = new WebOptions( rpParameters );
-        WebMetaData metaData = new WebMetaData();
+        WebMetadata metadata = new WebMetadata();
 
         if ( !aclService.canRead( currentUserService.getCurrentUser(), getEntityClass() ) )
         {
@@ -174,12 +175,12 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         if ( fields.isEmpty() )
         {
-            fields.add( ":identifiable" );
+            fields.addAll( Preset.defaultPreset().getFields() );
         }
 
-        List<T> entities = getEntityList( metaData, options, filters, orders );
+        List<T> entities = getEntityList( metadata, options, filters, orders );
         translate( entities, translateParams );
-        Pager pager = metaData.getPager();
+        Pager pager = metadata.getPager();
 
         if ( options.hasPaging() && pager == null )
         {
@@ -190,12 +191,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         postProcessEntities( entities );
         postProcessEntities( entities, options, rpParameters, translateParams );
 
-        if ( fields.contains( "access" ) )
-        {
-            options.getOptions().put( "viewClass", "sharing" );
-        }
-
-        handleLinksAndAccess( options, entities );
+        handleLinksAndAccess( entities, fields, false );
 
         linkService.generatePagerLinks( pager, getEntityClass() );
 
@@ -432,15 +428,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         entities = (List<T>) queryService.query( query );
 
-        if ( options.hasLinks() )
-        {
-            linkService.generateLinks( entities, true );
-        }
-
-        if ( aclService.isSupported( getEntityClass() ) )
-        {
-            addAccessProperties( entities );
-        }
+        handleLinksAndAccess( entities, fields, true );
 
         for ( T entity : entities )
         {
@@ -663,6 +651,11 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             } );
         }
 
+        if ( rootNode.getChildren().isEmpty() || rootNode.getChildren().get( 0 ).getChildren().isEmpty() )
+        {
+            throw new WebMessageException( WebMessageUtils.notFound( pvProperty + " with ID " + pvItemId + " could not be found." ) );
+        }
+
         return rootNode;
     }
 
@@ -867,7 +860,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     //--------------------------------------------------------------------------
 
     @SuppressWarnings( "unchecked" )
-    protected List<T> getEntityList( WebMetaData metaData, WebOptions options, List<String> filters, List<Order> orders ) throws QueryParserException
+    protected List<T> getEntityList( WebMetadata metadata, WebOptions options, List<String> filters, List<Order> orders ) throws QueryParserException
     {
         List<T> entityList;
         Query query = queryService.getQueryFromUrl( getEntityClass(), filters, orders );
@@ -930,14 +923,41 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         }
     }
 
-    protected void handleLinksAndAccess( WebOptions options, List<T> entityList )
+    private boolean fieldsContains( String match, List<String> fields )
     {
-        if ( options != null && options.hasLinks() )
+        for ( String field : fields )
         {
-            linkService.generateLinks( entityList, false );
+            // for now assume href/access if * or preset is requested
+            if ( field.contains( match ) || field.equals( "*" ) || field.startsWith( ":" ) )
+            {
+                return true;
+            }
         }
 
-        if ( entityList != null && aclService.isSupported( getEntityClass() ) )
+        return false;
+    }
+
+    protected boolean hasHref( List<String> fields )
+    {
+        return fieldsContains( "href", fields );
+    }
+
+    protected boolean hasAccess( List<String> fields )
+    {
+        return fieldsContains( "access", fields );
+    }
+
+    protected void handleLinksAndAccess( List<T> entityList, List<String> fields, boolean deep )
+    {
+        boolean generateLinks = hasHref( fields );
+        boolean generateAccess = hasAccess( fields );
+
+        if ( generateLinks )
+        {
+            linkService.generateLinks( entityList, deep );
+        }
+
+        if ( generateAccess && aclService.isSupported( getEntityClass() ) )
         {
             addAccessProperties( entityList );
         }

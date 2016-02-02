@@ -1,7 +1,7 @@
 package org.hisp.dhis.preheat;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,8 @@ package org.hisp.dhis.preheat;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
+import org.hisp.dhis.common.IdentifiableObject;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -40,14 +41,39 @@ public interface PreheatService
     /**
      * Preheat a set of pre-defined classes. If size == 0, then preheat all metadata classes automatically.
      *
-     * @param classes Classes to preheat
+     * @param params Params for preheating
      */
-    void preheat( Set<Class<?>> classes );
+    Preheat preheat( PreheatParams params );
 
     /**
-     * Preheat a specified set of UIDs for a set of classes.
+     * Validate PreheatParams.
      *
-     * @param classes Class => UID Collection map
+     * @param params PreheatParams
      */
-    void preheat( Map<Class<?>, Collection<String>> classes );
+    void validate( PreheatParams params ) throws PreheatException;
+
+    /**
+     * Scan object and collect all references (both id object and collections with id objects).
+     *
+     * @param object Object to scan
+     * @return Maps classes to collections of identifiers
+     */
+    Map<PreheatIdentifier, Map<Class<? extends IdentifiableObject>, Set<String>>> collectReferences( Object object );
+
+    /**
+     * Scan objects and collect all references (both id object and collections with id objects).
+     *
+     * @param objects Objects to scan
+     * @return Maps classes to collections of identifiers
+     */
+    Map<PreheatIdentifier, Map<Class<? extends IdentifiableObject>, Set<String>>> collectReferences( Set<Object> objects );
+
+    /**
+     * Connects id object references on a given object using a given identifier + a preheated Preheat cache.
+     *
+     * @param object     Object to connect to
+     * @param preheat    Preheat Cache to use
+     * @param identifier Use this identifier type to attach references
+     */
+    <T extends IdentifiableObject> void connectReferences( T object, Preheat preheat, PreheatIdentifier identifier );
 }

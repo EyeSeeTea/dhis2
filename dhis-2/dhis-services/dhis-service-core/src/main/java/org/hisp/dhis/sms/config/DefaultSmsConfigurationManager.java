@@ -1,7 +1,7 @@
 package org.hisp.dhis.sms.config;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -121,7 +121,7 @@ public class DefaultSmsConfigurationManager
             SmsConfiguration smsConfig = new SmsConfiguration( true );
             updateSmsConfiguration( smsConfig );
         }
-        
+
         for ( SmsGatewayConfig gateway : getSmsConfiguration().getGateways() )
         {
             if ( gateway.getClass().equals( clazz ) )
@@ -129,7 +129,7 @@ public class DefaultSmsConfigurationManager
                 return gateway;
             }
         }
-        
+
         return null;
     }
 
@@ -137,15 +137,15 @@ public class DefaultSmsConfigurationManager
     public boolean setDefaultSMSGateway( String gatewayId )
     {
         boolean result = false;
-        
+
         SmsConfiguration config = getSmsConfiguration();
-        
+
         if ( config == null )
         {
             return result;
         }
-        
-        List <SmsGatewayConfig> smsGatewayList = config.getGateways();
+
+        List<SmsGatewayConfig> smsGatewayList = config.getGateways();
 
         for ( SmsGatewayConfig gw : smsGatewayList )
         {
@@ -163,7 +163,7 @@ public class DefaultSmsConfigurationManager
         }
 
         updateSmsConfiguration( config );
-        
+
         return result;
     }
 
@@ -172,7 +172,7 @@ public class DefaultSmsConfigurationManager
     {
         SmsConfiguration config = getSmsConfiguration();
         List<SmsGatewayConfig> gatewayList = config.getGateways();
-        
+
         for ( SmsGatewayConfig gw : gatewayList )
         {
             if ( gw.getName().equals( gatewayId ) )
@@ -194,5 +194,5 @@ public class DefaultSmsConfigurationManager
     public String addSMSGateway()
     {
         throw new NotImplementedException();
-    } 
+    }
 }

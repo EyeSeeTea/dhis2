@@ -1,7 +1,7 @@
 package org.hisp.dhis.query;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,12 +28,6 @@ package org.hisp.dhis.query;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Projections;
@@ -42,7 +36,14 @@ import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
 import org.hisp.dhis.schema.Property;
 import org.hisp.dhis.schema.Schema;
+import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Implementation of QueryEngine that uses Hibernate Criteria and
@@ -50,9 +51,12 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class CriteriaQueryEngine<T extends IdentifiableObject> 
+public class CriteriaQueryEngine<T extends IdentifiableObject>
     implements QueryEngine<T>
 {
+    @Autowired
+    private CurrentUserService currentUserService;
+
     @Autowired
     private final List<HibernateGenericStore<T>> hibernateGenericStores = new ArrayList<>();
 
@@ -76,7 +80,12 @@ public class CriteriaQueryEngine<T extends IdentifiableObject>
             return new ArrayList<>();
         }
 
-        Criteria criteria = buildCriteria( store.getSharingCriteria(), query );
+        if ( query.getUser() == null )
+        {
+            query.setUser( currentUserService.getCurrentUser() );
+        }
+
+        Criteria criteria = buildCriteria( store.getSharingCriteria( query.getUser() ), query );
 
         if ( criteria == null )
         {
@@ -108,7 +117,12 @@ public class CriteriaQueryEngine<T extends IdentifiableObject>
             return 0;
         }
 
-        Criteria criteria = buildCriteria( store.getSharingCriteria(), countQuery );
+        if ( query.getUser() == null )
+        {
+            query.setUser( currentUserService.getCurrentUser() );
+        }
+
+        Criteria criteria = buildCriteria( store.getSharingCriteria( query.getUser() ), countQuery );
 
         if ( criteria == null )
         {
@@ -122,15 +136,15 @@ public class CriteriaQueryEngine<T extends IdentifiableObject>
 
     private Criteria buildCriteria( Criteria criteria, Query query )
     {
-        List<org.hisp.dhis.query.Criterion> criterions = getCriterions( query );
+        Query criteriaQuery = getCriteriaQuery( query );
 
-        for ( org.hisp.dhis.query.Criterion criterion : criterions )
+        for ( org.hisp.dhis.query.Criterion criterion : criteriaQuery.getCriterions() )
         {
             addCriterion( criteria, criterion, query.getSchema() );
         }
 
         // no more criterions available, so we can do our own paging
-        if ( query.getCriterions().isEmpty() )
+        if ( query.isEmpty() )
         {
             if ( query.getFirstResult() != null )
             {
@@ -141,11 +155,11 @@ public class CriteriaQueryEngine<T extends IdentifiableObject>
             {
                 criteria.setMaxResults( query.getMaxResults() );
             }
+        }
 
-            for ( Order order : query.getOrders() )
-            {
-                criteria.addOrder( getHibernateOrder( order ) );
-            }
+        for ( Order order : criteriaQuery.getOrders() )
+        {
+            criteria.addOrder( getHibernateOrder( order ) );
         }
 
         return criteria;
@@ -156,12 +170,11 @@ public class CriteriaQueryEngine<T extends IdentifiableObject>
      * the criterions will be passed on to the next query engine.
      *
      * @param query Query
-     * @return List of usable criterions for this engine
+     * @return Query instance
      */
-    private List<org.hisp.dhis.query.Criterion> getCriterions( Query query )
+    private Query getCriteriaQuery( Query query )
     {
-        List<org.hisp.dhis.query.Criterion> criterions = new ArrayList<>();
-
+        Query criteriaQuery = Query.from( query.getSchema() );
         Iterator<org.hisp.dhis.query.Criterion> criterionIterator = query.getCriterions().iterator();
 
         while ( criterionIterator.hasNext() )
@@ -174,13 +187,13 @@ public class CriteriaQueryEngine<T extends IdentifiableObject>
 
                 if ( !restriction.getPath().contains( "\\." ) )
                 {
-                    if ( query.getSchema().haveProperty( restriction.getPath() ) )
+                    if ( criteriaQuery.getSchema().haveProperty( restriction.getPath() ) )
                     {
                         Property property = query.getSchema().getProperty( restriction.getPath() );
 
                         if ( property.isSimple() && property.isPersisted() )
                         {
-                            criterions.add( criterion );
+                            criteriaQuery.getCriterions().add( criterion );
                             criterionIterator.remove();
                         }
                     }
@@ -188,7 +201,13 @@ public class CriteriaQueryEngine<T extends IdentifiableObject>
             }
         }
 
-        return criterions;
+        if ( query.ordersPersisted() )
+        {
+            criteriaQuery.addOrders( query.getOrders() );
+            query.clearOrders();
+        }
+
+        return criteriaQuery;
     }
 
     private void addJunction( org.hibernate.criterion.Junction junction, org.hisp.dhis.query.Criterion criterion, Schema schema )

@@ -10,44 +10,10 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
     var store = new dhis2.storage.Store({
         name: 'dhis2ec',
         adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
-        objectStores: ['programs', 'programStages', 'categories', 'geoJsons', 'optionSets', 'events', 'programValidations', 'programRules', 'programRuleVariables', 'programIndicators', 'ouLevels', 'constants']
+        objectStores: ['programs', 'optionSets', 'events', 'programValidations', 'programRules', 'programRuleVariables', 'programIndicators', 'ouLevels', 'constants']
     });
     return{
         currentStore: store
-    };
-})
-
-/* Service for uploading/downloading file */
-.service('FileService', function ($http) {
-
-    return {
-        get: function (uid) {
-            var promise = $http.get('../api/fileResources/' + uid).then(function (response) {
-                return response.data;
-            });
-            return promise;
-        },
-        delete: function (uid) {
-            var promise = $http.get('../api/fileResources/' + uid).then(function (response) {
-                return response.data;
-            });
-            return promise;
-        },
-        download: function (fileName) {
-            var promise = $http.get(fileName).then(function (response) {
-                return response.data;
-            });
-            return promise;
-        },
-        upload: function(file){
-            var formData = new FormData();
-            formData.append('file', file);
-            var headers = {transformRequest: angular.identity, headers: {'Content-Type': undefined}};
-            var promise = $http.post('../api/fileResources', formData, headers).then(function(response){
-                return response.data;
-            });
-            return promise;
-        }
     };
 })
 
@@ -91,27 +57,6 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
             });
             return def.promise;
         }
-    };
-})
-
-/* current selections */
-.service('CurrentSelection', function(){
-
-    this.ouLevels = null;     
-    this.location = null;
-    
-    this.setOuLevels = function(ouLevels){
-        this.ouLevels = ouLevels;
-    };
-    this.getOuLevels = function(){
-        return this.ouLevels;
-    };
-    
-    this.setLocation = function(location){
-        this.location = location;
-    };
-    this.getLocation = function(){
-        return this.location;
     };
 })
 
@@ -353,6 +298,7 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
                 return response.data;
             }, function(){
                 dhis2.ec.store.remove( 'events', dhis2Event.event );
+                return response.data;
             });
             return promise;           
         },    
@@ -565,52 +511,6 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
             });
                         
             return def.promise;
-        }
-    };
-})
-
-/* service for dealing with events */
-.service('DHIS2EventService', function(){
-    return {     
-        //for simplicity of grid display, events were changed from
-        //event.datavalues = [{dataElement: dataElement, value: value}] to
-        //event[dataElement] = value
-        //now they are changed back for the purpose of storage.   
-        reconstructEvent: function(event, programStageDataElements){
-            var e = {};
-        
-            e.event         = event.event;
-            e.status        = event.status;
-            e.program       = event.program;
-            e.programStage  = event.programStage;
-            e.orgUnit       = event.orgUnit;
-            e.eventDate     = event.eventDate;
-
-            var dvs = [];
-            angular.forEach(programStageDataElements, function(prStDe){
-                if(event.hasOwnProperty(prStDe.dataElement.id)){
-                    dvs.push({dataElement: prStDe.dataElement.id, value: event[prStDe.dataElement.id]});
-                }
-            });
-
-            e.dataValues = dvs;
-            
-            if(event.coordinate){
-                e.coordinate = {latitude: event.coordinate.latitude ? event.coordinate.latitude : '',
-                                     longitude: event.coordinate.longitude ? event.coordinate.longitude : ''};
-            }
-
-            return e;
-        },
-        refreshList: function(eventList, currentEvent){
-            var continueLoop = true;
-            for(var i=0; i< eventList.length && continueLoop; i++){
-                if(eventList[i].event === currentEvent.event ){
-                    eventList[i] = currentEvent;
-                    continueLoop = false;
-                }
-            }            
-            return eventList;
         }
     };
 });

@@ -10,6 +10,41 @@ html, body {
     display: none;
 }
 
+@media print {
+    .not-for-screen {
+        display: block;
+    }
+    body, html {
+        width: 100% !important;
+        height: auto !important;
+    }
+    
+    ::-webkit-input-placeholder { /* WebKit browsers */
+        color: white !important;
+    }
+    :-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+        color: white !important;
+    }
+    ::-moz-placeholder { /* Mozilla Firefox 19+ */
+        color: white !important;
+    }
+    :-ms-input-placeholder { /* Internet Explorer 10+ */
+        color: white !important;
+    }
+    
+    .select2-chosen {
+        color: white !important;
+    }
+
+    #header, #leftBar, .hideInPrint {
+        display: none !important;
+    }    
+    
+    .select2-arrow, .ui-select-toggle {
+        display: none !important;
+    }
+}
+
 /*----------------------------------------------------------------------------*/
 /* Table
 /*----------------------------------------------------------------------------*/
@@ -50,6 +85,10 @@ div.paging a.active
     text-decoration: none; 
     color: #000;
     cursor: default;
+}
+
+.input-pending {
+    background-color: #fffe8c !important;
 }
 
 .input-error {
@@ -342,7 +381,6 @@ div#orgUnitTree {
     background-color: #d0eBd0;
     padding-top: 10px;
     padding-bottom: 10px;    
-    //margin-bottom: 15px;
     border-radius: 3px;
 }
 
@@ -374,8 +412,8 @@ div#orgUnitTree {
 }
 
 .ui-datepicker-group .ui-datepicker-header {
-    //height: 1.5em; 
-    height: inherit;  //this is to make it play nice with bootstrap
+    /*height: 1.5em;*/ 
+    height: inherit;  /*this is to make it play nice with bootstrap*/
 }
 
 .btn-file {
@@ -417,12 +455,27 @@ div#orgUnitTree {
 }
 
 
+/*Audit icon specific*/
+.input-with-audit {
+    width:85%;
+    display: inline-block;
+}
 
-/*.file-input input[readonly] {
-    background-color: white !important;
-    cursor: text !important;
-}*/
+.checkbox-with-audit {
+    width:50%;
+    display: inline-block;
+}
 
-/*input[type='file'] {
-    opacity:0
-}*/
+.audit-icon {
+    margin-left: 5%;
+    display: inline-block;
+}
+
+.form-narrow-column {
+    width: 80px;
+}
+
+.audit-icon-column {
+    width: 30px;
+    align: center;
+}

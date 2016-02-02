@@ -1,7 +1,7 @@
 package org.hisp.dhis.webapi.controller.user;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,6 @@ package org.hisp.dhis.webapi.controller.user;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.common.CodeGenerator;
@@ -55,11 +54,14 @@ import org.hisp.dhis.user.UserGroupService;
 import org.hisp.dhis.user.UserInvitationStatus;
 import org.hisp.dhis.user.UserQueryParams;
 import org.hisp.dhis.user.UserService;
+import org.hisp.dhis.user.UserSetting;
+import org.hisp.dhis.user.UserSettingKey;
+import org.hisp.dhis.user.UserSettingService;
 import org.hisp.dhis.user.Users;
 import org.hisp.dhis.webapi.controller.AbstractCrudController;
 import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.hisp.dhis.webapi.utils.WebMessageUtils;
-import org.hisp.dhis.webapi.webdomain.WebMetaData;
+import org.hisp.dhis.webapi.webdomain.WebMetadata;
 import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -74,6 +76,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -100,13 +103,16 @@ public class UserController
 
     @Autowired
     private OrganisationUnitService organisationUnitService;
+    
+    @Autowired
+    private UserSettingService userSettingService;
 
     // -------------------------------------------------------------------------
     // GET
     // -------------------------------------------------------------------------
 
     @Override
-    protected List<User> getEntityList( WebMetaData metaData, WebOptions options, List<String> filters, List<Order> orders )
+    protected List<User> getEntityList( WebMetadata metadata, WebOptions options, List<String> filters, List<Order> orders )
     {
         UserQueryParams params = new UserQueryParams();
         params.setQuery( options.get( "query" ) );
@@ -137,7 +143,7 @@ public class UserController
         if ( options.hasPaging() && filters.isEmpty() )
         {
             Pager pager = new Pager( options.getPage(), count, options.getPageSize() );
-            metaData.setPager( pager );
+            metadata.setPager( pager );
             params.setFirst( pager.getOffset() );
             params.setMax( pager.getPageSize() );
         }
@@ -149,7 +155,7 @@ public class UserController
     protected List<User> getEntity( String uid, WebOptions options )
     {
         List<User> users = Lists.newArrayList();
-        Optional<User> user = Optional.fromNullable( userService.getUser( uid ) );
+        Optional<User> user = Optional.ofNullable( userService.getUser( uid ) );
 
         if ( user.isPresent() )
         {
@@ -285,7 +291,7 @@ public class UserController
     }
 
     @SuppressWarnings( "unchecked" )
-    @PreAuthorize( "hasRole('ALL')" )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_REPLICATE_USER')" )
     @RequestMapping( value = "/{uid}/replica", method = RequestMethod.POST )
     public void replicateUser( @PathVariable String uid,
         HttpServletRequest request, HttpServletResponse response ) throws IOException, WebMessageException
@@ -345,6 +351,22 @@ public class UserController
         userService.addUserCredentials( credentialsReplica );
         userGroupService.addUserToGroups( userReplica, IdentifiableObjectUtils.getUids( existingUser.getGroups() ) );
 
+        // ---------------------------------------------------------------------
+        // Replicate user settings
+        // ---------------------------------------------------------------------
+
+        List<UserSetting> settings = userSettingService.getUserSettings( existingUser );
+        
+        for ( UserSetting setting : settings )
+        {
+            Optional<UserSettingKey> key = UserSettingKey.getByName( setting.getName() );
+            
+            if ( key.isPresent() )
+            {
+                userSettingService.saveUserSetting( key.get(), setting.getValue(), userReplica );
+            }            
+        }
+        
         response.addHeader( "Location", UserSchemaDescriptor.API_ENDPOINT + "/" + userReplica.getUid() );
         webMessageService.send( WebMessageUtils.created( "User replica created" ), response, request );
     }

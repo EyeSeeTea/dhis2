@@ -1,7 +1,7 @@
 package org.hisp.dhis.dataapproval;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -221,6 +221,12 @@ public interface DataApprovalLevelService
      * @param dataApprovalLevel the data approval level to delete.
      */
     void deleteDataApprovalLevel( DataApprovalLevel dataApprovalLevel );
+
+    /**
+     * Reorders the remaining approval levels, if necessary, after deleting
+     * an approval level. Should follow the deleting of an approval level.
+     */
+    void postDeleteDataApprovalLevel();
 
     /**
      * Gets the approval level at which this user may make approval actions

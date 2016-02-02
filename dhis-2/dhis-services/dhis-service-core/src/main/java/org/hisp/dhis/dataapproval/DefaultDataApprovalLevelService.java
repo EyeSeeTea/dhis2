@@ -1,7 +1,7 @@
 package org.hisp.dhis.dataapproval;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -443,19 +443,19 @@ public class DefaultDataApprovalLevelService
     @Override
     public void deleteDataApprovalLevel( DataApprovalLevel dataApprovalLevel )
     {
+        dataApprovalLevelStore.delete( dataApprovalLevel );
+
+        postDeleteDataApprovalLevel();
+    }
+
+    @Override
+    public void postDeleteDataApprovalLevel()
+    {
         List<DataApprovalLevel> dataApprovalLevels = getAllDataApprovalLevels();
 
-        int index = dataApprovalLevel.getLevel() - 1;
-        
-        if ( index >= 0 && index < dataApprovalLevels.size() )
+        for ( int i = 0; i < dataApprovalLevels.size(); i++ )
         {
-            dataApprovalLevelStore.delete( dataApprovalLevel );
-
-            dataApprovalLevels.remove( index );
-
-            // Move up from here to end, to avoid duplicate level in database.
-
-            for ( int i = index; i < dataApprovalLevels.size(); i++ )
+            if ( dataApprovalLevels.get( i ).getLevel() != i + 1 )
             {
                 update( dataApprovalLevels.get( i ), i );
             }

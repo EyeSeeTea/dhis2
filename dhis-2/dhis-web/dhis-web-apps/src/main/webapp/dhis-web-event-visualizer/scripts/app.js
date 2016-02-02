@@ -2284,7 +2284,8 @@ Ext.onReady( function() {
 			fieldLabel: 'Range axis decimals',
 			labelStyle: 'color:#333',
 			labelWidth: 125,
-			minValue: 0
+			minValue: 0,
+            maxValue: 20
 		});
 
         // general
@@ -2791,7 +2792,7 @@ Ext.onReady( function() {
 								eventChart.name = name;
 
 								Ext.Ajax.request({
-									url: ns.core.init.contextPath + '/api/eventCharts/' + eventChart.id,
+									url: ns.core.init.contextPath + '/api/eventCharts/' + eventChart.id + '?mergeStrategy=REPLACE',
 									method: 'PUT',
 									headers: {'Content-Type': 'application/json'},
 									params: Ext.encode(eventChart),
@@ -2994,7 +2995,7 @@ Ext.onReady( function() {
 
 										if (confirm(message)) {
 											Ext.Ajax.request({
-												url: ns.core.init.contextPath + '/api/eventCharts/' + record.data.id,
+												url: ns.core.init.contextPath + '/api/eventCharts/' + record.data.id + '?mergeStrategy=REPLACE',
 												method: 'PUT',
 												headers: {'Content-Type': 'application/json'},
 												params: Ext.encode(favorite),
@@ -4045,7 +4046,7 @@ Ext.onReady( function() {
             }
             else {
                 Ext.Ajax.request({
-                    url: ns.core.init.contextPath + '/api/programs.json?filter=id:eq:' + programId + '&fields=programStages[id,displayName|rename(name)],programIndicators[id,' + namePropertyUrl + '],programTrackedEntityAttributes[trackedEntityAttribute[id,' + namePropertyUrl + ',valueType,optionSet[id,displayName|rename(name)],legendSet[id,displayName|rename(name)]]]&paging=false',
+                    url: ns.core.init.contextPath + '/api/programs.json?filter=id:eq:' + programId + '&fields=programStages[id,displayName|rename(name)],programIndicators[id,' + namePropertyUrl + '],programTrackedEntityAttributes[trackedEntityAttribute[id,' + namePropertyUrl + ',valueType,confidential,optionSet[id,displayName|rename(name)],legendSet[id,displayName|rename(name)]]]&paging=false',
                     success: function(r) {
                         var program = Ext.decode(r.responseText).programs[0],
                             stages,
@@ -4061,10 +4062,11 @@ Ext.onReady( function() {
                         attributes = Ext.Array.pluck(program.programTrackedEntityAttributes, 'trackedEntityAttribute');
                         programIndicators = program.programIndicators;
 
-                        // mark as attribute
-                        for (var i = 0; i < attributes.length; i++) {
-                            attributes[i].isAttribute = true;
-                        }
+                        // filter confidential, mark as attribute
+                        attributes.filter(function(item) {
+                            item.isAttribute = true;
+                            return !item.confidential;
+                        });
 
                         // attributes cache
                         if (Ext.isArray(attributes) && attributes.length) {
@@ -4072,15 +4074,15 @@ Ext.onReady( function() {
                         }
 
                         // mark as program indicator
-                        for (var i = 0; i < programIndicators.length; i++) {
-                            programIndicators[i].isProgramIndicator = true;
-                        }
+                        programIndicators.forEach(function(item) {
+                            item.isProgramIndicator = true;
+                        });
 
                         // program indicator cache
                         if (Ext.isArray(programIndicators) && programIndicators.length) {
                             programIndicatorStorage[programId] = programIndicators;
                         }
-
+                        
                         if (Ext.isArray(stages) && stages.length) {
 
                             // stages cache
@@ -4173,6 +4175,7 @@ Ext.onReady( function() {
                     url: ns.core.init.contextPath + '/api/programStages.json?filter=id:eq:' + stageId + '&fields=programStageDataElements[dataElement[id,' + namePropertyUrl + ',valueType,optionSet[id,displayName|rename(name)],legendSet|rename(storageLegendSet)[id,displayName|rename(name)]]]',
                     success: function(r) {
                         var objects = Ext.decode(r.responseText).programStages,
+                            types = ns.core.conf.valueType.tAggregateTypes,
                             dataElements;
 
                         if (!objects.length) {
@@ -4182,6 +4185,12 @@ Ext.onReady( function() {
 
                         dataElements = Ext.Array.pluck(objects[0].programStageDataElements, 'dataElement');
 
+                        // filter non-aggregatable types
+                        dataElements.filter(function(item) {
+                            item.isDataElement = true;
+                            return Ext.Array.contains(types, item.valueType);
+                        });
+                        
                         // data elements cache
                         dataElementStorage[stageId] = dataElements;
 
@@ -4447,7 +4456,7 @@ Ext.onReady( function() {
 				allElements = [],
                 aggWindow = ns.app.aggregateLayoutWindow,
                 //queryWindow = ns.app.queryLayoutWindow,
-                includeKeys = ns.core.conf.valueType.aggregateTypes,
+                includeKeys = ns.core.conf.valueType.tAggregateTypes,
                 ignoreKeys = ['pe', 'ou'],
                 recordMap = {
 					'pe': {id: 'pe', name: 'Periods'},
@@ -8189,7 +8198,7 @@ Ext.onReady( function() {
                                                 init.organisationUnitLevels = Ext.decode(r.responseText).organisationUnitLevels || [];
 
                                                 if (!init.organisationUnitLevels.length) {
-                                                    alert('No organisation unit levels found');
+                                                    console.log('Info: No organisation unit levels defined');
                                                 }
 
                                                 fn();

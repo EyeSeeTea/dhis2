@@ -1,7 +1,7 @@
 package org.hisp.dhis.webapi.controller;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,16 +29,17 @@ package org.hisp.dhis.webapi.controller;
  */
 
 import com.google.common.collect.Lists;
-
 import org.hisp.dhis.common.Pager;
+import org.hisp.dhis.dashboard.Dashboard;
 import org.hisp.dhis.dashboard.DashboardItem;
 import org.hisp.dhis.dashboard.DashboardItemShape;
 import org.hisp.dhis.dashboard.DashboardService;
 import org.hisp.dhis.dxf2.webmessage.WebMessageException;
+import org.hisp.dhis.hibernate.exception.UpdateAccessDeniedException;
 import org.hisp.dhis.query.Order;
 import org.hisp.dhis.schema.descriptors.DashboardItemSchemaDescriptor;
 import org.hisp.dhis.webapi.utils.WebMessageUtils;
-import org.hisp.dhis.webapi.webdomain.WebMetaData;
+import org.hisp.dhis.webapi.webdomain.WebMetadata;
 import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -48,7 +49,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.util.List;
 
 /**
@@ -63,7 +63,7 @@ public class DashboardItemController
     private DashboardService dashboardService;
 
     @Override
-    protected List<DashboardItem> getEntityList( WebMetaData metaData, WebOptions options, List<String> filters, List<Order> orders )
+    protected List<DashboardItem> getEntityList( WebMetadata metadata, WebOptions options, List<String> filters, List<Order> orders )
     {
         List<DashboardItem> entityList;
 
@@ -72,7 +72,7 @@ public class DashboardItemController
             int count = manager.getCount( getEntityClass() );
 
             Pager pager = new Pager( options.getPage(), count, options.getPageSize() );
-            metaData.setPager( pager );
+            metadata.setPager( pager );
 
             entityList = Lists.newArrayList( manager.getBetween( getEntityClass(), pager.getOffset(), pager.getPageSize() ) );
         }
@@ -93,6 +93,13 @@ public class DashboardItemController
         if ( item == null )
         {
             throw new WebMessageException( WebMessageUtils.notFound( "Dashboard item does not exist: " + uid ) );
+        }
+
+        Dashboard dashboard = dashboardService.getDashboardFromDashboardItem( item );
+
+        if ( !aclService.canUpdate( currentUserService.getCurrentUser(), dashboard ) )
+        {
+            throw new UpdateAccessDeniedException( "You don't have the proper permissions to update this dashboard." );
         }
 
         item.setShape( shape );

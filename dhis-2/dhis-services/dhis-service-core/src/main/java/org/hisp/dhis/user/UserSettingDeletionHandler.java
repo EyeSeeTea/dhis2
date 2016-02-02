@@ -1,7 +1,7 @@
 package org.hisp.dhis.user;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,7 +57,7 @@ public class UserSettingDeletionHandler
     @Override
     public void deleteUser( User user )
     {
-        for ( UserSetting setting : userSettingService.getAllUserSettings( user ) )
+        for ( UserSetting setting : userSettingService.getUserSettings( user ) )
         {
             userSettingService.deleteUserSetting( setting );
         }

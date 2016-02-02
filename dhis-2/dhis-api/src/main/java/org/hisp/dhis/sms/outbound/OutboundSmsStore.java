@@ -1,7 +1,7 @@
 package org.hisp.dhis.sms.outbound;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,18 +33,18 @@ import java.util.List;
 public interface OutboundSmsStore
 {
     int saveOutboundSms( OutboundSms sms );
-    
+
     List<OutboundSms> getAllOutboundSms();
-    
+
     List<OutboundSms> getAllOutboundSms( Integer min, Integer max );
 
     OutboundSms getOutboundSmsbyId( int id );
-    
+
     List<OutboundSms> get( OutboundSmsStatus status );
-    
+
     List<OutboundSms> get( OutboundSmsStatus status, Integer min, Integer max );
-    
+
     void updateOutboundSms( OutboundSms sms );
-    
+
     void deleteOutboundSms( OutboundSms sms );
 }

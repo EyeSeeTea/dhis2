@@ -1,7 +1,7 @@
 package org.hisp.dhis.webapi.controller.organisationunit;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@ import org.hisp.dhis.user.User;
 import org.hisp.dhis.util.ObjectUtils;
 import org.hisp.dhis.version.VersionService;
 import org.hisp.dhis.webapi.controller.AbstractCrudController;
-import org.hisp.dhis.webapi.webdomain.WebMetaData;
+import org.hisp.dhis.webapi.webdomain.WebMetadata;
 import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -80,7 +80,7 @@ public class OrganisationUnitController
 
     @Override
     @SuppressWarnings( "unchecked" )
-    protected List<OrganisationUnit> getEntityList( WebMetaData metaData, WebOptions options, List<String> filters, List<Order> orders ) throws QueryParserException
+    protected List<OrganisationUnit> getEntityList( WebMetadata metadata, WebOptions options, List<String> filters, List<Order> orders ) throws QueryParserException
     {
         List<OrganisationUnit> entityList;
         Query query = queryService.getQueryFromUrl( getEntityClass(), filters, orders );
@@ -216,11 +216,11 @@ public class OrganisationUnitController
             }
         }
 
-        WebMetaData metaData = new WebMetaData();
-        metaData.setOrganisationUnits( organisationUnits );
+        WebMetadata metadata = new WebMetadata();
+        metadata.setOrganisationUnits( organisationUnits );
         WebOptions options = new WebOptions( parameters );
 
-        model.addAttribute( "model", metaData );
+        model.addAttribute( "model", metadata );
         model.addAttribute( "viewClass", options.getViewClass( "basic" ) );
 
         return organisationUnits;

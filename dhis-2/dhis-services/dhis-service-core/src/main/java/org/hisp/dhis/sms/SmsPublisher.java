@@ -1,7 +1,9 @@
 package org.hisp.dhis.sms;
 
+import java.util.concurrent.ScheduledFuture;
+
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,148 +30,44 @@ package org.hisp.dhis.sms;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.sms.incoming.IncomingSms;
-import org.hisp.dhis.sms.incoming.IncomingSmsListener;
-import org.hisp.dhis.sms.incoming.SmsMessageStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.TaskScheduler;
 
 public class SmsPublisher
 {
     private static final Log log = LogFactory.getLog( SmsPublisher.class );
 
-    private List<IncomingSmsListener> listeners;
-
+    @Autowired
     private MessageQueue messageQueue;
 
-    private SMSConsumerThread thread;
+    @Autowired
+    private SmsConsumerThread smsConsumer;
 
-    private SmsSender smsSender;
+    @Autowired
+    private TaskScheduler taskScheduler;
+
+    private ScheduledFuture<?> future;
 
     public void start()
     {
         messageQueue.initialize();
 
-        if ( thread == null )
+        future = taskScheduler.scheduleWithFixedDelay( new Runnable()
         {
-            thread = new SMSConsumerThread();
-            thread.start();
-        }
+            public void run()
+            {
+                smsConsumer.spawnSmsConsumer();
+            }
+        }, 5000 );
+
+        log.info( "SMS Consumer Started" );
     }
 
     public void stop()
     {
-        if ( thread != null )
-        {
-            thread.stopFetching();
-        }
-
-        thread = null;
-    }
-
-    private class SMSConsumerThread
-        extends Thread
-    {
-        private boolean stop;
-
-        public SMSConsumerThread()
-        {
-        }
-
-        @Override
-        public void run()
-        {
-            while ( !stop )
-            {
-                try
-                {
-                    fetchAndParseSMS();
-                }
-                catch ( Exception ex )
-                {
-                    log.error( ex.getMessage() );
-                }
-
-                try
-                {
-                    Thread.sleep( 10000 );
-                }
-                catch ( InterruptedException e )
-                {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        private void fetchAndParseSMS()
-        {
-            IncomingSms message = messageQueue.get();
-            
-            while ( message != null )
-            {
-                log.info( "Received SMS: " + message.getText() );
-                try
-                {
-                    for ( IncomingSmsListener listener : listeners )
-                    {
-                        if ( listener.accept( message ) )
-                        {
-                            listener.receive( message );
-                            messageQueue.remove( message );
-                            return;
-                        }
-                    }
-                    
-                    smsSender.sendMessage( "No command found", message.getOriginator() );
-                    message.setStatus( SmsMessageStatus.UNHANDLED );
-                }
-                catch ( Exception e )
-                {
-                    log.error( e );
-                    e.printStackTrace();
-                    smsSender.sendMessage( e.getMessage(), message.getOriginator() );
-                    message.setStatus( SmsMessageStatus.FAILED );
-                }
-                finally
-                {
-                    messageQueue.remove( message );
-                    message = messageQueue.get();
-                }
-            }
-        }
-
-        public void stopFetching()
-        {
-            this.stop = true;
-        }
-    }
-
-    public void setMessageQueue( MessageQueue messageQueue )
-    {
-        this.messageQueue = messageQueue;
-    }
-
-    public List<IncomingSmsListener> getListeners()
-    {
-        return listeners;
-    }
-
-    @Autowired(required=false)
-    public void setListeners( List<IncomingSmsListener> listeners )
-    {
-        this.listeners = listeners;
-    }
-
-    public SmsSender getSmsSender()
-    {
-        return smsSender;
-    }
-
-    public void setSmsSender( SmsSender smsSender )
-    {
-        this.smsSender = smsSender;
+        future.cancel( true );
+        log.info( "SMS Consumer Stopped" );
     }
 }

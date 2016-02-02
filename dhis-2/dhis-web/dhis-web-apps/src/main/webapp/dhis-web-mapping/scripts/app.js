@@ -2768,7 +2768,7 @@ Ext.onReady( function() {
                             map.name = name;
 
                             Ext.Ajax.request({
-                                url: gis.init.contextPath + '/api/maps/' + id,
+                                url: gis.init.contextPath + '/api/maps/' + id + '?mergeStrategy=REPLACE',
                                 method: 'PUT',
                                 headers: {'Content-Type': 'application/json'},
                                 params: Ext.encode(map),
@@ -2972,11 +2972,13 @@ Ext.onReady( function() {
 
 												// remove
 												delete view.periodType;
+                                                delete view.dataDimensionItems;
 
 												views.push(view);
 											}
 
 											map = {
+                                                name: record.data.name,
 												longitude: lonlat.lon,
 												latitude: lonlat.lat,
 												zoom: gis.olmap.getZoom(),
@@ -2984,7 +2986,7 @@ Ext.onReady( function() {
 											};
 
 											Ext.Ajax.request({
-												url: gis.init.contextPath + '/api/maps/' + record.data.id,
+												url: gis.init.contextPath + '/api/maps/' + record.data.id + '?mergeStrategy=REPLACE',
 												method: 'PUT',
 												headers: {'Content-Type': 'application/json'},
 												params: Ext.encode(map),
@@ -3991,7 +3993,7 @@ Ext.onReady( function() {
 					body = Ext.encode(getRequestBody());
 
 					Ext.Ajax.request({
-						url: gis.init.contextPath + '/api/legendSets/' + id,
+						url: gis.init.contextPath + '/api/legendSets/' + id + '?mergeStrategy=REPLACE',
 						method: 'PUT',
 						headers: {'Content-Type': 'application/json'},
 						params: body,
@@ -7181,13 +7183,11 @@ Ext.onReady( function() {
 				this.sort('name', 'ASC');
 			},
 			setTotalsProxy: function(uid, preventLoad, callbackFn) {
-				var path;
+                var types = gis.conf.valueType.aAggregateTypes.join(','),
+                    path = '/dataElements.json?fields=dimensionItem|rename(id),' + gis.init.namePropertyUrl + '&filter=valueType:in:[' + types + ']&domainType=aggregate&paging=false';
 
 				if (Ext.isString(uid)) {
-                    path = '/dataElements.json?fields=id,' + gis.init.namePropertyUrl + '&domainType=aggregate&paging=false&filter=dataElementGroups.id:eq:' + uid;
-				}
-				else if (uid === 0) {
-					path = '/dataElements.json?fields=id,' + gis.init.namePropertyUrl + '&domainType=aggregate&paging=false';
+                    path += '&filter=dataElementGroups.id:eq:' + uid;
 				}
 
 				if (!path) {
@@ -7219,9 +7219,11 @@ Ext.onReady( function() {
 			},
 			setDetailsProxy: function(uid, preventLoad, callbackFn) {
 				if (Ext.isString(uid)) {
+                    var types = gis.conf.valueType.aAggregateTypes.join(',');
+                        
 					this.setProxy({
 						type: 'ajax',
-						url: gis.init.contextPath + '/api/dataElementOperands.json?fields=id,' + gis.init.namePropertyUrl + '&paging=false&filter=dataElement.dataElementGroups.id:eq:' + uid,
+						url: gis.init.contextPath + '/api/dataElementOperands.json?fields=dimensionItem|rename(id),' + gis.init.namePropertyUrl + '&filter=valueType:in:[' + types + ']&filter=dataElement.dataElementGroups.id:eq:' + uid + '&paging=false',
 						reader: {
 							type: 'json',
 							root: 'dataElementOperands'
@@ -7756,49 +7758,31 @@ Ext.onReady( function() {
         onEventDataItemProgramSelect = function(programId) {
             eventDataItem.clearValue();
 
+            var types = gis.conf.valueType.tAggregateTypes.join(','),
+                namePropertyUrl = gis.init.namePropertyUrl;
+            
             Ext.Ajax.request({
-                url: gis.init.contextPath + '/api/programs.json?paging=false&fields=programTrackedEntityAttributes[trackedEntityAttribute[id,displayName|rename(name),valueType]],programStages[programStageDataElements[dataElement[id,' + namePropertyUrl + ',valueType]]]&filter=id:eq:' + programId,
+                url: gis.init.contextPath + '/api/programDataElements.json?program=' + programId + '&filter=valueType:in:[' + types + ']&fields=dimensionItem|rename(id),name,valueType&paging=false',
+                disableCaching: false,
                 success: function(r) {
-                    r = Ext.decode(r.responseText);
+                    var elements = Ext.decode(r.responseText).programDataElements,
+                        isA = Ext.isArray,
+                        isO = Ext.isObject;
 
-                    var isA = Ext.isArray,
-                        isO = Ext.isObject,
-                        program = isA(r.programs) && r.programs.length ? r.programs[0] : null,
-                        stages = isO(program) && isA(program.programStages) && program.programStages.length ? program.programStages : [],
-                        teas = isO(program) && isA(program.programTrackedEntityAttributes) ? Ext.Array.pluck(program.programTrackedEntityAttributes, 'trackedEntityAttribute') : [],
-                        dataElements = [],
-                        attributes = [],
-                        types = gis.conf.valueType.aggregateTypes,
-                        data;
+                    Ext.Ajax.request({
+                        url: gis.init.contextPath + '/api/programs.json?filter=id:eq:' + programId + '&filter=programTrackedEntityAttributes.trackedEntityAttribute.confidential:eq:false&filter=programTrackedEntityAttributes.valueType:in:[' + types + ']&fields=programTrackedEntityAttributes[dimensionItem|rename(id),' + namePropertyUrl + '|rename(name),valueType]&paging=false',
+                        disableCaching: false,
+                        success: function(r) {
+                            var attributes = (Ext.decode(r.responseText).programs[0] || {}).programTrackedEntityAttributes || [],
+                                data = gis.util.array.sort(Ext.Array.clean([].concat(elements, attributes))) || [];
 
-                    // data elements
-                    for (var i = 0, stage, elements; i < stages.length; i++) {
-                        stage = stages[i];
-
-                        if (isA(stage.programStageDataElements) && stage.programStageDataElements.length) {
-                            elements = Ext.Array.pluck(stage.programStageDataElements, 'dataElement') || [];
-
-                            for (var j = 0; j < elements.length; j++) {
-                                if (Ext.Array.contains(types, elements[j].valueType)) {
-                                    dataElements.push(elements[j]);
-                                }
+                            if (data) {
+                                eventDataItemAvailableStore.loadData(data);
                             }
                         }
-                    }
-
-                    // attributes
-                    for (i = 0; i < teas.length; i++) {
-                        if (Ext.Array.contains(types, teas[i].valueType)) {
-                            attributes.push(teas[i]);
-                        }
-                    }
-
-                    data = gis.util.array.sort(Ext.Array.clean([].concat(dataElements, attributes))) || [];
-
-                    eventDataItemAvailableStore.loadData(data);
+                    });
                 }
             });
-
         };
 
 		eventDataItemProgram = Ext.create('Ext.form.field.ComboBox', {
@@ -10226,7 +10210,7 @@ Ext.onReady( function() {
                                                 init.organisationUnitLevels = Ext.decode(r.responseText).organisationUnitLevels || [];
 
                                                 if (!init.organisationUnitLevels.length) {
-                                                    alert('No organisation unit levels');
+                                                    console.log('Info: No organisation unit levels defined');
                                                 }
 
                                                 fn();

@@ -1,7 +1,7 @@
 package org.hisp.dhis.system.startup;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,20 +28,19 @@ package org.hisp.dhis.system.startup;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.external.conf.DhisConfigurationProvider;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.external.conf.ConfigurationKey;
-import org.hisp.dhis.external.conf.DhisConfigurationProvider;
-import org.springframework.beans.factory.annotation.Autowired;
-
 /**
  * Default implementation of StartupRoutineExecutor. The execute method will
- * execute the added StartupRoutines ordered by their runlevels. Startup routines
+ * execute the added StartupRoutines ordered by their run levels. Startup routines
  * can be ignored from the command line by appending the below.
  * 
  * <code>-Ddhis.skip.startup=true</code>
@@ -108,7 +107,7 @@ public class DefaultStartupRoutineExecutor
             return;
         }
         
-        if ( config.isEnabled( ConfigurationKey.SYSTEM_READ_ONLY_MODE ) )
+        if ( config.isReadOnlyMode() )
         {
             LOG.info( "Skipping startup routines, read-only mode is enabled" );
             return;

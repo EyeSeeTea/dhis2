@@ -1,7 +1,7 @@
 package org.hisp.dhis.dataapproval;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -242,6 +242,12 @@ public class DataApprovalLevelServiceTest
         assertNull( dataApprovalLevelService.getDataApprovalLevel( id2 ) );
         assertNotNull( dataApprovalLevelService.getDataApprovalLevel( id3 ) );
         assertNotNull( dataApprovalLevelService.getDataApprovalLevel( id4 ) );
+
+        List<DataApprovalLevel> levels = dataApprovalLevelService.getAllDataApprovalLevels();
+        assertEquals( 3, levels.size() );
+        assertEquals( 1, levels.get( 0 ).getLevel() );
+        assertEquals( 2, levels.get( 1 ).getLevel() );
+        assertEquals( 3, levels.get( 2 ).getLevel() );
     }
 
     @Test

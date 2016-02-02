@@ -1,7 +1,7 @@
 package org.hisp.dhis.program;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,6 @@ import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.trackedentitycomment.TrackedEntityComment;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -50,6 +49,8 @@ public class ProgramStageInstance
     private ProgramInstance programInstance;
 
     private ProgramStage programStage;
+
+    private String storedBy;
 
     private Date dueDate;
 
@@ -71,10 +72,10 @@ public class ProgramStageInstance
 
     private Double latitude;
 
-    private String completedUser;
+    private String completedBy;
 
     private Date completedDate;
-    
+
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -94,83 +95,66 @@ public class ProgramStageInstance
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    /**
-     * @return the programInstance
-     */
     public ProgramInstance getProgramInstance()
     {
         return programInstance;
     }
 
-    /**
-     * @param programInstance the programInstance to set
-     */
     public void setProgramInstance( ProgramInstance programInstance )
     {
         this.programInstance = programInstance;
     }
 
-    /**
-     * @return the programStage
-     */
     public ProgramStage getProgramStage()
     {
         return programStage;
     }
 
-    /**
-     * @param programStage the programStage to set
-     */
     public void setProgramStage( ProgramStage programStage )
     {
         this.programStage = programStage;
     }
 
-    public String getCompletedUser()
+    public String getStoredBy()
     {
-        return completedUser;
+        return storedBy;
     }
 
-    public void setCompletedUser( String completedUser )
+    public void setStoredBy( String storedBy )
     {
-        this.completedUser = completedUser;
+        this.storedBy = storedBy;
     }
 
-    /**
-     * @return the dueDate
-     */
+    public String getCompletedBy()
+    {
+        return completedBy;
+    }
+
+    public void setCompletedBy( String completedBy )
+    {
+        this.completedBy = completedBy;
+    }
+
     public Date getDueDate()
     {
         return dueDate;
     }
 
-    /**
-     * @param dueDate the dueDate to set
-     */
     public void setDueDate( Date dueDate )
     {
         this.dueDate = dueDate;
     }
 
-    /**
-     * @return the executionDate
-     */
     public Date getExecutionDate()
     {
         return executionDate;
     }
 
-    /**
-     * @param executionDate the executionDate to set
-     */
     public void setExecutionDate( Date executionDate )
     {
         this.executionDate = executionDate;
     }
 
-    /**
-     * @return the completed
-     */
     public boolean isCompleted()
     {
         return (status == EventStatus.COMPLETED) ? true : false;
@@ -185,7 +169,7 @@ public class ProgramStageInstance
     {
         this.organisationUnit = organisationUnit;
     }
-    
+
     public DataElementCategoryOptionCombo getAttributeOptionCombo()
     {
         return attributeOptionCombo;
@@ -263,37 +247,6 @@ public class ProgramStageInstance
 
     public EventStatus getStatus()
     {
-       return status;
-    }
-
-    public EventStatus getEventStatus()
-    {
-        if ( status == EventStatus.COMPLETED )
-        {
-            return status;
-        }
-        else if ( this.getExecutionDate() != null )
-        {
-            return EventStatus.VISITED;
-        }
-        else
-        {
-            // -------------------------------------------------------------
-            // If a program stage is not provided even a day after its due
-            // date, then that service is alerted red - because we are
-            // getting late
-            // -------------------------------------------------------------
-
-            Calendar dueDateCalendar = Calendar.getInstance();
-            dueDateCalendar.setTime( this.getDueDate() );
-            dueDateCalendar.add( Calendar.DATE, 1 );
-
-            if ( dueDateCalendar.getTime().before( new Date() ) )
-            {
-                return EventStatus.OVERDUE;
-            }
-
-            return EventStatus.SCHEDULE;
-        }
+        return status;
     }
 }

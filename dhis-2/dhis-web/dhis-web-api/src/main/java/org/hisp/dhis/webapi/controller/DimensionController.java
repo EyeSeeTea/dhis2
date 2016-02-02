@@ -1,7 +1,7 @@
 package org.hisp.dhis.webapi.controller;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,13 +39,14 @@ import org.hisp.dhis.dxf2.webmessage.WebMessageException;
 import org.hisp.dhis.node.AbstractNode;
 import org.hisp.dhis.node.Node;
 import org.hisp.dhis.node.NodeUtils;
+import org.hisp.dhis.node.Preset;
 import org.hisp.dhis.node.types.CollectionNode;
 import org.hisp.dhis.node.types.RootNode;
 import org.hisp.dhis.query.Order;
 import org.hisp.dhis.query.Query;
 import org.hisp.dhis.query.QueryParserException;
 import org.hisp.dhis.webapi.utils.WebMessageUtils;
-import org.hisp.dhis.webapi.webdomain.WebMetaData;
+import org.hisp.dhis.webapi.webdomain.WebMetadata;
 import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -88,7 +89,7 @@ public class DimensionController
 
     @Override
     @SuppressWarnings( "unchecked" )
-    protected List<DimensionalObject> getEntityList( WebMetaData metaData, WebOptions options, List<String> filters, List<Order> orders ) throws QueryParserException
+    protected List<DimensionalObject> getEntityList( WebMetadata metadata, WebOptions options, List<String> filters, List<Order> orders ) throws QueryParserException
     {
         List<DimensionalObject> dimensionalObjects;
         Query query = queryService.getQueryFromUrl( DimensionalObject.class, filters, orders );
@@ -114,7 +115,7 @@ public class DimensionController
 
         if ( fields.isEmpty() )
         {
-            fields.add( ":identifiable" );
+            fields.addAll( Preset.defaultPreset().getFields() );
         }
 
         List<DimensionalItemObject> items = dimensionService.getCanReadDimensionItems( uid );
@@ -159,7 +160,7 @@ public class DimensionController
         @RequestParam( value = "links", defaultValue = "true", required = false ) Boolean links,
         Model model, HttpServletResponse response ) throws WebMessageException
     {
-        WebMetaData metaData = new WebMetaData();
+        WebMetadata metadata = new WebMetadata();
 
         DataSet dataSet = identifiableObjectManager.get( DataSet.class, uid );
 
@@ -181,14 +182,14 @@ public class DimensionController
 
         for ( DimensionalObject dim : dimensions )
         {
-            metaData.getDimensions().add( dimensionService.getDimensionalObjectCopy( dim.getUid(), true ) );
+            metadata.getDimensions().add( dimensionService.getDimensionalObjectCopy( dim.getUid(), true ) );
         }
 
-        model.addAttribute( "model", metaData );
+        model.addAttribute( "model", metadata );
 
         if ( links )
         {
-            linkService.generateLinks( metaData, false );
+            linkService.generateLinks( metadata, false );
         }
 
         return "dimensions";

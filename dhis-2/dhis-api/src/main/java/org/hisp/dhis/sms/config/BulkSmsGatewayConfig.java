@@ -1,7 +1,9 @@
 package org.hisp.dhis.sms.config;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,9 +38,10 @@ public class BulkSmsGatewayConfig
     private String username;
 
     private String password;
-    
+
     private String region;
 
+    @JsonProperty( value = "username" )
     public String getUsername()
     {
         return username;
@@ -49,6 +52,13 @@ public class BulkSmsGatewayConfig
         this.username = username;
     }
 
+    @JsonProperty( value = "name" )
+    public String getName()
+    {
+        return super.getName();
+    }
+
+    @JsonProperty( value = "password" )
     public String getPassword()
     {
         return password;
@@ -58,10 +68,17 @@ public class BulkSmsGatewayConfig
     {
         this.password = password;
     }
-    
+
+    @JsonProperty( value = "region" )
     public String getRegion()
     {
         return region;
+    }
+
+    @JsonProperty( value = "default" )
+    public boolean getStatus()
+    {
+        return super.isDefault();
     }
 
     public void setRegion( String region )

@@ -1,7 +1,7 @@
 package org.hisp.dhis.webapi.controller.event;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@ import org.hisp.dhis.dxf2.events.enrollment.EnrollmentService;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
-import org.hisp.dhis.dxf2.render.RenderService;
+import org.hisp.dhis.render.RenderService;
 import org.hisp.dhis.dxf2.webmessage.WebMessageException;
 import org.hisp.dhis.fieldfilter.FieldFilterService;
 import org.hisp.dhis.importexport.ImportStrategy;
@@ -214,6 +214,14 @@ public class EnrollmentController
             webMessageService.send( WebMessageUtils.importSummaries( importSummaries ), response, request );
         }
     }
+    
+    @RequestMapping( value = "/{id}/note", method = RequestMethod.POST, consumes = "application/json" )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_PROGRAM_UNENROLLMENT')" )
+    public void updateEnrollmentForNoteJson( @PathVariable String id, HttpServletRequest request, HttpServletResponse response ) throws IOException
+    {
+        ImportSummary importSummary = enrollmentService.updateEnrollmentForNoteJson( id, request.getInputStream() );
+        webMessageService.send( WebMessageUtils.importSummary( importSummary ), response, request );
+    }
 
     // -------------------------------------------------------------------------
     // UPDATE
@@ -232,14 +240,6 @@ public class EnrollmentController
     public void updateEnrollmentJson( @PathVariable String id, ImportOptions importOptions, HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
         ImportSummary importSummary = enrollmentService.updateEnrollmentJson( id, request.getInputStream(), importOptions );
-        webMessageService.send( WebMessageUtils.importSummary( importSummary ), response, request );
-    }
-
-    @RequestMapping( value = "/{id}/addNote", method = RequestMethod.PUT, consumes = "application/json" )
-    @PreAuthorize( "hasRole('ALL') or hasRole('F_PROGRAM_UNENROLLMENT')" )
-    public void updateEnrollmentForNoteJson( @PathVariable String id, HttpServletRequest request, HttpServletResponse response ) throws IOException
-    {
-        ImportSummary importSummary = enrollmentService.updateEnrollmentForNoteJson( id, request.getInputStream() );
         webMessageService.send( WebMessageUtils.importSummary( importSummary ), response, request );
     }
 

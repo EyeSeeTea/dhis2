@@ -391,7 +391,7 @@ dhis2.db.renderDashboardListLoadFirst = function()
 
 	$l.empty();
 
-	$.getJSON( "../api/dashboards.json?paging=false&links=false&" + dhis2.util.cacheBust(), function( data )
+	$.getJSON( "../api/dashboards.json?fields=id,displayName&paging=false&links=false&" + dhis2.util.cacheBust(), function( data )
 	{
 		if ( undefined !== data.dashboards )
 		{
@@ -399,9 +399,9 @@ dhis2.db.renderDashboardListLoadFirst = function()
 
 			$.each( data.dashboards, function( index, dashboard )
 			{
-				$l.append( $.tmpl( dhis2.db.tmpl.dashboardLink, { "id": dashboard.id, "name": dashboard.name } ) );
+				$l.append( $.tmpl( dhis2.db.tmpl.dashboardLink, { "id": dashboard.id, "name": dashboard.displayName } ) );
 
-                if ( index == 0 )
+				if ( index == 0 )
 				{
 					first = dashboard.id;
 				}
@@ -534,7 +534,7 @@ dhis2.db.renderDashboard = function( id )
 
     $( "#dashboard-" + dhis2.db.current() ).addClass( "currentDashboard" );
 
-    $.getJSON( "../api/dashboards/" + id + "?fields=:all,dashboardItems[:all]&" + dhis2.util.cacheBust(), function( data )
+    $.getJSON( "../api/dashboards/" + id + "?fields=:all,dashboardItems[:all,reports[id,displayName],chart[id,displayName],map[id,displayName],reportTable[id,displayName]]&" + dhis2.util.cacheBust(), function( data )
     {
 		$d = $( "#contentList" ).empty();
 
@@ -780,7 +780,7 @@ dhis2.db.renderLinkItem = function( $d, itemId, contents, title, baseUrl, urlSuf
 		}
 
 		html +=
-			"<li><a href='" + baseUrl + content.id + urlSuffix + "'>" + content.name + "</a>" +
+			"<li><a href='" + baseUrl + content.id + urlSuffix + "'>" + content.displayName + "</a>" +
 			"<a class='removeItemLink' href='javascript:dhis2.db.removeItemContent( \"" + itemId + "\", \"" + content.id + "\" )' title='" + i18n_remove + "'>" +
 			"<img src='../images/hide.png'></a></li>";
 	} );

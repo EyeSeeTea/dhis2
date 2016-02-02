@@ -1,7 +1,7 @@
 package org.hisp.dhis.trackedentity;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,8 @@ package org.hisp.dhis.trackedentity;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.common.OrganisationUnitSelectionMode.CHILDREN;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -42,6 +44,7 @@ import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStatus;
+import org.hisp.dhis.user.User;
 
 /**
  * @author Lars Helge Overland
@@ -52,6 +55,7 @@ public class TrackedEntityInstanceQueryParams
     public static final String CREATED_ID = "created";
     public static final String LAST_UPDATED_ID = "lastupdated";
     public static final String ORG_UNIT_ID = "ou";
+    public static final String ORG_UNIT_NAME = "ouname";
     public static final String TRACKED_ENTITY_ID = "te";
     public static final String TRACKED_ENTITY_ATTRIBUTE_ID = "teattribute";
     public static final String TRACKED_ENTITY_ATTRIBUTE_VALUE_ID = "tevalue";
@@ -121,9 +125,9 @@ public class TrackedEntityInstanceQueryParams
     private TrackedEntity trackedEntity;
     
     /**
-     * Selection mode for the specified organisation units.
+     * Selection mode for the specified organisation units, default is ACCESSIBLE.
      */
-    private OrganisationUnitSelectionMode organisationUnitMode;
+    private OrganisationUnitSelectionMode organisationUnitMode = OrganisationUnitSelectionMode.DESCENDANTS;
     
     /**
      * Status of any events in the specified program.
@@ -164,6 +168,15 @@ public class TrackedEntityInstanceQueryParams
      * Indicates whether paging should be skipped.
      */
     private boolean skipPaging;
+
+    // -------------------------------------------------------------------------
+    // Transient properties
+    // -------------------------------------------------------------------------
+
+    /**
+     * Current user for query.
+     */
+    private transient User user;
     
     // -------------------------------------------------------------------------
     // Constructors
@@ -234,6 +247,36 @@ public class TrackedEntityInstanceQueryParams
                 
                 filterIter.remove();
             }
+        }
+    }
+
+    /**
+     * Prepares the organisation units of the given parameters to simplify querying.
+     * Mode ACCESSIBLE is converted to DESCENDANTS for organisation units linked
+     * to the given user, and mode CHILDREN is converted to CHILDREN for organisation
+     * units including all their children. Mode can be DESCENDANTS, SELECTED, ALL
+     * only after invoking this method.
+     * 
+     * @param user the user.
+     */
+    public void handleOrganisationUnits()
+    {
+        if ( user != null && isOrganisationUnitMode( OrganisationUnitSelectionMode.ACCESSIBLE ) )
+        {
+            setOrganisationUnits( user.getOrganisationUnits() );
+            setOrganisationUnitMode( OrganisationUnitSelectionMode.DESCENDANTS );
+        }
+        else if ( isOrganisationUnitMode( CHILDREN ) )
+        {
+            Set<OrganisationUnit> organisationUnits = new HashSet<>( getOrganisationUnits() );
+            
+            for ( OrganisationUnit organisationUnit : getOrganisationUnits() )
+            {
+                organisationUnits.addAll( organisationUnit.getChildren() );
+            }
+
+            setOrganisationUnits( organisationUnits );
+            setOrganisationUnitMode( OrganisationUnitSelectionMode.SELECTED );
         }
     }
     
@@ -713,5 +756,15 @@ public class TrackedEntityInstanceQueryParams
     public void setSkipPaging( boolean skipPaging )
     {
         this.skipPaging = skipPaging;
+    }
+
+    public User getUser()
+    {
+        return user;
+    }
+
+    public void setUser( User user )
+    {
+        this.user = user;
     }
 }

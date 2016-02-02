@@ -1,7 +1,7 @@
 package org.hisp.dhis.appmanager;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.datavalue.DefaultDataValueService;
+import org.hisp.dhis.external.location.LocationManager;
+import org.hisp.dhis.external.location.LocationManagerException;
 import org.hisp.dhis.keyjsonvalue.KeyJsonValueService;
 import org.hisp.dhis.setting.SettingKey;
 import org.hisp.dhis.setting.SystemSettingManager;
@@ -67,6 +69,8 @@ public class DefaultAppManager
     implements AppManager
 {
     private static final Log log = LogFactory.getLog( DefaultDataValueService.class );
+    
+    private static final String MANIFEST_FILENAME = "manifest.webapp";
 
     /**
      * In-memory singleton list holding state for apps.
@@ -81,6 +85,8 @@ public class DefaultAppManager
     @PostConstruct
     private void init()
     {
+        verifyAppFolder();
+        
         reloadApps();
     }
 
@@ -89,31 +95,29 @@ public class DefaultAppManager
 
     @Autowired
     private CurrentUserService currentUserService;
+    
+    @Autowired
+    private LocationManager locationManager;
 
     @Autowired
     private KeyJsonValueService keyJsonValueService;
-
+    
     // -------------------------------------------------------------------------
     // AppManagerService implementation
     // -------------------------------------------------------------------------
 
     @Override
-    public List<App> getApps()
+    public List<App> getApps( String contextPath )
     {
-        String baseUrl = getAppBaseUrl();
-
-        for ( App app : apps )
-        {
-            app.setBaseUrl( baseUrl );
-        }
-
+        apps.forEach( a -> a.init( contextPath ) );
+        
         return apps;
     }
 
     @Override
-    public App getApp( String key )
+    public App getApp( String key, String contextPath )
     {
-        List<App> apps = getApps();
+        List<App> apps = getApps( contextPath );
 
         for ( App app : apps )
         {
@@ -127,52 +131,56 @@ public class DefaultAppManager
     }
 
     @Override
-    public List<App> getAccessibleApps()
+    public List<App> getAccessibleApps( String contextPath )
     {
-        return getApps().stream().filter( this::isAccessible ).collect( Collectors.toList() );
+        User user = currentUserService.getCurrentUser();
+        
+        return getApps( contextPath ).stream().filter( a -> this.isAccessible( a, user ) ).collect( Collectors.toList() );
     }
 
     @Override
-    public AppStatus installApp( File file, String fileName, String rootPath )
+    public AppStatus installApp( File file, String fileName )
     {
         try
-        {
-
-            // ---------------------------------------------------------------------
-            // Parse zip file and it's manifest.webapp file.
-            // ---------------------------------------------------------------------
+        {            
+            // -----------------------------------------------------------------
+            // Parse ZIP file and it's manifest.webapp file.
+            // -----------------------------------------------------------------
 
             ZipFile zip = new ZipFile( file );
 
-            ZipEntry entry = zip.getEntry( "manifest.webapp" );
+            ZipEntry entry = zip.getEntry( MANIFEST_FILENAME );
             InputStream inputStream = zip.getInputStream( entry );
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure( DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false );
 
             App app = mapper.readValue( inputStream, App.class );
 
-            // ---------------------------------------------------------------------
+            // -----------------------------------------------------------------
             // Check for namespace and if it's already taken by another app
-            // ---------------------------------------------------------------------
+            // -----------------------------------------------------------------
 
-            String appNamespace = app.getActivities().getDhis().getNamespace();
-            if ( appNamespace != null && (this.appNamespaces.containsKey( appNamespace ) &&
-                !app.equals( appNamespaces.get( appNamespace ) )) )
+            String namespace = app.getActivities().getDhis().getNamespace();
+            
+            if ( namespace != null && ( this.appNamespaces.containsKey( namespace ) &&
+                !app.equals( appNamespaces.get( namespace ) ) ) )
             {
                 zip.close();
                 return AppStatus.NAMESPACE_TAKEN;
             }
-
-            // ---------------------------------------------------------------------
-            // Delete if app is already installed.
-            // Assuming app-update, so no data is deleted.
-            // ---------------------------------------------------------------------
+            
+            // -----------------------------------------------------------------
+            // Delete if app is already installed, assuming app update so no 
+            // data is deleted
+            // -----------------------------------------------------------------
 
             deleteApp( app.getName(), false );
 
-            // ---------------------------------------------------------------------
+            // -----------------------------------------------------------------
             // Unzip the app
-            // ---------------------------------------------------------------------
+            // -----------------------------------------------------------------
+
+            log.info( "Installing app, namespace: " + namespace );
 
             String dest = getAppFolderPath() + File.separator + fileName.substring( 0, fileName.lastIndexOf( '.' ) );
             Unzip unzip = new Unzip();
@@ -180,25 +188,11 @@ public class DefaultAppManager
             unzip.setDest( new File( dest ) );
             unzip.execute();
 
-            // ---------------------------------------------------------------------
-            // Set dhis server location
-            // ---------------------------------------------------------------------
-
-            File updateManifest = new File( dest + File.separator + "manifest.webapp" );
-            App installedApp = mapper.readValue( updateManifest, App.class );
-
-            if ( installedApp.getActivities() != null && installedApp.getActivities().getDhis() != null )
-            {
-                if ( "*".equals( installedApp.getActivities().getDhis().getHref() ) )
-                {
-                    installedApp.getActivities().getDhis().setHref( rootPath );
-                    mapper.writeValue( updateManifest, installedApp );
-                }
-            }
-
-            // ---------------------------------------------------------------------
+            log.info( "Installed app: " + app );
+            
+            // -----------------------------------------------------------------
             // Installation complete. Closing zip, reloading apps and return OK
-            // ---------------------------------------------------------------------
+            // -----------------------------------------------------------------
 
             zip.close();
 
@@ -228,7 +222,7 @@ public class DefaultAppManager
     @Override
     public boolean exists( String appName )
     {
-        for ( App app : getApps() )
+        for ( App app : getApps( null ) )
         {
             if ( app.getName().equals( appName ) || app.getFolderName().equals( appName ) )
             {
@@ -242,7 +236,7 @@ public class DefaultAppManager
     @Override
     public boolean deleteApp( String name, boolean deleteAppData )
     {
-        for ( App app : getApps() )
+        for ( App app : getApps( null ) )
         {
             if ( app.getName().equals( name ) || app.getFolderName().equals( name ) )
             {
@@ -251,7 +245,8 @@ public class DefaultAppManager
                     String folderPath = getAppFolderPath() + File.separator + app.getFolderName();
                     FileUtils.forceDelete( new File( folderPath ) );
 
-                    // If deleteAppData is true and a namespace associated with the app exists, delete it.
+                    // Delete if deleteAppData is true and a namespace associated with the app exists
+                    
                     if ( deleteAppData && appNamespaces.containsValue( app ) )
                     {
                         appNamespaces.forEach( ( namespace, app1 ) -> {
@@ -282,41 +277,15 @@ public class DefaultAppManager
     @Override
     public String getAppFolderPath()
     {
-        return StringUtils.trimToNull( (String) appSettingManager.getSystemSetting( SettingKey.APP_FOLDER_PATH ) );
-    }
-
-    @Override
-    public void setAppFolderPath( String appFolderPath )
-    {
-        if ( !appFolderPath.isEmpty() )
+        try
         {
-            try
-            {
-                File folder = new File( appFolderPath );
-                if ( !folder.exists() )
-                {
-                    FileUtils.forceMkdir( folder );
-                }
-            }
-            catch ( IOException ex )
-            {
-                log.error( ex.getLocalizedMessage(), ex );
-            }
+            return locationManager.getExternalDirectoryPath() + APPS_DIR;
         }
-
-        appSettingManager.saveSystemSetting( SettingKey.APP_FOLDER_PATH, appFolderPath );
-    }
-
-    @Override
-    public String getAppBaseUrl()
-    {
-        return StringUtils.trimToNull( (String) appSettingManager.getSystemSetting( SettingKey.APP_BASE_URL ) );
-    }
-
-    @Override
-    public void setAppBaseUrl( String appBaseUrl )
-    {
-        appSettingManager.saveSystemSetting( SettingKey.APP_BASE_URL, appBaseUrl );
+        catch ( LocationManagerException ex )
+        {
+            log.info( "Could not get app folder path, external directory not set" );
+            return null;
+        }
     }
 
     @Override
@@ -330,10 +299,6 @@ public class DefaultAppManager
     {
         appSettingManager.saveSystemSetting( SettingKey.APP_STORE_URL, appStoreUrl );
     }
-
-    // -------------------------------------------------------------------------
-    // Supportive methods
-    // -------------------------------------------------------------------------
 
     /**
      * Sets the list of apps with detected apps from the file system.
@@ -368,8 +333,8 @@ public class DefaultAppManager
                                 app.setFolderName( folder.getName() );
                                 appList.add( app );
 
-                                // Add namespace
                                 String appNamespace = app.getActivities().getDhis().getNamespace();
+                                
                                 if ( appNamespace != null )
                                 {
                                     appNamespaces.put( appNamespace, app );
@@ -416,5 +381,34 @@ public class DefaultAppManager
     public App getAppByNamespace( String namespace )
     {
         return appNamespaces.get( namespace );
+    }
+
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+
+    /**
+     * Creates the app folder if it does not exist already.
+     */
+    private void verifyAppFolder()
+    {
+        String appFolderPath = getAppFolderPath();
+        
+        if ( appFolderPath != null && !appFolderPath.isEmpty() )
+        {
+            try
+            {
+                File folder = new File( appFolderPath );
+                
+                if ( !folder.exists() )
+                {
+                    FileUtils.forceMkdir( folder );
+                }
+            }
+            catch ( IOException ex )
+            {
+                log.error( ex.getMessage(), ex );
+            }
+        }
     }
 }

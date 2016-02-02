@@ -1,7 +1,7 @@
 package org.hisp.dhis.dashboard.hibernate;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,7 @@ package org.hisp.dhis.dashboard.hibernate;
 import org.hibernate.Query;
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.hisp.dhis.dashboard.Dashboard;
 import org.hisp.dhis.dashboard.DashboardItem;
 import org.hisp.dhis.dashboard.DashboardItemStore;
 import org.hisp.dhis.document.Document;
@@ -87,5 +88,14 @@ public class HibernateDashboardItemStore extends HibernateIdentifiableObjectStor
         query.setEntity( "document", document );
 
         return ((Long) query.uniqueResult()).intValue();
+    }
+
+    @Override
+    public Dashboard getDashboardFromDashboardItem( DashboardItem dashboardItem )
+    {
+        Query query = getQuery( "from Dashboard d where :item in elements(d.items)" );
+        query.setEntity( "item", dashboardItem );
+
+        return (Dashboard) query.uniqueResult();
     }
 }

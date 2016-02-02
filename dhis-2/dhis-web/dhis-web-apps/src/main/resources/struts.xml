@@ -72,7 +72,19 @@
 
 	<package name="dhis-web-settings" extends="dhis-web-commons" namespace="/dhis-web-settings">
 		<action name="index" class="org.hisp.dhis.commons.action.NoAction">
-			<result name="success" type="redirect">index.html</result>
+			<result name="success" type="redirect">#</result>
+		</action>
+	</package>
+    
+	<package name="dhis-web-maintenance" extends="dhis-web-commons" namespace="/dhis-web-maintenance">
+		<action name="index" class="org.hisp.dhis.commons.action.NoAction">
+			<result name="success" type="redirect">#</result>
+		</action>
+	</package>
+    
+	<package name="dhis-web-app-management" extends="dhis-web-commons" namespace="/dhis-web-app-management">
+		<action name="index" class="org.hisp.dhis.commons.action.NoAction">
+			<result name="success" type="redirect">#</result>
 		</action>
 	</package>
     

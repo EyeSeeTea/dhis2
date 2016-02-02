@@ -1,7 +1,7 @@
 package org.hisp.dhis.webapi.utils;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -181,7 +181,7 @@ public class ContextUtils
 
     public static HttpServletRequest getRequest()
     {
-        return ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        return ( (ServletRequestAttributes) RequestContextHolder.getRequestAttributes() ).getRequest();
     }
 
     public static String getContextPath( HttpServletRequest request )
@@ -190,7 +190,7 @@ public class ContextUtils
         String xForwardedProto = request.getHeader( "X-Forwarded-Proto" );
         String xForwardedPort = request.getHeader( "X-Forwarded-Port" );
 
-        if ( xForwardedProto != null && (xForwardedProto.equalsIgnoreCase( "http" ) || xForwardedProto.equalsIgnoreCase( "https" )) )
+        if ( xForwardedProto != null && ( xForwardedProto.equalsIgnoreCase( "http" ) || xForwardedProto.equalsIgnoreCase( "https" ) ) )
         {
             builder.append( xForwardedProto );
         }

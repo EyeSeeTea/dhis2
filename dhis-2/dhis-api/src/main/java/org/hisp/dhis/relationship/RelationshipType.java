@@ -1,7 +1,7 @@
 package org.hisp.dhis.relationship;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -101,10 +101,17 @@ public class RelationshipType
     @Override
     public String toString()
     {
-        return "RelationshipType{" +
-            "aIsToB='" + aIsToB + '\'' +
-            ", bIsToA='" + bIsToA + '\'' +
-            '}';
+        return "{" +
+            "\"class\":\"" + getClass() + "\", " +
+            "\"id\":\"" + id + "\", " +
+            "\"uid\":\"" + uid + "\", " +
+            "\"code\":\"" + code + "\", " +
+            "\"name\":\"" + name + "\", " +
+            "\"created\":\"" + created + "\", " +
+            "\"lastUpdated\":\"" + lastUpdated + "\", " +
+            "\"aIsToB\":\"" + aIsToB + "\", " +
+            "\"bIsToA\":\"" + bIsToA + "\" " +
+            "}";
     }
 
     @Override

@@ -1,7 +1,7 @@
 package org.hisp.dhis.sms.outbound;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,15 +30,12 @@ package org.hisp.dhis.sms.outbound;
 
 import java.util.List;
 
-/**
- * OutboundSmsService provides support for sending SMSes.
- */
 public interface OutboundSmsService
 {
     String ID = OutboundSmsService.class.getName();
 
     List<OutboundSms> getAllOutboundSms();
-    
+
     List<OutboundSms> getAllOutboundSms( Integer min, Integer max );
 
     int saveOutboundSms( OutboundSms sms );
@@ -48,8 +45,8 @@ public interface OutboundSmsService
     void deleteById( Integer outboundSmsId );
 
     List<OutboundSms> getOutboundSms( OutboundSmsStatus status );
-    
+
     List<OutboundSms> getOutboundSms( OutboundSmsStatus status, Integer min, Integer max );
-    
+
     OutboundSms getOutboundSms( int id );
 }

@@ -1,7 +1,7 @@
 package org.hisp.dhis.dxf2.metadata;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -128,9 +128,9 @@ public class DefaultExportServiceTest
     public void exportMetaDataTest() throws IOException, XPathExpressionException
     {
         Options options = new Options( new HashMap<>() );
-        MetaData metaData = exportService.getMetaData( options );
+        Metadata metadata = exportService.getMetaData( options );
 
-        String metaDataXml = JacksonUtils.toXmlAsString( metaData );
+        String metaDataXml = JacksonUtils.toXmlAsString( metadata );
 
         assertEquals( "1", xpathTest( "count(//d:organisationUnits)", metaDataXml ) );
         assertEquals( "2", xpathTest( "count(//d:organisationUnit)", metaDataXml ) );

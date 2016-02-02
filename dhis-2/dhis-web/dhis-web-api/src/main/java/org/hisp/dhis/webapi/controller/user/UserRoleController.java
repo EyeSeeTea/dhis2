@@ -1,7 +1,7 @@
 package org.hisp.dhis.webapi.controller.user;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@ import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserService;
 import org.hisp.dhis.webapi.controller.AbstractCrudController;
 import org.hisp.dhis.webapi.utils.WebMessageUtils;
-import org.hisp.dhis.webapi.webdomain.WebMetaData;
+import org.hisp.dhis.webapi.webdomain.WebMetadata;
 import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -62,9 +62,9 @@ public class UserRoleController
     private UserService userService;
 
     @Override
-    protected List<UserAuthorityGroup> getEntityList( WebMetaData metaData, WebOptions options, List<String> filters, List<Order> orders ) throws QueryParserException
+    protected List<UserAuthorityGroup> getEntityList( WebMetadata metadata, WebOptions options, List<String> filters, List<Order> orders ) throws QueryParserException
     {
-        List<UserAuthorityGroup> entityList = super.getEntityList( metaData, options, filters, orders );
+        List<UserAuthorityGroup> entityList = super.getEntityList( metadata, options, filters, orders );
 
         if ( options.getOptions().containsKey( "canIssue" ) && Boolean.parseBoolean( options.getOptions().get( "canIssue" ) ) )
         {

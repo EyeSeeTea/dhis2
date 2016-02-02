@@ -1,7 +1,7 @@
 package org.hisp.dhis.query;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,7 @@ package org.hisp.dhis.query;
 import com.google.common.base.MoreObjects;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.schema.Schema;
+import org.hisp.dhis.user.User;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,6 +42,8 @@ import java.util.List;
  */
 public class Query extends Criteria
 {
+    private User user;
+
     private List<Order> orders = new ArrayList<>();
 
     private Integer firstResult = 0;
@@ -64,9 +67,42 @@ public class Query extends Criteria
         return schema;
     }
 
+    public boolean isEmpty()
+    {
+        return criterions.isEmpty() && orders.isEmpty();
+    }
+
     public List<Order> getOrders()
     {
         return orders;
+    }
+
+    public boolean ordersPersisted()
+    {
+        for ( Order order : orders )
+        {
+            if ( order.isNonPersisted() )
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public void clearOrders()
+    {
+        orders.clear();
+    }
+
+    public User getUser()
+    {
+        return user;
+    }
+
+    public void setUser( User user )
+    {
+        this.user = user;
     }
 
     public Integer getFirstResult()
@@ -161,11 +197,11 @@ public class Query extends Criteria
 
         if ( schema.havePersistedProperty( "name" ) )
         {
-            addOrder( Order.asc( schema.getPersistedProperty( "name" ) ) );
+            addOrder( Order.iasc( schema.getPersistedProperty( "name" ) ) );
         }
         if ( schema.havePersistedProperty( "created" ) )
         {
-            addOrder( Order.desc( schema.getPersistedProperty( "created" ) ) );
+            addOrder( Order.idesc( schema.getPersistedProperty( "created" ) ) );
         }
 
         return this;

@@ -1,7 +1,7 @@
 package org.hisp.dhis.query;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,14 +64,6 @@ public abstract class Criteria
             }
 
             Restriction restriction = (Restriction) criterion;
-
-            /* Commented out for now, validation of this happens in QueryParser
-            if ( !schema.haveProperty( restriction.getPath() ) )
-            {
-                continue;
-            }
-            */
-
             this.criterions.add( restriction );
         }
 

@@ -1,7 +1,7 @@
 package org.hisp.dhis.common;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -279,6 +279,7 @@ public class BaseIdentifiableObject
         this.lastUpdated = lastUpdated;
     }
 
+    @Override
     @JsonProperty( "attributeValues" )
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlElementWrapper( localName = "attributeValues", namespace = DxfNamespaces.DXF_2_0 )
@@ -560,15 +561,15 @@ public class BaseIdentifiableObject
     @Override
     public String toString()
     {
-        return "[IdentifiableObject: " +
-            "id='" + id +
-            "', uid='" + uid +
-            "', code='" + code +
-            "', name='" + name +
-            "', created='" + created +
-            "', lastUpdated='" + lastUpdated +
-            "', class='" + getClass() + '"' +
-            "']";
+        return "{" +
+            "\"class\":\"" + getClass() + "\", " +
+            "\"id\":\"" + id + "\", " +
+            "\"uid\":\"" + uid + "\", " +
+            "\"code\":\"" + code + "\", " +
+            "\"name\":\"" + name + "\", " +
+            "\"created\":\"" + created + "\", " +
+            "\"lastUpdated\":\"" + lastUpdated + "\" " +
+            "}";
     }
 
     @Override

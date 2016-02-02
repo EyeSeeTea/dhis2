@@ -1,7 +1,7 @@
 package org.hisp.dhis.program;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,6 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import com.google.common.base.MoreObjects;
 import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.common.BaseDimensionalItemObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
@@ -123,7 +122,21 @@ public class ProgramTrackedEntityAttribute
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public ValueType getValueType()
     {
-        return attribute.getValueType();
+        return attribute != null ? attribute.getValueType() : null;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "{" +
+            "\"class\":\"" + getClass() + "\", " +
+            "\"id\":\"" + id + "\", " +
+            "\"uid\":\"" + uid + "\", " +
+            "\"program\":" + program + ", " +
+            "\"attribute\":" + attribute + ", " +
+            "\"created\":\"" + created + "\", " +
+            "\"lastUpdated\":\"" + lastUpdated + "\" " +
+            "}";
     }
 
     // -------------------------------------------------------------------------
@@ -133,19 +146,19 @@ public class ProgramTrackedEntityAttribute
     @Override
     public String getDimensionItem()
     {
-        return program.getUid() + COMPOSITE_DIM_OBJECT_PLAIN_SEP + attribute.getUid();
+        return (program != null ? program.getUid() : "") + COMPOSITE_DIM_OBJECT_PLAIN_SEP + (attribute != null ? attribute.getUid() : "");
     }
 
     @Override
     public LegendSet getLegendSet()
     {
-        return attribute.getLegendSet();
+        return attribute != null ? attribute.getLegendSet() : null;
     }
 
     @Override
     public AggregationType getAggregationType()
     {
-        return attribute.getAggregationType();
+        return attribute != null ? attribute.getAggregationType() : null;
     }
 
     // -------------------------------------------------------------------------
@@ -217,18 +230,6 @@ public class ProgramTrackedEntityAttribute
     public void setAllowFutureDate( Boolean allowFutureDate )
     {
         this.allowFutureDate = allowFutureDate;
-    }
-
-    @Override
-    public String toString()
-    {
-        return MoreObjects.toStringHelper( this )
-            .add( "id", id )
-            .add( "attribute", attribute )
-            .add( "displayInList", displayInList )
-            .add( "mandatory", mandatory )
-            .add( "allowFutureDate", allowFutureDate )
-            .toString();
     }
 
     @Override

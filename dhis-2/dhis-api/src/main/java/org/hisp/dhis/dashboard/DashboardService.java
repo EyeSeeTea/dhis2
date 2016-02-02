@@ -1,7 +1,7 @@
 package org.hisp.dhis.dashboard;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,7 +74,9 @@ public interface DashboardService
     void updateDashboardItem( DashboardItem item );
     
     DashboardItem getDashboardItem( String uid );
-    
+
+    Dashboard getDashboardFromDashboardItem( DashboardItem dashboardItem );
+
     void deleteDashboardItem( DashboardItem item );
     
     int countMapDashboardItems( Map map );

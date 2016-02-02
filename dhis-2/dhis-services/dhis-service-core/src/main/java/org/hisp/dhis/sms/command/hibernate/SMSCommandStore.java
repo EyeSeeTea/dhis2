@@ -1,7 +1,7 @@
 package org.hisp.dhis.sms.command.hibernate;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,15 +48,15 @@ public interface SMSCommandStore
     void delete( SMSCommand cmd );
 
     void save( Set<SMSCode> codes );
-    
+
     List<SMSCommand> getJ2MESMSCommands();
-    
+
     SMSCommand getSMSCommand( String commandName, ParserType parserType );
-    
+
     void saveSpecialCharacterSet( Set<SMSSpecialCharacter> specialCharacters );
-    
+
     void deleteSpecialCharacterSet( Set<SMSSpecialCharacter> specialCharacters );
-    
+
     void deleteCodeSet( Set<SMSCode> codes );
 
     int countDataSetSmsCommands( DataSet dataSet );

@@ -1,7 +1,7 @@
 package org.hisp.dhis.startup;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -247,14 +247,6 @@ public class TableAlteror
         // minmaxdataelement query index
         executeSql( "CREATE INDEX index_minmaxdataelement ON minmaxdataelement( sourceid, dataelementid, categoryoptioncomboid )" );
 
-        // add mandatory boolean field to patientattribute
-        executeSql( "ALTER TABLE patientattribute ADD mandatory bool" );
-
-        if ( executeSql( "ALTER TABLE patientattribute ADD groupby bool" ) >= 0 )
-        {
-            executeSql( "UPDATE patientattribute SET groupby=false" );
-        }
-
         // update periodType field to ValidationRule
         executeSql( "UPDATE validationrule SET periodtypeid = (SELECT periodtypeid FROM periodtype WHERE name='Monthly') WHERE periodtypeid is null" );
 
@@ -275,7 +267,7 @@ public class TableAlteror
 
         executeSql( "ALTER TABLE minmaxdataelement RENAME minvalue TO minimumvalue" );
         executeSql( "ALTER TABLE minmaxdataelement RENAME maxvalue TO maximumvalue" );
-        
+
         executeSql( "update minmaxdataelement set generatedvalue = generated where generatedvalue is null" );
         executeSql( "alter table minmaxdataelement drop column generated" );
         executeSql( "alter table minmaxdataelement alter column generatedvalue set not null" );
@@ -284,7 +276,6 @@ public class TableAlteror
         executeSql( "ALTER TABLE organisationunit DROP CONSTRAINT organisationunit_shortname_key" );
 
         executeSql( "ALTER TABLE section DROP CONSTRAINT section_name_key" );
-        executeSql( "UPDATE patientattribute set inheritable=false where inheritable is null" );
         executeSql( "UPDATE dataelement SET aggregationtype='avg_sum_org_unit' where aggregationtype='average'" );
 
         // revert prepare aggregate*Value tables for offline diffs
@@ -565,8 +556,6 @@ public class TableAlteror
         executeSql( "update chart_filters set filter = 'pe' where filter = 'period'" );
         executeSql( "update chart_filters set filter = 'ou' where filter = 'organisationunit'" );
 
-        executeSql( "update users set selfregistered = false where selfregistered is null" );
-        executeSql( "update users set disabled = false where disabled is null" );
         executeSql( "update dataentryform set format = 1 where format is null" );
 
         executeSql( "update dataelementgroup set shortname=name where shortname is null and length(name)<=50" );
@@ -688,12 +677,6 @@ public class TableAlteror
         executeSql( "ALTER TABLE report DROP CONSTRAINT report_name_key" );
         executeSql( "ALTER TABLE usergroup DROP CONSTRAINT usergroup_name_key" );
 
-        // clear out sharing of de-group/de-group-set for now
-        executeSql( "UPDATE dataelementgroup SET userid=NULL WHERE userid IS NOT NULL" );
-        executeSql( "UPDATE dataelementgroup SET publicaccess=NULL WHERE userid IS NOT NULL" );
-        executeSql( "UPDATE dataelementgroupset SET userid=NULL WHERE userid IS NOT NULL" );
-        executeSql( "UPDATE dataelementgroupset SET publicaccess=NULL WHERE userid IS NOT NULL" );
-
         executeSql( "ALTER TABLE dataelementcategory DROP COLUMN conceptid" );
         executeSql( "ALTER TABLE dataelementcategoryoption DROP COLUMN conceptid" );
 
@@ -722,8 +705,9 @@ public class TableAlteror
         executeSql( "UPDATE program SET version=0 WHERE version IS NULL" );
         executeSql( "update program set shortname = substring(name,0,50) where shortname is null" );
         executeSql( "update program set categorycomboid = " + defaultCategoryComboId + " where categorycomboid is null" );
-        executeSql( "update programstageinstance set attributeoptioncomboid = " + defaultOptionComboId + " where attributeoptioncomboid is null" );
 
+        executeSql( "update programstageinstance set attributeoptioncomboid = " + defaultOptionComboId + " where attributeoptioncomboid is null" );
+        executeSql( "update programstageinstance set storedby=completedby where storedby is null" );
 
         executeSql( "ALTER TABLE datavalue ALTER COLUMN lastupdated TYPE timestamp" );
         executeSql( "ALTER TABLE completedatasetregistration ALTER COLUMN date TYPE timestamp" );
@@ -734,6 +718,7 @@ public class TableAlteror
         executeSql( "delete from usersetting where name = 'dashboardConfig' or name = 'dashboardConfiguration'" );
         executeSql( "update usersetting set name = 'keyUiLocale' where name = 'currentLocale'" );
         executeSql( "update usersetting set name = 'keyDbLocale' where name = 'keyLocaleUserSetting'" );
+        executeSql( "update usersetting set name = 'keyStyle' where name = 'currentStyle'" );
         executeSql( "ALTER TABLE interpretation ALTER COLUMN userid DROP NOT NULL" );
         executeSql( "UPDATE interpretation SET publicaccess='r-------' WHERE publicaccess IS NULL;" );
 
@@ -769,6 +754,8 @@ public class TableAlteror
         executeSql( "UPDATE attribute SET optionattribute=false WHERE optionattribute IS NULL" );
         executeSql( "UPDATE attribute SET optionsetattribute=false WHERE optionsetattribute IS NULL" );
 
+        executeSql( "update attribute set isunique=false where isunique is null" );
+
         executeSql( "ALTER TABLE trackedentityattributedimension DROP COLUMN operator" );
         executeSql( "ALTER TABLE trackedentitydataelementdimension DROP COLUMN operator" );
 
@@ -777,11 +764,11 @@ public class TableAlteror
 
         //update programruleaction:
         executeSql( "ALTER TABLE programruleaction DROP COLUMN name" );
-        
+
         //update programrule
         executeSql( "UPDATE programrule SET rulecondition = condition WHERE rulecondition IS NULL" );
         executeSql( "ALTER TABLE programrule DROP COLUMN condition" );
-        
+
         // data approval
         executeSql( "UPDATE dataapproval SET accepted=false WHERE accepted IS NULL" );
         executeSql( "ALTER TABLE dataapproval ALTER COLUMN accepted SET NOT NULL" );
@@ -867,12 +854,15 @@ public class TableAlteror
         executeSql( "update programstage set excecutiondatelabel = reportdatedescription where excecutiondatelabel is not null" );
         executeSql( "alter table programstage drop column reportdatedescription" );
         executeSql( "update programstage set reportdatetouse = 'indicentDate' where reportdatetouse='dateOfIncident'" );
+        executeSql( "update programstage set repeatable = false where repeatable is null" );
+
 
         executeSql( "alter table programindicator drop column missingvaluereplacement" );
-        
+
         executeSql( "update keyjsonvalue set namespacekey = key where namespacekey is null" );
         executeSql( "alter table keyjsonvalue alter column namespacekey set not null" );
         executeSql( "alter table keyjsonvalue drop column key" );
+        executeSql( "alter table trackedentityattributevalue drop column encrypted_value" );
 
         // Remove data mart
         executeSql( "drop table aggregateddatasetcompleteness" );
@@ -900,6 +890,8 @@ public class TableAlteror
         upgradeToDataApprovalWorkflows();
         executeSql( "alter table dataapproval alter column workflowid set not null" );
         executeSql( "alter table dataapproval add constraint dataapproval_unique_key unique (dataapprovallevelid,workflowid,periodid,organisationunitid,attributeoptioncomboid)" );
+
+        upgradeImplicitAverageMonitoringRules();
         updateOptions();
 
         upgradeAggregationType( "reporttable" );
@@ -911,6 +903,9 @@ public class TableAlteror
         organisationUnitService.updatePaths();
 
         categoryOptionComboStore.updateNames();
+
+        executeSql( "alter table trackedentitydatavalue alter column storedby TYPE character varying(255)" );
+        executeSql( "alter table datavalue alter column storedby TYPE character varying(255)" );
 
         log.info( "Tables updated" );
     }
@@ -1151,7 +1146,7 @@ public class TableAlteror
     /**
      * Convert from older releases where dataApproval referenced dataset
      * instead of workflow:
-     *
+     * <p>
      * For every dataset that has either ("approve data" == true) *or*
      * (existing data approval database records referencing it), a workflow will
      * be created with the same name as the data set. This workflow will be
@@ -1186,6 +1181,35 @@ public class TableAlteror
 
         log.info( "Added any workflows needed for approvble datasets and/or approved data." );
     }
+
+    /**
+     * Convert from older releases where the right hand sides of surveillance rules were
+     * implicitly averaged.  This just wraps the previous expression in a call to AVG().
+     * <p>
+     * We use the presence of the lowoutliers column to determine whether we need to make the
+     * change.  Just to be extra sure, our rewrite SQL won't rewrite rules which already have
+     * references to AVG or STDDEV.
+     */
+    private void upgradeImplicitAverageMonitoringRules()
+    {
+        if ( executeSql( "update validationrule set lowoutliers = lowoutliers where validationruleid < 0" ) < 0 )
+        {
+            return; // Already converted because lowoutliers fields are gone
+        }
+
+        // Just to be extra sure, we don't modify any expressions which already contain a call to AVG or STDDEV
+        executeSql( "update expression set expression=" + statementBuilder.concatenate( "'AVG('", "expression", "')'" ) + " from  validationrule where ruletype='SURVEILLANCE' AND rightexpressionid=expressionid AND expression NOT LIKE '%AVG%' and expression " +
+            "NOT LIKE '%STDDEV%';" );
+        executeSql( "update expression set expression=FORMAT('AVG(%s)',expression) from  validationrule where ruletype='SURVEILLANCE' AND rightexpressionid=expressionid AND expression NOT LIKE '%AVG%' and expression NOT LIKE '%STDDEV%';" );
+
+        executeSql( "ALTER TABLE validationrule DROP COLUMN highoutliers" );
+        executeSql( "ALTER TABLE validationrule DROP COLUMN lowoutliers" );
+
+        log.info( "Added explicit AVG calls to olid-style implicit average surveillance rules" );
+    }
+    /* For testing purposes, this will undo the wrapping functionality above:
+     * update expression set expression=regexp_replace(regexp_replace(expression,'[)]$',''),'^AVG[(]','') from validationrule where ruletype='SURVEILLANCE' AND rightexpressionid=expressionid;
+     */
 
     private List<Integer> getDistinctIdList( String table, String col1 )
     {

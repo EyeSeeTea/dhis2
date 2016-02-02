@@ -1,7 +1,7 @@
 package org.hisp.dhis.sms;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@ public class SmsServiceNotEnabledException
 {
     private static final long serialVersionUID = -1484667419558937721L;
 
-    public SmsServiceNotEnabledException( )
+    public SmsServiceNotEnabledException()
     {
         super( "Sms service is not enabled" );
     }

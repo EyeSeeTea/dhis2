@@ -1,7 +1,7 @@
 package org.hisp.dhis.trackedentity;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -97,7 +97,13 @@ public class TrackedEntityAttributeDimension
     @Override
     public String toString()
     {
-        return "[Id: " + id + ", attribute: " + attribute + ", legend set: " + legendSet + ", filter: " + filter + "]";
+        return "{" +
+            "\"class\":\"" + getClass() + "\", " +
+            "\"id\":\"" + id + "\", " +
+            "\"attribute\":" + attribute + ", " +
+            "\"legendSet\":" + legendSet + ", " +
+            "\"filter\":\"" + filter + "\" " +
+            "}";
     }
 
     @Override

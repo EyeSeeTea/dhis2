@@ -1,7 +1,7 @@
 package org.hisp.dhis.appmanager;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,29 +47,36 @@ public interface AppManager
     /**
      * Returns a list of all the installed apps at @see getAppFolderPath
      *
+     * @param contextPath the context path of this instance.
      * @return list of installed apps
      */
-    List<App> getApps();
+    List<App> getApps( String contextPath );
     
     /**
      * Returns the app with the given key (folder name).
      * 
      * @param key the app key.
+     * @param contextPath the context path of this instance.
      * @return the app with the given key.
      */
-    App getApp( String key );
+    App getApp( String key, String contextPath );
 
-    List<App> getAccessibleApps();
+    /**
+     * Returns apps which are accessible to the current user.
+     * 
+     * @param contextPath the context path of this instance.
+     * @return apps which are accessible to the current user.
+     */
+    List<App> getAccessibleApps( String contextPath );
 
     /**
      * Installs the app.
      *
      * @param file     the app file.
      * @param fileName the name of the app file.
-     * @param rootPath the root path of the instance.
      * @throws IOException if the app manifest file could not be read.
      */
-    AppStatus installApp( File file, String fileName, String rootPath )
+    AppStatus installApp( File file, String fileName )
         throws IOException;
 
     /**
@@ -104,27 +111,6 @@ public interface AppManager
     String getAppFolderPath();
 
     /**
-     * Saves the folder in which apps will be expanded
-     *
-     * @param appFolderPath
-     */
-    void setAppFolderPath( String appFolderPath );
-
-    /**
-     * Gets the Base URL for accessing the apps
-     *
-     * @return the apps baseurl
-     */
-    String getAppBaseUrl();
-
-    /**
-     * Saves the base URL where apps are installed
-     *
-     * @param appBaseUrl
-     */
-    void setAppBaseUrl( String appBaseUrl );
-
-    /**
      * Returns the url of the app repository
      *
      * @return url of appstore
@@ -138,8 +124,21 @@ public interface AppManager
      */
     void setAppStoreUrl( String appStoreUrl );
 
+    /**
+     * Indicates whether the given app is accessible to the current user.
+     * 
+     * @param app the app.
+     * @return true if app is accessible.
+     */
     boolean isAccessible( App app );
 
+    /**
+     * Indicates whether the given app is accessible to the given user.
+     * 
+     * @param app the app.
+     * @param user the user.
+     * @return true if app is accessible.
+     */
     boolean isAccessible( App app, User user );
 
     /**
@@ -148,5 +147,4 @@ public interface AppManager
      * @return App or null
      */
     App getAppByNamespace( String namespace);
-
 }

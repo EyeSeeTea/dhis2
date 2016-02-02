@@ -1,7 +1,7 @@
 package org.hisp.dhis.webapi.controller;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,8 +29,8 @@ package org.hisp.dhis.webapi.controller;
  */
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import org.hisp.dhis.dxf2.render.DefaultRenderService;
-import org.hisp.dhis.dxf2.render.RenderService;
+import org.hisp.dhis.render.DefaultRenderService;
+import org.hisp.dhis.render.RenderService;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nManager;
 import org.springframework.beans.factory.annotation.Autowired;

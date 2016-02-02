@@ -1,7 +1,7 @@
 package org.hisp.dhis.sms.command.hibernate;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,7 @@ public class HibernateSMSCommandStore
         this.sessionFactory = sessionFactory;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     @Override
     public List<SMSCommand> getSMSCommands()
     {
@@ -113,7 +113,7 @@ public class HibernateSMSCommandStore
 
         return null;
     }
-    
+
     @Override
     @Transactional
     public void delete( SMSCommand cmd )
@@ -133,7 +133,7 @@ public class HibernateSMSCommandStore
         session.delete( cmd );
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     @Override
     public List<SMSCommand> getJ2MESMSCommands()
     {
@@ -168,7 +168,6 @@ public class HibernateSMSCommandStore
         }
     }
 
-
     @Override
     public void deleteCodeSet( Set<SMSCode> codes )
     {
@@ -185,8 +184,8 @@ public class HibernateSMSCommandStore
     {
         Query query = getQuery( "select count(distinct c) from SMSCommand c where c.dataset=:dataSet", true );
         query.setEntity( "dataSet", dataSet );
-        //TODO rename dataset prop
-        
+        // TODO rename dataset prop
+
         return ((Long) query.uniqueResult()).intValue();
     }
 

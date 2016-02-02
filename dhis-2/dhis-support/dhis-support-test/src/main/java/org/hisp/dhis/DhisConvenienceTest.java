@@ -1,7 +1,7 @@
 package org.hisp.dhis;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,7 @@ import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.chart.ChartType;
 import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.common.DimensionalObject;
+import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.common.cache.CacheStrategy;
 import org.hisp.dhis.constant.Constant;
@@ -78,6 +79,7 @@ import org.hisp.dhis.programrule.ProgramRuleActionType;
 import org.hisp.dhis.programrule.ProgramRuleVariable;
 import org.hisp.dhis.programrule.ProgramRuleVariableSourceType;
 import org.hisp.dhis.relationship.RelationshipType;
+import org.hisp.dhis.render.RenderService;
 import org.hisp.dhis.sqlview.SqlView;
 import org.hisp.dhis.sqlview.SqlViewType;
 import org.hisp.dhis.trackedentity.TrackedEntity;
@@ -97,6 +99,7 @@ import org.hisp.dhis.validation.ValidationRuleGroup;
 import org.joda.time.DateTime;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -112,6 +115,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -142,6 +146,8 @@ public abstract class DhisConvenienceTest
 
     protected static final String BASE_OU_UID = "ouabcdefgh";
 
+    protected static final String BASE_USER_UID = "userabcdef";
+
     private static final String EXT_TEST_DIR = System.getProperty( "user.home" ) + File.separator + "dhis2_test_dir";
 
     private static Date date;
@@ -153,6 +159,8 @@ public abstract class DhisConvenienceTest
     // -------------------------------------------------------------------------
 
     protected UserService userService;
+
+    protected RenderService renderService;
 
     static
     {
@@ -533,7 +541,7 @@ public abstract class DhisConvenienceTest
 
         for ( DataElementCategoryOption categoryOption : categoryOptions )
         {
-            dataElementCategory.addDataElementCategoryOption( categoryOption );
+            dataElementCategory.addCategoryOption( categoryOption );
         }
 
         return dataElementCategory;
@@ -964,14 +972,10 @@ public abstract class DhisConvenienceTest
      *                              evaluated by this rule.
      * @param sequentialSampleCount How many sequential past periods to sample.
      * @param annualSampleCount     How many years of past periods to sample.
-     * @param highOutliers          How many high outlying past samples to discard before
-     *                              averaging.
-     * @param lowOutliers           How many low outlying past samples to discard before
-     *                              averaging.
      */
     public static ValidationRule createMonitoringRule( char uniqueCharacter, Operator operator, Expression leftSide,
         Expression rightSide, PeriodType periodType, int organisationUnitLevel, int sequentialSampleCount,
-        int annualSampleCount, int highOutliers, int lowOutliers )
+        int annualSampleCount )
     {
         ValidationRule validationRule = new ValidationRule();
         validationRule.setAutoFields();
@@ -986,8 +990,6 @@ public abstract class DhisConvenienceTest
         validationRule.setOrganisationUnitLevel( organisationUnitLevel );
         validationRule.setSequentialSampleCount( sequentialSampleCount );
         validationRule.setAnnualSampleCount( annualSampleCount );
-        validationRule.setHighOutliers( highOutliers );
-        validationRule.setLowOutliers( lowOutliers );
 
         return validationRule;
     }
@@ -1075,19 +1077,21 @@ public abstract class DhisConvenienceTest
 
     public static User createUser( char uniqueCharacter )
     {
+        UserCredentials credentials = new UserCredentials();
         User user = new User();
-        user.setAutoFields();
+        user.setUid( BASE_USER_UID + uniqueCharacter );
+
+        credentials.setUserInfo( user );
+        user.setUserCredentials( credentials );
+
+        credentials.setUsername( "username" + uniqueCharacter );
+        credentials.setPassword( "password" + uniqueCharacter );
 
         user.setFirstName( "FirstName" + uniqueCharacter );
         user.setSurname( "Surname" + uniqueCharacter );
         user.setEmail( "Email" + uniqueCharacter );
         user.setPhoneNumber( "PhoneNumber" + uniqueCharacter );
-
-        UserCredentials credentials = new UserCredentials();
-        credentials.setUsername( "username" ); //TODO include uniqueCharacter
-        credentials.setPassword( "password" );
-
-        user.setUserCredentials( credentials );
+        user.setCode( "UserCode" + uniqueCharacter );
 
         return user;
     }
@@ -1130,7 +1134,7 @@ public abstract class DhisConvenienceTest
     {
         return createProgram( uniqueCharacter, null, null );
     }
-    
+
     public static Program createProgram( char uniqueCharacter, Set<ProgramStage> programStages,
         OrganisationUnit unit )
     {
@@ -1440,6 +1444,22 @@ public abstract class DhisConvenienceTest
     // Supportive methods
     // -------------------------------------------------------------------------
 
+    protected <T extends IdentifiableObject> T fromJson( String path, Class<T> klass )
+    {
+        Assert.notNull( renderService, "RenderService must be injected in test" );
+
+        try
+        {
+            return renderService.fromJson( new ClassPathResource( path ).getInputStream(), klass );
+        }
+        catch ( IOException e )
+        {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     /**
      * Injects the externalDir property of LocationManager to
      * user.home/dhis2_test_dir. LocationManager dependency must be retrieved
@@ -1615,7 +1635,8 @@ public abstract class DhisConvenienceTest
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add( new SimpleGrantedAuthority( "ALL" ) );
 
-        UserDetails userDetails = new org.springframework.security.core.userdetails.User( "username", "password", authorities );
+        UserDetails userDetails = new org.springframework.security.core.userdetails.User(
+            user.getUserCredentials().getUsername(), user.getUserCredentials().getPassword(), authorities );
 
         Authentication authentication = new UsernamePasswordAuthenticationToken( userDetails, "", authorities );
         SecurityContextHolder.getContext().setAuthentication( authentication );

@@ -1,7 +1,7 @@
 package org.hisp.dhis.dashboard;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,4 +50,6 @@ public interface DashboardItemStore
     int countReportDashboardItems( Report report );
 
     int countDocumentDashboardItems( Document document );
+
+    Dashboard getDashboardFromDashboardItem( DashboardItem dashboardItem );
 }

@@ -1,7 +1,7 @@
 package org.hisp.dhis.dxf2.csv;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,13 +32,13 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.hisp.dhis.common.IdentifiableObject;
-import org.hisp.dhis.dxf2.metadata.MetaData;
+import org.hisp.dhis.dxf2.metadata.Metadata;
 
 /**
  * @author Lars Helge Overland
  */
 public interface CsvImportService
 {
-    MetaData fromCsv( InputStream input, Class<? extends IdentifiableObject> clazz )
+    Metadata fromCsv( InputStream input, Class<? extends IdentifiableObject> clazz )
         throws IOException;
 }
