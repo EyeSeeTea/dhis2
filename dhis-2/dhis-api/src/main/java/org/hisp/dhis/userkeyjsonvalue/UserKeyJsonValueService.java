@@ -1,4 +1,4 @@
-package org.hisp.dhis.webapi.controller.metadata;
+package org.hisp.dhis.userkeyjsonvalue;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -28,33 +28,52 @@ package org.hisp.dhis.webapi.controller.metadata;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dxf2.metadata2.MetadataExportParams;
-import org.hisp.dhis.dxf2.metadata2.MetadataExportService;
-import org.hisp.dhis.node.types.RootNode;
-import org.hisp.dhis.webapi.service.ContextService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.hisp.dhis.user.User;
+
+import java.util.List;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Stian Sandvold
  */
-@Controller
-@RequestMapping( "/metadata/export" )
-public class MetadataExportController
+public interface UserKeyJsonValueService
 {
-    @Autowired
-    private MetadataExportService metadataExportService;
+    /**
+     * Retrieves a list of keys from a user
+     * @param user the namespace to retrieve keys from
+     * @return a list of strings representing the keys from the user
+     */
+    List<String> getKeysByUser( User user );
 
-    @Autowired
-    private ContextService contextService;
+    /**
+     * Deletes all keys associated with a given user
+     * @param user the user to delete
+     */
+    void cleanUserData( User user );
 
-    @RequestMapping( value = "", method = RequestMethod.GET )
-    public @ResponseBody RootNode getMetadata()
-    {
-        MetadataExportParams params = metadataExportService.getParamsFromMap( contextService.getParameterValuesMap() );
-        return metadataExportService.getMetadataAsNode( params );
-    }
+    /**
+     * Retrieves a KeyJsonValue based on a user and key
+     * @param user the user where the key is associated
+     * @param key the key referencing the value
+     * @return the UserKeyJsonValue matching the key and namespace
+     */
+    UserKeyJsonValue getUserKeyJsonValue( User user, String key );
+
+    /**
+     * Adds a new UserKeyJsonValue
+     * @param userKeyJsonValue the UserKeyJsonValue to be stored
+     * @return the id of the UserKeyJsonValue stored
+     */
+    int addUserKeyJsonValue( UserKeyJsonValue userKeyJsonValue );
+
+    /**
+     * Updates a UserKeyJsonValue
+     * @param userKeyJsonValue the updated UserKeyJsonValue
+     */
+    void updateUserKeyJsonValue( UserKeyJsonValue userKeyJsonValue );
+
+    /**
+     * Deletes a UserKeyJsonValue
+     * @param userKeyJsonValue the UserKeyJsonValue to be deleted.
+     */
+    void deleteUserKeyJsonValue( UserKeyJsonValue userKeyJsonValue );
 }

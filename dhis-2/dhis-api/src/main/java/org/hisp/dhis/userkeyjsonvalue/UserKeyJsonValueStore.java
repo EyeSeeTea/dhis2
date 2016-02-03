@@ -1,4 +1,4 @@
-package org.hisp.dhis.webapi.controller.metadata;
+package org.hisp.dhis.userkeyjsonvalue;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -28,33 +28,36 @@ package org.hisp.dhis.webapi.controller.metadata;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dxf2.metadata2.MetadataExportParams;
-import org.hisp.dhis.dxf2.metadata2.MetadataExportService;
-import org.hisp.dhis.node.types.RootNode;
-import org.hisp.dhis.webapi.service.ContextService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.hisp.dhis.common.GenericIdentifiableObjectStore;
+import org.hisp.dhis.user.User;
+
+import java.util.List;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Stian Sandvold
  */
-@Controller
-@RequestMapping( "/metadata/export" )
-public class MetadataExportController
+public interface UserKeyJsonValueStore
+    extends GenericIdentifiableObjectStore<UserKeyJsonValue>
 {
-    @Autowired
-    private MetadataExportService metadataExportService;
+    /**
+     * Retrieves a list of keys associated with a given user.
+     * @param user the user to retrieve keys from
+     * @return a list of strings representing the different keys stored on the user
+     */
+    List<String> getKeysByUser( User user );
 
-    @Autowired
-    private ContextService contextService;
+    /**
+     * Retrieves a KeyJsonValue based on the associated key and user
+     * @param user the user where the key is stored
+     * @param key the key referencing the value
+     * @return the KeyJsonValue retrieved
+     */
+    UserKeyJsonValue getUserKeyJsonValue( User user, String key );
 
-    @RequestMapping( value = "", method = RequestMethod.GET )
-    public @ResponseBody RootNode getMetadata()
-    {
-        MetadataExportParams params = metadataExportService.getParamsFromMap( contextService.getParameterValuesMap() );
-        return metadataExportService.getMetadataAsNode( params );
-    }
+    /**
+     * Retrieves all UserKeyJsonValues owned by user
+     * @param user that owns UserKeyJsonValues
+     * @return list of UserKeyJsonValues
+     */
+    List<UserKeyJsonValue> getUserKeyJsonValueByUser ( User user );
 }

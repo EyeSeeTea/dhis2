@@ -1,4 +1,4 @@
-package org.hisp.dhis.webapi.controller.metadata;
+package org.hisp.dhis.userkeyjsonvalue.hibernate;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -28,33 +28,44 @@ package org.hisp.dhis.webapi.controller.metadata;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dxf2.metadata2.MetadataExportParams;
-import org.hisp.dhis.dxf2.metadata2.MetadataExportService;
-import org.hisp.dhis.node.types.RootNode;
-import org.hisp.dhis.webapi.service.ContextService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.hisp.dhis.user.User;
+import org.hisp.dhis.userkeyjsonvalue.UserKeyJsonValue;
+import org.hisp.dhis.userkeyjsonvalue.UserKeyJsonValueStore;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Stian Sandvold
  */
-@Controller
-@RequestMapping( "/metadata/export" )
-public class MetadataExportController
+public class HibernateUserKeyJsonValueStore
+    extends HibernateIdentifiableObjectStore<UserKeyJsonValue>
+    implements UserKeyJsonValueStore
 {
-    @Autowired
-    private MetadataExportService metadataExportService;
-
-    @Autowired
-    private ContextService contextService;
-
-    @RequestMapping( value = "", method = RequestMethod.GET )
-    public @ResponseBody RootNode getMetadata()
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<String> getKeysByUser( User user )
     {
-        MetadataExportParams params = metadataExportService.getParamsFromMap( contextService.getParameterValuesMap() );
-        return metadataExportService.getMetadataAsNode( params );
+        return (List<String>) getCriteria(
+            Restrictions.eq( "user", user ) ).list().stream().
+            map( o -> ((UserKeyJsonValue) o).getKey() ).collect( Collectors.toList() );
+    }
+
+    @Override
+    public UserKeyJsonValue getUserKeyJsonValue( User user, String key )
+    {
+        return (UserKeyJsonValue) getCriteria(
+            Restrictions.eq( "user", user ),
+            Restrictions.eq( "key", key ) ).uniqueResult();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<UserKeyJsonValue> getUserKeyJsonValueByUser( User user )
+    {
+        return getCriteria(
+            Restrictions.eq( "user", user ) ).list();
     }
 }

@@ -30,8 +30,10 @@ package org.hisp.dhis.dxf2.metadata2;
 
 import com.google.common.collect.Lists;
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.query.Order;
 import org.hisp.dhis.query.Query;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -47,9 +49,15 @@ public class MetadataExportParams
 
     private Map<Class<? extends IdentifiableObject>, Query> queries = new HashMap<>();
 
+    private Map<Class<? extends IdentifiableObject>, List<Order>> orders = new HashMap<>();
+
     private Map<Class<? extends IdentifiableObject>, List<String>> fields = new HashMap<>();
 
-    private static final List<String> defaultFields = Lists.newArrayList( ":owner" );
+    private List<String> defaultFields = Lists.newArrayList( ":owner" );
+
+    private List<String> defaultFilter = new ArrayList<>();
+
+    private List<String> defaultOrder = new ArrayList<>();
 
     public MetadataExportParams()
     {
@@ -74,10 +82,7 @@ public class MetadataExportParams
     @SuppressWarnings( "unchecked" )
     public MetadataExportParams addQuery( Query query )
     {
-        if ( !query.getSchema().isIdentifiableObject() )
-        {
-            return this;
-        }
+        if ( !query.getSchema().isIdentifiableObject() ) return this;
 
         Class<? extends IdentifiableObject> klass = (Class<? extends IdentifiableObject>) query.getSchema().getKlass();
         classes.add( klass );
@@ -91,12 +96,22 @@ public class MetadataExportParams
         return queries.get( klass );
     }
 
+    public MetadataExportParams addOrder( Class<? extends IdentifiableObject> klass, Order order )
+    {
+        if ( !orders.containsKey( klass ) ) orders.put( klass, new ArrayList<>() );
+
+        orders.get( klass ).add( order );
+        return this;
+    }
+
+    public Map<Class<? extends IdentifiableObject>, List<Order>> getOrders()
+    {
+        return orders;
+    }
+
     public MetadataExportParams addFields( Class<? extends IdentifiableObject> klass, List<String> classFields )
     {
-        if ( !fields.containsKey( klass ) )
-        {
-            fields.put( klass, classFields );
-        }
+        if ( !fields.containsKey( klass ) ) fields.put( klass, classFields );
 
         fields.get( klass ).addAll( classFields );
         return this;
@@ -106,5 +121,35 @@ public class MetadataExportParams
     {
         List<String> strings = fields.get( klass );
         return strings != null ? strings : defaultFields;
+    }
+
+    public List<String> getDefaultFields()
+    {
+        return defaultFields;
+    }
+
+    public void setDefaultFields( List<String> defaultFields )
+    {
+        this.defaultFields = defaultFields;
+    }
+
+    public List<String> getDefaultFilter()
+    {
+        return defaultFilter;
+    }
+
+    public void setDefaultFilter( List<String> filter )
+    {
+        this.defaultFilter = filter;
+    }
+
+    public List<String> getDefaultOrder()
+    {
+        return defaultOrder;
+    }
+
+    public void setDefaultOrder( List<String> defaultOrder )
+    {
+        this.defaultOrder = defaultOrder;
     }
 }

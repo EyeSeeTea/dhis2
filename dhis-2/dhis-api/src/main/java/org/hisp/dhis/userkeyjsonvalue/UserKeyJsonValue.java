@@ -1,4 +1,4 @@
-package org.hisp.dhis.webapi.controller.metadata;
+package org.hisp.dhis.userkeyjsonvalue;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -28,33 +28,61 @@ package org.hisp.dhis.webapi.controller.metadata;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dxf2.metadata2.MetadataExportParams;
-import org.hisp.dhis.dxf2.metadata2.MetadataExportService;
-import org.hisp.dhis.node.types.RootNode;
-import org.hisp.dhis.webapi.service.ContextService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.user.User;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Stian Sandvold
  */
-@Controller
-@RequestMapping( "/metadata/export" )
-public class MetadataExportController
+public class UserKeyJsonValue
+    extends BaseIdentifiableObject
 {
-    @Autowired
-    private MetadataExportService metadataExportService;
+    /**
+     * The user which owns this UserKeyJsonValue
+     */
+    private User user;
 
-    @Autowired
-    private ContextService contextService;
+    /**
+     * A key belongs to a namespace, and represent a value
+     */
+    private String key;
 
-    @RequestMapping( value = "", method = RequestMethod.GET )
-    public @ResponseBody RootNode getMetadata()
+    /**
+     * A value referenced by a key and user, JSON-formatted data stored as a string.
+     */
+    private String value;
+
+    @JsonProperty
+    public String getKey()
     {
-        MetadataExportParams params = metadataExportService.getParamsFromMap( contextService.getParameterValuesMap() );
-        return metadataExportService.getMetadataAsNode( params );
+        return key;
+    }
+
+    public void setKey( String key )
+    {
+        this.key = key;
+    }
+
+    @JsonProperty
+    public User getUser()
+    {
+        return user;
+    }
+
+    public void setUser( User user )
+    {
+        this.user = user;
+    }
+
+    @JsonProperty
+    public String getValue()
+    {
+        return value;
+    }
+
+    public void setValue( String value )
+    {
+        this.value = value;
     }
 }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.webapi.controller.metadata;
+package org.hisp.dhis.userkeyjsonvalue;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -28,33 +28,63 @@ package org.hisp.dhis.webapi.controller.metadata;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dxf2.metadata2.MetadataExportParams;
-import org.hisp.dhis.dxf2.metadata2.MetadataExportService;
-import org.hisp.dhis.node.types.RootNode;
-import org.hisp.dhis.webapi.service.ContextService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.hisp.dhis.user.User;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Stian Sandvold
  */
-@Controller
-@RequestMapping( "/metadata/export" )
-public class MetadataExportController
+@Transactional
+public class DefaultUserKeyJsonValueService
+    implements UserKeyJsonValueService
 {
-    @Autowired
-    private MetadataExportService metadataExportService;
+    private UserKeyJsonValueStore userKeyJsonValueStore;
 
-    @Autowired
-    private ContextService contextService;
-
-    @RequestMapping( value = "", method = RequestMethod.GET )
-    public @ResponseBody RootNode getMetadata()
+    public void setUserKeyJsonValueStore( UserKeyJsonValueStore userKeyJsonValueStore )
     {
-        MetadataExportParams params = metadataExportService.getParamsFromMap( contextService.getParameterValuesMap() );
-        return metadataExportService.getMetadataAsNode( params );
+        this.userKeyJsonValueStore = userKeyJsonValueStore;
+    }
+
+    public UserKeyJsonValueStore getUserKeyJsonValueStore()
+    {
+        return this.userKeyJsonValueStore;
+    }
+
+    @Override
+    public List<String> getKeysByUser( User user )
+    {
+        return userKeyJsonValueStore.getKeysByUser( user );
+    }
+
+    @Override
+    public void cleanUserData( User user )
+    {
+        userKeyJsonValueStore.getUserKeyJsonValueByUser( user ).forEach( userKeyJsonValueStore :: delete );
+    }
+
+    @Override
+    public UserKeyJsonValue getUserKeyJsonValue( User user, String key )
+    {
+        return userKeyJsonValueStore.getUserKeyJsonValue( user, key );
+    }
+
+    @Override
+    public int addUserKeyJsonValue( UserKeyJsonValue userKeyJsonValue )
+    {
+        return userKeyJsonValueStore.save( userKeyJsonValue );
+    }
+
+    @Override
+    public void updateUserKeyJsonValue( UserKeyJsonValue userKeyJsonValue )
+    {
+        userKeyJsonValueStore.update( userKeyJsonValue );
+    }
+
+    @Override
+    public void deleteUserKeyJsonValue( UserKeyJsonValue userKeyJsonValue )
+    {
+        userKeyJsonValueStore.delete( userKeyJsonValue );
     }
 }
