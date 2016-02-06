@@ -29,7 +29,8 @@ dhis2.appr.dataSetSelected = function()
                 var selected = ( this == periodTypeToSelect ) ? " selected" : "";
                 html += "<option value='" + this + "'" + selected + ">" + this + "</option>";
                 foundDataSetPeriodType = true;
-            } else if ( this == periodTypeToSelect ) {
+            } 
+            else if ( this == periodTypeToSelect ) {
                 periodTypeToSelect = dataSetPeriodType;
             }
         } );
@@ -38,7 +39,26 @@ dhis2.appr.dataSetSelected = function()
         $( "#periodType" ).removeAttr( "disabled" );
         dhis2.appr.displayPeriods();
     }
+    
+    var hasCatCombo = !!$( "#dataSetId :selected" ).data( "hc" );
+    
+    if ( hasCatCombo ) {
+		var cc = $( "#dataSetId :selected" ).data( "cc" );
+		var cn = $( "#dataSetId :selected" ).data( "cn" );
+		
+		var html = "Data set items: " + cn + " <a href='javascript:dhis2.appr.selectItems(\"" + cc + "\")'>Select items</a>";
+		$( "#attributeOptionComboDiv" ).show().html( html );
+	}
 }
+
+dhis2.appr.selectItems = function( cc )
+{
+	var url = "../api/categoryCombos/" + cc + ".json?fields=id,displayName,categoryOptionCombos[id,displayName]";
+	
+	$.getJSON( url, function( json ) {
+		var coc = json.categoryOptionCombos;
+	} );
+};
 
 dhis2.appr.displayPeriods = function()
 {

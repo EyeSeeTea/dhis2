@@ -83,11 +83,17 @@ div.inputSection {
 <select id="dataSetId" name="dataSetId" style="width:330px" onchange="dhis2.appr.dataSetSelected()">
   <option value="">[ $i18n.getString( "select" ) ]</option>
   #foreach( $dataSet in $dataSets )
-  <option value="$dataSet.uid" data-pt="${dataSet.periodType.name}" data-cc="${dataSet.hasCategoryCombo()}">
+  <option value="$dataSet.uid" data-pt="${dataSet.periodType.name}" data-cc="${dataSet.categoryCombo.uid}" 
+    data-hc="${dataSet.hasCategoryCombo()}" data-cn="${dataSet.categoryCombo.optionCombos.size()}">
   $encoder.htmlEncode( $dataSet.displayName )
   </option>
   #end
 </select>
+</div>
+
+<!-- Attribute option combo -->
+
+<div id="attributeOptionComboDiv" class="inputSection" style="display:none">
 </div>
 
 <!-- Period -->
@@ -118,4 +124,10 @@ div.inputSection {
 #parse( "dhis-web-commons/loader/loader.vm" )
 
 <div id="content"></div>
+
+
+<!-- Attribute option combo dialog -->
+
+<div id="attributeOptionComboDialog" style="display:none">
+</div>
 
