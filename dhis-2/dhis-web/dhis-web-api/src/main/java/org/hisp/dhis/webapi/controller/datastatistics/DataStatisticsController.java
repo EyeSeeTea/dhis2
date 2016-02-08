@@ -10,18 +10,23 @@ import org.springframework.web.bind.annotation.*;
 
 import org.hisp.dhis.datastatistics.DataStatistics;
 import org.hisp.dhis.datastatistics.DataStatisticsStore;
-//import org.hisp.dhis.datastatistics.DataStatisticsEvent;
+import org.hisp.dhis.datastatistics.DataStatisticsEvent;
 import org.hisp.dhis.reporttable.ReportTableService;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.chart.ChartService;
 import org.hisp.dhis.eventchart.EventChartService;
 import org.hisp.dhis.eventreport.EventReportService;
 import org.hisp.dhis.indicator.IndicatorService;
+import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.user.User;
+import org.hisp.dhis.datastatistics.EventType;
+import org.hisp.dhis.datastatistics.DataStatisticsService;
 
 
 import java.lang.String;
 import java.lang.System;
 import java.util.List;
+import java.util.Date;
 
 
 /**
@@ -32,69 +37,25 @@ import java.util.List;
 @Controller
 public class DataStatisticsController
 {
+    @Autowired
+    protected CurrentUserService currentUserService;
 
     @Autowired
-    DataStatisticsStore hibernateDataStatisticsStore;
-
-    /*@Autowired
-    DataStatisticsEvent defaultDataStatisticsEvent;*/
-
-    /*
-        Statistics
-     */
-    @Autowired
-    private ReportTableService reportTableService;
-    @Autowired
-    private ChartService chartService;
-    @Autowired
-    private EventReportService eventReportService;
-    @Autowired
-    private EventChartService eventChartService;
-    @Autowired
-    private IndicatorService indicatorService;
+    DataStatisticsService defaultDataStatisticsService;
 
 
-    @RequestMapping(value = "/datastatistics/{id}", produces = { "application/json", "text/*" }, method = RequestMethod.GET)
-    public @ResponseBody String helloworld(@PathVariable int id){
-        DataStatistics ds = hibernateDataStatisticsStore.getDataStatisticsById(id);
-        return ds.toString();
-    }
-
-    @RequestMapping(value = "/datastatistics/text", method = RequestMethod.GET)
-    public @ResponseBody String createObject(@RequestParam String text){
-
-        DataStatistics dataStatistics = new DataStatistics();
-        hibernateDataStatisticsStore.addDataStatistics(dataStatistics);
-        return "Hello World! Det funka!";
-    }
+    @RequestMapping(value = "/datastatistics/create", method = RequestMethod.GET)
+    public @ResponseBody String createObject(@RequestParam EventType eventType ){
 
 
-    @RequestMapping(value = "/datastatistics/delete/{id}", method = RequestMethod.GET)
-    public @ResponseBody String delete(@PathVariable int id){
-        DataStatistics ds =  hibernateDataStatisticsStore.getDataStatisticsById(id);
-        hibernateDataStatisticsStore.deleteDataStatistics(ds);
-        return "Hello World! Det funka å slette!";
-    }
+        Date timestamp = new Date();
+        User user = currentUserService.getCurrentUser();
 
-    @RequestMapping(value = "/datastatistics/", produces = { "application/json", "text/*" }, method = RequestMethod.GET)
-    public @ResponseBody String getReport(){
-
-        List<ReportTable> table = reportTableService.getAllReportTables();
-        System.out.println("\n\nReportTable: ");
-        System.out.println(table.size());
-        System.out.println("\n\nChart: ");
-        System.out.println(chartService.getAllCharts().size());
-        System.out.println("\n\nEventReport: ");
-        System.out.println(eventReportService.getAllEventReports().size());
-        System.out.println("\n\nEventChartService:");
-        System.out.println(eventChartService.getAllEventCharts().size());
-        System.out.println("\n\nIndicatorService");
-        System.out.println(indicatorService.getAllIndicators().size());
-
-
-        //defaultDataStatisticsEvent.getReportTable();
-
-        return "Funka dette????";
+        //Legge dette i DefaultDataStatisticsService?
+        DataStatisticsEvent event = new DataStatisticsEvent(eventType, timestamp, user.getId());
+        int id = defaultDataStatisticsService.addEvent(event);
+        //int id = hibernateDataStatisticsStore.addDataStatisticsEvent(event);
+        return "Date: " + timestamp + " User: " + user.toString() + " EventType: " + eventType + " databaseid: " + id;
     }
 
 
