@@ -29,6 +29,17 @@
   margin-left: 10px;
 }
 
+.approvalItemList
+{
+  list-style-type: none;
+  padding: 1px 0;
+}
+
+.approvalItemList li
+{
+  padding: 3px 0;
+}
+
 @media print
 {
 	div#control 
