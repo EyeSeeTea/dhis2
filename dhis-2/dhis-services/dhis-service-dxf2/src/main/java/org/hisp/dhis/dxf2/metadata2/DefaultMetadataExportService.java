@@ -28,9 +28,11 @@ package org.hisp.dhis.dxf2.metadata2;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.collect.Sets;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.dxf2.common.OrderParams;
 import org.hisp.dhis.fieldfilter.FieldFilterService;
 import org.hisp.dhis.node.NodeUtils;
 import org.hisp.dhis.node.types.RootNode;
@@ -44,6 +46,7 @@ import org.hisp.dhis.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -95,8 +98,8 @@ public class DefaultMetadataExportService implements MetadataExportService
             }
             else
             {
-                Schema schema = schemaService.getDynamicSchema( klass );
-                query = Query.from( schema );
+                OrderParams orderParams = new OrderParams( Sets.newHashSet( params.getDefaultOrder() ) );
+                query = queryService.getQueryFromUrl( klass, params.getDefaultFilter(), orderParams.getOrders( schemaService.getDynamicSchema( klass ) ) );
             }
 
             if ( query.getUser() == null )
@@ -104,6 +107,7 @@ public class DefaultMetadataExportService implements MetadataExportService
                 query.setUser( defaultUser );
             }
 
+            query.setDefaultOrder();
             List<? extends IdentifiableObject> objects = queryService.query( query );
             log.info( "Exported " + objects.size() + " objects of type " + klass.getSimpleName() );
             metadata.put( klass, objects );
@@ -131,24 +135,111 @@ public class DefaultMetadataExportService implements MetadataExportService
     }
 
     @Override
-    public void validate( MetadataExportParams params ) throws MetadataExportException
+    public void validate( MetadataExportParams params )
     {
 
     }
 
     @Override
     @SuppressWarnings( "unchecked" )
-    public MetadataExportParams getParamsFromMap( Map<String, String> parameters )
+    public MetadataExportParams getParamsFromMap( Map<String, List<String>> parameters )
     {
         MetadataExportParams params = new MetadataExportParams();
+        Map<Class<? extends IdentifiableObject>, Map<String, List<String>>> map = new HashMap<>();
 
-        for ( String p : parameters.keySet() )
+        if ( parameters.containsKey( "fields" ) )
         {
-            Schema schema = schemaService.getSchemaByPluralName( p );
+            params.setDefaultFields( parameters.get( "fields" ) );
+            parameters.remove( "fields" );
+        }
 
-            if ( schema != null && schema.isIdentifiableObject() && "true".equalsIgnoreCase( parameters.get( p ) ) )
+        if ( parameters.containsKey( "filter" ) )
+        {
+            params.setDefaultFilter( parameters.get( "filter" ) );
+            parameters.remove( "filter" );
+        }
+
+        if ( parameters.containsKey( "order" ) )
+        {
+            params.setDefaultOrder( parameters.get( "order" ) );
+            parameters.remove( "order" );
+        }
+
+        for ( String parameterKey : parameters.keySet() )
+        {
+            String[] parameter = parameterKey.split( ":" );
+            Schema schema = schemaService.getSchemaByPluralName( parameter[0] );
+
+            if ( schema == null || !schema.isIdentifiableObject() )
             {
-                params.addClass( (Class<? extends IdentifiableObject>) schema.getKlass() );
+                continue;
+            }
+
+            Class<? extends IdentifiableObject> klass = (Class<? extends IdentifiableObject>) schema.getKlass();
+
+            // class is enabled if value = true, or fields/filter/order is present
+            if ( "true".equalsIgnoreCase( parameters.get( parameterKey ).get( 0 ) ) || (parameter.length > 1 && ("fields".equalsIgnoreCase( parameter[1] )
+                || "filter".equalsIgnoreCase( parameter[1] ) || "order".equalsIgnoreCase( parameter[1] ))) )
+            {
+                if ( !map.containsKey( klass ) ) map.put( klass, new HashMap<>() );
+            }
+            else
+            {
+                continue;
+            }
+
+            if ( parameter.length > 1 )
+            {
+                if ( "fields".equalsIgnoreCase( parameter[1] ) )
+                {
+                    if ( !map.get( klass ).containsKey( "fields" ) ) map.get( klass ).put( "fields", new ArrayList<>() );
+                    map.get( klass ).get( "fields" ).addAll( parameters.get( parameterKey ) );
+                }
+
+                if ( "filter".equalsIgnoreCase( parameter[1] ) )
+                {
+                    if ( !map.get( klass ).containsKey( "filter" ) ) map.get( klass ).put( "filter", new ArrayList<>() );
+                    map.get( klass ).get( "filter" ).addAll( parameters.get( parameterKey ) );
+                }
+
+                if ( "order".equalsIgnoreCase( parameter[1] ) )
+                {
+                    if ( !map.get( klass ).containsKey( "order" ) ) map.get( klass ).put( "order", new ArrayList<>() );
+                    map.get( klass ).get( "order" ).addAll( parameters.get( parameterKey ) );
+                }
+            }
+        }
+
+        map.keySet().forEach( params::addClass );
+
+        for ( Class<? extends IdentifiableObject> klass : map.keySet() )
+        {
+            Map<String, List<String>> classMap = map.get( klass );
+            Schema schema = schemaService.getDynamicSchema( klass );
+
+            if ( classMap.containsKey( "fields" ) ) params.addFields( klass, classMap.get( "fields" ) );
+
+            if ( classMap.containsKey( "filter" ) && classMap.containsKey( "order" ) )
+            {
+                OrderParams orderParams = new OrderParams( Sets.newHashSet( classMap.get( "order" ) ) );
+                Query query = queryService.getQueryFromUrl( klass, classMap.get( "filter" ), orderParams.getOrders( schema ) );
+                query.setDefaultOrder();
+                params.addQuery( query );
+            }
+            else if ( classMap.containsKey( "filter" ) )
+            {
+                Query query = queryService.getQueryFromUrl( klass, classMap.get( "filter" ), new ArrayList<>() );
+                query.setDefaultOrder();
+                params.addQuery( query );
+            }
+            else if ( classMap.containsKey( "order" ) )
+            {
+                OrderParams orderParams = new OrderParams();
+                orderParams.setOrder( Sets.newHashSet( classMap.get( "order" ) ) );
+
+                Query query = queryService.getQueryFromUrl( klass, new ArrayList<>(), orderParams.getOrders( schema ) );
+                query.setDefaultOrder();
+                params.addQuery( query );
             }
         }
 

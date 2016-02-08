@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import org.hisp.dhis.datastatistics.DataStatistics;
 import org.hisp.dhis.datastatistics.DataStatisticsStore;
-import org.hisp.dhis.datastatistics.DataStatisticsEvent;
+//import org.hisp.dhis.datastatistics.DataStatisticsEvent;
 import org.hisp.dhis.reporttable.ReportTableService;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.chart.ChartService;
@@ -36,8 +36,8 @@ public class DataStatisticsController
     @Autowired
     DataStatisticsStore hibernateDataStatisticsStore;
 
-    @Autowired
-    DataStatisticsEvent defaultDataStatisticsEvent;
+    /*@Autowired
+    DataStatisticsEvent defaultDataStatisticsEvent;*/
 
     /*
         Statistics

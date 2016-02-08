@@ -77,13 +77,13 @@ public class DefaultMetadataImportService implements MetadataImportService
     }
 
     @Override
-    public void validate( MetadataImportParams params ) throws MetadataImportException
+    public void validate( MetadataImportParams params )
     {
 
     }
 
     @Override
-    public MetadataImportParams getParamsFromMap( Map<String, String> parameters )
+    public MetadataImportParams getParamsFromMap( Map<String, List<String>> parameters )
     {
         MetadataImportParams params = new MetadataImportParams();
         return params;

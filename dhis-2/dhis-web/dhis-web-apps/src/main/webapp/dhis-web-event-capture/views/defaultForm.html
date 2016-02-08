@@ -1,6 +1,6 @@
 <div  ng-if='!selectedProgramStage.programStageSections.length'>
     <div ng-include="'views/event-details.html'"></div>
-    <table class="dhis2-list-table-striped">
+    <table class="dhis2-list-table-striped table-with-fixed-layout">
         <thead>
             <tr>
                 <th>
@@ -9,14 +9,15 @@
                 <th>
                     {{'value'| translate}}                    
                 </th>
-                <th class="audit-icon-column hideInPrint" ng-if="currentEvent.event && currentEvent.event !== 'SINGLE_EVENT'">
+                <th class="hideInPrint audit-icon-column" ng-if="currentEvent.event && currentEvent.event !== 'SINGLE_EVENT'">
                 </th>
             </tr>                        
         </thead>
         <tbody>
             <tr ng-repeat="eventGridColumn in eventGridColumns" ng-if="eventGridColumn.id !== 'comment' && eventGridColumn.id !== 'uid' && eventGridColumn.id !== 'eventDate' && !hiddenFields[eventGridColumn.id]">
                 <td >
-                    {{eventGridColumn.name}}<span ng-if="eventGridColumn.compulsory" class="required">*</span>
+                    {{eventGridColumn.name}}
+                    <span ng-if="eventGridColumn.compulsory" class="required">*</span>                    
                 </td>
                 <td >
                     <ng-form name="innerForm">
@@ -144,37 +145,15 @@
                                         class="form-control">
                                     </textarea>
                             </div>
-                            <div ng-switch-when="BOOLEAN" class="form-control">
-                                <label class="radio-inline">
-                                    <input  type="radio"
-                                            ng-model="currentEvent[eventGridColumn.id]"                                                                
-                                            ng-required={{eventGridColumn.compulsory}}
-                                            ng-disabled="assignedFields[eventGridColumn.id]"
-                                            input-field-id={{eventGridColumn.id}} 
-                                            ng-change="saveDatavalue()"
-                                           value="">
-                                        {{'no_value'| translate}}
-                                </label>
-                                <label class="radio-inline">
-                                    <input  type="radio"
-                                            ng-model="currentEvent[eventGridColumn.id]"                                                                
-                                            ng-required={{eventGridColumn.compulsory}}
-                                            ng-disabled="assignedFields[eventGridColumn.id]"
-                                            input-field-id={{eventGridColumn.id}} 
-                                            ng-change="saveDatavalue()" 
-                                           value="true"> 
-                                        {{'yes'| translate}}
-                                </label>
-                                <label class="radio-inline">
-                                    <input  type="radio"
-                                            ng-model="currentEvent[eventGridColumn.id]"                                                                
-                                            ng-required={{eventGridColumn.compulsory}}
-                                            ng-disabled="assignedFields[eventGridColumn.id]"
-                                            input-field-id={{eventGridColumn.id}} 
-                                            ng-change="saveDatavalue()" 
-                                            value="false">
-                                           {{'no'| translate}}
-                                </label>
+                            <div ng-switch-when="BOOLEAN">
+                                <d2-radio-button
+                                    dh-required="eventGridColumn.compulsory"
+                                    dh-disabled="assignedFields[eventGridColumn.id]"
+                                    dh-value="currentEvent[eventGridColumn.id]"
+                                    dh-name="foo"
+                                    dh-event="currentEvent.event"
+                                    dh-id="eventGridColumn.id">
+                                </d2-radio-button>
                             </div>
                             <div ng-switch-when="DATE">
                                 <input type="text"
@@ -215,7 +194,7 @@
                                 <div class="input-group">
                                     <div class="form-control">
                                         <span ng-if="!currentEvent.event || currentEvent.event ==='SINGLE_EVENT'">{{fileNames[currentEvent.event][eventGridColumn.id]}}</span>
-                                        <a ng-if="currentEvent.event && currentEvent.event !=='SINGLE_EVENT'" href ng-click="downloadFile(currentEvent.event, eventGridColumn.id)">{{fileNames[currentEvent.event][eventGridColumn.id]}}</a>                                        
+                                        <a ng-if="currentEvent.event && currentEvent.event !=='SINGLE_EVENT'" href ng-click="downloadFile(currentEvent.event, eventGridColumn.id)" title="{{fileNames[currentEvent.event][eventGridColumn.id]}}">{{fileNames[currentEvent.event][eventGridColumn.id].length > 20 ? fileNames[currentEvent.event][eventGridColumn.id].substr(0,20).contact('...') : fileNames[currentEvent.event][eventGridColumn.id]}}</a>                                        
                                     </div>
                                     <span class="input-group-btn">
                                         <span class="btn btn-primary btn-file" ng-if="currentEvent[eventGridColumn.id]" ng-click="deleteFile(eventGridColumn.id)">
@@ -258,7 +237,7 @@
                         </div>
                     </ng-form>
                 </td>
-                <td class="hideInPrint audit-icon-column" align="center" ng-if="currentEvent.event && currentEvent.event !== 'SINGLE_EVENT'">
+                <td ng-if="currentEvent.event && currentEvent.event !== 'SINGLE_EVENT'">
                     <d2-audit dataelement-id="{{prStDes[eventGridColumn.id].dataElement.id}}" dataelement-name="{{prStDes[eventGridColumn.id].dataElement.name}}"  current-event="{{currentEvent.event}}"></d2-audit>
                 </td>
             </tr>        
@@ -281,13 +260,12 @@
             <thead>                        
                 <tr>
                     <th>
-                        {{'data_element'| translate}}                    
+                        {{'data_element'| translate}}                        
                     </th>
                     <th>
                         {{'value'| translate}}                    
                     </th>
-                    <th class="audit-icon-column hideInPrint" ng-if="currentEvent.event && currentEvent.event !== 'SINGLE_EVENT'">
-
+                    <th class="hideInPrint audit-icon-column" ng-if="currentEvent.event && currentEvent.event !== 'SINGLE_EVENT'">
                     </th>
                 </tr>                        
             </thead>
@@ -295,7 +273,7 @@
                 <tr ng-repeat="de in section.programStageDataElements" ng-if="!hiddenFields[de.dataElement.id]">
                     <td >
                         {{prStDes[de.dataElement.id].dataElement.formName ? prStDes[de.dataElement.id].dataElement.formName : prStDes[de.dataElement.id].dataElement.name}}                         
-                        <span ng-if="prStDes[de.dataElement.id].compulsory" class="required">*</span>
+                        <span ng-if="prStDes[de.dataElement.id].compulsory" class="required">*</span>                        
                     </td>
                     <td>
                         <ng-form name="innerForm">
@@ -427,41 +405,15 @@
                                     </textarea>
                                 </div>
                                 <div ng-switch-when="BOOLEAN">
-                                    <span class="form-control">
-                                        <label class="radio-inline">
-                                            <input type="radio"
-                                                ng-model="currentEvent[de.dataElement.id]"
-                                                ng-required={{prStDes[de.dataElement.id].compulsory}}
-                                                ng-disabled="assignedFields[de.dataElement.id]"
-                                                input-field-id={{de.dataElement.id}}
-                                                ng-change="saveDatavalue()"
-                                                value="">
-                                            {{'no_value'| translate}}
-                                        </label>
-                                        <label class="radio-inline">
-                                            <input type="radio"
-                                                ng-model="currentEvent[de.dataElement.id]"
-                                                ng-required={{prStDes[de.dataElement.id].compulsory}}
-                                                ng-disabled="assignedFields[de.dataElement.id]"
-                                                input-field-id={{de.dataElement.id}}
-                                                ng-change="saveDatavalue()"
-                                                value="true">
-                                            {{'yes'| translate}}
-                                        </label>
-                                        <label class="radio-inline">
-                                            <input type="radio"
-                                                ng-model="currentEvent[de.dataElement.id]"
-                                                ng-required={{prStDes[de.dataElement.id].compulsory}}
-                                                ng-disabled="assignedFields[de.dataElement.id]"
-                                                input-field-id={{de.dataElement.id}}
-                                                ng-change="saveDatavalue()"
-                                                value="false">
-                                                {{'no'| translate}}
-                                        </label>
-                                    </span>
+                                    <d2-radio-button
+                                        dh-required="prStDes[de.dataElement.id].compulsory"
+                                        dh-disabled="assignedFields[de.dataElement.id]"
+                                        dh-value="currentEvent[de.dataElement.id]"
+                                        dh-name="foo"
+                                        dh-event="currentEvent.event"
+                                        dh-id="de.dataElement.id">
+                                    </d2-radio-button>
                                 </div>
-
-
                                 <div ng-switch-when="DATE">
                                     <input type="text"
                                            placeholder="{{dhis2CalendarFormat.keyDateFormat}}"
@@ -548,8 +500,11 @@
                                 {{warningMessages[de.dataElement.id]}}
                             </div>
                         </ng-form>
+                        <!--<span class="hideInPrint audit-icon" ng-if="currentEvent.event && currentEvent.event !== 'SINGLE_EVENT'">
+                            <d2-audit dataelement-id="{{de.dataElement.id}}" dataelement-name="{{prStDes[de.dataElement.id].dataElement.name}}"  current-event="{{currentEvent.event}}"></d2-audit>
+                        </span>-->
                     </td>
-                    <td class="hideInPrint audit-icon-column" align="center" ng-if="currentEvent.event && currentEvent.event !== 'SINGLE_EVENT'">
+                    <td ng-if="currentEvent.event && currentEvent.event !== 'SINGLE_EVENT'">
                         <d2-audit dataelement-id="{{de.dataElement.id}}" dataelement-name="{{prStDes[de.dataElement.id].dataElement.name}}"  current-event="{{currentEvent.event}}"></d2-audit>
                     </td>
                 </tr>

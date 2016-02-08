@@ -56,7 +56,6 @@ public class Preheat
         return (T) map.get( identifier ).get( klass ).get( key );
     }
 
-    @SuppressWarnings( "unchecked" )
     public <T extends IdentifiableObject> T get( PreheatIdentifier identifier, T object )
     {
         if ( object == null )
@@ -107,12 +106,6 @@ public class Preheat
 
         Map<String, IdentifiableObject> identifierMap = map.get( identifier ).get( object.getClass() );
         String key = identifier.getIdentifier( object );
-
-        if ( identifierMap.containsKey( key ) )
-        {
-            throw new PreheatException( "Duplicate key " + key + " for class " + object.getClass().getName() + "." );
-        }
-
         identifierMap.put( key, object );
 
         return this;
