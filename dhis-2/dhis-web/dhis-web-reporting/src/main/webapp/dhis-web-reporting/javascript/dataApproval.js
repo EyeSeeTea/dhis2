@@ -3,10 +3,30 @@ dhis2.util.namespace( 'dhis2.appr' );
 
 dhis2.appr.currentPeriodOffset = 0;
 dhis2.appr.permissions = null;
+dhis2.appr.dataSets = {};
 
 //------------------------------------------------------------------------------
 // Report
 //------------------------------------------------------------------------------
+
+/**
+ * Page init.
+ */
+$( document ).ready( function() 
+{
+	$.getJSON( "../api/dataSets.json?fields=id,displayName,periodType,categoryCombo[id,displayName]", function( json ) {
+				
+		var dsHtml = "<option value=''>[ Select ]</option>";
+		
+		$.each( json.dataSets, function( inx, ds ) {
+			ds.hasCategoryCombo = !!( ds.categoryCombo.displayName !== "default" );
+			dsHtml += "<option value='" + ds.id + "'>" + ds.displayName + "</option>";
+			dhis2.appr.dataSets[ds.id] = ds;
+		} );
+		
+		$( "#dataSetId" ).html( dsHtml );
+	} );
+} );
 
 /**
  * Callback for changes in data set. Displays a list of period types starting
@@ -17,7 +37,8 @@ dhis2.appr.permissions = null;
  */
 dhis2.appr.dataSetSelected = function()
 {
-    var dataSetPeriodType = $( "#dataSetId :selected" ).data( "pt" );
+    var ds = dhis2.appr.dataSets[$( "#dataSetId :selected" ).val()];
+    var dataSetPeriodType = dhis2.appr.dataSets[ds.id].periodType;
 
     if ( $( "#periodType" ).val() != dataSetPeriodType ) {
         var periodTypeToSelect = $( "#periodType" ).val() || dataSetPeriodType;
@@ -29,7 +50,8 @@ dhis2.appr.dataSetSelected = function()
                 var selected = ( this == periodTypeToSelect ) ? " selected" : "";
                 html += "<option value='" + this + "'" + selected + ">" + this + "</option>";
                 foundDataSetPeriodType = true;
-            } else if ( this == periodTypeToSelect ) {
+            } 
+            else if ( this == periodTypeToSelect ) {
                 periodTypeToSelect = dataSetPeriodType;
             }
         } );
@@ -38,7 +60,55 @@ dhis2.appr.dataSetSelected = function()
         $( "#periodType" ).removeAttr( "disabled" );
         dhis2.appr.displayPeriods();
     }
-}
+    
+    if ( ds.hasCategoryCombo ) {
+		var cc = ds.categoryCombo;
+		var html = cc.displayName + "<br><a href='javascript:dhis2.appr.showItemsDialog()'>" + i18n_select_items + "</a>";
+		$( "#attributeOptionComboDiv" ).show().html( html );
+		dhis2.appr.setItemsDialog( cc );
+	}
+	else {
+		$( "#attributeOptionComboDiv" ).html( "" ).hide();
+	}
+};
+
+dhis2.appr.setItemsDialog = function( cc )
+{
+	var url = "../api/categoryCombos/" + cc.id + ".json?fields=id,displayName,categoryOptionCombos[id,displayName]";
+	
+	$.getJSON( url, function( cc ) {
+		var coc = cc.categoryOptionCombos;
+		var ccName = cc.displayName.toLowerCase();
+		
+		var html = "<h4 style='margin: 12px 0'>" + i18n_select_items_for + " " + ccName + "</h4><ul class='approvalItemList'>";
+		
+		$.each( coc, function( inx, coc ) {
+			html += "<li>";
+			html += "<input type='checkbox' class='itemCheckbox' id='coc-" + coc.id + "' data-coc='" + coc.id + "'>";
+			html += "<label for='coc-" + coc.id + "'>" + coc.displayName + "</label>";
+			html += "</li>";
+		} );
+		
+		html += "</ul>";
+		
+		$( "#attribteOptionComboItemDiv" ).html( html );
+	} );
+};
+
+dhis2.appr.showItemsDialog = function()
+{
+	$( "#attributeOptionComboDialog" ).dialog( {
+		modal : true,
+		width : 400,
+		height : 600,
+		title : i18n_select_items
+	} );
+};
+
+dhis2.appr.closeItemsDialog = function()
+{
+	$( "#attributeOptionComboDialog" ).dialog( "close" );
+};
 
 dhis2.appr.displayPeriods = function()
 {
@@ -76,6 +146,39 @@ dhis2.appr.getDataReport = function()
     return dataReport;
 };
 
+dhis2.appr.getApprovalPayload = function()
+{
+	var ds = dhis2.appr.dataSets[$( "#dataSetId :selected" ).val()],
+		pe = $( "#periodId" ).val(),
+		ou = selection.getSelected()[0];
+		
+	var attributeOptionCombos = $( ".itemCheckbox:checkbox:checked" ).map( function() {
+		return $( this ).data( "coc" );
+	} );
+	
+	var payload = {
+		ds: [ds],
+		pe: [pe],
+		approvals: []
+	};
+	
+	$.each( attributeOptionCombos, function( inx, aoc ) {
+		payload.approvals.push( {
+			ou: ou,
+			aoc: aoc
+		} );
+	} );
+	
+	return payload;
+};
+
+dhis2.appr.getItemDataReport = function()
+{
+	var attributeOptionCombos = $( ".itemCheckbox:checkbox:checked" ).map( function() {
+		return $( this ).data( "coc" );
+	} );
+};
+
 dhis2.appr.generateDataReport = function()
 {
 	var dataReport = dhis2.appr.getDataReport();
@@ -85,11 +188,13 @@ dhis2.appr.generateDataReport = function()
 		setHeaderDelayMessage( i18n_select_data_set );
         return false;
     }
+    
     if ( !dataReport.pe )
     {
     	setHeaderDelayMessage( i18n_select_period );
         return false;
     }
+    
     if ( !selection.isSelected() )
     {
     	setHeaderDelayMessage( i18n_select_organisation_unit );
