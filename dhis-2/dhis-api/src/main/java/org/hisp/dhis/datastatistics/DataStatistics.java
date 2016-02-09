@@ -38,16 +38,65 @@ import java.util.Date;
  */
 public class DataStatistics extends BaseIdentifiableObject
 {
+
     private int favorites;
     private int reportTables;
     private int charts;
     private int maps;
     private int eventReports;
     private int eventCharts;
+    private int favoriteViews;
 
+    public DataStatistics( int favorites, int reportTables, int charts, int maps, int eventReports, int eventCharts, int favoriteViews )
+    {
+        this.favorites = favorites;
+        this.reportTables = reportTables;
+        this.charts = charts;
+        this.maps = maps;
+        this.eventReports = eventReports;
+        this.eventCharts = eventCharts;
+        this.favoriteViews = favoriteViews;
+    }
+
+    @JsonProperty
     public int getFavorites()
     {
         return favorites;
+    }
+
+    @JsonProperty
+    public int getReportTables()
+    {
+        return reportTables;
+    }
+
+    @JsonProperty
+    public int getCharts()
+    {
+        return charts;
+    }
+
+    @JsonProperty
+    public int getMaps()
+    {
+        return maps;
+    }
+
+    @JsonProperty
+    public int getEventReports()
+    {
+        return eventReports;
+    }
+
+    @JsonProperty
+    public int getEventCharts() { return eventCharts; }
+
+    @JsonProperty
+    public int getFavoriteViews() { return favoriteViews; }
+
+    public void setEventCharts( int eventCharts )
+    {
+        this.eventCharts = eventCharts;
     }
 
     public void setFavorites( int favorites )
@@ -55,76 +104,33 @@ public class DataStatistics extends BaseIdentifiableObject
         this.favorites = favorites;
     }
 
-    public int getReportTables()
-    {
-        return reportTables;
-    }
-
     public void setReportTables( int reportTables )
     {
         this.reportTables = reportTables;
     }
 
-    public int getCharts()
-    {
-        return charts;
-    }
-
-    public void setCharts( int charts )
-    {
-        this.charts = charts;
-    }
-
-    public int getMaps()
-    {
-        return maps;
-    }
+    public void setCharts( int charts ) { this.charts = charts; }
 
     public void setMaps( int maps )
     {
         this.maps = maps;
     }
 
-    public int getEventReports()
-    {
-        return eventReports;
-    }
+    public void setEventReports( int eventReports ) { this.eventReports = eventReports; }
 
-    public void setEventReports( int eventReports )
-    {
-        this.eventReports = eventReports;
-    }
-
-    public int getEventCharts()
-    {
-        return eventCharts;
-    }
-
-    public void setEventCharts( int eventCharts )
-    {
-        this.eventCharts = eventCharts;
-    }
-
-    public DataStatistics(){}
-    /*public DataStatistics()
-
-    public DataStatistics(String text, String uid, String code,
-        Date created, Date lastUpdated)
-    {
-        super();
-        this.text = text;
-
-        super.setUid( uid );
-        super.setCode( code );
-        super.setCreated( created );
-        super.setLastUpdated( lastUpdated );
-    }*/
-
-
+    public void setFavoriteViews( int favoriteViews ) { this.favoriteViews = favoriteViews; }
 
     @Override
     public String toString()
     {
-        return super.toString() + "\nFavorites: " + favorites;
+        return super.toString() + ", DataStatistics{" +
+            "favorites=" + favorites +
+            ", reportTables=" + reportTables +
+            ", charts=" + charts +
+            ", maps=" + maps +
+            ", eventReports=" + eventReports +
+            ", eventCharts=" + eventCharts +
+            ", favoriteViews=" + favoriteViews +
+            '}';
     }
 }

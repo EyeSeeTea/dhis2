@@ -7899,7 +7899,7 @@ types to have a defined behavior.</para>
 <para>Comece por seleccionar o elemento de dados para eliminar a partir da lista e clique em confirmar. Em seguida, selecione o elemento de dados para manter e clique em confirmar novamente. Por fim, verifique se a seleção e clique em merge.</para>
 <para>Na situação em que existe de dados para o elemento de dados de eliminar e não para o de manter, os dados vão ser transferidos para a manter. Quando os dados existe para ambos os elementos de dados, os dados que foi atualizada pela última vez será usado. Quando os dados só existe para o manter, será tomada nenhuma ação. O elemento de dados para eliminar acabará por ser excluído, exceto quando é um elemento de dados multidimensional e tem outros dados registrados.</para>
 </section>
-<section id="DataStatisticsStore">
+<section id="DataStatisticsEventStore">
 <title>Estatísticas de dados</title>
 <para>O módulo de estatísticas de dados fornece uma visão geral do número de objetos armazenados no banco de dados DHIS2.. </para>
 <screenshot>

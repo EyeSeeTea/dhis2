@@ -29,11 +29,15 @@ package org.hisp.dhis.datastatistics;
  */
 
 
+import java.util.Date;
+
 /**
  * @author Yrjan A. F. Fraschetti
  * @author Julie Hill Roa
  */
-public interface DataStatisticsStore
+public interface DataStatisticsEventStore
 {
     int addDataStatisticsEvent(DataStatisticsEvent dataStatistics);
+
+    int getNumberOfEvents(Date startDate, Date endDate);
 }

@@ -6,7 +6,7 @@
 
   <!-- DataStatistics -->
 
-  <bean id="org.hisp.dhis.datastatistics.DataStatisticsStore" class="org.hisp.dhis.datastatistics.hibernate.HibernateDataStatisticsStore">
+  <bean id="org.hisp.dhis.datastatistics.DataStatisticsEventStore" class="org.hisp.dhis.datastatistics.hibernate.HibernateDataStatisticsEventStore">
     <property name="clazz" value="org.hisp.dhis.datastatistics.DataStatisticsEvent" />
     <property name="sessionFactory" ref="sessionFactory" />
   </bean>

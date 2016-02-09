@@ -19,8 +19,6 @@ public class DataStatisticsEvent
         this.userId = userId;
     }
 
-    public DataStatisticsEvent(){}
-
     public int getId()
     {
         return id;
