@@ -292,7 +292,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                 }
                 if(val && obj.optionSetValue && obj.optionSet && obj.optionSet.id && optionSets[obj.optionSet.id].options  ){
                     if(destination === 'USER'){
-                        val = OptionSetService.getName(optionSets[obj.optionSet.id].options, val);
+                        val = OptionSetService.getName(optionSets[obj.optionSet.id].options, String(val));
                     }
                     else{
                         val = OptionSetService.getCode(optionSets[obj.optionSet.id].options, val);
@@ -418,7 +418,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                     //check if dataelement has optionset
                                     if (prStDe.dataElement.optionSetValue) {
                                         var optionSetId = prStDe.dataElement.optionSet.id;
-                                        newInputField = '<span class="hideInPrint"><ui-select ng-style="{\'width\' : inputObj.isAuditIconPresent ? \'90%\' : \'100%\' }" theme="select2" ' + commonInputFieldProperty + ' on-select="saveDatavalue(prStDes.' + fieldId + ', outerForm.' + fieldId + ')" >' +
+                                        newInputField = '<span class="hideInPrint"><ui-select style="width: 90%;" theme="select2" ' + commonInputFieldProperty + ' on-select="saveDatavalue(prStDes.' + fieldId + ', outerForm.' + fieldId + ')" >' +
                                             '<ui-select-match ng-class="getInputNotifcationClass(prStDes.' + fieldId + '.dataElement.id, true)" allow-clear="true" placeholder="' + $translate.instant('select_or_search') + '">{{$select.selected.name || $select.selected}}</ui-select-match>' +
                                             '<ui-select-choices ' +
                                             ' repeat="option.name as option in optionSets.' + optionSetId + '.options | filter: $select.search | limitTo:maxOptionSize">' +
@@ -442,11 +442,16 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                                 commonInputFieldProperty + '></span><span class="not-for-screen"><input type="text" value={{currentEvent.' + fieldId + '}}></span>';
                                         }
                                         else if (prStDe.dataElement.valueType === "BOOLEAN") {
-                                            newInputField = '<span class="hideInPrint"><label class="radio-inline"><input type="radio" ng-change="saveDatavalue()" ' + commonInputFieldProperty + ' value="">{{\'no_value\'| translate}}</label>' +
-                                                '<label class="radio-inline"><input type="radio" ng-change="saveDatavalue(prStDes.' + fieldId + ', outerForm.' + fieldId + ')" ' + commonInputFieldProperty + ' value="true">{{\'yes\'| translate}}</label>' +
-                                                '<label class="radio-inline"><input type="radio" ng-change="saveDatavalue(prStDes.' + fieldId + ', outerForm.' + fieldId + ')" ' + commonInputFieldProperty + ' value="false">{{\'no\'| translate}}</label></span>' +
-                                                '<span class="not-for-screen"><label class="radio-inline"><input type="radio" ng-checked="{{\'true\' === currentEvent.' + fieldId + '}}">{{\'yes\'| translate}}</label>' +
-                                                '<label class="radio-inline"><input type="radio" ng-checked="{{\'false\' === currentEvent.' + fieldId + '}}">{{\'no\'| translate}}</label></span>';
+                                        	newInputField = '<d2-radio-button ' +
+                                                                        ' dh-required="prStDes.' + fieldId + '.compulsory" ' +
+                                                                        ' dh-disabled="isHidden(prStDes.' + fieldId + '.dataElement.id) || selectedEnrollment.status===\'CANCELLED\' || selectedEnrollment.status===\'COMPLETED\' || currentEvent[uid]==\'uid\' || currentEvent.editingNotAllowed" ' +
+                                                                        ' dh-value="currentEvent.' + fieldId + '" ' +
+                                                                        ' dh-name="foo" ' +
+                                                                        ' dh-current-element="currentElement" ' +
+                                                                        ' dh-event="currentEvent.event" ' +
+                                                                        ' dh-id="prStDes.' + fieldId + '.dataElement.id" ' +
+                                                                        ' dh-click="saveDatavalue(prStDes.' + fieldId + ', currentEvent, value )"' +
+                                                                ' </d2-radio-button>';
                                         }
                                         else if (prStDe.dataElement.valueType === "DATE") {
                                             var maxDate = prStDe.allowFutureDate ? '' : 0;
@@ -474,7 +479,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                         else if (prStDe.dataElement.valueType === "FILE_RESOURCE") {
                                             newInputField = '<span class="input-group">\n\
                                                             <span ng-if="currentEvent.' + fieldId + '">\n\
-                                                                <a href ng-click="downloadFile(null, \'' + fieldId + '\', null)" title="{{fileNames[currentEvent.event][' + fieldId + ']}}" >{{fileNames[currentEvent.event][' + fieldId + '].length > 20 ? fileNames[currentEvent.event][' + fieldId + '].substring(0,20).concat(\'...\') : fileNames[currentEvent.event][' + fieldId + ']}}</a>\n\
+                                                                <a href ng-click="downloadFile(null, \'' + fieldId + '\', null)" title="fileNames[currentEvent.event][' + fieldId + ']" >{{fileNames[currentEvent.event][' + fieldId + '].length > 20 ? fileNames[currentEvent.event][' + fieldId + '].substring(0,20).concat(\'...\') : fileNames[currentEvent.event][' + fieldId + ']}}</a>\n\
                                                             </span>\n\
                                                             <span class="input-group-btn">\n\
                                                                 <span class="btn btn-primary btn-file">\n\
@@ -596,15 +601,15 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                             '</span>';
                                     }
                                     else if (att.valueType === "BOOLEAN") {
-                                        newInputField = '<label class="radio-inline"><span><input type="radio" ng-change="teiValueUpdated(selectedTei,\'' + attId + '\')" ' + commonInputFieldProperty + ' value="">{{\'no_value\'| translate}}' +
-                                            '<d2-audit class="hideInPrint" dataelement-id="'+att.id+'" dataelement-name="'+att.name+'" data-type="attribute" selected-tei-id={{selectedTei.trackedEntityInstance}}></d2-audit>'+
-                                            '</span></label>' +
-                                            '<label class="radio-inline"><span><input type="radio" ng-change="teiValueUpdated(selectedTei,\'' + attId + '\')" ' + commonInputFieldProperty + ' value="true">{{\'yes\'| translate}}' +
-                                            '<d2-audit class="hideInPrint" dataelement-id="'+att.id+'" dataelement-name="'+att.name+'" data-type="attribute" selected-tei-id={{selectedTei.trackedEntityInstance}}></d2-audit>'+
-                                            '</span></label>' +
-                                            '<label class="radio-inline"><input type="radio" ng-change="teiValueUpdated(selectedTei,\'' + attId + '\')" ' + commonInputFieldProperty + ' value="false">{{\'no\'| translate}}' +
-                                            '<d2-audit class="hideInPrint" dataelement-id="'+att.id+'" dataelement-name="'+att.name+'" data-type="attribute" selected-tei-id={{selectedTei.trackedEntityInstance}} ></d2-audit>'+
-                                            '</span></label>';
+                                    	newInputField = '<d2-radio-button ' +
+                                                                ' dh-required=" ' + (att.mandatory || att.unique) + '" ' +
+                                                                ' dh-disabled="editingDisabled || isHidden(attributesById.' + attId + '.id) || ' + isTrackerAssociate + '"' +
+                                                                ' dh-value="selectedTei.' + attId + '" ' +
+                                                                ' dh-name="foo" ' +
+                                                                ' dh-current-element="currentElement" ' +
+                                                                ' dh-event="currentEvent.event" ' +
+                                                                ' dh-id="' + attId + '" ' +
+                                                        ' </d2-radio-button>';
                                     }
                                     else if (att.valueType === "DATE") {
                                         newInputField = '<span ng-controller="InputController"><input  type="text" ng-class="{\'input-with-audit\':inputObj.isAuditIconPresent}"' +
@@ -1290,6 +1295,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                     {name:"d2:round",parameters:1},
                     {name:"d2:hasValue",parameters:1},
                     {name:"d2:lastEventDate",parameters:1},
+                    {name:"d2:validatePattern",parameters:2},
                     {name:"d2:addControlDigits",parameters:1},
                     {name:"d2:checkControlDigits",parameters:1}];
                 var continueLooping = true;
@@ -1563,6 +1569,21 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                 expression = expression.replace(callToThisFunction, valueFound);
                                 successfulExecution = true;
                             }
+                            else if(dhisFunction.name === "d2:validatePattern") {
+                                var inputToValidate = parameters[0].toString();
+                                var pattern = parameters[1];
+                                var regEx = new RegExp(pattern,'g');
+                                var match = inputToValidate.match(regEx);
+                                
+                                var matchFound = false;
+                                if(match !== null && inputToValidate === match[0]) {
+                                    matchFound = true;
+                                }
+
+                                //Replace the end evaluation of the dhis function:
+                                expression = expression.replace(callToThisFunction, matchFound);
+                                successfulExecution = true;
+                            }
                             else if(dhisFunction.name === "d2:addControlDigits") {
 
                                 var baseNumber = parameters[0];
@@ -1697,7 +1718,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             var valArray = [];
             if(effect.data) {
                 valArray = effect.data.split(',');
-                var dataValues = [];
+            	var newEventDataValues = [];
                 angular.forEach(valArray, function(value) {
                     var valParts = value.split(':');
                     if(valParts && valParts.length >= 1) {
@@ -1710,18 +1731,20 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 
                         var processedValue = VariableService.processValue(valVal, valueType);
                         processedValue = $filter('trimquotes')(processedValue);
-                        dataValues.push({dataElement:valId,value:processedValue});
-                        dataValues[valId] = processedValue;
+                    	newEventDataValues.push({dataElement:valId,value:processedValue});
+                    	newEventDataValues[valId] = processedValue;
                     }
                 });
 
                 var valuesAlreadyExists = false;
                 angular.forEach(currentEvents, function(currentEvent) {
                     var misMatch = false;
-                    angular.forEach(dataValues, function(value) {
-                        if(currentEvent[value.dataElement] !== dataValues[value.dataElement]) {
-                            misMatch = true;
-                        }
+                    angular.forEach(newEventDataValues, function(value) {
+                        angular.forEach(currentEvent.dataValues, function(currentDataValue) {
+                            if(currentDataValue.dataElement === value.dataElement && currentDataValue.value != newEventDataValues[value.dataElement]) {
+                                misMatch = true;
+                            }
+                        });
                     });
                     if(!misMatch) {
                         //if no mismatches on this point, the exact same event already exists, and we dont create it.
@@ -1742,7 +1765,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                         dueDate: dueDate,
                         eventDate: eventDate,
                         notes: [],
-                        dataValues: dataValues,
+                    	dataValues: newEventDataValues,
                         status: 'ACTIVE',
                         event: dhis2.util.uid()
                     };
@@ -1883,10 +1906,10 @@ var d2Services = angular.module('d2Services', ['ngResource'])
 
                                 //In case the rule is of type CREATEEVENT, run event creation:
                                 if($rootScope.ruleeffects[ruleEffectKey][action.id].action === "CREATEEVENT" && $rootScope.ruleeffects[ruleEffectKey][action.id].ineffect){
-                                    if(evs && evs.byStage && evs.byStage[$rootScope.ruleeffects[ruleEffectKey]] && evs.byStage[$rootScope.ruleeffects[ruleEffectKey][action.id]])
-                                    {
-                                        if(evs.byStage[$rootScope.ruleeffects[ruleEffectKey][action.id].programStage]) {
-                                            eventsCreated += performCreateEventAction($rootScope.ruleeffects[ruleEffectKey][action.id], selectedEntity, selectedEnrollment, evs.byStage[$rootScope.ruleeffects[ruleEffectKey][action.id].programStage.id]);
+                                    if(evs && evs.byStage){
+                                        if($rootScope.ruleeffects[ruleEffectKey][action.id].programStage) {
+                                            var createdNow = performCreateEventAction($rootScope.ruleeffects[ruleEffectKey][action.id], selectedEntity, selectedEnrollment, evs.byStage[$rootScope.ruleeffects[ruleEffectKey][action.id].programStage.id]);
+                                            eventsCreated += createdNow;
                                         } else {
                                             $log.warn("No programstage defined for CREATEEVENT action: " + action.id);
                                         }
