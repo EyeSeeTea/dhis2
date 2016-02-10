@@ -30,6 +30,10 @@ trackerCapture.controller('DashboardController',
     $scope.selectedOrgUnit = SessionStorageService.get('SELECTED_OU');
     $scope.userAuthority = AuthorityService.getUserAuthorities(SessionStorageService.get('USER_ROLES'));
     $scope.sortedTeiIds = CurrentSelection.getSortedTeiIds();    
+    $scope.useTopBar = false;
+    $scope.showSettingsButton = true;
+    $scope.topbarClass = $scope.showSettingsButton ? "dashboard-info-box-sm" : "dashboard-info-box-lg";
+    $scope.topbarRightSizeClass = $scope.showSettingsButton ? "dashboard-info-btn-right-two-buttons" : "dashboard-info-btn-right-one-button";
     
     //Labels
     $scope.removeLabel = $translate.instant('remove');
@@ -47,6 +51,9 @@ trackerCapture.controller('DashboardController',
     $scope.previousTeiExists = false;
     $scope.nextTeiExists = false;
     
+    $scope.temporaryHideWidgets = [];
+    $scope.temporaryShowWidgets = [];
+    
     if($scope.sortedTeiIds && $scope.sortedTeiIds.length > 0){
         var current = $scope.sortedTeiIds.indexOf($scope.selectedTeiId);
         
@@ -60,7 +67,6 @@ trackerCapture.controller('DashboardController',
             }
         }
     }
-    
     $scope.selectedProgram;    
     $scope.selectedTei;
     
@@ -130,7 +136,7 @@ trackerCapture.controller('DashboardController',
     
     var setWidgetsSize = function(){        
         
-        $scope.widgetSize = {smaller: "col-sm-6 col-md-4 remove-one-pix", bigger: "col-sm-6 col-md-8"};
+        $scope.widgetSize = {smaller: "col-sm-6 col-md-4", bigger: "col-sm-6 col-md-8"};
         
         if(!$scope.hasSmaller){
             $scope.widgetSize = {smaller: "col-sm-1", bigger: "col-sm-11"};
@@ -329,7 +335,8 @@ trackerCapture.controller('DashboardController',
         }
     });
     
-    $scope.applySelectedProgram = function(){
+    $scope.applySelectedProgram = function(pr){
+        $scope.selectedProgram = pr;
         getDashboardLayout();
     };
     
@@ -345,8 +352,18 @@ trackerCapture.controller('DashboardController',
         
         $scope.trackedEntity = selections.te;
         $scope.optionSets = selections.optionSets;
+        $scope.selectedEnrollment = null;
         
-        CurrentSelection.set({tei: $scope.selectedTei, te: $scope.trackedEntity, prs: $scope.programs, pr: $scope.selectedProgram, prNames: $scope.programNames, prStNames: $scope.programStageNames, enrollments: selections.enrollments, selectedEnrollment: null, optionSets: $scope.optionSets});        
+        if($scope.selectedProgram){            
+            for(var i=0; i<selections.enrollments.length; i++){
+                if(selections.enrollments[i].program === $scope.selectedProgram.id){
+                    $scope.selectedEnrollment = selections.enrollments[i];
+                    break;
+                }
+            }
+        }
+        
+        CurrentSelection.set({tei: $scope.selectedTei, te: $scope.trackedEntity, prs: $scope.programs, pr: $scope.selectedProgram, prNames: $scope.programNames, prStNames: $scope.programStageNames, enrollments: selections.enrollments, selectedEnrollment: $scope.selectedEnrollment, optionSets: $scope.optionSets});        
         $timeout(function() { 
             $rootScope.$broadcast('selectedItems', {programExists: $scope.programs.length > 0});            
         }, 500);
@@ -373,10 +390,54 @@ trackerCapture.controller('DashboardController',
         });
     };
     
+    $scope.dataEntryMainMenuItemSelected = false;    
     $scope.back = function(){
-        //reload OU tree
-        selection.load();
-        $location.path('/').search({program: $scope.selectedProgramId});        
+        if(!$scope.dataEntryMainMenuItemSelected){
+            //reload OU tree
+            selection.load();
+            $location.path('/').search({program: $scope.selectedProgramId});        
+        }
+        else {
+            $rootScope.$broadcast('DashboardBackClicked');
+            $scope.dataEntryMainMenuItemSelected = false;            
+        }
+    };    
+
+    $scope.$on('DataEntryMainMenuItemSelected', function(event){        
+        $scope.dataEntryMainMenuItemSelected = true;        
+    });
+    
+    $scope.$on('DataEntryMainMenuVisibilitySet', function(event, data){
+        if(data.visible){            
+            //hide all widgets except visibleItems in data
+            angular.forEach($scope.dashboardWidgets, function(widget){
+                if(!data.visibleItems[widget.title]){
+                    $scope.temporaryHideWidgets[widget.title] = true;
+                }
+                else {
+                    $scope.temporaryShowWidgets[widget.title] = true;
+                }
+
+            });            
+        }else if(data.closingStage){//Palestine, show only closing stage
+            
+        }
+        else{
+            //show widgets, reset temporary settings
+            $scope.temporaryHideWidgets = [];
+            $scope.temporaryShowWidgets = [];
+            
+        }
+    });
+    
+    
+    $scope.getBackButtonText = function(){
+        if(!$scope.dataEntryMainMenuItemSelected){
+            return $translate.instant('back');
+        }
+        else {
+            return $translate.instant('menu');
+        }
     };
     
     $scope.$on('$locationChangeSuccess',function(){
@@ -395,7 +456,7 @@ trackerCapture.controller('DashboardController',
     
     $scope.expandCollapse = function(widget){
         widget.expand = !widget.expand;
-        saveDashboardLayout();;
+        saveDashboardLayout();
     };
     
     $scope.saveDashboarLayoutAsDefault = function(){      

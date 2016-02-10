@@ -673,7 +673,7 @@ public abstract class AbstractEventService
             programStageInstance.setCompletedBy( completedBy );
             programStageInstance.setCompletedDate( executionDate );
 
-            if ( !programStageInstance.isCompleted() )
+            if ( programStageInstance.isCompleted() )
             {
                 programStageInstanceService.completeProgramStageInstance( programStageInstance,
                     i18nManager.getI18nFormat() );
@@ -873,6 +873,8 @@ public abstract class AbstractEventService
         event.setStoredBy( programStageInstance.getStoredBy() );
         event.setCompletedBy( programStageInstance.getCompletedBy() );
         event.setCompletedDate( DateUtils.getLongDateString( programStageInstance.getCompletedDate() ) );
+        event.setCreated( DateUtils.getLongDateString( programStageInstance.getCreated() ) );
+        event.setLastUpdated( DateUtils.getLongDateString( programStageInstance.getLastUpdated() ) );
 
         UserCredentials userCredentials = currentUserService.getCurrentUser().getUserCredentials();
 

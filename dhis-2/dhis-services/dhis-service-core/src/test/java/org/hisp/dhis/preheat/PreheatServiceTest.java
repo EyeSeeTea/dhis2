@@ -28,6 +28,7 @@ package org.hisp.dhis.preheat;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.common.IdentifiableObject;
@@ -178,7 +179,7 @@ public class PreheatServiceTest
         deg2.addDataElement( de3 );
 
         Map<Class<? extends IdentifiableObject>, Set<String>> references = preheatService.collectReferences(
-            Sets.newHashSet( deg1, deg2 ) ).get( PreheatIdentifier.UID );
+            Lists.newArrayList( deg1, deg2 ) ).get( PreheatIdentifier.UID );
 
         assertTrue( references.containsKey( DataElement.class ) );
         assertEquals( 3, references.get( DataElement.class ).size() );
@@ -236,7 +237,7 @@ public class PreheatServiceTest
         deg2.addDataElement( de3 );
 
         Map<Class<? extends IdentifiableObject>, Set<String>> references = preheatService.collectReferences(
-            Sets.newHashSet( deg1, deg2 ) ).get( PreheatIdentifier.CODE );
+            Lists.newArrayList( deg1, deg2 ) ).get( PreheatIdentifier.CODE );
 
         assertTrue( references.containsKey( DataElement.class ) );
         assertEquals( 3, references.get( DataElement.class ).size() );
@@ -292,7 +293,6 @@ public class PreheatServiceTest
     }
 
     @Test
-    @SuppressWarnings( "unchecked" )
     public void testPreheatAllMetadataUID()
     {
         DataElementGroup dataElementGroup = new DataElementGroup( "DataElementGroupA" );
@@ -336,7 +336,6 @@ public class PreheatServiceTest
     }
 
     @Test
-    @SuppressWarnings( "unchecked" )
     public void testPreheatReferenceUID()
     {
         DataElementGroup dataElementGroup = new DataElementGroup( "DataElementGroupA" );
@@ -388,7 +387,6 @@ public class PreheatServiceTest
     }
 
     @Test
-    @SuppressWarnings( "unchecked" )
     public void testPreheatReferenceCODE()
     {
         DataElementGroup dataElementGroup = new DataElementGroup( "DataElementGroupA" );
@@ -441,7 +439,6 @@ public class PreheatServiceTest
     }
 
     @Test
-    @SuppressWarnings( "unchecked" )
     public void testPreheatReferenceWithScanUID()
     {
         DataElementGroup dataElementGroup = fromJson( "preheat/degAUidRef.json", DataElementGroup.class );
@@ -467,7 +464,6 @@ public class PreheatServiceTest
     }
 
     @Test
-    @SuppressWarnings( "unchecked" )
     public void testPreheatReferenceWithScanCODE()
     {
         DataElementGroup dataElementGroup = fromJson( "preheat/degACodeRef.json", DataElementGroup.class );
@@ -494,7 +490,25 @@ public class PreheatServiceTest
     }
 
     @Test
-    @SuppressWarnings( "unchecked" )
+    public void testPreheatReferenceCheckUID()
+    {
+        DataElementGroup dataElementGroup = fromJson( "preheat/degAUidRef_invalid.json", DataElementGroup.class );
+        defaultSetup();
+
+        PreheatParams params = new PreheatParams();
+        params.setPreheatMode( PreheatMode.REFERENCE );
+        params.setReferences( preheatService.collectReferences( dataElementGroup ) );
+
+        preheatService.validate( params );
+        Preheat preheat = preheatService.preheat( params );
+        List<InvalidReference> invalidReferences = preheatService.checkReferences( dataElementGroup, preheat, PreheatIdentifier.UID ).getInvalidReferences();
+        assertEquals( 3, invalidReferences.size() );
+        assertEquals( PreheatIdentifier.UID, invalidReferences.get( 0 ).getIdentifier() );
+        assertEquals( PreheatIdentifier.UID, invalidReferences.get( 1 ).getIdentifier() );
+        assertEquals( PreheatIdentifier.UID, invalidReferences.get( 2 ).getIdentifier() );
+    }
+
+    @Test
     public void testPreheatReferenceConnectUID()
     {
         DataElementGroup dataElementGroup = fromJson( "preheat/degAUidRef.json", DataElementGroup.class );
@@ -523,7 +537,6 @@ public class PreheatServiceTest
     }
 
     @Test
-    @SuppressWarnings( "unchecked" )
     public void testPreheatReferenceConnectCODE()
     {
         DataElementGroup dataElementGroup = fromJson( "preheat/degACodeRef.json", DataElementGroup.class );
@@ -553,7 +566,6 @@ public class PreheatServiceTest
     }
 
     @Test
-    @SuppressWarnings( "unchecked" )
     public void testPreheatReferenceConnectAUTO()
     {
         DataElementGroup dataElementGroup = fromJson( "preheat/degAAutoRef.json", DataElementGroup.class );
