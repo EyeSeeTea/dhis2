@@ -64,7 +64,7 @@ public class SchedulingStrategy
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getResourceTableStrategy()
     {
-        return resourceTableStrategy;
+       return resourceTableStrategy;
     }
 
     public void setResourceTableStrategy( String resourceTableStrategy )
@@ -121,5 +121,5 @@ public class SchedulingStrategy
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getDataStatisticsStrategy() { return dataStatisticsStrategy; }
 
-    public void setDataStatisticsStrategy(String statisticsStrategy) { this.dataStatisticsStrategy = dataStatisticsStrategy; }
+    public void setDataStatisticsStrategy(String dataStatisticsStrategy) { this.dataStatisticsStrategy = dataStatisticsStrategy; }
 }

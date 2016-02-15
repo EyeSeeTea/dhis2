@@ -34,6 +34,7 @@ import static org.hisp.dhis.scheduling.SchedulingManager.TASK_DATA_SYNCH;
 import static org.hisp.dhis.scheduling.SchedulingManager.TASK_MONITORING_LAST_DAY;
 import static org.hisp.dhis.scheduling.SchedulingManager.TASK_RESOURCE_TABLE;
 import static org.hisp.dhis.scheduling.SchedulingManager.TASK_RESOURCE_TABLE_15_MINS;
+import static org.hisp.dhis.scheduling.SchedulingManager.TASK_DATASTATISTICS;
 import static org.hisp.dhis.system.scheduling.Scheduler.CRON_DAILY_0AM;
 import static org.hisp.dhis.system.scheduling.Scheduler.CRON_EVERY_15MIN;
 import static org.hisp.dhis.system.scheduling.Scheduler.CRON_EVERY_MIN;
@@ -268,7 +269,11 @@ public class ScheduleTasksAction
                 // Data statistics
                 // -------------------------------------------------------------
 
-                
+                if ( STRATEGY_ENABLED.equals( dataStatisticsStrategy ) )
+                {
+                    cronKeyMap.putValue( CRON_EVERY_MIN, TASK_DATASTATISTICS );
+                }
+
 
                 schedulingManager.scheduleTasks( cronKeyMap );
             }
@@ -319,6 +324,15 @@ public class ScheduleTasksAction
             if ( keys.contains( TASK_DATA_SYNCH ) )
             {
                 dataSynchStrategy = STRATEGY_ENABLED;
+            }
+
+            // -------------------------------------------------------------
+            // Data statistics
+            // -------------------------------------------------------------
+
+            if ( keys.contains( TASK_DATASTATISTICS ) )
+            {
+                dataStatisticsStrategy = STRATEGY_ENABLED;
             }
         }
 
