@@ -17,5 +17,15 @@ public interface DataStatisticsService
 
     int getNumberOfFavoriteViews(Date startDate, Date endDate);
 
+    int getNumberOfMaps();
+
+    int getNumberOfEventReports();
+
+    int getNumberOfEventCharts();
+
+    int getNumberOfDashboards();
+
+    int getNumberOfIndicators();
+
     int getNumberOfUsers();
 }

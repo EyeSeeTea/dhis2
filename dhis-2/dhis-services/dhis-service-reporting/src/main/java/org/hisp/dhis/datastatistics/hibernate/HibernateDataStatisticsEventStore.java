@@ -11,6 +11,7 @@ import org.hisp.dhis.query.Restriction;
 import org.hisp.dhis.query.Restrictions;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -29,11 +30,17 @@ public class HibernateDataStatisticsEventStore extends HibernateGenericStore<Dat
     @Override
     public int getNumberOfEvents(Date startDate, Date endDate){
 
+        Calendar c = Calendar.getInstance();
+        c.setTime( endDate );
+        c.add( Calendar.DATE, 1 );
+        endDate = c.getTime();
+
+        System.out.println("\n\nendDate + 1: " + endDate);
         //TODO Find replacement for expressions!
         int count = ((Number) getSharingCriteria()
             .setProjection( Projections.countDistinct( "id" ) )
             .add( Expression.ge( "timestamp", startDate) )
-            .add( Expression.le( "timestamp", endDate) )
+            .add( Expression.lt( "timestamp", endDate) )
             .uniqueResult()).intValue();
 
         System.out.println("\n\nDette er svaret fra getCount(): " + count);

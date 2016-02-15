@@ -129,6 +129,11 @@ public class SchedulingController
             cronKeyMap.putValue( CRON_EVERY_MIN, TASK_DATA_SYNCH );
         }
 
+        if (STRATEGY_ENABLED.equals( strategy.getDataStatisticsStrategy()))
+        {
+            cronKeyMap.putValue( CRON_EVERY_MIN, TASK_DATASTATISTICS);
+        }
+
         schedulingManager.scheduleTasks( cronKeyMap );
     }
 }

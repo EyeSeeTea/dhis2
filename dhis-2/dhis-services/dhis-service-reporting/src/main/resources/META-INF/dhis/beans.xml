@@ -190,9 +190,12 @@
         <entry key="analyticsLast3YearsTask" value-ref="analyticsLast3YearsTask" />
         <entry key="monitoringLastDayTask" value-ref="monitoringLastDayTask" />
         <entry key="dataSynchTask" value-ref="dataSynchTask" />
+        <entry key="dataStatisticsTask" value-ref="dataStatisticsTask"/>
       </map>
     </property>
   </bean>
+
+  <bean id="dataStatisticsTask" class="org.hisp.dhis.datastatistics.DataStatisticsTask" scope="prototype"/>
 
   <!-- Startup routine definitions -->
 

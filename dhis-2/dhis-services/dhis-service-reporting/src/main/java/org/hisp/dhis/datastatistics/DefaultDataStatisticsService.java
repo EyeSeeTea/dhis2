@@ -1,6 +1,9 @@
 package org.hisp.dhis.datastatistics;
 
 import org.hisp.dhis.chart.ChartService;
+import org.hisp.dhis.dashboard.DashboardService;
+import org.hisp.dhis.eventreport.EventReportService;
+import org.hisp.dhis.mapping.MappingService;
 import org.hisp.dhis.reporttable.ReportTableService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +25,15 @@ public class DefaultDataStatisticsService implements DataStatisticsService
 
     @Autowired
     ReportTableService reportTableService;
+
+    /*@Autowired
+    MappingService mappingService;
+
+    @Autowired
+    EventReportService eventReportService;*/
+
+    @Autowired
+    DashboardService dashboardService;
 
 
     @Override
@@ -59,7 +71,37 @@ public class DefaultDataStatisticsService implements DataStatisticsService
     }
 
     @Override
-    public  int getNumberOfUsers(){
+    public int getNumberOfMaps()
+    {
+        return 0;
+    }
+
+    @Override
+    public int getNumberOfEventReports()
+    {
+        return 0;
+    }
+
+    @Override
+    public int getNumberOfEventCharts()
+    {
+        return 0;
+    }
+
+    @Override
+    public int getNumberOfDashboards()
+    {
+        return 0;
+    }
+
+    @Override
+    public int getNumberOfIndicators()
+    {
+        return 0;
+    }
+
+    @Override
+    public int getNumberOfUsers(){
         return 0;
     }
 }

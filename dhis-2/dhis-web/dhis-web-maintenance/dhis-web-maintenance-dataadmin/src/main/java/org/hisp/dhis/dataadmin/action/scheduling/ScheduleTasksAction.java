@@ -144,6 +144,12 @@ public class ScheduleTasksAction
         this.dataSynchStrategy = dataSynchStrategy;
     }
 
+    private String dataStatisticsStrategy;
+
+    public String getDataStatisticsStrategt() { return dataStatisticsStrategy; }
+
+    public void setDataStatisticsStrategy(String dataStatisticsStrategy) { this.dataStatisticsStrategy = dataStatisticsStrategy; }
+
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
@@ -257,6 +263,12 @@ public class ScheduleTasksAction
                 {
                     cronKeyMap.putValue( CRON_EVERY_MIN, TASK_DATA_SYNCH );
                 }
+
+                // -------------------------------------------------------------
+                // Data statistics
+                // -------------------------------------------------------------
+
+                
 
                 schedulingManager.scheduleTasks( cronKeyMap );
             }
