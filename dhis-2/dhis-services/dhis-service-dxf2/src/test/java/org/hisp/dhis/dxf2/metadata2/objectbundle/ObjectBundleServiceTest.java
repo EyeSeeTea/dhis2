@@ -28,16 +28,28 @@ package org.hisp.dhis.dxf2.metadata2.objectbundle;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.collect.Lists;
 import org.hisp.dhis.DhisSpringTest;
+import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.common.MergeMode;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementGroup;
+import org.hisp.dhis.option.OptionSet;
+import org.hisp.dhis.preheat.InvalidReference;
 import org.hisp.dhis.preheat.PreheatIdentifier;
+import org.hisp.dhis.preheat.PreheatMode;
+import org.hisp.dhis.preheat.PreheatValidation;
+import org.hisp.dhis.render.RenderFormat;
 import org.hisp.dhis.render.RenderService;
 import org.hisp.dhis.user.User;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -78,7 +90,8 @@ public class ObjectBundleServiceTest
         defaultSetup();
 
         ObjectBundleParams params = new ObjectBundleParams();
-        params.setObjects( Lists.newArrayList( dataElementGroup ) );
+        params.setPreheatMode( PreheatMode.REFERENCE );
+        params.addObject( dataElementGroup );
 
         ObjectBundle bundle = objectBundleService.create( params );
 
@@ -105,6 +118,128 @@ public class ObjectBundleServiceTest
 
         assertTrue( bundle.getObjects().get( DataElementGroup.class ).contains( dataElementGroup ) );
         assertTrue( bundle.getPreheat().containsKey( PreheatIdentifier.UID, DataElementGroup.class, dataElementGroup.getUid() ) );
+    }
+
+    @Test
+    public void testPreheatValidations() throws IOException
+    {
+        Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> metadata = renderService.fromMetadata(
+            new ClassPathResource( "dxf2/de_validate1.json" ).getInputStream(), RenderFormat.JSON );
+
+        ObjectBundleParams params = new ObjectBundleParams();
+        params.setObjectBundleMode( ObjectBundleMode.VALIDATE );
+        params.setObjects( metadata );
+
+        ObjectBundle bundle = objectBundleService.create( params );
+        ObjectBundleValidation validate = objectBundleService.validate( bundle );
+        assertFalse( validate.getPreheatValidations().isEmpty() );
+        List<PreheatValidation> dataElementValidations = validate.getPreheatValidations().get( DataElement.class );
+        assertFalse( dataElementValidations.isEmpty() );
+
+        for ( PreheatValidation preheatValidation : dataElementValidations )
+        {
+            assertFalse( preheatValidation.getInvalidReferences().isEmpty() );
+
+            for ( InvalidReference invalidReference : preheatValidation.getInvalidReferences() )
+            {
+                assertEquals( PreheatIdentifier.UID, invalidReference.getIdentifier() );
+
+                if ( DataElementCategoryCombo.class.isInstance( invalidReference.getRefObject() ) )
+                {
+                    assertEquals( "p0KPaWEg3cf", invalidReference.getRefObject().getUid() );
+                }
+                else if ( User.class.isInstance( invalidReference.getRefObject() ) )
+                {
+                    assertEquals( "GOLswS44mh8", invalidReference.getRefObject().getUid() );
+                }
+                else if ( OptionSet.class.isInstance( invalidReference.getRefObject() ) )
+                {
+                    assertEquals( "pQYCiuosBnZ", invalidReference.getRefObject().getUid() );
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testPreheatValidationsWithCatCombo() throws IOException
+    {
+        Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> metadata = renderService.fromMetadata(
+            new ClassPathResource( "dxf2/de_validate1.json" ).getInputStream(), RenderFormat.JSON );
+
+        DataElementCategoryCombo categoryCombo = manager.getByName( DataElementCategoryCombo.class, "default" );
+        categoryCombo.setUid( "p0KPaWEg3cf" );
+        manager.update( categoryCombo );
+
+        OptionSet optionSet = new OptionSet( "OptionSet: pQYCiuosBnZ" );
+        optionSet.setAutoFields();
+        optionSet.setUid( "pQYCiuosBnZ" );
+        manager.save( optionSet );
+
+        ObjectBundleParams params = new ObjectBundleParams();
+        params.setObjectBundleMode( ObjectBundleMode.VALIDATE );
+        params.setObjects( metadata );
+
+        ObjectBundle bundle = objectBundleService.create( params );
+        ObjectBundleValidation validate = objectBundleService.validate( bundle );
+        assertFalse( validate.getPreheatValidations().isEmpty() );
+        List<PreheatValidation> dataElementValidations = validate.getPreheatValidations().get( DataElement.class );
+        assertFalse( dataElementValidations.isEmpty() );
+
+        for ( PreheatValidation preheatValidation : dataElementValidations )
+        {
+            assertFalse( preheatValidation.getInvalidReferences().isEmpty() );
+
+            for ( InvalidReference invalidReference : preheatValidation.getInvalidReferences() )
+            {
+                assertEquals( PreheatIdentifier.UID, invalidReference.getIdentifier() );
+
+                if ( DataElementCategoryCombo.class.isInstance( invalidReference.getRefObject() ) )
+                {
+                    assertFalse( true );
+                }
+                else if ( User.class.isInstance( invalidReference.getRefObject() ) )
+                {
+                    assertEquals( "GOLswS44mh8", invalidReference.getRefObject().getUid() );
+                }
+                else if ( OptionSet.class.isInstance( invalidReference.getRefObject() ) )
+                {
+                    assertFalse( true );
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testPreheatValidationsInvalidObjects() throws IOException
+    {
+        Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> metadata = renderService.fromMetadata(
+            new ClassPathResource( "dxf2/de_validate2.json" ).getInputStream(), RenderFormat.JSON );
+
+        ObjectBundleParams params = new ObjectBundleParams();
+        params.setObjectBundleMode( ObjectBundleMode.VALIDATE );
+        params.setObjects( metadata );
+
+        ObjectBundle bundle = objectBundleService.create( params );
+        ObjectBundleValidation validate = objectBundleService.validate( bundle );
+
+        assertFalse( validate.getValidationViolations().isEmpty() );
+        assertEquals( 2, validate.getValidationViolations().get( DataElement.class ).size() );
+    }
+
+    @Test
+    public void testPreheatValidationsIncludingMerge() throws IOException
+    {
+        Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> metadata = renderService.fromMetadata(
+            new ClassPathResource( "dxf2/de_validate3.json" ).getInputStream(), RenderFormat.JSON );
+        defaultSetup();
+
+        ObjectBundleParams params = new ObjectBundleParams();
+        params.setObjectBundleMode( ObjectBundleMode.VALIDATE );
+        params.setMergeMode( MergeMode.REPLACE );
+        params.setObjects( metadata );
+
+        ObjectBundle bundle = objectBundleService.create( params );
+        ObjectBundleValidation validate = objectBundleService.validate( bundle );
     }
 
     private void defaultSetup()

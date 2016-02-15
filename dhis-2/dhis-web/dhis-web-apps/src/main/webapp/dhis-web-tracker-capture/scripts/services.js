@@ -243,7 +243,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 })
 
 /* Factory to fetch programs */
-.factory('ProgramFactory', function($q, $rootScope, SessionStorageService, TCStorageService) { 
+.factory('ProgramFactory', function($q, $rootScope, SessionStorageService, TCStorageService, orderByFilter) { 
     
     var userHasValidRole = function(program, userRoles){
         
@@ -304,6 +304,8 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                         }
                     });
                     
+                    programs = orderByFilter(programs, '-name').reverse();
+                    
                     if(programs.length === 0){
                         selectedProgram = null;
                     }
@@ -323,6 +325,10 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                                 selectedProgram = null;
                             }
                         }
+                    }
+                                        
+                    if(!selectedProgram && programs.legth > 0){
+                        selectedProgram = programs[0];
                     }
                     
                     $rootScope.$apply(function(){
@@ -360,6 +366,8 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                         }
                     });
                     
+                    programs = orderByFilter(programs, '-name').reverse();
+                    
                     if(programs.length === 0){
                         selectedProgram = null;
                     }
@@ -379,6 +387,10 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                                 selectedProgram = null;
                             }
                         }
+                    }
+                                        
+                    if(!selectedProgram || angular.isUndefined(selectedProgram) && programs.legth > 0){
+                        selectedProgram = programs[0];
                     }
                     
                     $rootScope.$apply(function(){
@@ -471,7 +483,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 })
 
 /* Factory for fetching OrgUnit */
-.factory('OrgUnitFactory', function($http, SessionStorageService) {    
+.factory('OrgUnitFactory', function($http) {    
     var orgUnit, orgUnitPromise, rootOrgUnitPromise,orgUnitTreePromise;
     return {
         get: function(uid){            
@@ -484,19 +496,8 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             return orgUnitPromise;
         },
         getSearchTreeRoot: function(){
-            //var roles = SessionStorageService.get('USER_ROLES');
             if(!rootOrgUnitPromise){
-                var url = '../api/me.json?fields=organisationUnits[id,name,level,children[id,name,level,children[id,name,level]]]&paging=false';
-                /*if( roles && roles.userCredentials && roles.userCredentials.userRoles){
-                    var userRoles = roles.userCredentials.userRoles;
-                    for(var i=0; i<userRoles.length; i++){
-                        if(userRoles[i].authorities.indexOf('ALL') !== -1 || 
-                          userRoles[i].authorities.indexOf('F_TRACKED_ENTITY_INSTANCE_SEARCH_IN_ALL_ORGUNITS') !== -1 ){                        
-                          url = '../api/organisationUnits.json?filter=level:eq:1&fields=id,name,children[id,name,children[id,name]]&paging=false';
-                          i=userRoles.length;
-                        }
-                    }  
-                }*/
+                var url = '../api/me.json?fields=organisationUnits[id,name,level,children[id,name,level,children[id,name,level]]]&paging=false';                
                 rootOrgUnitPromise = $http.get( url ).then(function(response){
                     return response.data;
                 });

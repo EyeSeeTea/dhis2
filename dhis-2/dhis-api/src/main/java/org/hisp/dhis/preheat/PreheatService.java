@@ -60,7 +60,15 @@ public interface PreheatService
      * @param object Object to scan
      * @return Maps classes to collections of identifiers
      */
-    Map<PreheatIdentifier, Map<Class<? extends IdentifiableObject>, Set<String>>> collectReferences( Object object );
+    Map<PreheatIdentifier, Map<Class<? extends IdentifiableObject>, Set<String>>> collectReferences( IdentifiableObject object );
+
+    /**
+     * Scan object and collect all references (both id object and collections with id objects).
+     *
+     * @param objects Object to scan
+     * @return Maps classes to collections of identifiers
+     */
+    Map<PreheatIdentifier, Map<Class<? extends IdentifiableObject>, Set<String>>> collectReferences( Collection<IdentifiableObject> objects );
 
     /**
      * Scan objects and collect all references (both id object and collections with id objects).
@@ -68,7 +76,15 @@ public interface PreheatService
      * @param objects Objects to scan
      * @return Maps classes to collections of identifiers
      */
-    Map<PreheatIdentifier, Map<Class<? extends IdentifiableObject>, Set<String>>> collectReferences( Collection<?> objects );
+    Map<PreheatIdentifier, Map<Class<? extends IdentifiableObject>, Set<String>>> collectReferences( Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> objects );
+
+    /**
+     * Checks but does not connect any references, returns check report
+     *  @param objects    Object to check
+     * @param preheat    Preheat Cache to use
+     * @param identifier Use this identifier type to check references
+     */
+    List<PreheatValidation> checkReferences( List<IdentifiableObject> objects, Preheat preheat, PreheatIdentifier identifier );
 
     /**
      * Checks but does not connect any references, returns check report
@@ -77,7 +93,7 @@ public interface PreheatService
      * @param preheat    Preheat Cache to use
      * @param identifier Use this identifier type to check references
      */
-    <T extends IdentifiableObject> List<MissingReference> checkReferences( T object, Preheat preheat, PreheatIdentifier identifier );
+    PreheatValidation checkReferences( IdentifiableObject object, Preheat preheat, PreheatIdentifier identifier );
 
     /**
      * Connects id object references on a given object using a given identifier + a preheated Preheat cache.

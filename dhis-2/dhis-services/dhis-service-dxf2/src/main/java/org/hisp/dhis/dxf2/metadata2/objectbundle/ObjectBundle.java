@@ -29,8 +29,11 @@ package org.hisp.dhis.dxf2.metadata2.objectbundle;
  */
 
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.MergeMode;
+import org.hisp.dhis.importexport.ImportStrategy;
 import org.hisp.dhis.preheat.Preheat;
 import org.hisp.dhis.preheat.PreheatIdentifier;
+import org.hisp.dhis.preheat.PreheatMode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,16 +45,27 @@ import java.util.Map;
  */
 public class ObjectBundle
 {
-    private ObjectBundleMode objectBundleMode = ObjectBundleMode.COMMIT;
+    private final ObjectBundleMode objectBundleMode;
 
-    private PreheatIdentifier preheatIdentifier = PreheatIdentifier.UID;
+    private final PreheatIdentifier preheatIdentifier;
+
+    private final PreheatMode preheatMode;
+
+    private final ImportStrategy importMode;
+
+    private final MergeMode mergeMode;
 
     private Preheat preheat = new Preheat();
 
     private Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> objects = new HashMap<>();
 
-    public ObjectBundle()
+    public ObjectBundle( ObjectBundleParams params )
     {
+        this.objectBundleMode = params.getObjectBundleMode();
+        this.preheatIdentifier = params.getPreheatIdentifier();
+        this.importMode = params.getImportMode();
+        this.preheatMode = params.getPreheatMode();
+        this.mergeMode = params.getMergeMode();
     }
 
     public ObjectBundleMode getObjectBundleMode()
@@ -59,19 +73,24 @@ public class ObjectBundle
         return objectBundleMode;
     }
 
-    public void setObjectBundleMode( ObjectBundleMode objectBundleMode )
-    {
-        this.objectBundleMode = objectBundleMode;
-    }
-
     public PreheatIdentifier getPreheatIdentifier()
     {
         return preheatIdentifier;
     }
 
-    public void setPreheatIdentifier( PreheatIdentifier preheatIdentifier )
+    public PreheatMode getPreheatMode()
     {
-        this.preheatIdentifier = preheatIdentifier;
+        return preheatMode;
+    }
+
+    public ImportStrategy getImportMode()
+    {
+        return importMode;
+    }
+
+    public MergeMode getMergeMode()
+    {
+        return mergeMode;
     }
 
     public Preheat getPreheat()
@@ -104,6 +123,19 @@ public class ObjectBundle
     public <T extends IdentifiableObject> void addObjects( List<T> objects )
     {
         objects.forEach( this::addObject );
+    }
+
+    public void putObjects( Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> objects )
+    {
+        for ( Class<? extends IdentifiableObject> klass : objects.keySet() )
+        {
+            if ( !this.objects.containsKey( klass ) )
+            {
+                this.objects.put( klass, new ArrayList<>() );
+            }
+
+            this.objects.get( klass ).addAll( objects.get( klass ) );
+        }
     }
 
     public Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> getObjects()

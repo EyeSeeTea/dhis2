@@ -29,12 +29,16 @@ package org.hisp.dhis.dxf2.metadata2.objectbundle;
  */
 
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.MergeMode;
+import org.hisp.dhis.importexport.ImportStrategy;
 import org.hisp.dhis.preheat.PreheatIdentifier;
 import org.hisp.dhis.preheat.PreheatMode;
 import org.hisp.dhis.preheat.PreheatParams;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -47,7 +51,11 @@ public class ObjectBundleParams
 
     private PreheatMode preheatMode = PreheatMode.REFERENCE;
 
-    private List<? extends IdentifiableObject> objects = new ArrayList<>();
+    private ImportStrategy importMode = ImportStrategy.CREATE_AND_UPDATE;
+
+    private MergeMode mergeMode = MergeMode.MERGE;
+
+    private Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> objects = new HashMap<>();
 
     public ObjectBundleParams()
     {
@@ -85,14 +93,64 @@ public class ObjectBundleParams
         this.preheatMode = preheatMode;
     }
 
-    public List<? extends IdentifiableObject> getObjects()
+    public ImportStrategy getImportMode()
+    {
+        return importMode;
+    }
+
+    public void setImportMode( ImportStrategy importMode )
+    {
+        this.importMode = importMode;
+    }
+
+    public MergeMode getMergeMode()
+    {
+        return mergeMode;
+    }
+
+    public void setMergeMode( MergeMode mergeMode )
+    {
+        this.mergeMode = mergeMode;
+    }
+
+    public Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> getObjects()
     {
         return objects;
     }
 
-    public void setObjects( List<? extends IdentifiableObject> objects )
+    public void setObjects( Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> objects )
     {
         this.objects = objects;
+    }
+
+    public void addObject( Class<? extends IdentifiableObject> klass, IdentifiableObject object )
+    {
+        if ( object == null )
+        {
+            return;
+        }
+
+        if ( !objects.containsKey( klass ) )
+        {
+            objects.put( klass, new ArrayList<>() );
+        }
+
+        objects.get( klass ).add( object );
+    }
+
+    public void addObject( IdentifiableObject object )
+    {
+        if ( object == null )
+        {
+            return;
+        }
+
+        if ( !objects.containsKey( object.getClass() ) )
+        {
+            objects.put( object.getClass(), new ArrayList<>() );
+        }
+
+        objects.get( object.getClass() ).add( object );
     }
 
     public PreheatParams getPreheatParams()
