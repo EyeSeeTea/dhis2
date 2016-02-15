@@ -3,6 +3,7 @@ package org.hisp.dhis.datastatistics.hibernate;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Expression;
+import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Projections;
 import org.hisp.dhis.datastatistics.DataStatisticsEvent;
 import org.hisp.dhis.datastatistics.DataStatisticsEventStore;
@@ -13,6 +14,7 @@ import org.hisp.dhis.query.Restrictions;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Yrjan A. F. Fraschetti
@@ -45,5 +47,21 @@ public class HibernateDataStatisticsEventStore extends HibernateGenericStore<Dat
 
         System.out.println("\n\nDette er svaret fra getCount(): " + count);
         return count;
+    }
+
+    public List<DataStatisticsEvent> getDataStatisticsEventList(){
+        Date now = new Date();
+        Calendar c = Calendar.getInstance();
+        c.setTime( now );
+        //c.add( Calendar.DATE, -1 );
+        c.add( Calendar.DATE, -6 );
+        now = c.getTime();
+
+        System.out.println("\n\nDate.toString: " + now.toString());
+        return getSharingCriteria()
+            .add( Expression.like( "timestamp", now) )
+            .list();
+
+
     }
 }

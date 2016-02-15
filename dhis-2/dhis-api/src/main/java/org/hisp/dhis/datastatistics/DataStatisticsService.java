@@ -28,4 +28,6 @@ public interface DataStatisticsService
     int getNumberOfIndicators();
 
     int getNumberOfUsers();
+
+    void saveSnapshot();
 }

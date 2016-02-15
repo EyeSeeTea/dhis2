@@ -1,5 +1,7 @@
 package org.hisp.dhis.datastatistics;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import javax.annotation.PostConstruct;
 
 /**
@@ -18,10 +20,14 @@ public class DataStatisticsTask implements Runnable
      *
      * @see Thread#run()
      */
+
+    @Autowired
+    DataStatisticsService dataStatisticsService;
+
     @Override
     public void run()
     {
-        System.out.println("\n\nDette er DataStatisticsTask!!!!");
+        dataStatisticsService.saveSnapshot();
     }
 
     @PostConstruct

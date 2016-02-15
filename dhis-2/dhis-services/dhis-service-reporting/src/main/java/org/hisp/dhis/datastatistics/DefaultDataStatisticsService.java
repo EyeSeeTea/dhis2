@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by yrjanaff on 08.02.2016.
@@ -103,5 +104,12 @@ public class DefaultDataStatisticsService implements DataStatisticsService
     @Override
     public int getNumberOfUsers(){
         return 0;
+    }
+
+    @Override public void saveSnapshot()
+    {
+        //TODO Lagre antall unike brukere, antall av hver enum, gjennomsnitt, total, når på døgnet folk er mest aktive
+        List<DataStatisticsEvent> events = hibernateDataStatisticsEventStore.getDataStatisticsEventList();
+        System.out.println("\n\nFirst place: " + events.get( 0 ));
     }
 }

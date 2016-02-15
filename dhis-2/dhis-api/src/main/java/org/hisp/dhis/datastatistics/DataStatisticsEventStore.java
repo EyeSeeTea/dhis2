@@ -30,6 +30,7 @@ package org.hisp.dhis.datastatistics;
 
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Yrjan A. F. Fraschetti
@@ -40,4 +41,6 @@ public interface DataStatisticsEventStore
     int addDataStatisticsEvent(DataStatisticsEvent dataStatistics);
 
     int getNumberOfEvents(Date startDate, Date endDate);
+
+    List<DataStatisticsEvent> getDataStatisticsEventList();
 }
