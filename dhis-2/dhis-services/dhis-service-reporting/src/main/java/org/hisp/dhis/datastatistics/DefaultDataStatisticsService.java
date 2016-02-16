@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -87,10 +88,14 @@ public class DefaultDataStatisticsService implements DataStatisticsService
 
     @Override
     public int getNumberOfReportTables(Date startDate, Date endDate){
-        DailyPeriodType dailyPeriodType = new DailyPeriodType();
+
+        PeriodType periodType = new DailyPeriodType();
+        //periodType.createPeriod(startDate);
+        //DailyPeriodType dailyPeriodType = new DailyPeriodType();
         //Period period = new Period(  );
         //period.setStartDate( startDate ); period.setEndDate( endDate ); period.setPeriodType( dailyPeriodType );
-        return reportTableService.countAnalyticalObjects(periodService.getPeriod( startDate, endDate, dailyPeriodType ));
+        //return reportTableService.countAnalyticalObjects(periodType.createPeriod(startDate));
+        return 0;
     }
 
     @Override
@@ -101,10 +106,11 @@ public class DefaultDataStatisticsService implements DataStatisticsService
     @Override
     public int getNumberOfMaps(Date startDate, Date endDate)
     {
-        DailyPeriodType dailyPeriodType = new DailyPeriodType();
+        PeriodType periodType = new DailyPeriodType();
         //Period period = new Period(  );
         //period.setStartDate( startDate ); period.setEndDate( endDate ); period.setPeriodType( dailyPeriodType );
-        return mappingService.countAnalyticalObjects( periodService.getPeriod( startDate, endDate, dailyPeriodType ) );
+        //return mappingService.countAnalyticalObjects( periodType.createPeriod(startDate) );
+        return 0;
     }
 
     @Override
@@ -134,15 +140,26 @@ public class DefaultDataStatisticsService implements DataStatisticsService
     @Override
     public int getNumberOfUsers(Date date)
     {
-        return userService.getActiveUsersCount( 1 );
+        return userService.getActiveUsersCount( 1000 );
     }
 
 
     @Override public void saveSnapshot()
     {
+        Date startDate = new Date();
+        Date endDate = new Date();
+        Calendar c = Calendar.getInstance();
+        c.setTime( startDate );
+        //c.add( Calendar.DATE, -1 );
+        c.add( Calendar.YEAR, -3 );
+        startDate = c.getTime();
+
+        System.out.println("\n\nstartDate.toString: " + startDate.toString());
+        System.out.println("\n\nendDate.toString: " + endDate.toString());
+
         //TODO Lagre antall unike brukere, antall av hver enum, gjennomsnitt, total, når på døgnet folk er mest aktive
-        List<DataStatisticsEvent> events = hibernateDataStatisticsEventStore.getDataStatisticsEventList();
-        List<Integer> uniqueUsers = new ArrayList<Integer>();
+        List<DataStatisticsEvent> events = hibernateDataStatisticsEventStore.getDataStatisticsEventList(startDate);
+        List<Integer> uniqueUsers = new ArrayList<>();
         int numberOfUsers = 0;
         int numberOfMapViews = 0;
         int numberOfChartViews = 0;
@@ -153,6 +170,9 @@ public class DefaultDataStatisticsService implements DataStatisticsService
         int averageNumberofViews = 0;
         int numberOfDashboardViews = 0;
         int numberOfIndicatorsViews = 0;
+
+        int totalNumberOfUsers = getNumberOfUsers( startDate );
+        System.out.println("\n\ntotalNumersOfUsers: " + totalNumberOfUsers);
 
 
         for(DataStatisticsEvent e : events){
@@ -177,10 +197,19 @@ public class DefaultDataStatisticsService implements DataStatisticsService
             }
         }
 
+        int averageNumberOfSavedMaps = 0;//getNumberOfMaps( startDate, endDate ) / totalNumberOfUsers;
+        int averageNumberOfSavedCharts = getNumberOfCharts( startDate );
+        int averageNumberOfSavedReportTables = 0;//getNumberOfReportTables( startDate, endDate ) / totalNumberOfUsers;
+        int averageNumberOfSavedEventReports = getNumberOfEventReports( startDate ) ;
+        int averageNumberOfSavedEventCharts = getNumberOfEventCharts( startDate );
+        int averageNumberOfSavedDashboards = getNumberOfDashboards( startDate ) ;
+        int averageNumberOfSavedIndicators = getNumberOfIndicators( startDate ) ;
+
         numberOfUsers = uniqueUsers.size();
         averageNumberofViews = totalNumberOfViews / numberOfUsers;
 
-        System.out.println("\nNumberofUsers: " + numberOfUsers +
+
+        /*System.out.println("\nNumberofUsers: " + numberOfUsers +
         "\nNumberOfMapViews: " + numberOfMapViews +
         "\nNumberofChartViews: " + numberOfChartViews +
         "\nnumberOfReportTableViews: " + numberOfReportTablesViews +
@@ -189,12 +218,15 @@ public class DefaultDataStatisticsService implements DataStatisticsService
         "\ntotalNumberofViews: " + totalNumberOfViews +
         "\naverageNumberOfViews: " + averageNumberofViews +
         "\nNumberOfDashboardViews: " + numberOfDashboardViews +
-        "\nnumberOfIndicatorViews: " + numberOfIndicatorsViews);
+        "\nnumberOfIndicatorViews: " + numberOfIndicatorsViews);*/
 
         DataStatistics dataStatistics = new DataStatistics( numberOfUsers, numberOfMapViews, numberOfChartViews,
             numberOfReportTablesViews, numberOfEventReportViews, numberOfEventChartViews, numberOfDashboardViews,
-            numberOfIndicatorsViews, totalNumberOfViews, averageNumberofViews, 0, 0, 0, 0, 0, 0 ,0 ,0 );
-
+            numberOfIndicatorsViews, totalNumberOfViews, averageNumberofViews, averageNumberOfSavedMaps,
+            averageNumberOfSavedCharts, averageNumberOfSavedReportTables, averageNumberOfSavedEventReports,
+            averageNumberOfSavedEventCharts, averageNumberOfSavedDashboards ,averageNumberOfSavedIndicators ,
+            totalNumberOfUsers );
+        System.out.println(dataStatistics.toString());
         int id = hibernateDataStatisticsStore.addSnapshot( dataStatistics );
 
         if(id == 0){

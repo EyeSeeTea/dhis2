@@ -62,7 +62,13 @@ public class DataStatistics extends BaseIdentifiableObject
 
     public DataStatistics( ) { super.setAutoFields(); }
 
-    public DataStatistics( int numberOfUsers, int numberOfMapViews, int numberOfChartViews, int numberOfReportTablesViews, int numberOfEventReportViews, int numberOfEventChartViews, int numberOfDashboardViews, int numberOfIndicatorsViews, int totalNumberOfViews, int averageNumberOfViews, int averageNumberOfSavedMaps, int averageNumberOfSavedCharts, int averageNumberOfSavedReportTables, int averageNumberOfSavedEventReports, int averageNumberOfSavedEventCharts, int averageNumberOfSavedDashboards, int averageNumberOfSavedIndicators, int totalNumberOfUsers )
+    public DataStatistics( int numberOfUsers, int numberOfMapViews, int numberOfChartViews,
+        int numberOfReportTablesViews, int numberOfEventReportViews, int numberOfEventChartViews,
+        int numberOfDashboardViews, int numberOfIndicatorsViews, int totalNumberOfViews,
+        int averageNumberOfViews, int averageNumberOfSavedMaps, int averageNumberOfSavedCharts,
+        int averageNumberOfSavedReportTables, int averageNumberOfSavedEventReports,
+        int averageNumberOfSavedEventCharts, int averageNumberOfSavedDashboards,
+        int averageNumberOfSavedIndicators, int totalNumberOfUsers )
     {
         this.numberOfUsers = numberOfUsers;
         this.numberOfMapViews = numberOfMapViews;

@@ -42,5 +42,5 @@ public interface DataStatisticsEventStore
 
     int getNumberOfEvents(Date startDate, Date endDate);
 
-    List<DataStatisticsEvent> getDataStatisticsEventList();
+    List<DataStatisticsEvent> getDataStatisticsEventList( Date date );
 }
