@@ -11,13 +11,13 @@ public interface DataStatisticsService
 
     DataStatistics createReport(Date startDate, Date endDate);
 
-    int getNumberOfCharts();
+    int getNumberOfCharts(Date startDate);
 
-    int getNumberOfReportTables();
+    int getNumberOfReportTables(Date startDate, Date endDate);
 
     int getNumberOfFavoriteViews(Date startDate, Date endDate);
 
-    int getNumberOfMaps();
+    int getNumberOfMaps(Date startDate, Date endDate);
 
     int getNumberOfEventReports();
 

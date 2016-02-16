@@ -108,4 +108,6 @@ public interface ChartService
     int getChartCount();
 
     int getChartCountByName( String name );
+
+    int countChartGeCreated(Date startDate);
 }
