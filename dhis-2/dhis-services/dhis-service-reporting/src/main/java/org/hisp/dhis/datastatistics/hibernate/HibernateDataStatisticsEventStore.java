@@ -50,16 +50,18 @@ public class HibernateDataStatisticsEventStore extends HibernateGenericStore<Dat
     }
 
     public List<DataStatisticsEvent> getDataStatisticsEventList(){
-        Date now = new Date();
+        Date startDate = new Date();
+        Date endDate = new Date();
         Calendar c = Calendar.getInstance();
-        c.setTime( now );
+        c.setTime( endDate );
         //c.add( Calendar.DATE, -1 );
-        c.add( Calendar.DATE, -6 );
-        now = c.getTime();
+        c.add( Calendar.DATE, -7 );
+        endDate = c.getTime();
 
-        System.out.println("\n\nDate.toString: " + now.toString());
+        System.out.println("\n\nendDate.toString: " + endDate.toString());
         return getSharingCriteria()
-            .add( Expression.like( "timestamp", now) )
+            .add( Expression.ge( "timestamp", startDate) )
+            .add(Expression.lt( "timestamp", endDate ) )
             .list();
 
 
