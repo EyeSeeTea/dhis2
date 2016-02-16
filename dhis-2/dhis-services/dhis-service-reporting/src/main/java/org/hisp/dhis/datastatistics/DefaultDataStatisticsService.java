@@ -1,6 +1,6 @@
 package org.hisp.dhis.datastatistics;
 
-import org.apache.commons.collections.FastArrayList;
+
 import org.hisp.dhis.chart.ChartService;
 import org.hisp.dhis.dashboard.DashboardService;
 import org.hisp.dhis.eventchart.EventChartService;
@@ -9,7 +9,6 @@ import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.mapping.MappingService;
 import org.hisp.dhis.reporttable.ReportTableService;
 import org.hisp.dhis.user.UserService;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,7 +63,7 @@ public class DefaultDataStatisticsService implements DataStatisticsService
     @Override
     public DataStatistics createReport(Date startDate, Date endDate)
     {
-        int favViewsCount = getNumberOfFavoriteViews( startDate, endDate );
+        int favViewsCount = getNumberOfFavoriteViews(startDate, endDate);
         int chartsCount = getNumberOfCharts();
         int reportTableCount = getNumberOfReportTables();
         int favCount = chartsCount + reportTableCount;
@@ -86,7 +85,7 @@ public class DefaultDataStatisticsService implements DataStatisticsService
 
     @Override
     public int getNumberOfFavoriteViews(Date startDate, Date endDate){
-        return hibernateDataStatisticsEventStore.getNumberOfEvents( startDate, endDate );
+        return hibernateDataStatisticsEventStore.getNumberOfEvents(startDate, endDate);
     }
 
     @Override
@@ -96,32 +95,32 @@ public class DefaultDataStatisticsService implements DataStatisticsService
     }
 
     @Override
-    public int getNumberOfEventReports()
+    public int getNumberOfEventReports(Date date)
     {
-        return eventReportService.getAllEventReports().size();
+        return eventReportService.getCountGeCreated(date);
     }
 
     @Override
-    public int getNumberOfEventCharts()
+    public int getNumberOfEventCharts(Date date)
     {
-        return eventChartService.getAllEventCharts().size();
+        return eventChartService.countGeCreated(date);
     }
 
     @Override
-    public int getNumberOfDashboards()
+    public int getNumberOfDashboards(Date date)
     {
-        return 0;
+        return dashboardService.countGeCreated(date);
     }
 
     @Override
-    public int getNumberOfIndicators()
+    public int getNumberOfIndicators(Date date)
     {
-        return indicatorService.getIndicatorCount();
+        return indicatorService.getCountGeCreated(date);
     }
 
     @Override
-    public int getNumberOfUsers(){
-        return 0;
+    public int getNumberOfUsers(Date date){
+        return userService.getActiveUsersCount(1);
     }
 
     @Override public void saveSnapshot()

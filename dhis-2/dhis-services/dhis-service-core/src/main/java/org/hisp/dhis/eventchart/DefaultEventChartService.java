@@ -28,6 +28,7 @@ package org.hisp.dhis.eventchart;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Date;
 import java.util.List;
 
 import org.hisp.dhis.common.AnalyticalObjectStore;
@@ -94,5 +95,10 @@ public class DefaultEventChartService
     public List<EventChart> getAllEventCharts()
     {
         return eventChartStore.getAll();
+    }
+
+    @Override
+    public int countGeCreated(Date date) {
+        return eventChartStore.getCountGeCreated(date);
     }
 }

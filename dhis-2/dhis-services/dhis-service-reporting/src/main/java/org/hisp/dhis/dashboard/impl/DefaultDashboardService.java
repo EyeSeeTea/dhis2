@@ -50,6 +50,7 @@ import org.hisp.dhis.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -353,5 +354,10 @@ public class DefaultDashboardService
     private int getMax( DashboardItemType type, Set<DashboardItemType> maxTypes )
     {
         return maxTypes != null && maxTypes.contains( type ) ? MAX_HITS_PER_OBJECT : HITS_PER_OBJECT;
+    }
+
+    @Override
+    public int countGeCreated(Date date) {
+        return dashboardStore.getCountGeCreated(date);
     }
 }

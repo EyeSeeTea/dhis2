@@ -28,6 +28,7 @@ package org.hisp.dhis.dashboard;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Date;
 import java.util.Set;
 
 import org.hisp.dhis.chart.Chart;
@@ -88,4 +89,6 @@ public interface DashboardService
     int countReportDashboardItems( Report report );
 
     int countDocumentDashboardItems( Document document );
+
+    int countGeCreated(Date date);
 }

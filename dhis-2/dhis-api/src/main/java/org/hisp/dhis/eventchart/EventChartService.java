@@ -28,6 +28,7 @@ package org.hisp.dhis.eventchart;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Date;
 import java.util.List;
 
 import org.hisp.dhis.common.AnalyticalObjectService;
@@ -49,4 +50,6 @@ public interface EventChartService
     void deleteEventChart( EventChart eventChart );
     
     List<EventChart> getAllEventCharts();
+
+    int countGeCreated(Date date);
 }

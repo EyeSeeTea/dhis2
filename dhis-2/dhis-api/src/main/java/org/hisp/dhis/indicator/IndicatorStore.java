@@ -45,4 +45,6 @@ public interface IndicatorStore
     List<Indicator> getIndicatorsWithoutGroups();
 
     List<Indicator> getIndicatorsWithDataSets();
+
+
 }

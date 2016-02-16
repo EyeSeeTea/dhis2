@@ -30,6 +30,7 @@ package org.hisp.dhis.indicator;
 
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -163,4 +164,6 @@ public interface IndicatorService
     int getIndicatorGroupSetCount();
 
     int getIndicatorGroupSetCountByName( String name );
+
+    int getCountGeCreated(Date date);
 }

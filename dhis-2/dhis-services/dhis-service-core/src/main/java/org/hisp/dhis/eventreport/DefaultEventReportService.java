@@ -28,6 +28,7 @@ package org.hisp.dhis.eventreport;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Date;
 import java.util.List;
 
 import org.hisp.dhis.common.AnalyticalObjectStore;
@@ -94,5 +95,10 @@ public class DefaultEventReportService
     public List<EventReport> getAllEventReports()
     {
         return eventReportStore.getAll();
+    }
+
+    @Override
+    public int getCountGeCreated(Date date) {
+        return eventReportStore.getCountGeCreated(date);
     }
 }

@@ -19,15 +19,15 @@ public interface DataStatisticsService
 
     int getNumberOfMaps();
 
-    int getNumberOfEventReports();
+    int getNumberOfEventReports(Date date);
 
-    int getNumberOfEventCharts();
+    int getNumberOfEventCharts(Date date);
 
-    int getNumberOfDashboards();
+    int getNumberOfDashboards(Date date);
 
-    int getNumberOfIndicators();
+    int getNumberOfIndicators(Date date);
 
-    int getNumberOfUsers();
+    int getNumberOfUsers(Date date);
 
     void saveSnapshot();
 }

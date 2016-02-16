@@ -36,6 +36,7 @@ import static org.hisp.dhis.i18n.I18nUtils.i18n;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
@@ -450,5 +451,10 @@ public class DefaultIndicatorService
     public List<IndicatorGroupSet> getIndicatorGroupSetsBetweenByName( String name, int first, int max )
     {
         return getObjectsBetweenByName( i18nService, indicatorGroupSetStore, name, first, max );
+    }
+
+    @Override
+    public int getCountGeCreated(Date date) {
+        return indicatorStore.getCountGeCreated(date);
     }
 }

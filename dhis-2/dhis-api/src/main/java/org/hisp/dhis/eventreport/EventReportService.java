@@ -28,6 +28,7 @@ package org.hisp.dhis.eventreport;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Date;
 import java.util.List;
 
 import org.hisp.dhis.common.AnalyticalObjectService;
@@ -49,4 +50,6 @@ public interface EventReportService
     void deleteEventReport( EventReport report );
     
     List<EventReport> getAllEventReports();
+
+    int getCountGeCreated(Date date);
 }
