@@ -14,6 +14,11 @@
   <bean id="org.hisp.dhis.datastatistics.DataStatisticsService" class="org.hisp.dhis.datastatistics.DefaultDataStatisticsService">
   </bean>
 
+  <bean id="org.hisp.dhis.datastatistics.DataStatisticsStore" class="org.hisp.dhis.datastatistics.hibernate.HibernateDataStatisticsStore">
+    <property name="clazz" value="org.hisp.dhis.datastatistics.DataStatistics"/>
+    <property name="sessionFactory" ref="sessionFactory"/>
+  </bean>
+
 
   <!-- ReportTable -->
 

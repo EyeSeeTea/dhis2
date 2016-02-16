@@ -38,99 +38,274 @@ import java.util.Date;
  */
 public class DataStatistics extends BaseIdentifiableObject
 {
+    int numberOfUsers;
+    int numberOfMapViews;
+    int numberOfChartViews;
+    int numberOfReportTablesViews;
+    int numberOfEventReportViews;
+    int numberOfEventChartViews;
+    int numberOfDashboardViews;
+    int numberOfIndicatorsViews;
+    int totalNumberOfViews;
+    int averageNumberOfViews;
 
-    private int favorites;
-    private int reportTables;
-    private int charts;
-    private int maps;
-    private int eventReports;
-    private int eventCharts;
-    private int favoriteViews;
+    int averageNumberOfSavedMaps;
+    int averageNumberOfSavedCharts;
+    int averageNumberOfSavedReportTables;
+    int averageNumberOfSavedEventReports;
+    int averageNumberOfSavedEventCharts;
+    int averageNumberOfSavedDashboards;
+    int averageNumberOfSavedIndicators;
 
-    public DataStatistics( int favorites, int reportTables, int charts, int maps, int eventReports, int eventCharts, int favoriteViews )
+    int totalNumberOfUsers;
+
+
+    public DataStatistics( ) { super.setAutoFields(); }
+
+    public DataStatistics( int numberOfUsers, int numberOfMapViews, int numberOfChartViews, int numberOfReportTablesViews, int numberOfEventReportViews, int numberOfEventChartViews, int numberOfDashboardViews, int numberOfIndicatorsViews, int totalNumberOfViews, int averageNumberOfViews, int averageNumberOfSavedMaps, int averageNumberOfSavedCharts, int averageNumberOfSavedReportTables, int averageNumberOfSavedEventReports, int averageNumberOfSavedEventCharts, int averageNumberOfSavedDashboards, int averageNumberOfSavedIndicators, int totalNumberOfUsers )
     {
-        this.favorites = favorites;
-        this.reportTables = reportTables;
-        this.charts = charts;
-        this.maps = maps;
-        this.eventReports = eventReports;
-        this.eventCharts = eventCharts;
-        this.favoriteViews = favoriteViews;
+        this.numberOfUsers = numberOfUsers;
+        this.numberOfMapViews = numberOfMapViews;
+        this.numberOfChartViews = numberOfChartViews;
+        this.numberOfReportTablesViews = numberOfReportTablesViews;
+        this.numberOfEventReportViews = numberOfEventReportViews;
+        this.numberOfEventChartViews = numberOfEventChartViews;
+        this.numberOfDashboardViews = numberOfDashboardViews;
+        this.numberOfIndicatorsViews = numberOfIndicatorsViews;
+        this.totalNumberOfViews = totalNumberOfViews;
+        this.averageNumberOfViews = averageNumberOfViews;
+        this.averageNumberOfSavedMaps = averageNumberOfSavedMaps;
+        this.averageNumberOfSavedCharts = averageNumberOfSavedCharts;
+        this.averageNumberOfSavedReportTables = averageNumberOfSavedReportTables;
+        this.averageNumberOfSavedEventReports = averageNumberOfSavedEventReports;
+        this.averageNumberOfSavedEventCharts = averageNumberOfSavedEventCharts;
+        this.averageNumberOfSavedDashboards = averageNumberOfSavedDashboards;
+        this.averageNumberOfSavedIndicators = averageNumberOfSavedIndicators;
+        this.totalNumberOfUsers = totalNumberOfUsers;
+
+        super.setAutoFields();
     }
 
     @JsonProperty
-    public int getFavorites()
+    public int getNumberOfUsers()
     {
-        return favorites;
+        return numberOfUsers;
+    }
+
+    public void setNumberOfUsers( int numberOfUsers )
+    {
+        this.numberOfUsers = numberOfUsers;
     }
 
     @JsonProperty
-    public int getReportTables()
+    public int getNumberOfMapViews()
     {
-        return reportTables;
+        return numberOfMapViews;
+    }
+
+    public void setNumberOfMapViews( int numberOfMapViews )
+    {
+        this.numberOfMapViews = numberOfMapViews;
     }
 
     @JsonProperty
-    public int getCharts()
+    public int getNumberOfChartViews()
     {
-        return charts;
+        return numberOfChartViews;
+    }
+
+    public void setNumberOfChartViews( int numberOfChartViews )
+    {
+        this.numberOfChartViews = numberOfChartViews;
     }
 
     @JsonProperty
-    public int getMaps()
+    public int getNumberOfReportTablesViews()
     {
-        return maps;
+        return numberOfReportTablesViews;
+    }
+
+    public void setNumberOfReportTablesViews( int numberOfReportTablesViews )
+    {
+        this.numberOfReportTablesViews = numberOfReportTablesViews;
     }
 
     @JsonProperty
-    public int getEventReports()
+    public int getNumberOfEventReportViews()
     {
-        return eventReports;
+        return numberOfEventReportViews;
+    }
+
+    public void setNumberOfEventReportViews( int numberOfEventReportViews )
+    {
+        this.numberOfEventReportViews = numberOfEventReportViews;
     }
 
     @JsonProperty
-    public int getEventCharts() { return eventCharts; }
+    public int getNumberOfEventChartViews()
+    {
+        return numberOfEventChartViews;
+    }
+
+    public void setNumberOfEventChartViews( int numberOfEventChartViews )
+    {
+        this.numberOfEventChartViews = numberOfEventChartViews;
+    }
 
     @JsonProperty
-    public int getFavoriteViews() { return favoriteViews; }
-
-    public void setEventCharts( int eventCharts )
+    public int getNumberOfDashboardViews()
     {
-        this.eventCharts = eventCharts;
+        return numberOfDashboardViews;
     }
 
-    public void setFavorites( int favorites )
+    public void setNumberOfDashboardViews( int numberOfDashboardViews )
     {
-        this.favorites = favorites;
+        this.numberOfDashboardViews = numberOfDashboardViews;
     }
 
-    public void setReportTables( int reportTables )
+    @JsonProperty
+    public int getNumberOfIndicatorsViews()
     {
-        this.reportTables = reportTables;
+        return numberOfIndicatorsViews;
     }
 
-    public void setCharts( int charts ) { this.charts = charts; }
-
-    public void setMaps( int maps )
+    public void setNumberOfIndicatorsViews( int numberOfIndicatorsViews )
     {
-        this.maps = maps;
+        this.numberOfIndicatorsViews = numberOfIndicatorsViews;
     }
 
-    public void setEventReports( int eventReports ) { this.eventReports = eventReports; }
-
-    public void setFavoriteViews( int favoriteViews ) { this.favoriteViews = favoriteViews; }
-
-    @Override
-    public String toString()
+    @JsonProperty
+    public int getTotalNumberOfViews()
     {
-        return super.toString() + ", DataStatistics{" +
-            "favorites=" + favorites +
-            ", reportTables=" + reportTables +
-            ", charts=" + charts +
-            ", maps=" + maps +
-            ", eventReports=" + eventReports +
-            ", eventCharts=" + eventCharts +
-            ", favoriteViews=" + favoriteViews +
+        return totalNumberOfViews;
+    }
+
+    public void setTotalNumberOfViews( int totalNumberOfViews )
+    {
+        this.totalNumberOfViews = totalNumberOfViews;
+    }
+
+    @JsonProperty
+    public int getAverageNumberOfViews()
+    {
+        return averageNumberOfViews;
+    }
+
+    public void setAverageNumberOfViews( int averageNumberofViews )
+    {
+        this.averageNumberOfViews = averageNumberofViews;
+    }
+
+    @JsonProperty
+    public int getAverageNumberOfSavedMaps()
+    {
+        return averageNumberOfSavedMaps;
+    }
+
+    public void setAverageNumberOfSavedMaps( int averageNumberOfSavedMaps )
+    {
+        this.averageNumberOfSavedMaps = averageNumberOfSavedMaps;
+    }
+
+    @JsonProperty
+    public int getAverageNumberOfSavedCharts()
+    {
+        return averageNumberOfSavedCharts;
+    }
+
+    public void setAverageNumberOfSavedCharts( int averageNumberOfSavedCharts )
+    {
+        this.averageNumberOfSavedCharts = averageNumberOfSavedCharts;
+    }
+
+    @JsonProperty
+    public int getAverageNumberOfSavedReportTables()
+    {
+        return averageNumberOfSavedReportTables;
+    }
+
+    public void setAverageNumberOfSavedReportTables( int averageNumberOfSavedReportTables )
+    {
+        this.averageNumberOfSavedReportTables = averageNumberOfSavedReportTables;
+    }
+
+    @JsonProperty
+    public int getAverageNumberOfSavedEventReports()
+    {
+        return averageNumberOfSavedEventReports;
+    }
+
+    public void setAverageNumberOfSavedEventReports( int averageNumberOfSavedEventReports )
+    {
+        this.averageNumberOfSavedEventReports = averageNumberOfSavedEventReports;
+    }
+
+    @JsonProperty
+    public int getAverageNumberOfSavedEventCharts()
+    {
+        return averageNumberOfSavedEventCharts;
+    }
+
+    public void setAverageNumberOfSavedEventCharts( int averageNumberOfSavedEventCharts )
+    {
+        this.averageNumberOfSavedEventCharts = averageNumberOfSavedEventCharts;
+    }
+
+    @JsonProperty
+    public int getAverageNumberOfSavedDashboards()
+    {
+        return averageNumberOfSavedDashboards;
+    }
+
+    public void setAverageNumberOfSavedDashboards( int averageNumberOfSavedDashboards )
+    {
+        this.averageNumberOfSavedDashboards = averageNumberOfSavedDashboards;
+    }
+
+    @JsonProperty
+    public int getAverageNumberOfSavedIndicators()
+    {
+        return averageNumberOfSavedIndicators;
+    }
+
+    public void setAverageNumberOfSavedIndicators( int averageNumberOfSavedIndicators )
+    {
+        this.averageNumberOfSavedIndicators = averageNumberOfSavedIndicators;
+    }
+
+    @JsonProperty
+    public int getTotalNumberOfUsers()
+    {
+        return totalNumberOfUsers;
+    }
+
+    public void setTotalNumberOfUsers( int totalNumberOfUsers )
+    {
+        this.totalNumberOfUsers = totalNumberOfUsers;
+    }
+
+    @Override public String toString()
+    {
+        return super.toString() +
+            "DataStatistics{" +
+            "numberOfUsers=" + numberOfUsers +
+            ", numberOfMapViews=" + numberOfMapViews +
+            ", numberOfChartViews=" + numberOfChartViews +
+            ", numberOfReportTablesViews=" + numberOfReportTablesViews +
+            ", numberOfEventReportViews=" + numberOfEventReportViews +
+            ", numberOfEventChartViews=" + numberOfEventChartViews +
+            ", numberOfDashboardViews=" + numberOfDashboardViews +
+            ", numberOfIndicatorsViews=" + numberOfIndicatorsViews +
+            ", totalNumberOfViews=" + totalNumberOfViews +
+            ", averageNumberOfViews=" + averageNumberOfViews +
+            ", averageNumberOfSavedMaps=" + averageNumberOfSavedMaps +
+            ", averageNumberOfSavedCharts=" + averageNumberOfSavedCharts +
+            ", averageNumberOfSavedReportTables=" + averageNumberOfSavedReportTables +
+            ", averageNumberOfSavedEventReports=" + averageNumberOfSavedEventReports +
+            ", averageNumberOfSavedEventCharts=" + averageNumberOfSavedEventCharts +
+            ", averageNumberOfSavedDashboards=" + averageNumberOfSavedDashboards +
+            ", averageNumberOfSavedIndicators=" + averageNumberOfSavedIndicators +
+            ", totalNumberOfUsers=" + totalNumberOfUsers +
             '}';
     }
 }

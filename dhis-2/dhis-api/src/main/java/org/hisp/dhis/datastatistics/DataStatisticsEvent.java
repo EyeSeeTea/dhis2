@@ -13,6 +13,8 @@ public class DataStatisticsEvent
     Date timestamp;
     int userId;
 
+    public DataStatisticsEvent(){}
+
     public DataStatisticsEvent(EventType type, Date timestamp, int userId){
         this.type = type;
         this.timestamp = timestamp;

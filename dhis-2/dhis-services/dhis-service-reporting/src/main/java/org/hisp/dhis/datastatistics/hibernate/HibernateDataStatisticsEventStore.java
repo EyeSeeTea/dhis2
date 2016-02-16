@@ -53,11 +53,12 @@ public class HibernateDataStatisticsEventStore extends HibernateGenericStore<Dat
         Date startDate = new Date();
         Date endDate = new Date();
         Calendar c = Calendar.getInstance();
-        c.setTime( endDate );
+        c.setTime( startDate );
         //c.add( Calendar.DATE, -1 );
-        c.add( Calendar.DATE, -7 );
-        endDate = c.getTime();
+        c.add( Calendar.DATE, -9 );
+        startDate = c.getTime();
 
+        System.out.println("\n\nstartDate.toString: " + startDate.toString());
         System.out.println("\n\nendDate.toString: " + endDate.toString());
         return getSharingCriteria()
             .add( Expression.ge( "timestamp", startDate) )

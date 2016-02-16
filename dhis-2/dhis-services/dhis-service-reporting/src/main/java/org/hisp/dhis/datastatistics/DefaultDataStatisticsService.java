@@ -1,13 +1,19 @@
 package org.hisp.dhis.datastatistics;
 
+import org.apache.commons.collections.FastArrayList;
 import org.hisp.dhis.chart.ChartService;
 import org.hisp.dhis.dashboard.DashboardService;
+import org.hisp.dhis.eventchart.EventChartService;
 import org.hisp.dhis.eventreport.EventReportService;
+import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.mapping.MappingService;
 import org.hisp.dhis.reporttable.ReportTableService;
+import org.hisp.dhis.user.UserService;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -19,6 +25,9 @@ import java.util.List;
 public class DefaultDataStatisticsService implements DataStatisticsService
 {
     @Autowired
+    DataStatisticsStore hibernateDataStatisticsStore;
+
+    @Autowired
     DataStatisticsEventStore hibernateDataStatisticsEventStore;
 
     @Autowired
@@ -27,11 +36,20 @@ public class DefaultDataStatisticsService implements DataStatisticsService
     @Autowired
     ReportTableService reportTableService;
 
-    /*@Autowired
+    @Autowired
     MappingService mappingService;
 
     @Autowired
-    EventReportService eventReportService;*/
+    EventReportService eventReportService;
+
+    @Autowired
+    UserService userService;
+
+    @Autowired
+    IndicatorService indicatorService;
+
+    @Autowired
+    EventChartService eventChartService;
 
     @Autowired
     DashboardService dashboardService;
@@ -51,9 +69,9 @@ public class DefaultDataStatisticsService implements DataStatisticsService
         int reportTableCount = getNumberOfReportTables();
         int favCount = chartsCount + reportTableCount;
 
-        DataStatistics dataStatistics = new DataStatistics( favCount, reportTableCount, chartsCount, 0, 0, 0, favViewsCount );
+        //DataStatistics dataStatistics = new DataStatistics( favCount, reportTableCount, chartsCount, 0, 0, 0, favViewsCount );
 
-        return dataStatistics;
+        return null;
     }
 
     @Override
@@ -74,19 +92,19 @@ public class DefaultDataStatisticsService implements DataStatisticsService
     @Override
     public int getNumberOfMaps()
     {
-        return 0;
+        return mappingService.getAllMaps().size();
     }
 
     @Override
     public int getNumberOfEventReports()
     {
-        return 0;
+        return eventReportService.getAllEventReports().size();
     }
 
     @Override
     public int getNumberOfEventCharts()
     {
-        return 0;
+        return eventChartService.getAllEventCharts().size();
     }
 
     @Override
@@ -98,7 +116,7 @@ public class DefaultDataStatisticsService implements DataStatisticsService
     @Override
     public int getNumberOfIndicators()
     {
-        return 0;
+        return indicatorService.getIndicatorCount();
     }
 
     @Override
@@ -110,6 +128,68 @@ public class DefaultDataStatisticsService implements DataStatisticsService
     {
         //TODO Lagre antall unike brukere, antall av hver enum, gjennomsnitt, total, når på døgnet folk er mest aktive
         List<DataStatisticsEvent> events = hibernateDataStatisticsEventStore.getDataStatisticsEventList();
-        System.out.println("\n\nFirst place: " + events.get( 0 ));
+        List<Integer> uniqueUsers = new ArrayList<Integer>();
+        int numberOfUsers = 0;
+        int numberOfMapViews = 0;
+        int numberOfChartViews = 0;
+        int numberOfReportTablesViews = 0;
+        int numberOfEventReportViews = 0;
+        int numberOfEventChartViews = 0;
+        int totalNumberOfViews = events.size();
+        int averageNumberofViews = 0;
+        int numberOfDashboardViews = 0;
+        int numberOfIndicatorsViews = 0;
+
+
+        for(DataStatisticsEvent e : events){
+            switch ( e.getType() ) {
+                case CHART: numberOfChartViews++;
+                    break;
+                case MAP: numberOfMapViews++;
+                    break;
+                case DASHBOARD: numberOfDashboardViews++;
+                    break;
+                case REPORT_TABLE: numberOfReportTablesViews++;
+                    break;
+                case EVENT_REPORT: numberOfEventReportViews++;
+                    break;
+                case EVENT_CHART: numberOfEventChartViews++;
+                    break;
+                case INDICATOR: numberOfIndicatorsViews++;
+                    break;
+            }
+            if(!uniqueUsers.contains( e.getUserId())){
+                uniqueUsers.add( e.getUserId() );
+            }
+        }
+
+        numberOfUsers = uniqueUsers.size();
+        averageNumberofViews = totalNumberOfViews / numberOfUsers;
+
+        System.out.println("\nNumberofUsers: " + numberOfUsers +
+        "\nNumberOfMapViews: " + numberOfMapViews +
+        "\nNumberofChartViews: " + numberOfChartViews +
+        "\nnumberOfReportTableViews: " + numberOfReportTablesViews +
+        "\nNumberOfEventReportViews: " + numberOfEventReportViews +
+        "\nNumberOfEventChartViews: " + numberOfEventChartViews +
+        "\ntotalNumberofViews: " + totalNumberOfViews +
+        "\naverageNumberOfViews: " + averageNumberofViews +
+        "\nNumberOfDashboardViews: " + numberOfDashboardViews +
+        "\nnumberOfIndicatorViews: " + numberOfIndicatorsViews);
+
+        DataStatistics dataStatistics = new DataStatistics( numberOfUsers, numberOfMapViews, numberOfChartViews,
+            numberOfReportTablesViews, numberOfEventReportViews, numberOfEventChartViews, numberOfDashboardViews,
+            numberOfIndicatorsViews, totalNumberOfViews, averageNumberofViews, 0, 0, 0, 0, 0, 0 ,0 ,0 );
+
+        int id = hibernateDataStatisticsStore.addSnapshot( dataStatistics );
+
+        if(id == 0){
+           // Logger logger = Logger.getLogger(DefaultDataStatisticsService.class);
+            System.out.println("\n\nCould not save snapshot");
+        }
+        else{
+            System.out.println("\n\nSnapshot was saved with id: " + id);
+        }
+
     }
 }

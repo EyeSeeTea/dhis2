@@ -5,5 +5,5 @@ package org.hisp.dhis.datastatistics;
  */
 public enum EventType
 {
-    CHART, MAP, DASHBOARD, REPORT
+    CHART, MAP, DASHBOARD, REPORT_TABLE, EVENT_REPORT, EVENT_CHART, INDICATOR
 }

@@ -11,8 +11,25 @@
     <id name="id" column="statisticsid">
       <generator class="native" />
     </id>
+    <property name="numberOfChartViews" column="chartviews" type="int"/>
+    <property name="numberOfMapViews" column="mapviews" type="int"/>
+    <property name="numberOfReportTablesViews" column="reporttableviews" type="int"/>
+    <property name="numberOfEventReportViews" column="eventreportviews" type="int"/>
+    <property name="numberOfEventChartViews" column="eventchartviews" type="int"/>
+    <property name="numberOfDashboardViews" column="dashboardviews" type="int"/>
+    <property name="numberOfIndicatorsViews" column="indicatorviews" type="int"/>
+    <property name="numberOfUsers" column="users" type="int"/>
+    <property name="totalNumberOfViews" column="totalviews" type="int"/>
+    <property name="averageNumberOfViews" column="averageviews" type="int"/>
+    <property name="averageNumberOfSavedCharts" column="averagenumcharts" type="int"/>
+    <property name="averageNumberOfSavedMaps" column="averagenummaps" type="int"/>
+    <property name="averageNumberOfSavedReportTables" column="averagenumreporttables" type="int"/>
+    <property name="averageNumberOfSavedEventReports" column="averagenumeventreports" type="int"/>
+    <property name="averageNumberOfSavedEventCharts" column="averagenumeventcharts" type="int"/>
+    <property name="averageNumberOfSavedDashboards" column="averagenumdashborards" type="int"/>
+    <property name="averageNumberOfSavedIndicators" column="averagenumindicators" type="int"/>
+    <property name="totalNumberOfUsers" column="totalnumusers" type="int"/>
     &identifiableProperties;
-
 
   </class>
 </hibernate-mapping>
