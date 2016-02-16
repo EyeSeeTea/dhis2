@@ -7,6 +7,10 @@ import org.hisp.dhis.eventchart.EventChartService;
 import org.hisp.dhis.eventreport.EventReportService;
 import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.mapping.MappingService;
+import org.hisp.dhis.period.DailyPeriodType;
+import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.reporttable.ReportTableService;
 import org.hisp.dhis.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +57,9 @@ public class DefaultDataStatisticsService implements DataStatisticsService
     @Autowired
     DashboardService dashboardService;
 
+    @Autowired
+    PeriodService periodService;
+
 
     @Override
     public int addEvent(DataStatisticsEvent event)
@@ -63,10 +70,10 @@ public class DefaultDataStatisticsService implements DataStatisticsService
     @Override
     public DataStatistics createReport(Date startDate, Date endDate)
     {
-        int favViewsCount = getNumberOfFavoriteViews(startDate, endDate);
-        int chartsCount = getNumberOfCharts();
-        int reportTableCount = getNumberOfReportTables();
-        int favCount = chartsCount + reportTableCount;
+        int favViewsCount = getNumberOfFavoriteViews( startDate, endDate );
+        //int chartsCount = getNumberOfCharts();
+        //int reportTableCount = getNumberOfReportTables();
+        //int favCount = chartsCount + reportTableCount;
 
         //DataStatistics dataStatistics = new DataStatistics( favCount, reportTableCount, chartsCount, 0, 0, 0, favViewsCount );
 
@@ -74,13 +81,16 @@ public class DefaultDataStatisticsService implements DataStatisticsService
     }
 
     @Override
-    public int getNumberOfCharts(){
-        return chartService.getChartCount();
+    public int getNumberOfCharts(Date startDate){
+        return chartService.countChartGeCreated( startDate );
     }
 
     @Override
-    public int getNumberOfReportTables(){
-        return reportTableService.getReportTableCount();
+    public int getNumberOfReportTables(Date startDate, Date endDate){
+        DailyPeriodType dailyPeriodType = new DailyPeriodType();
+        //Period period = new Period(  );
+        //period.setStartDate( startDate ); period.setEndDate( endDate ); period.setPeriodType( dailyPeriodType );
+        return reportTableService.countAnalyticalObjects(periodService.getPeriod( startDate, endDate, dailyPeriodType ));
     }
 
     @Override
@@ -89,9 +99,12 @@ public class DefaultDataStatisticsService implements DataStatisticsService
     }
 
     @Override
-    public int getNumberOfMaps()
+    public int getNumberOfMaps(Date startDate, Date endDate)
     {
-        return mappingService.getAllMaps().size();
+        DailyPeriodType dailyPeriodType = new DailyPeriodType();
+        //Period period = new Period(  );
+        //period.setStartDate( startDate ); period.setEndDate( endDate ); period.setPeriodType( dailyPeriodType );
+        return mappingService.countAnalyticalObjects( periodService.getPeriod( startDate, endDate, dailyPeriodType ) );
     }
 
     @Override
@@ -119,9 +132,11 @@ public class DefaultDataStatisticsService implements DataStatisticsService
     }
 
     @Override
-    public int getNumberOfUsers(Date date){
-        return userService.getActiveUsersCount(1);
+    public int getNumberOfUsers(Date date)
+    {
+        return userService.getActiveUsersCount( 1 );
     }
+
 
     @Override public void saveSnapshot()
     {
