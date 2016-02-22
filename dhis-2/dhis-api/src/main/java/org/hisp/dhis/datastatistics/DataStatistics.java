@@ -35,6 +35,8 @@ import java.util.Date;
 /**
  * @author Julie Hill Roa
  * @author Yrjan A. F. Fraschetti
+ *
+ * DataStatistics object to be saved as snapshot
  */
 public class DataStatistics extends BaseIdentifiableObject
 {
@@ -293,7 +295,7 @@ public class DataStatistics extends BaseIdentifiableObject
     @Override public String toString()
     {
         return super.toString() +
-            "DataStatistics{" +
+            " DataStatistics{" +
             "numberOfUsers=" + numberOfUsers +
             ", numberOfMapViews=" + numberOfMapViews +
             ", numberOfChartViews=" + numberOfChartViews +
