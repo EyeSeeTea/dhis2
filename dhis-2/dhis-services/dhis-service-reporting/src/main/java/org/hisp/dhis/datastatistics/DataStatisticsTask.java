@@ -5,8 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.PostConstruct;
 
 /**
- * Created by yrjanaff on 15.02.2016.
+ * @author Yrjan A. F. Fraschetti
+ * @author Julie Hill Roa
  */
+
 public class DataStatisticsTask implements Runnable
 {
     /**

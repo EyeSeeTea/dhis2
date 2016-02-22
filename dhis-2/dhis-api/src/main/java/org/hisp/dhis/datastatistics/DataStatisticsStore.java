@@ -4,10 +4,13 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Created by yrjanaff on 16.02.2016.
+ * @author Yrjan A. F. Fraschetti
+ * @author Julie Hill Roa
  */
+
 public interface DataStatisticsStore
 {
     int addSnapshot(DataStatistics dataStatistics);
     List<DataStatistics> getSnapshotsInInterval(Date startDate, Date endDate);
+
 }

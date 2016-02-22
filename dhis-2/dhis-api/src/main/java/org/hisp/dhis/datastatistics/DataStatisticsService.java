@@ -1,15 +1,18 @@
 package org.hisp.dhis.datastatistics;
 
 import java.util.Date;
+import java.util.List;
 
 /**
- * Created by yrjanaff on 08.02.2016.
+ * @author Yrjan A. F. Fraschetti
+ * @author Julie Hill Roa
  */
+
 public interface DataStatisticsService
 {
     int addEvent(DataStatisticsEvent event);
 
-    DataStatistics createReport(Date startDate, Date endDate);
+    List<DataStatistics> getReports(Date startDate, Date endDate);
 
     int getNumberOfCharts(Date startDate);
 
@@ -28,7 +31,6 @@ public interface DataStatisticsService
     int getNumberOfIndicators(Date date);
 
     int getNumberOfUsers(Date date);
-
 
     void saveSnapshot();
 }

@@ -1,17 +1,11 @@
 package org.hisp.dhis.datastatistics.hibernate;
 
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Expression;
-import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Projections;
 import org.hisp.dhis.datastatistics.DataStatisticsEvent;
 import org.hisp.dhis.datastatistics.DataStatisticsEventStore;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
-import org.hisp.dhis.query.Restriction;
-import org.hisp.dhis.query.Restrictions;
+import org.hibernate.criterion.Restrictions;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -38,11 +32,10 @@ public class HibernateDataStatisticsEventStore extends HibernateGenericStore<Dat
         endDate = c.getTime();
 
         System.out.println("\n\nendDate + 1: " + endDate);
-        //TODO Find replacement for expressions!
         int count = ((Number) getSharingCriteria()
             .setProjection( Projections.countDistinct( "id" ) )
-            .add( Expression.ge( "timestamp", startDate) )
-            .add( Expression.lt( "timestamp", endDate) )
+            .add( Restrictions.ge( "timestamp", startDate) )
+            .add( Restrictions.lt( "timestamp", endDate) )
             .uniqueResult()).intValue();
 
         System.out.println("\n\nDette er svaret fra getCount(): " + count);
@@ -51,7 +44,7 @@ public class HibernateDataStatisticsEventStore extends HibernateGenericStore<Dat
 
     public List<DataStatisticsEvent> getDataStatisticsEventList(Date date){
         return getSharingCriteria()
-            .add( Expression.ge( "timestamp", date) )
+            .add( Restrictions.ge( "timestamp", date) )
             .list();
 
 

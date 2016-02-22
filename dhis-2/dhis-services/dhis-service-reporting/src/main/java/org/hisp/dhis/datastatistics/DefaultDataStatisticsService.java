@@ -1,6 +1,5 @@
 package org.hisp.dhis.datastatistics;
 
-
 import org.hisp.dhis.chart.ChartService;
 import org.hisp.dhis.dashboard.DashboardService;
 import org.hisp.dhis.eventchart.EventChartService;
@@ -18,7 +17,8 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Created by yrjanaff on 08.02.2016.
+ * @author Yrjan A. F. Fraschetti
+ * @author Julie Hill Roa
  */
 
 @Transactional
@@ -63,16 +63,9 @@ public class DefaultDataStatisticsService implements DataStatisticsService
     }
 
     @Override
-    public DataStatistics createReport(Date startDate, Date endDate)
+    public List<DataStatistics> getReports(Date startDate, Date endDate)
     {
-        int favViewsCount = getNumberOfFavoriteViews( startDate, endDate );
-        //int chartsCount = getNumberOfCharts();
-        //int reportTableCount = getNumberOfReportTables();
-        //int favCount = chartsCount + reportTableCount;
-
-        //DataStatistics dataStatistics = new DataStatistics( favCount, reportTableCount, chartsCount, 0, 0, 0, favViewsCount );
-
-        return null;
+        return hibernateDataStatisticsStore.getSnapshotsInInterval( startDate, endDate );
     }
 
     @Override

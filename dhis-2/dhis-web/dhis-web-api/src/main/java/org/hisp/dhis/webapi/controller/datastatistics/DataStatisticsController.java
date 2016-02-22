@@ -50,11 +50,11 @@ public class DataStatisticsController
     }
 
     @RequestMapping(value = "/datastatistics/report", method = RequestMethod.GET)
-    public @ResponseBody DataStatistics report(@RequestParam @DateTimeFormat(pattern="yyyy-mm-dd") Date startDate,
+    public @ResponseBody List<DataStatistics> report(@RequestParam @DateTimeFormat(pattern="yyyy-mm-dd") Date startDate,
         @RequestParam @DateTimeFormat(pattern="yyyy-mm-dd") Date endDate ){
         System.out.println("\n\nstartDate i controller: " + startDate);
         System.out.println("\n\nendDate i controller: " + endDate);
 
-        return defaultDataStatisticsService.createReport(startDate, endDate);
+        return defaultDataStatisticsService.getReports(startDate, endDate);
     }
 }
