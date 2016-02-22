@@ -35,9 +35,13 @@ import static org.hisp.dhis.scheduling.SchedulingManager.TASK_MONITORING_LAST_DA
 import static org.hisp.dhis.scheduling.SchedulingManager.TASK_RESOURCE_TABLE;
 import static org.hisp.dhis.scheduling.SchedulingManager.TASK_RESOURCE_TABLE_15_MINS;
 import static org.hisp.dhis.scheduling.SchedulingManager.TASK_DATASTATISTICS;
+import static org.hisp.dhis.scheduling.SchedulingManager.TASK_SMS_SCHEDULER;
+import static org.hisp.dhis.scheduling.SchedulingManager.TASK_SEND_SCHEDULED_SMS;
 import static org.hisp.dhis.system.scheduling.Scheduler.CRON_DAILY_0AM;
 import static org.hisp.dhis.system.scheduling.Scheduler.CRON_EVERY_15MIN;
 import static org.hisp.dhis.system.scheduling.Scheduler.CRON_EVERY_MIN;
+import static org.hisp.dhis.system.scheduling.Scheduler.CRON_DAILY_11PM;
+import static org.hisp.dhis.system.scheduling.Scheduler.CRON_DAILY_8AM;
 
 import java.util.Collection;
 import java.util.Date;
@@ -67,6 +71,7 @@ public class ScheduleTasksAction
     private static final String STRATEGY_ALL_15_MIN = "allEvery15Min";
     private static final String STRATEGY_LAST_3_YEARS_DAILY = "last3YearsDaily";
     private static final String STRATEGY_ENABLED = "enabled";
+    private static final String STRATEGY_EVERY_MIDNIGHT = "everyMidNight";
 
     private static final Log log = LogFactory.getLog( ScheduleTasksAction.class );
 
@@ -90,11 +95,25 @@ public class ScheduleTasksAction
     // Input
     // -------------------------------------------------------------------------
 
+    private boolean executeNow;
+    
+    public void setExecuteNow( boolean executeNow )
+    {
+        this.executeNow = executeNow;
+    }
+
     private boolean schedule;
 
     public void setSchedule( boolean schedule )
     {
         this.schedule = schedule;
+    }
+    
+    private String taskKey;
+
+    public void setTaskKey( String taskKey )
+    {
+        this.taskKey = taskKey;
     }
 
     private String resourceTableStrategy;
@@ -143,6 +162,18 @@ public class ScheduleTasksAction
     public void setDataSynchStrategy( String dataSynchStrategy )
     {
         this.dataSynchStrategy = dataSynchStrategy;
+    }
+    
+    private String smsSchedulerStrategy;
+    
+    public String getSmsSchedulerStrategy()
+    {
+        return smsSchedulerStrategy;
+    }
+
+    public void setSmsSchedulerStrategy( String smsSchedulerStrategy )
+    {
+        this.smsSchedulerStrategy = smsSchedulerStrategy;
     }
 
     private String dataStatisticsStrategy;
@@ -203,6 +234,13 @@ public class ScheduleTasksAction
     {
         return lastDataSyncSuccess;
     }
+    
+    private Date lastSmsSchedulerSuccess;
+
+    public Date getLastSmsSchedulerSuccess()
+    {
+        return lastSmsSchedulerSuccess;
+    }
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -211,6 +249,13 @@ public class ScheduleTasksAction
     @Override
     public String execute()
     {
+        if ( executeNow )
+        {       
+            schedulingManager.executeTask( taskKey );
+            
+            return SUCCESS;
+        }
+        
         if ( schedule )
         {
             if ( ScheduledTaskStatus.RUNNING.equals( schedulingManager.getTaskStatus() ) )
@@ -263,6 +308,16 @@ public class ScheduleTasksAction
                 if ( STRATEGY_ENABLED.equals( dataSynchStrategy ) )
                 {
                     cronKeyMap.putValue( CRON_EVERY_MIN, TASK_DATA_SYNCH );
+                }
+                
+                // -------------------------------------------------------------
+                // SMS Scheduler
+                // -------------------------------------------------------------
+                
+                if(STRATEGY_EVERY_MIDNIGHT.equals( smsSchedulerStrategy ))
+                {
+                    cronKeyMap.putValue(CRON_DAILY_11PM, TASK_SMS_SCHEDULER);
+                    cronKeyMap.putValue( CRON_DAILY_8AM, TASK_SEND_SCHEDULED_SMS );
                 }
 
                 // -------------------------------------------------------------
@@ -326,13 +381,23 @@ public class ScheduleTasksAction
                 dataSynchStrategy = STRATEGY_ENABLED;
             }
 
+
             // -------------------------------------------------------------
             // Data statistics
             // -------------------------------------------------------------
 
-            if ( keys.contains( TASK_DATASTATISTICS ) )
-            {
+            if ( keys.contains( TASK_DATASTATISTICS ) ){
                 dataStatisticsStrategy = STRATEGY_ENABLED;
+            }
+
+            
+            // -------------------------------------------------------------
+            // SMS Scheduler
+            // -------------------------------------------------------------
+
+            if ( keys.contains( TASK_SMS_SCHEDULER ) )
+            {
+                smsSchedulerStrategy = STRATEGY_EVERY_MIDNIGHT;
             }
         }
 
@@ -344,6 +409,7 @@ public class ScheduleTasksAction
         lastResourceTableSuccess = (Date) systemSettingManager.getSystemSetting( SettingKey.LAST_SUCCESSFUL_RESOURCE_TABLES_UPDATE );
         lastAnalyticsTableSuccess = (Date) systemSettingManager.getSystemSetting( SettingKey.LAST_SUCCESSFUL_ANALYTICS_TABLES_UPDATE );
         lastMonitoringSuccess = (Date) systemSettingManager.getSystemSetting( SettingKey.LAST_SUCCESSFUL_MONITORING );
+        lastSmsSchedulerSuccess = (Date) systemSettingManager.getSystemSetting( SettingKey.LAST_SUCCESSFUL_SMS_SCHEDULING );
         lastDataSyncSuccess = synchronizationManager.getLastSynchSuccess();
 
         log.info( "Status: " + status );

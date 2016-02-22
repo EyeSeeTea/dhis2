@@ -46,11 +46,20 @@ public interface SchedulingManager
     String TASK_MONITORING_LAST_DAY = "monitoringLastDayTask";
     String TASK_DATA_SYNCH = "dataSynchTask";
     String TASK_DATASTATISTICS = "dataStatisticsTask";
+    String TASK_SMS_SCHEDULER = "smsSchedulerTask";
+    String TASK_SEND_SCHEDULED_SMS = "sendScheduledMessageTask";
+    String TASK_SEND_SCHEDULED_SMS_NOW = "sendScheduledMessageTaskNow";
+
     
     /**
      * Schedules all tasks.
      */
     void scheduleTasks();
+    
+    /**
+     * Execute the Task.
+     */
+    void executeTask(String taskKey);
     
     /**
      * Schedules the given tasks. The task map will replace the currently scheduled

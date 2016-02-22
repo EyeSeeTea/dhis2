@@ -7,10 +7,6 @@ import org.hisp.dhis.eventchart.EventChartService;
 import org.hisp.dhis.eventreport.EventReportService;
 import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.mapping.MappingService;
-import org.hisp.dhis.period.DailyPeriodType;
-import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodService;
-import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.reporttable.ReportTableService;
 import org.hisp.dhis.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,8 +54,6 @@ public class DefaultDataStatisticsService implements DataStatisticsService
     @Autowired
     DashboardService dashboardService;
 
-    @Autowired
-    PeriodService periodService;
 
 
     @Override
@@ -87,15 +81,9 @@ public class DefaultDataStatisticsService implements DataStatisticsService
     }
 
     @Override
-    public int getNumberOfReportTables(Date startDate, Date endDate){
+    public int getNumberOfReportTables(Date date){
 
-        PeriodType periodType = new DailyPeriodType();
-        //periodType.createPeriod(startDate);
-        //DailyPeriodType dailyPeriodType = new DailyPeriodType();
-        //Period period = new Period(  );
-        //period.setStartDate( startDate ); period.setEndDate( endDate ); period.setPeriodType( dailyPeriodType );
-        //return reportTableService.countAnalyticalObjects(periodType.createPeriod(startDate));
-        return 0;
+       return reportTableService.getCountGeCreated( date );
     }
 
     @Override
@@ -104,13 +92,9 @@ public class DefaultDataStatisticsService implements DataStatisticsService
     }
 
     @Override
-    public int getNumberOfMaps(Date startDate, Date endDate)
+    public int getNumberOfMaps(Date date)
     {
-        PeriodType periodType = new DailyPeriodType();
-        //Period period = new Period(  );
-        //period.setStartDate( startDate ); period.setEndDate( endDate ); period.setPeriodType( dailyPeriodType );
-        //return mappingService.countAnalyticalObjects( periodType.createPeriod(startDate) );
-        return 0;
+        return mappingService.getCountGeCreated( date );
     }
 
     @Override
@@ -197,9 +181,9 @@ public class DefaultDataStatisticsService implements DataStatisticsService
             }
         }
 
-        int averageNumberOfSavedMaps = 0;//getNumberOfMaps( startDate, endDate ) / totalNumberOfUsers;
+        int averageNumberOfSavedMaps =getNumberOfMaps( startDate ) / totalNumberOfUsers;
         int averageNumberOfSavedCharts = getNumberOfCharts( startDate );
-        int averageNumberOfSavedReportTables = 0;//getNumberOfReportTables( startDate, endDate ) / totalNumberOfUsers;
+        int averageNumberOfSavedReportTables = getNumberOfReportTables( startDate ) / totalNumberOfUsers;
         int averageNumberOfSavedEventReports = getNumberOfEventReports( startDate ) ;
         int averageNumberOfSavedEventCharts = getNumberOfEventCharts( startDate );
         int averageNumberOfSavedDashboards = getNumberOfDashboards( startDate ) ;
@@ -207,18 +191,6 @@ public class DefaultDataStatisticsService implements DataStatisticsService
 
         numberOfUsers = uniqueUsers.size();
         averageNumberofViews = totalNumberOfViews / numberOfUsers;
-
-
-        /*System.out.println("\nNumberofUsers: " + numberOfUsers +
-        "\nNumberOfMapViews: " + numberOfMapViews +
-        "\nNumberofChartViews: " + numberOfChartViews +
-        "\nnumberOfReportTableViews: " + numberOfReportTablesViews +
-        "\nNumberOfEventReportViews: " + numberOfEventReportViews +
-        "\nNumberOfEventChartViews: " + numberOfEventChartViews +
-        "\ntotalNumberofViews: " + totalNumberOfViews +
-        "\naverageNumberOfViews: " + averageNumberofViews +
-        "\nNumberOfDashboardViews: " + numberOfDashboardViews +
-        "\nnumberOfIndicatorViews: " + numberOfIndicatorsViews);*/
 
         DataStatistics dataStatistics = new DataStatistics( numberOfUsers, numberOfMapViews, numberOfChartViews,
             numberOfReportTablesViews, numberOfEventReportViews, numberOfEventChartViews, numberOfDashboardViews,

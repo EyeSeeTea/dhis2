@@ -28,6 +28,7 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Date;
 import java.util.List;
 
 import org.hisp.dhis.dataelement.CategoryOptionGroup;
@@ -77,4 +78,6 @@ public interface AnalyticalObjectService<T extends AnalyticalObject>
     int countAnalyticalObjects( OrganisationUnit organisationUnit );
     
     int countAnalyticalObjects( CategoryOptionGroup categoryOptionGroup );
+
+    int getCountGeCreated(Date date);
 }

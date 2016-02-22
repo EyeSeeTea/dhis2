@@ -35,8 +35,11 @@ import org.hisp.dhis.common.MergeMode;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementGroup;
+import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.importexport.ImportStrategy;
 import org.hisp.dhis.option.OptionSet;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.preheat.InvalidReference;
 import org.hisp.dhis.preheat.PreheatIdentifier;
 import org.hisp.dhis.preheat.PreheatMode;
@@ -376,6 +379,88 @@ public class ObjectBundleServiceTest
 
         ObjectBundle bundle = objectBundleService.create( params );
         ObjectBundleValidation validate = objectBundleService.validate( bundle );
+    }
+
+    @Test
+    public void testSimpleDataElementDeleteUID() throws IOException
+    {
+        Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> metadata = renderService.fromMetadata(
+            new ClassPathResource( "dxf2/de_simple_delete_uid.json" ).getInputStream(), RenderFormat.JSON );
+        defaultSetup();
+
+        ObjectBundleParams params = new ObjectBundleParams();
+        params.setObjectBundleMode( ObjectBundleMode.COMMIT );
+        params.setImportMode( ImportStrategy.DELETE );
+        params.setObjects( metadata );
+
+        ObjectBundle bundle = objectBundleService.create( params );
+        objectBundleService.validate( bundle );
+        objectBundleService.commit( bundle );
+
+        List<DataElement> dataElements = manager.getAll( DataElement.class );
+        assertEquals( 1, dataElements.size() );
+        assertEquals( "deabcdefghB", dataElements.get( 0 ).getUid() );
+    }
+
+    @Test
+    public void testSimpleDataElementDeleteCODE() throws IOException
+    {
+        Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> metadata = renderService.fromMetadata(
+            new ClassPathResource( "dxf2/de_simple_delete_code.json" ).getInputStream(), RenderFormat.JSON );
+        defaultSetup();
+
+        ObjectBundleParams params = new ObjectBundleParams();
+        params.setObjectBundleMode( ObjectBundleMode.COMMIT );
+        params.setPreheatIdentifier( PreheatIdentifier.CODE );
+        params.setImportMode( ImportStrategy.DELETE );
+        params.setObjects( metadata );
+
+        ObjectBundle bundle = objectBundleService.create( params );
+        objectBundleService.validate( bundle );
+        objectBundleService.commit( bundle );
+
+        List<DataElement> dataElements = manager.getAll( DataElement.class );
+        assertEquals( 1, dataElements.size() );
+        assertEquals( "DataElementCodeD", dataElements.get( 0 ).getCode() );
+    }
+
+    @Test
+    public void testCreateSimpleMetadataUID() throws IOException
+    {
+        Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> metadata = renderService.fromMetadata(
+            new ClassPathResource( "dxf2/simple_metadata1.json" ).getInputStream(), RenderFormat.JSON );
+
+        ObjectBundleParams params = new ObjectBundleParams();
+        params.setObjectBundleMode( ObjectBundleMode.COMMIT );
+        params.setImportMode( ImportStrategy.CREATE );
+        params.setObjects( metadata );
+
+        ObjectBundle bundle = objectBundleService.create( params );
+        objectBundleService.validate( bundle );
+        objectBundleService.commit( bundle );
+
+        List<OrganisationUnit> organisationUnits = manager.getAll( OrganisationUnit.class );
+        List<DataElement> dataElements = manager.getAll( DataElement.class );
+        List<DataSet> dataSets = manager.getAll( DataSet.class );
+        DataSet dataSet = dataSets.get( 0 );
+
+        Map<Class<? extends IdentifiableObject>, IdentifiableObject> defaults = manager.getDefaults();
+
+        assertFalse( organisationUnits.isEmpty() );
+        assertFalse( dataElements.isEmpty() );
+        assertFalse( dataSets.isEmpty() );
+
+        for ( DataElement dataElement : dataElements )
+        {
+            assertNotNull( dataElement.getCategoryCombo() );
+            assertEquals( defaults.get( DataElementCategoryCombo.class ), dataElement.getCategoryCombo() );
+        }
+
+        assertFalse( dataSet.getSources().isEmpty() );
+        assertFalse( dataSet.getDataElements().isEmpty() );
+        assertEquals( 1, dataSet.getSources().size() );
+        assertEquals( 2, dataSet.getDataElements().size() );
+        assertEquals( PeriodType.getPeriodTypeByName( "Monthly" ), dataSet.getPeriodType() );
     }
 
     private void defaultSetup()

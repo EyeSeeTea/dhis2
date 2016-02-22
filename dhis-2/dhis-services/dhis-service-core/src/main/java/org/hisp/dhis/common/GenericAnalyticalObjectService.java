@@ -28,8 +28,11 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Date;
 import java.util.List;
 
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataset.DataSet;
@@ -146,5 +149,11 @@ public abstract class GenericAnalyticalObjectService<T extends AnalyticalObject>
     public int countAnalyticalObjects( CategoryOptionGroup categoryOptionGroup )
     {
         return getAnalyticalObjectStore().countAnalyticalObjects( categoryOptionGroup );
+    }
+
+    @Override
+    public int getCountGeCreated(Date date)
+    {
+        return getAnalyticalObjectStore().getCountGeCreated(date);
     }
 }
