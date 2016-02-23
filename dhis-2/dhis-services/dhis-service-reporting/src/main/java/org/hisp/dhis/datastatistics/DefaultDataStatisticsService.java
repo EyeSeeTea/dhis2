@@ -195,15 +195,12 @@ public class DefaultDataStatisticsService implements DataStatisticsService
 
     /**
      * Gets a number of active users that day.
-     * @param date
      * @return number og active users
      */
     @Override
-    public int getNumberOfUsers(Date date)
+    public int getNumberOfUsers()
     {
-        //DO WE NEED A DATE PARAM ???????
-        // change this to 1 when its time to deploy
-        return userService.getActiveUsersCount( 1000 );
+        return userService.getUserCount();
     }
 
 
@@ -213,14 +210,10 @@ public class DefaultDataStatisticsService implements DataStatisticsService
     @Override public int saveSnapshot()
     {
         Date startDate = new Date();
-        Date endDate = new Date();
         Calendar c = Calendar.getInstance();
         c.setTime( startDate );
         c.add(Calendar.DATE, -1);
         startDate = c.getTime();
-
-        System.out.println("\nStartdate: " + startDate.toString());
-        System.out.println("\nEndDate: " + endDate.toString());
 
         //TODO Lagre antall unike brukere, antall av hver enum, gjennomsnitt, total, når på døgnet folk er mest aktive
         List<DataStatisticsEvent> events = hibernateDataStatisticsEventStore.getDataStatisticsEventList(startDate);
@@ -236,7 +229,7 @@ public class DefaultDataStatisticsService implements DataStatisticsService
         int numberOfDashboardViews = 0;
         int numberOfIndicatorsViews = 0;
 
-        int totalNumberOfUsers = getNumberOfUsers( startDate );
+        int totalNumberOfUsers = getNumberOfUsers();
 
         for(DataStatisticsEvent e : events){
             switch ( e.getType() ) {

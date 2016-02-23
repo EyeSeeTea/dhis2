@@ -33,7 +33,6 @@ import org.hisp.dhis.datastatistics.DataStatistics;
 import org.hisp.dhis.datastatistics.DataStatisticsStore;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -67,11 +66,6 @@ public class HibernateDataStatisticsStore extends HibernateGenericStore<DataStat
     @Override
     public List<DataStatistics> getSnapshotsInInterval( Date startDate, Date endDate )
     {
-        Calendar c = Calendar.getInstance();
-        c.setTime( endDate );
-        c.add( Calendar.DATE, 1 );
-        endDate = c.getTime();
-
         return ((List<DataStatistics>) getSharingCriteria()
         .add( Restrictions.ge( "created", startDate ) )
             .add( Restrictions.le( "created", endDate ) ).list());

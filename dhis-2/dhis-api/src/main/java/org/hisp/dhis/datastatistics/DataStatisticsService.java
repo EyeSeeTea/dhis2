@@ -113,10 +113,9 @@ public interface DataStatisticsService
 
     /**
      * Finds number of active users in interval date to current date
-     * @param date
      * @return
      */
-    int getNumberOfUsers(Date date);
+    int getNumberOfUsers();
 
     /**
      * Creates a snapshot of DataStatistics and saves it

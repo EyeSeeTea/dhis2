@@ -30,8 +30,6 @@ package org.hisp.dhis.datastatistics;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 
-import java.util.Date;
-
 /**
  * @author Julie Hill Roa
  * @author Yrjan A. F. Fraschetti

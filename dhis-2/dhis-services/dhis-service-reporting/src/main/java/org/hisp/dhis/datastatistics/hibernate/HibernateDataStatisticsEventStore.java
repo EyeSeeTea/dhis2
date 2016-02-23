@@ -34,7 +34,6 @@ import org.hisp.dhis.datastatistics.DataStatisticsEventStore;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
 import org.hibernate.criterion.Restrictions;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -66,17 +65,10 @@ public class HibernateDataStatisticsEventStore extends HibernateGenericStore<Dat
      */
     @Override
     public int getNumberOfEvents(Date startDate, Date endDate){
-
-        Calendar c = Calendar.getInstance();
-        c.setTime( endDate );
-        c.add( Calendar.DATE, 1 );
-        endDate = c.getTime();
-
-        System.out.println("\n\nendDate + 1: " + endDate);
         int count = ((Number) getSharingCriteria()
             .setProjection( Projections.countDistinct( "id" ) )
             .add( Restrictions.ge( "timestamp", startDate) )
-            .add( Restrictions.lt( "timestamp", endDate) )
+            .add( Restrictions.le( "timestamp", endDate) )
             .uniqueResult()).intValue();
         return count;
     }

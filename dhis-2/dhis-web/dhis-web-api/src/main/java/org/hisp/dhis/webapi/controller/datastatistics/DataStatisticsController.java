@@ -36,6 +36,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.hisp.dhis.datastatistics.DataStatisticsEvent;
 import org.hisp.dhis.user.CurrentUserService;
@@ -43,7 +47,6 @@ import org.hisp.dhis.user.User;
 import org.hisp.dhis.datastatistics.EventType;
 import org.hisp.dhis.datastatistics.DataStatisticsService;
 import org.hisp.dhis.datastatistics.DataStatistics;
-
 
 import java.lang.System;
 import java.util.List;
@@ -87,9 +90,17 @@ public class DataStatisticsController
      */
     @RequestMapping(value = "/datastatistics/report", method = RequestMethod.GET)
     public @ResponseBody List<DataStatistics> report(@RequestParam @DateTimeFormat(pattern="yyyy-mm-dd") Date startDate,
-        @RequestParam @DateTimeFormat(pattern="yyyy-mm-dd") Date endDate ){
-        System.out.println("\n\nstartDate i controller: " + startDate);
-        System.out.println("\n\nendDate i controller: " + endDate);
+        @RequestParam @DateTimeFormat(pattern="yyyy-mm-dd") Date endDate, HttpServletResponse response ){
+        if( startDate.after(endDate) ){
+            try
+            {
+                response.sendError( HttpServletResponse.SC_BAD_REQUEST, "Invalid interval: startDate > endDate" );
+            }
+            catch ( Exception e ){
+                System.out.println("Caught exception: " + e);
+            }
+            return null;
+        }
 
         return defaultDataStatisticsService.getReports(startDate, endDate);
     }

@@ -178,7 +178,7 @@ public class ScheduleTasksAction
 
     private String dataStatisticsStrategy;
 
-    public String getDataStatisticsStrategt() { return dataStatisticsStrategy; }
+    public String getDataStatisticsStrategy() { return dataStatisticsStrategy; }
 
     public void setDataStatisticsStrategy(String dataStatisticsStrategy) { this.dataStatisticsStrategy = dataStatisticsStrategy; }
 
