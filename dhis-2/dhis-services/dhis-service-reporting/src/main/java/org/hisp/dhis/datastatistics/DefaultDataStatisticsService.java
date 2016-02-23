@@ -208,9 +208,9 @@ public class DefaultDataStatisticsService implements DataStatisticsService
 
 
     /**
-     * Gets all important information and creates a DAtastatistics object and saves it in db
+     * Gets all important information and creates a Datastatistics object and saves it in db
      */
-    @Override public void saveSnapshot()
+    @Override public int saveSnapshot()
     {
         Date startDate = new Date();
         Date endDate = new Date();
@@ -260,16 +260,28 @@ public class DefaultDataStatisticsService implements DataStatisticsService
             }
         }
 
-        int averageNumberOfSavedMaps =getNumberOfMaps( startDate ) / totalNumberOfUsers;
+        int averageNumberOfSavedMaps = getNumberOfMaps( startDate );
         int averageNumberOfSavedCharts = getNumberOfCharts( startDate );
-        int averageNumberOfSavedReportTables = getNumberOfReportTables( startDate ) / totalNumberOfUsers;
-        int averageNumberOfSavedEventReports = getNumberOfEventReports( startDate ) ;
+        int averageNumberOfSavedReportTables = getNumberOfReportTables( startDate );
+        int averageNumberOfSavedEventReports = getNumberOfEventReports( startDate );
         int averageNumberOfSavedEventCharts = getNumberOfEventCharts( startDate );
-        int averageNumberOfSavedDashboards = getNumberOfDashboards( startDate ) ;
-        int averageNumberOfSavedIndicators = getNumberOfIndicators( startDate ) ;
+        int averageNumberOfSavedDashboards = getNumberOfDashboards( startDate );
+        int averageNumberOfSavedIndicators = getNumberOfIndicators( startDate );
+
+        if( totalNumberOfUsers != 0){
+            averageNumberOfSavedCharts /= totalNumberOfUsers;
+            averageNumberOfSavedDashboards /= totalNumberOfUsers;
+            averageNumberOfSavedEventCharts /= totalNumberOfUsers;
+            averageNumberOfSavedEventReports /= totalNumberOfUsers;
+            averageNumberOfSavedIndicators /= totalNumberOfUsers;
+            averageNumberOfSavedMaps /= totalNumberOfUsers;
+            averageNumberOfSavedReportTables /= totalNumberOfUsers;
+        }
 
         numberOfUsers = uniqueUsers.size();
-        averageNumberofViews = totalNumberOfViews / numberOfUsers;
+
+        if(numberOfUsers != 0)
+            averageNumberofViews = totalNumberOfViews / numberOfUsers;
 
         DataStatistics dataStatistics = new DataStatistics( numberOfUsers, numberOfMapViews, numberOfChartViews,
             numberOfReportTablesViews, numberOfEventReportViews, numberOfEventChartViews, numberOfDashboardViews,
@@ -286,6 +298,6 @@ public class DefaultDataStatisticsService implements DataStatisticsService
         else{
             System.out.println("\nSnapshot was saved with id: " + id);
         }
-
+        return id;
     }
 }

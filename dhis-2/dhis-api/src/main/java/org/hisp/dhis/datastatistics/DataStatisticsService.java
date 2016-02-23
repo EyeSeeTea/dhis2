@@ -121,5 +121,5 @@ public interface DataStatisticsService
     /**
      * Creates a snapshot of DataStatistics and saves it
      */
-    void saveSnapshot();
+    int saveSnapshot();
 }
