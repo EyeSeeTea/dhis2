@@ -28,7 +28,11 @@ package org.hisp.dhis.datastatistics;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.setting.SettingKey;
+import org.hisp.dhis.setting.SystemSettingManager;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Date;
 
 /**
  * @author Yrjan A. F. Fraschetti
@@ -52,6 +56,9 @@ public class DataStatisticsTask implements Runnable
     @Autowired
     DataStatisticsService dataStatisticsService;
 
+    @Autowired
+    SystemSettingManager systemSettingManager;
+
     /**
      * saves calls saveSnapShot() in DefaultDataStatisticsService
      */
@@ -59,6 +66,8 @@ public class DataStatisticsTask implements Runnable
     public void run()
     {
         dataStatisticsService.saveSnapshot();
+        systemSettingManager.saveSystemSetting( SettingKey.LAST_SUCCESSFUL_DATA_STATISTIC, new Date() );
+
     }
 
 }

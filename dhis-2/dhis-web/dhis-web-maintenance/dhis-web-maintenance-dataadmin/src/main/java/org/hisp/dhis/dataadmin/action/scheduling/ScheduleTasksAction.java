@@ -242,6 +242,10 @@ public class ScheduleTasksAction
         return lastSmsSchedulerSuccess;
     }
 
+    private Date lastDataStatisticSuccess;
+
+    public Date getLastDataStatisticSuccess() { return lastDataStatisticSuccess; }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -265,7 +269,14 @@ public class ScheduleTasksAction
             else
             {
                 ListMap<String, String> cronKeyMap = new ListMap<>();
+                // -------------------------------------------------------------
+                // Data statistics
+                // -------------------------------------------------------------
 
+                if (  STRATEGY_ALL_DAILY.equals( dataStatisticsStrategy ) )
+                {
+                    cronKeyMap.putValue(  CRON_DAILY_0AM, TASK_DATASTATISTICS );
+                }
                 // -------------------------------------------------------------
                 // Resource tables
                 // -------------------------------------------------------------
@@ -320,22 +331,20 @@ public class ScheduleTasksAction
                     cronKeyMap.putValue( CRON_DAILY_8AM, TASK_SEND_SCHEDULED_SMS );
                 }
 
-                // -------------------------------------------------------------
-                // Data statistics
-                // -------------------------------------------------------------
-
-                if ( STRATEGY_ENABLED.equals( dataStatisticsStrategy ) )
-                {
-                    cronKeyMap.putValue( CRON_EVERY_MIN, TASK_DATASTATISTICS );
-                }
-
-
                 schedulingManager.scheduleTasks( cronKeyMap );
             }
         }
         else
         {
             Collection<String> keys = schedulingManager.getScheduledKeys();
+
+            // -------------------------------------------------------------
+            // Data statistics
+            // -------------------------------------------------------------
+
+            if ( keys.contains( TASK_DATASTATISTICS ) ){
+                dataStatisticsStrategy = STRATEGY_ALL_DAILY;
+            }
 
             // -----------------------------------------------------------------
             // Resource tables
@@ -381,16 +390,6 @@ public class ScheduleTasksAction
                 dataSynchStrategy = STRATEGY_ENABLED;
             }
 
-
-            // -------------------------------------------------------------
-            // Data statistics
-            // -------------------------------------------------------------
-
-            if ( keys.contains( TASK_DATASTATISTICS ) ){
-                dataStatisticsStrategy = STRATEGY_ENABLED;
-            }
-
-            
             // -------------------------------------------------------------
             // SMS Scheduler
             // -------------------------------------------------------------
@@ -410,6 +409,7 @@ public class ScheduleTasksAction
         lastAnalyticsTableSuccess = (Date) systemSettingManager.getSystemSetting( SettingKey.LAST_SUCCESSFUL_ANALYTICS_TABLES_UPDATE );
         lastMonitoringSuccess = (Date) systemSettingManager.getSystemSetting( SettingKey.LAST_SUCCESSFUL_MONITORING );
         lastSmsSchedulerSuccess = (Date) systemSettingManager.getSystemSetting( SettingKey.LAST_SUCCESSFUL_SMS_SCHEDULING );
+        lastDataStatisticSuccess = (Date) systemSettingManager.getSystemSetting( SettingKey.LAST_SUCCESSFUL_DATA_STATISTIC );
         lastDataSyncSuccess = synchronizationManager.getLastSynchSuccess();
 
         log.info( "Status: " + status );
