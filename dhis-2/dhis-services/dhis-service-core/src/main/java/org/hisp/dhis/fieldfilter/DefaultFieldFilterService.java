@@ -434,9 +434,16 @@ public class DefaultFieldFilterService implements FieldFilterService
     {
         FieldMap fieldMap = new FieldMap();
 
-        for ( String mapKey : schema.getPropertyMap().keySet() )
+        if ( schema.isPersisted() )
         {
-            fieldMap.put( mapKey, new FieldMap() );
+            fieldMap.put( ":owner", new FieldMap() );
+        }
+        else
+        {
+            for ( String mapKey : schema.getPropertyMap().keySet() )
+            {
+                fieldMap.put( mapKey, new FieldMap() );
+            }
         }
 
         return fieldMap;

@@ -182,7 +182,6 @@ public class DefaultAttributeService
     // AttributeValue implementation
     // -------------------------------------------------------------------------
 
-
     @Override
     public <T extends IdentifiableObject> void addAttributeValue( T object, AttributeValue attributeValue ) throws NonUniqueAttributeValueException
     {
@@ -278,6 +277,11 @@ public class DefaultAttributeService
     {
         List<ValidationViolation> validationViolations = new ArrayList<>();
 
+        if ( attributeValues.isEmpty() )
+        {
+            return validationViolations;
+        }
+
         Map<String, AttributeValue> attributeValueMap = attributeValues.stream()
             .collect( Collectors.toMap( av -> av.getAttribute().getUid(), av -> av ) );
 
@@ -339,6 +343,11 @@ public class DefaultAttributeService
     @Override
     public <T extends IdentifiableObject> void updateAttributeValues( T object, Set<AttributeValue> attributeValues ) throws Exception
     {
+        if ( attributeValues.isEmpty() )
+        {
+            return;
+        }
+
         Map<String, AttributeValue> attributeValueMap = attributeValues.stream()
             .collect( Collectors.toMap( av -> av.getAttribute().getUid(), av -> av ) );
 

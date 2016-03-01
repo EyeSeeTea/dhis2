@@ -32,6 +32,7 @@ import static org.hisp.dhis.common.DataDimensionItem.DATA_DIMENSION_TYPE_CLASS_M
 import static org.hisp.dhis.system.util.DateUtils.getMediumDateString;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -132,7 +133,7 @@ public class AnalyticsUtils
     }
     
     /**
-     * Returns a value. If the given parameters has skip rounding, the value is
+     * Rounds a value. If the given parameters has skip rounding, the value is
      * returned unchanged. If the given number of decimals is specified, the
      * value is rounded to the given decimals. Otherwise, default rounding is
      * used.
@@ -144,7 +145,7 @@ public class AnalyticsUtils
      */
     public static Double getRoundedValue( DataQueryParams params, Integer decimals, Double value )
     {
-        if ( params.isSkipRounding() )
+        if ( value == null || params.isSkipRounding() )
         {
             return value;
         }
@@ -159,6 +160,25 @@ public class AnalyticsUtils
     }
     
     /**
+     * Rounds a value. If the given parameters has skip rounding, the value is
+     * returned unchanged. If the given number is null or not of class Double,
+     * the value is returned unchanged. Otherwise, default rounding is used.
+     *  
+     * @param params the query parameters.
+     * @param value the value.
+     * @return a value.
+     */
+    public static Object getRoundedValueObject( DataQueryParams params, Object value )
+    {
+        if ( value == null || params.isSkipRounding() || !Double.class.equals( value.getClass() ) )
+        {
+            return value;
+        }
+        
+        return MathUtils.getRounded( (Double) value );
+    }
+    
+    /**
      * Converts the data and option combo identifiers to an operand identifier,
      * i.e. "deuid-cocuid" to "deuid.cocuid".
      * 
@@ -169,5 +189,28 @@ public class AnalyticsUtils
     {
         return valueMap.entrySet().stream().collect( Collectors.toMap( e -> e.getKey().replaceFirst( 
             DimensionalObject.DIMENSION_SEP, DimensionalObjectUtils.COMPOSITE_DIM_OBJECT_PLAIN_SEP ), e -> e.getValue() ) );
+    }
+
+    /**
+     * Converts a String, Object map into a specific String, Double map.
+     *
+     * @param map the map to convert.
+     * @return a mapping between string and double values.
+     */
+    public static Map<String, Double> getDoubleMap( Map<String, Object> map )
+    {
+        Map<String, Double> typedMap = new HashMap<>();
+
+        for ( Map.Entry<String, Object> entry : map.entrySet() )
+        {
+            final Object value = entry.getValue();
+
+            if ( value != null && Double.class.equals( value.getClass() ) )
+            {
+                typedMap.put( entry.getKey(), (Double) entry.getValue() );
+            }
+        }
+
+        return typedMap;
     }
 }

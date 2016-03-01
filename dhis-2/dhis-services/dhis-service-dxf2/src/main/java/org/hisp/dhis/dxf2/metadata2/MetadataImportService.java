@@ -28,6 +28,8 @@ package org.hisp.dhis.dxf2.metadata2;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.dxf2.metadata2.feedback.ImportReport;
+
 import java.util.List;
 import java.util.Map;
 
@@ -36,7 +38,7 @@ import java.util.Map;
  */
 public interface MetadataImportService
 {
-    void importMetadata( MetadataImportParams params );
+    ImportReport importMetadata( MetadataImportParams params );
 
     void validate( MetadataImportParams params );
 

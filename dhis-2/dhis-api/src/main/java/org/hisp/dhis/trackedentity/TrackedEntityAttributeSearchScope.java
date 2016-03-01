@@ -1,4 +1,4 @@
-package org.hisp.dhis.caseaggregation;
+package org.hisp.dhis.trackedentity;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -28,9 +28,38 @@ package org.hisp.dhis.caseaggregation;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.HashSet;
-
-public class AggregationQueries
-    extends HashSet<AggregationQuery>
+/**
+ * @author Abyot Asalefew Gizaw <abyot@dhis2.org>
+ *
+ */
+public enum TrackedEntityAttributeSearchScope
 {
+
+    NOT_SEARCHABLE( "not_searchable" ), OWN_OUS( "own_organisations" ), SEARCH_OUS( "search_organisations" );
+
+    private final String value;
+
+    private TrackedEntityAttributeSearchScope( String value )
+    {
+        this.value = value;
+    }
+
+    public static TrackedEntityAttributeSearchScope fromValue( String value )
+    {
+        for ( TrackedEntityAttributeSearchScope trackedEntityAttributeSearchScope : TrackedEntityAttributeSearchScope
+            .values() )
+        {
+            if ( trackedEntityAttributeSearchScope.value.equalsIgnoreCase( value ) )
+            {
+                return trackedEntityAttributeSearchScope;
+            }
+        }
+
+        return null;
+    }
+
+    public String getValue()
+    {
+        return value;
+    }
 }

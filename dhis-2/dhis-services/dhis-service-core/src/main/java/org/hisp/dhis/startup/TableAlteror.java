@@ -184,9 +184,6 @@ public class TableAlteror
         executeSql( "ALTER TABLE mapview DROP COLUMN bounds" );
         executeSql( "ALTER TABLE mapview DROP COLUMN valuetype" );
         executeSql( "ALTER TABLE mapview DROP COLUMN legendtype" );
-        executeSql( "ALTER TABLE mapview RENAME COLUMN mapvaluetype TO valuetype" );
-        executeSql( "ALTER TABLE mapview RENAME COLUMN maplegendtype TO legendtype" );
-        executeSql( "ALTER TABLE mapview RENAME COLUMN maplegendsetid TO legendsetid" );
         executeSql( "ALTER TABLE mapview ALTER COLUMN opacity TYPE double precision" );
 
         executeSql( "ALTER TABLE maplegend DROP CONSTRAINT maplegend_name_key" );
@@ -693,7 +690,6 @@ public class TableAlteror
 
         executeSql( "UPDATE dataset SET dataelementdecoration=false WHERE dataelementdecoration is null" );
 
-        executeSql( "alter table validationrulegroup rename column validationgroupid to validationrulegroupid" );
         executeSql( "update sqlview set sqlviewid=viweid" );
         executeSql( "alter table sqlview drop column viewid" );
         executeSql( "update sqlview set type = 'QUERY' where query is true" );
@@ -845,19 +841,20 @@ public class TableAlteror
         executeSql( "update eventreport set completedonly = false where completedonly is null" );
         executeSql( "update eventchart set completedonly = false where completedonly is null" );
 
-        executeSql( "update program set enrollmentdatelabel = dateofenrollmentdescription where enrollmentdatelabel is not null" );
-        executeSql( "update program set incidentdatelabel = dateofincidentdescription where incidentdatelabel is not null" );
-        executeSql( "update programinstance set incidentdate = dateofincident where incidentdate is not null" );
+        executeSql( "update program set enrollmentdatelabel = dateofenrollmentdescription where enrollmentdatelabel is null" );
+        executeSql( "update program set incidentdatelabel = dateofincidentdescription where incidentdatelabel is null" );
+        executeSql( "update programinstance set incidentdate = dateofincident where incidentdate is null" );
         executeSql( "alter table programinstance alter column incidentdate set not null" );
         executeSql( "alter table program drop column dateofenrollmentdescription" );
         executeSql( "alter table program drop column dateofincidentdescription" );
         executeSql( "alter table programinstance drop column dateofincident" );
 
-        executeSql( "update programstage set excecutiondatelabel = reportdatedescription where excecutiondatelabel is not null" );
-        executeSql( "alter table programstage drop column reportdatedescription" );
+        executeSql( "update programstage set excecutiondatelabel = reportdatedescription where excecutiondatelabel is null" );
         executeSql( "update programstage set reportdatetouse = 'indicentDate' where reportdatetouse='dateOfIncident'" );
+        executeSql( "update programstage set repeatable = irregular where repeatable is null" );
         executeSql( "update programstage set repeatable = false where repeatable is null" );
-
+        executeSql( "alter table programstage drop column reportdatedescription" );
+        executeSql( "alter table programstage drop column irregular" );        
 
         executeSql( "alter table programindicator drop column missingvaluereplacement" );
 
