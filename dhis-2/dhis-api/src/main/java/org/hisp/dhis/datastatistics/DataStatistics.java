@@ -47,28 +47,23 @@ public class DataStatistics extends BaseIdentifiableObject
     int numberOfDashboardViews;
     int numberOfIndicatorsViews;
     int totalNumberOfViews;
-    int averageNumberOfViews;
-
-    int averageNumberOfSavedMaps;
-    int averageNumberOfSavedCharts;
-    int averageNumberOfSavedReportTables;
-    int averageNumberOfSavedEventReports;
-    int averageNumberOfSavedEventCharts;
-    int averageNumberOfSavedDashboards;
-    int averageNumberOfSavedIndicators;
+    double averageNumberOfViews;
+    double averageNumberOfSavedMaps;
+    double averageNumberOfSavedCharts;
+    double averageNumberOfSavedReportTables;
+    double averageNumberOfSavedEventReports;
+    double averageNumberOfSavedEventCharts;
+    double averageNumberOfSavedDashboards;
+    double averageNumberOfSavedIndicators;
 
     int totalNumberOfUsers;
 
+    public DataStatistics( )
+    {
+        super.setAutoFields();
+    }
 
-    public DataStatistics( ) { super.setAutoFields(); }
-
-    public DataStatistics( int numberOfUsers, int numberOfMapViews, int numberOfChartViews,
-        int numberOfReportTablesViews, int numberOfEventReportViews, int numberOfEventChartViews,
-        int numberOfDashboardViews, int numberOfIndicatorsViews, int totalNumberOfViews,
-        int averageNumberOfViews, int averageNumberOfSavedMaps, int averageNumberOfSavedCharts,
-        int averageNumberOfSavedReportTables, int averageNumberOfSavedEventReports,
-        int averageNumberOfSavedEventCharts, int averageNumberOfSavedDashboards,
-        int averageNumberOfSavedIndicators, int totalNumberOfUsers )
+    public DataStatistics( int numberOfUsers, int numberOfMapViews, int numberOfChartViews, int numberOfReportTablesViews, int numberOfEventReportViews, int numberOfEventChartViews, int numberOfDashboardViews, int numberOfIndicatorsViews, int totalNumberOfViews, double averageNumberOfViews, double averageNumberOfSavedMaps, double averageNumberOfSavedCharts, double averageNumberOfSavedReportTables, double averageNumberOfSavedEventReports, double averageNumberOfSavedEventCharts, double averageNumberOfSavedDashboards, double averageNumberOfSavedIndicators, int totalNumberOfUsers )
     {
         this.numberOfUsers = numberOfUsers;
         this.numberOfMapViews = numberOfMapViews;
@@ -192,89 +187,89 @@ public class DataStatistics extends BaseIdentifiableObject
     }
 
     @JsonProperty
-    public int getAverageNumberOfViews()
+    public double getAverageNumberOfViews()
     {
         return averageNumberOfViews;
     }
 
-    public void setAverageNumberOfViews( int averageNumberofViews )
+    public void setAverageNumberOfViews( double averageNumberOfViews )
     {
-        this.averageNumberOfViews = averageNumberofViews;
+        this.averageNumberOfViews = averageNumberOfViews;
     }
 
     @JsonProperty
-    public int getAverageNumberOfSavedMaps()
+    public double getAverageNumberOfSavedMaps()
     {
         return averageNumberOfSavedMaps;
     }
 
-    public void setAverageNumberOfSavedMaps( int averageNumberOfSavedMaps )
+    public void setAverageNumberOfSavedMaps( double averageNumberOfSavedMaps )
     {
         this.averageNumberOfSavedMaps = averageNumberOfSavedMaps;
     }
 
     @JsonProperty
-    public int getAverageNumberOfSavedCharts()
+    public double getAverageNumberOfSavedCharts()
     {
         return averageNumberOfSavedCharts;
     }
 
-    public void setAverageNumberOfSavedCharts( int averageNumberOfSavedCharts )
+    public void setAverageNumberOfSavedCharts( double averageNumberOfSavedCharts )
     {
         this.averageNumberOfSavedCharts = averageNumberOfSavedCharts;
     }
 
     @JsonProperty
-    public int getAverageNumberOfSavedReportTables()
+    public double getAverageNumberOfSavedReportTables()
     {
         return averageNumberOfSavedReportTables;
     }
 
-    public void setAverageNumberOfSavedReportTables( int averageNumberOfSavedReportTables )
+    public void setAverageNumberOfSavedReportTables( double averageNumberOfSavedReportTables )
     {
         this.averageNumberOfSavedReportTables = averageNumberOfSavedReportTables;
     }
 
     @JsonProperty
-    public int getAverageNumberOfSavedEventReports()
+    public double getAverageNumberOfSavedEventReports()
     {
         return averageNumberOfSavedEventReports;
     }
 
-    public void setAverageNumberOfSavedEventReports( int averageNumberOfSavedEventReports )
+    public void setAverageNumberOfSavedEventReports( double averageNumberOfSavedEventReports )
     {
         this.averageNumberOfSavedEventReports = averageNumberOfSavedEventReports;
     }
 
     @JsonProperty
-    public int getAverageNumberOfSavedEventCharts()
+    public double getAverageNumberOfSavedEventCharts()
     {
         return averageNumberOfSavedEventCharts;
     }
 
-    public void setAverageNumberOfSavedEventCharts( int averageNumberOfSavedEventCharts )
+    public void setAverageNumberOfSavedEventCharts( double averageNumberOfSavedEventCharts )
     {
         this.averageNumberOfSavedEventCharts = averageNumberOfSavedEventCharts;
     }
 
     @JsonProperty
-    public int getAverageNumberOfSavedDashboards()
+    public double getAverageNumberOfSavedDashboards()
     {
         return averageNumberOfSavedDashboards;
     }
 
-    public void setAverageNumberOfSavedDashboards( int averageNumberOfSavedDashboards )
+    public void setAverageNumberOfSavedDashboards( double averageNumberOfSavedDashboards )
     {
         this.averageNumberOfSavedDashboards = averageNumberOfSavedDashboards;
     }
 
     @JsonProperty
-    public int getAverageNumberOfSavedIndicators()
+    public double getAverageNumberOfSavedIndicators()
     {
         return averageNumberOfSavedIndicators;
     }
 
-    public void setAverageNumberOfSavedIndicators( int averageNumberOfSavedIndicators )
+    public void setAverageNumberOfSavedIndicators( double averageNumberOfSavedIndicators )
     {
         this.averageNumberOfSavedIndicators = averageNumberOfSavedIndicators;
     }
@@ -292,8 +287,7 @@ public class DataStatistics extends BaseIdentifiableObject
 
     @Override public String toString()
     {
-        return super.toString() +
-            " DataStatistics{" +
+        return super.toString() + " DataStatistics{" +
             "numberOfUsers=" + numberOfUsers +
             ", numberOfMapViews=" + numberOfMapViews +
             ", numberOfChartViews=" + numberOfChartViews +

@@ -47,6 +47,7 @@ import org.hisp.dhis.user.User;
 import org.hisp.dhis.datastatistics.EventType;
 import org.hisp.dhis.datastatistics.DataStatisticsService;
 import org.hisp.dhis.datastatistics.DataStatistics;
+import org.hisp.dhis.datastatistics.Interval;
 
 import java.lang.System;
 import java.util.List;
@@ -56,6 +57,7 @@ import java.util.Date;
 /**
  * @author Yrjan A. F. Fraschetti
  * @author Julie Hill Roa
+ *
  * Controller for datastatistics
  */
 
@@ -80,7 +82,6 @@ public class DataStatisticsController
 
         DataStatisticsEvent event = new DataStatisticsEvent(eventType, timestamp, user.getId());
         int id = defaultDataStatisticsService.addEvent(event);
-
     }
 
     /**
@@ -90,7 +91,8 @@ public class DataStatisticsController
      */
     @RequestMapping(value = "/datastatistics/report", method = RequestMethod.GET)
     public @ResponseBody List<DataStatistics> report(@RequestParam @DateTimeFormat(pattern="yyyy-mm-dd") Date startDate,
-        @RequestParam @DateTimeFormat(pattern="yyyy-mm-dd") Date endDate, HttpServletResponse response ){
+        @RequestParam @DateTimeFormat(pattern="yyyy-mm-dd") Date endDate, @RequestParam Interval interval, HttpServletResponse response ){
+        System.out.println("\n\nInterval: " + interval);
         if( startDate.after(endDate) ){
             try
             {
@@ -102,6 +104,6 @@ public class DataStatisticsController
             return null;
         }
 
-        return defaultDataStatisticsService.getReports(startDate, endDate);
+        return defaultDataStatisticsService.getReports(startDate, endDate, interval);
     }
 }

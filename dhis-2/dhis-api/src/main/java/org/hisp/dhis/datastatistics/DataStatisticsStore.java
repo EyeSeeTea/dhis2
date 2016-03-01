@@ -28,6 +28,7 @@ package org.hisp.dhis.datastatistics;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -46,11 +47,35 @@ public interface DataStatisticsStore
     int addSnapshot(DataStatistics dataStatistics);
 
     /**
-     * Creates a list of snapshots in interval
+     * Creates a list of snapshots in interval (day)
      * @param startDate of interval
      * @param endDate of interval
      * @return List of DataStatistics (snapshot)
      */
-    List<DataStatistics> getSnapshotsInInterval(Date startDate, Date endDate);
+    List<DataStatistics> getSnapshotsInIntervalDay(Date startDate, Date endDate);
+
+    /**
+     * Creates an aggregated list of snapshots in interval (week)
+     * @param start of interval
+     * @param end of interval
+     * @return List of DataStatistics (snapshot)
+     */
+    List<DataStatistics> getSnapshotsInIntervalWeek(Calendar start, Calendar end);
+
+    /**
+     * Creates an aggregated list of snapshots in interval (month)
+     * @param start of interval
+     * @param end of interval
+     * @return List of DataStatistics (snapshot)
+     */
+    List<DataStatistics> getSnapshotsInIntervalMonth(Calendar start, Calendar end);
+
+    /**
+     * Creates an aggregated list of snapshots in interval (year)
+     * @param start of interval
+     * @param end of interval
+     * @return List of DataStatistics (snapshot)
+     */
+    List<DataStatistics> getSnapshotsInIntervalYear(Calendar start, Calendar end);
 
 }

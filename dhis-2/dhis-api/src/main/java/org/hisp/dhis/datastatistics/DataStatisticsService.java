@@ -52,7 +52,7 @@ public interface DataStatisticsService
      * @param endDate of interval
      * @return
      */
-    List<DataStatistics> getReports(Date startDate, Date endDate);
+    List<DataStatistics> getReports(Date startDate, Date endDate, Interval interval);
 
     /**
      * Finds number of charts in interval date to current date

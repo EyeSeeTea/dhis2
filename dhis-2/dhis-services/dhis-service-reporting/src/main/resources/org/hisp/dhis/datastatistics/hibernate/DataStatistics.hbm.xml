@@ -20,14 +20,14 @@
     <property name="numberOfIndicatorsViews" column="indicatorviews" type="int"/>
     <property name="numberOfUsers" column="users" type="int"/>
     <property name="totalNumberOfViews" column="totalviews" type="int"/>
-    <property name="averageNumberOfViews" column="averageviews" type="int"/>
-    <property name="averageNumberOfSavedCharts" column="averagenumcharts" type="int"/>
-    <property name="averageNumberOfSavedMaps" column="averagenummaps" type="int"/>
-    <property name="averageNumberOfSavedReportTables" column="averagenumreporttables" type="int"/>
-    <property name="averageNumberOfSavedEventReports" column="averagenumeventreports" type="int"/>
-    <property name="averageNumberOfSavedEventCharts" column="averagenumeventcharts" type="int"/>
-    <property name="averageNumberOfSavedDashboards" column="averagenumdashborards" type="int"/>
-    <property name="averageNumberOfSavedIndicators" column="averagenumindicators" type="int"/>
+    <property name="averageNumberOfViews" column="averageviews" type="double"/>
+    <property name="averageNumberOfSavedCharts" column="averagenumcharts" type="double"/>
+    <property name="averageNumberOfSavedMaps" column="averagenummaps" type="double"/>
+    <property name="averageNumberOfSavedReportTables" column="averagenumreporttables" type="double"/>
+    <property name="averageNumberOfSavedEventReports" column="averagenumeventreports" type="double"/>
+    <property name="averageNumberOfSavedEventCharts" column="averagenumeventcharts" type="double"/>
+    <property name="averageNumberOfSavedDashboards" column="averagenumdashborards" type="double"/>
+    <property name="averageNumberOfSavedIndicators" column="averagenumindicators" type="double"/>
     <property name="totalNumberOfUsers" column="totalnumusers" type="int"/>
     &identifiableProperties;
 

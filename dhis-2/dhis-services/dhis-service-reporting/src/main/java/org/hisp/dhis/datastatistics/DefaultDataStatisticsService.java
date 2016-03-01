@@ -101,10 +101,28 @@ public class DefaultDataStatisticsService implements DataStatisticsService
      * @return number of Reports saved in db
      */
     @Override
-    public List<DataStatistics> getReports(Date startDate, Date endDate)
+    public List<DataStatistics> getReports(Date startDate, Date endDate, Interval interval)
     {
-        return hibernateDataStatisticsStore.getSnapshotsInInterval( startDate, endDate );
+        Calendar start = Calendar.getInstance();
+        start.setTime( startDate );
+
+        Calendar end = Calendar.getInstance();
+        end.setTime( endDate );
+
+        switch ( interval ){
+            case DAY: return hibernateDataStatisticsStore.getSnapshotsInIntervalDay( startDate, endDate );
+
+            case WEEK: return hibernateDataStatisticsStore.getSnapshotsInIntervalWeek( start, end );
+
+            case MONTH: return hibernateDataStatisticsStore.getSnapshotsInIntervalMonth( start, end );
+
+            case YEAR: return hibernateDataStatisticsStore.getSnapshotsInIntervalYear( start, end );
+
+            default: return hibernateDataStatisticsStore.getSnapshotsInIntervalDay( startDate, endDate );
+        }
     }
+
+
 
     /**
      * gets number of saved Charts from a date till now
@@ -225,7 +243,7 @@ public class DefaultDataStatisticsService implements DataStatisticsService
         int numberOfEventReportViews = 0;
         int numberOfEventChartViews = 0;
         int totalNumberOfViews = events.size();
-        int averageNumberofViews = 0;
+        double averageNumberofViews = 0;
         int numberOfDashboardViews = 0;
         int numberOfIndicatorsViews = 0;
 
@@ -253,13 +271,13 @@ public class DefaultDataStatisticsService implements DataStatisticsService
             }
         }
 
-        int averageNumberOfSavedMaps = getNumberOfMaps( startDate );
-        int averageNumberOfSavedCharts = getNumberOfCharts( startDate );
-        int averageNumberOfSavedReportTables = getNumberOfReportTables( startDate );
-        int averageNumberOfSavedEventReports = getNumberOfEventReports( startDate );
-        int averageNumberOfSavedEventCharts = getNumberOfEventCharts( startDate );
-        int averageNumberOfSavedDashboards = getNumberOfDashboards( startDate );
-        int averageNumberOfSavedIndicators = getNumberOfIndicators( startDate );
+        double averageNumberOfSavedMaps = getNumberOfMaps( startDate );
+        double averageNumberOfSavedCharts = getNumberOfCharts( startDate );
+        double averageNumberOfSavedReportTables = getNumberOfReportTables( startDate );
+        double averageNumberOfSavedEventReports = getNumberOfEventReports( startDate );
+        double averageNumberOfSavedEventCharts = getNumberOfEventCharts( startDate );
+        double averageNumberOfSavedDashboards = getNumberOfDashboards( startDate );
+        double averageNumberOfSavedIndicators = getNumberOfIndicators( startDate );
 
         if( totalNumberOfUsers != 0){
             averageNumberOfSavedCharts /= totalNumberOfUsers;

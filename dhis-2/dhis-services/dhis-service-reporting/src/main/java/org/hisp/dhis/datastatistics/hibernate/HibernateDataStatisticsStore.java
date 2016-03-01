@@ -28,13 +28,18 @@ package org.hisp.dhis.datastatistics.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.h2.store.Data;
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.datastatistics.DataStatistics;
 import org.hisp.dhis.datastatistics.DataStatisticsStore;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
+import org.hisp.dhis.period.Cal;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Calendar;
 
 /**
  * @author Yrjan A. F. Fraschetti
@@ -58,16 +63,82 @@ public class HibernateDataStatisticsStore extends HibernateGenericStore<DataStat
     }
 
     /**
-     * get a list of snapshots between start- and enddate
-     * @param startDate - get snapshots from this date
-     * @param endDate - to this date
-     * @return a list for datastatistics
+     * Creates a list of snapshots in interval (day)
+     *
+     * @param startDate of interval
+     * @param endDate   of interval
+     * @return List of DataStatistics (snapshot)
      */
-    @Override
-    public List<DataStatistics> getSnapshotsInInterval( Date startDate, Date endDate )
+    @Override public List<DataStatistics> getSnapshotsInIntervalDay( Date startDate, Date endDate )
     {
         return ((List<DataStatistics>) getSharingCriteria()
-        .add( Restrictions.ge( "created", startDate ) )
+            .add( Restrictions.ge( "created", startDate ) )
             .add( Restrictions.le( "created", endDate ) ).list());
+    }
+
+    /**
+     * Creates an aggregated list of snapshots in interval (week)
+     *
+     * @param start of interval
+     * @param end   of interval
+     * @return List of DataStatistics (snapshot)
+     */
+    @Override public List<DataStatistics> getSnapshotsInIntervalWeek( Calendar start, Calendar end )
+    {
+        return null;
+    }
+
+    /**
+     * Creates an aggregated list of snapshots in interval (month)
+     *
+     * @param start of interval
+     * @param end   of interval
+     * @return List of DataStatistics (snapshot)
+     */
+    @Override public List<DataStatistics> getSnapshotsInIntervalMonth( Calendar start, Calendar end )
+    {
+        return null;
+    }
+
+    /**
+     * Creates an aggregated list of snapshots in interval (year)
+     *
+     * @param start of interval
+     * @param end   of interval
+     * @return List of DataStatistics (snapshot)
+     */
+    @Override public List<DataStatistics> getSnapshotsInIntervalYear( Calendar start, Calendar end )
+    {
+        int stop = end.get(Calendar.YEAR) - start.get(Calendar.YEAR);
+        List<DataStatistics> aggregatedSnapshotList = new ArrayList<>();
+
+        Calendar startDate = Calendar.getInstance();
+        Calendar nextDate = Calendar.getInstance();
+
+        System.out.println("\n\nStop: " + stop);
+        for(int i = 0; i < stop; i++ ){
+
+            startDate.setTime( start.getTime() );
+            startDate.add(Calendar.YEAR, i);
+
+            nextDate.setTime( startDate.getTime() );
+            nextDate.add( Calendar.YEAR,  1 );
+
+            System.out.println("\n\n\n for: i = " + i + " startDate: " + startDate.get( Calendar.YEAR ) + " nextDate: " + nextDate.get( Calendar.YEAR ) + "\n\n");
+
+
+            List<DataStatistics> tmpList = ((List<DataStatistics>) getSharingCriteria()
+                .add( Restrictions.ge( "created", startDate.getTime() ) )
+                .add( Restrictions.le( "created", nextDate.getTime() ) ).list());
+
+            DataStatistics dataStatistics = new DataStatistics(  );
+
+           /* for ( DataStatistics ds : tmpList )
+            {
+                dataStatistics.accumulate(ds);
+            }*/
+
+        }
+        return null;
     }
 }
