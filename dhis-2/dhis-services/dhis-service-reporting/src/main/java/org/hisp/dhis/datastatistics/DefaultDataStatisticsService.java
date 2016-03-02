@@ -279,6 +279,8 @@ public class DefaultDataStatisticsService implements DataStatisticsService
         double averageNumberOfSavedDashboards = getNumberOfDashboards( startDate );
         double averageNumberOfSavedIndicators = getNumberOfIndicators( startDate );
 
+        System.out.println("\n\naverageSavedEventReports: ");
+
         if( totalNumberOfUsers != 0){
             averageNumberOfSavedCharts /= totalNumberOfUsers;
             averageNumberOfSavedDashboards /= totalNumberOfUsers;
