@@ -28,8 +28,12 @@ package org.hisp.dhis.dxf2.metadata2.feedback;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.feedback.ErrorCode;
 import org.hisp.dhis.feedback.ErrorReport;
-import org.hisp.dhis.feedback.ErrorReports;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,55 +43,83 @@ import java.util.Map;
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
+@JacksonXmlRootElement( localName = "importReport", namespace = DxfNamespaces.DXF_2_0 )
 public class ImportReport
 {
     private ImportStats stats = new ImportStats();
 
-    private Map<Class<?>, ErrorReports> errorReportMap = new HashMap<>();
+    private Map<Class<?>, Map<ErrorCode, List<ErrorReport>>> errorReports = new HashMap<>();
 
     public ImportReport()
     {
     }
 
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public ImportStats getStats()
     {
         return stats;
     }
 
-    public void addErrorReport( ErrorReport errorReport )
+    public void addErrorReports( List<ErrorReport> errorReports )
     {
-        if ( !errorReportMap.containsKey( errorReport.getMainKlass() ) )
-        {
-            errorReportMap.put( errorReport.getMainKlass(), new ErrorReports() );
-        }
-
-        errorReportMap.get( errorReport.getMainKlass() ).getErrorReports().add( errorReport );
+        errorReports.forEach( this::addErrorReport );
     }
 
-    public void addErrorReports( ErrorReports errorReports )
+    public <T extends ErrorReport> void addErrorReport( T errorReport )
     {
-        if ( errorReports == null || errorReports.getErrorReports().isEmpty() )
+        if ( !errorReports.containsKey( errorReport.getMainKlass() ) )
         {
-            return;
+            errorReports.put( errorReport.getMainKlass(), new HashMap<>() );
         }
 
-        Class<?> mainKlass = errorReports.getErrorReports().get( 0 ).getMainKlass();
-
-        if ( !errorReportMap.containsKey( mainKlass ) )
+        if ( !errorReports.get( errorReport.getMainKlass() ).containsKey( errorReport.getErrorCode() ) )
         {
-            errorReportMap.put( mainKlass, new ErrorReports() );
+            errorReports.get( errorReport.getMainKlass() ).put( errorReport.getErrorCode(), new ArrayList<>() );
         }
 
-        errorReportMap.get( mainKlass ).getErrorReports().addAll( errorReports.getErrorReports() );
+        errorReports.get( errorReport.getMainKlass() ).get( errorReport.getErrorCode() ).add( errorReport );
     }
 
-    public Map<Class<?>, ErrorReports> getErrorReportMap()
+    public void addErrorReport( Class<?> mainKlass, ErrorCode errorCode, Object... args )
     {
-        return errorReportMap;
+        ErrorReport errorReport = new ErrorReport( mainKlass, errorCode, args );
+        addErrorReport( errorReport );
     }
 
-    public List<ErrorReports> getErrorReports()
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Map<Class<?>, Map<ErrorCode, List<ErrorReport>>> getErrorReports()
     {
-        return new ArrayList<>( errorReportMap.values() );
+        return errorReports;
+    }
+
+    public Map<ErrorCode, List<ErrorReport>> getErrorReports( Class<?> klass )
+    {
+        Map<ErrorCode, List<ErrorReport>> map = errorReports.get( klass );
+
+        if ( map == null )
+        {
+            return new HashMap<>();
+        }
+
+        return map;
+    }
+
+    public List<ErrorReport> getErrorReports( Class<?> klass, ErrorCode errorCode )
+    {
+        Map<ErrorCode, List<ErrorReport>> map = errorReports.get( klass );
+
+        if ( !map.containsKey( errorCode ) )
+        {
+            return new ArrayList<>();
+        }
+
+        return map.get( errorCode );
+    }
+
+    public void setErrorReports( Map<Class<?>, Map<ErrorCode, List<ErrorReport>>> errorReports )
+    {
+        this.errorReports = errorReports;
     }
 }
