@@ -236,16 +236,16 @@ public class DefaultDataStatisticsService implements DataStatisticsService
         //TODO Lagre antall unike brukere, antall av hver enum, gjennomsnitt, total, når på døgnet folk er mest aktive
         List<DataStatisticsEvent> events = hibernateDataStatisticsEventStore.getDataStatisticsEventList(startDate);
         List<Integer> uniqueUsers = new ArrayList<>();
-        int numberOfUsers = 0;
-        int numberOfMapViews = 0;
-        int numberOfChartViews = 0;
-        int numberOfReportTablesViews = 0;
-        int numberOfEventReportViews = 0;
-        int numberOfEventChartViews = 0;
-        int totalNumberOfViews = events.size();
+        int numberOfActiveUsers = 0;
+        double numberOfMapViews = 0;
+        double numberOfChartViews = 0;
+        double numberOfReportTablesViews = 0;
+        double numberOfEventReportViews = 0;
+        double numberOfEventChartViews = 0;
+        double totalNumberOfViews = events.size();
         double averageNumberofViews = 0;
-        int numberOfDashboardViews = 0;
-        int numberOfIndicatorsViews = 0;
+        double numberOfDashboardViews = 0;
+        double numberOfIndicatorsViews = 0;
 
         int totalNumberOfUsers = getNumberOfUsers();
 
@@ -271,46 +271,37 @@ public class DefaultDataStatisticsService implements DataStatisticsService
             }
         }
 
-        double averageNumberOfSavedMaps = getNumberOfMaps( startDate );
-        double averageNumberOfSavedCharts = getNumberOfCharts( startDate );
-        double averageNumberOfSavedReportTables = getNumberOfReportTables( startDate );
-        double averageNumberOfSavedEventReports = getNumberOfEventReports( startDate );
-        double averageNumberOfSavedEventCharts = getNumberOfEventCharts( startDate );
-        double averageNumberOfSavedDashboards = getNumberOfDashboards( startDate );
-        double averageNumberOfSavedIndicators = getNumberOfIndicators( startDate );
+        double numberOfSavedMaps = getNumberOfMaps( startDate );
+        double numberOfSavedCharts = getNumberOfCharts( startDate );
+        double numberOfSavedReportTables = getNumberOfReportTables( startDate );
+        double numberOfSavedEventReports = getNumberOfEventReports( startDate );
+        double numberOfSavedEventCharts = getNumberOfEventCharts( startDate );
+        double numberOfSavedDashboards = getNumberOfDashboards( startDate );
+        double numberOfSavedIndicators = getNumberOfIndicators( startDate );
 
-        System.out.println("\n\naverageSavedEventReports: ");
+        numberOfActiveUsers = uniqueUsers.size();
 
-        if( totalNumberOfUsers != 0){
-            averageNumberOfSavedCharts /= totalNumberOfUsers;
-            averageNumberOfSavedDashboards /= totalNumberOfUsers;
-            averageNumberOfSavedEventCharts /= totalNumberOfUsers;
-            averageNumberOfSavedEventReports /= totalNumberOfUsers;
-            averageNumberOfSavedIndicators /= totalNumberOfUsers;
-            averageNumberOfSavedMaps /= totalNumberOfUsers;
-            averageNumberOfSavedReportTables /= totalNumberOfUsers;
-        }
+        if(numberOfActiveUsers != 0)
+            averageNumberofViews = totalNumberOfViews / numberOfActiveUsers;
 
-        numberOfUsers = uniqueUsers.size();
-
-        if(numberOfUsers != 0)
-            averageNumberofViews = totalNumberOfViews / numberOfUsers;
-
-        DataStatistics dataStatistics = new DataStatistics( numberOfUsers, numberOfMapViews, numberOfChartViews,
+        DataStatistics dataStatistics = new DataStatistics( numberOfActiveUsers, numberOfMapViews, numberOfChartViews,
             numberOfReportTablesViews, numberOfEventReportViews, numberOfEventChartViews, numberOfDashboardViews,
-            numberOfIndicatorsViews, totalNumberOfViews, averageNumberofViews, averageNumberOfSavedMaps,
-            averageNumberOfSavedCharts, averageNumberOfSavedReportTables, averageNumberOfSavedEventReports,
-            averageNumberOfSavedEventCharts, averageNumberOfSavedDashboards ,averageNumberOfSavedIndicators ,
+            numberOfIndicatorsViews, totalNumberOfViews, averageNumberofViews, numberOfSavedMaps,
+            numberOfSavedCharts, numberOfSavedReportTables, numberOfSavedEventReports,
+            numberOfSavedEventCharts, numberOfSavedDashboards ,numberOfSavedIndicators ,
             totalNumberOfUsers );
         System.out.println(dataStatistics.toString());
 
-        int id = hibernateDataStatisticsStore.addSnapshot( dataStatistics );
-        if(id == 0){
-            System.out.println("\nCould not save snapshot");
+        try
+        {
+            int id = hibernateDataStatisticsStore.addSnapshot( dataStatistics );
+            System.out.println( "\nSnapshot was saved with id: " + id );
+            return id;
         }
-        else{
-            System.out.println("\nSnapshot was saved with id: " + id);
+        catch ( Exception e )
+        {
+            System.out.println( "Could not save snapshot. Exception: " + e.toString() );
+            return 0;
         }
-        return id;
     }
 }

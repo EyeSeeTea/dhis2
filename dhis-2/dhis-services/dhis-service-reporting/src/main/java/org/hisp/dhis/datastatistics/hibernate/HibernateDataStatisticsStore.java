@@ -126,12 +126,16 @@ public class HibernateDataStatisticsStore extends HibernateGenericStore<DataStat
 
             System.out.println("\n\n\n for: i = " + i + " startDate: " + startDate.get( Calendar.YEAR ) + " nextDate: " + nextDate.get( Calendar.YEAR ) + "\n\n");
 
+            String hql = "from datastatistics";
 
-            List<DataStatistics> tmpList = ((List<DataStatistics>) getSharingCriteria()
+            List<DataStatistics> test = getQuery( hql ).list();
+            return test;
+
+            /*List<DataStatistics> tmpList = ((List<DataStatistics>) getSharingCriteria()
                 .add( Restrictions.ge( "created", startDate.getTime() ) )
                 .add( Restrictions.le( "created", nextDate.getTime() ) ).list());
 
-            DataStatistics dataStatistics = new DataStatistics(  );
+            DataStatistics dataStatistics = new DataStatistics(  );*/
 
            /* for ( DataStatistics ds : tmpList )
             {
