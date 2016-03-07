@@ -110,13 +110,13 @@ public class DefaultDataStatisticsService implements DataStatisticsService
         end.setTime( endDate );
 
         switch ( interval ){
-            case DAY: return hibernateDataStatisticsStore.getSnapshotsInIntervalDay( startDate, endDate );
+            case DAY:  return hibernateDataStatisticsStore.getSnapshotsInIntervalDay( startDate, endDate );
 
-            case WEEK: return hibernateDataStatisticsStore.getSnapshotsInIntervalWeek( start, end );
+            case WEEK:  return hibernateDataStatisticsStore.getSnapshotsInInterval(start, end, Calendar.WEEK_OF_YEAR);
 
-            case MONTH: return hibernateDataStatisticsStore.getSnapshotsInIntervalMonth( start, end );
+            case MONTH: return hibernateDataStatisticsStore.getSnapshotsInInterval(start, end, Calendar.MONTH);
 
-            case YEAR: return hibernateDataStatisticsStore.getSnapshotsInIntervalYear( start, end );
+            case YEAR: return hibernateDataStatisticsStore.getSnapshotsInInterval(start, end, Calendar.YEAR);
 
             default: return hibernateDataStatisticsStore.getSnapshotsInIntervalDay( startDate, endDate );
         }

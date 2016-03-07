@@ -28,14 +28,11 @@ package org.hisp.dhis.datastatistics.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.h2.store.Data;
-import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.transform.AliasToBeanResultTransformer;
 import org.hisp.dhis.datastatistics.DataStatistics;
 import org.hisp.dhis.datastatistics.DataStatisticsStore;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
-import org.hisp.dhis.period.Cal;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -77,29 +74,6 @@ public class HibernateDataStatisticsStore extends HibernateGenericStore<DataStat
             .add( Restrictions.le( "created", endDate ) ).list());
     }
 
-    /**
-     * Creates an aggregated list of snapshots in interval (week)
-     *
-     * @param start of interval
-     * @param end   of interval
-     * @return List of DataStatistics (snapshot)
-     */
-    @Override public List<DataStatistics> getSnapshotsInIntervalWeek( Calendar start, Calendar end )
-    {
-        return null;
-    }
-
-    /**
-     * Creates an aggregated list of snapshots in interval (month)
-     *
-     * @param start of interval
-     * @param end   of interval
-     * @return List of DataStatistics (snapshot)
-     */
-    @Override public List<DataStatistics> getSnapshotsInIntervalMonth( Calendar start, Calendar end )
-    {
-        return null;
-    }
 
     /**
      * Creates an aggregated list of snapshots in interval (year)
@@ -108,26 +82,41 @@ public class HibernateDataStatisticsStore extends HibernateGenericStore<DataStat
      * @param end   of interval
      * @return List of DataStatistics (snapshot)
      */
-    @Override public List<DataStatistics> getSnapshotsInIntervalYear( Calendar start, Calendar end )
+    @Override public List<DataStatistics> getSnapshotsInInterval( Calendar start, Calendar end , int interval )
     {
-        int stop = end.get(Calendar.YEAR) - start.get(Calendar.YEAR);
+        int stop = end.get(interval) - start.get(interval);
         List<DataStatistics> aggregatedSnapshotList = new ArrayList<>();
 
-        Calendar startDate = Calendar.getInstance();
-        Calendar nextDate = Calendar.getInstance();
-
         System.out.println("\n\nStop: " + stop);
-        for(int i = 0; i < stop; i++ ){
 
-            startDate.setTime( start.getTime() );
-            startDate.add(Calendar.YEAR, i);
+        if(stop == 0){
+            getAgregatedData(start.getTime(),end.getTime(),aggregatedSnapshotList);
+        }else{
 
-            nextDate.setTime( startDate.getTime() );
-            nextDate.add( Calendar.YEAR,  1 );
+            Calendar startDate = Calendar.getInstance();
+            Calendar nextDate = Calendar.getInstance();
 
-            System.out.println("\n\n\n for: i = " + i + " startDate: " + startDate.get( Calendar.YEAR ) + " nextDate: " + nextDate.get( Calendar.YEAR ) + "\n\n");
+            for(int i = 0; i < stop; i++ ){
 
-            String hql = "select max(data.numberOfActiveUsers) as numberOfActiveUsers, avg(data.numberOfMapViews) as numberOfMapViews, " +
+                startDate.setTime( start.getTime() );
+                startDate.add(interval, i);
+
+                nextDate.setTime(startDate.getTime());
+                nextDate.add(interval, 1);
+
+                System.out.println("\n\n\n for: i = " + i + " startDate: " + startDate.get(interval)+ " nextDate: " + nextDate.get(interval) + "\n\n");
+                getAgregatedData(startDate.getTime(), nextDate.getTime(), aggregatedSnapshotList);
+
+
+            }
+        }
+        return aggregatedSnapshotList;
+    }
+
+
+    private void getAgregatedData(Date start, Date end, List<DataStatistics> list){
+
+        String hql = "select max(data.numberOfActiveUsers) as numberOfActiveUsers, avg(data.numberOfMapViews) as numberOfMapViews, " +
                 "avg(data.numberOfChartViews) as numberOfChartViews, avg(data.numberOfReportTablesViews) as numberOfReportTablesViews, " +
                 "avg(data.numberOfEventReportViews) as numberOfEventReportViews, avg(data.numberOfEventChartViews) as numberOfEventChartViews, " +
                 "avg(data.numberOfDashboardViews) as numberOfDashboardViews, avg(data.numberOfIndicatorsViews) as numberOfIndicatorsViews, " +
@@ -136,48 +125,15 @@ public class HibernateDataStatisticsStore extends HibernateGenericStore<DataStat
                 "avg(data.numberOfSavedReportTables) as numberOfSavedReportTables, avg(data.numberOfSavedEventReports) as numberOfSavedEventReports, " +
                 "avg(data.numberOfSavedEventCharts) as numberOfSavedEventCharts, avg(data.numberOfSavedDashboards) as numberOfSavedDashboards, " +
                 "avg(data.numberOfSavedIndicators) as numberOfSavedIndicators, max(data.totalNumberOfUsers) as totalNumberOfUsers " +
-                "from " + getClazz().getSimpleName() + " data where (created between '" + startDate.getTime() + "' and '" + nextDate.getTime() + "')";
-
-            /*String hql = "select avg(data.numberOfActiveUsers) as data.numberOfActiveUsers, avg(data.numberOfMapViews) as data.numberOfMapViews, " +
-                "avg(data.numberOfChartViews) as data.numberOfChartViews, avg(data.numberOfReportTablesViews) as data.numberOfReportTablesViews, " +
-                "avg(data.numberOfEventReportViews) as data.numberOfEventReportViews, avg(data.numberOfEventChartViews) as data.numberOfEventChartViews, " +
-                "avg(data.numberOfDashboardViews) as data.numberOfDashboardViews, avg(data.numberOfIndicatorsViews) as data.numberOfIndicatorsViews, " +
-                "sum(data.totalNumberOfViews) as data.totalNumberOfViews, avg(data.averageNumberOfViews) as data.averageNumberOfViews, " +
-                "avg(data.numberOfSavedMaps) as data.numberOfSavedMaps, avg(data.numberOfSavedCharts) as data.numberOfSavedCharts, " +
-                "avg(data.numberOfSavedReportTables) as data.numberOfSavedReportTables, avg(data.numberOfSavedEventReports) as data.numberOfSavedEventReports, " +
-                "avg(data.numberOfSavedEventCharts) as data.numberOfSavedEventCharts, avg(data.numberOfSavedDashboards) as data.numberOfSavedDashboards, " +
-                "avg(data.numberOfSavedIndicators) as data.numberOfSavedIndicators, sum(data.totalNumberOfUsers) as data.totalNumberOfUsers " +
-                "from " + getClazz().getSimpleName() + " data";*/
-
-            //select sum(chartviews)/count(chartviews) as chartvievsum, sum(mapviews)/count(mapviews) as mapviewsum, sum(averagenumindicators)/count(averagenumindicators) as averagenumindicatorssum from datastatistics where (created between '2016-02-16 12:30:00.018' and '2016-02-17 12:35:00.051');
-
-           /*Object data = getQuery( hql ).setResultTransformer(
-               new AliasToBeanResultTransformer(DataStatistics.class) );
-            System.out.println(data.toString());
-            aggregatedSnapshotList.add( (DataStatistics) data );
-            System.out.println(data.toString());*/
+                "from " + getClazz().getSimpleName() + " data where (created between '" + start + "' and '" + end + "')";
 
 
-            List<DataStatistics> test = getQuery( hql )
+        List<DataStatistics> test = getQuery( hql )
                 .setResultTransformer(
-                new AliasToBeanResultTransformer(DataStatistics.class) ).list();
+                        new AliasToBeanResultTransformer(DataStatistics.class)).list();
 
-            aggregatedSnapshotList.add( test.get( 0 ) );
+        list.add( test.get( 0 ) );
 
-            //return aggregatedSnapshotList;
 
-            /*List<DataStatistics> tmpList = ((List<DataStatistics>) getSharingCriteria()
-                .add( Restrictions.ge( "created", startDate.getTime() ) )
-                .add( Restrictions.le( "created", nextDate.getTime() ) ).list());
-
-            DataStatistics dataStatistics = new DataStatistics(  );*/
-
-           /* for ( DataStatistics ds : tmpList )
-            {
-                dataStatistics.accumulate(ds);
-            }*/
-
-        }
-        return aggregatedSnapshotList;
     }
 }
