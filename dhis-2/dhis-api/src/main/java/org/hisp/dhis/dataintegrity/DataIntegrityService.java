@@ -30,10 +30,12 @@ package org.hisp.dhis.dataintegrity;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedMap;
 
 import org.hisp.dhis.common.SetMap;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataset.DataSet;
@@ -63,12 +65,12 @@ public interface DataIntegrityService
     /**
      * Gets all data elements which are not assigned to any data set.
      */
-    Collection<DataElement> getDataElementsWithoutDataSet();
+    List<DataElement> getDataElementsWithoutDataSet();
 
     /**
      * Gets all data elements which are not members of any groups.
      */
-    Collection<DataElement> getDataElementsWithoutGroups();
+    List<DataElement> getDataElementsWithoutGroups();
     
     /**
      * Gets all data elements units which are members of more than one group
@@ -88,6 +90,11 @@ public interface DataIntegrityService
      */
     SortedMap<DataSet, Collection<DataElement>> getDataElementsInDataSetNotInForm();
     
+    /**
+     * Returns all invalid category combinations.
+     */
+    List<DataElementCategoryCombo> getInvalidCategoryCombos();
+    
     // -------------------------------------------------------------------------
     // Section
     // -------------------------------------------------------------------------
@@ -102,7 +109,7 @@ public interface DataIntegrityService
      * Gets all section with invalid category combinations. Invalid means that
      * the data elements in the sections don't have the same category combination.
      */
-    Collection<Section> getSectionsWithInvalidCategoryCombinations();
+    List<Section> getSectionsWithInvalidCategoryCombinations();
     
     // -------------------------------------------------------------------------
     // DataSet
@@ -111,7 +118,7 @@ public interface DataIntegrityService
     /**
      * Gets all data sets which are not assigned to any organisation units.
      */
-    Collection<DataSet> getDataSetsNotAssignedToOrganisationUnits();
+    List<DataSet> getDataSetsNotAssignedToOrganisationUnits();
     
     // -------------------------------------------------------------------------
     // Indicator
@@ -120,12 +127,12 @@ public interface DataIntegrityService
     /**
      * Gets all indicators with identical numerator and denominator.
      */
-    Collection<Collection<Indicator>> getIndicatorsWithIdenticalFormulas();
+    Set<Set<Indicator>> getIndicatorsWithIdenticalFormulas();
 
     /**
      * Gets all indicators which are not assigned to any groups.
      */
-    Collection<Indicator> getIndicatorsWithoutGroups();
+    List<Indicator> getIndicatorsWithoutGroups();
 
     /**
      * Gets all indicators with invalid indicator numerators.
@@ -150,17 +157,17 @@ public interface DataIntegrityService
     /**
      * Gets all organisation units which are related to each other in a cyclic reference.
      */
-    Collection<OrganisationUnit> getOrganisationUnitsWithCyclicReferences();
+    Set<OrganisationUnit> getOrganisationUnitsWithCyclicReferences();
 
     /**
      * Gets all organisation units with no parents or children.
      */
-    Collection<OrganisationUnit> getOrphanedOrganisationUnits();
+    List<OrganisationUnit> getOrphanedOrganisationUnits();
 
     /**
      * Gets all organisation units which are not assigned to any groups.
      */
-    Collection<OrganisationUnit> getOrganisationUnitsWithoutGroups();
+    List<OrganisationUnit> getOrganisationUnitsWithoutGroups();
 
     /**
      * Gets all organisation units which are members of more than one group
@@ -185,7 +192,7 @@ public interface DataIntegrityService
     /**
      * Gets all organisation unit groups which are not assigned to any group set.
      */
-    Collection<OrganisationUnitGroup> getOrganisationUnitGroupsWithoutGroupSets();
+    List<OrganisationUnitGroup> getOrganisationUnitGroupsWithoutGroupSets();
 
     // -------------------------------------------------------------------------
     // ValidationRule
@@ -194,7 +201,7 @@ public interface DataIntegrityService
     /**
      * Gets all ValidationRules which are not members fo one or more groups.
      */
-    Collection<ValidationRule> getValidationRulesWithoutGroups();
+    List<ValidationRule> getValidationRulesWithoutGroups();
     
     /**
      * Gets all ValidationRules with invalid left side expressions.
@@ -205,4 +212,18 @@ public interface DataIntegrityService
      * Gets all ValidationRules with invalid right side expressions.
      */
     SortedMap<ValidationRule, String> getInvalidValidationRuleRightSideExpressions();
+
+    // -------------------------------------------------------------------------
+    // DataIntegrityReport
+    // -------------------------------------------------------------------------
+
+    /**
+     * Returns a DataIntegrityReport.
+     */
+    DataIntegrityReport getDataIntegrityReport();
+
+    /**
+     * Returns a FlattenedDataIntegrityReport.
+     */
+    FlattenedDataIntegrityReport getFlattenedDataIntegrityReport();
 }

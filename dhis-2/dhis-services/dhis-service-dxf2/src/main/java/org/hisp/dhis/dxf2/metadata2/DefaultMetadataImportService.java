@@ -28,11 +28,17 @@ package org.hisp.dhis.dxf2.metadata2;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.base.Enums;
+import org.hisp.dhis.common.MergeMode;
 import org.hisp.dhis.dxf2.metadata2.feedback.ImportReport;
 import org.hisp.dhis.dxf2.metadata2.objectbundle.ObjectBundle;
+import org.hisp.dhis.dxf2.metadata2.objectbundle.ObjectBundleMode;
 import org.hisp.dhis.dxf2.metadata2.objectbundle.ObjectBundleParams;
 import org.hisp.dhis.dxf2.metadata2.objectbundle.ObjectBundleService;
 import org.hisp.dhis.dxf2.metadata2.objectbundle.ObjectBundleValidation;
+import org.hisp.dhis.importexport.ImportStrategy;
+import org.hisp.dhis.preheat.PreheatIdentifier;
+import org.hisp.dhis.preheat.PreheatMode;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -63,10 +69,12 @@ public class DefaultMetadataImportService implements MetadataImportService
         }
 
         ObjectBundleParams bundleParams = params.toObjectBundleParams();
-        ObjectBundle objectBundle = objectBundleService.create( bundleParams );
+        ObjectBundle bundle = objectBundleService.create( bundleParams );
 
-        ObjectBundleValidation validation = objectBundleService.validate( objectBundle );
+        ObjectBundleValidation validation = objectBundleService.validate( bundle );
         report.setErrorReports( validation.getErrorReports() );
+
+        objectBundleService.commit( bundle );
 
         return report;
     }
@@ -75,6 +83,24 @@ public class DefaultMetadataImportService implements MetadataImportService
     public MetadataImportParams getParamsFromMap( Map<String, List<String>> parameters )
     {
         MetadataImportParams params = new MetadataImportParams();
+        params.setObjectBundleMode( getEnumWithDefault( ObjectBundleMode.class, parameters, "objectBundleMode", ObjectBundleMode.COMMIT ) );
+        params.setPreheatMode( getEnumWithDefault( PreheatMode.class, parameters, "preheatMode", PreheatMode.REFERENCE ) );
+        params.setPreheatIdentifier( getEnumWithDefault( PreheatIdentifier.class, parameters, "preheatIdentifier", PreheatIdentifier.UID ) );
+        params.setImportMode( getEnumWithDefault( ImportStrategy.class, parameters, "importMode", ImportStrategy.CREATE_AND_UPDATE ) );
+        params.setMergeMode( getEnumWithDefault( MergeMode.class, parameters, "mergeMode", MergeMode.MERGE ) );
+
         return params;
+    }
+
+    private <T extends Enum<T>> T getEnumWithDefault( Class<T> enumKlass, Map<String, List<String>> parameters, String key, T defaultValue )
+    {
+        if ( parameters == null || parameters.get( key ) == null || parameters.get( key ).isEmpty() )
+        {
+            return defaultValue;
+        }
+
+        String value = String.valueOf( parameters.get( key ).get( 0 ) );
+
+        return Enums.getIfPresent( enumKlass, value ).or( defaultValue );
     }
 }

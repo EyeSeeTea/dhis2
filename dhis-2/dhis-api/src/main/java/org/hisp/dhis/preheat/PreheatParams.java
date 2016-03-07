@@ -1,5 +1,7 @@
 package org.hisp.dhis.preheat;
 
+import com.google.common.base.MoreObjects;
+
 /*
  * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
@@ -29,6 +31,7 @@ package org.hisp.dhis.preheat;
  */
 
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.user.User;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,6 +43,8 @@ import java.util.Set;
  */
 public class PreheatParams
 {
+    private User user;
+
     private PreheatMode preheatMode = PreheatMode.ALL;
 
     private PreheatIdentifier preheatIdentifier = PreheatIdentifier.UID;
@@ -50,6 +55,16 @@ public class PreheatParams
 
     public PreheatParams()
     {
+    }
+
+    public User getUser()
+    {
+        return user;
+    }
+
+    public void setUser( User user )
+    {
+        this.user = user;
     }
 
     public PreheatMode getPreheatMode()
@@ -94,5 +109,18 @@ public class PreheatParams
     {
         this.references = references;
         return this;
+    }
+
+
+    @Override
+    public String toString()
+    {
+        return MoreObjects.toStringHelper( this )
+            .add( "user", user )
+            .add( "preheatMode", preheatMode )
+            .add( "preheatIdentifier", preheatIdentifier )
+            .add( "classes", classes )
+            .add( "references", references )
+            .toString();
     }
 }

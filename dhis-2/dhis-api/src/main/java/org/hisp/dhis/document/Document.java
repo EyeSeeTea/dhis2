@@ -38,8 +38,6 @@ import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeMode;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
-import org.hisp.dhis.schema.PropertyType;
-import org.hisp.dhis.schema.annotation.Property;
 
 /**
  * @author Lars Helge Overland
@@ -77,7 +75,7 @@ public class Document
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    @Property( PropertyType.URL )
+    // @Property( PropertyType.URL )
     public String getUrl()
     {
         return url;

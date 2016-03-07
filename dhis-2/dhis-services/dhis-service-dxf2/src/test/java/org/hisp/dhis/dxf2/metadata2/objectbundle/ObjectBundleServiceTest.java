@@ -28,8 +28,10 @@ package org.hisp.dhis.dxf2.metadata2.objectbundle;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.collect.Sets;
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.attribute.Attribute;
+import org.hisp.dhis.common.IdScheme;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.MergeMode;
@@ -37,9 +39,11 @@ import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dxf2.metadata2.MetadataExportService;
 import org.hisp.dhis.feedback.ErrorCode;
 import org.hisp.dhis.feedback.ErrorReport;
 import org.hisp.dhis.importexport.ImportStrategy;
+import org.hisp.dhis.node.NodeService;
 import org.hisp.dhis.option.Option;
 import org.hisp.dhis.option.OptionSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -51,6 +55,7 @@ import org.hisp.dhis.render.RenderFormat;
 import org.hisp.dhis.render.RenderService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserAuthorityGroup;
+import org.hisp.dhis.user.UserGroup;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -72,6 +77,12 @@ public class ObjectBundleServiceTest
 
     @Autowired
     private IdentifiableObjectManager manager;
+
+    @Autowired
+    private MetadataExportService metadataExportService;
+
+    @Autowired
+    private NodeService nodeService;
 
     @Autowired
     private RenderService _renderService;
@@ -238,8 +249,8 @@ public class ObjectBundleServiceTest
         ObjectBundle bundle = objectBundleService.create( params );
         ObjectBundleValidation validate = objectBundleService.validate( bundle );
 
-        assertFalse( validate.getValidationViolations().isEmpty() );
-        assertEquals( 2, validate.getValidationViolations().get( DataElement.class ).size() );
+        assertFalse( validate.getErrorReports().isEmpty() );
+        assertEquals( 2, validate.getErrorReports().get( DataElement.class ).size() );
     }
 
     @Test
@@ -257,7 +268,7 @@ public class ObjectBundleServiceTest
         ObjectBundle bundle = objectBundleService.create( params );
         ObjectBundleValidation validate = objectBundleService.validate( bundle );
 
-        assertEquals( 3, validate.getErrorReports( DataElement.class, ErrorCode.E5000 ).size() );
+        assertEquals( 3, validate.getErrorReports( DataElement.class, ErrorCode.E5001 ).size() );
     }
 
     @Test
@@ -276,8 +287,9 @@ public class ObjectBundleServiceTest
         ObjectBundle bundle = objectBundleService.create( params );
         ObjectBundleValidation validate = objectBundleService.validate( bundle );
 
-        assertEquals( 1, validate.getErrorReports( DataElement.class ).size() );
-        assertEquals( 2, bundle.getObjects().get( DataElement.class ).size() );
+        assertEquals( 1, validate.getErrorReports( DataElement.class ).get( ErrorCode.E5001 ).size() );
+        assertFalse( validate.getErrorReports( DataElement.class ).get( ErrorCode.E4000 ).isEmpty() );
+        assertEquals( 0, bundle.getObjects().get( DataElement.class ).size() );
     }
 
     @Test
@@ -296,7 +308,7 @@ public class ObjectBundleServiceTest
         ObjectBundleValidation validate = objectBundleService.validate( bundle );
 
         assertFalse( validate.getErrorReports( DataElement.class ).isEmpty() );
-        assertEquals( 3, validate.getErrorReports( DataElement.class, ErrorCode.E5000 ).size() );
+        assertEquals( 3, validate.getErrorReports( DataElement.class, ErrorCode.E5001 ).size() );
     }
 
     @Test
@@ -315,7 +327,7 @@ public class ObjectBundleServiceTest
         ObjectBundleValidation validate = objectBundleService.validate( bundle );
 
         assertFalse( validate.getErrorReports( DataElement.class ).isEmpty() );
-        assertEquals( 3, validate.getErrorReports( DataElement.class, ErrorCode.E5000 ).size() );
+        assertEquals( 3, validate.getErrorReports( DataElement.class, ErrorCode.E5001 ).size() );
     }
 
     @Test
@@ -334,7 +346,7 @@ public class ObjectBundleServiceTest
         ObjectBundleValidation validate = objectBundleService.validate( bundle );
 
         assertFalse( validate.getErrorReports( DataElement.class ).isEmpty() );
-        assertEquals( 3, validate.getErrorReports( DataElement.class, ErrorCode.E5000 ).size() );
+        assertEquals( 3, validate.getErrorReports( DataElement.class, ErrorCode.E5001 ).size() );
     }
 
     @Test
@@ -353,7 +365,7 @@ public class ObjectBundleServiceTest
         ObjectBundleValidation validate = objectBundleService.validate( bundle );
 
         assertFalse( validate.getErrorReports( DataElement.class ).isEmpty() );
-        assertEquals( 3, validate.getErrorReports( DataElement.class, ErrorCode.E5000 ).size() );
+        assertEquals( 3, validate.getErrorReports( DataElement.class, ErrorCode.E5001 ).size() );
     }
 
     @Test
@@ -372,7 +384,7 @@ public class ObjectBundleServiceTest
         ObjectBundleValidation validate = objectBundleService.validate( bundle );
 
         assertFalse( validate.getErrorReports( DataElement.class ).isEmpty() );
-        assertEquals( 3, validate.getErrorReports( DataElement.class, ErrorCode.E5000 ).size() );
+        assertEquals( 3, validate.getErrorReports( DataElement.class, ErrorCode.E5001 ).size() );
     }
 
     @Test
@@ -567,7 +579,7 @@ public class ObjectBundleServiceTest
     public void testValidateMetadataAttributeValuesUniqueAndMandatoryUID() throws IOException
     {
         Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> metadata = renderService.fromMetadata(
-            new ClassPathResource( "dxf2/metadata_av_unique_and_mandatory.json" ).getInputStream(), RenderFormat.JSON );
+            new ClassPathResource( "dxf2/simple_metadata_uga.json" ).getInputStream(), RenderFormat.JSON );
 
         ObjectBundleParams params = new ObjectBundleParams();
         params.setObjectBundleMode( ObjectBundleMode.VALIDATE );
@@ -575,6 +587,155 @@ public class ObjectBundleServiceTest
 
         ObjectBundle bundle = objectBundleService.create( params );
         ObjectBundleValidation validation = objectBundleService.validate( bundle );
+    }
+
+    @Test
+    public void testCreateDataSetsWithUgaUID() throws IOException
+    {
+        Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> metadata = renderService.fromMetadata(
+            new ClassPathResource( "dxf2/simple_metadata_uga.json" ).getInputStream(), RenderFormat.JSON );
+
+        ObjectBundleParams params = new ObjectBundleParams();
+        params.setObjectBundleMode( ObjectBundleMode.COMMIT );
+        params.setImportMode( ImportStrategy.CREATE );
+        params.setObjects( metadata );
+
+        ObjectBundle bundle = objectBundleService.create( params );
+        objectBundleService.validate( bundle );
+        objectBundleService.commit( bundle );
+
+        List<OrganisationUnit> organisationUnits = manager.getAll( OrganisationUnit.class );
+        List<DataElement> dataElements = manager.getAll( DataElement.class );
+        List<UserAuthorityGroup> userRoles = manager.getAll( UserAuthorityGroup.class );
+        List<User> users = manager.getAll( User.class );
+        List<UserGroup> userGroups = manager.getAll( UserGroup.class );
+
+        assertEquals( 1, organisationUnits.size() );
+        assertEquals( 2, dataElements.size() );
+        assertEquals( 1, userRoles.size() );
+        assertEquals( 1, users.size() );
+        assertEquals( 2, userGroups.size() );
+
+        assertEquals( 1, dataElements.get( 0 ).getUserGroupAccesses().size() );
+        assertEquals( 1, dataElements.get( 1 ).getUserGroupAccesses().size() );
+    }
+
+    @Test
+    public void testUpdateDataElementsUID() throws IOException
+    {
+        defaultSetup();
+
+        Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> metadata = renderService.fromMetadata(
+            new ClassPathResource( "dxf2/de_update1.json" ).getInputStream(), RenderFormat.JSON );
+
+        ObjectBundleParams params = new ObjectBundleParams();
+        params.setObjectBundleMode( ObjectBundleMode.COMMIT );
+        params.setPreheatMode( PreheatMode.REFERENCE );
+        params.setImportMode( ImportStrategy.UPDATE );
+        params.setObjects( metadata );
+
+        Map<String, DataElement> dataElementMap = manager.getIdMap( DataElement.class, IdScheme.UID );
+        UserGroup userGroup = manager.get( UserGroup.class, "ugabcdefghA" );
+        assertEquals( 4, dataElementMap.size() );
+        assertNotNull( userGroup );
+
+        ObjectBundle bundle = objectBundleService.create( params );
+        objectBundleService.validate( bundle );
+        objectBundleService.commit( bundle );
+
+        DataElement dataElementA = dataElementMap.get( "deabcdefghA" );
+        DataElement dataElementB = dataElementMap.get( "deabcdefghB" );
+        DataElement dataElementC = dataElementMap.get( "deabcdefghC" );
+        DataElement dataElementD = dataElementMap.get( "deabcdefghD" );
+
+        assertNotNull( dataElementA );
+        assertNotNull( dataElementB );
+        assertNotNull( dataElementC );
+        assertNotNull( dataElementD );
+
+        assertEquals( "DEA", dataElementA.getName() );
+        assertEquals( "DEB", dataElementB.getName() );
+        assertEquals( "DEC", dataElementC.getName() );
+        assertEquals( "DED", dataElementD.getName() );
+
+        assertEquals( "DECA", dataElementA.getCode() );
+        assertEquals( "DECB", dataElementB.getCode() );
+        assertEquals( "DECC", dataElementC.getCode() );
+        assertEquals( "DECD", dataElementD.getCode() );
+
+        assertEquals( "DESA", dataElementA.getShortName() );
+        assertEquals( "DESB", dataElementB.getShortName() );
+        assertEquals( "DESC", dataElementC.getShortName() );
+        assertEquals( "DESD", dataElementD.getShortName() );
+
+        assertEquals( "DEDA", dataElementA.getDescription() );
+        assertEquals( "DEDB", dataElementB.getDescription() );
+        assertEquals( "DEDC", dataElementC.getDescription() );
+        assertEquals( "DEDD", dataElementD.getDescription() );
+
+        assertEquals( 1, dataElementA.getUserGroupAccesses().size() );
+        assertEquals( 0, dataElementB.getUserGroupAccesses().size() );
+        assertEquals( 1, dataElementC.getUserGroupAccesses().size() );
+        assertEquals( 0, dataElementD.getUserGroupAccesses().size() );
+    }
+
+    @Test
+    public void testUpdateDataElementsCODE() throws IOException
+    {
+        defaultSetup();
+
+        Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> metadata = renderService.fromMetadata(
+            new ClassPathResource( "dxf2/de_update2.json" ).getInputStream(), RenderFormat.JSON );
+
+        ObjectBundleParams params = new ObjectBundleParams();
+        params.setObjectBundleMode( ObjectBundleMode.COMMIT );
+        params.setPreheatIdentifier( PreheatIdentifier.CODE );
+        params.setImportMode( ImportStrategy.UPDATE );
+        params.setObjects( metadata );
+
+        Map<String, DataElement> dataElementMap = manager.getIdMap( DataElement.class, IdScheme.UID );
+        UserGroup userGroup = manager.get( UserGroup.class, "ugabcdefghA" );
+        assertEquals( 4, dataElementMap.size() );
+        assertNotNull( userGroup );
+
+        ObjectBundle bundle = objectBundleService.create( params );
+        objectBundleService.validate( bundle );
+        objectBundleService.commit( bundle );
+
+        DataElement dataElementA = dataElementMap.get( "deabcdefghA" );
+        DataElement dataElementB = dataElementMap.get( "deabcdefghB" );
+        DataElement dataElementC = dataElementMap.get( "deabcdefghC" );
+        DataElement dataElementD = dataElementMap.get( "deabcdefghD" );
+
+        assertNotNull( dataElementA );
+        assertNotNull( dataElementB );
+        assertNotNull( dataElementC );
+        assertNotNull( dataElementD );
+
+        assertEquals( "DEA", dataElementA.getName() );
+        assertEquals( "DEB", dataElementB.getName() );
+        assertEquals( "DEC", dataElementC.getName() );
+        assertEquals( "DED", dataElementD.getName() );
+
+        assertEquals( "DataElementCodeA", dataElementA.getCode() );
+        assertEquals( "DataElementCodeB", dataElementB.getCode() );
+        assertEquals( "DataElementCodeC", dataElementC.getCode() );
+        assertEquals( "DataElementCodeD", dataElementD.getCode() );
+
+        assertEquals( "DESA", dataElementA.getShortName() );
+        assertEquals( "DESB", dataElementB.getShortName() );
+        assertEquals( "DESC", dataElementC.getShortName() );
+        assertEquals( "DESD", dataElementD.getShortName() );
+
+        assertEquals( "DEDA", dataElementA.getDescription() );
+        assertEquals( "DEDB", dataElementB.getDescription() );
+        assertEquals( "DEDC", dataElementC.getDescription() );
+        assertEquals( "DEDD", dataElementD.getDescription() );
+
+        assertEquals( 1, dataElementA.getUserGroupAccesses().size() );
+        assertEquals( 0, dataElementB.getUserGroupAccesses().size() );
+        assertEquals( 1, dataElementC.getUserGroupAccesses().size() );
+        assertEquals( 0, dataElementD.getUserGroupAccesses().size() );
     }
 
     private void defaultSetup()
@@ -591,5 +752,8 @@ public class ObjectBundleServiceTest
 
         User user = createUser( 'A' );
         manager.save( user );
+
+        UserGroup userGroup = createUserGroup( 'A', Sets.newHashSet( user ) );
+        manager.save( userGroup );
     }
 }

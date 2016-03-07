@@ -35,9 +35,9 @@ import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
-import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.dxf2.metadata2.objectbundle.hooks.ObjectBundleHook;
 import org.hisp.dhis.feedback.ErrorCode;
+import org.hisp.dhis.feedback.ErrorReport;
 import org.hisp.dhis.preheat.Preheat;
 import org.hisp.dhis.preheat.PreheatErrorReport;
 import org.hisp.dhis.preheat.PreheatIdentifier;
@@ -46,7 +46,6 @@ import org.hisp.dhis.preheat.PreheatParams;
 import org.hisp.dhis.preheat.PreheatService;
 import org.hisp.dhis.schema.SchemaService;
 import org.hisp.dhis.schema.validation.SchemaValidator;
-import org.hisp.dhis.schema.validation.ValidationViolation;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -99,6 +98,7 @@ public class DefaultObjectBundleService implements ObjectBundleService
         }
 
         PreheatParams preheatParams = params.getPreheatParams();
+        preheatParams.setUser( params.getUser() );
 
         if ( PreheatMode.REFERENCE == preheatParams.getPreheatMode() )
         {
@@ -172,7 +172,24 @@ public class DefaultObjectBundleService implements ObjectBundleService
 
         for ( Class<? extends IdentifiableObject> klass : klasses )
         {
-            if ( bundle.getImportMode().isUpdate() || bundle.getImportMode().isDelete() )
+            if ( bundle.getImportMode().isCreate() )
+            {
+                Iterator<IdentifiableObject> iterator = bundle.getObjects().get( klass ).iterator();
+
+                while ( iterator.hasNext() )
+                {
+                    IdentifiableObject identifiableObject = iterator.next();
+                    IdentifiableObject object = bundle.getPreheat().get( bundle.getPreheatIdentifier(), identifiableObject );
+
+                    if ( object != null && object.getId() > 0 )
+                    {
+                        objectBundleValidation.addErrorReport( klass, ErrorCode.E5000, bundle.getPreheatIdentifier(),
+                            bundle.getPreheatIdentifier().getIdentifiersWithName( identifiableObject ) );
+                        iterator.remove();
+                    }
+                }
+            }
+            else if ( bundle.getImportMode().isUpdate() || bundle.getImportMode().isDelete() )
             {
                 Iterator<IdentifiableObject> iterator = bundle.getObjects().get( klass ).iterator();
 
@@ -183,29 +200,32 @@ public class DefaultObjectBundleService implements ObjectBundleService
 
                     if ( object == null )
                     {
-                        objectBundleValidation.addErrorReport( klass, ErrorCode.E5000, bundle.getPreheatIdentifier(),
-                            bundle.getPreheatIdentifier().getIdentifiers( identifiableObject ) );
+                        objectBundleValidation.addErrorReport( klass, ErrorCode.E5001, bundle.getPreheatIdentifier(),
+                            bundle.getPreheatIdentifier().getIdentifiersWithName( identifiableObject ) );
                         iterator.remove();
                     }
                 }
             }
 
-            List<List<PreheatErrorReport>> referenceErrors = preheatService.checkReferences( bundle.getObjects().get( klass ), bundle.getPreheat(), bundle.getPreheatIdentifier() );
-            referenceErrors.forEach( objectBundleValidation::addErrorReports ); // collapsing for now, we might want to give pr object ref list
+            List<List<PreheatErrorReport>> referencesErrorReports = preheatService.checkReferences( bundle.getObjects().get( klass ), bundle.getPreheat(), bundle.getPreheatIdentifier() );
+            referencesErrorReports.forEach( objectBundleValidation::addErrorReports ); // collapsing for now, we might want to give pr object ref list
 
-            List<List<ValidationViolation>> validationViolations = new ArrayList<>();
-
-            for ( IdentifiableObject object : bundle.getObjects().get( klass ) )
+            if ( !bundle.getImportMode().isDelete() )
             {
-                List<ValidationViolation> validate = schemaValidator.validate( object );
+                Iterator<IdentifiableObject> iterator = bundle.getObjects().get( klass ).iterator();
 
-                if ( !validate.isEmpty() )
+                while ( iterator.hasNext() )
                 {
-                    validationViolations.add( validate );
+                    IdentifiableObject object = iterator.next();
+                    List<ErrorReport> validationErrorReports = schemaValidator.validate( object );
+
+                    if ( !validationErrorReports.isEmpty() )
+                    {
+                        objectBundleValidation.addErrorReports( validationErrorReports );
+                        iterator.remove();
+                    }
                 }
             }
-
-            objectBundleValidation.addValidationViolation( klass, validationViolations );
         }
 
         bundle.setObjectBundleStatus( ObjectBundleStatus.VALIDATED );
@@ -278,6 +298,8 @@ public class DefaultObjectBundleService implements ObjectBundleService
 
     private void handleCreates( List<IdentifiableObject> objects, ObjectBundle bundle )
     {
+        log.info( "Creating " + objects.size() + " object of type " + objects.get( 0 ).getClass().getSimpleName() );
+
         for ( IdentifiableObject object : objects )
         {
             if ( Preheat.isDefault( object ) ) continue;
@@ -285,7 +307,7 @@ public class DefaultObjectBundleService implements ObjectBundleService
             objectBundleHooks.forEach( hook -> hook.preCreate( object, bundle ) );
 
             preheatService.connectReferences( object, bundle.getPreheat(), bundle.getPreheatIdentifier() );
-            manager.save( object, bundle.getUser() );
+            manager.save( object, bundle.getUser(), false );
 
             bundle.getPreheat().put( bundle.getPreheatIdentifier(), object );
 
@@ -293,7 +315,7 @@ public class DefaultObjectBundleService implements ObjectBundleService
 
             if ( log.isDebugEnabled() )
             {
-                String msg = "Created object '" + IdentifiableObjectUtils.getDisplayName( object ) + "'";
+                String msg = "Created object '" + bundle.getPreheatIdentifier().getIdentifiersWithName( object ) + "'";
                 log.debug( msg );
             }
         }
@@ -301,11 +323,36 @@ public class DefaultObjectBundleService implements ObjectBundleService
 
     private void handleUpdates( List<IdentifiableObject> objects, ObjectBundle bundle )
     {
+        log.info( "Updating " + objects.size() + " object of type " + objects.get( 0 ).getClass().getSimpleName() );
 
+        for ( IdentifiableObject object : objects )
+        {
+            if ( Preheat.isDefault( object ) ) continue;
+
+            objectBundleHooks.forEach( hook -> hook.preUpdate( object, bundle ) );
+
+            preheatService.connectReferences( object, bundle.getPreheat(), bundle.getPreheatIdentifier() );
+
+            IdentifiableObject persistedObject = bundle.getPreheat().get( bundle.getPreheatIdentifier(), object );
+            persistedObject.mergeWith( object, bundle.getMergeMode() );
+            persistedObject.mergeSharingWith( object );
+
+            sessionFactory.getCurrentSession().update( persistedObject );
+
+            objectBundleHooks.forEach( hook -> hook.postUpdate( persistedObject, bundle ) );
+
+            if ( log.isDebugEnabled() )
+            {
+                String msg = "Updated object '" + bundle.getPreheatIdentifier().getIdentifiersWithName( persistedObject ) + "'";
+                log.debug( msg );
+            }
+        }
     }
 
     private void handleDeletes( List<IdentifiableObject> objects, ObjectBundle bundle )
     {
+        log.info( "Deleting " + objects.size() + " object of type " + objects.get( 0 ).getClass().getSimpleName() );
+
         List<IdentifiableObject> persistedObjects = bundle.getPreheat().getAll( bundle.getPreheatIdentifier(), objects );
 
         for ( IdentifiableObject object : persistedObjects )
@@ -317,7 +364,7 @@ public class DefaultObjectBundleService implements ObjectBundleService
 
             if ( log.isDebugEnabled() )
             {
-                String msg = "Deleted object '" + IdentifiableObjectUtils.getDisplayName( object ) + "'";
+                String msg = "Deleted object '" + bundle.getPreheatIdentifier().getIdentifiersWithName( object ) + "'";
                 log.debug( msg );
             }
         }

@@ -32,6 +32,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.google.common.base.MoreObjects;
 import org.hisp.dhis.common.DxfNamespaces;
 
 /**
@@ -116,5 +117,14 @@ public class UserGroupAccess
     public void setUserGroup( UserGroup userGroup )
     {
         this.userGroup = userGroup;
+    }
+
+    @Override
+    public String toString()
+    {
+        return MoreObjects.toStringHelper( this )
+            .add( "id", id )
+            .add( "access", access )
+            .toString();
     }
 }

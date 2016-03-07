@@ -31,6 +31,7 @@ package org.hisp.dhis.datastatistics.hibernate;
 import org.h2.store.Data;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.transform.AliasToBeanResultTransformer;
 import org.hisp.dhis.datastatistics.DataStatistics;
 import org.hisp.dhis.datastatistics.DataStatisticsStore;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
@@ -126,10 +127,44 @@ public class HibernateDataStatisticsStore extends HibernateGenericStore<DataStat
 
             System.out.println("\n\n\n for: i = " + i + " startDate: " + startDate.get( Calendar.YEAR ) + " nextDate: " + nextDate.get( Calendar.YEAR ) + "\n\n");
 
-            String hql = "from datastatistics";
+            String hql = "select max(data.numberOfActiveUsers) as numberOfActiveUsers, avg(data.numberOfMapViews) as numberOfMapViews, " +
+                "avg(data.numberOfChartViews) as numberOfChartViews, avg(data.numberOfReportTablesViews) as numberOfReportTablesViews, " +
+                "avg(data.numberOfEventReportViews) as numberOfEventReportViews, avg(data.numberOfEventChartViews) as numberOfEventChartViews, " +
+                "avg(data.numberOfDashboardViews) as numberOfDashboardViews, avg(data.numberOfIndicatorsViews) as numberOfIndicatorsViews, " +
+                "max(data.totalNumberOfViews) as totalNumberOfViews, avg(data.averageNumberOfViews) as averageNumberOfViews, " +
+                "avg(data.numberOfSavedMaps) as numberOfSavedMaps, avg(data.numberOfSavedCharts) as numberOfSavedCharts, " +
+                "avg(data.numberOfSavedReportTables) as numberOfSavedReportTables, avg(data.numberOfSavedEventReports) as numberOfSavedEventReports, " +
+                "avg(data.numberOfSavedEventCharts) as numberOfSavedEventCharts, avg(data.numberOfSavedDashboards) as numberOfSavedDashboards, " +
+                "avg(data.numberOfSavedIndicators) as numberOfSavedIndicators, max(data.totalNumberOfUsers) as totalNumberOfUsers " +
+                "from " + getClazz().getSimpleName() + " data where (created between '" + startDate.getTime() + "' and '" + nextDate.getTime() + "')";
 
-            List<DataStatistics> test = getQuery( hql ).list();
-            return test;
+            /*String hql = "select avg(data.numberOfActiveUsers) as data.numberOfActiveUsers, avg(data.numberOfMapViews) as data.numberOfMapViews, " +
+                "avg(data.numberOfChartViews) as data.numberOfChartViews, avg(data.numberOfReportTablesViews) as data.numberOfReportTablesViews, " +
+                "avg(data.numberOfEventReportViews) as data.numberOfEventReportViews, avg(data.numberOfEventChartViews) as data.numberOfEventChartViews, " +
+                "avg(data.numberOfDashboardViews) as data.numberOfDashboardViews, avg(data.numberOfIndicatorsViews) as data.numberOfIndicatorsViews, " +
+                "sum(data.totalNumberOfViews) as data.totalNumberOfViews, avg(data.averageNumberOfViews) as data.averageNumberOfViews, " +
+                "avg(data.numberOfSavedMaps) as data.numberOfSavedMaps, avg(data.numberOfSavedCharts) as data.numberOfSavedCharts, " +
+                "avg(data.numberOfSavedReportTables) as data.numberOfSavedReportTables, avg(data.numberOfSavedEventReports) as data.numberOfSavedEventReports, " +
+                "avg(data.numberOfSavedEventCharts) as data.numberOfSavedEventCharts, avg(data.numberOfSavedDashboards) as data.numberOfSavedDashboards, " +
+                "avg(data.numberOfSavedIndicators) as data.numberOfSavedIndicators, sum(data.totalNumberOfUsers) as data.totalNumberOfUsers " +
+                "from " + getClazz().getSimpleName() + " data";*/
+
+            //select sum(chartviews)/count(chartviews) as chartvievsum, sum(mapviews)/count(mapviews) as mapviewsum, sum(averagenumindicators)/count(averagenumindicators) as averagenumindicatorssum from datastatistics where (created between '2016-02-16 12:30:00.018' and '2016-02-17 12:35:00.051');
+
+           /*Object data = getQuery( hql ).setResultTransformer(
+               new AliasToBeanResultTransformer(DataStatistics.class) );
+            System.out.println(data.toString());
+            aggregatedSnapshotList.add( (DataStatistics) data );
+            System.out.println(data.toString());*/
+
+
+            List<DataStatistics> test = getQuery( hql )
+                .setResultTransformer(
+                new AliasToBeanResultTransformer(DataStatistics.class) ).list();
+
+            aggregatedSnapshotList.add( test.get( 0 ) );
+
+            //return aggregatedSnapshotList;
 
             /*List<DataStatistics> tmpList = ((List<DataStatistics>) getSharingCriteria()
                 .add( Restrictions.ge( "created", startDate.getTime() ) )
@@ -143,6 +178,6 @@ public class HibernateDataStatisticsStore extends HibernateGenericStore<DataStat
             }*/
 
         }
-        return null;
+        return aggregatedSnapshotList;
     }
 }
