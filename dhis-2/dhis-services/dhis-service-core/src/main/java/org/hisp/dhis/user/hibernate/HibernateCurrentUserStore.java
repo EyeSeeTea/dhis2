@@ -1,4 +1,4 @@
-package org.hisp.dhis.sms.outbound;
+package org.hisp.dhis.user.hibernate;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -28,49 +28,29 @@ package org.hisp.dhis.sms.outbound;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Map;
-
-import org.hisp.dhis.sms.SmsServiceException;
-import org.hisp.dhis.sms.config.SMSGatewayStatus;
-import org.hisp.dhis.sms.config.SmsConfigurable;
-import org.hisp.dhis.sms.config.SmsConfiguration;
+import org.hibernate.Query;
+import org.hibernate.SessionFactory;
+import org.hisp.dhis.user.CurrentUserStore;
+import org.hisp.dhis.user.UserCredentials;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * Marker interface for {@code OutboundSmsService outbound sms services}
- * providing actual SMS sending.
+ * @author Lars Helge Overland
  */
-public interface OutboundSmsTransportService
-    extends SmsConfigurable
+public class HibernateCurrentUserStore
+    implements CurrentUserStore
 {
-    Map<String, String> getGatewayMap();
-
-    void updateGatewayMap( String key );
-
-    void stopService();
-
-    void startService();
-
-    void reloadConfig()
-        throws SmsServiceException;
-
-    String getServiceStatus();
-
-    String getMessageStatus();
-
-    String getDefaultGateway();
-
-    SMSServiceStatus getServiceStatusEnum();
-
-    SMSGatewayStatus getGatewayStatus();
-
-    boolean isEnabled();
+    @Autowired
+    private SessionFactory sessionFactory;
 
     @Override
-    String initialize( SmsConfiguration smsConfiguration )
-        throws SmsServiceException;
-
-    String sendMessage( OutboundSms sms, String gatewayId )
-        throws SmsServiceException;
-    
-    boolean sendAyncMessage( OutboundSms sms, String gatewayId );
+    public UserCredentials getUserCredentialsByUsername( String username )
+    {
+        String hql = "from UserCredentials uc where uc.username = :username";
+        
+        Query query = sessionFactory.getCurrentSession().createQuery( hql );
+        query.setString( "username", username );
+        
+        return (UserCredentials) query.uniqueResult();
+    }
 }

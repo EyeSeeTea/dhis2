@@ -35,6 +35,7 @@ import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.MergeMode;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.feedback.ErrorCode;
+import org.hisp.dhis.feedback.ObjectErrorReport;
 import org.hisp.dhis.query.Query;
 import org.hisp.dhis.query.QueryService;
 import org.hisp.dhis.query.Restrictions;
@@ -437,12 +438,29 @@ public class DefaultPreheatService implements PreheatService
     }
 
     @Override
-    public List<List<PreheatErrorReport>> checkReferences( List<IdentifiableObject> objects, Preheat preheat, PreheatIdentifier identifier )
+    public List<ObjectErrorReport> checkReferences( List<IdentifiableObject> objects, Preheat preheat, PreheatIdentifier identifier )
     {
-        List<List<PreheatErrorReport>> preheatErrorReports = new ArrayList<>();
-        objects.forEach( object -> preheatErrorReports.add( checkReferences( object, preheat, identifier ) ) );
+        List<ObjectErrorReport> objectErrorReports = new ArrayList<>();
 
-        return preheatErrorReports;
+        if ( objects.isEmpty() )
+        {
+            return objectErrorReports;
+        }
+
+        for ( int i = 0; i < objects.size(); i++ )
+        {
+            IdentifiableObject object = objects.get( i );
+            List<PreheatErrorReport> errorReports = checkReferences( object, preheat, identifier );
+
+            if ( errorReports.isEmpty() ) continue;
+
+            ObjectErrorReport objectErrorReport = new ObjectErrorReport( object.getClass(), i );
+            objectErrorReport.addErrorReports( errorReports );
+            objectErrorReports.add( objectErrorReport );
+
+        }
+
+        return objectErrorReports;
     }
 
     @Override
@@ -469,7 +487,7 @@ public class DefaultPreheatService implements PreheatService
                     IdentifiableObject refObject = ReflectionUtils.invokeMethod( object, p.getGetterMethod() );
                     IdentifiableObject ref = preheat.get( identifier, refObject );
 
-                    if ( ref == null && refObject != null && !Preheat.isDefault( refObject ) )
+                    if ( ref == null && refObject != null && !Preheat.isDefaultClass( refObject.getClass() ) )
                     {
                         preheatErrorReports.add( new PreheatErrorReport( identifier, object.getClass(), ErrorCode.E5002,
                             identifier.getIdentifiersWithName( refObject ), identifier.getIdentifiersWithName( object ), p.getName() ) );
@@ -486,7 +504,7 @@ public class DefaultPreheatService implements PreheatService
 
                         IdentifiableObject ref = preheat.get( identifier, refObject );
 
-                        if ( ref == null && refObject != null )
+                        if ( ref == null && refObject != null && !Preheat.isDefaultClass( refObject.getClass() ) )
                         {
                             preheatErrorReports.add( new PreheatErrorReport( identifier, object.getClass(), ErrorCode.E5002,
                                 identifier.getIdentifiersWithName( refObject ), identifier.getIdentifiersWithName( object ), p.getCollectionName() ) );
@@ -500,6 +518,22 @@ public class DefaultPreheatService implements PreheatService
                     ReflectionUtils.invokeMethod( object, p.getSetterMethod(), objects );
                 }
             } );
+
+        if ( schema.havePersistedProperty( "attributeValues" ) )
+        {
+            object.getAttributeValues().stream()
+                .filter( attributeValue -> attributeValue.getAttribute() != null && preheat.get( identifier, attributeValue.getAttribute() ) == null )
+                .forEach( attributeValue -> preheatErrorReports.add( new PreheatErrorReport( identifier, object.getClass(), ErrorCode.E5002,
+                    identifier.getIdentifiersWithName( attributeValue.getAttribute() ), identifier.getIdentifiersWithName( object ), "attributeValues" ) ) );
+        }
+
+        if ( schema.havePersistedProperty( "userGroupAccesses" ) )
+        {
+            object.getUserGroupAccesses().stream()
+                .filter( userGroupAccess -> userGroupAccess.getUserGroup() != null && preheat.get( identifier, userGroupAccess.getUserGroup() ) == null )
+                .forEach( attributeValue -> preheatErrorReports.add( new PreheatErrorReport( identifier, object.getClass(), ErrorCode.E5002,
+                    identifier.getIdentifiersWithName( attributeValue.getUserGroup() ), identifier.getIdentifiersWithName( object ), "userGroupAccesses" ) ) );
+        }
 
         return preheatErrorReports;
     }

@@ -178,12 +178,13 @@ public class HibernateTranslationStore
     }
 
     @Override
-    public boolean haveTranslations( String className )
+    public boolean hasTranslations( String className )
     {
         Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( Translation.class );
         criteria.add( Restrictions.eq( "className", className ) );
+        criteria.setMaxResults( 1 );
 
         criteria.setCacheable( true );
 

@@ -1,4 +1,4 @@
-package org.hisp.dhis.sms.outbound;
+package org.hisp.dhis.user;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -28,49 +28,10 @@ package org.hisp.dhis.sms.outbound;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Map;
-
-import org.hisp.dhis.sms.SmsServiceException;
-import org.hisp.dhis.sms.config.SMSGatewayStatus;
-import org.hisp.dhis.sms.config.SmsConfigurable;
-import org.hisp.dhis.sms.config.SmsConfiguration;
-
 /**
- * Marker interface for {@code OutboundSmsService outbound sms services}
- * providing actual SMS sending.
+ * @author Lars Helge Overland
  */
-public interface OutboundSmsTransportService
-    extends SmsConfigurable
+public interface CurrentUserStore
 {
-    Map<String, String> getGatewayMap();
-
-    void updateGatewayMap( String key );
-
-    void stopService();
-
-    void startService();
-
-    void reloadConfig()
-        throws SmsServiceException;
-
-    String getServiceStatus();
-
-    String getMessageStatus();
-
-    String getDefaultGateway();
-
-    SMSServiceStatus getServiceStatusEnum();
-
-    SMSGatewayStatus getGatewayStatus();
-
-    boolean isEnabled();
-
-    @Override
-    String initialize( SmsConfiguration smsConfiguration )
-        throws SmsServiceException;
-
-    String sendMessage( OutboundSms sms, String gatewayId )
-        throws SmsServiceException;
-    
-    boolean sendAyncMessage( OutboundSms sms, String gatewayId );
+    UserCredentials getUserCredentialsByUsername( String username );
 }

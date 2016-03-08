@@ -28,49 +28,55 @@ package org.hisp.dhis.sms.outbound;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.smslib.AGateway;
+import org.smslib.IOutboundMessageNotification;
+import org.smslib.OutboundMessage;
+import org.smslib.OutboundMessage.MessageStatuses;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import org.hisp.dhis.sms.SmsServiceException;
-import org.hisp.dhis.sms.config.SMSGatewayStatus;
-import org.hisp.dhis.sms.config.SmsConfigurable;
-import org.hisp.dhis.sms.config.SmsConfiguration;
-
-/**
- * Marker interface for {@code OutboundSmsService outbound sms services}
- * providing actual SMS sending.
- */
-public interface OutboundSmsTransportService
-    extends SmsConfigurable
+public class DefaultOutboundNotification
+    implements IOutboundMessageNotification
 {
-    Map<String, String> getGatewayMap();
 
-    void updateGatewayMap( String key );
+    private static final Log log = LogFactory.getLog( DefaultOutboundNotification.class );
 
-    void stopService();
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
 
-    void startService();
+    @Autowired
+    private OutboundSmsService outboundSmsService;
 
-    void reloadConfig()
-        throws SmsServiceException;
+    private OutboundSms outboundSms;
 
-    String getServiceStatus();
+    public void setOutboundSms( OutboundSms outboundSms )
+    {
+        this.outboundSms = outboundSms;
+    }
 
-    String getMessageStatus();
-
-    String getDefaultGateway();
-
-    SMSServiceStatus getServiceStatusEnum();
-
-    SMSGatewayStatus getGatewayStatus();
-
-    boolean isEnabled();
+    // -------------------------------------------------------------------------
+    // Implementation
+    // -------------------------------------------------------------------------
 
     @Override
-    String initialize( SmsConfiguration smsConfiguration )
-        throws SmsServiceException;
+    public void process( AGateway gateway, OutboundMessage msg )
+    {
+        log.info( "SENDING via " + gateway.getGatewayId() + " " );
 
-    String sendMessage( OutboundSms sms, String gatewayId )
-        throws SmsServiceException;
-    
-    boolean sendAyncMessage( OutboundSms sms, String gatewayId );
+        outboundSms = outboundSmsService.convertToOutboundSms( msg );
+        outboundSmsService.saveOutboundSms( outboundSms );
+
+        if ( msg.getMessageStatus() == MessageStatuses.SENT )
+        {
+            log.info( "SENT To ::: " + msg.getRecipient() );
+        }
+        else
+        {
+            log.info( "FAILED To ::: " + msg.getRecipient() );
+        }
+
+    }
+
 }

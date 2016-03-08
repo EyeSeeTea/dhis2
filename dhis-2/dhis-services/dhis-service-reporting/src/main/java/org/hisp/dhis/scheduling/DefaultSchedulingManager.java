@@ -34,10 +34,14 @@ import java.util.Map;
 import java.util.Set;
 
 import org.hisp.dhis.common.ListMap;
+import org.hisp.dhis.fileresource.FileResourceCleanUpTask;
 import org.hisp.dhis.setting.SettingKey;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.scheduling.ScheduledTaskStatus;
 import org.hisp.dhis.system.scheduling.Scheduler;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 
 /**
  * Cron refers to the cron expression used for scheduling. Key refers to the key
@@ -46,7 +50,7 @@ import org.hisp.dhis.system.scheduling.Scheduler;
  * @author Lars Helge Overland
  */
 public class DefaultSchedulingManager
-    implements SchedulingManager
+    implements ApplicationListener<ContextRefreshedEvent>, SchedulingManager
 {
     // -------------------------------------------------------------------------
     // Dependencies
@@ -73,12 +77,22 @@ public class DefaultSchedulingManager
         this.tasks = tasks;
     }
     
+    @Autowired
+    private FileResourceCleanUpTask fileResourceCleanUpTask;
+    
     // TODO Avoid map, use bean identifier directly and get bean from context
 
     // -------------------------------------------------------------------------
     // SchedulingManager implementation
     // -------------------------------------------------------------------------
 
+    @Override
+    public void onApplicationEvent( ContextRefreshedEvent contextRefreshedEvent )
+    {
+        scheduleTasks();
+        scheduleFixedTasks();
+    }
+    
     @Override
     public void scheduleTasks()
     {        
@@ -93,6 +107,11 @@ public class DefaultSchedulingManager
                 scheduler.scheduleTask( cron, scheduledTasks, cron );
             }
         }
+    }
+    
+    private void scheduleFixedTasks()
+    {
+        scheduler.scheduleTask( FileResourceCleanUpTask.KEY_TASK, fileResourceCleanUpTask, Scheduler.CRON_DAILY_2AM );
     }
     
     @Override

@@ -30,6 +30,8 @@ package org.hisp.dhis.sms.outbound;
 
 import java.util.List;
 
+import org.smslib.OutboundMessage;
+
 public interface OutboundSmsService
 {
     String ID = OutboundSmsService.class.getName();
@@ -49,4 +51,6 @@ public interface OutboundSmsService
     List<OutboundSms> getOutboundSms( OutboundSmsStatus status, Integer min, Integer max );
 
     OutboundSms getOutboundSms( int id );
+    
+    OutboundSms convertToOutboundSms (OutboundMessage sms);
 }

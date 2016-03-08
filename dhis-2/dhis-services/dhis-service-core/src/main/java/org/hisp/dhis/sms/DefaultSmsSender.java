@@ -203,6 +203,19 @@ public class DefaultSmsSender
         return message;
     }
 
+    @Transactional
+    @Override
+    public boolean sendAyncMessage( OutboundSms sms )
+        throws SmsServiceException
+    {
+        if ( transportService == null || !transportService.isEnabled() )
+        {
+            throw new SmsServiceNotEnabledException();
+        }
+
+        return transportService.sendAyncMessage( sms, transportService.getDefaultGateway() );
+    }
+
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
