@@ -28,6 +28,8 @@ package org.hisp.dhis.datastatistics;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.common.GenericStore;
+
 import java.util.Date;
 import java.util.List;
 
@@ -35,15 +37,8 @@ import java.util.List;
  * @author Yrjan A. F. Fraschetti
  * @author Julie Hill Roa
  */
-public interface DataStatisticsEventStore
+public interface DataStatisticsEventStore extends GenericStore<DataStatisticsEvent>
 {
-    /**
-     * Saves a DataStatisticsEvent object
-     * @param dataStatistics event
-     * @return id of event
-     */
-    int addDataStatisticsEvent(DataStatisticsEvent dataStatistics);
-
     /**
      * Finds the number of events in a given interval
      * @param startDate of interval
@@ -57,5 +52,5 @@ public interface DataStatisticsEventStore
      * @param date start of interval
      * @return list og objects
      */
-    List<DataStatisticsEvent> getDataStatisticsEventList( Date date );
+    List<DataStatisticsEvent> getDataStatisticsEventCount( Date date );
 }

@@ -87,11 +87,11 @@ public class HibernateDataStatisticsEventStoreTest extends DhisSpringTest
         testDate = c.getTime();
 
 
-        dse1 = new DataStatisticsEvent( EventType.REPORT_TABLE, endDate, 10 );
-        dse2 = new DataStatisticsEvent( EventType.EVENT_CHART, endDate, 10 );
-        dse3 = new DataStatisticsEvent( EventType.CHART, endDate, 10 );
-        dse4 = new DataStatisticsEvent( EventType.DASHBOARD, endDate, 10 );
-        dse5 = new DataStatisticsEvent( EventType.INDICATOR, testDate, 10 );
+        dse1 = new DataStatisticsEvent( EventType.REPORT_TABLE_VIEWS, endDate, "Testuser" );
+        dse2 = new DataStatisticsEvent( EventType.EVENT_CHART_VIEWS, endDate, "TestUser" );
+        dse3 = new DataStatisticsEvent( EventType.CHART_VIEWS, endDate, "Testuser" );
+        dse4 = new DataStatisticsEvent( EventType.DASHBOARD_VIEWS, endDate, "TestUser" );
+        dse5 = new DataStatisticsEvent( EventType.INDICATOR_VIEWS, testDate, "Testuser" );
 
 
         dse1Id = 0;
@@ -101,8 +101,8 @@ public class HibernateDataStatisticsEventStoreTest extends DhisSpringTest
     @Test
     public void testAddDataStatisticsEvent() throws Exception
     {
-        dse1Id = dataStatisticsEventStore.addDataStatisticsEvent( dse1 );
-        dse2Id = dataStatisticsEventStore.addDataStatisticsEvent( dse2 );
+        dse1Id = dataStatisticsEventStore.save( dse1 );
+        dse2Id = dataStatisticsEventStore.save( dse2 );
 
         assertTrue( dse1Id != 0 );
         assertTrue( dse2Id != 0 );
@@ -111,8 +111,8 @@ public class HibernateDataStatisticsEventStoreTest extends DhisSpringTest
     @Test
     public void testGetNumberOfEvents() throws Exception
     {
-        dataStatisticsEventStore.addDataStatisticsEvent( dse3 );
-        dataStatisticsEventStore.addDataStatisticsEvent( dse4 );
+        dataStatisticsEventStore.save( dse3 );
+        dataStatisticsEventStore.save( dse4 );
 
         int numberOfEvents = dataStatisticsEventStore.getNumberOfEvents( startDate, endDate );
 
@@ -122,7 +122,7 @@ public class HibernateDataStatisticsEventStoreTest extends DhisSpringTest
     @Test
     public void testGetNumberOfEventsNotInInterval() throws Exception
     {
-        dataStatisticsEventStore.addDataStatisticsEvent( dse5 );
+        dataStatisticsEventStore.save( dse5 );
 
         int numberOfEvents = dataStatisticsEventStore.getNumberOfEvents( startDate, endDate );
 
@@ -132,13 +132,13 @@ public class HibernateDataStatisticsEventStoreTest extends DhisSpringTest
     @Test
     public void testGetDataStatisticsEventList() throws Exception
     {
-        dataStatisticsEventStore.addDataStatisticsEvent( dse1 );
-        dataStatisticsEventStore.addDataStatisticsEvent( dse2 );
-        dataStatisticsEventStore.addDataStatisticsEvent( dse3 );
-        dataStatisticsEventStore.addDataStatisticsEvent( dse4 );
-        dataStatisticsEventStore.addDataStatisticsEvent( dse5 );
+        dataStatisticsEventStore.save( dse1 );
+        dataStatisticsEventStore.save( dse2 );
+        dataStatisticsEventStore.save( dse3 );
+        dataStatisticsEventStore.save( dse4 );
+        dataStatisticsEventStore.save( dse5 );
 
-        List<DataStatisticsEvent> eventList = dataStatisticsEventStore.getDataStatisticsEventList( startDate );
+        List<DataStatisticsEvent> eventList = dataStatisticsEventStore.getDataStatisticsEventCount( startDate );
 
         assertTrue( eventList.size() == 4 );
         assertTrue( eventList.contains( dse1 ) );

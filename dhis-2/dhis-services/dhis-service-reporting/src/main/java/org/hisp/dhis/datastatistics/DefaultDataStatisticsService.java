@@ -37,7 +37,6 @@ import org.hisp.dhis.mapping.MappingService;
 import org.hisp.dhis.reporttable.ReportTableService;
 import org.hisp.dhis.user.UserService;
 import org.joda.time.DateTime;
-import org.joda.time.Days;
 import org.joda.time.Months;
 import org.joda.time.Weeks;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,18 +94,18 @@ public class DefaultDataStatisticsService implements DataStatisticsService
     @Override
     public int addEvent(DataStatisticsEvent event)
     {
-        return hibernateDataStatisticsEventStore.addDataStatisticsEvent( event );
+        return hibernateDataStatisticsEventStore.save( event );
     }
 
     /**
      * gets number of saved Reports from a start date too a end date
      * @param startDate - From date
      * @param endDate - Too date
-     * @param interval - Enum Interval (YEAR, MONTH, WEEK, DAY)
+     * @param eventInterval - Enum EventInterval (YEAR, MONTH, WEEK, DAY)
      * @return list of reports
      */
     @Override
-    public List<AggregatedStatistics> getReports(Date startDate, Date endDate, Interval interval)
+    public List<AggregatedStatistics> getReports(Date startDate, Date endDate, EventInterval eventInterval )
     {
         Calendar start = Calendar.getInstance();
         start.setTime( startDate );
@@ -117,7 +116,7 @@ public class DefaultDataStatisticsService implements DataStatisticsService
         DateTime startDateTime = new DateTime(start.getTime());
         DateTime endDateTime = new DateTime(end.getTime());
 
-        switch ( interval ){
+        switch ( eventInterval ){
             case DAY: return hibernateDataStatisticsStore.getSnapshotsInIntervalDay( startDate, endDate);
 
             case WEEK: return hibernateDataStatisticsStore.getSnapshotsInInterval(start, end, Calendar.WEEK_OF_YEAR, Weeks.weeksBetween(startDateTime,endDateTime).getWeeks());
@@ -231,49 +230,49 @@ public class DefaultDataStatisticsService implements DataStatisticsService
     /**
      * Gets all important information and creates a Datastatistics object and saves it in db
      */
-    @Override public int saveSnapshot()
+    @Override public int saveSnapshot( )
     {
-        Date startDate = new Date();
-        Calendar c = Calendar.getInstance();
+        Date startDate = new Date( );
+        Calendar c = Calendar.getInstance( );
         c.setTime( startDate );
-        c.add(Calendar.DATE, -1);
-        startDate = c.getTime();
+        c.add( Calendar.DATE, -1);
+        startDate = c.getTime( );
 
-        //TODO Lagre antall unike brukere, antall av hver enum, gjennomsnitt, total, når på døgnet folk er mest aktive
-        List<DataStatisticsEvent> events = hibernateDataStatisticsEventStore.getDataStatisticsEventList(startDate);
-        List<Integer> uniqueUsers = new ArrayList<>();
+        List<DataStatisticsEvent> events = hibernateDataStatisticsEventStore.getDataStatisticsEventCount( startDate );
+        List<String> uniqueUsers = new ArrayList<>( );
         int numberOfActiveUsers = 0;
         double numberOfMapViews = 0;
         double numberOfChartViews = 0;
         double numberOfReportTablesViews = 0;
         double numberOfEventReportViews = 0;
         double numberOfEventChartViews = 0;
-        double totalNumberOfViews = events.size();
+        double totalNumberOfViews = events.size( );
         double averageNumberofViews = 0;
         double numberOfDashboardViews = 0;
         double numberOfIndicatorsViews = 0;
 
-        int totalNumberOfUsers = getNumberOfUsers();
+        int totalNumberOfUsers = getNumberOfUsers( );
 
-        for(DataStatisticsEvent e : events){
-            switch ( e.getType() ) {
-                case CHART: numberOfChartViews++;
+        for( DataStatisticsEvent e : events ){
+            switch ( e.getType( ) ) {
+                case CHART_VIEWS: numberOfChartViews++;
                     break;
-                case MAP: numberOfMapViews++;
+                case MAP_VIEWS: numberOfMapViews++;
                     break;
-                case DASHBOARD: numberOfDashboardViews++;
+                case DASHBOARD_VIEWS: numberOfDashboardViews++;
                     break;
-                case REPORT_TABLE: numberOfReportTablesViews++;
+                case REPORT_TABLE_VIEWS: numberOfReportTablesViews++;
                     break;
-                case EVENT_REPORT: numberOfEventReportViews++;
+                case EVENT_REPORT_VIEWS: numberOfEventReportViews++;
                     break;
-                case EVENT_CHART: numberOfEventChartViews++;
+                case EVENT_CHART_VIEWS: numberOfEventChartViews++;
                     break;
-                case INDICATOR: numberOfIndicatorsViews++;
+                case INDICATOR_VIEWS: numberOfIndicatorsViews++;
                     break;
             }
-            if(!uniqueUsers.contains( e.getUserId())){
-                uniqueUsers.add( e.getUserId() );
+
+            if(!uniqueUsers.contains( e.getUserName( ) ) ){
+                uniqueUsers.add( e.getUserName( ) );
             }
         }
 
@@ -285,9 +284,9 @@ public class DefaultDataStatisticsService implements DataStatisticsService
         double numberOfSavedDashboards = getNumberOfDashboards( startDate );
         double numberOfSavedIndicators = getNumberOfIndicators( startDate );
 
-        numberOfActiveUsers = uniqueUsers.size();
+        numberOfActiveUsers = uniqueUsers.size( );
 
-        if(numberOfActiveUsers != 0)
+        if( numberOfActiveUsers != 0 )
             averageNumberofViews = totalNumberOfViews / numberOfActiveUsers;
 
         DataStatistics dataStatistics = new DataStatistics( numberOfActiveUsers, numberOfMapViews, numberOfChartViews,
@@ -296,7 +295,7 @@ public class DefaultDataStatisticsService implements DataStatisticsService
             numberOfSavedCharts, numberOfSavedReportTables, numberOfSavedEventReports,
             numberOfSavedEventCharts, numberOfSavedDashboards ,numberOfSavedIndicators ,
             totalNumberOfUsers );
-        System.out.println(dataStatistics.toString());
+        System.out.println( dataStatistics.toString( ) );
 
         try
         {

@@ -47,73 +47,73 @@ public interface DataStatisticsService
     int addEvent(DataStatisticsEvent event);
 
     /**
-     * Generates a list of DataStatistics snapshots in the given interval
+     * Generates a list of DataStatistics snapshots in the given eventInterval
      * @param startDate
      * @param endDate
-     * @param interval
+     * @param eventInterval
      * @return
      */
-    List<AggregatedStatistics> getReports(Date startDate, Date endDate, Interval interval);
+    List<AggregatedStatistics> getReports(Date startDate, Date endDate, EventInterval eventInterval );
 
     /**
-     * Finds number of charts in interval date to current date
+     * Finds number of charts in eventInterval date to current date
      * @param date
      * @return
      */
     int getNumberOfCharts(Date date);
 
     /**
-     * Finds number of report tables in interval date to current date
+     * Finds number of report tables in eventInterval date to current date
      * @param date
      * @return
      */
     int getNumberOfReportTables(Date date);
 
     /**
-     * Finds number of favorite views in interval
-     * @param startDate of interval
-     * @param endDate of interval
+     * Finds number of favorite views in eventInterval
+     * @param startDate of eventInterval
+     * @param endDate of eventInterval
      * @return
      */
     int getNumberOfFavoriteViews(Date startDate, Date endDate);
 
     /**
-     * Finds number of maps in interval date to current date
+     * Finds number of maps in eventInterval date to current date
      * @param date
      * @return
      */
     int getNumberOfMaps(Date date);
 
     /**
-     * Finds number of event reports in interval date to current date
+     * Finds number of event reports in eventInterval date to current date
      * @param date
      * @return
      */
     int getNumberOfEventReports(Date date);
 
     /**
-     * Finds number of event charts in interval date to current date
+     * Finds number of event charts in eventInterval date to current date
      * @param date
      * @return
      */
     int getNumberOfEventCharts(Date date);
 
     /**
-     * Finds number of dashboards in interval date to current date
+     * Finds number of dashboards in eventInterval date to current date
      * @param date
      * @return
      */
     int getNumberOfDashboards(Date date);
 
     /**
-     * Finds number of indicators in interval date to current date
+     * Finds number of indicators in eventInterval date to current date
      * @param date
      * @return
      */
     int getNumberOfIndicators(Date date);
 
     /**
-     * Finds number of active users in interval date to current date
+     * Finds number of active users in eventInterval date to current date
      * @return
      */
     int getNumberOfUsers();

@@ -41,15 +41,15 @@ public class DataStatisticsEvent
     int id;
     EventType type;
     Date timestamp;
-    int userId;
+    String userName;
 
     public DataStatisticsEvent(){}
 
-    public DataStatisticsEvent( EventType type, Date timestamp, int userId )
+    public DataStatisticsEvent( EventType type, Date timestamp, String userName )
     {
         this.type = type;
         this.timestamp = timestamp;
-        this.userId = userId;
+        this.userName = userName;
     }
 
     public int getId()
@@ -67,9 +67,9 @@ public class DataStatisticsEvent
         return type;
     }
 
-    public int getUserId()
+    public String getUserName()
     {
-        return userId;
+        return userName;
     }
 
     public void setId( int id )
@@ -87,8 +87,8 @@ public class DataStatisticsEvent
         this.type = type;
     }
 
-    public void setUserId( int userId )
+    public void setUserName( String userName )
     {
-        this.userId = userId;
+        this.userName = userName;
     }
 }

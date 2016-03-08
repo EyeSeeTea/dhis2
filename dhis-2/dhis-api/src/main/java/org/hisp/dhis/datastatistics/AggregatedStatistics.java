@@ -15,257 +15,321 @@ public class AggregatedStatistics
 
     Date startInterval;
     Date endInterval;
+    Integer activeUsers;
+    Double mapViews;
+    Double chartViews;
+    Double reportTablesViews;
+    Double eventReportViews;
+    Double eventChartViews;
+    Double dashboardViews;
+    Double indicatorsViews;
+    Double totalViews;
+    Double averageViews;
+    Double savedMaps;
+    Double savedCharts;
+    Double savedReportTables;
+    Double savedEventReports;
+    Double savedEventCharts;
+    Double savedDashboards;
+    Double savedIndicators;
+    Integer users;
 
-    int maxNumberOfActiveUsers;
-    double aggregatedMapViews;
-    double aggregatedChartViews;
-    double aggregatedReportTablesViews;
-    double aggregatedEventReportViews;
-    double aggregatedEventChartViews;
-    double aggregatedDashboardViews;
-    double aggregatedIndicatorsViews;
-    double maxTotalNumberOfViews;
-    double averageNumberOfViews;
-    double aggregatedSavedMaps;
-    double aggregatedSavedCharts;
-    double aggregatedSavedReportTables;
-    double aggregatedSavedEventReports;
-    double aggregatedSavedEventCharts;
-    double aggregatedSavedDashboards;
-    double aggregatedSavedIndicators;
+    public AggregatedStatistics( Date startInterval, Date endInterval, Integer activeUsers, Double mapViews, Double chartViews,
+        Double reportTablesViews, Double eventReportViews, Double eventChartViews, Double dashboardViews, Double indicatorsViews,
+        Double totalViews, Double averageViews, Double savedMaps, Double savedCharts, Double savedReportTables, Double savedEventReports,
+        Double savedEventCharts, Double savedDashboards, Double savedIndicators, Integer users )
+    {
+        this.startInterval = startInterval;
+        this.endInterval = endInterval;
+        this.activeUsers = activeUsers;
+        this.mapViews = mapViews;
+        this.chartViews = chartViews;
+        this.reportTablesViews = reportTablesViews;
+        this.eventReportViews = eventReportViews;
+        this.eventChartViews = eventChartViews;
+        this.dashboardViews = dashboardViews;
+        this.indicatorsViews = indicatorsViews;
+        this.totalViews = totalViews;
+        this.averageViews = averageViews;
+        this.savedMaps = savedMaps;
+        this.savedCharts = savedCharts;
+        this.savedReportTables = savedReportTables;
+        this.savedEventReports = savedEventReports;
+        this.savedEventCharts = savedEventCharts;
+        this.savedDashboards = savedDashboards;
+        this.savedIndicators = savedIndicators;
+        this.users = users;
+    }
 
-    int maxTotalNumberOfUsers;
-
-    public AggregatedStatistics(int maxNumberOfActiveUsers, double aggregatedMapViews, double aggregatedChartViews, double aggregatedReportTablesViews, double aggregatedEventReportViews, double aggregatedEventChartViews, double aggregatedDashboardViews, double aggregatedIndicatorsViews, double maxTotalNumberOfViews, double averageNumberOfViews, double aggregatedSavedMaps, double aggregatedSavedCharts, double aggregatedSavedReportTables, double aggregatedSavedEventReports, double aggregatedSavedEventCharts, double aggregatedSavedDashboards, double aggregatedSavedIndicators, int maxTotalNumberOfUsers) {
-        this.maxNumberOfActiveUsers = maxNumberOfActiveUsers;
-        this.aggregatedMapViews = aggregatedMapViews;
-        this.aggregatedChartViews = aggregatedChartViews;
-        this.aggregatedReportTablesViews = aggregatedReportTablesViews;
-        this.aggregatedEventReportViews = aggregatedEventReportViews;
-        this.aggregatedEventChartViews = aggregatedEventChartViews;
-        this.aggregatedDashboardViews = aggregatedDashboardViews;
-        this.aggregatedIndicatorsViews = aggregatedIndicatorsViews;
-        this.maxTotalNumberOfViews = maxTotalNumberOfViews;
-        this.averageNumberOfViews = averageNumberOfViews;
-        this.aggregatedSavedMaps = aggregatedSavedMaps;
-        this.aggregatedSavedCharts = aggregatedSavedCharts;
-        this.aggregatedSavedReportTables = aggregatedSavedReportTables;
-        this.aggregatedSavedEventReports = aggregatedSavedEventReports;
-        this.aggregatedSavedEventCharts = aggregatedSavedEventCharts;
-        this.aggregatedSavedDashboards = aggregatedSavedDashboards;
-        this.aggregatedSavedIndicators = aggregatedSavedIndicators;
-        this.maxTotalNumberOfUsers = maxTotalNumberOfUsers;
+    public AggregatedStatistics( Integer activeUsers, Double mapViews, Double chartViews, Double reportTablesViews,
+        Double eventReportViews, Double eventChartViews, Double dashboardViews, Double indicatorsViews, Double totalViews,
+        Double averageViews, Double savedMaps, Double savedCharts, Double savedReportTables, Double savedEventReports,
+        Double savedEventCharts, Double savedDashboards, Double savedIndicators, Integer users )
+    {
+        this.activeUsers = activeUsers;
+        this.mapViews = mapViews;
+        this.chartViews = chartViews;
+        this.reportTablesViews = reportTablesViews;
+        this.eventReportViews = eventReportViews;
+        this.eventChartViews = eventChartViews;
+        this.dashboardViews = dashboardViews;
+        this.indicatorsViews = indicatorsViews;
+        this.totalViews = totalViews;
+        this.averageViews = averageViews;
+        this.savedMaps = savedMaps;
+        this.savedCharts = savedCharts;
+        this.savedReportTables = savedReportTables;
+        this.savedEventReports = savedEventReports;
+        this.savedEventCharts = savedEventCharts;
+        this.savedDashboards = savedDashboards;
+        this.savedIndicators = savedIndicators;
+        this.users = users;
     }
 
     @JsonProperty
-    public Date getStartInterval() {
+    public Date getStartInterval()
+    {
         return startInterval;
     }
 
-    public void setStartInterval(Date startInterval) {
+    public void setStartInterval( Date startInterval )
+    {
         this.startInterval = startInterval;
     }
 
     @JsonProperty
-    public Date getEndInterval() {
+    public Date getEndInterval()
+    {
         return endInterval;
     }
 
-    @JsonProperty
-    public void setEndInterval(Date endInterval) {
+    public void setEndInterval( Date endInterval )
+    {
         this.endInterval = endInterval;
     }
 
-
-
     @JsonProperty
-    public double getAggregatedMapViews() {
-        return aggregatedMapViews;
+    public Integer getActiveUsers()
+    {
+        return activeUsers;
     }
 
-    public void setAggregatedMapViews(double aggregatedMapViews) {
-        this.aggregatedMapViews = aggregatedMapViews;
-    }
-
-    @JsonProperty
-    public double getAggregatedChartViews() {
-        return aggregatedChartViews;
-    }
-
-    public void setAggregatedChartViews(double aggregatedChartViews) {
-        this.aggregatedChartViews = aggregatedChartViews;
+    public void setActiveUsers( Integer activeUsers )
+    {
+        this.activeUsers = activeUsers;
     }
 
     @JsonProperty
-    public double getAggregatedReportTablesViews() {
-        return aggregatedReportTablesViews;
+    public Double getMapViews()
+    {
+        return mapViews;
     }
 
-    public void setAggregatedReportTablesViews(double aggregatedReportTablesViews) {
-        this.aggregatedReportTablesViews = aggregatedReportTablesViews;
-    }
-
-    @JsonProperty
-    public double getAggregatedEventReportViews() {
-        return aggregatedEventReportViews;
-    }
-
-    public void setAggregatedEventReportViews(double aggregatedEventReportViews) {
-        this.aggregatedEventReportViews = aggregatedEventReportViews;
+    public void setMapViews( Double mapViews )
+    {
+        this.mapViews = mapViews;
     }
 
     @JsonProperty
-    public double getAggregatedEventChartViews() {
-        return aggregatedEventChartViews;
+    public Double getChartViews()
+    {
+        return chartViews;
     }
 
-    public void setAggregatedEventChartViews(double aggregatedEventChartViews) {
-        this.aggregatedEventChartViews = aggregatedEventChartViews;
-    }
-
-    @JsonProperty
-    public double getAggregatedDashboardViews() {
-        return aggregatedDashboardViews;
-    }
-
-    public void setAggregatedDashboardViews(double aggregatedDashboardViews) {
-        this.aggregatedDashboardViews = aggregatedDashboardViews;
+    public void setChartViews( Double chartViews )
+    {
+        this.chartViews = chartViews;
     }
 
     @JsonProperty
-    public double getAggregatedIndicatorsViews() {
-        return aggregatedIndicatorsViews;
+    public Double getReportTablesViews()
+    {
+        return reportTablesViews;
     }
 
-    public void setAggregatedIndicatorsViews(double aggregatedIndicatorsViews) {
-        this.aggregatedIndicatorsViews = aggregatedIndicatorsViews;
-    }
-
-    @JsonProperty
-    public int getMaxNumberOfActiveUsers() {
-        return maxNumberOfActiveUsers;
-    }
-
-    public void setMaxNumberOfActiveUsers(int maxNumberOfActiveUsers) {
-        this.maxNumberOfActiveUsers = maxNumberOfActiveUsers;
+    public void setReportTablesViews( Double reportTablesViews )
+    {
+        this.reportTablesViews = reportTablesViews;
     }
 
     @JsonProperty
-    public double getMaxTotalNumberOfViews() {
-        return maxTotalNumberOfViews;
+    public Double getEventReportViews()
+    {
+        return eventReportViews;
     }
 
-    public void setMaxTotalNumberOfViews(double maxTotalNumberOfViews) {
-        this.maxTotalNumberOfViews = maxTotalNumberOfViews;
-    }
-
-    @JsonProperty
-    public double getAverageNumberOfViews() {
-        return averageNumberOfViews;
-    }
-
-    public void setAverageNumberOfViews(double averageNumberOfViews) {
-        this.averageNumberOfViews = averageNumberOfViews;
+    public void setEventReportViews( Double eventReportViews )
+    {
+        this.eventReportViews = eventReportViews;
     }
 
     @JsonProperty
-    public int getMaxTotalNumberOfUsers() {
-        return maxTotalNumberOfUsers;
+    public Double getEventChartViews()
+    {
+        return eventChartViews;
     }
 
-    public void setMaxTotalNumberOfUsers(int maxTotalNumberOfUsers) {
-        this.maxTotalNumberOfUsers = maxTotalNumberOfUsers;
-    }
-
-    @JsonProperty
-    public double getAggregatedSavedMaps() {
-        return aggregatedSavedMaps;
-    }
-
-    public void setAggregatedSavedMaps(double aggregatedSavedMaps) {
-        this.aggregatedSavedMaps = aggregatedSavedMaps;
+    public void setEventChartViews( Double eventChartViews )
+    {
+        this.eventChartViews = eventChartViews;
     }
 
     @JsonProperty
-    public double getAggregatedSavedCharts() {
-        return aggregatedSavedCharts;
+    public Double getDashboardViews()
+    {
+        return dashboardViews;
     }
 
-    public void setAggregatedSavedCharts(double aggregatedSavedCharts) {
-        this.aggregatedSavedCharts = aggregatedSavedCharts;
-    }
-
-    @JsonProperty
-    public double getAggregatedSavedReportTables() {
-        return aggregatedSavedReportTables;
-    }
-
-    public void setAggregatedSavedReportTables(double aggregatedSavedReportTables) {
-        this.aggregatedSavedReportTables = aggregatedSavedReportTables;
+    public void setDashboardViews( Double dashboardViews )
+    {
+        this.dashboardViews = dashboardViews;
     }
 
     @JsonProperty
-    public double getAggregatedSavedEventReports() {
-        return aggregatedSavedEventReports;
+    public Double getIndicatorsViews()
+    {
+        return indicatorsViews;
     }
 
-    public void setAggregatedSavedEventReports(double aggregatedSavedEventReports) {
-        this.aggregatedSavedEventReports = aggregatedSavedEventReports;
-    }
-
-    @JsonProperty
-    public double getAggregatedSavedEventCharts() {
-        return aggregatedSavedEventCharts;
+    public void setIndicatorsViews( Double indicatorsViews )
+    {
+        this.indicatorsViews = indicatorsViews;
     }
 
     @JsonProperty
-    public void setAggregatedSavedEventCharts(double aggregatedSavedEventCharts) {
-        this.aggregatedSavedEventCharts = aggregatedSavedEventCharts;
+    public Double getTotalViews()
+    {
+        return totalViews;
+    }
+
+    public void setTotalViews( Double totalViews )
+    {
+        this.totalViews = totalViews;
     }
 
     @JsonProperty
-    public double getAggregatedSavedDashboards() {
-        return aggregatedSavedDashboards;
+    public Double getAverageViews()
+    {
+        return averageViews;
+    }
+
+    public void setAverageViews( Double averageViews )
+    {
+        this.averageViews = averageViews;
     }
 
     @JsonProperty
-    public void setAggregatedSavedDashboards(double aggregatedSavedDashboards) {
-        this.aggregatedSavedDashboards = aggregatedSavedDashboards;
+    public Double getSavedMaps()
+    {
+        return savedMaps;
     }
 
-    public double getAggregatedSavedIndicators() {
-        return aggregatedSavedIndicators;
+    public void setSavedMaps( Double savedMaps )
+    {
+        this.savedMaps = savedMaps;
     }
 
     @JsonProperty
-    public void setAggregatedSavedIndicators(double aggregatedSavedIndicators) {
-        this.aggregatedSavedIndicators = aggregatedSavedIndicators;
+    public Double getSavedCharts()
+    {
+        return savedCharts;
     }
 
+    public void setSavedCharts( Double savedCharts )
+    {
+        this.savedCharts = savedCharts;
+    }
+
+    @JsonProperty
+    public Double getSavedReportTables()
+    {
+        return savedReportTables;
+    }
+
+    public void setSavedReportTables( Double savedReportTables )
+    {
+        this.savedReportTables = savedReportTables;
+    }
+
+    @JsonProperty
+    public Double getSavedEventReports()
+    {
+        return savedEventReports;
+    }
+
+    public void setSavedEventReports( Double savedEventReports )
+    {
+        this.savedEventReports = savedEventReports;
+    }
+
+    @JsonProperty
+    public Double getSavedEventCharts()
+    {
+        return savedEventCharts;
+    }
+
+    public void setSavedEventCharts( Double savedEventCharts )
+    {
+        this.savedEventCharts = savedEventCharts;
+    }
+
+    @JsonProperty
+    public Double getSavedDashboards()
+    {
+        return savedDashboards;
+    }
+
+    public void setSavedDashboards( Double savedDashboards )
+    {
+        this.savedDashboards = savedDashboards;
+    }
+
+    @JsonProperty
+    public Double getSavedIndicators()
+    {
+        return savedIndicators;
+    }
+
+    public void setSavedIndicators( Double savedIndicators )
+    {
+        this.savedIndicators = savedIndicators;
+    }
+
+    @JsonProperty
+    public Integer getusers()
+    {
+        return users;
+    }
+
+    public void setusers( Integer users )
+    {
+        this.users = users;
+    }
 
     @Override
-    public String toString() {
+    public String toString()
+    {
         return "AggregatedStatistics{" +
-                "startInterval=" + startInterval +
-                ", endInterval=" + endInterval +
-                ", maxNumberOfActiveUsers=" + maxNumberOfActiveUsers +
-                ", aggregatedMapViews=" + aggregatedMapViews +
-                ", aggregatedChartViews=" + aggregatedChartViews +
-                ", aggregatedReportTablesViews=" + aggregatedReportTablesViews +
-                ", aggregatedEventReportViews=" + aggregatedEventReportViews +
-                ", aggregatedEventChartViews=" + aggregatedEventChartViews +
-                ", aggregatedDashboardViews=" + aggregatedDashboardViews +
-                ", aggregatedIndicatorsViews=" + aggregatedIndicatorsViews +
-                ", maxTotalNumberOfViews=" + maxTotalNumberOfViews +
-                ", averageNumberOfViews=" + averageNumberOfViews +
-                ", aggregatedSavedMaps=" + aggregatedSavedMaps +
-                ", aggregatedSavedCharts=" + aggregatedSavedCharts +
-                ", aggregatedSavedReportTables=" + aggregatedSavedReportTables +
-                ", aggregatedSavedEventReports=" + aggregatedSavedEventReports +
-                ", aggregatedSavedEventCharts=" + aggregatedSavedEventCharts +
-                ", aggregatedSavedDashboards=" + aggregatedSavedDashboards +
-                ", aggregatedSavedIndicators=" + aggregatedSavedIndicators +
-                ", maxTotalNumberOfUsers=" + maxTotalNumberOfUsers +
-                '}';
+            "startInterval=" + startInterval +
+            ", endInterval=" + endInterval +
+            ", activeUsers=" + activeUsers +
+            ", mapViews=" + mapViews +
+            ", chartViews=" + chartViews +
+            ", reportTablesViews=" + reportTablesViews +
+            ", eventReportViews=" + eventReportViews +
+            ", eventChartViews=" + eventChartViews +
+            ", dashboardViews=" + dashboardViews +
+            ", indicatorsViews=" + indicatorsViews +
+            ", totalViews=" + totalViews +
+            ", averageViews=" + averageViews +
+            ", savedMaps=" + savedMaps +
+            ", savedCharts=" + savedCharts +
+            ", savedReportTables=" + savedReportTables +
+            ", savedEventReports=" + savedEventReports +
+            ", savedEventCharts=" + savedEventCharts +
+            ", savedDashboards=" + savedDashboards +
+            ", savedIndicators=" + savedIndicators +
+            ", users=" + users +
+            '}';
     }
 }

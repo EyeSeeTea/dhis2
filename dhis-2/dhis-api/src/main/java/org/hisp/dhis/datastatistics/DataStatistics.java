@@ -39,274 +39,302 @@ import org.hisp.dhis.common.BaseIdentifiableObject;
  */
 public class DataStatistics extends BaseIdentifiableObject
 {
-    int numberOfActiveUsers;
-    double numberOfMapViews;
-    double numberOfChartViews;
-    double numberOfReportTablesViews;
-    double numberOfEventReportViews;
-    double numberOfEventChartViews;
-    double numberOfDashboardViews;
-    double numberOfIndicatorsViews;
-    double totalNumberOfViews;
-    double averageNumberOfViews;
-    double numberOfSavedMaps;
-    double numberOfSavedCharts;
-    double numberOfSavedReportTables;
-    double numberOfSavedEventReports;
-    double numberOfSavedEventCharts;
-    double numberOfSavedDashboards;
-    double numberOfSavedIndicators;
+    Integer activeUsers;
+    Double mapViews;
+    Double chartViews;
+    Double reportTablesViews;
+    Double eventReportViews;
+    Double eventChartViews;
+    Double dashboardViews;
+    Double indicatorsViews;
+    Double totalViews;
+    Double averageViews;
+    Double savedMaps;
+    Double savedCharts;
+    Double savedReportTables;
+    Double savedEventReports;
+    Double savedEventCharts;
+    Double savedDashboards;
+    Double savedIndicators;
+    Integer users;
 
-    int totalNumberOfUsers;
-
-    public DataStatistics( )
+    public DataStatistics(  )
     {
-        super.setAutoFields();
+        super.setAutoFields( );
     }
 
-    public DataStatistics( int numberOfActiveUsers, double numberOfMapViews, double numberOfChartViews, double numberOfReportTablesViews, double numberOfEventReportViews, double numberOfEventChartViews, double numberOfDashboardViews, double numberOfIndicatorsViews, double totalNumberOfViews, double numberOfViews, double numberOfSavedMaps, double numberOfSavedCharts, double numberOfSavedReportTables, double numberOfSavedEventReports, double numberOfSavedEventCharts, double numberOfSavedDashboards, double numberOfSavedIndicators, int totalNumberOfUsers )
+    public DataStatistics( Integer activeUsers, Double mapViews, Double chartViews, Double reportTablesViews, Double eventReportViews,
+        Double eventChartViews, Double dashboardViews, Double indicatorsViews, Double totalViews, Double averageViews, Double savedMaps,
+        Double savedCharts, Double savedReportTables, Double savedEventReports, Double savedEventCharts, Double savedDashboards,
+        Double savedIndicators, Integer users )
     {
-        this.numberOfActiveUsers = numberOfActiveUsers;
-        this.numberOfMapViews = numberOfMapViews;
-        this.numberOfChartViews = numberOfChartViews;
-        this.numberOfReportTablesViews = numberOfReportTablesViews;
-        this.numberOfEventReportViews = numberOfEventReportViews;
-        this.numberOfEventChartViews = numberOfEventChartViews;
-        this.numberOfDashboardViews = numberOfDashboardViews;
-        this.numberOfIndicatorsViews = numberOfIndicatorsViews;
-        this.totalNumberOfViews = totalNumberOfViews;
-        this.averageNumberOfViews = numberOfViews;
-        this.numberOfSavedMaps = numberOfSavedMaps;
-        this.numberOfSavedCharts = numberOfSavedCharts;
-        this.numberOfSavedReportTables = numberOfSavedReportTables;
-        this.numberOfSavedEventReports = numberOfSavedEventReports;
-        this.numberOfSavedEventCharts = numberOfSavedEventCharts;
-        this.numberOfSavedDashboards = numberOfSavedDashboards;
-        this.numberOfSavedIndicators = numberOfSavedIndicators;
-        this.totalNumberOfUsers = totalNumberOfUsers;
-
-        super.setAutoFields();
+        super.setAutoFields( );
+        this.activeUsers = activeUsers;
+        this.mapViews = mapViews;
+        this.chartViews = chartViews;
+        this.reportTablesViews = reportTablesViews;
+        this.eventReportViews = eventReportViews;
+        this.eventChartViews = eventChartViews;
+        this.dashboardViews = dashboardViews;
+        this.indicatorsViews = indicatorsViews;
+        this.totalViews = totalViews;
+        this.averageViews = averageViews;
+        this.savedMaps = savedMaps;
+        this.savedCharts = savedCharts;
+        this.savedReportTables = savedReportTables;
+        this.savedEventReports = savedEventReports;
+        this.savedEventCharts = savedEventCharts;
+        this.savedDashboards = savedDashboards;
+        this.savedIndicators = savedIndicators;
+        this.users = users;
     }
 
-    @JsonProperty
-    public int getNumberOfActiveUsers()
+    public DataStatistics( int activeUsers, double mapViews, double chartViews, double reportTablesViews, double eventReportViews,
+        double eventChartViews, double dashboardViews, double indicatorsViews, double totalViews, double averageViews, double savedMaps,
+        double savedCharts, double savedReportTables, double savedEventReports, double savedEventCharts, double savedDashboards,
+        double savedIndicators, int users )
     {
-        return numberOfActiveUsers;
-    }
-
-    public void setNumberOfActiveUsers( int numberOfActiveUsers )
-    {
-        this.numberOfActiveUsers = numberOfActiveUsers;
-    }
-
-    @JsonProperty
-    public double getNumberOfMapViews()
-    {
-        return numberOfMapViews;
-    }
-
-    public void setNumberOfMapViews( double numberOfMapViews )
-    {
-        this.numberOfMapViews = numberOfMapViews;
-    }
-
-    @JsonProperty
-    public double getNumberOfChartViews()
-    {
-        return numberOfChartViews;
-    }
-
-    public void setNumberOfChartViews( double numberOfChartViews )
-    {
-        this.numberOfChartViews = numberOfChartViews;
+        super.setAutoFields( );
+        this.activeUsers = activeUsers;
+        this.mapViews = mapViews;
+        this.chartViews = chartViews;
+        this.reportTablesViews = reportTablesViews;
+        this.eventReportViews = eventReportViews;
+        this.eventChartViews = eventChartViews;
+        this.dashboardViews = dashboardViews;
+        this.indicatorsViews = indicatorsViews;
+        this.totalViews = totalViews;
+        this.averageViews = averageViews;
+        this.savedMaps = savedMaps;
+        this.savedCharts = savedCharts;
+        this.savedReportTables = savedReportTables;
+        this.savedEventReports = savedEventReports;
+        this.savedEventCharts = savedEventCharts;
+        this.savedDashboards = savedDashboards;
+        this.savedIndicators = savedIndicators;
+        this.users = users;
     }
 
     @JsonProperty
-    public double getNumberOfReportTablesViews()
+    public Integer getActiveUsers()
     {
-        return numberOfReportTablesViews;
+        return activeUsers;
     }
 
-    public void setNumberOfReportTablesViews( double numberOfReportTablesViews )
+    public void setActiveUsers( Integer activeUsers )
     {
-        this.numberOfReportTablesViews = numberOfReportTablesViews;
-    }
-
-    @JsonProperty
-    public double getNumberOfEventReportViews()
-    {
-        return numberOfEventReportViews;
-    }
-
-    public void setNumberOfEventReportViews( double numberOfEventReportViews )
-    {
-        this.numberOfEventReportViews = numberOfEventReportViews;
+        this.activeUsers = activeUsers;
     }
 
     @JsonProperty
-    public double getNumberOfEventChartViews()
+    public Double getMapViews()
     {
-        return numberOfEventChartViews;
+        return mapViews;
     }
 
-    public void setNumberOfEventChartViews( double numberOfEventChartViews )
+    public void setMapViews( Double mapViews )
     {
-        this.numberOfEventChartViews = numberOfEventChartViews;
-    }
-
-    @JsonProperty
-    public double getNumberOfDashboardViews()
-    {
-        return numberOfDashboardViews;
-    }
-
-    public void setNumberOfDashboardViews( double numberOfDashboardViews )
-    {
-        this.numberOfDashboardViews = numberOfDashboardViews;
+        this.mapViews = mapViews;
     }
 
     @JsonProperty
-    public double getNumberOfIndicatorsViews()
+    public Double getChartViews()
     {
-        return numberOfIndicatorsViews;
+        return chartViews;
     }
 
-    public void setNumberOfIndicatorsViews( double numberOfIndicatorsViews )
+    public void setChartViews( Double chartViews )
     {
-        this.numberOfIndicatorsViews = numberOfIndicatorsViews;
-    }
-
-    @JsonProperty
-    public double getTotalNumberOfViews()
-    {
-        return totalNumberOfViews;
-    }
-
-    public void setTotalNumberOfViews( double totalNumberOfViews )
-    {
-        this.totalNumberOfViews = totalNumberOfViews;
+        this.chartViews = chartViews;
     }
 
     @JsonProperty
-    public double getAverageNumberOfViews()
+    public Double getReportTablesViews()
     {
-        return averageNumberOfViews;
+        return reportTablesViews;
     }
 
-    public void setAverageNumberOfViews( double numberOfViews )
+    public void setReportTablesViews( Double reportTablesViews )
     {
-        this.averageNumberOfViews = numberOfViews;
-    }
-
-    @JsonProperty
-    public double getNumberOfSavedMaps()
-    {
-        return numberOfSavedMaps;
-    }
-
-    public void setNumberOfSavedMaps( double numberOfSavedMaps )
-    {
-        this.numberOfSavedMaps = numberOfSavedMaps;
+        this.reportTablesViews = reportTablesViews;
     }
 
     @JsonProperty
-    public double getNumberOfSavedCharts()
+    public Double getEventReportViews()
     {
-        return numberOfSavedCharts;
+        return eventReportViews;
     }
 
-    public void setNumberOfSavedCharts( double numberOfSavedCharts )
+    public void setEventReportViews( Double eventReportViews )
     {
-        this.numberOfSavedCharts = numberOfSavedCharts;
-    }
-
-    @JsonProperty
-    public double getNumberOfSavedReportTables()
-    {
-        return numberOfSavedReportTables;
-    }
-
-    public void setNumberOfSavedReportTables( double numberOfSavedReportTables )
-    {
-        this.numberOfSavedReportTables = numberOfSavedReportTables;
+        this.eventReportViews = eventReportViews;
     }
 
     @JsonProperty
-    public double getNumberOfSavedEventReports()
+    public Double getEventChartViews()
     {
-        return numberOfSavedEventReports;
+        return eventChartViews;
     }
 
-    public void setNumberOfSavedEventReports( double numberOfSavedEventReports )
+    public void setEventChartViews( Double eventChartViews )
     {
-        this.numberOfSavedEventReports = numberOfSavedEventReports;
-    }
-
-    @JsonProperty
-    public double getNumberOfSavedEventCharts()
-    {
-        return numberOfSavedEventCharts;
-    }
-
-    public void setNumberOfSavedEventCharts( double numberOfSavedEventCharts )
-    {
-        this.numberOfSavedEventCharts = numberOfSavedEventCharts;
+        this.eventChartViews = eventChartViews;
     }
 
     @JsonProperty
-    public double getNumberOfSavedDashboards()
+    public Double getDashboardViews()
     {
-        return numberOfSavedDashboards;
+        return dashboardViews;
     }
 
-    public void setNumberOfSavedDashboards( double numberOfSavedDashboards )
+    public void setDashboardViews( Double dashboardViews )
     {
-        this.numberOfSavedDashboards = numberOfSavedDashboards;
-    }
-
-    @JsonProperty
-    public double getNumberOfSavedIndicators()
-    {
-        return numberOfSavedIndicators;
-    }
-
-    public void setNumberOfSavedIndicators( double numberOfSavedIndicators )
-    {
-        this.numberOfSavedIndicators = numberOfSavedIndicators;
+        this.dashboardViews = dashboardViews;
     }
 
     @JsonProperty
-    public int getTotalNumberOfUsers()
+    public Double getIndicatorsViews()
     {
-        return totalNumberOfUsers;
+        return indicatorsViews;
     }
 
-    public void setTotalNumberOfUsers( int totalNumberOfUsers )
+    public void setIndicatorsViews( Double indicatorsViews )
     {
-        this.totalNumberOfUsers = totalNumberOfUsers;
+        this.indicatorsViews = indicatorsViews;
+    }
+
+    @JsonProperty
+    public Double getTotalViews()
+    {
+        return totalViews;
+    }
+
+    public void setTotalViews( Double totalViews )
+    {
+        this.totalViews = totalViews;
+    }
+
+    @JsonProperty
+    public Double getAverageViews()
+    {
+        return averageViews;
+    }
+
+    public void setAverageViews( Double averageViews )
+    {
+        this.averageViews = averageViews;
+    }
+
+    @JsonProperty
+    public Double getSavedMaps()
+    {
+        return savedMaps;
+    }
+
+    public void setSavedMaps( Double savedMaps )
+    {
+        this.savedMaps = savedMaps;
+    }
+
+    @JsonProperty
+    public Double getSavedCharts()
+    {
+        return savedCharts;
+    }
+
+    public void setSavedCharts( Double savedCharts )
+    {
+        this.savedCharts = savedCharts;
+    }
+
+    @JsonProperty
+    public Double getSavedReportTables()
+    {
+        return savedReportTables;
+    }
+
+    public void setSavedReportTables( Double savedReportTables )
+    {
+        this.savedReportTables = savedReportTables;
+    }
+
+    @JsonProperty
+    public Double getSavedEventReports()
+    {
+        return savedEventReports;
+    }
+
+    public void setSavedEventReports( Double savedEventReports )
+    {
+        this.savedEventReports = savedEventReports;
+    }
+
+    @JsonProperty
+    public Double getSavedEventCharts()
+    {
+        return savedEventCharts;
+    }
+
+    public void setSavedEventCharts( Double savedEventCharts )
+    {
+        this.savedEventCharts = savedEventCharts;
+    }
+
+    @JsonProperty
+    public Double getSavedDashboards()
+    {
+        return savedDashboards;
+    }
+
+    public void setSavedDashboards( Double savedDashboards )
+    {
+        this.savedDashboards = savedDashboards;
+    }
+
+    @JsonProperty
+    public Double getSavedIndicators()
+    {
+        return savedIndicators;
+    }
+
+    public void setSavedIndicators( Double savedIndicators )
+    {
+        this.savedIndicators = savedIndicators;
+    }
+
+    @JsonProperty
+    public Integer getUsers()
+    {
+        return users;
+    }
+
+    @JsonProperty
+    public void setUsers( Integer users )
+    {
+        this.users = users;
     }
 
     @Override public String toString()
     {
-        return super.toString() + " DataStatistics{" +
-            "numberOfActiveUsers=" + numberOfActiveUsers +
-            ", numberOfMapViews=" + numberOfMapViews +
-            ", numberOfChartViews=" + numberOfChartViews +
-            ", numberOfReportTablesViews=" + numberOfReportTablesViews +
-            ", numberOfEventReportViews=" + numberOfEventReportViews +
-            ", numberOfEventChartViews=" + numberOfEventChartViews +
-            ", numberOfDashboardViews=" + numberOfDashboardViews +
-            ", numberOfIndicatorsViews=" + numberOfIndicatorsViews +
-            ", totalNumberOfViews=" + totalNumberOfViews +
-            ", averageNumberOfViews=" + averageNumberOfViews +
-            ", numberOfSavedMaps=" + numberOfSavedMaps +
-            ", numberOfSavedCharts=" + numberOfSavedCharts +
-            ", numberOfSavedReportTables=" + numberOfSavedReportTables +
-            ", numberOfSavedEventReports=" + numberOfSavedEventReports +
-            ", numberOfSavedEventCharts=" + numberOfSavedEventCharts +
-            ", numberOfSavedDashboards=" + numberOfSavedDashboards +
-            ", numberOfSavedIndicators=" + numberOfSavedIndicators +
-            ", totalNumberOfUsers=" + totalNumberOfUsers +
+        return super.toString() + "DataStatistics{" +
+            "activeUsers=" + activeUsers +
+            ", mapViews=" + mapViews +
+            ", chartViews=" + chartViews +
+            ", reportTablesViews=" + reportTablesViews +
+            ", eventReportViews=" + eventReportViews +
+            ", eventChartViews=" + eventChartViews +
+            ", dashboardViews=" + dashboardViews +
+            ", indicatorsViews=" + indicatorsViews +
+            ", totalViews=" + totalViews +
+            ", averageViews=" + averageViews +
+            ", savedMaps=" + savedMaps +
+            ", savedCharts=" + savedCharts +
+            ", savedReportTables=" + savedReportTables +
+            ", savedEventReports=" + savedEventReports +
+            ", savedEventCharts=" + savedEventCharts +
+            ", savedDashboards=" + savedDashboards +
+            ", savedIndicators=" + savedIndicators +
+            ", users=" + users +
             '}';
     }
 }

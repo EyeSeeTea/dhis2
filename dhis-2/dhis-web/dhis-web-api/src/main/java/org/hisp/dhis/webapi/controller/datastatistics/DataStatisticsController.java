@@ -48,7 +48,7 @@ import org.hisp.dhis.user.User;
 import org.hisp.dhis.datastatistics.EventType;
 import org.hisp.dhis.datastatistics.DataStatisticsService;
 import org.hisp.dhis.datastatistics.DataStatistics;
-import org.hisp.dhis.datastatistics.Interval;
+import org.hisp.dhis.datastatistics.EventInterval;
 
 import java.lang.System;
 import java.util.List;
@@ -81,7 +81,7 @@ public class DataStatisticsController
         Date timestamp = new Date();
         User user = currentUserService.getCurrentUser();
 
-        DataStatisticsEvent event = new DataStatisticsEvent(eventType, timestamp, user.getId());
+        DataStatisticsEvent event = new DataStatisticsEvent(eventType, timestamp, user.getName());
         int id = defaultDataStatisticsService.addEvent(event);
     }
 
@@ -92,7 +92,7 @@ public class DataStatisticsController
      */
     @RequestMapping(value = "/dataStatistics", method = RequestMethod.GET)
     public @ResponseBody  List<AggregatedStatistics> report(@RequestParam @DateTimeFormat(pattern="yyyy-mm-dd") Date startDate,
-        @RequestParam @DateTimeFormat(pattern="yyyy-mm-dd") Date endDate, @RequestParam Interval interval, HttpServletResponse response ){
+        @RequestParam @DateTimeFormat(pattern="yyyy-mm-dd") Date endDate, @RequestParam EventInterval interval, HttpServletResponse response ){
         System.out.println("\n\nInterval: " + interval);
         if( startDate.after(endDate) ){
             try

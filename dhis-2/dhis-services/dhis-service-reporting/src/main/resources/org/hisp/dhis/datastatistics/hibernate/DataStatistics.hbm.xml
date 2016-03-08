@@ -12,24 +12,24 @@
       <generator class="native" />
     </id>
     &identifiableProperties;
-    <property name="numberOfChartViews" column="chartviews" type="double"/>
-    <property name="numberOfMapViews" column="mapviews" type="double"/>
-    <property name="numberOfReportTablesViews" column="reporttableviews" type="double"/>
-    <property name="numberOfEventReportViews" column="eventreportviews" type="double"/>
-    <property name="numberOfEventChartViews" column="eventchartviews" type="double"/>
-    <property name="numberOfDashboardViews" column="dashboardviews" type="double"/>
-    <property name="numberOfIndicatorsViews" column="indicatorviews" type="double"/>
-    <property name="numberOfActiveUsers" column="users" type="int"/>
-    <property name="totalNumberOfViews" column="totalviews" type="double"/>
-    <property name="averageNumberOfViews" column="average_number_of_views" type="double"/>
-    <property name="numberOfSavedCharts" column="number_of_charts" type="double"/>
-    <property name="numberOfSavedMaps" column="number_of_maps" type="double"/>
-    <property name="numberOfSavedReportTables" column="number_of_reporttables" type="double"/>
-    <property name="numberOfSavedEventReports" column="number_of_eventreports" type="double"/>
-    <property name="numberOfSavedEventCharts" column="number_of_eventcharts" type="double"/>
-    <property name="numberOfSavedDashboards" column="number_of_dashborards" type="double"/>
-    <property name="numberOfSavedIndicators" column="number_of_indicators" type="double"/>
-    <property name="totalNumberOfUsers" column="total_number_of_users" type="int"/>
+    <property name="chartViews" column="chartviews" type="double"/>
+    <property name="mapViews" column="mapviews" type="double"/>
+    <property name="reportTablesViews" column="reporttableviews" type="double"/>
+    <property name="eventReportViews" column="eventreportviews" type="double"/>
+    <property name="eventChartViews" column="eventchartviews" type="double"/>
+    <property name="dashboardViews" column="dashboardviews" type="double"/>
+    <property name="indicatorsViews" column="indicatorviews" type="double"/>
+    <property name="activeUsers" column="active_users" type="int"/>
+    <property name="totalViews" column="totalviews" type="double"/>
+    <property name="averageViews" column="average_views" type="double"/>
+    <property name="savedCharts" column="charts" type="double"/>
+    <property name="savedMaps" column="maps" type="double"/>
+    <property name="savedReportTables" column="reporttables" type="double"/>
+    <property name="savedEventReports" column="eventreports" type="double"/>
+    <property name="savedEventCharts" column="eventcharts" type="double"/>
+    <property name="savedDashboards" column="dashborards" type="double"/>
+    <property name="savedIndicators" column="indicators" type="double"/>
+    <property name="users" column="users" type="int"/>
 
   </class>
 </hibernate-mapping>

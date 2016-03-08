@@ -46,18 +46,6 @@ import java.util.List;
 public class HibernateDataStatisticsEventStore extends HibernateGenericStore<DataStatisticsEvent> implements DataStatisticsEventStore
 {
     /**
-     * Method for saving and datastatisticsevent in the database
-     * @param dataStatistics - object to be saved
-     * @return the objects id in the db
-     */
-
-    @Override
-    public int addDataStatisticsEvent( DataStatisticsEvent dataStatistics )
-    {
-        return save(dataStatistics);
-    }
-
-    /**
      * Get number of events between start- and enddate
      * @param startDate - from this date
      * @param endDate - to this date
@@ -78,7 +66,7 @@ public class HibernateDataStatisticsEventStore extends HibernateGenericStore<Dat
      * @param date - get all saved from this date
      * @return List of datastatisticsevents
      */
-    public List<DataStatisticsEvent> getDataStatisticsEventList(Date date){
+    public List<DataStatisticsEvent> getDataStatisticsEventCount(Date date){
         return getSharingCriteria()
             .add( Restrictions.ge( "timestamp", date) )
             .list();

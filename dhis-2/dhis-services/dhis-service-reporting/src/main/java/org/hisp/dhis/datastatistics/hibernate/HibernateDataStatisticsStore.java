@@ -28,7 +28,6 @@ package org.hisp.dhis.datastatistics.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hibernate.criterion.Restrictions;
 import org.hibernate.transform.AliasToBeanResultTransformer;
 import org.hisp.dhis.datastatistics.AggregatedStatistics;
 import org.hisp.dhis.datastatistics.DataStatistics;
@@ -148,15 +147,9 @@ public class HibernateDataStatisticsStore extends HibernateGenericStore<DataStat
 
 
         List<AggregatedStatistics> result;
-        try{
-           result = getQuery( hql )
+        result = getQuery( hql )
                     .setResultTransformer(
                             new AliasToBeanResultTransformer(AggregatedStatistics.class)).list();
-        }
-        catch(Exception e){
-            result = new ArrayList<>();
-           result.add(new AggregatedStatistics(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0));
-        }
 
         AggregatedStatistics as = result.get( 0 );
         as.setStartInterval( start );
