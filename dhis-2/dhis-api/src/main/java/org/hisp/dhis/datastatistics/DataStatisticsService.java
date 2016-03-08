@@ -48,8 +48,9 @@ public interface DataStatisticsService
 
     /**
      * Generates a list of DataStatistics snapshots in the given interval
-     * @param startDate of interval
-     * @param endDate of interval
+     * @param startDate
+     * @param endDate
+     * @param interval
      * @return
      */
     List<AggregatedStatistics> getReports(Date startDate, Date endDate, Interval interval);

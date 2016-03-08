@@ -76,7 +76,7 @@ public class DataStatisticsController
      * web api for saving a DataStatisticsEvent
      * @param eventType - what is viewed
      */
-    @RequestMapping(value = "/datastatistics/create", method = RequestMethod.POST)
+    @RequestMapping(value = "/dataStatistics", method = RequestMethod.POST)
     public @ResponseBody void saveEvent(@RequestParam EventType eventType ){
         Date timestamp = new Date();
         User user = currentUserService.getCurrentUser();
@@ -90,7 +90,7 @@ public class DataStatisticsController
      * @param eventType
      * @return a List of Datastatistic objects
      */
-    @RequestMapping(value = "/datastatistics/report", method = RequestMethod.GET)
+    @RequestMapping(value = "/dataStatistics", method = RequestMethod.GET)
     public @ResponseBody  List<AggregatedStatistics> report(@RequestParam @DateTimeFormat(pattern="yyyy-mm-dd") Date startDate,
         @RequestParam @DateTimeFormat(pattern="yyyy-mm-dd") Date endDate, @RequestParam Interval interval, HttpServletResponse response ){
         System.out.println("\n\nInterval: " + interval);

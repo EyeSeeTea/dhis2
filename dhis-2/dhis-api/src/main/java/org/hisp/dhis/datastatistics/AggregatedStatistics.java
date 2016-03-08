@@ -5,9 +5,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Date;
 
 /**
- * Created by JulieHillRoa on 08.03.2016.
+ * @author  Julie Hill Roa
+ * @author Yrjan Fraschetti
+ *
+ * Aggregated DataStatistics object
  */
-public class AggregatedStatistics {
+public class AggregatedStatistics
+{
 
     Date startInterval;
     Date endInterval;
@@ -31,31 +35,6 @@ public class AggregatedStatistics {
     double aggregatedSavedIndicators;
 
     int maxTotalNumberOfUsers;
-
-    public AggregatedStatistics(Date startInterval, Date endInterval, int maxNumberOfActiveUsers, double aggregatedMapViews, double aggregatedChartViews, double aggregatedReportTablesViews, double aggregatedEventReportViews, double aggregatedEventChartViews, double aggregatedDashboardViews, double aggregatedIndicatorsViews, double maxTotalNumberOfViews, double averageNumberOfViews, double aggregatedSavedMaps, double aggregatedSavedCharts, double aggregatedSavedReportTables, double aggregatedSavedEventReports, double aggregatedSavedEventCharts, double aggregatedSavedDashboards, double aggregatedSavedIndicators, int maxTotalNumberOfUsers) {
-        this.startInterval = startInterval;
-        this.endInterval = endInterval;
-        this.maxNumberOfActiveUsers = maxNumberOfActiveUsers;
-        this.aggregatedMapViews = aggregatedMapViews;
-        this.aggregatedChartViews = aggregatedChartViews;
-        this.aggregatedReportTablesViews = aggregatedReportTablesViews;
-        this.aggregatedEventReportViews = aggregatedEventReportViews;
-        this.aggregatedEventChartViews = aggregatedEventChartViews;
-        this.aggregatedDashboardViews = aggregatedDashboardViews;
-        this.aggregatedIndicatorsViews = aggregatedIndicatorsViews;
-        this.maxTotalNumberOfViews = maxTotalNumberOfViews;
-        this.averageNumberOfViews = averageNumberOfViews;
-        this.aggregatedSavedMaps = aggregatedSavedMaps;
-        this.aggregatedSavedCharts = aggregatedSavedCharts;
-        this.aggregatedSavedReportTables = aggregatedSavedReportTables;
-        this.aggregatedSavedEventReports = aggregatedSavedEventReports;
-        this.aggregatedSavedEventCharts = aggregatedSavedEventCharts;
-        this.aggregatedSavedDashboards = aggregatedSavedDashboards;
-        this.aggregatedSavedIndicators = aggregatedSavedIndicators;
-        this.maxTotalNumberOfUsers = maxTotalNumberOfUsers;
-    }
-
-    public AggregatedStatistics(){}
 
     public AggregatedStatistics(int maxNumberOfActiveUsers, double aggregatedMapViews, double aggregatedChartViews, double aggregatedReportTablesViews, double aggregatedEventReportViews, double aggregatedEventChartViews, double aggregatedDashboardViews, double aggregatedIndicatorsViews, double maxTotalNumberOfViews, double averageNumberOfViews, double aggregatedSavedMaps, double aggregatedSavedCharts, double aggregatedSavedReportTables, double aggregatedSavedEventReports, double aggregatedSavedEventCharts, double aggregatedSavedDashboards, double aggregatedSavedIndicators, int maxTotalNumberOfUsers) {
         this.maxNumberOfActiveUsers = maxNumberOfActiveUsers;

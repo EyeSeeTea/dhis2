@@ -33,6 +33,8 @@ import java.util.Date;
 /**
  * @author Yrjan A. F. Fraschetti
  * @author Julie Hill Roa
+ *
+ * Object of event to be saved
  */
 public class DataStatisticsEvent
 {
@@ -43,7 +45,8 @@ public class DataStatisticsEvent
 
     public DataStatisticsEvent(){}
 
-    public DataStatisticsEvent(EventType type, Date timestamp, int userId){
+    public DataStatisticsEvent( EventType type, Date timestamp, int userId )
+    {
         this.type = type;
         this.timestamp = timestamp;
         this.userId = userId;

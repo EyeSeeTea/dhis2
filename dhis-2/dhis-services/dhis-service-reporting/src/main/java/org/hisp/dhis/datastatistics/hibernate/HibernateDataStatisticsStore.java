@@ -70,18 +70,30 @@ public class HibernateDataStatisticsStore extends HibernateGenericStore<DataStat
      */
     @Override public List<AggregatedStatistics> getSnapshotsInIntervalDay( Date startDate, Date endDate )
     {
-        return ((List<AggregatedStatistics>) getSharingCriteria()
-            .add( Restrictions.ge( "created", startDate ) )
-            .add( Restrictions.le( "created", endDate ) ).list());
+        String hql = "select data.created as startInterval, data.numberOfActiveUsers as maxNumberOfActiveUsers, data.numberOfMapViews as aggregatedMapViews, " +
+        "data.numberOfChartViews as aggregatedChartViews, data.numberOfReportTablesViews as aggregatedReportTablesViews, " +
+            "data.numberOfEventReportViews as aggregatedEventReportViews, data.numberOfEventChartViews as aggregatedEventChartViews, " +
+            "data.numberOfDashboardViews as aggregatedDashboardViews, data.numberOfIndicatorsViews as aggregatedIndicatorsViews, " +
+            "data.totalNumberOfViews as maxTotalNumberOfViews, data.averageNumberOfViews as averageNumberOfViews, " +
+            "data.numberOfSavedMaps as aggregatedSavedMaps, data.numberOfSavedCharts as aggregatedSavedCharts, " +
+            "data.numberOfSavedReportTables as aggregatedSavedReportTables, data.numberOfSavedEventReports as aggregatedSavedEventReports, " +
+            "data.numberOfSavedEventCharts as aggregatedSavedEventCharts, data.numberOfSavedDashboards as aggregatedSavedDashboards, " +
+            "data.numberOfSavedIndicators as aggregatedSavedIndicators, data.totalNumberOfUsers as maxTotalNumberOfUsers " +
+            "from " + getClazz().getSimpleName() + " data where (created between '" + startDate + "' and '" + endDate + "')";
+
+        return getQuery( hql )
+            .setResultTransformer(
+                new AliasToBeanResultTransformer( AggregatedStatistics.class ) ).list();
     }
 
 
     /**
-     * Creates an aggregated list of snapshots in interval (year)
-     *
+     * Creates an aggregated list of snapshots in interval (year, month or week)
      * @param start of interval
-     * @param end   of interval
-     * @return List of DataStatistics (snapshot)
+     * @param end of interval
+     * @param interval Type of interval (Calendar enum)
+     * @param number of aggregations
+     * @return
      */
     @Override public List<AggregatedStatistics> getSnapshotsInInterval( Calendar start, Calendar end , int interval, int number )
     {
@@ -115,6 +127,12 @@ public class HibernateDataStatisticsStore extends HibernateGenericStore<DataStat
     }
 
 
+    /**
+     * Retrives and aggregates data
+     * @param start of interval
+     * @param end of interval
+     * @param list to put the aggregated data in
+     */
     private void getAggregatedData(Date start, Date end, List<AggregatedStatistics> list){
 
         String hql = "select max(data.numberOfActiveUsers) as maxNumberOfActiveUsers, avg(data.numberOfMapViews) as aggregatedMapViews, " +
@@ -140,8 +158,10 @@ public class HibernateDataStatisticsStore extends HibernateGenericStore<DataStat
            result.add(new AggregatedStatistics(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0));
         }
 
-
-        list.add( result.get( 0 ) );
+        AggregatedStatistics as = result.get( 0 );
+        as.setStartInterval( start );
+        as.setEndInterval( end );
+        list.add( as );
 
 
     }

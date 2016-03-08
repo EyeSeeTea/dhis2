@@ -37,6 +37,8 @@ import org.hisp.dhis.mapping.MappingService;
 import org.hisp.dhis.reporttable.ReportTableService;
 import org.hisp.dhis.user.UserService;
 import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.joda.time.Months;
 import org.joda.time.Weeks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -100,7 +102,8 @@ public class DefaultDataStatisticsService implements DataStatisticsService
      * gets number of saved Reports from a start date too a end date
      * @param startDate - From date
      * @param endDate - Too date
-     * @return number of Reports saved in db
+     * @param interval - Enum Interval (YEAR, MONTH, WEEK, DAY)
+     * @return list of reports
      */
     @Override
     public List<AggregatedStatistics> getReports(Date startDate, Date endDate, Interval interval)
@@ -111,41 +114,21 @@ public class DefaultDataStatisticsService implements DataStatisticsService
         Calendar end = Calendar.getInstance();
         end.setTime( endDate );
 
+        DateTime startDateTime = new DateTime(start.getTime());
+        DateTime endDateTime = new DateTime(end.getTime());
 
         switch ( interval ){
-            case DAY:  return hibernateDataStatisticsStore.getSnapshotsInInterval( start, end,0,0 );
+            case DAY: return hibernateDataStatisticsStore.getSnapshotsInIntervalDay( startDate, endDate);
 
-            case WEEK: int weeks = calculateWeeks(start,end);
-                return hibernateDataStatisticsStore.getSnapshotsInInterval(start, end, Calendar.WEEK_OF_YEAR,weeks);
+            case WEEK: return hibernateDataStatisticsStore.getSnapshotsInInterval(start, end, Calendar.WEEK_OF_YEAR, Weeks.weeksBetween(startDateTime,endDateTime).getWeeks());
 
-            case MONTH: int months = calculateMonths(start,end);
-                return hibernateDataStatisticsStore.getSnapshotsInInterval(start, end, Calendar.MONTH, months);
+            case MONTH: return hibernateDataStatisticsStore.getSnapshotsInInterval(start, end, Calendar.MONTH, Months.monthsBetween( startDateTime, endDateTime ).getMonths());
 
-            case YEAR: return hibernateDataStatisticsStore.getSnapshotsInInterval(start, end, Calendar.YEAR, 0);
+            case YEAR: return hibernateDataStatisticsStore.getSnapshotsInInterval(start, end, Calendar.YEAR, end.get(Calendar.YEAR) - start.get(Calendar.YEAR));
 
             default: return hibernateDataStatisticsStore.getSnapshotsInIntervalDay( startDate, endDate );
         }
     }
-
-    private int calculateWeeks(Calendar start, Calendar end){
-        System.out.println("\n\n start: " + start.YEAR +  " " + start.MONTH+ " " + start.DAY_OF_MONTH);
-        System.out.println("\n\n end: " + end.YEAR +  " " + end.MONTH+ " " + end.DAY_OF_MONTH);
-
-        DateTime startDate = new DateTime(start.getTime());
-        DateTime endDate = new DateTime(end.getTime());
-
-        System.out.println("\n\n startDate:" + startDate);
-        System.out.println("\n\n“ endDate" + endDate);
-
-        int weeks = Weeks.weeksBetween(startDate,endDate).getWeeks();
-        System.out.println("\n\nTotalWeeks" + weeks);
-        return weeks;
-
-    }
-
-    private int calculateMonths(Calendar start, Calendar end){ return 0;}
-
-
 
     /**
      * gets number of saved Charts from a date till now
