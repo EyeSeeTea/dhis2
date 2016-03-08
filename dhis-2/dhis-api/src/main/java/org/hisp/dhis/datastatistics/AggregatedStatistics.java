@@ -87,7 +87,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Date getStartInterval()
+    public Date getStartInterval( )
     {
         return startInterval;
     }
@@ -98,7 +98,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Date getEndInterval()
+    public Date getEndInterval( )
     {
         return endInterval;
     }
@@ -109,7 +109,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Integer getActiveUsers()
+    public Integer getActiveUsers( )
     {
         return activeUsers;
     }
@@ -120,7 +120,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getMapViews()
+    public Double getMapViews( )
     {
         return mapViews;
     }
@@ -131,7 +131,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getChartViews()
+    public Double getChartViews( )
     {
         return chartViews;
     }
@@ -142,7 +142,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getReportTablesViews()
+    public Double getReportTablesViews( )
     {
         return reportTablesViews;
     }
@@ -153,7 +153,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getEventReportViews()
+    public Double getEventReportViews( )
     {
         return eventReportViews;
     }
@@ -164,7 +164,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getEventChartViews()
+    public Double getEventChartViews( )
     {
         return eventChartViews;
     }
@@ -175,7 +175,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getDashboardViews()
+    public Double getDashboardViews( )
     {
         return dashboardViews;
     }
@@ -186,7 +186,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getIndicatorsViews()
+    public Double getIndicatorsViews( )
     {
         return indicatorsViews;
     }
@@ -197,7 +197,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getTotalViews()
+    public Double getTotalViews( )
     {
         return totalViews;
     }
@@ -208,7 +208,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getAverageViews()
+    public Double getAverageViews( )
     {
         return averageViews;
     }
@@ -219,7 +219,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getSavedMaps()
+    public Double getSavedMaps( )
     {
         return savedMaps;
     }
@@ -230,7 +230,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getSavedCharts()
+    public Double getSavedCharts( )
     {
         return savedCharts;
     }
@@ -241,7 +241,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getSavedReportTables()
+    public Double getSavedReportTables( )
     {
         return savedReportTables;
     }
@@ -252,7 +252,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getSavedEventReports()
+    public Double getSavedEventReports( )
     {
         return savedEventReports;
     }
@@ -263,7 +263,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getSavedEventCharts()
+    public Double getSavedEventCharts( )
     {
         return savedEventCharts;
     }
@@ -274,7 +274,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getSavedDashboards()
+    public Double getSavedDashboards( )
     {
         return savedDashboards;
     }
@@ -285,7 +285,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getSavedIndicators()
+    public Double getSavedIndicators( )
     {
         return savedIndicators;
     }
@@ -296,7 +296,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Integer getusers()
+    public Integer getusers( )
     {
         return users;
     }
@@ -307,7 +307,7 @@ public class AggregatedStatistics
     }
 
     @Override
-    public String toString()
+    public String toString( )
     {
         return "AggregatedStatistics{" +
             "startInterval=" + startInterval +

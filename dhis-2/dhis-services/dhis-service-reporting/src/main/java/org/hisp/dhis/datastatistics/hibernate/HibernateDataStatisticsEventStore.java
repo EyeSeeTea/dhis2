@@ -52,12 +52,13 @@ public class HibernateDataStatisticsEventStore extends HibernateGenericStore<Dat
      * @return number of events
      */
     @Override
-    public int getNumberOfEvents(Date startDate, Date endDate){
-        int count = ((Number) getSharingCriteria()
+    public int getNumberOfEvents( Date startDate, Date endDate )
+    {
+        int count = ( ( Number ) getSharingCriteria( )
             .setProjection( Projections.countDistinct( "id" ) )
             .add( Restrictions.ge( "timestamp", startDate) )
             .add( Restrictions.le( "timestamp", endDate) )
-            .uniqueResult()).intValue();
+            .uniqueResult( ) ).intValue( );
         return count;
     }
 
@@ -66,10 +67,11 @@ public class HibernateDataStatisticsEventStore extends HibernateGenericStore<Dat
      * @param date - get all saved from this date
      * @return List of datastatisticsevents
      */
-    public List<DataStatisticsEvent> getDataStatisticsEventCount(Date date){
-        return getSharingCriteria()
+    public List<DataStatisticsEvent> getDataStatisticsEventCount( Date date )
+    {
+        return getSharingCriteria( )
             .add( Restrictions.ge( "timestamp", date) )
-            .list();
+            .list( );
 
 
     }

@@ -92,7 +92,7 @@ public class DefaultDataStatisticsService implements DataStatisticsService
      * @return id of the object in the database
      */
     @Override
-    public int addEvent(DataStatisticsEvent event)
+    public int addEvent( DataStatisticsEvent event )
     {
         return hibernateDataStatisticsEventStore.save( event );
     }
@@ -105,25 +105,26 @@ public class DefaultDataStatisticsService implements DataStatisticsService
      * @return list of reports
      */
     @Override
-    public List<AggregatedStatistics> getReports(Date startDate, Date endDate, EventInterval eventInterval )
+    public List<AggregatedStatistics> getReports( Date startDate, Date endDate, EventInterval eventInterval )
     {
-        Calendar start = Calendar.getInstance();
+        Calendar start = Calendar.getInstance( );
         start.setTime( startDate );
 
-        Calendar end = Calendar.getInstance();
+        Calendar end = Calendar.getInstance( );
         end.setTime( endDate );
 
-        DateTime startDateTime = new DateTime(start.getTime());
-        DateTime endDateTime = new DateTime(end.getTime());
+        DateTime startDateTime = new DateTime( start.getTime( ) );
+        DateTime endDateTime = new DateTime( end.getTime( ) );
 
-        switch ( eventInterval ){
+        switch ( eventInterval )
+        {
             case DAY: return hibernateDataStatisticsStore.getSnapshotsInIntervalDay( startDate, endDate);
 
-            case WEEK: return hibernateDataStatisticsStore.getSnapshotsInInterval(start, end, Calendar.WEEK_OF_YEAR, Weeks.weeksBetween(startDateTime,endDateTime).getWeeks());
+            case WEEK: return hibernateDataStatisticsStore.getSnapshotsInInterval( start, end, Calendar.WEEK_OF_YEAR, Weeks.weeksBetween( startDateTime,endDateTime ).getWeeks( ) );
 
-            case MONTH: return hibernateDataStatisticsStore.getSnapshotsInInterval(start, end, Calendar.MONTH, Months.monthsBetween( startDateTime, endDateTime ).getMonths());
+            case MONTH: return hibernateDataStatisticsStore.getSnapshotsInInterval( start, end, Calendar.MONTH, Months.monthsBetween( startDateTime, endDateTime ).getMonths( ) );
 
-            case YEAR: return hibernateDataStatisticsStore.getSnapshotsInInterval(start, end, Calendar.YEAR, end.get(Calendar.YEAR) - start.get(Calendar.YEAR));
+            case YEAR: return hibernateDataStatisticsStore.getSnapshotsInInterval( start, end, Calendar.YEAR, end.get( Calendar.YEAR ) - start.get( Calendar.YEAR ) );
 
             default: return hibernateDataStatisticsStore.getSnapshotsInIntervalDay( startDate, endDate );
         }
@@ -135,17 +136,19 @@ public class DefaultDataStatisticsService implements DataStatisticsService
      * @return number of Charts saved in db
      */
     @Override
-    public int getNumberOfCharts(Date date){
+    public int getNumberOfCharts( Date date )
+    {
         return chartService.countChartGeCreated( date );
     }
+
     /**
      * gets number of saved Report tables from a date till now
      * @param date - From date
      * @return number of Report tables saved in db
      */
     @Override
-    public int getNumberOfReportTables(Date date){
-
+    public int getNumberOfReportTables( Date date )
+    {
        return reportTableService.getCountGeCreated( date );
     }
 
@@ -156,8 +159,9 @@ public class DefaultDataStatisticsService implements DataStatisticsService
      * @return number of favorite views saved in db
      */
     @Override
-    public int getNumberOfFavoriteViews(Date startDate, Date endDate){
-        return hibernateDataStatisticsEventStore.getNumberOfEvents(startDate, endDate);
+    public int getNumberOfFavoriteViews( Date startDate, Date endDate )
+    {
+        return hibernateDataStatisticsEventStore.getNumberOfEvents( startDate, endDate );
     }
 
     /**
@@ -166,7 +170,7 @@ public class DefaultDataStatisticsService implements DataStatisticsService
      * @return number of Maps saved in db
      */
     @Override
-    public int getNumberOfMaps(Date date)
+    public int getNumberOfMaps( Date date )
     {
         return mappingService.getCountGeCreated( date );
     }
@@ -177,7 +181,7 @@ public class DefaultDataStatisticsService implements DataStatisticsService
      * @return number of Event Reports saved in db
      */
     @Override
-    public int getNumberOfEventReports(Date date)
+    public int getNumberOfEventReports( Date date )
     {
         return eventReportService.getCountGeCreated(date);
     }
@@ -188,7 +192,7 @@ public class DefaultDataStatisticsService implements DataStatisticsService
      * @return number of Event Charts saved in db
      */
     @Override
-    public int getNumberOfEventCharts(Date date)
+    public int getNumberOfEventCharts( Date date )
     {
         return eventChartService.countGeCreated(date);
     }
@@ -200,7 +204,7 @@ public class DefaultDataStatisticsService implements DataStatisticsService
      */
 
     @Override
-    public int getNumberOfDashboards(Date date)
+    public int getNumberOfDashboards( Date date )
     {
         return dashboardService.countGeCreated(date);
     }
@@ -211,7 +215,7 @@ public class DefaultDataStatisticsService implements DataStatisticsService
      * @return number of indicators saved in db
      */
     @Override
-    public int getNumberOfIndicators(Date date)
+    public int getNumberOfIndicators( Date date )
     {
         return indicatorService.getCountGeCreated(date);
     }
@@ -221,11 +225,10 @@ public class DefaultDataStatisticsService implements DataStatisticsService
      * @return number og active users
      */
     @Override
-    public int getNumberOfUsers()
+    public int getNumberOfUsers( )
     {
         return userService.getUserCount();
     }
-
 
     /**
      * Gets all important information and creates a Datastatistics object and saves it in db
@@ -235,7 +238,7 @@ public class DefaultDataStatisticsService implements DataStatisticsService
         Date startDate = new Date( );
         Calendar c = Calendar.getInstance( );
         c.setTime( startDate );
-        c.add( Calendar.DATE, -1);
+        c.add( Calendar.DATE, -1 );
         startDate = c.getTime( );
 
         List<DataStatisticsEvent> events = hibernateDataStatisticsEventStore.getDataStatisticsEventCount( startDate );
@@ -255,19 +258,19 @@ public class DefaultDataStatisticsService implements DataStatisticsService
 
         for( DataStatisticsEvent e : events ){
             switch ( e.getType( ) ) {
-                case CHART_VIEWS: numberOfChartViews++;
+                case CHART_VIEW: numberOfChartViews++;
                     break;
-                case MAP_VIEWS: numberOfMapViews++;
+                case MAP_VIEW: numberOfMapViews++;
                     break;
-                case DASHBOARD_VIEWS: numberOfDashboardViews++;
+                case DASHBOARD_VIEW: numberOfDashboardViews++;
                     break;
-                case REPORT_TABLE_VIEWS: numberOfReportTablesViews++;
+                case REPORT_TABLE_VIEW: numberOfReportTablesViews++;
                     break;
-                case EVENT_REPORT_VIEWS: numberOfEventReportViews++;
+                case EVENT_REPORT_VIEW: numberOfEventReportViews++;
                     break;
-                case EVENT_CHART_VIEWS: numberOfEventChartViews++;
+                case EVENT_CHART_VIEW: numberOfEventChartViews++;
                     break;
-                case INDICATOR_VIEWS: numberOfIndicatorsViews++;
+                case INDICATOR_VIEW: numberOfIndicatorsViews++;
                     break;
             }
 

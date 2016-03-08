@@ -63,10 +63,10 @@ public class DataStatisticsTask implements Runnable
      * saves calls saveSnapShot() in DefaultDataStatisticsService
      */
     @Override
-    public void run()
+    public void run( )
     {
-        dataStatisticsService.saveSnapshot();
-        systemSettingManager.saveSystemSetting( SettingKey.LAST_SUCCESSFUL_DATA_STATISTIC, new Date() );
+        dataStatisticsService.saveSnapshot( );
+        systemSettingManager.saveSystemSetting( SettingKey.LAST_SUCCESSFUL_DATA_STATISTIC, new Date( ) );
 
     }
 

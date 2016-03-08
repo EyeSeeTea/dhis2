@@ -76,13 +76,14 @@ public class DataStatisticsController
      * web api for saving a DataStatisticsEvent
      * @param eventType - what is viewed
      */
-    @RequestMapping(value = "/dataStatistics", method = RequestMethod.POST)
-    public @ResponseBody void saveEvent(@RequestParam EventType eventType ){
+    @RequestMapping( value = "/dataStatistics", method = RequestMethod.POST )
+    public @ResponseBody void saveEvent( @RequestParam EventType eventType )
+    {
         Date timestamp = new Date();
-        User user = currentUserService.getCurrentUser();
+        User user = currentUserService.getCurrentUser( );
 
-        DataStatisticsEvent event = new DataStatisticsEvent(eventType, timestamp, user.getName());
-        int id = defaultDataStatisticsService.addEvent(event);
+        DataStatisticsEvent event = new DataStatisticsEvent( eventType, timestamp, user.getName( ) );
+        int id = defaultDataStatisticsService.addEvent( event );
     }
 
     /**
@@ -90,21 +91,16 @@ public class DataStatisticsController
      * @param eventType
      * @return a List of Datastatistic objects
      */
-    @RequestMapping(value = "/dataStatistics", method = RequestMethod.GET)
-    public @ResponseBody  List<AggregatedStatistics> report(@RequestParam @DateTimeFormat(pattern="yyyy-mm-dd") Date startDate,
-        @RequestParam @DateTimeFormat(pattern="yyyy-mm-dd") Date endDate, @RequestParam EventInterval interval, HttpServletResponse response ){
-        System.out.println("\n\nInterval: " + interval);
-        if( startDate.after(endDate) ){
-            try
-            {
-                response.sendError( HttpServletResponse.SC_BAD_REQUEST, "Invalid interval: startDate > endDate" );
-            }
-            catch ( Exception e ){
-                System.out.println("Caught exception: " + e);
-            }
+    @RequestMapping( value = "/dataStatistics", method = RequestMethod.GET )
+    public @ResponseBody List<AggregatedStatistics> report( @RequestParam @DateTimeFormat(pattern="yyyy-mm-dd" ) Date startDate,
+        @RequestParam @DateTimeFormat( pattern="yyyy-mm-dd" ) Date endDate, @RequestParam EventInterval interval, HttpServletResponse response ){
+        System.out.println( "\n\nInterval: " + interval );
+        if( startDate.after( endDate ) )
+        {
+            response.setStatus( HttpServletResponse.SC_CONFLICT);
             return null;
         }
 
-        return defaultDataStatisticsService.getReports(startDate, endDate, interval);
+        return defaultDataStatisticsService.getReports( startDate, endDate, interval );
     }
 }

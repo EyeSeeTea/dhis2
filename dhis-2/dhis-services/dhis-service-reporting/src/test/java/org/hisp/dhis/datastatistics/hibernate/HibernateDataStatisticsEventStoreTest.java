@@ -87,11 +87,11 @@ public class HibernateDataStatisticsEventStoreTest extends DhisSpringTest
         testDate = c.getTime();
 
 
-        dse1 = new DataStatisticsEvent( EventType.REPORT_TABLE_VIEWS, endDate, "Testuser" );
-        dse2 = new DataStatisticsEvent( EventType.EVENT_CHART_VIEWS, endDate, "TestUser" );
-        dse3 = new DataStatisticsEvent( EventType.CHART_VIEWS, endDate, "Testuser" );
-        dse4 = new DataStatisticsEvent( EventType.DASHBOARD_VIEWS, endDate, "TestUser" );
-        dse5 = new DataStatisticsEvent( EventType.INDICATOR_VIEWS, testDate, "Testuser" );
+        dse1 = new DataStatisticsEvent( EventType.REPORT_TABLE_VIEW, endDate, "Testuser" );
+        dse2 = new DataStatisticsEvent( EventType.EVENT_CHART_VIEW, endDate, "TestUser" );
+        dse3 = new DataStatisticsEvent( EventType.CHART_VIEW, endDate, "Testuser" );
+        dse4 = new DataStatisticsEvent( EventType.DASHBOARD_VIEW, endDate, "TestUser" );
+        dse5 = new DataStatisticsEvent( EventType.INDICATOR_VIEW, testDate, "Testuser" );
 
 
         dse1Id = 0;

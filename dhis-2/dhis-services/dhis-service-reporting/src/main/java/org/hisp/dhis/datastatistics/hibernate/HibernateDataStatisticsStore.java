@@ -96,30 +96,31 @@ public class HibernateDataStatisticsStore extends HibernateGenericStore<DataStat
      */
     @Override public List<AggregatedStatistics> getSnapshotsInInterval( Calendar start, Calendar end , int interval, int number )
     {
-        List<AggregatedStatistics> aggregatedSnapshotList = new ArrayList<>();
+        List<AggregatedStatistics> aggregatedSnapshotList = new ArrayList<>( );
 
-        if(number == 0){
-            getAggregatedData(start.getTime(), end.getTime(), aggregatedSnapshotList);
-        }else{
+        if(number == 0)
+        {
+            getAggregatedData( start.getTime( ), end.getTime( ), aggregatedSnapshotList );
+        }
+        else
+        {
 
-            Calendar startDate = Calendar.getInstance();
-            Calendar nextDate = Calendar.getInstance();
+            Calendar startDate = Calendar.getInstance( );
+            Calendar nextDate = Calendar.getInstance( );
 
-            for(int i = 0; i < number; i++ ){
+            for( int i = 0; i < number; i++ )
+            {
+                startDate.setTime( start.getTime( ) );
+                startDate.add( interval, i );
 
-                startDate.setTime( start.getTime() );
-                startDate.add(interval, i);
+                nextDate.setTime( startDate.getTime( ) );
+                nextDate.add( interval, 1 );
 
-                nextDate.setTime(startDate.getTime());
-                nextDate.add(interval, 1);
-
-                if(!nextDate.before(end))
+                if( !nextDate.before( end ) )
                     nextDate = end;
 
                 System.out.println("\n\n\n for: i = " + i + " startDate: " + startDate.get(interval)+ " nextDate: " + nextDate.get(interval) + "\n\n");
-                getAggregatedData(startDate.getTime(), nextDate.getTime(), aggregatedSnapshotList);
-
-
+                getAggregatedData( startDate.getTime( ), nextDate.getTime( ), aggregatedSnapshotList );
             }
         }
         return aggregatedSnapshotList;
