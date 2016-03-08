@@ -52,7 +52,7 @@ public interface DataStatisticsStore
      * @param endDate of interval
      * @return List of DataStatistics (snapshot)
      */
-    List<DataStatistics> getSnapshotsInIntervalDay(Date startDate, Date endDate);
+    List<AggregatedStatistics> getSnapshotsInIntervalDay(Date startDate, Date endDate);
 
     /**
      * Creates an aggregated list of snapshots in interval (year, month or week)
@@ -60,6 +60,6 @@ public interface DataStatisticsStore
      * @param end of interval
      * @return List of DataStatistics (snapshot)
      */
-    List<DataStatistics> getSnapshotsInInterval(Calendar start, Calendar end, int interval);
+    List<AggregatedStatistics> getSnapshotsInInterval(Calendar start, Calendar end, int interval, int number);
 
 }
