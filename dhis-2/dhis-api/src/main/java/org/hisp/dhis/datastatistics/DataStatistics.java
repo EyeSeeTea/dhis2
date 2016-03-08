@@ -30,6 +30,7 @@ package org.hisp.dhis.datastatistics;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 
+
 /**
  * @author Julie Hill Roa
  * @author Yrjan A. F. Fraschetti
@@ -60,7 +61,7 @@ public class DataStatistics extends BaseIdentifiableObject
 
     public DataStatistics( )
     {
-
+        super.setAutoFields();
     }
 
     public DataStatistics( int numberOfActiveUsers, double numberOfMapViews, double numberOfChartViews, double numberOfReportTablesViews, double numberOfEventReportViews, double numberOfEventChartViews, double numberOfDashboardViews, double numberOfIndicatorsViews, double totalNumberOfViews, double numberOfViews, double numberOfSavedMaps, double numberOfSavedCharts, double numberOfSavedReportTables, double numberOfSavedEventReports, double numberOfSavedEventCharts, double numberOfSavedDashboards, double numberOfSavedIndicators, int totalNumberOfUsers )

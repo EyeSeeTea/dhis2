@@ -30,6 +30,7 @@ package org.hisp.dhis.datastatistics.hibernate;
 
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.transform.AliasToBeanResultTransformer;
+import org.hisp.dhis.datastatistics.AggregatedStatistics;
 import org.hisp.dhis.datastatistics.DataStatistics;
 import org.hisp.dhis.datastatistics.DataStatisticsStore;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
@@ -67,9 +68,9 @@ public class HibernateDataStatisticsStore extends HibernateGenericStore<DataStat
      * @param endDate   of interval
      * @return List of DataStatistics (snapshot)
      */
-    @Override public List<DataStatistics> getSnapshotsInIntervalDay( Date startDate, Date endDate )
+    @Override public List<AggregatedStatistics> getSnapshotsInIntervalDay( Date startDate, Date endDate )
     {
-        return ((List<DataStatistics>) getSharingCriteria()
+        return ((List<AggregatedStatistics>) getSharingCriteria()
             .add( Restrictions.ge( "created", startDate ) )
             .add( Restrictions.le( "created", endDate ) ).list());
     }
@@ -82,21 +83,18 @@ public class HibernateDataStatisticsStore extends HibernateGenericStore<DataStat
      * @param end   of interval
      * @return List of DataStatistics (snapshot)
      */
-    @Override public List<DataStatistics> getSnapshotsInInterval( Calendar start, Calendar end , int interval )
+    @Override public List<AggregatedStatistics> getSnapshotsInInterval( Calendar start, Calendar end , int interval, int number )
     {
-        int stop = end.get(interval) - start.get(interval);
-        List<DataStatistics> aggregatedSnapshotList = new ArrayList<>();
+        List<AggregatedStatistics> aggregatedSnapshotList = new ArrayList<>();
 
-        System.out.println("\n\nStop: " + stop);
-
-        if(stop == 0){
-            getAgregatedData(start.getTime(),end.getTime(),aggregatedSnapshotList);
+        if(number == 0){
+            getAggregatedData(start.getTime(), end.getTime(), aggregatedSnapshotList);
         }else{
 
             Calendar startDate = Calendar.getInstance();
             Calendar nextDate = Calendar.getInstance();
 
-            for(int i = 0; i < stop; i++ ){
+            for(int i = 0; i < number; i++ ){
 
                 startDate.setTime( start.getTime() );
                 startDate.add(interval, i);
@@ -104,8 +102,11 @@ public class HibernateDataStatisticsStore extends HibernateGenericStore<DataStat
                 nextDate.setTime(startDate.getTime());
                 nextDate.add(interval, 1);
 
+                if(!nextDate.before(end))
+                    nextDate = end;
+
                 System.out.println("\n\n\n for: i = " + i + " startDate: " + startDate.get(interval)+ " nextDate: " + nextDate.get(interval) + "\n\n");
-                getAgregatedData(startDate.getTime(), nextDate.getTime(), aggregatedSnapshotList);
+                getAggregatedData(startDate.getTime(), nextDate.getTime(), aggregatedSnapshotList);
 
 
             }
@@ -114,25 +115,33 @@ public class HibernateDataStatisticsStore extends HibernateGenericStore<DataStat
     }
 
 
-    private void getAgregatedData(Date start, Date end, List<DataStatistics> list){
+    private void getAggregatedData(Date start, Date end, List<AggregatedStatistics> list){
 
-        String hql = "select max(data.numberOfActiveUsers) as numberOfActiveUsers, avg(data.numberOfMapViews) as numberOfMapViews, " +
-                "avg(data.numberOfChartViews) as numberOfChartViews, avg(data.numberOfReportTablesViews) as numberOfReportTablesViews, " +
-                "avg(data.numberOfEventReportViews) as numberOfEventReportViews, avg(data.numberOfEventChartViews) as numberOfEventChartViews, " +
-                "avg(data.numberOfDashboardViews) as numberOfDashboardViews, avg(data.numberOfIndicatorsViews) as numberOfIndicatorsViews, " +
-                "max(data.totalNumberOfViews) as totalNumberOfViews, avg(data.averageNumberOfViews) as averageNumberOfViews, " +
-                "avg(data.numberOfSavedMaps) as numberOfSavedMaps, avg(data.numberOfSavedCharts) as numberOfSavedCharts, " +
-                "avg(data.numberOfSavedReportTables) as numberOfSavedReportTables, avg(data.numberOfSavedEventReports) as numberOfSavedEventReports, " +
-                "avg(data.numberOfSavedEventCharts) as numberOfSavedEventCharts, avg(data.numberOfSavedDashboards) as numberOfSavedDashboards, " +
-                "avg(data.numberOfSavedIndicators) as numberOfSavedIndicators, max(data.totalNumberOfUsers) as totalNumberOfUsers " +
+        String hql = "select max(data.numberOfActiveUsers) as maxNumberOfActiveUsers, avg(data.numberOfMapViews) as aggregatedMapViews, " +
+                "avg(data.numberOfChartViews) as aggregatedChartViews, avg(data.numberOfReportTablesViews) as aggregatedReportTablesViews, " +
+                "avg(data.numberOfEventReportViews) as aggregatedEventReportViews, avg(data.numberOfEventChartViews) as aggregatedEventChartViews, " +
+                "avg(data.numberOfDashboardViews) as aggregatedDashboardViews, avg(data.numberOfIndicatorsViews) as aggregatedIndicatorsViews, " +
+                "max(data.totalNumberOfViews) as maxTotalNumberOfViews, avg(data.averageNumberOfViews) as averageNumberOfViews, " +
+                "avg(data.numberOfSavedMaps) as aggregatedSavedMaps, avg(data.numberOfSavedCharts) as aggregatedSavedCharts, " +
+                "avg(data.numberOfSavedReportTables) as aggregatedSavedReportTables, avg(data.numberOfSavedEventReports) as aggregatedSavedEventReports, " +
+                "avg(data.numberOfSavedEventCharts) as aggregatedSavedEventCharts, avg(data.numberOfSavedDashboards) as aggregatedSavedDashboards, " +
+                "avg(data.numberOfSavedIndicators) as aggregatedSavedIndicators, max(data.totalNumberOfUsers) as maxTotalNumberOfUsers " +
                 "from " + getClazz().getSimpleName() + " data where (created between '" + start + "' and '" + end + "')";
 
 
-        List<DataStatistics> test = getQuery( hql )
-                .setResultTransformer(
-                        new AliasToBeanResultTransformer(DataStatistics.class)).list();
+        List<AggregatedStatistics> result;
+        try{
+           result = getQuery( hql )
+                    .setResultTransformer(
+                            new AliasToBeanResultTransformer(AggregatedStatistics.class)).list();
+        }
+        catch(Exception e){
+            result = new ArrayList<>();
+           result.add(new AggregatedStatistics(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0));
+        }
 
-        list.add( test.get( 0 ) );
+
+        list.add( result.get( 0 ) );
 
 
     }

@@ -42,6 +42,7 @@ import org.springframework.http.ResponseEntity;
 import javax.servlet.http.HttpServletResponse;
 
 import org.hisp.dhis.datastatistics.DataStatisticsEvent;
+import org.hisp.dhis.datastatistics.AggregatedStatistics;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.datastatistics.EventType;
@@ -90,7 +91,7 @@ public class DataStatisticsController
      * @return a List of Datastatistic objects
      */
     @RequestMapping(value = "/datastatistics/report", method = RequestMethod.GET)
-    public @ResponseBody List<DataStatistics> report(@RequestParam @DateTimeFormat(pattern="yyyy-mm-dd") Date startDate,
+    public @ResponseBody  List<AggregatedStatistics> report(@RequestParam @DateTimeFormat(pattern="yyyy-mm-dd") Date startDate,
         @RequestParam @DateTimeFormat(pattern="yyyy-mm-dd") Date endDate, @RequestParam Interval interval, HttpServletResponse response ){
         System.out.println("\n\nInterval: " + interval);
         if( startDate.after(endDate) ){
