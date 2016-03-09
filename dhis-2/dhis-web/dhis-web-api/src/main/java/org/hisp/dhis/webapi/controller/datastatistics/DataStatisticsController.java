@@ -59,7 +59,7 @@ import java.util.Date;
  * @author Yrjan A. F. Fraschetti
  * @author Julie Hill Roa
  *
- * Controller for datastatistics
+ *         Controller for datastatistics
  */
 
 @Controller
@@ -74,30 +74,32 @@ public class DataStatisticsController
 
     /**
      * web api for saving a DataStatisticsEvent
+     *
      * @param eventType - what is viewed
      */
     @RequestMapping( value = "/dataStatistics", method = RequestMethod.POST )
     public @ResponseBody void saveEvent( @RequestParam EventType eventType )
     {
         Date timestamp = new Date();
-        User user = currentUserService.getCurrentUser( );
+        User user = currentUserService.getCurrentUser();
 
-        DataStatisticsEvent event = new DataStatisticsEvent( eventType, timestamp, user.getName( ) );
+        DataStatisticsEvent event = new DataStatisticsEvent( eventType, timestamp, user.getName() );
         int id = defaultDataStatisticsService.addEvent( event );
     }
 
     /**
      * web api for getting a report from start date too end date
+     *
      * @param eventType
      * @return a List of Datastatistic objects
      */
     @RequestMapping( value = "/dataStatistics", method = RequestMethod.GET )
-    public @ResponseBody List<AggregatedStatistics> report( @RequestParam @DateTimeFormat(pattern="yyyy-mm-dd" ) Date startDate,
-        @RequestParam @DateTimeFormat( pattern="yyyy-mm-dd" ) Date endDate, @RequestParam EventInterval interval, HttpServletResponse response ){
-        System.out.println( "\n\nInterval: " + interval );
-        if( startDate.after( endDate ) )
+    public @ResponseBody List<AggregatedStatistics> report( @RequestParam @DateTimeFormat( pattern = "yyyy-mm-dd" ) Date startDate,
+        @RequestParam @DateTimeFormat( pattern = "yyyy-mm-dd" ) Date endDate, @RequestParam EventInterval interval, HttpServletResponse response )
+    {
+        if ( startDate.after( endDate ) )
         {
-            response.setStatus( HttpServletResponse.SC_CONFLICT);
+            response.setStatus( HttpServletResponse.SC_CONFLICT );
             return null;
         }
 

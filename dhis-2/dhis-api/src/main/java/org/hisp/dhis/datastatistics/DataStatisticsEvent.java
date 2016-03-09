@@ -34,7 +34,7 @@ import java.util.Date;
  * @author Yrjan A. F. Fraschetti
  * @author Julie Hill Roa
  *
- * Object of event to be saved
+ *         Object of event to be saved
  */
 public class DataStatisticsEvent
 {
@@ -43,7 +43,9 @@ public class DataStatisticsEvent
     Date timestamp;
     String userName;
 
-    public DataStatisticsEvent(){}
+    public DataStatisticsEvent()
+    {
+    }
 
     public DataStatisticsEvent( EventType type, Date timestamp, String userName )
     {

@@ -28,135 +28,78 @@ package org.hisp.dhis.datastatistics.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hibernate.transform.AliasToBeanResultTransformer;
 import org.hisp.dhis.datastatistics.AggregatedStatistics;
 import org.hisp.dhis.datastatistics.DataStatistics;
 import org.hisp.dhis.datastatistics.DataStatisticsStore;
+import org.hisp.dhis.datastatistics.EventInterval;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Calendar;
+
 
 /**
  * @author Yrjan A. F. Fraschetti
  * @author Julie Hill Roa
  *
- * Class for database logic for datastatistics
+ *         Class for database logic for datastatisticsStore
  */
 
 public class HibernateDataStatisticsStore extends HibernateGenericStore<DataStatistics> implements DataStatisticsStore
 {
 
+    @Autowired
+    JdbcTemplate jdbcTemplate;
+
     /**
-     * Saves a snapshot object in the database
-     * @param dataStatistics - object to be saved in the db
-     * @return id of saved object
+     * Retrives data from db and maps aggregated data to and AggregatedStatistic object
+     *
+     * @param sql           - for data to be retrieved
+     * @param eventInterval - interval: DAY,MONTH,WEEK,YEAR
+     * @return List of aggregated data
      */
     @Override
-    public int addSnapshot( DataStatistics dataStatistics )
+    public List<AggregatedStatistics> getSnapshotsInInterval( String sql, EventInterval eventInterval )
     {
-        return save( dataStatistics );
-    }
+        return jdbcTemplate.query( sql, ( resultSet, i ) -> {
 
-    /**
-     * Creates a list of snapshots in interval (day)
-     *
-     * @param startDate of interval
-     * @param endDate   of interval
-     * @return List of DataStatistics (snapshot)
-     */
-    @Override public List<AggregatedStatistics> getSnapshotsInIntervalDay( Date startDate, Date endDate )
-    {
-        String hql = "select data.created as startInterval, data.numberOfActiveUsers as maxNumberOfActiveUsers, data.numberOfMapViews as aggregatedMapViews, " +
-        "data.numberOfChartViews as aggregatedChartViews, data.numberOfReportTablesViews as aggregatedReportTablesViews, " +
-            "data.numberOfEventReportViews as aggregatedEventReportViews, data.numberOfEventChartViews as aggregatedEventChartViews, " +
-            "data.numberOfDashboardViews as aggregatedDashboardViews, data.numberOfIndicatorsViews as aggregatedIndicatorsViews, " +
-            "data.totalNumberOfViews as maxTotalNumberOfViews, data.averageNumberOfViews as averageNumberOfViews, " +
-            "data.numberOfSavedMaps as aggregatedSavedMaps, data.numberOfSavedCharts as aggregatedSavedCharts, " +
-            "data.numberOfSavedReportTables as aggregatedSavedReportTables, data.numberOfSavedEventReports as aggregatedSavedEventReports, " +
-            "data.numberOfSavedEventCharts as aggregatedSavedEventCharts, data.numberOfSavedDashboards as aggregatedSavedDashboards, " +
-            "data.numberOfSavedIndicators as aggregatedSavedIndicators, data.totalNumberOfUsers as maxTotalNumberOfUsers " +
-            "from " + getClazz().getSimpleName() + " data where (created between '" + startDate + "' and '" + endDate + "')";
-
-        return getQuery( hql )
-            .setResultTransformer(
-                new AliasToBeanResultTransformer( AggregatedStatistics.class ) ).list();
-    }
-
-
-    /**
-     * Creates an aggregated list of snapshots in interval (year, month or week)
-     * @param start of interval
-     * @param end of interval
-     * @param interval Type of interval (Calendar enum)
-     * @param number of aggregations
-     * @return
-     */
-    @Override public List<AggregatedStatistics> getSnapshotsInInterval( Calendar start, Calendar end , int interval, int number )
-    {
-        List<AggregatedStatistics> aggregatedSnapshotList = new ArrayList<>( );
-
-        if(number == 0)
-        {
-            getAggregatedData( start.getTime( ), end.getTime( ), aggregatedSnapshotList );
-        }
-        else
-        {
-
-            Calendar startDate = Calendar.getInstance( );
-            Calendar nextDate = Calendar.getInstance( );
-
-            for( int i = 0; i < number; i++ )
+            AggregatedStatistics ads = new AggregatedStatistics();
+            ads.setYear( resultSet.getInt( "yr" ) );
+            switch ( eventInterval )
             {
-                startDate.setTime( start.getTime( ) );
-                startDate.add( interval, i );
-
-                nextDate.setTime( startDate.getTime( ) );
-                nextDate.add( interval, 1 );
-
-                if( !nextDate.before( end ) )
-                    nextDate = end;
-
-                System.out.println("\n\n\n for: i = " + i + " startDate: " + startDate.get(interval)+ " nextDate: " + nextDate.get(interval) + "\n\n");
-                getAggregatedData( startDate.getTime( ), nextDate.getTime( ), aggregatedSnapshotList );
+                case DAY:
+                    ads.setDay( resultSet.getInt( "day" ) );
+                    break;
+                case WEEK:
+                    ads.setWeek( resultSet.getInt( "week" ) );
+                    break;
+                case MONTH:
+                    ads.setMonth( resultSet.getInt( "mnt" ) );
+                    break;
             }
-        }
-        return aggregatedSnapshotList;
+            ads.setActiveUsers( resultSet.getInt( "activeUsers" ) );
+            ads.setMapViews( resultSet.getDouble( "mapViews" ) );
+            ads.setChartViews( resultSet.getDouble( "chartViews" ) );
+            ads.setReportTablesViews( resultSet.getDouble( "reportTablesViews" ) );
+            ads.setEventReportViews( resultSet.getDouble( "reportTablesViews" ) );
+            ads.setEventChartViews( resultSet.getDouble( "eventChartViews" ) );
+            ads.setDashboardViews( resultSet.getDouble( "dashboardViews" ) );
+            ads.setIndicatorsViews( resultSet.getDouble( "indicatorsViews" ) );
+            ads.setTotalViews( resultSet.getDouble( "totalViews" ) );
+            ads.setAverageViews( resultSet.getDouble( "averageViews" ) );
+            ads.setSavedMaps( resultSet.getDouble( "savedMaps" ) );
+            ads.setSavedCharts( resultSet.getDouble( "savedCharts" ) );
+            ads.setSavedReportTables( resultSet.getDouble( "savedReportTables" ) );
+            ads.setSavedEventReports( resultSet.getDouble( "savedEventReports" ) );
+            ads.setSavedEventCharts( resultSet.getDouble( "savedEventCharts" ) );
+            ads.setSavedDashboards( resultSet.getDouble( "savedDashboards" ) );
+            ads.setSavedIndicators( resultSet.getDouble( "savedIndicators" ) );
+            ads.setusers( resultSet.getInt( "users" ) );
+            return ads;
+
+        } );
     }
 
 
-    /**
-     * Retrives and aggregates data
-     * @param start of interval
-     * @param end of interval
-     * @param list to put the aggregated data in
-     */
-    private void getAggregatedData(Date start, Date end, List<AggregatedStatistics> list){
-
-        String hql = "select max(data.numberOfActiveUsers) as maxNumberOfActiveUsers, avg(data.numberOfMapViews) as aggregatedMapViews, " +
-                "avg(data.numberOfChartViews) as aggregatedChartViews, avg(data.numberOfReportTablesViews) as aggregatedReportTablesViews, " +
-                "avg(data.numberOfEventReportViews) as aggregatedEventReportViews, avg(data.numberOfEventChartViews) as aggregatedEventChartViews, " +
-                "avg(data.numberOfDashboardViews) as aggregatedDashboardViews, avg(data.numberOfIndicatorsViews) as aggregatedIndicatorsViews, " +
-                "max(data.totalNumberOfViews) as maxTotalNumberOfViews, avg(data.averageNumberOfViews) as averageNumberOfViews, " +
-                "avg(data.numberOfSavedMaps) as aggregatedSavedMaps, avg(data.numberOfSavedCharts) as aggregatedSavedCharts, " +
-                "avg(data.numberOfSavedReportTables) as aggregatedSavedReportTables, avg(data.numberOfSavedEventReports) as aggregatedSavedEventReports, " +
-                "avg(data.numberOfSavedEventCharts) as aggregatedSavedEventCharts, avg(data.numberOfSavedDashboards) as aggregatedSavedDashboards, " +
-                "avg(data.numberOfSavedIndicators) as aggregatedSavedIndicators, max(data.totalNumberOfUsers) as maxTotalNumberOfUsers " +
-                "from " + getClazz().getSimpleName() + " data where (created between '" + start + "' and '" + end + "')";
-
-
-        List<AggregatedStatistics> result;
-        result = getQuery( hql )
-                    .setResultTransformer(
-                            new AliasToBeanResultTransformer(AggregatedStatistics.class)).list();
-
-        AggregatedStatistics as = result.get( 0 );
-        as.setStartInterval( start );
-        as.setEndInterval( end );
-        list.add( as );
-
-
-    }
 }
