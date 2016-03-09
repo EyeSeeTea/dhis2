@@ -36,29 +36,31 @@ import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.MergeMode;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
+import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementGroup;
+import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.Section;
-import org.hisp.dhis.dxf2.metadata2.MetadataExportService;
 import org.hisp.dhis.feedback.ErrorCode;
 import org.hisp.dhis.feedback.ErrorReport;
 import org.hisp.dhis.feedback.ObjectErrorReport;
 import org.hisp.dhis.importexport.ImportStrategy;
-import org.hisp.dhis.node.NodeService;
 import org.hisp.dhis.option.Option;
 import org.hisp.dhis.option.OptionSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.preheat.PreheatErrorReport;
 import org.hisp.dhis.preheat.PreheatIdentifier;
 import org.hisp.dhis.preheat.PreheatMode;
 import org.hisp.dhis.render.RenderFormat;
 import org.hisp.dhis.render.RenderService;
+import org.hisp.dhis.trackedentity.TrackedEntity;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserGroup;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -80,12 +82,6 @@ public class ObjectBundleServiceTest
 
     @Autowired
     private IdentifiableObjectManager manager;
-
-    @Autowired
-    private MetadataExportService metadataExportService;
-
-    @Autowired
-    private NodeService nodeService;
 
     @Autowired
     private RenderService _renderService;
@@ -769,6 +765,16 @@ public class ObjectBundleServiceTest
 
         List<DataSet> dataSets = manager.getAll( DataSet.class );
         List<Section> sections = manager.getAll( Section.class );
+        List<OrganisationUnit> organisationUnits = manager.getAll( OrganisationUnit.class );
+        List<DataElement> dataElements = manager.getAll( DataElement.class );
+        List<UserAuthorityGroup> userRoles = manager.getAll( UserAuthorityGroup.class );
+        List<User> users = manager.getAll( User.class );
+
+        assertFalse( organisationUnits.isEmpty() );
+        assertFalse( dataElements.isEmpty() );
+        assertFalse( dataSets.isEmpty() );
+        assertFalse( users.isEmpty() );
+        assertFalse( userRoles.isEmpty() );
 
         assertEquals( 1, dataSets.size() );
         assertEquals( 2, sections.size() );
@@ -787,7 +793,6 @@ public class ObjectBundleServiceTest
     }
 
     @Test
-    @Ignore
     public void testCreateDataSetWithSectionsAndGreyedFields() throws IOException
     {
         Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> metadata = renderService.fromMetadata(
@@ -799,8 +804,166 @@ public class ObjectBundleServiceTest
         params.setObjects( metadata );
 
         ObjectBundle bundle = objectBundleService.create( params );
-        objectBundleService.validate( bundle );
+        ObjectBundleValidation validate = objectBundleService.validate( bundle );
+        assertTrue( validate.getObjectErrorReportsMap().isEmpty() );
+
         objectBundleService.commit( bundle );
+
+        List<DataSet> dataSets = manager.getAll( DataSet.class );
+        List<Section> sections = manager.getAll( Section.class );
+        List<OrganisationUnit> organisationUnits = manager.getAll( OrganisationUnit.class );
+        List<DataElement> dataElements = manager.getAll( DataElement.class );
+        List<UserAuthorityGroup> userRoles = manager.getAll( UserAuthorityGroup.class );
+        List<User> users = manager.getAll( User.class );
+        List<DataElementOperand> dataElementOperands = manager.getAll( DataElementOperand.class );
+        List<TrackedEntity> trackedEntities = manager.getAll( TrackedEntity.class );
+        List<OrganisationUnitLevel> organisationUnitLevels = manager.getAll( OrganisationUnitLevel.class );
+
+        assertFalse( organisationUnits.isEmpty() );
+        assertEquals( 1, organisationUnitLevels.size() );
+        assertEquals( 1, trackedEntities.size() );
+        assertFalse( dataElements.isEmpty() );
+        assertFalse( users.isEmpty() );
+        assertFalse( userRoles.isEmpty() );
+
+        assertEquals( 1, dataSets.size() );
+        assertEquals( 2, sections.size() );
+        assertEquals( 1, dataElementOperands.size() );
+
+        DataSet dataSet = dataSets.get( 0 );
+        assertEquals( 2, dataSet.getSections().size() );
+
+        Section section1 = sections.get( 0 );
+        Section section2 = sections.get( 1 );
+
+        assertEquals( 1, section1.getDataElements().size() );
+        assertEquals( 1, section2.getDataElements().size() );
+
+        assertNotNull( section1.getDataSet() );
+        assertNotNull( section2.getDataSet() );
+
+        Section section = manager.get( Section.class, "C50M0WxaI7y" );
+        assertNotNull( section.getDataSet() );
+        assertNotNull( section.getCategoryCombo() );
+        assertEquals( 1, section.getGreyedFields().size() );
+
+        DataElementCategoryCombo categoryCombo = manager.get( DataElementCategoryCombo.class, "faV8QvLgIwB" );
+        assertNotNull( categoryCombo );
+
+        DataElementCategory category = manager.get( DataElementCategory.class, "XJGLlMAMCcn" );
+        assertNotNull( category );
+
+        DataElementCategoryOption categoryOption1 = manager.get( DataElementCategoryOption.class, "JYiFOMKa25J" );
+        DataElementCategoryOption categoryOption2 = manager.get( DataElementCategoryOption.class, "tdaMRD34m8o" );
+
+        assertNotNull( categoryOption1 );
+        assertNotNull( categoryOption2 );
+    }
+
+    @Test
+    public void testUpdateDataSetWithSectionsAndGreyedFields() throws IOException
+    {
+        Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> metadata = renderService.fromMetadata(
+            new ClassPathResource( "dxf2/dataset_with_sections_gf.json" ).getInputStream(), RenderFormat.JSON );
+
+        ObjectBundleParams params = new ObjectBundleParams();
+        params.setObjectBundleMode( ObjectBundleMode.COMMIT );
+        params.setImportMode( ImportStrategy.CREATE );
+        params.setObjects( metadata );
+
+        ObjectBundle bundle = objectBundleService.create( params );
+        ObjectBundleValidation validate = objectBundleService.validate( bundle );
+        assertTrue( validate.getObjectErrorReportsMap().isEmpty() );
+
+        objectBundleService.commit( bundle );
+
+        metadata = renderService.fromMetadata( new ClassPathResource( "dxf2/dataset_with_sections_gf_update.json" ).getInputStream(), RenderFormat.JSON );
+
+        params = new ObjectBundleParams();
+        params.setObjectBundleMode( ObjectBundleMode.COMMIT );
+        params.setImportMode( ImportStrategy.UPDATE );
+        params.setObjects( metadata );
+
+        bundle = objectBundleService.create( params );
+        validate = objectBundleService.validate( bundle );
+        assertTrue( validate.getObjectErrorReportsMap().isEmpty() );
+
+        objectBundleService.commit( bundle );
+
+        List<DataSet> dataSets = manager.getAll( DataSet.class );
+        List<Section> sections = manager.getAll( Section.class );
+        List<OrganisationUnit> organisationUnits = manager.getAll( OrganisationUnit.class );
+        List<DataElement> dataElements = manager.getAll( DataElement.class );
+        List<UserAuthorityGroup> userRoles = manager.getAll( UserAuthorityGroup.class );
+        List<User> users = manager.getAll( User.class );
+        List<DataElementOperand> dataElementOperands = manager.getAll( DataElementOperand.class );
+
+        assertFalse( organisationUnits.isEmpty() );
+        assertFalse( dataElements.isEmpty() );
+        assertFalse( users.isEmpty() );
+        assertFalse( userRoles.isEmpty() );
+
+        assertEquals( 1, dataSets.size() );
+        assertEquals( 2, sections.size() );
+        assertEquals( 1, dataElementOperands.size() );
+
+        DataSet dataSet = dataSets.get( 0 );
+        assertEquals( "Updated Data Set", dataSet.getName() );
+        assertEquals( 2, dataSet.getSections().size() );
+        assertNotNull( dataSet.getUser() );
+
+        Section section1 = manager.get( Section.class, "JwcV2ZifEQf" );
+        assertNotNull( section1.getDataSet() );
+        assertNotNull( section1.getCategoryCombo() );
+        assertEquals( 1, section1.getGreyedFields().size() );
+        assertEquals( 1, section1.getDataElements().size() );
+        assertNotNull( section1.getDataSet() );
+
+        Section section2 = manager.get( Section.class, "C50M0WxaI7y" );
+        assertNotNull( section2.getDataSet() );
+        assertNotNull( section2.getCategoryCombo() );
+        assertTrue( section2.getGreyedFields().isEmpty() );
+        assertEquals( 1, section2.getDataElements().size() );
+        assertNotNull( section2.getDataSet() );
+    }
+
+    @Test
+    public void testCreateDataSetWithCompulsoryDataElements() throws IOException
+    {
+        Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> metadata = renderService.fromMetadata(
+            new ClassPathResource( "dxf2/dataset_with_compulsory.json" ).getInputStream(), RenderFormat.JSON );
+
+        ObjectBundleParams params = new ObjectBundleParams();
+        params.setObjectBundleMode( ObjectBundleMode.COMMIT );
+        params.setImportMode( ImportStrategy.CREATE );
+        params.setObjects( metadata );
+
+        ObjectBundle bundle = objectBundleService.create( params );
+        ObjectBundleValidation validate = objectBundleService.validate( bundle );
+        assertTrue( validate.getObjectErrorReportsMap().isEmpty() );
+
+        objectBundleService.commit( bundle );
+
+        List<DataSet> dataSets = manager.getAll( DataSet.class );
+        List<OrganisationUnit> organisationUnits = manager.getAll( OrganisationUnit.class );
+        List<DataElement> dataElements = manager.getAll( DataElement.class );
+        List<UserAuthorityGroup> userRoles = manager.getAll( UserAuthorityGroup.class );
+        List<User> users = manager.getAll( User.class );
+        List<DataElementOperand> dataElementOperands = manager.getAll( DataElementOperand.class );
+
+        assertFalse( organisationUnits.isEmpty() );
+        assertFalse( dataElements.isEmpty() );
+        assertFalse( users.isEmpty() );
+        assertFalse( userRoles.isEmpty() );
+
+        assertEquals( 1, dataSets.size() );
+        assertEquals( 1, dataElementOperands.size() );
+
+        DataSet dataSet = dataSets.get( 0 );
+        assertEquals( "DataSetA", dataSet.getName() );
+        assertTrue( dataSet.getSections().isEmpty() );
+        assertNotNull( dataSet.getUser() );
+        assertEquals( 1, dataSet.getCompulsoryDataElementOperands().size() );
     }
 
     private void defaultSetup()

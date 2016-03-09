@@ -67,19 +67,19 @@ public class HibernateDataStatisticsStoreTest extends DhisSpringTest
     @Override
     public void setUpTest() throws Exception
     {
-        ds1 = new DataStatistics(  );
-        ds2 = new DataStatistics( 10,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18 );
-        ds3 = new DataStatistics(  );
-        ds4 = new DataStatistics( 10,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19 );
-        ds5 = new DataStatistics(  );
-        ds6 = new DataStatistics(  );
+        ds1 = new DataStatistics();
+        ds2 = new DataStatistics( 10, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18 );
+        ds3 = new DataStatistics();
+        ds4 = new DataStatistics( 10, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 );
+        ds5 = new DataStatistics();
+        ds6 = new DataStatistics();
 
         ds1Id = 0;
         ds2Id = 0;
 
-        startDate = new Date(  );
-        endDate = new Date(  );
-        testDate = new Date(  );
+        startDate = new Date();
+        endDate = new Date();
+        testDate = new Date();
 
         Calendar c = Calendar.getInstance();
         c.setTime( startDate );
@@ -95,8 +95,8 @@ public class HibernateDataStatisticsStoreTest extends DhisSpringTest
     @Test
     public void testAddSnapshot() throws Exception
     {
-        ds1Id = dataStatisticsStore.addSnapshot( ds1 );
-        ds2Id = dataStatisticsStore.addSnapshot( ds2 );
+        ds1Id = dataStatisticsStore.save( ds1 );
+        ds2Id = dataStatisticsStore.save( ds2 );
 
         assertTrue( ds1Id != 0 );
         assertTrue( ds2Id != 0 );

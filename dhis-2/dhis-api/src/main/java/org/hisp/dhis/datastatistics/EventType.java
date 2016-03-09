@@ -32,7 +32,7 @@ package org.hisp.dhis.datastatistics;
  * @author Yrjan A. F. Fraschetti
  * @author Julie Hill Roa
  *
- * Enum of EventTypes to be used as identifiers in DataStatisticsEvent
+ *         Enum of EventTypes to be used as identifiers in DataStatisticsEvent
  */
 public enum EventType
 {

@@ -35,7 +35,7 @@ import org.hisp.dhis.common.BaseIdentifiableObject;
  * @author Julie Hill Roa
  * @author Yrjan A. F. Fraschetti
  *
- * DataStatistics object to be saved as snapshot
+ *         DataStatistics object to be saved as snapshot
  */
 public class DataStatistics extends BaseIdentifiableObject
 {
@@ -58,9 +58,9 @@ public class DataStatistics extends BaseIdentifiableObject
     Double savedIndicators;
     Integer users;
 
-    public DataStatistics(  )
+    public DataStatistics()
     {
-        super.setAutoFields( );
+        super.setAutoFields();
     }
 
     public DataStatistics( Integer activeUsers, Double mapViews, Double chartViews, Double reportTablesViews, Double eventReportViews,
@@ -68,7 +68,7 @@ public class DataStatistics extends BaseIdentifiableObject
         Double savedCharts, Double savedReportTables, Double savedEventReports, Double savedEventCharts, Double savedDashboards,
         Double savedIndicators, Integer users )
     {
-        super.setAutoFields( );
+        super.setAutoFields();
         this.activeUsers = activeUsers;
         this.mapViews = mapViews;
         this.chartViews = chartViews;
@@ -94,7 +94,7 @@ public class DataStatistics extends BaseIdentifiableObject
         double savedCharts, double savedReportTables, double savedEventReports, double savedEventCharts, double savedDashboards,
         double savedIndicators, int users )
     {
-        super.setAutoFields( );
+        super.setAutoFields();
         this.activeUsers = activeUsers;
         this.mapViews = mapViews;
         this.chartViews = chartViews;

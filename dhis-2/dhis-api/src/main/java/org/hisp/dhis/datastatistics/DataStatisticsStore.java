@@ -28,8 +28,8 @@ package org.hisp.dhis.datastatistics;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Calendar;
-import java.util.Date;
+import org.hisp.dhis.common.GenericStore;
+
 import java.util.List;
 
 /**
@@ -37,31 +37,15 @@ import java.util.List;
  * @author Julie Hill Roa
  */
 
-public interface DataStatisticsStore
+public interface DataStatisticsStore extends GenericStore<DataStatistics>
 {
     /**
-     * Adds a snapshot (DataStatistics object)
-     * @param dataStatistics snapshot
-     * @return id of snapshot
+     * Retrives data from db and maps aggregated data to and AggregatedStatistic object
+     *
+     * @param sql           - for data to be retrieved
+     * @param eventInterval - interval: DAY,MONTH,WEEK,YEAR
+     * @return List of aggregated data
      */
-    int addSnapshot(DataStatistics dataStatistics);
-
-    /**
-     * Creates a list of snapshots in interval (day)
-     * @param startDate of interval
-     * @param endDate of interval
-     * @return List of AggregatedStatistics (snapshot)
-     */
-    List<AggregatedStatistics> getSnapshotsInIntervalDay(Date startDate, Date endDate);
-
-    /**
-     * Creates an aggregated list of snapshots in interval (year, month or week)
-     * @param start of interval
-     * @param end of interval
-     * @param interval Type of interval (Calendar enum)
-     * @param number of aggregations
-     * @return List of AggregatedStatistics (aggregated snapshot)
-     */
-    List<AggregatedStatistics> getSnapshotsInInterval(Calendar start, Calendar end, int interval, int number);
+    List<AggregatedStatistics> getSnapshotsInInterval( String sql, EventInterval eventInterval );
 
 }

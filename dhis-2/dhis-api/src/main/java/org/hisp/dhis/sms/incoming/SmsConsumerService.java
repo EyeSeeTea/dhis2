@@ -1,4 +1,5 @@
-package org.hisp.dhis.datastatistics;
+package org.hisp.dhis.sms.incoming;
+
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -28,69 +29,12 @@ package org.hisp.dhis.datastatistics;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Date;
-
 /**
- * @author Yrjan A. F. Fraschetti
- * @author Julie Hill Roa
- *
- *         Object of event to be saved
+ * Zubair <rajazubair.asghar@gmail.com>
  */
-public class DataStatisticsEvent
+
+public interface SmsConsumerService
 {
-    int id;
-    EventType type;
-    Date timestamp;
-    String userName;
-
-    public DataStatisticsEvent()
-    {
-    }
-
-    public DataStatisticsEvent( EventType type, Date timestamp, String userName )
-    {
-        this.type = type;
-        this.timestamp = timestamp;
-        this.userName = userName;
-    }
-
-    public int getId()
-    {
-        return id;
-    }
-
-    public Date getTimestamp()
-    {
-        return timestamp;
-    }
-
-    public EventType getType()
-    {
-        return type;
-    }
-
-    public String getUserName()
-    {
-        return userName;
-    }
-
-    public void setId( int id )
-    {
-        this.id = id;
-    }
-
-    public void setTimestamp( Date timestamp )
-    {
-        this.timestamp = timestamp;
-    }
-
-    public void setType( EventType type )
-    {
-        this.type = type;
-    }
-
-    public void setUserName( String userName )
-    {
-        this.userName = userName;
-    }
+    void startSmsConsumer();
+    void stopSmsConsumer();    
 }

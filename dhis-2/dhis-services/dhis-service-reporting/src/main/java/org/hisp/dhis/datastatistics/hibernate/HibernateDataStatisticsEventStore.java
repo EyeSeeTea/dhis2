@@ -41,37 +41,39 @@ import java.util.List;
  * @author Yrjan A. F. Fraschetti
  * @author Julie Hill Roa
  *
- * Class for database logic for datastatisticevent
+ *         Class for database logic for datastatisticevent
  */
 public class HibernateDataStatisticsEventStore extends HibernateGenericStore<DataStatisticsEvent> implements DataStatisticsEventStore
 {
     /**
      * Get number of events between start- and enddate
+     *
      * @param startDate - from this date
-     * @param endDate - to this date
+     * @param endDate   - to this date
      * @return number of events
      */
     @Override
     public int getNumberOfEvents( Date startDate, Date endDate )
     {
-        int count = ( ( Number ) getSharingCriteria( )
+        int count = ((Number) getSharingCriteria()
             .setProjection( Projections.countDistinct( "id" ) )
-            .add( Restrictions.ge( "timestamp", startDate) )
-            .add( Restrictions.le( "timestamp", endDate) )
-            .uniqueResult( ) ).intValue( );
+            .add( Restrictions.ge( "timestamp", startDate ) )
+            .add( Restrictions.le( "timestamp", endDate ) )
+            .uniqueResult()).intValue();
         return count;
     }
 
     /**
      * Method for getting a list of all events saved from a specific date
+     *
      * @param date - get all saved from this date
      * @return List of datastatisticsevents
      */
     public List<DataStatisticsEvent> getDataStatisticsEventCount( Date date )
     {
-        return getSharingCriteria( )
-            .add( Restrictions.ge( "timestamp", date) )
-            .list( );
+        return getSharingCriteria()
+            .add( Restrictions.ge( "timestamp", date ) )
+            .list();
 
 
     }

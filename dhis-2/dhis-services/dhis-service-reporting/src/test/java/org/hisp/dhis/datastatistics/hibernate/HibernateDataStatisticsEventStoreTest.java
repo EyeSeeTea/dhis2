@@ -45,7 +45,6 @@ import static org.junit.Assert.*;
 /**
  * @author Yrjan A. F. Fraschetti
  * @author Julie Hill Roa
- *
  */
 public class HibernateDataStatisticsEventStoreTest extends DhisSpringTest
 {
@@ -70,16 +69,15 @@ public class HibernateDataStatisticsEventStoreTest extends DhisSpringTest
     @Override
     public void setUpTest() throws Exception
     {
-        startDate = new Date( );
+        startDate = new Date();
         endDate = new Date();
-        testDate = new Date(  );
+        testDate = new Date();
 
         Calendar c = Calendar.getInstance();
         endDate = c.getTime();
         c.setTime( startDate );
         c.add( Calendar.DATE, -1 );
         startDate = c.getTime();
-
 
 
         c.setTime( testDate );

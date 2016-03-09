@@ -1,7 +1,7 @@
-package org.hisp.dhis.datastatistics;
+package org.hisp.dhis.dataset.comparator;
 
 /*
- * Copyright (c) 2004-2016, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,69 +28,45 @@ package org.hisp.dhis.datastatistics;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Date;
+import java.util.Comparator;
 
-/**
- * @author Yrjan A. F. Fraschetti
- * @author Julie Hill Roa
- *
- *         Object of event to be saved
- */
-public class DataStatisticsEvent
+import org.hisp.dhis.dataset.DataSet;
+
+public class DataSetApprovalFrequencyComparator
+    implements Comparator<DataSet>
 {
-    int id;
-    EventType type;
-    Date timestamp;
-    String userName;
-
-    public DataStatisticsEvent()
+    public static final DataSetApprovalFrequencyComparator INSTANCE = new DataSetApprovalFrequencyComparator();
+    
+    @Override
+    public int compare( DataSet d1, DataSet d2 )
     {
-    }
-
-    public DataStatisticsEvent( EventType type, Date timestamp, String userName )
-    {
-        this.type = type;
-        this.timestamp = timestamp;
-        this.userName = userName;
-    }
-
-    public int getId()
-    {
-        return id;
-    }
-
-    public Date getTimestamp()
-    {
-        return timestamp;
-    }
-
-    public EventType getType()
-    {
-        return type;
-    }
-
-    public String getUserName()
-    {
-        return userName;
-    }
-
-    public void setId( int id )
-    {
-        this.id = id;
-    }
-
-    public void setTimestamp( Date timestamp )
-    {
-        this.timestamp = timestamp;
-    }
-
-    public void setType( EventType type )
-    {
-        this.type = type;
-    }
-
-    public void setUserName( String userName )
-    {
-        this.userName = userName;
+        if ( d1 == null )
+        {
+            return -1;
+        }
+        
+        if ( d2 == null )
+        {
+            return 1;
+        }
+        
+        if ( d1.getWorkflow() != null && d2.getWorkflow() == null)
+        {
+            return -1;
+        }
+        
+        if ( d1.getWorkflow() == null && d2.getWorkflow() != null )
+        {
+            return 1;
+        }
+        
+        int frequencyOrder = Integer.valueOf( d1.getPeriodType().getFrequencyOrder() ).compareTo( Integer.valueOf( d2.getPeriodType().getFrequencyOrder() ) );
+        
+        if ( frequencyOrder != 0 )
+        {
+            return frequencyOrder;
+        }
+        
+        return d1.compareTo( d2 );
     }
 }

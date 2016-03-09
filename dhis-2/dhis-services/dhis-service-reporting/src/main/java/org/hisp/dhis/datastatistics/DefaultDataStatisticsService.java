@@ -36,9 +36,6 @@ import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.mapping.MappingService;
 import org.hisp.dhis.reporttable.ReportTableService;
 import org.hisp.dhis.user.UserService;
-import org.joda.time.DateTime;
-import org.joda.time.Months;
-import org.joda.time.Weeks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -88,6 +85,7 @@ public class DefaultDataStatisticsService implements DataStatisticsService
 
     /**
      * Adds an datastatistics event in the database
+     *
      * @param event - object to be saved
      * @return id of the object in the database
      */
@@ -99,39 +97,132 @@ public class DefaultDataStatisticsService implements DataStatisticsService
 
     /**
      * gets number of saved Reports from a start date too a end date
-     * @param startDate - From date
-     * @param endDate - Too date
+     *
+     * @param startDate     - From date
+     * @param endDate       - Too date
      * @param eventInterval - Enum EventInterval (YEAR, MONTH, WEEK, DAY)
      * @return list of reports
      */
     @Override
     public List<AggregatedStatistics> getReports( Date startDate, Date endDate, EventInterval eventInterval )
     {
-        Calendar start = Calendar.getInstance( );
-        start.setTime( startDate );
-
-        Calendar end = Calendar.getInstance( );
-        end.setTime( endDate );
-
-        DateTime startDateTime = new DateTime( start.getTime( ) );
-        DateTime endDateTime = new DateTime( end.getTime( ) );
-
         switch ( eventInterval )
         {
-            case DAY: return hibernateDataStatisticsStore.getSnapshotsInIntervalDay( startDate, endDate);
+            case DAY:
+                return hibernateDataStatisticsStore.getSnapshotsInInterval( getDaySql( startDate, endDate ), eventInterval );
 
-            case WEEK: return hibernateDataStatisticsStore.getSnapshotsInInterval( start, end, Calendar.WEEK_OF_YEAR, Weeks.weeksBetween( startDateTime,endDateTime ).getWeeks( ) );
+            case WEEK:
+                return hibernateDataStatisticsStore.getSnapshotsInInterval( getWeekSql( startDate, endDate ), eventInterval );
 
-            case MONTH: return hibernateDataStatisticsStore.getSnapshotsInInterval( start, end, Calendar.MONTH, Months.monthsBetween( startDateTime, endDateTime ).getMonths( ) );
+            case MONTH:
+                return hibernateDataStatisticsStore.getSnapshotsInInterval( getMonthSql( startDate, endDate ), eventInterval );
 
-            case YEAR: return hibernateDataStatisticsStore.getSnapshotsInInterval( start, end, Calendar.YEAR, end.get( Calendar.YEAR ) - start.get( Calendar.YEAR ) );
-
-            default: return hibernateDataStatisticsStore.getSnapshotsInIntervalDay( startDate, endDate );
+            case YEAR:
+                return hibernateDataStatisticsStore.getSnapshotsInInterval( getYearSql( startDate, endDate ), eventInterval );
+            default:
+                return hibernateDataStatisticsStore.getSnapshotsInInterval( getDaySql( startDate, endDate ), eventInterval );
         }
     }
 
     /**
+     * private method: creating a sql for retriving aggregated data with grpup by YEAR
+     *
+     * @param start - start date
+     * @param end   - end date
+     * @return - sql string
+     */
+    private String getYearSql( Date start, Date end )
+    {
+
+        return "select extract(year from created) as yr, " +
+            commonSql( start, end ) +
+            " order by yr;";
+
+    }
+
+    /**
+     * private method: creating a sql for retriving aggregated data with grpup by YEAR, MONTH
+     *
+     * @param start - start date
+     * @param end   - end date
+     * @return - sql string
+     */
+    private String getMonthSql( Date start, Date end )
+    {
+
+        return "select extract(year from created) as yr, " +
+            "extract(month from created) as mnt, " +
+            commonSql( start, end ) +
+            ", mnt order by yr, mnt;";
+
+    }
+
+    /**
+     * private method: creating a sql for retriving aggregated data with grpup by YEAR, WEEK
+     *
+     * @param start - start date
+     * @param end   - end date
+     * @return - sql string
+     */
+    private String getWeekSql( Date start, Date end )
+    {
+
+        return "select extract(year from created) as yr, " +
+            "extract(week from created) as week, " +
+            commonSql( start, end ) +
+            ", week order by yr, week;";
+
+    }
+
+    /**
+     * private method: creating a sql for retriving aggregated data with grpup by YEAR, DAY
+     *
+     * @param start - start date
+     * @param end   - end date
+     * @return - sql string
+     */
+    private String getDaySql( Date start, Date end )
+    {
+        return "select extract(year from created) as yr, " +
+            "extract(day from created) as day, " +
+            commonSql( start, end ) +
+            ", day order by yr, day;";
+
+    }
+
+    /**
+     * private method: part of sql witch is always the same in the different intervall YEAR, MONTH, WEEK and DAY
+     *
+     * @param start - start date
+     * @param end   - end date
+     * @return - sql string
+     */
+    private String commonSql( Date start, Date end )
+    {
+        return "max(active_users) as activeUsers," +
+            "sum(mapviews) as mapViews," +
+            "sum(chartviews) as chartViews," +
+            "sum(reporttableviews) as reportTablesViews, " +
+            "sum(eventreportviews) as eventReportViews, " +
+            "sum(eventchartviews) as eventChartViews," +
+            "sum(dashboardviews) as dashboardViews, " +
+            "sum(indicatorviews) as indicatorsViews, " +
+            "max(totalviews) as totalViews," +
+            "sum(average_views) as averageViews, " +
+            "sum(maps) as savedMaps," +
+            "sum(charts) as savedCharts," +
+            "sum(reporttables) as savedReportTables," +
+            "sum(eventreports) as savedEventReports," +
+            "sum(eventcharts) as savedEventCharts," +
+            "sum(dashborards) as savedDashboards, " +
+            "sum(indicators) as savedIndicators," +
+            "max(users) as users from datastatistics " +
+            "where (created between '" + start + "'and '" + end + "') group by yr";
+    }
+
+    /**
      * gets number of saved Charts from a date till now
+     *
      * @param date - From date
      * @return number of Charts saved in db
      */
@@ -143,19 +234,21 @@ public class DefaultDataStatisticsService implements DataStatisticsService
 
     /**
      * gets number of saved Report tables from a date till now
+     *
      * @param date - From date
      * @return number of Report tables saved in db
      */
     @Override
     public int getNumberOfReportTables( Date date )
     {
-       return reportTableService.getCountGeCreated( date );
+        return reportTableService.getCountGeCreated( date );
     }
 
     /**
      * gets number of saved favorite views from a start date too a end date
+     *
      * @param startDate - From date
-     * @param endDate - Too date
+     * @param endDate   - Too date
      * @return number of favorite views saved in db
      */
     @Override
@@ -166,6 +259,7 @@ public class DefaultDataStatisticsService implements DataStatisticsService
 
     /**
      * gets number of saved Maps from a date till now
+     *
      * @param date - From date
      * @return number of Maps saved in db
      */
@@ -177,28 +271,31 @@ public class DefaultDataStatisticsService implements DataStatisticsService
 
     /**
      * gets number of saved Event Reports from a date till now
+     *
      * @param date - From date
      * @return number of Event Reports saved in db
      */
     @Override
     public int getNumberOfEventReports( Date date )
     {
-        return eventReportService.getCountGeCreated(date);
+        return eventReportService.getCountGeCreated( date );
     }
 
     /**
      * gets number of saved Event Charts from a date till now
+     *
      * @param date - From date
      * @return number of Event Charts saved in db
      */
     @Override
     public int getNumberOfEventCharts( Date date )
     {
-        return eventChartService.countGeCreated(date);
+        return eventChartService.countGeCreated( date );
     }
 
     /**
      * gets number of saved dashboards from a date till now
+     *
      * @param date - From date
      * @return number of dashboards saved in db
      */
@@ -206,26 +303,28 @@ public class DefaultDataStatisticsService implements DataStatisticsService
     @Override
     public int getNumberOfDashboards( Date date )
     {
-        return dashboardService.countGeCreated(date);
+        return dashboardService.countGeCreated( date );
     }
 
     /**
      * Gets the number of indicators saved from a date till now
+     *
      * @param date - From date
      * @return number of indicators saved in db
      */
     @Override
     public int getNumberOfIndicators( Date date )
     {
-        return indicatorService.getCountGeCreated(date);
+        return indicatorService.getCountGeCreated( date );
     }
 
     /**
      * Gets a number of active users that day.
+     *
      * @return number og active users
      */
     @Override
-    public int getNumberOfUsers( )
+    public int getNumberOfUsers()
     {
         return userService.getUserCount();
     }
@@ -233,49 +332,59 @@ public class DefaultDataStatisticsService implements DataStatisticsService
     /**
      * Gets all important information and creates a Datastatistics object and saves it in db
      */
-    @Override public int saveSnapshot( )
+    @Override public int saveSnapshot()
     {
-        Date startDate = new Date( );
-        Calendar c = Calendar.getInstance( );
+        Date startDate = new Date();
+        Calendar c = Calendar.getInstance();
         c.setTime( startDate );
         c.add( Calendar.DATE, -1 );
-        startDate = c.getTime( );
+        startDate = c.getTime();
 
         List<DataStatisticsEvent> events = hibernateDataStatisticsEventStore.getDataStatisticsEventCount( startDate );
-        List<String> uniqueUsers = new ArrayList<>( );
+        List<String> uniqueUsers = new ArrayList<>();
         int numberOfActiveUsers = 0;
         double numberOfMapViews = 0;
         double numberOfChartViews = 0;
         double numberOfReportTablesViews = 0;
         double numberOfEventReportViews = 0;
         double numberOfEventChartViews = 0;
-        double totalNumberOfViews = events.size( );
+        double totalNumberOfViews = events.size();
         double averageNumberofViews = 0;
         double numberOfDashboardViews = 0;
         double numberOfIndicatorsViews = 0;
 
-        int totalNumberOfUsers = getNumberOfUsers( );
+        int totalNumberOfUsers = getNumberOfUsers();
 
-        for( DataStatisticsEvent e : events ){
-            switch ( e.getType( ) ) {
-                case CHART_VIEW: numberOfChartViews++;
+        for ( DataStatisticsEvent e : events )
+        {
+            switch ( e.getType() )
+            {
+                case CHART_VIEW:
+                    numberOfChartViews++;
                     break;
-                case MAP_VIEW: numberOfMapViews++;
+                case MAP_VIEW:
+                    numberOfMapViews++;
                     break;
-                case DASHBOARD_VIEW: numberOfDashboardViews++;
+                case DASHBOARD_VIEW:
+                    numberOfDashboardViews++;
                     break;
-                case REPORT_TABLE_VIEW: numberOfReportTablesViews++;
+                case REPORT_TABLE_VIEW:
+                    numberOfReportTablesViews++;
                     break;
-                case EVENT_REPORT_VIEW: numberOfEventReportViews++;
+                case EVENT_REPORT_VIEW:
+                    numberOfEventReportViews++;
                     break;
-                case EVENT_CHART_VIEW: numberOfEventChartViews++;
+                case EVENT_CHART_VIEW:
+                    numberOfEventChartViews++;
                     break;
-                case INDICATOR_VIEW: numberOfIndicatorsViews++;
+                case INDICATOR_VIEW:
+                    numberOfIndicatorsViews++;
                     break;
             }
 
-            if(!uniqueUsers.contains( e.getUserName( ) ) ){
-                uniqueUsers.add( e.getUserName( ) );
+            if ( !uniqueUsers.contains( e.getUserName() ) )
+            {
+                uniqueUsers.add( e.getUserName() );
             }
         }
 
@@ -287,29 +396,21 @@ public class DefaultDataStatisticsService implements DataStatisticsService
         double numberOfSavedDashboards = getNumberOfDashboards( startDate );
         double numberOfSavedIndicators = getNumberOfIndicators( startDate );
 
-        numberOfActiveUsers = uniqueUsers.size( );
+        numberOfActiveUsers = uniqueUsers.size();
 
-        if( numberOfActiveUsers != 0 )
+        if ( numberOfActiveUsers != 0 )
             averageNumberofViews = totalNumberOfViews / numberOfActiveUsers;
 
         DataStatistics dataStatistics = new DataStatistics( numberOfActiveUsers, numberOfMapViews, numberOfChartViews,
             numberOfReportTablesViews, numberOfEventReportViews, numberOfEventChartViews, numberOfDashboardViews,
             numberOfIndicatorsViews, totalNumberOfViews, averageNumberofViews, numberOfSavedMaps,
             numberOfSavedCharts, numberOfSavedReportTables, numberOfSavedEventReports,
-            numberOfSavedEventCharts, numberOfSavedDashboards ,numberOfSavedIndicators ,
+            numberOfSavedEventCharts, numberOfSavedDashboards, numberOfSavedIndicators,
             totalNumberOfUsers );
-        System.out.println( dataStatistics.toString( ) );
 
-        try
-        {
-            int id = hibernateDataStatisticsStore.addSnapshot( dataStatistics );
-            System.out.println( "\nSnapshot was saved with id: " + id );
-            return id;
-        }
-        catch ( Exception e )
-        {
-            System.out.println( "Could not save snapshot. Exception: " + e.toString() );
-            return 0;
-        }
+        int id = hibernateDataStatisticsStore.save( dataStatistics );
+        return id;
+
+
     }
 }

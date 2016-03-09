@@ -46,7 +46,7 @@ public class DataStatisticsTask implements Runnable
      * to create a thread, starting the thread causes the object's
      * <code>run</code> method to be called in that separately executing
      * thread.
-     * <p>
+     * <p/>
      * The general contract of the method <code>run</code> is that it may
      * take any action whatsoever.
      *
@@ -63,10 +63,10 @@ public class DataStatisticsTask implements Runnable
      * saves calls saveSnapShot() in DefaultDataStatisticsService
      */
     @Override
-    public void run( )
+    public void run()
     {
-        dataStatisticsService.saveSnapshot( );
-        systemSettingManager.saveSystemSetting( SettingKey.LAST_SUCCESSFUL_DATA_STATISTIC, new Date( ) );
+        dataStatisticsService.saveSnapshot();
+        systemSettingManager.saveSystemSetting( SettingKey.LAST_SUCCESSFUL_DATA_STATISTIC, new Date() );
 
     }
 

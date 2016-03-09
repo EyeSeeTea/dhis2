@@ -1,20 +1,49 @@
 package org.hisp.dhis.datastatistics;
 
+/*
+ * Copyright (c) 2004-2016, University of Oslo
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.Date;
 
 /**
- * @author  Julie Hill Roa
+ * @author Julie Hill Roa
  * @author Yrjan Fraschetti
  *
- * Aggregated DataStatistics object
+ *         Aggregated DataStatistics object
  */
 public class AggregatedStatistics
 {
 
-    Date startInterval;
-    Date endInterval;
+    Integer year;
+    Integer month;
+    Integer week;
+    Integer day;
     Integer activeUsers;
     Double mapViews;
     Double chartViews;
@@ -34,82 +63,57 @@ public class AggregatedStatistics
     Double savedIndicators;
     Integer users;
 
-    public AggregatedStatistics( Date startInterval, Date endInterval, Integer activeUsers, Double mapViews, Double chartViews,
-        Double reportTablesViews, Double eventReportViews, Double eventChartViews, Double dashboardViews, Double indicatorsViews,
-        Double totalViews, Double averageViews, Double savedMaps, Double savedCharts, Double savedReportTables, Double savedEventReports,
-        Double savedEventCharts, Double savedDashboards, Double savedIndicators, Integer users )
+    public AggregatedStatistics()
     {
-        this.startInterval = startInterval;
-        this.endInterval = endInterval;
-        this.activeUsers = activeUsers;
-        this.mapViews = mapViews;
-        this.chartViews = chartViews;
-        this.reportTablesViews = reportTablesViews;
-        this.eventReportViews = eventReportViews;
-        this.eventChartViews = eventChartViews;
-        this.dashboardViews = dashboardViews;
-        this.indicatorsViews = indicatorsViews;
-        this.totalViews = totalViews;
-        this.averageViews = averageViews;
-        this.savedMaps = savedMaps;
-        this.savedCharts = savedCharts;
-        this.savedReportTables = savedReportTables;
-        this.savedEventReports = savedEventReports;
-        this.savedEventCharts = savedEventCharts;
-        this.savedDashboards = savedDashboards;
-        this.savedIndicators = savedIndicators;
-        this.users = users;
-    }
-
-    public AggregatedStatistics( Integer activeUsers, Double mapViews, Double chartViews, Double reportTablesViews,
-        Double eventReportViews, Double eventChartViews, Double dashboardViews, Double indicatorsViews, Double totalViews,
-        Double averageViews, Double savedMaps, Double savedCharts, Double savedReportTables, Double savedEventReports,
-        Double savedEventCharts, Double savedDashboards, Double savedIndicators, Integer users )
-    {
-        this.activeUsers = activeUsers;
-        this.mapViews = mapViews;
-        this.chartViews = chartViews;
-        this.reportTablesViews = reportTablesViews;
-        this.eventReportViews = eventReportViews;
-        this.eventChartViews = eventChartViews;
-        this.dashboardViews = dashboardViews;
-        this.indicatorsViews = indicatorsViews;
-        this.totalViews = totalViews;
-        this.averageViews = averageViews;
-        this.savedMaps = savedMaps;
-        this.savedCharts = savedCharts;
-        this.savedReportTables = savedReportTables;
-        this.savedEventReports = savedEventReports;
-        this.savedEventCharts = savedEventCharts;
-        this.savedDashboards = savedDashboards;
-        this.savedIndicators = savedIndicators;
-        this.users = users;
     }
 
     @JsonProperty
-    public Date getStartInterval( )
+    public Integer getYear()
     {
-        return startInterval;
+        return year;
     }
 
-    public void setStartInterval( Date startInterval )
+    public void setYear( Integer year )
     {
-        this.startInterval = startInterval;
-    }
-
-    @JsonProperty
-    public Date getEndInterval( )
-    {
-        return endInterval;
-    }
-
-    public void setEndInterval( Date endInterval )
-    {
-        this.endInterval = endInterval;
+        this.year = year;
     }
 
     @JsonProperty
-    public Integer getActiveUsers( )
+    public Integer getMonth()
+    {
+        return month;
+    }
+
+    public void setMonth( Integer month )
+    {
+        this.month = month;
+    }
+
+    @JsonProperty
+    public Integer getWeek()
+    {
+        return week;
+    }
+
+    public void setWeek( Integer week )
+    {
+        this.week = week;
+    }
+
+    @JsonProperty
+    public Integer getDay()
+    {
+        return day;
+    }
+
+    public void setDay( Integer day )
+    {
+        this.day = day;
+    }
+
+
+    @JsonProperty
+    public Integer getActiveUsers()
     {
         return activeUsers;
     }
@@ -120,7 +124,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getMapViews( )
+    public Double getMapViews()
     {
         return mapViews;
     }
@@ -131,7 +135,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getChartViews( )
+    public Double getChartViews()
     {
         return chartViews;
     }
@@ -142,7 +146,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getReportTablesViews( )
+    public Double getReportTablesViews()
     {
         return reportTablesViews;
     }
@@ -153,7 +157,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getEventReportViews( )
+    public Double getEventReportViews()
     {
         return eventReportViews;
     }
@@ -164,7 +168,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getEventChartViews( )
+    public Double getEventChartViews()
     {
         return eventChartViews;
     }
@@ -175,7 +179,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getDashboardViews( )
+    public Double getDashboardViews()
     {
         return dashboardViews;
     }
@@ -186,7 +190,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getIndicatorsViews( )
+    public Double getIndicatorsViews()
     {
         return indicatorsViews;
     }
@@ -197,7 +201,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getTotalViews( )
+    public Double getTotalViews()
     {
         return totalViews;
     }
@@ -208,7 +212,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getAverageViews( )
+    public Double getAverageViews()
     {
         return averageViews;
     }
@@ -219,7 +223,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getSavedMaps( )
+    public Double getSavedMaps()
     {
         return savedMaps;
     }
@@ -230,7 +234,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getSavedCharts( )
+    public Double getSavedCharts()
     {
         return savedCharts;
     }
@@ -241,7 +245,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getSavedReportTables( )
+    public Double getSavedReportTables()
     {
         return savedReportTables;
     }
@@ -252,7 +256,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getSavedEventReports( )
+    public Double getSavedEventReports()
     {
         return savedEventReports;
     }
@@ -263,7 +267,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getSavedEventCharts( )
+    public Double getSavedEventCharts()
     {
         return savedEventCharts;
     }
@@ -274,7 +278,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getSavedDashboards( )
+    public Double getSavedDashboards()
     {
         return savedDashboards;
     }
@@ -285,7 +289,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getSavedIndicators( )
+    public Double getSavedIndicators()
     {
         return savedIndicators;
     }
@@ -296,7 +300,7 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Integer getusers( )
+    public Integer getusers()
     {
         return users;
     }
@@ -307,11 +311,13 @@ public class AggregatedStatistics
     }
 
     @Override
-    public String toString( )
+    public String toString()
     {
         return "AggregatedStatistics{" +
-            "startInterval=" + startInterval +
-            ", endInterval=" + endInterval +
+            "year=" + year +
+            ", month=" + month +
+            ", week=" + week +
+            ", day=" + day +
             ", activeUsers=" + activeUsers +
             ", mapViews=" + mapViews +
             ", chartViews=" + chartViews +
