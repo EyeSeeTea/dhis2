@@ -56,7 +56,8 @@ public class HibernateDataStatisticsEventStoreTest extends DhisSpringTest
     DataStatisticsEvent dse2;
     DataStatisticsEvent dse3;
     DataStatisticsEvent dse4;
-    DataStatisticsEvent dse5;
+
+
 
 
     int dse1Id;
@@ -76,7 +77,7 @@ public class HibernateDataStatisticsEventStoreTest extends DhisSpringTest
         Calendar c = Calendar.getInstance();
         endDate = c.getTime();
         c.setTime( startDate );
-        c.add( Calendar.DATE, -1 );
+        c.add( Calendar.DATE, -2 );
         startDate = c.getTime();
 
 
@@ -87,62 +88,73 @@ public class HibernateDataStatisticsEventStoreTest extends DhisSpringTest
 
         dse1 = new DataStatisticsEvent( EventType.REPORT_TABLE_VIEW, endDate, "Testuser" );
         dse2 = new DataStatisticsEvent( EventType.EVENT_CHART_VIEW, endDate, "TestUser" );
-        dse3 = new DataStatisticsEvent( EventType.CHART_VIEW, endDate, "Testuser" );
+        dse3 = new DataStatisticsEvent( EventType.INDICATOR_VIEW, testDate, "Testuser" );
         dse4 = new DataStatisticsEvent( EventType.DASHBOARD_VIEW, endDate, "TestUser" );
-        dse5 = new DataStatisticsEvent( EventType.INDICATOR_VIEW, testDate, "Testuser" );
-
 
         dse1Id = 0;
         dse2Id = 0;
     }
 
     @Test
-    public void testAddDataStatisticsEvent() throws Exception
+    public void addDataStatisticsEventTest()
     {
         dse1Id = dataStatisticsEventStore.save( dse1 );
         dse2Id = dataStatisticsEventStore.save( dse2 );
-
         assertTrue( dse1Id != 0 );
         assertTrue( dse2Id != 0 );
+
     }
 
+
     @Test
-    public void testGetNumberOfEvents() throws Exception
+    public void getDataStatisticsEventCountTest()
     {
-        dataStatisticsEventStore.save( dse3 );
+
+        dataStatisticsEventStore.save( dse1 );
         dataStatisticsEventStore.save( dse4 );
 
-        int numberOfEvents = dataStatisticsEventStore.getNumberOfEvents( startDate, endDate );
+        List<DataStatisticsEvent> dsList = dataStatisticsEventStore.getDataStatisticsEventCount( startDate );
 
-        assertTrue( numberOfEvents == 2 );
+        assertTrue( dsList.size() == 2 );
+
     }
 
     @Test
-    public void testGetNumberOfEventsNotInInterval() throws Exception
+    public void getDataStatisticsEventCountCorrectContentTest()
     {
-        dataStatisticsEventStore.save( dse5 );
 
-        int numberOfEvents = dataStatisticsEventStore.getNumberOfEvents( startDate, endDate );
+        dataStatisticsEventStore.save( dse1 );
+        dataStatisticsEventStore.save( dse4 );
 
-        assertTrue( numberOfEvents == 0 );
+        List<DataStatisticsEvent> dsList = dataStatisticsEventStore.getDataStatisticsEventCount( startDate );
+        assertEquals( dse1, dsList.get( 0 ) );
+        assertEquals( dse4, dsList.get( 1 ) );
     }
 
     @Test
-    public void testGetDataStatisticsEventList() throws Exception
+    public void getDataStatisticsEventCountCorrectDatesTest()
     {
         dataStatisticsEventStore.save( dse1 );
-        dataStatisticsEventStore.save( dse2 );
-        dataStatisticsEventStore.save( dse3 );
         dataStatisticsEventStore.save( dse4 );
-        dataStatisticsEventStore.save( dse5 );
+        dataStatisticsEventStore.save( dse3 );
 
-        List<DataStatisticsEvent> eventList = dataStatisticsEventStore.getDataStatisticsEventCount( startDate );
+        List<DataStatisticsEvent> dsList = dataStatisticsEventStore.getDataStatisticsEventCount( testDate );
 
-        assertTrue( eventList.size() == 4 );
-        assertTrue( eventList.contains( dse1 ) );
-        assertTrue( eventList.contains( dse2 ) );
-        assertTrue( eventList.contains( dse3 ) );
-        assertTrue( eventList.contains( dse4 ) );
-        assertFalse( eventList.contains( dse5 ) );
+        assertTrue( dsList.size() == 3 );
+
     }
+
+    @Test
+    public void getDataStatisticsEventCountWrongDatesTest()
+    {
+        dataStatisticsEventStore.save( dse1 );
+        dataStatisticsEventStore.save( dse4 );
+        dataStatisticsEventStore.save( dse3 );
+
+        List<DataStatisticsEvent> dsList = dataStatisticsEventStore.getDataStatisticsEventCount( startDate );
+
+        assertTrue( dsList.size() == 2 );
+
+    }
+
 }

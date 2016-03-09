@@ -29,9 +29,11 @@ package org.hisp.dhis.datastatistics.hibernate;
  */
 
 import org.hisp.dhis.DhisSpringTest;
+import org.hisp.dhis.datastatistics.AggregatedStatistics;
 import org.hisp.dhis.datastatistics.DataStatistics;
 import org.hisp.dhis.datastatistics.DataStatisticsStore;
 
+import org.hisp.dhis.datastatistics.EventInterval;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -71,8 +73,8 @@ public class HibernateDataStatisticsStoreTest extends DhisSpringTest
         ds2 = new DataStatistics( 10, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18 );
         ds3 = new DataStatistics();
         ds4 = new DataStatistics( 10, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 );
-        ds5 = new DataStatistics();
-        ds6 = new DataStatistics();
+        ds5 = new DataStatistics(3,2,1,6,5,4,8,7,6,3,4,4,5,9,7,6,4,2);
+        ds6 = new DataStatistics(5,6,4,3,5,7,8,5,3,2,1,5,6,8,8,9,9,9);
 
         ds1Id = 0;
         ds2Id = 0;
@@ -93,7 +95,7 @@ public class HibernateDataStatisticsStoreTest extends DhisSpringTest
     }
 
     @Test
-    public void testAddSnapshot() throws Exception
+    public void saveSnapshotTest() throws Exception
     {
         ds1Id = dataStatisticsStore.save( ds1 );
         ds2Id = dataStatisticsStore.save( ds2 );
@@ -102,31 +104,45 @@ public class HibernateDataStatisticsStoreTest extends DhisSpringTest
         assertTrue( ds2Id != 0 );
     }
 
-   /* @Test
-    public void testGetSnapshotsInInterval() throws Exception
-    {
-        dataStatisticsStore.addSnapshot( ds3 );
-        dataStatisticsStore.addSnapshot( ds4 );
+    @Test
+    public void getSnapshotsInIntervalGetAllTest(){
+      /*  dataStatisticsStore.save( ds1 );
+        dataStatisticsStore.save( ds2 );
+        dataStatisticsStore.save( ds3 );
+        dataStatisticsStore.save( ds4 );
+        dataStatisticsStore.save( ds5 );
+        dataStatisticsStore.save( ds6 );
 
-        List<DataStatistics> list = dataStatisticsStore.getSnapshotsInInterval( startDate, endDate );
+        List<AggregatedStatistics> asList = dataStatisticsStore.getSnapshotsInInterval( "select * from datastatistics", EventInterval.DAY );
 
-        assertTrue( list.size() == 2 );
-        assertTrue( list.contains( ds3 ) );
-        assertTrue( list.contains( ds4 ) );
-
-        assertFalse( list.contains( ds5 ) );
+        assertTrue( asList.size() == 6 );*/
 
     }
 
     @Test
-    public void testGetSnapshotInIntervalNotInInterval(){
-        ds6.setCreated( testDate );
-        dataStatisticsStore.addSnapshot( ds3 );
-        dataStatisticsStore.addSnapshot( ds6 );
+    public void getSnapshotsInIntervalGetInDAYTest(){
+       /* dataStatisticsStore.save( ds1 );
+        dataStatisticsStore.save( ds2 );
+        dataStatisticsStore.save( ds3 );
+        dataStatisticsStore.save( ds4 );
+        dataStatisticsStore.save( ds5 );
+        dataStatisticsStore.save( ds6 );
 
-        List<DataStatistics> list = dataStatisticsStore.getSnapshotsInInterval( startDate, endDate );
+        List<AggregatedStatistics> asList = dataStatisticsStore.getSnapshotsInInterval( "select extract(day from created) as yr from datastatistics ", EventInterval.DAY );
 
-        assertFalse( list.contains( ds6 ) );
-        assertTrue( list.size() == 1);
-    }*/
+        assertTrue( asList.size() == 6 );*/
+    }
+
+    @Test
+    public void getSnapshotsInIntervalGetInWEEKTest(){}
+
+    @Test
+    public void getSnapshotsInIntervalGetInMONTHTest(){}
+
+    @Test
+    public void getSnapshotsInIntervalGetInYEARTest(){}
+
+
+
+
 }

@@ -109,6 +109,7 @@ public class DefaultDataStatisticsService implements DataStatisticsService
         switch ( eventInterval )
         {
             case DAY:
+                System.out.println(getDaySql( startDate, endDate ));
                 return hibernateDataStatisticsStore.getSnapshotsInInterval( getDaySql( startDate, endDate ), eventInterval );
 
             case WEEK:
@@ -207,7 +208,7 @@ public class DefaultDataStatisticsService implements DataStatisticsService
             "sum(eventchartviews) as eventChartViews," +
             "sum(dashboardviews) as dashboardViews, " +
             "sum(indicatorviews) as indicatorsViews, " +
-            "max(totalviews) as totalViews," +
+            "sum(totalviews) as totalViews," +
             "sum(average_views) as averageViews, " +
             "sum(maps) as savedMaps," +
             "sum(charts) as savedCharts," +
@@ -244,18 +245,6 @@ public class DefaultDataStatisticsService implements DataStatisticsService
         return reportTableService.getCountGeCreated( date );
     }
 
-    /**
-     * gets number of saved favorite views from a start date too a end date
-     *
-     * @param startDate - From date
-     * @param endDate   - Too date
-     * @return number of favorite views saved in db
-     */
-    @Override
-    public int getNumberOfFavoriteViews( Date startDate, Date endDate )
-    {
-        return hibernateDataStatisticsEventStore.getNumberOfEvents( startDate, endDate );
-    }
 
     /**
      * gets number of saved Maps from a date till now

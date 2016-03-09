@@ -74,15 +74,6 @@ public interface DataStatisticsService
     int getNumberOfReportTables( Date date );
 
     /**
-     * Finds number of favorite views in eventInterval
-     *
-     * @param startDate of eventInterval
-     * @param endDate   of eventInterval
-     * @return
-     */
-    int getNumberOfFavoriteViews( Date startDate, Date endDate );
-
-    /**
      * Finds number of maps in eventInterval date to current date
      *
      * @param date

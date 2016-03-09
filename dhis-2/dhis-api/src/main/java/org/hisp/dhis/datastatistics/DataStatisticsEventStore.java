@@ -40,15 +40,6 @@ import java.util.List;
 public interface DataStatisticsEventStore extends GenericStore<DataStatisticsEvent>
 {
     /**
-     * Finds the number of events in a given interval
-     *
-     * @param startDate of interval
-     * @param endDate   of interval
-     * @return number of events in interval
-     */
-    int getNumberOfEvents( Date startDate, Date endDate );
-
-    /**
      * Creates a list of DataStatisticsEvent objects in interval date to current date
      *
      * @param date start of interval

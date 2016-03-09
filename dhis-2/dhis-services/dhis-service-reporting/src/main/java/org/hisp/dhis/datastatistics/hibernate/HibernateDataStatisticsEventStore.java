@@ -28,7 +28,6 @@ package org.hisp.dhis.datastatistics.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hibernate.criterion.Projections;
 import org.hisp.dhis.datastatistics.DataStatisticsEvent;
 import org.hisp.dhis.datastatistics.DataStatisticsEventStore;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
@@ -45,24 +44,6 @@ import java.util.List;
  */
 public class HibernateDataStatisticsEventStore extends HibernateGenericStore<DataStatisticsEvent> implements DataStatisticsEventStore
 {
-    /**
-     * Get number of events between start- and enddate
-     *
-     * @param startDate - from this date
-     * @param endDate   - to this date
-     * @return number of events
-     */
-    @Override
-    public int getNumberOfEvents( Date startDate, Date endDate )
-    {
-        int count = ((Number) getSharingCriteria()
-            .setProjection( Projections.countDistinct( "id" ) )
-            .add( Restrictions.ge( "timestamp", startDate ) )
-            .add( Restrictions.le( "timestamp", endDate ) )
-            .uniqueResult()).intValue();
-        return count;
-    }
-
     /**
      * Method for getting a list of all events saved from a specific date
      *

@@ -30,11 +30,14 @@ package org.hisp.dhis.datastatistics;
 
 import org.hisp.dhis.DhisSpringTest;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -70,11 +73,19 @@ public class DefaultDataStatisticsServiceTest extends DhisSpringTest
         c.add( Calendar.DATE, -2 );
         startDate = c.getTime();
 
+       /* SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+        now = dateFormat.parse( now.toString() );
+        startDate = dateFormat.parse( startDate.toString() );*/
+
+
+
         dse1 = new DataStatisticsEvent();
         dse2 = new DataStatisticsEvent( EventType.EVENT_CHART_VIEW, now, "TestUser" );
         ds = new DataStatistics( 10, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18 );
+
         snapId1 = hibernateDataStatisticsStore.save( ds );
     }
+
 
     @Test
     public void testAddEvent() throws Exception
@@ -91,29 +102,95 @@ public class DefaultDataStatisticsServiceTest extends DhisSpringTest
         assertNotEquals( 0, id );
     }
 
-   /* @Test
-    public void testGetReports() throws Exception
+    @Ignore
+    @Test
+    public void testSaveSnapshot() throws Exception
     {
+        dataStatisticsService.addEvent( dse1);
+        dataStatisticsService.addEvent( dse2 );
+        snapId2 = dataStatisticsService.saveSnapshot();
+
+        assertTrue( dataStatisticsService.getReports( startDate, now, EventInterval.DAY ).size() == 2 );
+    }
+
+    @Ignore
+    @Test
+    public void testSaveSnapshotWithInvalidInterval() throws Exception
+    {
+        assertTrue( dataStatisticsService.getReports( now, startDate, EventInterval.DAY ).size() == 0 );
+    }
+
+    @Ignore
+    @Test
+    public void testGetReportsDayInterval() throws Exception
+    {
+        dataStatisticsService.addEvent( dse1);
+        dataStatisticsService.addEvent( dse2 );
         Date startDate = new Date();
         Calendar c = Calendar.getInstance();
         c.setTime( startDate );
         c.add( Calendar.DATE, -1 );
         startDate = c.getTime();
 
-        assertNotNull( dataStatisticsService.getReports( startDate, now ) );
+        List<AggregatedStatistics> asList = dataStatisticsService.getReports( startDate, now, EventInterval.DAY );
+
+        assertNotNull( asList );
+        assertTrue( asList.size() == 2 );
     }
 
-    @Test
-    public void testSaveSnapshot() throws Exception
-    {
-        snapId2 = dataStatisticsService.saveSnapshot();
 
-        assertTrue( dataStatisticsService.getReports( startDate, new Date() ).size() == 2 );
+
+    @Ignore
+    @Test
+    public void testGetReportsWEEKInterval() throws Exception
+    {
+        dataStatisticsService.addEvent( dse1 );
+        dataStatisticsService.addEvent( dse2 );
+        Date startDate = new Date();
+        Calendar c = Calendar.getInstance();
+        c.setTime( startDate );
+        c.add( Calendar.DATE, -1 );
+        startDate = c.getTime();
+
+        List<AggregatedStatistics> asList = dataStatisticsService.getReports( now, new Date(  ), EventInterval.WEEK );
+
+        assertNotNull( asList );
+        assertTrue( asList.size() == 1 );
     }
 
+    @Ignore
     @Test
-    public void testSaveSnapshotWithInvalidInterval() throws Exception
+    public void testGetReportsMONTHInterval() throws Exception
     {
-        assertTrue( dataStatisticsService.getReports( now, startDate ).size() == 0);
-    }*/
+        dataStatisticsService.addEvent( dse1);
+        dataStatisticsService.addEvent( dse2 );
+        Date startDate = new Date();
+        Calendar c = Calendar.getInstance();
+        c.setTime( startDate );
+        c.add( Calendar.DATE, -1 );
+        startDate = c.getTime();
+
+        List<AggregatedStatistics> asList = dataStatisticsService.getReports( startDate, now, EventInterval.MONTH );
+
+        assertNotNull( asList );
+        assertTrue( asList.size() == 1 );    }
+
+    @Ignore
+    @Test
+    public void testGetReportsYEAHInterval() throws Exception
+    {
+        dataStatisticsService.addEvent( dse1);
+        dataStatisticsService.addEvent( dse2 );
+        Date startDate = new Date();
+        Calendar c = Calendar.getInstance();
+        c.setTime( startDate );
+        c.add( Calendar.DATE, -1 );
+        startDate = c.getTime();
+
+        List<AggregatedStatistics> asList = dataStatisticsService.getReports( startDate, now, EventInterval.YEAR );
+
+        assertNotNull( asList );
+        assertTrue( asList.size() == 1 );    }
+
+
 }
