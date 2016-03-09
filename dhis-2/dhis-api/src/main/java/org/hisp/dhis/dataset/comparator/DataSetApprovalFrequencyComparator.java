@@ -1,9 +1,7 @@
-package org.hisp.dhis.sms;
-
-import java.util.concurrent.ScheduledFuture;
+package org.hisp.dhis.dataset.comparator;
 
 /*
- * Copyright (c) 2004-2016, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,38 +28,45 @@ import java.util.concurrent.ScheduledFuture;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.TaskScheduler;
+import java.util.Comparator;
 
-public class SmsPublisher
+import org.hisp.dhis.dataset.DataSet;
+
+public class DataSetApprovalFrequencyComparator
+    implements Comparator<DataSet>
 {
-
-    @Autowired
-    private MessageQueue messageQueue;
-
-    @Autowired
-    private SmsConsumerThread smsConsumer;
-
-    @Autowired
-    private TaskScheduler taskScheduler;
-
-    private ScheduledFuture<?> future;
-
-    public void start()
+    public static final DataSetApprovalFrequencyComparator INSTANCE = new DataSetApprovalFrequencyComparator();
+    
+    @Override
+    public int compare( DataSet d1, DataSet d2 )
     {
-        messageQueue.initialize();
-
-        future = taskScheduler.scheduleWithFixedDelay( new Runnable()
+        if ( d1 == null )
         {
-            public void run()
-            {
-                smsConsumer.spawnSmsConsumer();
-            }
-        }, 5000 );
-    }
-
-    public void stop()
-    {
-        future.cancel( true );
+            return -1;
+        }
+        
+        if ( d2 == null )
+        {
+            return 1;
+        }
+        
+        if ( d1.getWorkflow() != null && d2.getWorkflow() == null)
+        {
+            return -1;
+        }
+        
+        if ( d1.getWorkflow() == null && d2.getWorkflow() != null )
+        {
+            return 1;
+        }
+        
+        int frequencyOrder = Integer.valueOf( d1.getPeriodType().getFrequencyOrder() ).compareTo( Integer.valueOf( d2.getPeriodType().getFrequencyOrder() ) );
+        
+        if ( frequencyOrder != 0 )
+        {
+            return frequencyOrder;
+        }
+        
+        return d1.compareTo( d2 );
     }
 }

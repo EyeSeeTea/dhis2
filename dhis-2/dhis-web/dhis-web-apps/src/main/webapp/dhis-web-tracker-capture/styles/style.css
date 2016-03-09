@@ -637,11 +637,11 @@ table.table-striped tr td.optionset {
 }
 
 .widget-link {
-    color: #104E8B;
+    font-weight: normal !important;
 }
 
 .widget-link-active {
-    color: #551A8B;
+    font-weight: bold !important;
 }
 
 .empty-dashboard-container{
@@ -1919,11 +1919,6 @@ a.disable-link-effects:focus {
     cursor: pointer;
     color: #3162C5;
     margin-left: 5px;
-}
-
-.audit-icon-column {
-    width: 20px !important;
-    text-align: center;
 }
 
 .row-with-go-button {
