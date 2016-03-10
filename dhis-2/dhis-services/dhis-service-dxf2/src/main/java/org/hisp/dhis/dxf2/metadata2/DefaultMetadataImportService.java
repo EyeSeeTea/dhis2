@@ -42,6 +42,7 @@ import org.hisp.dhis.preheat.PreheatMode;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -50,6 +51,7 @@ import java.util.Map;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Component
+@Transactional
 public class DefaultMetadataImportService implements MetadataImportService
 {
     @Autowired
@@ -74,7 +76,10 @@ public class DefaultMetadataImportService implements MetadataImportService
         ObjectBundleValidation validation = objectBundleService.validate( bundle );
         report.setObjectErrorReports( validation.getObjectErrorReportsMap() );
 
-        objectBundleService.commit( bundle );
+        if ( !(bundleParams.getImportMode().isAtomic() && !validation.getObjectErrorReportsMap().isEmpty()) )
+        {
+            objectBundleService.commit( bundle );
+        }
 
         return report;
     }
@@ -88,6 +93,7 @@ public class DefaultMetadataImportService implements MetadataImportService
         params.setPreheatIdentifier( getEnumWithDefault( PreheatIdentifier.class, parameters, "preheatIdentifier", PreheatIdentifier.UID ) );
         params.setImportMode( getEnumWithDefault( ImportStrategy.class, parameters, "importMode", ImportStrategy.CREATE_AND_UPDATE ) );
         params.setMergeMode( getEnumWithDefault( MergeMode.class, parameters, "mergeMode", MergeMode.MERGE ) );
+        params.setFlushMode( getEnumWithDefault( FlushMode.class, parameters, "flushMode", FlushMode.OBJECTS ) );
 
         return params;
     }
