@@ -38,6 +38,11 @@ public enum ImportStrategy
     CREATE_AND_UPDATE,
     DELETE,
 
+    ATOMIC_CREATE,
+    ATOMIC_UPDATE,
+    ATOMIC_CREATE_AND_UPDATE,
+    ATOMIC_DELETE,
+
     NEW_AND_UPDATES,
     NEW,
     UPDATES,
@@ -61,5 +66,10 @@ public enum ImportStrategy
     public boolean isDelete()
     {
         return this == DELETE || this == DELETES;
+    }
+
+    public boolean isAtomic()
+    {
+        return this == ATOMIC_CREATE_AND_UPDATE || this == ATOMIC_UPDATE || this == ATOMIC_CREATE || this == ATOMIC_DELETE;
     }
 }
