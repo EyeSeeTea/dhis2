@@ -56,6 +56,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Zubair <rajazubair.asghar@gmail.com>
  */
+
 @RestController
 @RequestMapping( value = "/sms/gateways" )
 public class SmsGatewayController
@@ -135,8 +136,14 @@ public class SmsGatewayController
 
         SmsGatewayConfig payLoad = renderService.fromJson( request.getInputStream(), ClickatellGatewayConfig.class );
 
-        renderService.toJson( response.getOutputStream(),
-            gatewayAdminService.addOrUpdateGateway( payLoad, ClickatellGatewayConfig.class ) );
+        if ( gatewayAdminService.addOrUpdateGateway( payLoad, ClickatellGatewayConfig.class ) )
+        {
+            webMessageService.send( WebMessageUtils.ok( "SAVED" ), response, request );
+        }
+        else
+        {
+            webMessageService.send( WebMessageUtils.error( "NOT_SAVED" ), response, request );
+        }
     }
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_MOBILE_SENDSMS')" )
@@ -152,8 +159,14 @@ public class SmsGatewayController
 
         BulkSmsGatewayConfig payLoad = renderService.fromJson( request.getInputStream(), BulkSmsGatewayConfig.class );
 
-        renderService.toJson( response.getOutputStream(),
-            gatewayAdminService.addOrUpdateGateway( payLoad, BulkSmsGatewayConfig.class ) );
+        if ( gatewayAdminService.addOrUpdateGateway( payLoad, BulkSmsGatewayConfig.class ) )
+        {
+            webMessageService.send( WebMessageUtils.ok( "SAVED" ), response, request );
+        }
+        else
+        {
+            webMessageService.send( WebMessageUtils.error( "NOT_SAVED" ), response, request );
+        }
     }
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_MOBILE_SENDSMS')" )
@@ -169,8 +182,14 @@ public class SmsGatewayController
 
         SMPPGatewayConfig payLoad = renderService.fromJson( request.getInputStream(), SMPPGatewayConfig.class );
 
-        renderService.toJson( response.getOutputStream(),
-            gatewayAdminService.addOrUpdateGateway( payLoad, SMPPGatewayConfig.class ) );
+        if ( gatewayAdminService.addOrUpdateGateway( payLoad, SMPPGatewayConfig.class ) )
+        {
+            webMessageService.send( WebMessageUtils.ok( "SAVED" ), response, request );
+        }
+        else
+        {
+            webMessageService.send( WebMessageUtils.error( "NOT_SAVED" ), response, request );
+        }
     }
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_MOBILE_SENDSMS')" )
@@ -187,8 +206,14 @@ public class SmsGatewayController
         GenericHttpGatewayConfig payLoad = renderService.fromJson( request.getInputStream(),
             GenericHttpGatewayConfig.class );
 
-        renderService.toJson( response.getOutputStream(),
-            gatewayAdminService.addOrUpdateGateway( payLoad, GenericHttpGatewayConfig.class ) );
+        if ( gatewayAdminService.addOrUpdateGateway( payLoad, GenericHttpGatewayConfig.class ) )
+        {
+            webMessageService.send( WebMessageUtils.ok( "SAVED" ), response, request );
+        }
+        else
+        {
+            webMessageService.send( WebMessageUtils.error( "NOT_SAVED" ), response, request );
+        }
     }
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_MOBILE_SENDSMS')" )

@@ -30,6 +30,7 @@ package org.hisp.dhis.dataelement;
 
 import org.hisp.dhis.common.IdentifiableProperty;
 import org.hisp.dhis.hierarchy.HierarchyViolationException;
+import org.hisp.dhis.user.UserCredentials;
 
 import java.util.Collection;
 import java.util.List;
@@ -252,6 +253,15 @@ public interface DataElementCategoryService
      */
     List<DataElementCategoryOption> getDataElementCategoryOptions( DataElementCategory category );
 
+    /**
+     * Returns a set of CategoryOptions that may be seen by the current
+     * user, if the current user has any Category constraint(s).
+     *
+     * @param userCredentials User credentials to check restrictions for.
+     * @return Set of CategoryOptions if constrained, else null.
+     */
+    Set<DataElementCategoryOption> getCoDimensionConstraints( UserCredentials userCredentials );
+
     // -------------------------------------------------------------------------
     // CategoryCombo
     // -------------------------------------------------------------------------
@@ -418,15 +428,6 @@ public interface DataElementCategoryService
     /**
      * Retrieves a DataElementCategoryOptionCombo.
      *
-     * @param categoryOptionCombo the DataElementCategoryOptionCombo to
-     *                            retrieve.
-     * @return a DataElementCategoryOptionCombo.
-     */
-    DataElementCategoryOptionCombo getDataElementCategoryOptionCombo( DataElementCategoryOptionCombo categoryOptionCombo );
-
-    /**
-     * Retrieves a DataElementCategoryOptionCombo.
-     *
      * @param categoryCombo   the DataElementCategoryOptionCombo.
      * @param categoryOptions the set of DataElementCategoryOptions.
      */
@@ -543,6 +544,8 @@ public interface DataElementCategoryService
 
     List<DataElementCategoryCombo> getDataElementCategoryCombosBetweenByName( String name, int first, int max );
 
+    void updateCategoryOptionComboNames();
+    
     // -------------------------------------------------------------------------
     // DataElementOperand
     // -------------------------------------------------------------------------
@@ -607,6 +610,15 @@ public interface DataElementCategoryService
     int getCategoryOptionGroupCount();
 
     int getCategoryOptionGroupCountByName( String name );
+
+    /**
+     * Returns a set of CategoryOptionGroups that may be seen by the current
+     * user, if the current user has any CategoryOptionGroupSet constraint(s).
+     *
+     * @param userCredentials User credentials to check restrictions for.
+     * @return Set of CategoryOptionGroups if constrained, else null.
+     */
+    Set<CategoryOptionGroup> getCogDimensionConstraints( UserCredentials userCredentials );
 
     // -------------------------------------------------------------------------
     // CategoryOptionGroupSet

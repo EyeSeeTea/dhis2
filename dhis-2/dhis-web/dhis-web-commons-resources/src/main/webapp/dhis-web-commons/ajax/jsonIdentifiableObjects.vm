@@ -1,4 +1,4 @@
-#set( $size = $objects.size() )
+#set( $size = $objectMap.size() )
 { "objects": [
 #foreach( $object in $objects )
   {

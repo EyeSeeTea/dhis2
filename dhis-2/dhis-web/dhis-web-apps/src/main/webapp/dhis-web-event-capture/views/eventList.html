@@ -21,7 +21,7 @@
                     <div class="pull-right hideInPrint">
                         <button class="btn btn-primary hideInPrint"
                                 type="button"
-                                ng-if="editingEventInGrid""                                        
+                                ng-if="editingEventInGrid"
                                 ng-click="showEventList()">
                             {{'close_editing'| translate}}
                         </button>
@@ -58,9 +58,12 @@
                             <th ng-repeat="eventGridColumn in eventGridColumns | filter: {show: true}" ng-if="eventGridColumn.id !== 'comment'">                                    
                                 <!-- sort icon begins -->                                
                                 <span ng-hide="eventGridColumn.showFilter" class="bold" ng-click="sortEventGrid(eventGridColumn)">
-                                    <span ng-class="{true: 'red'} [sortHeader.id == eventGridColumn.id]"><i class="fa fa-sort"></i></span>
-                                    <span ng-if="eventGridColumn.id !== 'uid'">{{eventGridColumn.name}}</span>
-                                    <span ng-if="eventGridColumn.id == 'uid'">{{eventGridColumn.name | translate}}</span>
+                                    <span class="fa-stack">
+                                        <span ng-class="{true: 'red'} [sortHeader.id === eventGridColumn.id && !reverse]"><i class="fa fa-sort-asc fa-stack-1x"></i></span>
+                                        <span ng-class="{true: 'red'} [sortHeader.id === eventGridColumn.id && reverse]"><i class="fa fa-sort-desc fa-stack-1x"></i></span>
+                                    </span>
+                                    <span ng-if="eventGridColumn.id !== 'uid'">{{eventGridColumn.displayName}}</span>
+                                    <span ng-if="eventGridColumn.id == 'uid'">{{eventGridColumn.displayName | translate}}</span>
                                 </span>
                                 <!-- sort icon ends -->
 
@@ -175,10 +178,10 @@
                                                                          class="form-control-ui-select" 
                                                                          ng-class="getInputNotifcationClass(eventGridColumn.id, true)" 
                                                                          placeholder="{{'select_or_search' | translate}}">
-                                                            {{$select.selected.name || $select.selected}}
+                                                            {{$select.selected.displayName || $select.selected}}
                                                         </ui-select-match>
-                                                        <ui-select-choices  repeat="option.name as option in optionSets[prStDes[eventGridColumn.id].dataElement.optionSet.id].options | filter: $select.search | limitTo:maxOptionSize">
-                                                            <span ng-bind-html="option.name | highlight: $select.search"></span>
+                                                        <ui-select-choices  repeat="option.displayName as option in optionSets[prStDes[eventGridColumn.id].dataElement.optionSet.id].options | filter: $select.search | limitTo:maxOptionSize">
+                                                            <span ng-bind-html="option.displayName | highlight: $select.search"></span>
                                                         </ui-select-choices>
                                                     </ui-select>
                                                 </span>
@@ -201,7 +204,7 @@
                                                                ng-model="currentEvent[eventGridColumn.id]" 
                                                                ng-change="updateEventDataValue(dhis2Event, eventGridColumn.id)"
                                                                ng-class="getInputNotifcationClass(eventGridColumn.id,false)"
-                                                               value={{option.name}}> {{option.name}}<br>                                    
+                                                               value={{option.displayName}}> {{option.displayName}}<br>                                    
                                                     </label>
                                                 </span> 
                                             </div>

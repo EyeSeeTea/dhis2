@@ -36,7 +36,6 @@ import org.hisp.dhis.sms.config.SmsConfiguration;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -72,14 +71,10 @@ public enum SettingKey
     INSTANCE_BASE_URL( "keyInstanceBaseUrl" ),
     SCHEDULED_TASKS( "keySchedTasks", ListMap.class ),
     SMS_CONFIG( "keySmsConfig", SmsConfiguration.class ),
+    SMS_CONSUMER_STATE( "isStarted", Boolean.FALSE, Boolean.class ),
     CACHE_STRATEGY( "keyCacheStrategy", "CACHE_6AM_TOMORROW", String.class ),
-    TIME_FOR_SENDING_MESSAGE( "timeSendingMessage", "08:00", String.class ),
-    SEND_MESSAGE_SCHEDULED_TASKS( "sendMessageScheduled" ),
-    SCHEDULE_MESSAGE_TASKS( "scheduleMessage" ),
     PHONE_NUMBER_AREA_CODE( "phoneNumberAreaCode" ),
     MULTI_ORGANISATION_UNIT_FORMS( "multiOrganisationUnitForms", Boolean.FALSE, Boolean.class ),
-    SCHEDULE_AGGREGATE_QUERY_BUILDER_TASKS( "scheduleAggregateQueryBuilder", Map.class ),
-    SCHEDULE_AGGREGATE_QUERY_BUILDER_TASK_STRATEGY( "scheduleAggregateQueryBuilderTackStrategy", "lastMonth", String.class ),
     CONFIGURATION( "keyConfig", Configuration.class ),
     ACCOUNT_RECOVERY( "keyAccountRecovery", Boolean.FALSE, Boolean.class ),
     GOOGLE_ANALYTICS_UA( "googleAnalyticsUA" ),
@@ -100,6 +95,7 @@ public enum SettingKey
     LAST_SUCCESSFUL_ANALYTICS_TABLES_UPDATE( "keyLastSuccessfulAnalyticsTablesUpdate", Date.class ),
     LAST_SUCCESSFUL_RESOURCE_TABLES_UPDATE( "keyLastSuccessfulResourceTablesUpdate", Date.class ),
     LAST_SUCCESSFUL_MONITORING( "keyLastSuccessfulMonitoring", Date.class ),
+    LAST_SUCCESSFUL_SMS_SCHEDULING( "lastSuccessfulSmsScheduling", Date.class ),
     HELP_PAGE_LINK( "helpPageLink", "../dhis-web-commons-about/help.action", String.class ),
     ACCEPTANCE_REQUIRED_FOR_APPROVAL( "keyAcceptanceRequiredForApproval", Boolean.FALSE, Boolean.class ),
     SYSTEM_NOTIFICATIONS_EMAIL( "keySystemNotificationsEmail" ),

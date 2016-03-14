@@ -35,7 +35,6 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.sms.SmsPublisher;
 import org.hisp.dhis.sms.SmsServiceException;
 import org.hisp.dhis.sms.config.BulkSmsGatewayConfig;
 import org.hisp.dhis.sms.config.ClickatellGatewayConfig;
@@ -79,19 +78,19 @@ public class DefaultOutboundSmsTransportService
     {
         this.smppInboundMessageNotification = smppInboundMessageNotification;
     }
+    
+    private IOutboundMessageNotification outboundMessageNotification;
+
+    public void setOutboundMessageNotification( IOutboundMessageNotification outboundMessageNotification )
+    {
+        this.outboundMessageNotification = outboundMessageNotification;
+    }
 
     private OutboundSmsService outboundSmsService;
 
     public void setOutboundSmsService( OutboundSmsService outboundSmsService )
     {
         this.outboundSmsService = outboundSmsService;
-    }
-
-    private SmsPublisher smsPublisher;
-
-    public void setSmsPublisher( SmsPublisher smsPublisher )
-    {
-        this.smsPublisher = smsPublisher;
     }
 
     // -------------------------------------------------------------------------
@@ -121,8 +120,7 @@ public class DefaultOutboundSmsTransportService
 
         try
         {
-            getService().stopService();
-            smsPublisher.stop();
+            getService().stopService();       
         }
         catch ( SMSLibException e )
         {
@@ -155,17 +153,6 @@ public class DefaultOutboundSmsTransportService
                 {
                     getService().setInboundMessageNotification( smppInboundMessageNotification );
                 }
-
-                try
-                {
-                    smsPublisher.start();
-                }
-                catch ( Exception e1 )
-                {
-                    message = "Unable to start smsConsumer service " + e1.getMessage();
-                    log.warn( "Unable to start smsConsumer service ", e1 );
-                }
-
             }
             catch ( SMSLibException e )
             {
@@ -463,13 +450,6 @@ public class DefaultOutboundSmsTransportService
             log.warn( "Unable to send message: " + sms, e );
             message = "Unable to send message: " + sms + " " + e.getCause().getMessage();
         }
-        finally
-        {
-            if ( recipients.size() > 1 )
-            {
-                removeGroup( recipient );
-            }
-        }
 
         if ( outboundMessage.getMessageStatus() == MessageStatuses.SENT )
         {
@@ -496,6 +476,56 @@ public class DefaultOutboundSmsTransportService
         return message;
     }
 
+    @Override
+    public boolean sendAyncMessage( OutboundSms sms, String gatewayId )
+    {
+        String recipient = null;
+
+        Set<String> recipients = sms.getRecipients();
+
+        if ( recipients.size() == 1 )
+        {
+            recipient = recipients.iterator().next();
+        }
+        else
+        {
+            recipient = createTmpGroup( recipients );
+        }
+
+        OutboundMessage outboundMessage = new OutboundMessage( recipient, sms.getMessage() );
+
+        for ( char each : sms.getMessage().toCharArray() )
+        {
+            if ( !Character.UnicodeBlock.of( each ).equals( UnicodeBlock.BASIC_LATIN ) )
+            {
+                outboundMessage.setEncoding( MessageEncodings.ENCUCS2 );
+                break;
+            }
+        }
+
+        outboundMessage.setStatusReport( true );
+
+        String longNumber = config.getLongNumber();
+
+        if ( longNumber != null && !longNumber.isEmpty() )
+        {
+            outboundMessage.setFrom( longNumber );
+        }
+
+        try
+        {
+            getService().setOutboundMessageNotification( outboundMessageNotification );
+            getService().queueMessage( outboundMessage, gatewayId );
+            return true;
+        }
+        catch ( Exception e )
+        {
+            log.warn( "ASYNC Message sending failed ", e );
+        }
+
+        return false;
+    }
+
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
@@ -517,21 +547,17 @@ public class DefaultOutboundSmsTransportService
 
     private String createTmpGroup( Set<String> recipients )
     {
-        String groupName = Thread.currentThread().getName();
+        String recipientList = "";
 
-        getService().createGroup( groupName );
-
-        for ( String recepient : recipients )
+        for ( String recipient : recipients )
         {
-            getService().addToGroup( groupName, recepient );
+            recipientList += recipient;
+            recipientList += ",";
         }
 
-        return groupName;
-    }
+        recipientList = recipientList.substring( 0, recipientList.length() - 1 );
 
-    private void removeGroup( String groupName )
-    {
-        getService().removeGroup( groupName );
+        return recipientList;
     }
 
     @Override

@@ -50,9 +50,11 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.user.User;
 import org.joda.time.DateTime;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 /**
@@ -289,6 +291,26 @@ public class DefaultDataSetService
         return getObjectsBetweenByName( i18nService, dataSetStore, name, first, max );
     }
 
+    @Override
+    public List<DataSet> getCurrentUserDataSets()
+    {
+        User user = currentUserService.getCurrentUser();
+        
+        if ( user == null )
+        {
+            return Lists.newArrayList();
+        }
+        
+        if ( user.isSuper() )
+        {
+            return getAllDataSets();
+        }
+        else
+        {
+            return i18n( i18nService, Lists.newArrayList( user.getUserCredentials().getAllDataSets() ) );
+        }
+    }
+    
     // -------------------------------------------------------------------------
     // DataSet LockExceptions
     // -------------------------------------------------------------------------
@@ -397,13 +419,28 @@ public class DefaultDataSetService
     }
 
     @Override
-    public boolean isLocked( DataElement dataElement, Period period, OrganisationUnit organisationUnit, Date now )
+    public boolean isLocked( DataElement dataElement, Period period, OrganisationUnit organisationUnit,
+        DataElementCategoryOptionCombo attributeOptionCombo, Date now )
     {
         now = now != null ? now : new Date();
 
         boolean expired = dataElement.isExpired( period, now );
-        
-        return expired && lockExceptionStore.getCount( dataElement, period, organisationUnit ) == 0L;
+
+        if ( expired && lockExceptionStore.getCount( dataElement, period, organisationUnit ) == 0L )
+        {
+            return true;
+        }
+
+        DataSet dataSet = dataElement.getApprovalDataSet();
+
+        if ( dataSet == null || dataSet.getWorkflow() == null )
+        {
+            return false;
+        }
+
+        DataApprovalStatus dataApprovalStatus = dataApprovalService.getDataApprovalStatus( dataSet.getWorkflow(), period, organisationUnit, attributeOptionCombo );
+
+        return dataApprovalStatus.getState().isApproved();
     }
     
     @Override

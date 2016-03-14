@@ -30,14 +30,11 @@ import java.util.concurrent.ScheduledFuture;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 
 public class SmsPublisher
 {
-    private static final Log log = LogFactory.getLog( SmsPublisher.class );
 
     @Autowired
     private MessageQueue messageQueue;
@@ -61,13 +58,10 @@ public class SmsPublisher
                 smsConsumer.spawnSmsConsumer();
             }
         }, 5000 );
-
-        log.info( "SMS Consumer Started" );
     }
 
     public void stop()
     {
         future.cancel( true );
-        log.info( "SMS Consumer Stopped" );
     }
 }

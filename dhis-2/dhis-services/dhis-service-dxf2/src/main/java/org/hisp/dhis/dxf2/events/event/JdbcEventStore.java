@@ -30,6 +30,8 @@ package org.hisp.dhis.dxf2.events.event;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.IdSchemes;
@@ -42,6 +44,7 @@ import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.ProgramStatus;
 import org.hisp.dhis.program.ProgramType;
+import org.hisp.dhis.query.Order;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.util.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +55,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getIdentifiers;
@@ -66,6 +70,25 @@ public class JdbcEventStore
 {
     private static final Log log = LogFactory.getLog( JdbcEventStore.class );
 
+    private static final Map<String, String> QUERY_PARAM_COL_MAP = ImmutableMap.<String, String>builder().
+        put( "event", "psi_uid" ).
+        put( "program", "p_uid" ).
+        put( "programStage", "ps_uid" ).
+        put( "enrollment", "pi_uid" ).
+        put( "enrollmentStatus", "pi_status" ).
+        put( "orgUnit", "ou_uid" ).
+        put( "orgUnitName", "ou_name" ).
+        put( "trackedEntityInstance", "tei_uid" ).
+        put( "eventDate", "psi_executiondate" ).
+        put( "followup", "pi_followup" ).
+        put( "status", "psi_status" ).
+        put( "dueDate", "psi_duedate" ).
+        put( "storedBy", "psi_storedby" ).
+        put( "created", "psi_created" ).
+        put( "lastUpdated", "psi_lastupdated" ).
+        put( "completedBy", "psi_completedby" ).
+        put( "completedDate", "psi_completeddate" ).build();
+    
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -337,7 +360,7 @@ public class JdbcEventStore
 
         sql += ") as cm on event.psi_id=cm.psic_id ";
 
-        sql += "order by psi_uid desc ";
+        sql += getOrderQuery( params.getOrders() );
 
         return sql;
     }
@@ -467,6 +490,31 @@ public class JdbcEventStore
             "inner join trackedentitycomment psinote on psic.trackedentitycommentid=psinote.trackedentitycommentid ";
 
         return sql;
+    }
+    
+    private String getOrderQuery( List<Order> orders )
+    {
+        if ( orders != null ) 
+        {    
+            ArrayList<String> orderFields = new ArrayList<String>();
+            
+            for ( Order order : orders )
+            {                   
+                if ( QUERY_PARAM_COL_MAP.containsKey( order.getProperty().getName() ) )
+                {
+                    String orderText = QUERY_PARAM_COL_MAP.get( order.getProperty().getName() );
+                    orderText += order.isAscending() ? " asc" : " desc";                    
+                    orderFields.add( orderText );
+                }
+            }
+            
+            if ( !orderFields.isEmpty() ) 
+            {
+                return "order by " + StringUtils.join( orderFields, ',' ) + " ";
+            }
+        }
+        
+        return "order by psi_lastupdated desc ";
     }
 
     private String getAttributeValueQuery()

@@ -54,6 +54,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
@@ -330,7 +331,7 @@ public class DefaultAnalyticsService
             {
                 grid.addRow();
                 grid.addValues( entry.getKey().split( DIMENSION_SEP ) );
-                grid.addValue( params.isSkipRounding() ? entry.getValue() : getRounded( entry.getValue() ) );
+                grid.addValue( AnalyticsUtils.getRoundedValueObject( params, entry.getValue() ) );
             }
         }
     }
@@ -371,7 +372,7 @@ public class DefaultAnalyticsService
             {
                 grid.addRow();
                 grid.addValues( entry.getKey().split( DIMENSION_SEP ) );
-                grid.addValue( dataSourceParams.isSkipRounding() ? entry.getValue() : getRounded( entry.getValue() ) );
+                grid.addValue( AnalyticsUtils.getRoundedValueObject( dataSourceParams, entry.getValue() ) );
             }
         }
     }
@@ -578,7 +579,7 @@ public class DefaultAnalyticsService
      */
     private void applyIdScheme( DataQueryParams params, Grid grid )
     {
-        if ( params.hasNonUidOutputIdScheme() )
+        if ( !params.isSkipMeta() && params.hasNonUidOutputIdScheme() )
         {
             List<DimensionalItemObject> items = params.getAllDimensionItems();
             
@@ -595,6 +596,8 @@ public class DefaultAnalyticsService
         {
             return getAggregatedDataValues( params );
         }
+        
+        Locale locale = i18nService.getCurrentLocale();
         
         params.setOutputIdScheme( null );
         
@@ -615,8 +618,12 @@ public class DefaultAnalyticsService
             for ( String dimension : columns )
             {
                 reportTable.getColumnDimensions().add( dimension );
+                
+                List<DimensionalItemObject> items = params.getDimensionArrayExplodeCoc( dimension );
+                
+                i18nService.internationalise( items, locale );
 
-                tableColumns.add( params.getDimensionArrayExplodeCoc( dimension ) );
+                tableColumns.add( items.toArray( new DimensionalItemObject[0] ) );
             }
         }
 
@@ -625,11 +632,15 @@ public class DefaultAnalyticsService
             for ( String dimension : rows )
             {
                 reportTable.getRowDimensions().add( dimension );
+                
+                List<DimensionalItemObject> items = params.getDimensionArrayExplodeCoc( dimension );
+                
+                i18nService.internationalise( items, locale );
 
-                tableRows.add( params.getDimensionArrayExplodeCoc( dimension ) );
+                tableRows.add( items.toArray( new DimensionalItemObject[0] ) );
             }
         }
-
+        
         reportTable.setGridColumns( new CombinationGenerator<>( tableColumns.toArray( IRT2D ) ).getCombinations() );
         reportTable.setGridRows( new CombinationGenerator<>( tableRows.toArray( IRT2D ) ).getCombinations() );
 
@@ -642,7 +653,7 @@ public class DefaultAnalyticsService
 
         Map<String, Object> valueMap = getAggregatedDataValueMapping( grid );
 
-        return reportTable.getGrid( new ListGrid( grid.getMetaData() ), valueMap, false );
+        return reportTable.getGrid( new ListGrid( grid.getMetaData() ), valueMap, params.getDisplayProperty(), false );
     }
 
     @Override
@@ -744,7 +755,7 @@ public class DefaultAnalyticsService
      */
     private Map<String, Double> getAggregatedDataValueMap( DataQueryParams params )
     {
-        return getDoubleMap( getAggregatedValueMap( params, ANALYTICS_TABLE_NAME ) );
+        return AnalyticsUtils.getDoubleMap( getAggregatedValueMap( params, ANALYTICS_TABLE_NAME ) );
     }
 
     /**
@@ -770,7 +781,7 @@ public class DefaultAnalyticsService
      */
     private Map<String, Double> getAggregatedCompletenessValueMap( DataQueryParams params )
     {
-        return getDoubleMap( getAggregatedValueMap( params, COMPLETENESS_TABLE_NAME ) );
+        return AnalyticsUtils.getDoubleMap( getAggregatedValueMap( params, COMPLETENESS_TABLE_NAME ) );
     }
 
     /**
@@ -783,7 +794,7 @@ public class DefaultAnalyticsService
      */
     private Map<String, Double> getAggregatedCompletenessTargetMap( DataQueryParams params )
     {
-        return getDoubleMap( getAggregatedValueMap( params, COMPLETENESS_TARGET_TABLE_NAME ) );
+        return AnalyticsUtils.getDoubleMap( getAggregatedValueMap( params, COMPLETENESS_TARGET_TABLE_NAME ) );
     }
 
     /**
@@ -797,7 +808,7 @@ public class DefaultAnalyticsService
      */
     private Map<String, Double> getAggregatedOrganisationUnitTargetMap( DataQueryParams params )
     {
-        return getDoubleMap( getAggregatedValueMap( params, ORGUNIT_TARGET_TABLE_NAME ) );
+        return AnalyticsUtils.getDoubleMap( getAggregatedValueMap( params, ORGUNIT_TARGET_TABLE_NAME ) );
     }
 
     /**
@@ -919,12 +930,14 @@ public class DefaultAnalyticsService
         Map<String, String> map = new HashMap<>();
         
         Calendar calendar = PeriodType.getCalendar();
+        
+        Locale locale = i18nService.getCurrentLocale();
 
         for ( DimensionalObject dimension : dimensions )
         {
             List<DimensionalItemObject> items = new ArrayList<>( dimension.getItems() );
             
-            i18nService.internationalise( items );
+            i18nService.internationalise( items, locale );
 
             for ( DimensionalItemObject object : items )
             {
@@ -1004,40 +1017,6 @@ public class DefaultAnalyticsService
         Integer cores = (Integer) systemSettingManager.getSystemSetting( SettingKey.DATABASE_SERVER_CPUS );
 
         return ( cores == null || cores == 0 ) ? SystemUtils.getCpuCores() : cores;
-    }
-
-    /**
-     * Converts a String, Object map into a specific String, Double map.
-     *
-     * @param map the map to convert.
-     * @return a mapping between string and double values.
-     */
-    private Map<String, Double> getDoubleMap( Map<String, Object> map )
-    {
-        Map<String, Double> typedMap = new HashMap<>();
-
-        for ( Map.Entry<String, Object> entry : map.entrySet() )
-        {
-            final Object value = entry.getValue();
-
-            if ( value != null && Double.class.equals( value.getClass() ) )
-            {
-                typedMap.put( entry.getKey(), (Double) entry.getValue() );
-            }
-        }
-
-        return typedMap;
-    }
-
-    /**
-     * Returns the given value. If of class Double the value is rounded.
-     *
-     * @param value the value to return and potentially round.
-     * @return the rounded value.
-     */
-    private Object getRounded( Object value )
-    {
-        return value != null && Double.class.equals( value.getClass() ) ? MathUtils.getRounded( (Double) value ) : value;
     }
 
     /**

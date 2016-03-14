@@ -28,6 +28,7 @@ package org.hisp.dhis.analytics;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.DhisSpringTest;
 import org.junit.Test;
 
 import com.google.common.collect.Lists;
@@ -45,12 +46,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.hisp.dhis.DhisConvenienceTest.*;
-
 /**
  * @author Lars Helge Overland
  */
-public class AnalyticsUtilsTest
+public class AnalyticsUtilsTest extends DhisSpringTest
 {
     @Test
     public void testGetByDataDimensionType()
@@ -84,5 +83,34 @@ public class AnalyticsUtilsTest
         assertTrue( convertedMap.containsKey( "GauDLAiXPKT.kC1OT9Q1n1j-R9U8q7X1aJG" ) );
         assertTrue( convertedMap.containsKey( "YkRvCLedQa4.h1dJ9W4dWor-Zrd4DAf8M99" ) );
         assertTrue( convertedMap.containsKey( "PcfRp1HETO8.zqXKIEycBck-KBJBZopYMPV" ) );
+    }
+    
+    @Test
+    public void testGetRoundedValueObject()
+    {
+        DataQueryParams paramsA = new DataQueryParams();
+        DataQueryParams paramsB = new DataQueryParams();
+        paramsB.setSkipRounding( true );
+        
+        assertEquals( null, AnalyticsUtils.getRoundedValueObject( paramsA, null ) );
+        assertEquals( "Car", AnalyticsUtils.getRoundedValueObject( paramsA, "Car" ) );
+        assertEquals( 3d, AnalyticsUtils.getRoundedValueObject( paramsA, 3d ) );
+        assertEquals( 3.1, (Double) AnalyticsUtils.getRoundedValueObject( paramsA, 3.123 ), 0.01 );
+        assertEquals( 3.123, (Double) AnalyticsUtils.getRoundedValueObject( paramsB, 3.123 ), 0.01 );
+    }
+
+    @Test
+    public void testGetRoundedValueDouble()
+    {
+        DataQueryParams paramsA = new DataQueryParams();
+        DataQueryParams paramsB = new DataQueryParams();
+        paramsB.setSkipRounding( true );
+        
+        assertEquals( null, AnalyticsUtils.getRoundedValue( paramsA, null, null ) );
+        assertEquals( 3d, AnalyticsUtils.getRoundedValue( paramsA, null, 3d ), 0.01 );
+        assertEquals( 3.1, AnalyticsUtils.getRoundedValue( paramsA, null, 3.123 ), 0.01 );
+        assertEquals( 3.1, AnalyticsUtils.getRoundedValue( paramsA, 1, 3.123 ), 0.01 );
+        assertEquals( 3.12, AnalyticsUtils.getRoundedValue( paramsA, 2, 3.123 ), 0.01 );
+        assertEquals( 3.123, AnalyticsUtils.getRoundedValue( paramsB, 2, 3.123 ), 0.01 );
     }
 }

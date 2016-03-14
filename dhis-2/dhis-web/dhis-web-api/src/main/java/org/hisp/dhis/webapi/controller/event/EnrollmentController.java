@@ -126,7 +126,7 @@ public class EnrollmentController
 
         if ( fields.isEmpty() )
         {
-            fields.add( "enrollment,created,lastUpdated,trackedEntity,trackedEntityInstance,program,status,orgUnit,enrollmentDate,incidentDate,followup" );
+            fields.add( "enrollment,created,lastUpdated,trackedEntity,trackedEntityInstance,program,status,orgUnit,orgUnitName,enrollmentDate,incidentDate,followup" );
         }
 
         Set<String> orgUnits = TextUtils.splitToArray( ou, TextUtils.SEMICOLON );
@@ -196,7 +196,7 @@ public class EnrollmentController
         ImportSummaries importSummaries = enrollmentService.addEnrollmentsJson( request.getInputStream(), importOptions );
         response.setContentType( MediaType.APPLICATION_JSON_VALUE );
 
-        if ( importSummaries.getImportSummaries().size() > 1 )
+        if ( importSummaries.getImportSummaries().isEmpty() || importSummaries.getImportSummaries().size() > 1 )
         {
             response.setStatus( HttpServletResponse.SC_CREATED );
             renderService.toJson( response.getOutputStream(), importSummaries );

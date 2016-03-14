@@ -50,8 +50,6 @@ import org.hisp.dhis.dataelement.DataElementCategoryDimension;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataelement.DataElementOperandService;
-import org.hisp.dhis.dataentryform.DataEntryForm;
-import org.hisp.dhis.dataentryform.DataEntryFormService;
 import org.hisp.dhis.dxf2.common.ImportOptions;
 import org.hisp.dhis.dxf2.importsummary.ImportConflict;
 import org.hisp.dhis.dxf2.metadata.ImportTypeSummary;
@@ -59,11 +57,12 @@ import org.hisp.dhis.dxf2.metadata.Importer;
 import org.hisp.dhis.dxf2.metadata.ObjectBridge;
 import org.hisp.dhis.dxf2.metadata.handlers.ObjectHandler;
 import org.hisp.dhis.dxf2.metadata.handlers.ObjectHandlerUtils;
-import org.hisp.dhis.dxf2.schema.SchemaValidator;
 import org.hisp.dhis.eventchart.EventChart;
 import org.hisp.dhis.eventreport.EventReport;
 import org.hisp.dhis.expression.Expression;
 import org.hisp.dhis.expression.ExpressionService;
+import org.hisp.dhis.feedback.ErrorCode;
+import org.hisp.dhis.feedback.ErrorReport;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
@@ -72,6 +71,7 @@ import org.hisp.dhis.program.ProgramStageDataElement;
 import org.hisp.dhis.program.ProgramValidation;
 import org.hisp.dhis.schema.Schema;
 import org.hisp.dhis.schema.SchemaService;
+import org.hisp.dhis.schema.validation.SchemaValidator;
 import org.hisp.dhis.security.acl.AclService;
 import org.hisp.dhis.system.util.ReflectionUtils;
 import org.hisp.dhis.trackedentity.TrackedEntity;
@@ -79,9 +79,11 @@ import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.translation.Translation;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserCredentials;
+import org.hisp.dhis.user.UserGroup;
+import org.hisp.dhis.user.UserGroupAccess;
+import org.hisp.dhis.user.UserGroupAccessService;
 import org.hisp.dhis.user.UserService;
 import org.hisp.dhis.validation.ValidationRule;
-import org.hisp.dhis.validation.ValidationViolation;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.lang.reflect.Field;
@@ -120,9 +122,6 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     private ExpressionService expressionService;
 
     @Autowired
-    private DataEntryFormService dataEntryFormService;
-
-    @Autowired
     private DataElementOperandService dataElementOperandService;
 
     @Autowired
@@ -142,6 +141,9 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private UserGroupAccessService userGroupAccessService;
 
     @Autowired( required = false )
     private List<ObjectHandler<T>> objectHandlers;
@@ -282,12 +284,12 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             return false;
         }
 
-        List<ValidationViolation> validationViolations = schemaValidator.validate( object );
+        List<ErrorReport> errorReports = schemaValidator.validate( object );
 
-        if ( !validationViolations.isEmpty() )
+        if ( !errorReports.isEmpty() )
         {
             summaryType.getImportConflicts().add(
-                new ImportConflict( IdentifiableObjectUtils.getDisplayName( object ), "Validation Violations: " + validationViolations ) );
+                new ImportConflict( IdentifiableObjectUtils.getDisplayName( object ), "Validation Violations: " + errorReports ) );
 
             return false;
         }
@@ -301,12 +303,12 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         }
 
         NonIdentifiableObjects nonIdentifiableObjects = new NonIdentifiableObjects( user );
-        validationViolations = nonIdentifiableObjects.validate( object, object );
+        errorReports = nonIdentifiableObjects.validate( object, object );
 
-        if ( !validationViolations.isEmpty() )
+        if ( !errorReports.isEmpty() )
         {
             summaryType.getImportConflicts().add(
-                new ImportConflict( IdentifiableObjectUtils.getDisplayName( object ), "Validation Violations: " + validationViolations ) );
+                new ImportConflict( IdentifiableObjectUtils.getDisplayName( object ), "Validation Violations: " + errorReports ) );
 
             return false;
         }
@@ -407,23 +409,23 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             return true;
         }
 
-        List<ValidationViolation> validationViolations = schemaValidator.validate( object );
+        List<ErrorReport> errorReports = schemaValidator.validate( object );
 
-        if ( !validationViolations.isEmpty() )
+        if ( !errorReports.isEmpty() )
         {
             summaryType.getImportConflicts().add(
-                new ImportConflict( IdentifiableObjectUtils.getDisplayName( object ), "Validation Violations: " + validationViolations ) );
+                new ImportConflict( IdentifiableObjectUtils.getDisplayName( object ), "Validation Violations: " + errorReports ) );
 
             return false;
         }
 
         NonIdentifiableObjects nonIdentifiableObjects = new NonIdentifiableObjects( user );
-        validationViolations = nonIdentifiableObjects.validate( persistedObject, object );
+        errorReports = nonIdentifiableObjects.validate( persistedObject, object );
 
-        if ( !validationViolations.isEmpty() )
+        if ( !errorReports.isEmpty() )
         {
             summaryType.getImportConflicts().add(
-                new ImportConflict( IdentifiableObjectUtils.getDisplayName( object ), "Validation Violations: " + validationViolations ) );
+                new ImportConflict( IdentifiableObjectUtils.getDisplayName( object ), "Validation Violations: " + errorReports ) );
 
             return false;
         }
@@ -454,13 +456,13 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         if ( !options.isSharing() )
         {
             User persistedObjectUser = persistedObject.getUser();
-            persistedObject.mergeWith( object, options.getMergeStrategy() );
+            persistedObject.mergeWith( object, options.getMergeMode() );
             // mergeService.merge( persistedObject, object, options.getMergeStrategy() );
             persistedObject.setUser( persistedObjectUser );
         }
         else
         {
-            persistedObject.mergeWith( object, options.getMergeStrategy() );
+            persistedObject.mergeWith( object, options.getMergeMode() );
             // mergeService.merge( persistedObject, object, options.getMergeStrategy() );
             persistedObject.mergeSharingWith( object );
         }
@@ -486,7 +488,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
                     userService.encodeAndSetPassword( userCredentials, userCredentials.getPassword() );
                 }
 
-                ((User) persistedObject).getUserCredentials().mergeWith( userCredentials, options.getMergeStrategy() );
+                ((User) persistedObject).getUserCredentials().mergeWith( userCredentials, options.getMergeMode() );
                 // mergeService.merge( ((User) persistedObject).getUserCredentials(), userCredentials, options.getMergeStrategy() );
                 reattachFields( ((User) persistedObject).getUserCredentials(), fieldsUserCredentials, user );
                 reattachCollectionFields( ((User) persistedObject).getUserCredentials(), collectionFieldsUserCredentials, user );
@@ -944,12 +946,11 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     // keeping this internal for now, might be split into several classes
     private class NonIdentifiableObjects
     {
-        private Set<AttributeValue> attributeValues = Sets.newHashSet();
+        private Set<AttributeValue> attributeValues = new HashSet<>();
+        private Set<UserGroupAccess> userGroupAccesses = new HashSet<>();
 
         private Expression leftSide;
         private Expression rightSide;
-
-        private DataEntryForm dataEntryForm;
 
         private Set<DataElementOperand> compulsoryDataElementOperands = new HashSet<>();
         private Set<DataElementOperand> greyedFields = new HashSet<>();
@@ -966,10 +967,10 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             this.user = user;
         }
 
-        public List<ValidationViolation> validate( T persistedObject, T object )
+        public List<ErrorReport> validate( T persistedObject, T object )
         {
             schema = schemaService.getDynamicSchema( object.getClass() );
-            List<ValidationViolation> validationViolations = new ArrayList<>();
+            List<ErrorReport> errorReports = new ArrayList<>();
 
             if ( schema.havePersistedProperty( "attributeValues" ) )
             {
@@ -979,26 +980,26 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
                     if ( attribute == null )
                     {
-                        validationViolations.add( new ValidationViolation( attributeValue.getAttribute().getUid(),
-                            "Unknown reference to " + attributeValue.getAttribute() + " on object " + attributeValue ) );
+                        errorReports.add( new ErrorReport( Attribute.class, ErrorCode.E5002, attributeValue.getAttribute().getUid(),
+                            object.getUid(), "attributeValues" ) );
                     }
 
                     attributeValue.setAttribute( attribute );
                 }
 
-                validationViolations.addAll( attributeService.validateAttributeValues( persistedObject, object.getAttributeValues() ) );
+                errorReports.addAll( attributeService.validateAttributeValues( persistedObject, object.getAttributeValues() ) );
             }
 
-            return validationViolations;
+            return errorReports;
         }
 
         public void extract( T object )
         {
             schema = schemaService.getDynamicSchema( object.getClass() );
             attributeValues = extractAttributeValues( object );
+            userGroupAccesses = extractUserGroupAccesses( object );
             leftSide = extractExpression( object, "leftSide" );
             rightSide = extractExpression( object, "rightSide" );
-            dataEntryForm = extractDataEntryForm( object, "dataEntryForm" );
             compulsoryDataElementOperands = Sets.newHashSet( extractDataElementOperands( object, "compulsoryDataElementOperands" ) );
             greyedFields = Sets.newHashSet( extractDataElementOperands( object, "greyedFields" ) );
             dataElementOperands = Lists.newArrayList( extractDataElementOperands( object, "dataElementOperands" ) );
@@ -1014,7 +1015,6 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             {
                 deleteExpression( object, "leftSide" );
                 deleteExpression( object, "rightSide" );
-                deleteDataEntryForm( object, "dataEntryForm" );
 
                 if ( options.getImportStrategy().isDelete() )
                 {
@@ -1030,56 +1030,14 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             schema = schemaService.getDynamicSchema( object.getClass() );
 
             saveAttributeValues( object, attributeValues );
+            saveUserGroupAccess( object, userGroupAccesses );
             saveExpression( object, "leftSide", leftSide );
             saveExpression( object, "rightSide", rightSide );
-            saveDataEntryForm( object, "dataEntryForm", dataEntryForm );
             saveDataElementOperands( object, "compulsoryDataElementOperands", compulsoryDataElementOperands );
             saveDataElementOperands( object, "greyedFields", greyedFields );
             saveDataElementOperands( object, "dataElementOperands", dataElementOperands );
             saveCategoryDimensions( object, categoryDimensions );
             saveDataDimensionItems( object, dataDimensionItems );
-        }
-
-        private void saveDataEntryForm( T object, String fieldName, DataEntryForm dataEntryForm )
-        {
-            if ( dataEntryForm != null )
-            {
-                Map<Field, Collection<Object>> identifiableObjectCollections = detachCollectionFields( dataEntryForm );
-                reattachCollectionFields( dataEntryForm, identifiableObjectCollections, user );
-
-                dataEntryForm.setId( 0 );
-                dataEntryFormService.addDataEntryForm( dataEntryForm );
-
-                ReflectionUtils.invokeSetterMethod( fieldName, object, dataEntryForm );
-            }
-        }
-
-        private DataEntryForm extractDataEntryForm( T object, String fieldName )
-        {
-            DataEntryForm dataEntryForm = null;
-
-            if ( ReflectionUtils.findGetterMethod( fieldName, object ) != null )
-            {
-                dataEntryForm = ReflectionUtils.invokeGetterMethod( fieldName, object );
-
-                if ( dataEntryForm != null )
-                {
-                    ReflectionUtils.invokeSetterMethod( fieldName, object, new Object[]{ null } );
-                }
-            }
-
-            return dataEntryForm;
-        }
-
-        private void deleteDataEntryForm( T object, String fieldName )
-        {
-            DataEntryForm dataEntryForm = extractDataEntryForm( object, fieldName );
-
-            if ( dataEntryForm != null )
-            {
-                dataEntryFormService.deleteDataEntryForm( dataEntryForm );
-                sessionFactory.getCurrentSession().flush();
-            }
         }
 
         private Expression extractExpression( T object, String fieldName )
@@ -1208,11 +1166,19 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
             if ( schema.havePersistedProperty( "attributeValues" ) )
             {
-                attributeValues = ReflectionUtils.invokeGetterMethod( "attributeValues", object );
-                ReflectionUtils.invokeSetterMethod( "attributeValues", object, new HashSet<>() );
+                attributeValues = object.getAttributeValues();
+                object.setAttributeValues( new HashSet<>() );
             }
 
             return attributeValues;
+        }
+
+        private Set<UserGroupAccess> extractUserGroupAccesses( T object )
+        {
+            userGroupAccesses = object.getUserGroupAccesses();
+            object.setUserGroupAccesses( new HashSet<>() );
+
+            return userGroupAccesses;
         }
 
         private void saveAttributeValues( T object, Collection<AttributeValue> attributeValues )
@@ -1237,6 +1203,24 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             catch ( Exception ex )
             {
                 log.info( ex.getMessage() );
+            }
+        }
+
+        private void saveUserGroupAccess( T object, Set<UserGroupAccess> userGroupAccesses )
+        {
+            for ( UserGroupAccess uga : userGroupAccesses )
+            {
+                UserGroup userGroup = objectBridge.getObject( uga.getUserGroup() );
+
+                if ( userGroup == null )
+                {
+                    log.info( "Unknown reference to " + uga.getUserGroup() + " on object " + uga );
+                    return;
+                }
+
+                uga.setUserGroup( userGroup );
+                userGroupAccessService.addUserGroupAccess( uga );
+                object.getUserGroupAccesses().add( uga );
             }
         }
 

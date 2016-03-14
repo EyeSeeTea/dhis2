@@ -35,12 +35,11 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-
 import org.hisp.dhis.common.BaseDimensionalItemObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
-import org.hisp.dhis.common.MergeStrategy;
+import org.hisp.dhis.common.MergeMode;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataset.DataSet;
@@ -155,7 +154,7 @@ public class Indicator
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
-    
+
     @Override
     public boolean haveUniqueNames()
     {
@@ -321,9 +320,9 @@ public class Indicator
     }
 
     @Override
-    public void mergeWith( IdentifiableObject other, MergeStrategy strategy )
+    public void mergeWith( IdentifiableObject other, MergeMode mergeMode )
     {
-        super.mergeWith( other, strategy );
+        super.mergeWith( other, mergeMode );
 
         if ( other.getClass().isInstance( this ) )
         {
@@ -331,8 +330,9 @@ public class Indicator
 
             annualized = indicator.isAnnualized();
 
-            if ( strategy.isReplace() )
+            if ( mergeMode.isReplace() )
             {
+                decimals = indicator.getDecimals();
                 denominator = indicator.getDenominator();
                 denominatorDescription = indicator.getDenominatorDescription();
                 numerator = indicator.getNumerator();
@@ -341,8 +341,9 @@ public class Indicator
                 explodedDenominator = indicator.getExplodedDenominator();
                 indicatorType = indicator.getIndicatorType();
             }
-            else if ( strategy.isMerge() )
+            else if ( mergeMode.isMerge() )
             {
+                decimals = indicator.getDecimals() == null ? decimals : indicator.getDecimals();
                 denominator = indicator.getDenominator() == null ? denominator : indicator.getDenominator();
                 denominatorDescription = indicator.getDenominatorDescription() == null ? denominatorDescription : indicator.getDenominatorDescription();
                 numerator = indicator.getNumerator() == null ? numerator : indicator.getNumerator();

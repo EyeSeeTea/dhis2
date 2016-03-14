@@ -466,13 +466,17 @@ div#orgUnitTree {
     margin-left: 2px;
 }
 
-.audit-icon-column {
-    width: 20px !important;
-    text-align: center;
+.scroll {
+    height: 400px;
+    overflow: auto;
 }
 
 .radio-display-none {
     display: none;
+}
+
+.fa-stack {
+    cursor: pointer;
 }
 
 .fa-stack > .fa.fa-stack-1x.fa-circle.radio-save-success {
@@ -512,8 +516,50 @@ div#orgUnitTree {
     margin-left: -5px;
 }
 
-.custom-radio-error{
+.custom-radio-error {
     margin-left: 5px;
     width:100px;
     text-align: center;
+}
+
+.fa-stack-custom-large {
+    font-size: 20px;
+}
+
+.fa-stack-custom-small {
+    font-size: 10px;
+}
+
+.wrap-text {
+    word-wrap: break-word;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.fa-icon-width {
+    width: 15px;
+}
+
+/*classes for the details tooltip popup for dataelements*/
+
+.popover {
+    max-width:400px;
+    pointer-events:none;
+}
+
+.tooltip-separator-line {
+    height: 0;
+    margin-right:0em;
+    margin-top: 0em;
+    margin-bottom: 0em;
+    width:100%;
+    text-align: center;
+    border: 0;
+    border-top: 1px solid #ddd;
+}
+
+.tooltip-font {
+    font-size: small;
 }

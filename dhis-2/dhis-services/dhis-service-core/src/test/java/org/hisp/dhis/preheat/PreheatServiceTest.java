@@ -28,6 +28,7 @@ package org.hisp.dhis.preheat;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.common.IdentifiableObject;
@@ -44,7 +45,6 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -85,23 +85,6 @@ public class PreheatServiceTest
     {
         PreheatParams params = new PreheatParams().setPreheatMode( PreheatMode.ALL );
         params.getClasses().add( DataElement.class );
-
-        preheatService.validate( params );
-    }
-
-    @Test( expected = PreheatException.class )
-    public void testValidateRefFail()
-    {
-        PreheatParams params = new PreheatParams().setPreheatMode( PreheatMode.REFERENCE );
-        preheatService.validate( params );
-    }
-
-    @Test
-    public void testValidateRef()
-    {
-        PreheatParams params = new PreheatParams().setPreheatMode( PreheatMode.REFERENCE );
-        params.getReferences().put( PreheatIdentifier.UID, new HashMap<>() );
-        params.getReferences().get( PreheatIdentifier.UID ).put( DataElement.class, Sets.newHashSet( "ID1", "ID2" ) );
 
         preheatService.validate( params );
     }
@@ -178,7 +161,7 @@ public class PreheatServiceTest
         deg2.addDataElement( de3 );
 
         Map<Class<? extends IdentifiableObject>, Set<String>> references = preheatService.collectReferences(
-            Sets.newHashSet( deg1, deg2 ) ).get( PreheatIdentifier.UID );
+            Lists.newArrayList( deg1, deg2 ) ).get( PreheatIdentifier.UID );
 
         assertTrue( references.containsKey( DataElement.class ) );
         assertEquals( 3, references.get( DataElement.class ).size() );
@@ -236,7 +219,7 @@ public class PreheatServiceTest
         deg2.addDataElement( de3 );
 
         Map<Class<? extends IdentifiableObject>, Set<String>> references = preheatService.collectReferences(
-            Sets.newHashSet( deg1, deg2 ) ).get( PreheatIdentifier.CODE );
+            Lists.newArrayList( deg1, deg2 ) ).get( PreheatIdentifier.CODE );
 
         assertTrue( references.containsKey( DataElement.class ) );
         assertEquals( 3, references.get( DataElement.class ).size() );
@@ -361,13 +344,8 @@ public class PreheatServiceTest
         PreheatParams params = new PreheatParams();
         params.setPreheatMode( PreheatMode.REFERENCE );
 
-        Map<PreheatIdentifier, Map<Class<? extends IdentifiableObject>, Set<String>>> references = new HashMap<>();
-        references.put( PreheatIdentifier.UID, new HashMap<>() );
-
-        references.get( PreheatIdentifier.UID ).put( DataElement.class, Sets.newHashSet( de1.getUid(), de2.getUid() ) );
-        references.get( PreheatIdentifier.UID ).put( User.class, Sets.newHashSet( user.getUid() ) );
-
-        params.setReferences( references );
+        params.getObjects().put( DataElement.class, Lists.newArrayList( de1, de2 ) );
+        params.getObjects().put( User.class, Lists.newArrayList( user ) );
 
         preheatService.validate( params );
         Preheat preheat = preheatService.preheat( params );
@@ -413,13 +391,8 @@ public class PreheatServiceTest
         params.setPreheatIdentifier( PreheatIdentifier.CODE );
         params.setPreheatMode( PreheatMode.REFERENCE );
 
-        Map<PreheatIdentifier, Map<Class<? extends IdentifiableObject>, Set<String>>> references = new HashMap<>();
-        references.put( PreheatIdentifier.CODE, new HashMap<>() );
-
-        references.get( PreheatIdentifier.CODE ).put( DataElement.class, Sets.newHashSet( de1.getCode(), de2.getCode() ) );
-        references.get( PreheatIdentifier.CODE ).put( User.class, Sets.newHashSet( user.getCode() ) );
-
-        params.setReferences( references );
+        params.getObjects().put( DataElement.class, Lists.newArrayList( de1, de2 ) );
+        params.getObjects().put( User.class, Lists.newArrayList( user ) );
 
         preheatService.validate( params );
         Preheat preheat = preheatService.preheat( params );
@@ -445,7 +418,7 @@ public class PreheatServiceTest
 
         PreheatParams params = new PreheatParams();
         params.setPreheatMode( PreheatMode.REFERENCE );
-        params.setReferences( preheatService.collectReferences( dataElementGroup ) );
+        params.getObjects().put( DataElementGroup.class, Lists.newArrayList( dataElementGroup ) );
 
         preheatService.validate( params );
         Preheat preheat = preheatService.preheat( params );
@@ -453,7 +426,7 @@ public class PreheatServiceTest
         assertFalse( preheat.isEmpty() );
         assertFalse( preheat.isEmpty( PreheatIdentifier.UID ) );
         assertFalse( preheat.isEmpty( PreheatIdentifier.UID, DataElement.class ) );
-        assertTrue( preheat.isEmpty( PreheatIdentifier.UID, DataElementGroup.class ) );
+        assertFalse( preheat.isEmpty( PreheatIdentifier.UID, DataElementGroup.class ) );
         assertFalse( preheat.isEmpty( PreheatIdentifier.UID, User.class ) );
 
         assertTrue( preheat.containsKey( PreheatIdentifier.UID, DataElement.class, "deabcdefghA" ) );
@@ -471,7 +444,7 @@ public class PreheatServiceTest
         PreheatParams params = new PreheatParams();
         params.setPreheatIdentifier( PreheatIdentifier.CODE );
         params.setPreheatMode( PreheatMode.REFERENCE );
-        params.setReferences( preheatService.collectReferences( dataElementGroup ) );
+        params.getObjects().put( DataElementGroup.class, Lists.newArrayList( dataElementGroup ) );
 
         preheatService.validate( params );
         Preheat preheat = preheatService.preheat( params );
@@ -496,15 +469,15 @@ public class PreheatServiceTest
 
         PreheatParams params = new PreheatParams();
         params.setPreheatMode( PreheatMode.REFERENCE );
-        params.setReferences( preheatService.collectReferences( dataElementGroup ) );
+        params.getObjects().put( DataElementGroup.class, Lists.newArrayList( dataElementGroup ) );
 
         preheatService.validate( params );
         Preheat preheat = preheatService.preheat( params );
-        List<MissingReference> missingReferences = preheatService.checkReferences( dataElementGroup, preheat, PreheatIdentifier.UID );
-        assertEquals( 3, missingReferences.size() );
-        assertEquals( PreheatIdentifier.UID, missingReferences.get( 0 ).getIdentifier() );
-        assertEquals( PreheatIdentifier.UID, missingReferences.get( 1 ).getIdentifier() );
-        assertEquals( PreheatIdentifier.UID, missingReferences.get( 2 ).getIdentifier() );
+        List<PreheatErrorReport> referenceErrors = preheatService.checkReferences( dataElementGroup, preheat, PreheatIdentifier.UID );
+        assertEquals( 3, referenceErrors.size() );
+        assertEquals( PreheatIdentifier.UID, referenceErrors.get( 0 ).getPreheatIdentifier() );
+        assertEquals( PreheatIdentifier.UID, referenceErrors.get( 1 ).getPreheatIdentifier() );
+        assertEquals( PreheatIdentifier.UID, referenceErrors.get( 2 ).getPreheatIdentifier() );
     }
 
     @Test
@@ -515,7 +488,7 @@ public class PreheatServiceTest
 
         PreheatParams params = new PreheatParams();
         params.setPreheatMode( PreheatMode.REFERENCE );
-        params.setReferences( preheatService.collectReferences( dataElementGroup ) );
+        params.getObjects().put( DataElementGroup.class, Lists.newArrayList( dataElementGroup ) );
 
         preheatService.validate( params );
         Preheat preheat = preheatService.preheat( params );
@@ -544,7 +517,7 @@ public class PreheatServiceTest
         PreheatParams params = new PreheatParams();
         params.setPreheatIdentifier( PreheatIdentifier.CODE );
         params.setPreheatMode( PreheatMode.REFERENCE );
-        params.setReferences( preheatService.collectReferences( dataElementGroup ) );
+        params.getObjects().put( DataElementGroup.class, Lists.newArrayList( dataElementGroup ) );
 
         preheatService.validate( params );
         Preheat preheat = preheatService.preheat( params );
@@ -573,7 +546,7 @@ public class PreheatServiceTest
         PreheatParams params = new PreheatParams();
         params.setPreheatIdentifier( PreheatIdentifier.AUTO );
         params.setPreheatMode( PreheatMode.REFERENCE );
-        params.setReferences( preheatService.collectReferences( dataElementGroup ) );
+        params.getObjects().put( DataElementGroup.class, Lists.newArrayList( dataElementGroup ) );
 
         preheatService.validate( params );
         Preheat preheat = preheatService.preheat( params );

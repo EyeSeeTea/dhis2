@@ -39,7 +39,7 @@ import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectUtils;
-import org.hisp.dhis.common.MergeStrategy;
+import org.hisp.dhis.common.MergeMode;
 import org.hisp.dhis.common.annotation.Scanned;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.common.view.DetailedView;
@@ -111,6 +111,12 @@ public class User
      */
     @Scanned
     private Set<OrganisationUnit> dataViewOrganisationUnits = new HashSet<>();
+
+    /**
+     * Organisation units for tracked entity instance search operations.
+     */
+    @Scanned
+    private Set<OrganisationUnit> teiSearchOrganisationUnits = new HashSet<>();
 
     /**
      * Ordered favorite apps.
@@ -202,6 +208,10 @@ public class User
         return !CollectionUtils.isEmpty( organisationUnits );
     }
 
+    // -------------------------------------------------------------------------
+    // Logic - data view organisation unit
+    // -------------------------------------------------------------------------
+
     public boolean hasDataViewOrganisationUnit()
     {
         return !CollectionUtils.isEmpty( dataViewOrganisationUnits );
@@ -234,6 +244,44 @@ public class User
     {
         return hasDataViewOrganisationUnit() ? dataViewOrganisationUnits : organisationUnits;
     }
+
+    // -------------------------------------------------------------------------
+    // Logic - tei search organisation unit
+    // -------------------------------------------------------------------------
+
+    public boolean hasTeiSearchOrganisationUnit()
+    {
+        return !CollectionUtils.isEmpty( teiSearchOrganisationUnits );
+    }
+
+    public OrganisationUnit getTeiSearchOrganisationUnit()
+    {
+        return CollectionUtils.isEmpty( teiSearchOrganisationUnits ) ? null : teiSearchOrganisationUnits.iterator().next();
+    }
+
+    public boolean hasTeiSearchOrganisationUnitWithFallback()
+    {
+        return hasTeiSearchOrganisationUnit() || hasOrganisationUnit();
+    }
+
+    /**
+     * Returns the first of the tei search organisation units associated with the
+     * user. If none, returns the first of the data capture organisation units.
+     * If none, return nulls.
+     */
+    public OrganisationUnit getTeiSearchOrganisationUnitWithFallback()
+    {
+        return hasTeiSearchOrganisationUnit() ? getTeiSearchOrganisationUnit() : getOrganisationUnit();
+    }
+
+    /**
+     * Returns the tei search organisation units or organisation units if not exist.
+     */
+    public Set<OrganisationUnit> getTeiSearchOrganisationUnitsWithFallback()
+    {
+        return hasTeiSearchOrganisationUnit() ? teiSearchOrganisationUnits : organisationUnits;
+    }
+
 
     public String getOrganisationUnitsName()
     {
@@ -611,6 +659,21 @@ public class User
         this.dataViewOrganisationUnits = dataViewOrganisationUnits;
     }
 
+    @JsonProperty
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlElementWrapper( localName = "teiSearchOrganisationUnits", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "teiSearchOrganisationUnit", namespace = DxfNamespaces.DXF_2_0 )
+    public Set<OrganisationUnit> getTeiSearchOrganisationUnits()
+    {
+        return teiSearchOrganisationUnits;
+    }
+
+    public void setTeiSearchOrganisationUnits( Set<OrganisationUnit> teiSearchOrganisationUnits )
+    {
+        this.teiSearchOrganisationUnits = teiSearchOrganisationUnits;
+    }
+
     public List<String> getApps()
     {
         return apps;
@@ -622,15 +685,15 @@ public class User
     }
 
     @Override
-    public void mergeWith( IdentifiableObject other, MergeStrategy strategy )
+    public void mergeWith( IdentifiableObject other, MergeMode mergeMode )
     {
-        super.mergeWith( other, strategy );
+        super.mergeWith( other, mergeMode );
 
         if ( other.getClass().isInstance( this ) )
         {
             User user = (User) other;
 
-            if ( strategy.isReplace() )
+            if ( mergeMode.isReplace() )
             {
                 surname = user.getSurname();
                 firstName = user.getFirstName();
@@ -648,7 +711,7 @@ public class User
                 lastCheckedInterpretations = user.getLastCheckedInterpretations();
                 userCredentials = user.getUserCredentials();
             }
-            else if ( strategy.isMerge() )
+            else if ( mergeMode.isMerge() )
             {
                 surname = user.getSurname() == null ? surname : user.getSurname();
                 firstName = user.getFirstName() == null ? firstName : user.getFirstName();
@@ -672,6 +735,9 @@ public class User
 
             dataViewOrganisationUnits.clear();
             dataViewOrganisationUnits.addAll( user.getDataViewOrganisationUnits() );
+
+            teiSearchOrganisationUnits.clear();
+            teiSearchOrganisationUnits.addAll( user.getTeiSearchOrganisationUnits() );
         }
     }
 
@@ -702,6 +768,7 @@ public class User
             "\"groups\":\"" + groups + "\", " +
             "\"organisationUnits\":\"" + organisationUnits + "\", " +
             "\"dataViewOrganisationUnits\":\"" + dataViewOrganisationUnits + "\" " +
+            "\"teiSearchOrganisationUnits\":\"" + teiSearchOrganisationUnits + "\" " +
             "}";
     }
 }

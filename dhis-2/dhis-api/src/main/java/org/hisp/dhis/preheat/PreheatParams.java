@@ -1,5 +1,15 @@
 package org.hisp.dhis.preheat;
 
+import com.google.common.base.MoreObjects;
+import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.user.User;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 /*
  * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
@@ -28,28 +38,33 @@ package org.hisp.dhis.preheat;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.IdentifiableObject;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public class PreheatParams
 {
+    private User user;
+
     private PreheatMode preheatMode = PreheatMode.ALL;
 
     private PreheatIdentifier preheatIdentifier = PreheatIdentifier.UID;
 
     private Set<Class<? extends IdentifiableObject>> classes = new HashSet<>();
 
-    private Map<PreheatIdentifier, Map<Class<? extends IdentifiableObject>, Set<String>>> references = new HashMap<>();
+    private Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> objects = new HashMap<>();
 
     public PreheatParams()
     {
+    }
+
+    public User getUser()
+    {
+        return user;
+    }
+
+    public void setUser( User user )
+    {
+        this.user = user;
     }
 
     public PreheatMode getPreheatMode()
@@ -85,14 +100,25 @@ public class PreheatParams
         return this;
     }
 
-    public Map<PreheatIdentifier, Map<Class<? extends IdentifiableObject>, Set<String>>> getReferences()
+    public Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> getObjects()
     {
-        return references;
+        return objects;
     }
 
-    public PreheatParams setReferences( Map<PreheatIdentifier, Map<Class<? extends IdentifiableObject>, Set<String>>> references )
+    public void setObjects( Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> objects )
     {
-        this.references = references;
-        return this;
+        this.objects = objects;
+    }
+
+    @Override
+    public String toString()
+    {
+        return MoreObjects.toStringHelper( this )
+            .add( "user", user )
+            .add( "preheatMode", preheatMode )
+            .add( "preheatIdentifier", preheatIdentifier )
+            .add( "classes", classes )
+            .add( "objects", objects )
+            .toString();
     }
 }

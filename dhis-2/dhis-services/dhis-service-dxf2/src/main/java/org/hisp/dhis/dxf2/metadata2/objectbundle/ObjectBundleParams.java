@@ -28,29 +28,55 @@ package org.hisp.dhis.dxf2.metadata2.objectbundle;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.base.MoreObjects;
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.MergeMode;
+import org.hisp.dhis.dxf2.metadata2.FlushMode;
+import org.hisp.dhis.importexport.ImportStrategy;
 import org.hisp.dhis.preheat.PreheatIdentifier;
 import org.hisp.dhis.preheat.PreheatMode;
 import org.hisp.dhis.preheat.PreheatParams;
+import org.hisp.dhis.user.User;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public class ObjectBundleParams
 {
-    private ObjectBundleMode objectBundleMode = ObjectBundleMode.VALIDATE;
+    private User user;
+
+    private ObjectBundleMode objectBundleMode = ObjectBundleMode.COMMIT;
 
     private PreheatIdentifier preheatIdentifier = PreheatIdentifier.UID;
 
     private PreheatMode preheatMode = PreheatMode.REFERENCE;
 
-    private List<? extends IdentifiableObject> objects = new ArrayList<>();
+    private ImportStrategy importMode = ImportStrategy.CREATE_AND_UPDATE;
+
+    private MergeMode mergeMode = MergeMode.MERGE;
+
+    private FlushMode flushMode = FlushMode.AUTO;
+
+    private Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> objects = new HashMap<>();
 
     public ObjectBundleParams()
     {
+
+    }
+
+    public User getUser()
+    {
+        return user;
+    }
+
+    public void setUser( User user )
+    {
+        this.user = user;
     }
 
     public ObjectBundleMode getObjectBundleMode()
@@ -85,14 +111,74 @@ public class ObjectBundleParams
         this.preheatMode = preheatMode;
     }
 
-    public List<? extends IdentifiableObject> getObjects()
+    public ImportStrategy getImportMode()
+    {
+        return importMode;
+    }
+
+    public void setImportMode( ImportStrategy importMode )
+    {
+        this.importMode = importMode;
+    }
+
+    public MergeMode getMergeMode()
+    {
+        return mergeMode;
+    }
+
+    public void setMergeMode( MergeMode mergeMode )
+    {
+        this.mergeMode = mergeMode;
+    }
+
+    public FlushMode getFlushMode()
+    {
+        return flushMode;
+    }
+
+    public void setFlushMode( FlushMode flushMode )
+    {
+        this.flushMode = flushMode;
+    }
+
+    public Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> getObjects()
     {
         return objects;
     }
 
-    public void setObjects( List<? extends IdentifiableObject> objects )
+    public void setObjects( Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> objects )
     {
         this.objects = objects;
+    }
+
+    public void addObject( Class<? extends IdentifiableObject> klass, IdentifiableObject object )
+    {
+        if ( object == null )
+        {
+            return;
+        }
+
+        if ( !objects.containsKey( klass ) )
+        {
+            objects.put( klass, new ArrayList<>() );
+        }
+
+        objects.get( klass ).add( object );
+    }
+
+    public void addObject( IdentifiableObject object )
+    {
+        if ( object == null )
+        {
+            return;
+        }
+
+        if ( !objects.containsKey( object.getClass() ) )
+        {
+            objects.put( object.getClass(), new ArrayList<>() );
+        }
+
+        objects.get( object.getClass() ).add( object );
     }
 
     public PreheatParams getPreheatParams()
@@ -102,5 +188,19 @@ public class ObjectBundleParams
         params.setPreheatMode( preheatMode );
 
         return params;
+    }
+
+
+    @Override
+    public String toString()
+    {
+        return MoreObjects.toStringHelper( this )
+            .add( "user", user )
+            .add( "objectBundleMode", objectBundleMode )
+            .add( "preheatIdentifier", preheatIdentifier )
+            .add( "preheatMode", preheatMode )
+            .add( "importMode", importMode )
+            .add( "mergeMode", mergeMode )
+            .toString();
     }
 }

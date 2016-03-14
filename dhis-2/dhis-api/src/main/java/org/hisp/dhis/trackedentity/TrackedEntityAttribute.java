@@ -1,6 +1,23 @@
 package org.hisp.dhis.trackedentity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.hisp.dhis.common.BaseDimensionalItemObject;
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.DimensionType;
+import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.MergeMode;
+import org.hisp.dhis.common.ValueType;
+import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
+import org.hisp.dhis.option.Option;
+import org.hisp.dhis.option.OptionSet;
+import org.hisp.dhis.schema.annotation.PropertyRange;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -29,25 +46,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-
-import org.hisp.dhis.common.BaseDimensionalItemObject;
-import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.DimensionType;
-import org.hisp.dhis.common.DxfNamespaces;
-import org.hisp.dhis.common.IdentifiableObject;
-import org.hisp.dhis.common.MergeStrategy;
-import org.hisp.dhis.common.ValueType;
-import org.hisp.dhis.common.view.DetailedView;
-import org.hisp.dhis.common.view.ExportView;
-import org.hisp.dhis.option.Option;
-import org.hisp.dhis.option.OptionSet;
-import org.hisp.dhis.schema.annotation.PropertyRange;
 
 /**
  * @author Abyot Asalefew
@@ -80,13 +78,15 @@ public class TrackedEntityAttribute
 
     private Boolean confidential = false;
 
-    private Boolean unique = false;
+    private Boolean unique = false;    
 
     // For Local ID type
 
     private Boolean orgunitScope = false;
 
     private Boolean programScope = false;
+    
+    private TrackedEntityAttributeSearchScope searchScope;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -124,7 +124,7 @@ public class TrackedEntityAttribute
     {
         return valueType.isDate();
     }
-    
+
     /**
      * Indicates whether this attribute has confidential information.
      */
@@ -396,16 +396,29 @@ public class TrackedEntityAttribute
         this.confidential = confidential;
     }
 
-    @Override
-    public void mergeWith( IdentifiableObject other, MergeStrategy strategy )
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public TrackedEntityAttributeSearchScope getSearchScope()
     {
-        super.mergeWith( other, strategy );
+        return searchScope;
+    }
+
+    public void setSearchScope( TrackedEntityAttributeSearchScope searchScope )
+    {
+        this.searchScope = searchScope;
+    }    
+    
+    @Override
+    public void mergeWith( IdentifiableObject other, MergeMode mergeMode )
+    {
+        super.mergeWith( other, mergeMode );
 
         if ( other.getClass().isInstance( this ) )
         {
             TrackedEntityAttribute trackedEntityAttribute = (TrackedEntityAttribute) other;
 
-            if ( strategy.isReplace() )
+            if ( mergeMode.isReplace() )
             {
                 description = trackedEntityAttribute.getDescription();
                 valueType = trackedEntityAttribute.getValueType();
@@ -419,9 +432,10 @@ public class TrackedEntityAttribute
                 unique = trackedEntityAttribute.isUnique();
                 orgunitScope = trackedEntityAttribute.getOrgunitScope();
                 programScope = trackedEntityAttribute.getProgramScope();
+                searchScope = trackedEntityAttribute.getSearchScope();
                 optionSet = trackedEntityAttribute.getOptionSet();
             }
-            else if ( strategy.isMerge() )
+            else if ( mergeMode.isMerge() )
             {
                 description = trackedEntityAttribute.getDescription() == null ? description : trackedEntityAttribute.getDescription();
                 valueType = trackedEntityAttribute.getValueType() == null ? valueType : trackedEntityAttribute.getValueType();
@@ -432,9 +446,10 @@ public class TrackedEntityAttribute
                 sortOrderInVisitSchedule = trackedEntityAttribute.getSortOrderInVisitSchedule() == null ? sortOrderInVisitSchedule : trackedEntityAttribute.getSortOrderInVisitSchedule();
                 displayInListNoProgram = trackedEntityAttribute.getDisplayInListNoProgram() == null ? displayInListNoProgram : trackedEntityAttribute.getDisplayInListNoProgram();
                 sortOrderInListNoProgram = trackedEntityAttribute.getSortOrderInListNoProgram() == null ? sortOrderInListNoProgram : trackedEntityAttribute.getSortOrderInListNoProgram();
-                unique = trackedEntityAttribute.isUnique() == null ? unique : trackedEntityAttribute.isUnique();
+                unique = trackedEntityAttribute.isUnique() == null ? unique : trackedEntityAttribute.isUnique();                
                 orgunitScope = trackedEntityAttribute.getOrgunitScope() == null ? orgunitScope : trackedEntityAttribute.getOrgunitScope();
                 programScope = trackedEntityAttribute.getProgramScope() == null ? programScope : trackedEntityAttribute.getProgramScope();
+                searchScope = trackedEntityAttribute.getSearchScope() == null ? searchScope : trackedEntityAttribute.getSearchScope();
                 optionSet = trackedEntityAttribute.getOptionSet() == null ? optionSet : trackedEntityAttribute.getOptionSet();
             }
         }

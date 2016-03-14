@@ -47,13 +47,14 @@ import org.hisp.dhis.common.DimensionalItemObject;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.DimensionalObjectUtils;
 import org.hisp.dhis.common.DisplayDensity;
+import org.hisp.dhis.common.DisplayProperty;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.FontSize;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectUtils;
-import org.hisp.dhis.common.MergeStrategy;
+import org.hisp.dhis.common.MergeMode;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.DimensionalView;
 import org.hisp.dhis.common.view.ExportView;
@@ -412,7 +413,7 @@ public class ReportTable
 
         for ( DimensionalItemObject object : objects )
         {
-            builder.append( object != null ? (object.getShortName() + SPACE) : EMPTY );
+            builder.append( object != null ? (object.getDisplayShortName() + SPACE) : EMPTY );
         }
 
         return builder.length() > 0 ? builder.substring( 0, builder.lastIndexOf( SPACE ) ) : TOTAL_COLUMN_PRETTY_NAME;
@@ -515,13 +516,14 @@ public class ReportTable
      * Generates a grid for this report table based on the given aggregate value
      * map.
      *
-     * @param grid         the grid, should be empty and not null.
-     * @param valueMap     the mapping of identifiers to aggregate values.
+     * @param grid the grid, should be empty and not null.
+     * @param valueMap the mapping of identifiers to aggregate values.
+     * @param displayProperty the display property to use for meta data.
      * @param paramColumns whether to include report parameter columns.
      * @return a grid.
      */
     @SuppressWarnings( "unchecked" )
-    public Grid getGrid( Grid grid, Map<String, Object> valueMap, boolean paramColumns )
+    public Grid getGrid( Grid grid, Map<String, Object> valueMap, DisplayProperty displayProperty, boolean paramColumns )
     {
         valueMap = new HashMap<>( valueMap );
 
@@ -593,9 +595,9 @@ public class ReportTable
             for ( DimensionalItemObject object : row )
             {
                 grid.addValue( object.getUid() );
-                grid.addValue( object.getName() );
+                grid.addValue( object.getDisplayProperty( displayProperty ) );
                 grid.addValue( object.getCode() );
-                grid.addValue( object.getDescription() );
+                grid.addValue( object.getDisplayDescription() );
             }
 
             if ( paramColumns )
@@ -1028,9 +1030,9 @@ public class ReportTable
     }
 
     @Override
-    public void mergeWith( IdentifiableObject other, MergeStrategy strategy )
+    public void mergeWith( IdentifiableObject other, MergeMode mergeMode )
     {
-        super.mergeWith( other, strategy );
+        super.mergeWith( other, mergeMode );
 
         if ( other.getClass().isInstance( this ) )
         {
@@ -1050,14 +1052,14 @@ public class ReportTable
             topLimit = reportTable.getTopLimit();
             sortOrder = reportTable.getSortOrder();
 
-            if ( strategy.isReplace() )
+            if ( mergeMode.isReplace() )
             {
                 reportParams = reportTable.getReportParams();
                 displayDensity = reportTable.getDisplayDensity();
                 fontSize = reportTable.getFontSize();
                 legendSet = reportTable.getLegendSet();
             }
-            else if ( strategy.isMerge() )
+            else if ( mergeMode.isMerge() )
             {
                 reportParams = reportTable.getReportParams() == null ? reportParams : reportTable.getReportParams();
                 displayDensity = reportTable.getDisplayDensity() == null ? displayDensity : reportTable.getDisplayDensity();

@@ -28,24 +28,6 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.commons.lang3.StringUtils;
-import org.hisp.dhis.common.BaseDimensionalItemObject;
-import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.DxfNamespaces;
-import org.hisp.dhis.common.IdentifiableObject;
-import org.hisp.dhis.common.MergeStrategy;
-import org.hisp.dhis.common.annotation.Scanned;
-import org.hisp.dhis.common.view.DetailedView;
-import org.hisp.dhis.common.view.ExportView;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -53,6 +35,20 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.apache.commons.lang3.StringUtils;
+import org.hisp.dhis.common.BaseDimensionalItemObject;
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.MergeMode;
+import org.hisp.dhis.common.annotation.Scanned;
+import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
+
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Abyot Aselefew
@@ -75,7 +71,7 @@ public class DataElementCategoryOptionCombo
      */
     @Scanned
     private Set<DataElementCategoryOption> categoryOptions = new HashSet<>();
-    
+
     /**
      * Indicates whether to ignore data approval.
      */
@@ -87,9 +83,8 @@ public class DataElementCategoryOptionCombo
 
     public DataElementCategoryOptionCombo()
     {
-
     }
-    
+
     // -------------------------------------------------------------------------
     // hashCode, equals and toString
     // -------------------------------------------------------------------------
@@ -200,74 +195,9 @@ public class DataElementCategoryOptionCombo
         categoryOptions.clear();
     }
 
-    /**
-     * Tests whether two objects compare on a name basis. The default equals
-     * method becomes unusable in the case of detached objects in conjunction
-     * with persistence frameworks that put proxys on associated objects and
-     * collections, since it tests the class type which will differ between the
-     * proxy and the raw type.
-     *
-     * @param object the object to test for equality.
-     * @return true if objects are equal, false otherwise.
-     */
-    public boolean equalsOnName( DataElementCategoryOptionCombo object )
-    {
-        if ( this == object )
-        {
-            return true;
-        }
-
-        if ( object == null || object.getCategoryCombo() == null || object.getCategoryOptions() == null )
-        {
-            return false;
-        }
-
-        if ( !categoryCombo.getName().equals( object.getCategoryCombo().getName() ) )
-        {
-            return false;
-        }
-
-        if ( categoryOptions.size() != object.getCategoryOptions().size() )
-        {
-            return false;
-        }
-
-        final Set<String> names1 = new HashSet<>();
-        final Set<String> names2 = new HashSet<>();
-
-        for ( DataElementCategoryOption option : categoryOptions )
-        {
-            names1.add( option.getName() );
-        }
-
-        for ( DataElementCategoryOption option : object.getCategoryOptions() )
-        {
-            names2.add( option.getName() );
-        }
-
-        return names1.equals( names2 );
-    }
-
     public boolean isDefault()
     {
         return categoryCombo != null && DEFAULT_NAME.equals( categoryCombo.getName() );
-    }
-
-    /**
-     * Creates a mapping between the category option combo identifier and name
-     * for the given collection of elements.
-     */
-    @Deprecated
-    public static Map<Integer, String> getCategoryOptionComboMap( Collection<DataElementCategoryOptionCombo> categoryOptionCombos )
-    {
-        Map<Integer, String> map = new HashMap<>();
-
-        for ( DataElementCategoryOptionCombo coc : categoryOptionCombos )
-        {
-            map.put( coc.getId(), coc.getName() );
-        }
-
-        return map;
     }
 
     // -------------------------------------------------------------------------
@@ -293,28 +223,33 @@ public class DataElementCategoryOptionCombo
         {
             return name;
         }
-        
+
         StringBuilder builder = new StringBuilder();
-        
-        List<DataElementCategory> categories = this.categoryCombo.getCategories();
-            
+
+        if ( categoryCombo == null || categoryCombo.getCategories().isEmpty() )
+        {
+            return uid;
+        }
+
+        List<DataElementCategory> categories = categoryCombo.getCategories();
+
         for ( DataElementCategory category : categories )
         {
             List<DataElementCategoryOption> options = category.getCategoryOptions();
-            
-            optionLoop: for ( DataElementCategoryOption option : this.categoryOptions )
+
+            optionLoop: for ( DataElementCategoryOption option : categoryOptions )
             {
                 if ( options.contains( option ) )
                 {
                     builder.append( option.getDisplayName() ).append( ", " );
-                    
+
                     continue optionLoop;
                 }
             }
         }
-        
+
         builder.delete( Math.max( builder.length() - 2, 0 ), builder.length() );
-        
+
         return StringUtils.substring( builder.toString(), 0, 255 );
     }
 
@@ -377,21 +312,21 @@ public class DataElementCategoryOptionCombo
     {
         this.ignoreApproval = ignoreApproval;
     }
-    
+
     @Override
-    public void mergeWith( IdentifiableObject other, MergeStrategy strategy )
+    public void mergeWith( IdentifiableObject other, MergeMode mergeMode )
     {
-        super.mergeWith( other, strategy );
+        super.mergeWith( other, mergeMode );
 
         if ( other.getClass().isInstance( this ) )
         {
             DataElementCategoryOptionCombo categoryOptionCombo = (DataElementCategoryOptionCombo) other;
 
-            if ( strategy.isReplace() )
+            if ( mergeMode.isReplace() )
             {
                 categoryCombo = categoryOptionCombo.getCategoryCombo();
             }
-            else if ( strategy.isMerge() )
+            else if ( mergeMode.isMerge() )
             {
                 categoryCombo = categoryOptionCombo.getCategoryCombo() == null ? categoryCombo : categoryOptionCombo.getCategoryCombo();
             }

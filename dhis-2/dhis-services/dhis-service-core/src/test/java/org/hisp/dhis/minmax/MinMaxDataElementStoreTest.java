@@ -29,12 +29,9 @@ package org.hisp.dhis.minmax;
  */
 
 import org.hisp.dhis.DhisSpringTest;
-import org.hisp.dhis.analytics.AggregationType;
-import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
-import org.hisp.dhis.dataelement.DataElementDomain;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
@@ -73,33 +70,10 @@ public class MinMaxDataElementStoreTest
         organisationUnitService.addOrganisationUnit( source1 );
         organisationUnitService.addOrganisationUnit( source2 );
 
-        DataElement dataElement1 = new DataElement();
-        dataElement1.setName( "DE1name" );
-        dataElement1.setShortName( "DE1sname" );
-        dataElement1.setAggregationType( AggregationType.SUM );
-        dataElement1.setValueType( ValueType.INTEGER );
-        dataElement1.setDomainType( DataElementDomain.AGGREGATE );
-
-        DataElement dataElement2 = new DataElement();
-        dataElement2.setName( "DE2name" );
-        dataElement2.setShortName( "DE2sname" );
-        dataElement2.setAggregationType( AggregationType.SUM );
-        dataElement2.setValueType( ValueType.INTEGER );
-        dataElement2.setDomainType( DataElementDomain.AGGREGATE );
-
-        DataElement dataElement3 = new DataElement();
-        dataElement3.setName( "DE3name" );
-        dataElement3.setShortName( "DE3sname" );
-        dataElement3.setAggregationType( AggregationType.SUM );
-        dataElement3.setValueType( ValueType.INTEGER );
-        dataElement3.setDomainType( DataElementDomain.AGGREGATE );
-
-        DataElement dataElement4 = new DataElement();
-        dataElement4.setName( "DE4name" );
-        dataElement4.setShortName( "DE4sname" );
-        dataElement4.setAggregationType( AggregationType.SUM );
-        dataElement4.setValueType( ValueType.INTEGER );
-        dataElement4.setDomainType( DataElementDomain.AGGREGATE );
+        DataElement dataElement1 = createDataElement( 'A' );
+        DataElement dataElement2 = createDataElement( 'B' );
+        DataElement dataElement3 = createDataElement( 'C' );
+        DataElement dataElement4 = createDataElement( 'D' );
 
         dataElementService.addDataElement( dataElement1 );
         dataElementService.addDataElement( dataElement2 );

@@ -220,7 +220,13 @@ public interface DataSetService
     int getDataSetCount();
 
     List<DataSet> getDataSetsBetween( int first, int max );
-
+    
+    /**
+     * Returns the data sets associated with the current user. If the current
+     * user has the ALL authority then all data sets are returned.
+     */
+    List<DataSet> getCurrentUserDataSets();
+    
     // -------------------------------------------------------------------------
     // DataSet LockExceptions
     // -------------------------------------------------------------------------
@@ -327,10 +333,11 @@ public interface DataSetService
      * @param dataElement the data element.
      * @param period the period.
      * @param organisationUnit the organisation unit.
+     * @param attributeOptionCombo the attribute option combo.
      * @param now the base date for deciding locked date, current date if null.
      * @return true or false indicating whether the system is locked or not.
      */
-    boolean isLocked( DataElement dataElement, Period period, OrganisationUnit organisationUnit, Date now );
+    boolean isLocked( DataElement dataElement, Period period, OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo, Date now );
 
     /**
      * Take

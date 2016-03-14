@@ -48,6 +48,7 @@ import org.jclouds.domain.Credentials;
 import org.jclouds.domain.Location;
 import org.jclouds.filesystem.reference.FilesystemConstants;
 import org.jclouds.http.HttpRequest;
+import org.jclouds.http.HttpResponseException;
 import org.joda.time.Minutes;
 
 import java.io.File;
@@ -61,6 +62,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.regex.Pattern;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 /**
  * @author Halvdan Hoem Grelland
@@ -110,6 +114,7 @@ public class JCloudsFileResourceContentStore
     // Life cycle management
     // -------------------------------------------------------------------------
 
+    @PostConstruct
     public void init()
     {
         String provider = configurationProvider.getProperty( ConfigurationKey.FILESTORE_PROVIDER );
@@ -168,12 +173,21 @@ public class JCloudsFileResourceContentStore
         Optional<? extends Location> configuredLocation = blobStore.listAssignableLocations()
             .stream().filter( l -> l.getId().equals( location ) ).findFirst();
 
-        blobStore.createContainerInLocation( configuredLocation.isPresent() ? configuredLocation.get() : null, container );
+        try
+        {
+            blobStore.createContainerInLocation( configuredLocation.isPresent() ? configuredLocation.get() : null, container );
 
-        log.info( "File store configured with provider '" + provider + "' and container '" + container + "'. " +
-            ( configuredLocation.isPresent() ? "Provider location: " + configuredLocation.get().getId() : StringUtils.EMPTY ) );
+            log.info( "File store configured with provider '" + provider + "' and container '" + container + "'. " +
+                ( configuredLocation.isPresent() ? "Provider location: " + configuredLocation.get().getId() : StringUtils.EMPTY ) );
+        }
+        catch ( HttpResponseException ex )
+        {
+            log.error( "Could not configure file store with provider '" + provider + "' and container '" + container + "'. " +
+                "Check your internet connectivity. File storage will not be available.", ex );
+        }
     }
 
+    @PreDestroy
     public void cleanUp()
     {
         blobStoreContext.close();
@@ -352,7 +366,7 @@ public class JCloudsFileResourceContentStore
 
         if ( provider.equals( JCLOUDS_PROVIDER_KEY_FILESYSTEM ) && !locationManager.externalDirectorySet() )
         {
-            log.warn( "File system file store provider could not be configured; external directory is not set. " +
+            log.info( "File system file store provider could not be configured; external directory is not set. " +
                 "Falling back to in-memory provider." );
             provider = JCLOUDS_PROVIDER_KEY_TRANSIENT;
         }

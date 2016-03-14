@@ -1,12 +1,35 @@
 <h3 ng-if="widget !== 'PROFILE'">{{'profile'| translate}}</h3>
+<script type="text/ng-template" id="attribute-details.html">
+    <table class="table table-bordered">
+        <tr>
+            <td class="bold">{{'description' | translate}}</td>
+            <td>{{content.description ? content.description : 'not_available' | translate}}</td>
+        </tr>
+        <!--<tr>
+            <td class="bold">{{'url' | translate}}</td>
+            <td>
+                <span ng-if="content.url">
+                    <a href="{{content.url}}" target="_blank">{{content.url}}</a>
+                </span>
+                <span ng-if="!content.url">
+                    {{'not_available' | translate}}
+                </span>
+            </td>
+        </tr>-->
+    </table>
+</script>
 <table class="dhis2-list-table-striped dhis2-table-hover">
     <tr ng-repeat="attribute in attributes | filter: {attribute: 'true'} " ng-if="!hiddenFields[attribute.id] && ((editingDisabled  && attribute.show) || !editingDisabled)">
         <td>
-            <span ng-bind="attribute.name"></span><span ng-if="attribute.mandatory || attribute.unique" class="required">*</span>
-            <a ng-if="attribute.description" Title="{{attribute.description}}" ng-click="showHelpText(attribute.id)">
-                <span class="glyphicon glyphicon-info-sign" ></span>
-                <span ng-show="helpTexts[attribute.id]" ><br>{{attribute.description}}</span>
-            </a>
+            <span d2-pop-over 
+                details="{{'details'| translate}}"
+                content="attribute"
+                template="attribute-details.html"
+                trigger="click"
+                placement="right">
+                <a href title="{{'details'| translate}}">{{attribute.displayName}}</a>
+            </span>
+            <span ng-if="attribute.mandatory || attribute.unique" class="required">*</span>
         </td>
         <td>
             <ng-form name="innerForm">
@@ -22,9 +45,9 @@
                                 ng-disabled="editingDisabled" 
                                 on-select="teiValueUpdated(selectedTei, attribute.id)"
                                  ng-style="{'width': '100%'}">
-                        <ui-select-match allow-clear="true"  class="form-control-ui-select"  placeholder="{{'select_or_search' | translate}}">{{$select.selected.name  || $select.selected}}</ui-select-match>
-                        <ui-select-choices  repeat="option.name as option in optionSets[attributesById[attribute.id].optionSet.id].options | filter: $select.search | limitTo:maxOptionSize">
-                          <span ng-bind-html="option.name | highlight: $select.search"></span>
+                        <ui-select-match allow-clear="true"  class="form-control-ui-select"  placeholder="{{'select_or_search' | translate}}">{{$select.selected.displayName  || $select.selected}}</ui-select-match>
+                        <ui-select-choices  repeat="option.displayName as option in optionSets[attributesById[attribute.id].optionSet.id].options | filter: $select.search | limitTo:maxOptionSize">
+                          <span ng-bind-html="option.displayName | highlight: $select.search"></span>
                         </ui-select-choices>
                     </ui-select>
                 </span>
@@ -71,47 +94,7 @@
                             dh-current-element="currentElement"
                             dh-event="currentEvent.event"
                             dh-id="attribute.id">
-                        </d2-radio-button>
-                        <!--<label class="radio-inline">
-                            <input  type="radio"
-                                    ng-model="selectedTei[attribute.id]"
-                                    d2-attribute-validator 
-                                    attribute-data={{attribute}}
-                                    selected-program-id={{selectedProgram.id}}  
-                                    selected-tei-id={{selectedTei.trackedEntityInstance}} 
-                                    ng-disabled="editingDisabled" 
-                                    ng-change="teiValueUpdated(selectedTei, attribute.id)"
-                                    ng-required="attribute.mandatory || attribute.unique" 
-                                    value=""> 
-                            {{'no_value'| translate}}
-                        </label>
-                        <label class="radio-inline">
-                            <input  type="radio"
-                                    class="input-with-audit"
-                                    ng-model="selectedTei[attribute.id]" 
-                                    d2-attribute-validator 
-                                    attribute-data={{attribute}}
-                                    selected-program-id={{selectedProgram.id}}  
-                                    selected-tei-id={{selectedTei.trackedEntityInstance}} 
-                                    ng-disabled="editingDisabled" 
-                                    ng-change="teiValueUpdated(selectedTei, attribute.id)"
-                                    ng-required="attribute.mandatory || attribute.unique" 
-                                    value="true"> 
-                            {{'yes'| translate}}
-                        </label>
-                        <label class="radio-inline">
-                            <input  type="radio"                                                         
-                                    ng-model="selectedTei[attribute.id]"
-                                    d2-attribute-validator
-                                    attribute-data={{attribute}}
-                                    selected-program-id={{selectedProgram.id}}  
-                                    selected-tei-id={{selectedTei.trackedEntityInstance}} 
-                                    ng-disabled="editingDisabled" 
-                                    ng-change="teiValueUpdated(selectedTei, attribute.id)"
-                                    ng-required="attribute.mandatory || attribute.unique" 
-                                    value="false"> 
-                            {{'no'| translate}}
-                        </label>-->
+                        </d2-radio-button>                        
                     </span>                    
                     <span ng-switch-when="NUMBER">
                         <input type="number"
@@ -173,10 +156,10 @@
                                style="width:75%;"
                                ng-required="attribute.mandatory || attribute.unique"/>
                         <span class="hideInPrint">
-                            <a href ng-class="{true: 'disable-clicks', false: ''} [editingDisabled]" ng-click="getTrackerAssociate(attribute, selectedTei[attribute.id])" title="{{'add'| translate}} {{attribute.name}}">
+                            <a href ng-class="{true: 'disable-clicks', false: ''} [editingDisabled]" ng-click="getTrackerAssociate(attribute, selectedTei[attribute.id])" title="{{'add'| translate}} {{attribute.displayName}}">
                                 <i class="fa fa-external-link fa-2x vertical-center"></i>
                             </a>
-                            <a href ng-if="selectedTei[attribute.id]" ng-class="{true: 'disable-clicks', false: ''} [editingDisabled]" ng-click="selectedTei[attribute.id] = null" title="{{'add'| translate}} {{attribute.name}}">
+                            <a href ng-if="selectedTei[attribute.id]" ng-class="{true: 'disable-clicks', false: ''} [editingDisabled]" ng-click="selectedTei[attribute.id] = null" title="{{'add'| translate}} {{attribute.displayName}}">
                                 <i class="fa fa-trash-o fa-2x vertical-center"></i>
                             </a>
                         </span>
@@ -207,9 +190,6 @@
                     </div>
                 </div>
             </ng-form>            
-        </td>
-        <td class="hideInPrint audit-icon-column" align="center" ng-if="selectedTeiId">
-            <d2-audit dataelement-id="{{attribute.id}}" dataelement-name="{{attribute.name}}" data-type="attribute" selected-tei-id={{selectedTei.trackedEntityInstance}}></d2-audit>
         </td>
     </tr>           
 </table>

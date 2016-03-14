@@ -46,7 +46,7 @@ public interface ObjectBundleService
      *
      * @param bundle Bundle to validate
      */
-    void validate( ObjectBundle bundle );
+    ObjectBundleValidation validate( ObjectBundle bundle );
 
     /**
      * Commits objects from bundle into persistence store if bundle mode COMMIT is enabled.

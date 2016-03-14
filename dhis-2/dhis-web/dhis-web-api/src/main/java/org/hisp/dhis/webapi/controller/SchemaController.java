@@ -29,18 +29,18 @@ package org.hisp.dhis.webapi.controller;
  */
 
 import com.google.common.collect.Lists;
-import org.hisp.dhis.render.RenderService;
-import org.hisp.dhis.dxf2.schema.SchemaValidator;
-import org.hisp.dhis.validation.ValidationViolation;
 import org.hisp.dhis.dxf2.webmessage.WebMessage;
+import org.hisp.dhis.feedback.ErrorReport;
 import org.hisp.dhis.fieldfilter.FieldFilterService;
 import org.hisp.dhis.node.NodeUtils;
 import org.hisp.dhis.node.types.CollectionNode;
 import org.hisp.dhis.node.types.RootNode;
+import org.hisp.dhis.render.RenderService;
 import org.hisp.dhis.schema.Property;
 import org.hisp.dhis.schema.Schema;
 import org.hisp.dhis.schema.SchemaService;
 import org.hisp.dhis.schema.Schemas;
+import org.hisp.dhis.schema.validation.SchemaValidator;
 import org.hisp.dhis.webapi.service.ContextService;
 import org.hisp.dhis.webapi.service.LinkService;
 import org.hisp.dhis.webapi.service.WebMessageService;
@@ -96,7 +96,7 @@ public class SchemaController
 
         if ( fields.isEmpty() )
         {
-            fields.add( "*,properties[*,constants[*]]" );
+            fields.add( "*" );
         }
 
         Schemas schemas = new Schemas( schemaService.getSortedSchemas() );
@@ -117,7 +117,7 @@ public class SchemaController
 
         if ( fields.isEmpty() )
         {
-            fields.add( "*,properties[*,constants[*]]" );
+            fields.add( "*" );
         }
 
         Schema schema = getSchemaFromType( type );
@@ -144,9 +144,9 @@ public class SchemaController
         }
 
         Object object = renderService.fromJson( request.getInputStream(), schema.getKlass() );
-        List<ValidationViolation> validationViolations = schemaValidator.validate( object );
+        List<ErrorReport> validationViolations = schemaValidator.validate( object );
 
-        WebMessage webMessage = WebMessageUtils.validationViolations( validationViolations );
+        WebMessage webMessage = WebMessageUtils.errorReports( validationViolations );
         webMessageService.send( webMessage, response, request );
     }
 

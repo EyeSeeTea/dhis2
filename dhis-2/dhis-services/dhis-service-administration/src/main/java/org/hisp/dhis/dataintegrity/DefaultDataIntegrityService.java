@@ -33,9 +33,8 @@ import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.ListMap;
 import org.hisp.dhis.common.SetMap;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
-import org.hisp.dhis.commons.filter.Filter;
-import org.hisp.dhis.commons.filter.FilterUtils;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementGroup;
@@ -61,19 +60,23 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.system.filter.OrganisationUnitGroupWithoutGroupSetFilter;
 import org.hisp.dhis.validation.ValidationRule;
 import org.hisp.dhis.validation.ValidationRuleService;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.collect.Sets;
+
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import static org.hisp.dhis.commons.collection.ListUtils.getDuplicates;
 
@@ -178,13 +181,13 @@ public class DefaultDataIntegrityService
     // -------------------------------------------------------------------------
 
     @Override
-    public Collection<DataElement> getDataElementsWithoutDataSet()
+    public List<DataElement> getDataElementsWithoutDataSet()
     {
         return dataElementService.getDataElementsWithoutDataSets();
     }
 
     @Override
-    public Collection<DataElement> getDataElementsWithoutGroups()
+    public List<DataElement> getDataElementsWithoutGroups()
     {
         return dataElementService.getDataElementsWithoutGroups();
     }
@@ -277,6 +280,14 @@ public class DefaultDataIntegrityService
 
         return map;
     }
+    
+    @Override
+    public List<DataElementCategoryCombo> getInvalidCategoryCombos()
+    {
+        List<DataElementCategoryCombo> categoryCombos = categoryService.getAllDataElementCategoryCombos();
+        
+        return categoryCombos.stream().filter( c -> !c.isValid() ).collect( Collectors.toList() );
+    }
 
     // -------------------------------------------------------------------------
     // DataSet
@@ -323,18 +334,11 @@ public class DefaultDataIntegrityService
     }
 
     @Override
-    public Collection<DataSet> getDataSetsNotAssignedToOrganisationUnits()
+    public List<DataSet> getDataSetsNotAssignedToOrganisationUnits()
     {
         Collection<DataSet> dataSets = dataSetService.getAllDataSets();
 
-        return FilterUtils.filter( dataSets, new Filter<DataSet>()
-        {
-            @Override
-            public boolean retain( DataSet object )
-            {
-                return object.getSources() == null || object.getSources().size() == 0;
-            }
-        } );
+        return dataSets.stream().filter( ds -> ds.getSources() == null || ds.getSources().isEmpty() ).collect( Collectors.toList() );
     }
 
     // -------------------------------------------------------------------------
@@ -342,9 +346,9 @@ public class DefaultDataIntegrityService
     // -------------------------------------------------------------------------
 
     @Override
-    public Collection<Section> getSectionsWithInvalidCategoryCombinations()
+    public List<Section> getSectionsWithInvalidCategoryCombinations()
     {
-        Collection<Section> sections = new HashSet<>();
+        List<Section> sections = new ArrayList<>();
 
         for ( Section section : sectionService.getAllSections() )
         {
@@ -362,13 +366,13 @@ public class DefaultDataIntegrityService
     // -------------------------------------------------------------------------
 
     @Override
-    public Collection<Collection<Indicator>> getIndicatorsWithIdenticalFormulas()
+    public Set<Set<Indicator>> getIndicatorsWithIdenticalFormulas()
     {
-        Hashtable<String, Indicator> formulas = new Hashtable<>();
+        Map<String, Indicator> formulas = new HashMap<>();
 
-        Hashtable<String, Collection<Indicator>> targets = new Hashtable<>();
+        Map<String, Set<Indicator>> targets = new HashMap<>();
 
-        Collection<Indicator> indicators = indicatorService.getAllIndicators();
+        List<Indicator> indicators = indicatorService.getAllIndicators();
 
         for ( Indicator indicator : indicators )
         {
@@ -397,11 +401,11 @@ public class DefaultDataIntegrityService
             }
         }
 
-        return targets.values();
+        return Sets.newHashSet( targets.values() );
     }
 
     @Override
-    public Collection<Indicator> getIndicatorsWithoutGroups()
+    public List<Indicator> getIndicatorsWithoutGroups()
     {
         return indicatorService.getIndicatorsWithoutGroups();
     }
@@ -503,9 +507,9 @@ public class DefaultDataIntegrityService
     // -------------------------------------------------------------------------
 
     @Override
-    public Collection<OrganisationUnit> getOrganisationUnitsWithCyclicReferences()
+    public Set<OrganisationUnit> getOrganisationUnitsWithCyclicReferences()
     {
-        Collection<OrganisationUnit> organisationUnits = organisationUnitService.getAllOrganisationUnits();
+        List<OrganisationUnit> organisationUnits = organisationUnitService.getAllOrganisationUnits();
 
         Set<OrganisationUnit> cyclic = new HashSet<>();
 
@@ -542,22 +546,15 @@ public class DefaultDataIntegrityService
     }
 
     @Override
-    public Collection<OrganisationUnit> getOrphanedOrganisationUnits()
+    public List<OrganisationUnit> getOrphanedOrganisationUnits()
     {
-        Collection<OrganisationUnit> organisationUnits = organisationUnitService.getAllOrganisationUnits();
-
-        return FilterUtils.filter( organisationUnits, new Filter<OrganisationUnit>()
-        {
-            @Override
-            public boolean retain( OrganisationUnit object )
-            {
-                return object.getParent() == null && (object.getChildren() == null || object.getChildren().size() == 0);
-            }
-        } );
+        List<OrganisationUnit> units = organisationUnitService.getAllOrganisationUnits();
+        
+        return units.stream().filter( ou -> ou.getParent() == null && ( ou.getChildren() == null || ou.getChildren().size() == 0 ) ).collect( Collectors.toList() );
     }
 
     @Override
-    public Collection<OrganisationUnit> getOrganisationUnitsWithoutGroups()
+    public List<OrganisationUnit> getOrganisationUnitsWithoutGroups()
     {
         return organisationUnitService.getOrganisationUnitsWithoutGroups();
     }
@@ -585,11 +582,11 @@ public class DefaultDataIntegrityService
     }
 
     @Override
-    public Collection<OrganisationUnitGroup> getOrganisationUnitGroupsWithoutGroupSets()
+    public List<OrganisationUnitGroup> getOrganisationUnitGroupsWithoutGroupSets()
     {
         Collection<OrganisationUnitGroup> groups = organisationUnitGroupService.getAllOrganisationUnitGroups();
-
-        return FilterUtils.filter( groups, new OrganisationUnitGroupWithoutGroupSetFilter() );
+        
+        return groups.stream().filter( g -> g == null || g.getGroupSet() == null ).collect( Collectors.toList() );
     }
 
     // -------------------------------------------------------------------------
@@ -597,18 +594,11 @@ public class DefaultDataIntegrityService
     // -------------------------------------------------------------------------
 
     @Override
-    public Collection<ValidationRule> getValidationRulesWithoutGroups()
+    public List<ValidationRule> getValidationRulesWithoutGroups()
     {
         Collection<ValidationRule> validationRules = validationRuleService.getAllValidationRules();
-
-        return FilterUtils.filter( validationRules, new Filter<ValidationRule>()
-        {
-            @Override
-            public boolean retain( ValidationRule object )
-            {
-                return object.getGroups() == null || object.getGroups().size() == 0;
-            }
-        } );
+        
+        return validationRules.stream().filter( r -> r.getGroups() == null || r.getGroups().isEmpty() ).collect( Collectors.toList() );
     }
 
     @Override
@@ -647,5 +637,71 @@ public class DefaultDataIntegrityService
         }
 
         return invalids;
+    }
+
+    @Override
+    public DataIntegrityReport getDataIntegrityReport()
+    {
+        DataIntegrityReport report = new DataIntegrityReport();
+        
+        report.setDataElementsWithoutDataSet( new ArrayList<>( getDataElementsWithoutDataSet() ) );
+        report.setDataElementsWithoutGroups( new ArrayList<>( getDataElementsWithoutGroups() ) );
+        report.setDataElementsAssignedToDataSetsWithDifferentPeriodTypes( getDataElementsAssignedToDataSetsWithDifferentPeriodTypes() );
+        report.setDataElementsViolatingExclusiveGroupSets( getDataElementsViolatingExclusiveGroupSets() );
+        report.setDataElementsInDataSetNotInForm( getDataElementsInDataSetNotInForm() );
+        report.setInvalidCategoryCombos( getInvalidCategoryCombos() );
+
+        log.info( "Checked data elements" );
+
+        report.setCategoryOptionCombosNotInDataElementCategoryCombo( getCategoryOptionCombosNotInDataElementCategoryCombo() );
+        report.setDataSetsNotAssignedToOrganisationUnits( new ArrayList<>( getDataSetsNotAssignedToOrganisationUnits() ) );
+        report.setSectionsWithInvalidCategoryCombinations( new ArrayList<>( getSectionsWithInvalidCategoryCombinations() ) );
+
+        log.info( "Checked data sets" );
+
+        report.setIndicatorsWithIdenticalFormulas( getIndicatorsWithIdenticalFormulas() );
+        report.setIndicatorsWithoutGroups( new ArrayList<>( getIndicatorsWithoutGroups() ) );
+        report.setInvalidIndicatorNumerators( getInvalidIndicatorNumerators() );
+        report.setInvalidIndicatorDenominators( getInvalidIndicatorDenominators() );
+        report.setIndicatorsViolatingExclusiveGroupSets( getIndicatorsViolatingExclusiveGroupSets() );
+
+        log.info( "Checked indicators" );
+
+        report.setDuplicatePeriods( getDuplicatePeriods() );
+
+        log.info( "Checked periods" );
+
+        report.setOrganisationUnitsWithCyclicReferences( new ArrayList<>( getOrganisationUnitsWithCyclicReferences() ) );
+        report.setOrphanedOrganisationUnits( new ArrayList<>( getOrphanedOrganisationUnits() ) );
+        report.setOrganisationUnitsWithoutGroups( new ArrayList<>( getOrganisationUnitsWithoutGroups() ) );
+        report.setOrganisationUnitsViolatingExclusiveGroupSets( getOrganisationUnitsViolatingExclusiveGroupSets() );
+        report.setOrganisationUnitGroupsWithoutGroupSets( new ArrayList<>( getOrganisationUnitGroupsWithoutGroupSets() ) );
+        report.setValidationRulesWithoutGroups( new ArrayList<>( getValidationRulesWithoutGroups() ) );
+
+        log.info( "Checked organisation units" );
+
+        report.setInvalidValidationRuleLeftSideExpressions( getInvalidValidationRuleLeftSideExpressions() );
+        report.setInvalidValidationRuleRightSideExpressions( getInvalidValidationRuleRightSideExpressions() );
+
+        log.info( "Checked validation rules" );
+
+        Collections.sort( report.getDataElementsWithoutDataSet(), IdentifiableObjectNameComparator.INSTANCE );
+        Collections.sort( report.getDataElementsWithoutGroups(), IdentifiableObjectNameComparator.INSTANCE );
+        Collections.sort( report.getDataSetsNotAssignedToOrganisationUnits(), IdentifiableObjectNameComparator.INSTANCE );
+        Collections.sort( report.getSectionsWithInvalidCategoryCombinations(), IdentifiableObjectNameComparator.INSTANCE );
+        Collections.sort( report.getIndicatorsWithoutGroups(), IdentifiableObjectNameComparator.INSTANCE );
+        Collections.sort( report.getOrganisationUnitsWithCyclicReferences(), IdentifiableObjectNameComparator.INSTANCE );
+        Collections.sort( report.getOrphanedOrganisationUnits(), IdentifiableObjectNameComparator.INSTANCE );
+        Collections.sort( report.getOrganisationUnitsWithoutGroups(), IdentifiableObjectNameComparator.INSTANCE );
+        Collections.sort( report.getOrganisationUnitGroupsWithoutGroupSets(), IdentifiableObjectNameComparator.INSTANCE );
+        Collections.sort( report.getValidationRulesWithoutGroups(), IdentifiableObjectNameComparator.INSTANCE );
+
+        return report;
+    }
+
+    @Override
+    public FlattenedDataIntegrityReport getFlattenedDataIntegrityReport()
+    {
+        return new FlattenedDataIntegrityReport( getDataIntegrityReport() );
     }
 }

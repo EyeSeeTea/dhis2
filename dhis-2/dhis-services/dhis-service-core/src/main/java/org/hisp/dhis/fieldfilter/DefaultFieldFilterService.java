@@ -32,6 +32,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.node.AbstractNode;
 import org.hisp.dhis.node.Node;
 import org.hisp.dhis.node.NodePropertyConverter;
@@ -45,6 +46,7 @@ import org.hisp.dhis.schema.Property;
 import org.hisp.dhis.schema.Schema;
 import org.hisp.dhis.schema.SchemaService;
 import org.hisp.dhis.system.util.ReflectionUtils;
+import org.hisp.dhis.user.UserCredentials;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -229,7 +231,7 @@ public class DefaultFieldFilterService implements FieldFilterService
                     child = new CollectionNode( property.getCollectionName() );
                     child.setNamespace( property.getNamespace() );
 
-                    if ( property.isIdentifiableObject() )
+                    if ( property.isIdentifiableObject() && isProperIdObject( property.getItemKlass() ) )
                     {
                         for ( Object collectionObject : collection )
                         {
@@ -262,7 +264,7 @@ public class DefaultFieldFilterService implements FieldFilterService
                         }
                     }
                 }
-                else if ( property.isIdentifiableObject() )
+                else if ( property.isIdentifiableObject() && isProperIdObject( property.getKlass() ) )
                 {
                     child = getProperties( property, returnValue, fields );
                 }
@@ -432,9 +434,16 @@ public class DefaultFieldFilterService implements FieldFilterService
     {
         FieldMap fieldMap = new FieldMap();
 
-        for ( String mapKey : schema.getPropertyMap().keySet() )
+        if ( schema.isPersisted() )
         {
-            fieldMap.put( mapKey, new FieldMap() );
+            fieldMap.put( ":owner", new FieldMap() );
+        }
+        else
+        {
+            for ( String mapKey : schema.getPropertyMap().keySet() )
+            {
+                fieldMap.put( mapKey, new FieldMap() );
+            }
         }
 
         return fieldMap;
@@ -483,5 +492,10 @@ public class DefaultFieldFilterService implements FieldFilterService
         }
 
         return complexNode;
+    }
+
+    private boolean isProperIdObject( Class<?> klass )
+    {
+        return !(DataElementOperand.class.isAssignableFrom( klass ) || UserCredentials.class.isAssignableFrom( klass ));
     }
 }

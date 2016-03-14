@@ -2,13 +2,15 @@
     <div class="panel-heading handle bold">
         {{profileWidget.title| translate}}
         <span class="nav-pills" ng-if="!enrollmentEditing && !selectedTei.inactive">
-            | <a href ng-click="enableEdit()" title="{{'edit_profile'| translate}}"><span ng-class="{true: 'widget - link - active', false: 'widget - link'} [!editingDisabled]">{{'edit'| translate}}</span></a>
+            | <a href ng-click="enableEdit()" title="{{'edit_profile'| translate}}"><span ng-class="{true: 'widget-link-active', false: 'widget-link'} [!editingDisabled]">{{'edit'| translate}}</span></a>
         </span>
 
         <span class="pull-right widget-link">            
             <a class="small-horizonal-spacing" href ng-click="expandCollapse(profileWidget)">
                 <span ng-show="profileWidget.expand"><i class="fa fa-chevron-up" title="{{collapseLabel}}"></i></span>
                 <span ng-show="!profileWidget.expand"><i class="fa fa-chevron-down" title="{{expandLabel}}"></i></span>
+                <d2-audit name-id-map="attributesById" event-id="{{selectedTei.trackedEntityInstance}}" data-type="attribute">
+                </d2-audit>
             </a>
             <a class="small-horizonal-spacing" href ng-click="removeWidget(profileWidget)" title="{{removeLabel}}"><i class="fa fa-times-circle"></i></a>            
         </span>        

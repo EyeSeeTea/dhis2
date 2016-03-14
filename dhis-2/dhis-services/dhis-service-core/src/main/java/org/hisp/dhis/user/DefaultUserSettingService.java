@@ -34,6 +34,7 @@ import com.google.common.collect.Sets;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.setting.SettingKey;
 import org.hisp.dhis.setting.SystemSettingManager;
+import org.hisp.dhis.system.util.SystemUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,7 +60,7 @@ public class DefaultUserSettingService
     private static Cache<String, Optional<Serializable>> SETTING_CACHE = CacheBuilder.newBuilder()
         .expireAfterAccess( 1, TimeUnit.HOURS )
         .initialCapacity( 200 )
-        .maximumSize( 10000 )
+        .maximumSize( SystemUtils.isTestRun() ? 0 : 10000 )
         .build();
 
     private static final Map<String, SettingKey> NAME_SETTING_KEY_MAP = Sets.newHashSet(
@@ -199,6 +200,35 @@ public class DefaultUserSettingService
         return getUserSetting( key, Optional.ofNullable( user ) ).orElse( null );
     }
 
+    @Override
+    public List<UserSetting> getAllUserSettings()
+    {
+        User currentUser = currentUserService.getCurrentUser();
+
+        return getUserSettings( currentUser );
+    }
+
+    @Override
+    public List<UserSetting> getUserSettings( User user )
+    {
+        if ( user == null )
+        {
+            return new ArrayList<>();
+        }
+
+        return userSettingStore.getAllUserSettings( user );
+    }
+
+    @Override
+    public void invalidateCache()
+    {
+        SETTING_CACHE.invalidateAll();
+    }
+
+    // -------------------------------------------------------------------------
+    // Private methods
+    // -------------------------------------------------------------------------
+
     private Optional<Serializable> getUserSetting( UserSettingKey key, Optional<User> user )
     {
         if ( key == null )
@@ -209,20 +239,21 @@ public class DefaultUserSettingService
         try
         {
             String username = user.isPresent() ? user.get().getUsername() : currentUserService.getCurrentUsername();
+            
             String cacheKey = getCacheKey( key.getName(), username );
-            Optional<Serializable> result = SETTING_CACHE
-                .get( cacheKey, () -> getUserSettingOptional( key, username ) );
+            
+            Optional<Serializable> result = SETTING_CACHE.
+                get( cacheKey, () -> getUserSettingOptional( key, username ) );
 
             if ( !result.isPresent() && NAME_SETTING_KEY_MAP.containsKey( key.getName() ) )
             {
-                return Optional
-                    .ofNullable( systemSettingManager.getSystemSetting( NAME_SETTING_KEY_MAP.get( key.getName() ) ) );
+                return Optional.ofNullable( 
+                    systemSettingManager.getSystemSetting( NAME_SETTING_KEY_MAP.get( key.getName() ) ) );
             }
             else
             {
                 return result;
             }
-
         }
         catch ( ExecutionException ignored )
         {
@@ -242,40 +273,6 @@ public class DefaultUserSettingService
         UserSetting setting = userSettingStore.getUserSetting( userCredentials.getUserInfo(), key.getName() );
 
         return setting != null && setting.hasValue() ?
-            Optional.of( setting.getValue() ) :
-            Optional.empty();
-    }
-
-    @Override
-    public List<UserSetting> getAllUserSettings()
-    {
-        User currentUser = currentUserService.getCurrentUser();
-
-        return getUserSettings( currentUser );
-    }
-
-    @Override
-    public List<UserSetting> getUserSettings( User user )
-    {
-        if ( user == null )
-        {
-            return new ArrayList<>();
-        }
-
-        List<UserSetting> list = userSettingStore.getAllUserSettings( user );
-
-        return list.stream().map( userSetting -> {
-            if ( userSetting.getValue() == null )
-                return new UserSetting( userSetting.getUser(), userSetting.getName(),
-                    systemSettingManager.getSystemSetting( NAME_SETTING_KEY_MAP.get( userSetting.getName() ) ) );
-            else
-                return userSetting;
-        } ).collect( Collectors.toList() );
-    }
-
-    @Override
-    public void invalidateCache()
-    {
-        SETTING_CACHE.invalidateAll();
+            Optional.of( setting.getValue() ) : Optional.empty();
     }
 }

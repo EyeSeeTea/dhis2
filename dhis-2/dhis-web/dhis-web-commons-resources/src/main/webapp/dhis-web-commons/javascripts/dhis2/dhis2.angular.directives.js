@@ -34,7 +34,7 @@ var d2Directives = angular.module('d2Directives', [])
             //listen to user selection, and inform angular         
             selection.setListenerFunction(setSelectedOu, true);
             function setSelectedOu(ids, names) {
-                var ou = {id: ids[0], name: names[0]};
+                var ou = {id: ids[0], displayName: names[0]};
                 $timeout(function () {
                     scope.selectedOrgUnit = ou;
                     scope.$apply();
@@ -117,20 +117,28 @@ var d2Directives = angular.module('d2Directives', [])
         scope: {
             content: '=',
             title: '@details',
-            template: "@template"
+            template: "@template",
+            placement: "@placement",
+            trigger: "@trigger"
         },
         link: function (scope, element, attrs) {
-            var content = $templateCache.get("popover.html");
+            var content = $templateCache.get(scope.template);
             content = $compile(content)(scope);
             scope.content.heading = scope.content.value && scope.content.value.length > 20 ? scope.content.value.substring(0,20).concat('...') : scope.content.value;
             var options = {
                 content: content,
-                placement: 'auto',
-                trigger: 'hover',
+                placement: scope.placement ? scope.placement : 'auto',
+                trigger: scope.trigger ? scope.trigger : 'hover',
                 html: true,
                 title: scope.title
             };
-            element.popover(options);
+            element.popover(options);            
+            
+            $('body').on('click', function (e) {
+                if( !element[0].contains(e.target) ) {
+                    element.popover('hide');
+                }
+            });
         }
     };
 })
@@ -379,69 +387,40 @@ var d2Directives = angular.module('d2Directives', [])
                 });                 
             }
         }
-    };    
+    };
 })
-
 .directive('d2Audit', function () {
     return {
         restrict: 'E',
-        template: '<span class="hideInPrint audit-icon" title="{{\'audit_history\' | translate}}"><i class="glyphicon glyphicon-user" data-ng-click="showAuditHistory()" ng-if="showAuditIcon()"></i></span>',
-        scope:{
-            dataElementId: '@dataelementId',
-            dataElementName: '@dataelementName',
-            currentEvent:'@',
-            type:'@',
-            selectedTeiId:'@',
-            isAuditIconPresent:'=?'
+        template: '<span class="hideInPrint audit-icon" title="{{\'audit_history\' | translate}}" data-ng-click="showAuditHistory()">' +
+        '<i class="glyphicon glyphicon-user""></i>' +
+        '</span>',
+        scope: {
+            eventId: '@',
+            type: '@',
+            nameIdMap: '='
         },
-        controller:function($scope, $modal) {
-            if (!$scope.dataElementId) {
-                return;
-            }
-
-            $scope.showAuditIcon = function() {
-                if ($scope.currentEvent && $scope.currentEvent !== 'SINGLE_EVENT') {
-                    $scope.isAuditIconPresent = true;
-                    return true;
-                }
-                if ($scope.type === "attribute" && $scope.selectedTeiId) {
-                    $scope.isAuditIconPresent = true;
-                    return true;
-                }
-                $scope.isAuditIconPresent = false;
-                return false;
-            }
-
-            $scope.showAuditHistory = function() {
-
+        controller: function ($scope, $modal) {
+            $scope.showAuditHistory = function () {
                 $modal.open({
                     templateUrl: "../dhis-web-commons/angular-forms/audit-history.html",
                     controller: "AuditHistoryController",
                     resolve: {
-                        dataElementId: function () {
-                            return $scope.dataElementId;
+                        eventId: function () {
+                            return $scope.eventId;
                         },
-                        dataElementName: function () {
-                            return $scope.dataElementName;
-                        },
-                        dataType: function() {
+                        dataType: function () {
                             return $scope.type;
                         },
-                        currentEvent: function() {
-                            return $scope.currentEvent;
-                        },
-                        selectedTeiId: function() {
-                            return $scope.selectedTeiId;
+                        nameIdMap: function () {
+                            return $scope.nameIdMap;
                         }
                     }
                 })
-
             }
-
-        }
+        },
     };
 })
-
 .directive('d2RadioButton', function (){  
     return {
         restrict: 'E',
@@ -616,13 +595,14 @@ var d2Directives = angular.module('d2Directives', [])
                     }
                     $scope.elementClicked = false;
                 };
-                
-                if(angular.isDefined($scope.preSelected) && $scope.preSelected === true){                    
+
+                if(angular.isDefined($scope.preSelected) && $scope.preSelected === true){
                     $document.on('click', $scope.documentClick);
                     $scope.documentEventListenerSet = true;
                 }
-                
+
             }],
-        link: function (scope, element, attrs) {}
+        link: function (scope, element, attrs) {
+        }
     };
 });

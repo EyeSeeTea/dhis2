@@ -37,6 +37,7 @@ import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.common.IdentifiableProperty;
 import org.hisp.dhis.i18n.I18nService;
+import org.hisp.dhis.user.UserCredentials;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -374,6 +375,26 @@ public class DefaultDataElementCategoryService
         return categoryOptionStore.getCountLikeName( name );
     }
 
+    @Override
+    public Set<DataElementCategoryOption> getCoDimensionConstraints( UserCredentials userCredentials )
+    {
+        Set<DataElementCategoryOption> options = null;
+
+        Set<DataElementCategory> catConstraints = userCredentials.getCatDimensionConstraints();
+
+        if ( catConstraints != null && !catConstraints.isEmpty() )
+        {
+            options = new HashSet<>();
+
+            for ( DataElementCategory category : catConstraints )
+            {
+                options.addAll( getDataElementCategoryOptions( category ) );
+            }
+        }
+
+        return options;
+    }
+
     // -------------------------------------------------------------------------
     // CategoryCombo
     // -------------------------------------------------------------------------
@@ -560,25 +581,6 @@ public class DefaultDataElementCategoryService
     }
 
     @Override
-    public DataElementCategoryOptionCombo getDataElementCategoryOptionCombo( DataElementCategoryOptionCombo categoryOptionCombo )
-    {
-        for ( DataElementCategoryOptionCombo dcoc : getAllDataElementCategoryOptionCombos() )
-        {
-            // -----------------------------------------------------------------
-            // Hibernate puts proxies on associations and makes the native
-            // equals methods unusable
-            // -----------------------------------------------------------------
-
-            if ( dcoc.equalsOnName( categoryOptionCombo ) )
-            {
-                return dcoc;
-            }
-        }
-
-        return null;
-    }
-
-    @Override
     public DataElementCategoryOptionCombo getDataElementCategoryOptionCombo( DataElementCategoryCombo categoryCombo,
         Set<DataElementCategoryOption> categoryOptions )
     {
@@ -610,8 +612,9 @@ public class DefaultDataElementCategoryService
         // DataElementCategoryOption
         // ---------------------------------------------------------------------
 
-        DataElementCategoryOption categoryOption = new DataElementCategoryOption(
-            DataElementCategoryOption.DEFAULT_NAME );
+        DataElementCategoryOption categoryOption = new DataElementCategoryOption( DataElementCategoryOption.DEFAULT_NAME );
+        categoryOption.setUid( "xYerKDKCefk" );
+        categoryOption.setCode( "default" );
 
         addDataElementCategoryOption( categoryOption );
 
@@ -620,6 +623,9 @@ public class DefaultDataElementCategoryService
         // ---------------------------------------------------------------------
 
         DataElementCategory category = new DataElementCategory( DataElementCategory.DEFAULT_NAME );
+        category.setUid( "GLevLNI9wkl" );
+        category.setCode( "default" );
+
         category.addCategoryOption( categoryOption );
         addDataElementCategory( category );
 
@@ -627,8 +633,10 @@ public class DefaultDataElementCategoryService
         // DataElementCategoryCombo
         // ---------------------------------------------------------------------
 
-        DataElementCategoryCombo categoryCombo = new DataElementCategoryCombo(
-            DataElementCategoryCombo.DEFAULT_CATEGORY_COMBO_NAME );
+        DataElementCategoryCombo categoryCombo = new DataElementCategoryCombo( DataElementCategoryCombo.DEFAULT_CATEGORY_COMBO_NAME );
+        categoryCombo.setUid( "bjDvmb4bfuf" );
+        categoryCombo.setCode( "default" );
+
         categoryCombo.addDataElementCategory( category );
         addDataElementCategoryCombo( categoryCombo );
 
@@ -637,6 +645,8 @@ public class DefaultDataElementCategoryService
         // ---------------------------------------------------------------------
 
         DataElementCategoryOptionCombo categoryOptionCombo = new DataElementCategoryOptionCombo();
+        categoryOptionCombo.setUid( "HllvX50cXC0" );
+        categoryOptionCombo.setCode( "default" );
 
         categoryOptionCombo.setCategoryCombo( categoryCombo );
         categoryOptionCombo.addDataElementCategoryOption( categoryOption );
@@ -695,7 +705,7 @@ public class DefaultDataElementCategoryService
             log.warn( "Category combo is null or invalid, could not update option combos: " + categoryCombo );
             return;
         }
-        
+
         List<DataElementCategoryOptionCombo> generatedOptionCombos = categoryCombo.generateOptionCombosList();
         Set<DataElementCategoryOptionCombo> persistedOptionCombos = categoryCombo.getOptionCombos();
 
@@ -775,6 +785,12 @@ public class DefaultDataElementCategoryService
             IdentifiableObjectUtils.getUids( categoryOptionCombo.getCategoryOptions() ) );
 
         return options.size() == categoryOptionCombo.getCategoryOptions().size();
+    }
+
+    @Override
+    public void updateCategoryOptionComboNames()
+    {
+        categoryOptionComboStore.updateNames();
     }
 
     // -------------------------------------------------------------------------
@@ -932,6 +948,26 @@ public class DefaultDataElementCategoryService
     public int getCategoryOptionGroupCountByName( String name )
     {
         return categoryOptionGroupStore.getCountLikeName( name );
+    }
+
+    @Override
+    public Set<CategoryOptionGroup> getCogDimensionConstraints( UserCredentials userCredentials )
+    {
+        Set<CategoryOptionGroup> groups = null;
+
+        Set<CategoryOptionGroupSet> cogsConstraints = userCredentials.getCogsDimensionConstraints();
+
+        if ( cogsConstraints != null && !cogsConstraints.isEmpty() )
+        {
+            groups = new HashSet<>();
+
+            for ( CategoryOptionGroupSet cogs : cogsConstraints )
+            {
+                groups.addAll( getCategoryOptionGroups( cogs ) );
+            }
+        }
+
+        return groups;
     }
 
     // -------------------------------------------------------------------------

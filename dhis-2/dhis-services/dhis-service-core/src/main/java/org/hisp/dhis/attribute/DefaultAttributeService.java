@@ -33,8 +33,9 @@ import org.hisp.dhis.attribute.exception.MissingMandatoryAttributeValueException
 import org.hisp.dhis.attribute.exception.NonUniqueAttributeValueException;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.feedback.ErrorCode;
+import org.hisp.dhis.feedback.ErrorReport;
 import org.hisp.dhis.i18n.I18nService;
-import org.hisp.dhis.validation.ValidationViolation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -182,7 +183,6 @@ public class DefaultAttributeService
     // AttributeValue implementation
     // -------------------------------------------------------------------------
 
-
     @Override
     public <T extends IdentifiableObject> void addAttributeValue( T object, AttributeValue attributeValue ) throws NonUniqueAttributeValueException
     {
@@ -274,9 +274,14 @@ public class DefaultAttributeService
     }
 
     @Override
-    public <T extends IdentifiableObject> List<ValidationViolation> validateAttributeValues( T object, Set<AttributeValue> attributeValues )
+    public <T extends IdentifiableObject> List<ErrorReport> validateAttributeValues( T object, Set<AttributeValue> attributeValues )
     {
-        List<ValidationViolation> validationViolations = new ArrayList<>();
+        List<ErrorReport> errorReports = new ArrayList<>();
+
+        if ( attributeValues.isEmpty() )
+        {
+            return errorReports;
+        }
 
         Map<String, AttributeValue> attributeValueMap = attributeValues.stream()
             .collect( Collectors.toMap( av -> av.getAttribute().getUid(), av -> av ) );
@@ -296,9 +301,7 @@ public class DefaultAttributeService
                 {
                     if ( !manager.isAttributeValueUnique( object.getClass(), object, attributeValue.getAttribute(), av.getValue() ) )
                     {
-                        validationViolations.add( new ValidationViolation( attributeValue.getAttribute().getUid(),
-                            "Value '" + av.getValue() + "' already exists for attribute '"
-                                + attributeValue.getAttribute().getDisplayName() + "' (" + attributeValue.getAttribute().getUid() + ")" ) );
+                        errorReports.add( new ErrorReport( Attribute.class, ErrorCode.E4009, attributeValue.getAttribute().getUid(), av.getValue() ) );
                     }
                 }
 
@@ -313,9 +316,7 @@ public class DefaultAttributeService
 
             if ( !attributeValue.getAttribute().getSupportedClasses().contains( object.getClass() ) )
             {
-                validationViolations.add( new ValidationViolation( attributeValue.getAttribute().getUid(),
-                    "Attribute '" + attributeValue.getAttribute().getDisplayName() + "' (" + attributeValue.getAttribute().getUid() + ") is not supported for type "
-                        + object.getClass().getSimpleName() ) );
+                errorReports.add( new ErrorReport( Attribute.class, ErrorCode.E4010, attributeValue.getAttribute().getUid(), object.getClass().getSimpleName() ) );
             }
             else
             {
@@ -323,11 +324,9 @@ public class DefaultAttributeService
             }
         }
 
-        mandatoryAttributes.stream()
-            .forEach( att -> validationViolations.add(
-                new ValidationViolation( att.getUid(), "Missing mandatory attribute '" + att.getDisplayName() + "' (" + att.getUid() + ")" ) ) );
+        mandatoryAttributes.stream().forEach( att -> errorReports.add( new ErrorReport( Attribute.class, ErrorCode.E4011, att.getUid() ) ) );
 
-        return validationViolations;
+        return errorReports;
     }
 
     @Override
@@ -339,6 +338,11 @@ public class DefaultAttributeService
     @Override
     public <T extends IdentifiableObject> void updateAttributeValues( T object, Set<AttributeValue> attributeValues ) throws Exception
     {
+        if ( attributeValues.isEmpty() )
+        {
+            return;
+        }
+
         Map<String, AttributeValue> attributeValueMap = attributeValues.stream()
             .collect( Collectors.toMap( av -> av.getAttribute().getUid(), av -> av ) );
 

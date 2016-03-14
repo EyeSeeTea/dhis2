@@ -32,11 +32,9 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
-import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.i18n.I18nManager;
+import org.hisp.dhis.system.util.SystemUtils;
 import org.hisp.dhis.system.util.ValidationUtils;
 import org.jasypt.encryption.pbe.PBEStringEncryptor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
@@ -55,12 +53,12 @@ public class DefaultSystemSettingManager
     implements SystemSettingManager
 {
     /**
-     * Cache for system settings. Does not accept nulls.
+     * Cache for system settings. Does not accept nulls. Disabled during test phase.
      */
     private static final Cache<String, Optional<Serializable>> SETTING_CACHE = CacheBuilder.newBuilder()
         .expireAfterAccess( 1, TimeUnit.HOURS )
         .initialCapacity( 200 )
-        .maximumSize( 400 )
+        .maximumSize( SystemUtils.isTestRun() ? 0 : 400 )
         .build();
 
     private static final Map<String, SettingKey> NAME_KEY_MAP = Lists.newArrayList(
@@ -69,7 +67,7 @@ public class DefaultSystemSettingManager
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
+    
     private SystemSettingStore systemSettingStore;
 
     public void setSystemSettingStore( SystemSettingStore systemSettingStore )
@@ -83,9 +81,6 @@ public class DefaultSystemSettingManager
     {
         this.flags = flags;
     }
-
-    @Autowired
-    private I18nManager i18nManager;
 
     @Resource( name = "stringEncryptor" )
     private PBEStringEncryptor pbeStringEncryptor;
@@ -184,7 +179,7 @@ public class DefaultSystemSettingManager
     }
 
     private Optional<Serializable> getSystemSettingOptional( String name, Serializable defaultValue )
-    {
+    {        
         SystemSetting setting = systemSettingStore.getByName( name );
 
         if ( setting != null && setting.hasValue() )
@@ -296,26 +291,6 @@ public class DefaultSystemSettingManager
     {
         Collections.sort( flags );
         return flags;
-    }
-
-    @Override
-    public List<StyleObject> getFlagObjects()
-    {
-        Collections.sort( flags );
-
-        I18n i18n = i18nManager.getI18n();
-
-        List<StyleObject> list = Lists.newArrayList();
-
-        for ( String flag : flags )
-        {
-            String name = i18n.getString( flag );
-            String file = flag + ".png";
-
-            list.add( new StyleObject( name, flag, file ) );
-        }
-
-        return list;
     }
 
     @Override

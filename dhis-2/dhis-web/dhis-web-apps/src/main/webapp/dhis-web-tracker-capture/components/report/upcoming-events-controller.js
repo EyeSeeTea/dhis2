@@ -1,9 +1,12 @@
+/* global trackerCapture */
+
 trackerCapture.controller('UpcomingEventsController',
          function($scope,
                 $modal,
                 $location,
                 $translate,
-                DateUtils,                
+                $location,
+                DateUtils,
                 Paginator,
                 EventReportService,
                 TEIGridService,
@@ -13,11 +16,12 @@ trackerCapture.controller('UpcomingEventsController',
                 MetaDataFactory) {
     $scope.today = DateUtils.getToday();
     
+    $scope.maxOptionSize = 30;
     $scope.selectedOuMode = 'SELECTED';
     $scope.report = {};
     $scope.displayMode = {};
     $scope.printMode = false;
-    
+    $scope.model = {};
     //get optionsets
     $scope.optionSets = CurrentSelection.getOptionSets();
     if(!$scope.optionSets){
@@ -56,19 +60,19 @@ trackerCapture.controller('UpcomingEventsController',
     //load programs associated with the selected org unit.
     $scope.loadPrograms = function() {
         if (angular.isObject($scope.selectedOrgUnit)){
-            ProgramFactory.getAllForUser($scope.selectedProgram).then(function(response){
+            ProgramFactory.getAllForUser($scope.model.selectedProgram).then(function(response){
                 $scope.programs = response.programs;
-                $scope.selectedProgram = response.selectedProgram;
+                $scope.model.selectedProgram = response.selectedProgram;
             });
         }        
     };
     
     //watch for selection of program
-    $scope.$watchCollection('[selectedProgram, selectedOuMode]', function () {
+    $scope.$watchCollection('[model.selectedProgram, selectedOuMode]', function () {
         $scope.reportFinished = false;
         $scope.reportStarted = false;
         
-        if (angular.isObject($scope.selectedProgram)){
+        if (angular.isObject($scope.model.selectedProgram)){
             $scope.generateGridHeader();
         }
     });
@@ -77,7 +81,7 @@ trackerCapture.controller('UpcomingEventsController',
         
         //check for form validity
         $scope.outerForm.submitted = true;        
-        if( $scope.outerForm.$invalid || !$scope.selectedProgram){
+        if( $scope.outerForm.$invalid || !$scope.model.selectedProgram){
             return false;
         }
         
@@ -87,7 +91,7 @@ trackerCapture.controller('UpcomingEventsController',
         $scope.upcomingEvents = [];
         EventReportService.getEventReport($scope.selectedOrgUnit.id, 
                                         $scope.selectedOuMode, 
-                                        $scope.selectedProgram.id, 
+                                        $scope.model.selectedProgram.id, 
                                         DateUtils.formatFromUserToApi($scope.report.startDate), 
                                         DateUtils.formatFromUserToApi($scope.report.endDate), 
                                         'ACTIVE',
@@ -113,7 +117,7 @@ trackerCapture.controller('UpcomingEventsController',
 
                     upcomingEvent.dueDate = DateUtils.formatFromApiToUser(row.dueDate);
                     upcomingEvent.event = row.event;
-                    upcomingEvent.eventName = $scope.programStages[row.programStage].name;                    
+                    upcomingEvent.eventName = $scope.programStages[row.programStage].displayName;                    
                     upcomingEvent.orgUnitName = row.orgUnitName; 
                     upcomingEvent.followup = row.followup;
                     upcomingEvent.program = row.program;
@@ -126,7 +130,7 @@ trackerCapture.controller('UpcomingEventsController',
 
                 //sort upcoming events by their due dates - this is default
                 if(!$scope.sortColumn.id){                                      
-                    $scope.sortGrid({id: 'dueDate', name: $translate.instant('due_date'), valueType: 'DATE', displayInListNoProgram: false, showFilter: false, show: true});
+                    $scope.sortGrid({id: 'dueDate', displayName: $translate.instant('due_date'), valueType: 'DATE', displayInListNoProgram: false, showFilter: false, show: true});
                     $scope.reverse = false;
                 }
             }
@@ -138,7 +142,7 @@ trackerCapture.controller('UpcomingEventsController',
     
     $scope.generateGridHeader = function(){
         
-        if (angular.isObject($scope.selectedProgram)){
+        if (angular.isObject($scope.model.selectedProgram)){
             
             $scope.programStages = [];
             $scope.sortColumn = {};
@@ -146,17 +150,17 @@ trackerCapture.controller('UpcomingEventsController',
             $scope.filterText = {};
             $scope.reverse = false;;
 
-            angular.forEach($scope.selectedProgram.programStages, function(stage){
+            angular.forEach($scope.model.selectedProgram.programStages, function(stage){
                 $scope.programStages[stage.id] = stage;
             });
 
             
-            AttributesFactory.getByProgram($scope.selectedProgram).then(function(atts){            
+            AttributesFactory.getByProgram($scope.model.selectedProgram).then(function(atts){            
                 var grid = TEIGridService.generateGridColumns(atts, $scope.selectedOuMode, true);
                 
                 $scope.gridColumns = [];
-                $scope.gridColumns.push({name: $translate.instant('due_date'), id: 'dueDate', valueType: 'DATE', displayInListNoProgram: false, showFilter: false, show: true, eventCol: true});
-                $scope.gridColumns.push({name: $translate.instant('event_name'), id: 'eventName', valueType: 'TEXT', displayInListNoProgram: false, showFilter: false, show: true, eventCol: true});
+                $scope.gridColumns.push({displayName: $translate.instant('due_date'), id: 'dueDate', valueType: 'DATE', displayInListNoProgram: false, showFilter: false, show: true, eventCol: true});
+                $scope.gridColumns.push({displayName: $translate.instant('event_name'), id: 'eventName', valueType: 'TEXT', displayInListNoProgram: false, showFilter: false, show: true, eventCol: true});
                 $scope.gridColumns = $scope.gridColumns.concat(grid.columns);
                 
                 $scope.filterTypes['eventName'] = 'TEXT';                
@@ -247,11 +251,45 @@ trackerCapture.controller('UpcomingEventsController',
     
     $scope.showDashboard = function(tei){
         $location.path('/dashboard').search({tei: tei,                                            
-                                            program: $scope.selectedProgram ? $scope.selectedProgram.id: null});
+                                            program: $scope.model.selectedProgram ? $scope.model.selectedProgram.id: null});
     };
     
     $scope.generateReportData = function(){
         return TEIGridService.getData($scope.upcomingEvents, $scope.gridColumns);
+    };
+
+
+    $scope.dates=[ {"name":$translate.instant('events_today'), "numOfDays":1},
+                     {"name":$translate.instant('events_in_one_week'), "numOfDays":7},
+                     {"name":$translate.instant('events_in_two_weeks'), "numOfDays":14},
+                     {"name":$translate.instant('events_in_one_month'), "numOfDays":30},
+                     {"name":$translate.instant('choose_the_dates')}
+    ];
+
+    $scope.selectedDate = $scope.dates[0];
+
+    $scope.datePicker = {"visible":false};
+
+    $scope.$watch('selectedDate',function() {
+        var numOfDays = $scope.selectedDate.numOfDays;
+        $scope.report.startDate = $scope.today;
+        if ($scope.selectedDate) {
+            if (numOfDays) {
+                $scope.datePicker.visible = false;
+                if (numOfDays === 1) {
+                    $scope.report.endDate = $scope.today;
+                } else {
+                    $scope.report.endDate = DateUtils.getDateAfterOffsetDays(numOfDays);
+                }
+            } else {
+                $scope.datePicker.visible = true;
+            }
+        }
+    });
+
+    $scope.hideDatePicker = function(){
+        $scope.datePicker.visible = !$scope.datePicker.visible;
+        $scope.selectedDate = $scope.dates[0];
     };
     
     $scope.generateReportHeader = function(){

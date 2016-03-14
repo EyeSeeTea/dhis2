@@ -198,7 +198,7 @@ public class DataValueController
         // Locking validation
         // ---------------------------------------------------------------------
 
-        validateDataSetNotLocked( dataElement, period, organisationUnit );
+        validateDataSetNotLocked( dataElement, period, organisationUnit, attributeOptionCombo );
 
         // ---------------------------------------------------------------------
         // Assemble and save data value
@@ -267,7 +267,15 @@ public class DataValueController
                 fileResourceService.deleteFileResource( dataValue.getValue() );
             }
 
-            dataValue.setValue( StringUtils.trimToNull( value ) );
+            // -----------------------------------------------------------------
+            // Value and comment are sent individually, so null checks must be 
+            // made for each. Empty string is sent for clearing a value.
+            // -----------------------------------------------------------------
+            
+            if ( value != null )
+            {
+                dataValue.setValue( StringUtils.trimToNull( value ) );
+            }
 
             if ( comment != null )
             {
@@ -325,7 +333,7 @@ public class DataValueController
         // Locking validation
         // ---------------------------------------------------------------------
 
-        validateDataSetNotLocked( dataElement, period, organisationUnit );
+        validateDataSetNotLocked( dataElement, period, organisationUnit, attributeOptionCombo );
 
         // ---------------------------------------------------------------------
         // Delete data value
@@ -374,7 +382,7 @@ public class DataValueController
         // Locking validation
         // ---------------------------------------------------------------------
 
-        validateDataSetNotLocked( dataElement, period, organisationUnit );
+        validateDataSetNotLocked( dataElement, period, organisationUnit, attributeOptionCombo );
 
         // ---------------------------------------------------------------------
         // Get data value
@@ -432,7 +440,7 @@ public class DataValueController
         // Locking validation
         // ---------------------------------------------------------------------
 
-        validateDataSetNotLocked( dataElement, period, organisationUnit );
+        validateDataSetNotLocked( dataElement, period, organisationUnit, attributeOptionCombo );
 
         // ---------------------------------------------------------------------
         // Get data value
@@ -625,10 +633,11 @@ public class DataValueController
         }
     }
 
-    private void validateDataSetNotLocked( DataElement dataElement, Period period, OrganisationUnit organisationUnit )
+    private void validateDataSetNotLocked( DataElement dataElement, Period period,
+        OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo )
         throws WebMessageException
     {
-        if ( dataSetService.isLocked( dataElement, period, organisationUnit, null ) )
+        if ( dataSetService.isLocked( dataElement, period, organisationUnit, attributeOptionCombo, null ) )
         {
             throw new WebMessageException( WebMessageUtils.conflict( "Data set is locked" ) );
         }

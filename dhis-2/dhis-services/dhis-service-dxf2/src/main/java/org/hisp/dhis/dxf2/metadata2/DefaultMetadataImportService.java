@@ -28,15 +28,22 @@ package org.hisp.dhis.dxf2.metadata2;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.common.IdentifiableObject;
-import org.hisp.dhis.common.IdentifiableObjectManager;
-import org.hisp.dhis.preheat.PreheatService;
-import org.hisp.dhis.schema.SchemaService;
+import com.google.common.base.Enums;
+import org.hisp.dhis.common.MergeMode;
+import org.hisp.dhis.dxf2.metadata2.feedback.ImportReport;
+import org.hisp.dhis.feedback.ObjectTypeErrorReport;
+import org.hisp.dhis.dxf2.metadata2.objectbundle.ObjectBundle;
+import org.hisp.dhis.dxf2.metadata2.objectbundle.ObjectBundleMode;
+import org.hisp.dhis.dxf2.metadata2.objectbundle.ObjectBundleParams;
+import org.hisp.dhis.dxf2.metadata2.objectbundle.ObjectBundleService;
+import org.hisp.dhis.dxf2.metadata2.objectbundle.ObjectBundleValidation;
+import org.hisp.dhis.importexport.ImportStrategy;
+import org.hisp.dhis.preheat.PreheatIdentifier;
+import org.hisp.dhis.preheat.PreheatMode;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -45,56 +52,74 @@ import java.util.Map;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Component
+@Transactional
 public class DefaultMetadataImportService implements MetadataImportService
 {
-    private static final Log log = LogFactory.getLog( MetadataImportService.class );
-
-    @Autowired
-    private SchemaService schemaService;
-
-    @Autowired
-    private PreheatService preheatService;
-
     @Autowired
     private CurrentUserService currentUserService;
 
     @Autowired
-    private IdentifiableObjectManager manager;
+    private ObjectBundleService objectBundleService;
 
     @Override
-    public void importMetadata( MetadataImportParams params )
+    public ImportReport importMetadata( MetadataImportParams params )
     {
+        ImportReport report = new ImportReport();
+
         if ( params.getUser() == null )
         {
             params.setUser( currentUserService.getCurrentUser() );
         }
 
-        for ( Class<? extends IdentifiableObject> klass : params.getClasses() )
+        ObjectBundleParams bundleParams = params.toObjectBundleParams();
+        ObjectBundle bundle = objectBundleService.create( bundleParams );
+
+        ObjectBundleValidation validation = objectBundleService.validate( bundle );
+        validation.getObjectErrorReports().forEach( ( klass, objectErrorReports ) -> {
+            if ( !report.getImportTypeReportMap().containsKey( klass ) )
+            {
+                ObjectTypeErrorReport objectTypeErrorReport = new ObjectTypeErrorReport( klass, objectErrorReports );
+                report.getImportTypeReportMap().put( klass, objectTypeErrorReport );
+            }
+            else
+            {
+                ObjectTypeErrorReport objectTypeErrorReport = report.getImportTypeReportMap().get( klass );
+                objectTypeErrorReport.getObjectErrorReports().addObjectErrorReports( objectErrorReports );
+            }
+
+        } );
+
+        if ( !(bundleParams.getImportMode().isAtomic() && !validation.getObjectErrorReports().isEmpty()) )
         {
-            List<? extends IdentifiableObject> objects = params.getObjects( klass );
-            objects.forEach( this::importObject );
+            objectBundleService.commit( bundle );
         }
-    }
 
-    @Override
-    public void validate( MetadataImportParams params )
-    {
-
+        return report;
     }
 
     @Override
     public MetadataImportParams getParamsFromMap( Map<String, List<String>> parameters )
     {
         MetadataImportParams params = new MetadataImportParams();
+        params.setObjectBundleMode( getEnumWithDefault( ObjectBundleMode.class, parameters, "objectBundleMode", ObjectBundleMode.COMMIT ) );
+        params.setPreheatMode( getEnumWithDefault( PreheatMode.class, parameters, "preheatMode", PreheatMode.REFERENCE ) );
+        params.setPreheatIdentifier( getEnumWithDefault( PreheatIdentifier.class, parameters, "preheatIdentifier", PreheatIdentifier.UID ) );
+        params.setImportMode( getEnumWithDefault( ImportStrategy.class, parameters, "importMode", ImportStrategy.CREATE_AND_UPDATE ) );
+        params.setMergeMode( getEnumWithDefault( MergeMode.class, parameters, "mergeMode", MergeMode.MERGE ) );
+        params.setFlushMode( getEnumWithDefault( FlushMode.class, parameters, "flushMode", FlushMode.AUTO ) );
+
         return params;
     }
 
-    //------------------------------------------------------------------------------------------------
-    // Helpers
-    //------------------------------------------------------------------------------------------------
-
-    private void importObject( IdentifiableObject object )
+    private <T extends Enum<T>> T getEnumWithDefault( Class<T> enumKlass, Map<String, List<String>> parameters, String key, T defaultValue )
     {
-        manager.save( object );
+        if ( parameters == null || parameters.get( key ) == null || parameters.get( key ).isEmpty() )
+        {
+            return defaultValue;
+        }
+
+        String value = String.valueOf( parameters.get( key ).get( 0 ) );
+
+        return Enums.getIfPresent( enumKlass, value ).or( defaultValue );
     }
 }

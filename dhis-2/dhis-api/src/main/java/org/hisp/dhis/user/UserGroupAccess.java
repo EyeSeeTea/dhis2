@@ -32,6 +32,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.google.common.base.MoreObjects;
 import org.hisp.dhis.common.DxfNamespaces;
 
 /**
@@ -42,9 +43,11 @@ public class UserGroupAccess
 {
     private int id;
 
-    private String access;
-
     private UserGroup userGroup;
+
+    private transient String uid;
+
+    private transient String access;
 
     public UserGroupAccess()
     {
@@ -75,7 +78,7 @@ public class UserGroupAccess
 
     @JsonProperty
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String userGroupUid()
+    public String getUserGroupUid()
     {
         return userGroup != null ? userGroup.getUid() : null;
     }
@@ -84,7 +87,12 @@ public class UserGroupAccess
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getUid()
     {
-        return userGroup != null ? userGroup.getUid() : null;
+        return uid != null ? uid : (userGroup != null ? userGroup.getUid() : null);
+    }
+
+    public void setUid( String uid )
+    {
+        this.uid = uid;
     }
 
     @JsonProperty
@@ -96,11 +104,27 @@ public class UserGroupAccess
 
     public UserGroup getUserGroup()
     {
+        if ( userGroup == null )
+        {
+            UserGroup userGroup = new UserGroup();
+            userGroup.setUid( uid );
+            return userGroup;
+        }
+
         return userGroup;
     }
 
     public void setUserGroup( UserGroup userGroup )
     {
         this.userGroup = userGroup;
+    }
+
+    @Override
+    public String toString()
+    {
+        return MoreObjects.toStringHelper( this )
+            .add( "id", id )
+            .add( "access", access )
+            .toString();
     }
 }

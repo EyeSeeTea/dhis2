@@ -35,12 +35,14 @@ import java.util.Map;
 
 import org.hisp.dhis.analytics.AnalyticsService;
 import org.hisp.dhis.common.AnalyticalObjectStore;
+import org.hisp.dhis.common.DisplayProperty;
 import org.hisp.dhis.common.GenericAnalyticalObjectService;
+import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.report.ReportService;
+import org.hisp.dhis.report.Report;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.reporttable.ReportTableService;
 import org.hisp.dhis.system.grid.ListGrid;
@@ -73,11 +75,11 @@ public class DefaultReportTableService
         this.reportTableStore = reportTableStore;
     }
 
-    private ReportService reportService;
+    private GenericIdentifiableObjectStore<Report> reportStore;
 
-    public void setReportService( ReportService reportService )
+    public void setReportStore( GenericIdentifiableObjectStore<Report> reportStore )
     {
-        this.reportService = reportService;
+        this.reportStore = reportStore;
     }
 
     private OrganisationUnitService organisationUnitService;
@@ -128,7 +130,7 @@ public class DefaultReportTableService
 
         Map<String, Object> valueMap = analyticsService.getAggregatedDataValueMapping( reportTable, format );
 
-        return reportTable.getGrid( new ListGrid(), valueMap, true );
+        return reportTable.getGrid( new ListGrid(), valueMap, DisplayProperty.SHORTNAME, true );
     }
 
     @Override
@@ -140,7 +142,7 @@ public class DefaultReportTableService
         }
         else if ( mode.equals( MODE_REPORT ) )
         {
-            return reportService.getReport( uid ).getReportTable();
+            return reportStore.getByUid( uid ).getReportTable();
         }
 
         return null;

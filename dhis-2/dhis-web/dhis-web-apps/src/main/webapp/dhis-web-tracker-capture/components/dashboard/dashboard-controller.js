@@ -214,9 +214,9 @@ trackerCapture.controller('DashboardController',
                                     angular.forEach(programs, function(program){                                    
                                         if( program.trackedEntity.id === $scope.selectedTei.trackedEntity ){
                                             $scope.programs.push(program);
-                                            $scope.programNames[program.id] = {id: program.id, name: program.name};
+                                            $scope.programNames[program.id] = {id: program.id, displayName: program.displayName};
                                             angular.forEach(program.programStages, function(stage){                
-                                                    $scope.programStageNames[stage.id] = {id: stage.id, name: stage.name};
+                                                    $scope.programStageNames[stage.id] = {id: stage.id, displayName: stage.displayName};
                                             });
 
                                             if($scope.selectedProgramId && program.id === $scope.selectedProgramId || selectedEnrollment && selectedEnrollment.program === program.id){
@@ -335,7 +335,8 @@ trackerCapture.controller('DashboardController',
         }
     });
     
-    $scope.applySelectedProgram = function(){
+    $scope.applySelectedProgram = function(pr){
+        $scope.selectedProgram = pr;
         getDashboardLayout();
     };
     
@@ -351,8 +352,18 @@ trackerCapture.controller('DashboardController',
         
         $scope.trackedEntity = selections.te;
         $scope.optionSets = selections.optionSets;
+        $scope.selectedEnrollment = null;
         
-        CurrentSelection.set({tei: $scope.selectedTei, te: $scope.trackedEntity, prs: $scope.programs, pr: $scope.selectedProgram, prNames: $scope.programNames, prStNames: $scope.programStageNames, enrollments: selections.enrollments, selectedEnrollment: selections.selectedEnrollment, optionSets: $scope.optionSets});        
+        if($scope.selectedProgram){            
+            for(var i=0; i<selections.enrollments.length; i++){
+                if(selections.enrollments[i].program === $scope.selectedProgram.id){
+                    $scope.selectedEnrollment = selections.enrollments[i];
+                    break;
+                }
+            }
+        }
+        
+        CurrentSelection.set({tei: $scope.selectedTei, te: $scope.trackedEntity, prs: $scope.programs, pr: $scope.selectedProgram, prNames: $scope.programNames, prStNames: $scope.programStageNames, enrollments: selections.enrollments, selectedEnrollment: $scope.selectedEnrollment, optionSets: $scope.optionSets});        
         $timeout(function() { 
             $rootScope.$broadcast('selectedItems', {programExists: $scope.programs.length > 0});            
         }, 500);

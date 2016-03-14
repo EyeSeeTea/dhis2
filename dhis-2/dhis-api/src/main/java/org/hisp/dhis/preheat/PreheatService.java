@@ -29,6 +29,8 @@ package org.hisp.dhis.preheat;
  */
 
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.feedback.ErrorReport;
+import org.hisp.dhis.feedback.ObjectErrorReport;
 
 import java.util.Collection;
 import java.util.List;
@@ -60,7 +62,15 @@ public interface PreheatService
      * @param object Object to scan
      * @return Maps classes to collections of identifiers
      */
-    Map<PreheatIdentifier, Map<Class<? extends IdentifiableObject>, Set<String>>> collectReferences( Object object );
+    Map<PreheatIdentifier, Map<Class<? extends IdentifiableObject>, Set<String>>> collectReferences( IdentifiableObject object );
+
+    /**
+     * Scan object and collect all references (both id object and collections with id objects).
+     *
+     * @param objects Object to scan
+     * @return Maps classes to collections of identifiers
+     */
+    Map<PreheatIdentifier, Map<Class<? extends IdentifiableObject>, Set<String>>> collectReferences( Collection<IdentifiableObject> objects );
 
     /**
      * Scan objects and collect all references (both id object and collections with id objects).
@@ -68,7 +78,26 @@ public interface PreheatService
      * @param objects Objects to scan
      * @return Maps classes to collections of identifiers
      */
-    Map<PreheatIdentifier, Map<Class<? extends IdentifiableObject>, Set<String>>> collectReferences( Collection<?> objects );
+    Map<PreheatIdentifier, Map<Class<? extends IdentifiableObject>, Set<String>>> collectReferences( Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> objects );
+
+    /**
+     * Scan objects and collect unique values (used to verify object properties with unique=true)
+     *
+     * @param objects Objects to scan
+     * @return Klass -> Property.name -> Value -> UID
+     */
+    Map<Class<? extends IdentifiableObject>, Map<String, Map<Object, String>>> collectUniqueness( Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> objects );
+
+    Map<Class<?>, Map<String, Map<String, Object>>> collectObjectReferences( Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> objects );
+
+    /**
+     * Checks but does not connect any references, returns check report
+     *
+     * @param objects    Object to check
+     * @param preheat    Preheat Cache to use
+     * @param identifier Use this identifier type to check references
+     */
+    List<ObjectErrorReport> checkReferences( List<IdentifiableObject> objects, Preheat preheat, PreheatIdentifier identifier );
 
     /**
      * Checks but does not connect any references, returns check report
@@ -77,7 +106,24 @@ public interface PreheatService
      * @param preheat    Preheat Cache to use
      * @param identifier Use this identifier type to check references
      */
-    <T extends IdentifiableObject> List<MissingReference> checkReferences( T object, Preheat preheat, PreheatIdentifier identifier );
+    List<PreheatErrorReport> checkReferences( IdentifiableObject object, Preheat preheat, PreheatIdentifier identifier );
+
+    /**
+     * Check for properties that are unique.
+     *
+     * @param objects    Object to check
+     * @param preheat    Preheat Cache to use
+     * @param identifier Use this identifier type report issues
+     */
+    List<ObjectErrorReport> checkUniqueness( List<IdentifiableObject> objects, Preheat preheat, PreheatIdentifier identifier );
+
+    /**
+     * Check for properties that are unique.
+     *
+     * @param object  Object to check
+     * @param preheat Preheat Cache to use
+     */
+    List<ErrorReport> checkUniqueness( IdentifiableObject object, Preheat preheat, PreheatIdentifier identifier );
 
     /**
      * Connects id object references on a given object using a given identifier + a preheated Preheat cache.
@@ -86,5 +132,5 @@ public interface PreheatService
      * @param preheat    Preheat Cache to use
      * @param identifier Use this identifier type to attach references
      */
-    <T extends IdentifiableObject> void connectReferences( T object, Preheat preheat, PreheatIdentifier identifier );
+    void connectReferences( Object object, Preheat preheat, PreheatIdentifier identifier );
 }
