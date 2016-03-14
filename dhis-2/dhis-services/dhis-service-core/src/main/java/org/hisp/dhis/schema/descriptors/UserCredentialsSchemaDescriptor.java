@@ -43,6 +43,8 @@ public class UserCredentialsSchemaDescriptor implements SchemaDescriptor
 
     public static final String PLURAL = "userCredentials";
 
+    public static final String API_ENDPOINT = "/" + PLURAL;
+
     @Override
     public Schema getSchema()
     {

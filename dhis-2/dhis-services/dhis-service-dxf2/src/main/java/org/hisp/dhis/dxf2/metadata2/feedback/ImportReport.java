@@ -29,12 +29,15 @@ package org.hisp.dhis.dxf2.metadata2.feedback;
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.DxfNamespaces;
-import org.hisp.dhis.feedback.ObjectErrorReport;
+import org.hisp.dhis.feedback.ObjectTypeErrorReport;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -43,30 +46,22 @@ import java.util.Map;
 @JacksonXmlRootElement( localName = "importReport", namespace = DxfNamespaces.DXF_2_0 )
 public class ImportReport
 {
-    private ImportStats stats = new ImportStats();
-
-    private Map<Class<?>, Map<Integer, ObjectErrorReport>> objectErrorReports = new HashMap<>();
+    private final Map<Class<?>, ObjectTypeErrorReport> importTypeReportMap = new HashMap<>();
 
     public ImportReport()
     {
     }
 
     @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public ImportStats getStats()
+    @JacksonXmlElementWrapper( localName = "importTypeReports", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "importTypeReport", namespace = DxfNamespaces.DXF_2_0 )
+    public List<ObjectTypeErrorReport> getImportTypeReports()
     {
-        return stats;
+        return new ArrayList<>( importTypeReportMap.values() );
     }
 
-    @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public Map<Class<?>, Map<Integer, ObjectErrorReport>> getObjectErrorReports()
+    public Map<Class<?>, ObjectTypeErrorReport> getImportTypeReportMap()
     {
-        return objectErrorReports;
-    }
-
-    public void setObjectErrorReports( Map<Class<?>, Map<Integer, ObjectErrorReport>> objectErrorReports )
-    {
-        this.objectErrorReports = objectErrorReports;
+        return importTypeReportMap;
     }
 }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.schema.descriptors;
+package org.hisp.dhis.dxf2.metadata2.objectbundle.hooks;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -28,36 +28,40 @@ package org.hisp.dhis.schema.descriptors;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.collect.Lists;
-import org.hisp.dhis.program.ProgramStageDataElement;
-import org.hisp.dhis.security.Authority;
-import org.hisp.dhis.security.AuthorityType;
-import org.hisp.dhis.schema.Schema;
-import org.hisp.dhis.schema.SchemaDescriptor;
+import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.dxf2.metadata2.objectbundle.ObjectBundle;
+import org.hisp.dhis.validation.ValidationRule;
 import org.springframework.stereotype.Component;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Component
-public class ProgramStageDataElementSchemaDescriptor implements SchemaDescriptor
+public class ValidationRuleObjectBundleHook extends AbstractObjectBundleHook
 {
-    public static final String SINGULAR = "programStageDataElement";
+    @Override
+    public void preCreate( IdentifiableObject identifiableObject, ObjectBundle objectBundle )
+    {
+        if ( !ValidationRule.class.isInstance( identifiableObject ) ) return;
+        ValidationRule validationRule = (ValidationRule) identifiableObject;
 
-    public static final String PLURAL = "programStageDataElements";
+        preheatService.connectReferences( validationRule.getLeftSide(), objectBundle.getPreheat(), objectBundle.getPreheatIdentifier() );
+        preheatService.connectReferences( validationRule.getRightSide(), objectBundle.getPreheat(), objectBundle.getPreheatIdentifier() );
 
-    public static final String API_ENDPOINT = "/" + PLURAL;
+        sessionFactory.getCurrentSession().save( validationRule.getLeftSide() );
+        sessionFactory.getCurrentSession().save( validationRule.getRightSide() );
+    }
 
     @Override
-    public Schema getSchema()
+    public void preUpdate( IdentifiableObject identifiableObject, ObjectBundle objectBundle )
     {
-        Schema schema = new Schema( ProgramStageDataElement.class, SINGULAR, PLURAL );
-        schema.setRelativeApiEndpoint( API_ENDPOINT );
-        schema.setOrder( 1509 );
+        if ( !ValidationRule.class.isInstance( identifiableObject ) ) return;
+        ValidationRule validationRule = (ValidationRule) identifiableObject;
 
-        schema.getAuthorities().add( new Authority( AuthorityType.CREATE, Lists.newArrayList( "F_PROGRAMSTAGE_ADD" ) ) );
-        schema.getAuthorities().add( new Authority( AuthorityType.DELETE, Lists.newArrayList( "F_PROGRAMSTAGE_DELETE" ) ) );
+        preheatService.connectReferences( validationRule.getLeftSide(), objectBundle.getPreheat(), objectBundle.getPreheatIdentifier() );
+        preheatService.connectReferences( validationRule.getRightSide(), objectBundle.getPreheat(), objectBundle.getPreheatIdentifier() );
 
-        return schema;
+        sessionFactory.getCurrentSession().save( validationRule.getLeftSide() );
+        sessionFactory.getCurrentSession().save( validationRule.getRightSide() );
     }
 }

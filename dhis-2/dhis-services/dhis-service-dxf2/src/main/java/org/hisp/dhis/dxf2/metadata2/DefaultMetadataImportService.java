@@ -31,6 +31,7 @@ package org.hisp.dhis.dxf2.metadata2;
 import com.google.common.base.Enums;
 import org.hisp.dhis.common.MergeMode;
 import org.hisp.dhis.dxf2.metadata2.feedback.ImportReport;
+import org.hisp.dhis.feedback.ObjectTypeErrorReport;
 import org.hisp.dhis.dxf2.metadata2.objectbundle.ObjectBundle;
 import org.hisp.dhis.dxf2.metadata2.objectbundle.ObjectBundleMode;
 import org.hisp.dhis.dxf2.metadata2.objectbundle.ObjectBundleParams;
@@ -42,6 +43,7 @@ import org.hisp.dhis.preheat.PreheatMode;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -50,6 +52,7 @@ import java.util.Map;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Component
+@Transactional
 public class DefaultMetadataImportService implements MetadataImportService
 {
     @Autowired
@@ -72,9 +75,24 @@ public class DefaultMetadataImportService implements MetadataImportService
         ObjectBundle bundle = objectBundleService.create( bundleParams );
 
         ObjectBundleValidation validation = objectBundleService.validate( bundle );
-        report.setObjectErrorReports( validation.getObjectErrorReportsMap() );
+        validation.getObjectErrorReports().forEach( ( klass, objectErrorReports ) -> {
+            if ( !report.getImportTypeReportMap().containsKey( klass ) )
+            {
+                ObjectTypeErrorReport objectTypeErrorReport = new ObjectTypeErrorReport( klass, objectErrorReports );
+                report.getImportTypeReportMap().put( klass, objectTypeErrorReport );
+            }
+            else
+            {
+                ObjectTypeErrorReport objectTypeErrorReport = report.getImportTypeReportMap().get( klass );
+                objectTypeErrorReport.getObjectErrorReports().addObjectErrorReports( objectErrorReports );
+            }
 
-        objectBundleService.commit( bundle );
+        } );
+
+        if ( !(bundleParams.getImportMode().isAtomic() && !validation.getObjectErrorReports().isEmpty()) )
+        {
+            objectBundleService.commit( bundle );
+        }
 
         return report;
     }
@@ -88,6 +106,7 @@ public class DefaultMetadataImportService implements MetadataImportService
         params.setPreheatIdentifier( getEnumWithDefault( PreheatIdentifier.class, parameters, "preheatIdentifier", PreheatIdentifier.UID ) );
         params.setImportMode( getEnumWithDefault( ImportStrategy.class, parameters, "importMode", ImportStrategy.CREATE_AND_UPDATE ) );
         params.setMergeMode( getEnumWithDefault( MergeMode.class, parameters, "mergeMode", MergeMode.MERGE ) );
+        params.setFlushMode( getEnumWithDefault( FlushMode.class, parameters, "flushMode", FlushMode.AUTO ) );
 
         return params;
     }

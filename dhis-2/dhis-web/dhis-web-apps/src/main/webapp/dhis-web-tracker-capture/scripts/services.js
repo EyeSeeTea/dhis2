@@ -993,17 +993,18 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 /* factory for handling events */
 .factory('DHIS2EventFactory', function($http, DialogService, $translate) {   
     
+    var skipPaging = "&skipPaging=true";
     return {     
         
         getEventsByStatus: function(entity, orgUnit, program, programStatus){   
-            var promise = $http.get( '../api/events.json?ouMode=ACCESSIBLE&' + 'trackedEntityInstance=' + entity + '&orgUnit=' + orgUnit + '&program=' + program + '&programStatus=' + programStatus  + '&paging=false').then(function(response){
+            var promise = $http.get( '../api/events.json?ouMode=ACCESSIBLE&' + 'trackedEntityInstance=' + entity + '&orgUnit=' + orgUnit + '&program=' + program + '&programStatus=' + programStatus  + skipPaging).then(function(response){
                 return response.data.events;
             });            
             return promise;
         },
         getEventsByProgram: function(entity, program){   
             
-            var url = '../api/events.json?ouMode=ACCESSIBLE&' + 'trackedEntityInstance=' + entity + '&paging=false';            
+            var url = '../api/events.json?ouMode=ACCESSIBLE&' + 'trackedEntityInstance=' + entity + skipPaging;            
             if(program){
                 url = url + '&program=' + program;
             }
@@ -1013,7 +1014,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             return promise;
         },
         getEventsByProgramStage: function(entity, programStage){
-          var url = '../api/events.json?ouMode=ACCESSIBLE&' + 'trackedEntityInstance=' + entity + '&paging=false'; 
+          var url = '../api/events.json?ouMode=ACCESSIBLE&' + 'trackedEntityInstance=' + entity + skipPaging; 
           if(programStage){
               url += '&programStage='+programStage;
           }
@@ -1025,10 +1026,10 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         getByOrgUnitAndProgram: function(orgUnit, ouMode, program, startDate, endDate){
             var url;
             if(startDate && endDate){
-                url = '../api/events.json?' + 'orgUnit=' + orgUnit + '&ouMode='+ ouMode + '&program=' + program + '&startDate=' + startDate + '&endDate=' + endDate + '&paging=false';
+                url = '../api/events.json?' + 'orgUnit=' + orgUnit + '&ouMode='+ ouMode + '&program=' + program + '&startDate=' + startDate + '&endDate=' + endDate + skipPaging;
             }
             else{
-                url = '../api/events.json?' + 'orgUnit=' + orgUnit + '&ouMode='+ ouMode + '&program=' + program + '&paging=false';
+                url = '../api/events.json?' + 'orgUnit=' + orgUnit + '&ouMode='+ ouMode + '&program=' + program + skipPaging;
             }
             var promise = $http.get( url ).then(function(response){
                 return response.data.events;
@@ -1427,22 +1428,22 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         
         if(enrollment){
             var q = '';
-            if(enrollment.operator === OperatorFactory.defaultOperators[0]){
-                if(enrollment.programExactDate && enrollment.programExactDate !== ''){
-                    query.hasValue = true;
-                    q += '&programStartDate=' + DateUtils.formatFromUserToApi(enrollment.programExactDate) + '&programEndDate=' + DateUtils.formatFromUserToApi(enrollment.programExactDate);
-                }
+            if(enrollment.programEnrollmentStartDate && enrollment.programEnrollmentStartDate !== ''){                
+                query.hasValue = true;
+                q += '&programEnrollmentStartDate=' + DateUtils.formatFromUserToApi(enrollment.programEnrollmentStartDate);
             }
-            if(enrollment.operator === OperatorFactory.defaultOperators[1]){
-                if(enrollment.programStartDate && enrollment.programStartDate !== ''){                
-                    query.hasValue = true;
-                    q += '&programStartDate=' + DateUtils.formatFromUserToApi(enrollment.programStartDate);
-                }
-                if(enrollment.programEndDate && enrollment.programEndDate !== ''){
-                    query.hasValue = true;
-                    q += '&programEndDate=' + DateUtils.formatFromUserToApi(enrollment.programEndDate);
-                }
-            }            
+            if(enrollment.programEnrollmentEndDate && enrollment.programEnrollmentEndDate !== ''){
+                query.hasValue = true;
+                q += '&programEnrollmentEndDate=' + DateUtils.formatFromUserToApi(enrollment.programEnrollmentEndDate);
+            }
+            if(enrollment.programIncidentStartDate && enrollment.programIncidentStartDate !== ''){                
+                query.hasValue = true;
+                q += '&programIncidentStartDate=' + DateUtils.formatFromUserToApi(enrollment.programIncidentStartDate);
+            }
+            if(enrollment.programIncidentEndDate && enrollment.programIncidentEndDate !== ''){
+                query.hasValue = true;
+                q += '&programIncidentEndDate=' + DateUtils.formatFromUserToApi(enrollment.programIncidentEndDate);
+            }
             if(q){
                 if(query.url){
                     query.url = query.url + q;
