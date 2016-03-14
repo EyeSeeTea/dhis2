@@ -39,6 +39,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.message.MessageSender;
+import org.hisp.dhis.sms.config.GatewayAdministratonService;
 import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.sms.outbound.OutboundSmsTransportService;
 import org.hisp.dhis.system.util.SmsUtils;
@@ -75,6 +76,9 @@ public class SmsMessageSender
     @Autowired
     private OutboundSmsTransportService outboundSmsTransportService;
 
+    @Autowired
+    private GatewayAdministratonService gatewayAdminService;
+
     @Override
     public String sendMessage( String subject, String text, String footer, User sender, Set<User> users,
         boolean forceSend )
@@ -86,16 +90,14 @@ public class SmsMessageSender
             return "No gateway";
         }
 
-        Map<String, String> gatewayMap = outboundSmsTransportService.getGatewayMap();
+        Map<String, String> gatewayMap = null;
 
-        String gatewayId = StringUtils.trimToNull( outboundSmsTransportService.getDefaultGateway() );
-
-        boolean gatewayEnabled = outboundSmsTransportService.isEnabled();
-
-        if ( gatewayMap == null || gatewayId == null || !gatewayEnabled )
+        if ( gatewayAdminService.getDefaultGateway().getName() == null )
         {
-            return "No gateway";
+            return "No gatway";
         }
+
+        String gatewayId = StringUtils.trimToNull( gatewayAdminService.getDefaultGateway().getName() );
 
         Set<User> toSendList = new HashSet<>();
 
@@ -184,8 +186,8 @@ public class SmsMessageSender
         else
         // Receiver is user
         {
-            Serializable userSetting = userSettingService
-                .getUserSetting( UserSettingKey.MESSAGE_SMS_NOTIFICATION, user );
+            Serializable userSetting = userSettingService.getUserSetting( UserSettingKey.MESSAGE_SMS_NOTIFICATION,
+                user );
 
             return userSetting != null ? (Boolean) userSetting : false;
         }

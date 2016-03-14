@@ -35,6 +35,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.sms.config.GatewayAdministratonService;
 import org.hisp.dhis.sms.outbound.DefaultOutboundSmsTransportService;
 import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.sms.outbound.OutboundSmsService;
@@ -65,12 +66,15 @@ public class DefaultSmsSender
     @Autowired
     private OutboundSmsTransportService transportService;
 
+    @Autowired
+    private GatewayAdministratonService gatewayAdminService;
+
     @Transactional
     @Override
     public String sendMessage( OutboundSms sms, String gatewayId )
         throws SmsServiceException
     {
-        if ( transportService == null || !transportService.isEnabled() )
+        if ( transportService == null )
         {
             throw new SmsServiceNotEnabledException();
         }
@@ -83,12 +87,12 @@ public class DefaultSmsSender
     public String sendMessage( OutboundSms sms )
         throws SmsServiceException
     {
-        if ( transportService == null || !transportService.isEnabled() )
+        if ( transportService == null )
         {
             throw new SmsServiceNotEnabledException();
         }
 
-        return transportService.sendMessage( sms, transportService.getDefaultGateway() );
+        return transportService.sendMessage( sms, gatewayAdminService.getDefaultGateway().getName() );
     }
 
     @Transactional
@@ -96,7 +100,7 @@ public class DefaultSmsSender
     public String sendMessage( String message, String phoneNumber )
         throws SmsServiceException
     {
-        if ( transportService == null || !transportService.isEnabled() )
+        if ( transportService == null )
         {
             throw new SmsServiceNotEnabledException();
         }
@@ -120,7 +124,7 @@ public class DefaultSmsSender
 
         List<User> toSendList = new ArrayList<>();
 
-        String gatewayId = transportService.getDefaultGateway();
+        String gatewayId = gatewayAdminService.getDefaultGateway().getName();
 
         if ( gatewayId != null && !gatewayId.trim().isEmpty() )
         {
@@ -150,7 +154,7 @@ public class DefaultSmsSender
 
             Set<String> phoneNumbers = null;
 
-            if ( transportService != null && transportService.isEnabled() )
+            if ( transportService != null )
             {
                 phoneNumbers = SmsUtils.getRecipientsPhoneNumber( toSendList );
 
@@ -208,12 +212,12 @@ public class DefaultSmsSender
     public boolean sendAyncMessage( OutboundSms sms )
         throws SmsServiceException
     {
-        if ( transportService == null || !transportService.isEnabled() )
+        if ( transportService == null )
         {
             throw new SmsServiceNotEnabledException();
         }
 
-        return transportService.sendAyncMessage( sms, transportService.getDefaultGateway() );
+        return transportService.sendAyncMessage( sms, gatewayAdminService.getDefaultGateway().getName() );
     }
 
     // -------------------------------------------------------------------------

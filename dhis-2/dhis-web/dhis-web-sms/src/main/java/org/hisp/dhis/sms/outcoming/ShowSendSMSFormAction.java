@@ -74,7 +74,7 @@ public class ShowSendSMSFormAction
 
     public Map<String, String> getGatewayMap()
     {
-        return transportService.getGatewayMap();
+        return null;
     }
 
     private List<UserGroup> userGroups;

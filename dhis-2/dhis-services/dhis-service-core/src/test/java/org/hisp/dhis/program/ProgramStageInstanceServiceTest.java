@@ -47,6 +47,7 @@ import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueService;
 import org.joda.time.DateTime;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -429,6 +430,7 @@ public class ProgramStageInstanceServiceTest
         assertTrue( stageInstances.contains( programStageInstanceB ) );
     }
 
+    @Ignore
     @Test
     public void testCompleteProgramStageInstance()
     {

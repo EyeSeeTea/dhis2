@@ -99,7 +99,7 @@ public class ShowSendSMSBeneficiaryFormAction
 
     public Map<String, String> getGatewayMap()
     {
-        return transportService.getGatewayMap();
+        return null;
     }
 
     // -------------------------------------------------------------------------

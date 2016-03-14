@@ -34,14 +34,21 @@ package org.hisp.dhis.sms.config;
  */
 public interface GatewayAdministratonService
 {
-    String setDefault( String uid );
+    String setDefaultGateway( String uid );
+
+    String setDefaultGateway( Object gatewayName );
 
     boolean removeGateway( String uid );
+
+    boolean removeGateway( Object gatewayName );
+
+    SmsGatewayConfig getDefaultGateway();
 
     SmsConfiguration listGateways();
 
     SmsGatewayConfig getGatewayConfiguration( String uid );
 
-    String addOrUpdateGateway( SmsGatewayConfig config, Class<?> klass );
+    SmsGatewayConfig getGatewayConfiguration( Object gatewayName );
 
+    boolean addOrUpdateGateway( SmsGatewayConfig config, Class<?> klass );
 }

@@ -58,9 +58,6 @@ public class GetSmsConfigurationAction
     @Autowired
     private SmsConfigurationManager smsConfigurationManager;
 
-    @Autowired
-    private OutboundSmsTransportService outboundSmsTransportService;
-
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
@@ -141,8 +138,6 @@ public class GetSmsConfigurationAction
     public String execute()
         throws Exception
     {
-
-        smsServiceStatus = outboundSmsTransportService.getServiceStatus();
 
         smsConfig = smsConfigurationManager.getSmsConfiguration();
 

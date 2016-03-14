@@ -104,27 +104,23 @@ public class RemoveGatewayConfigAction
                 
                 if ( gatewayConfig instanceof BulkSmsGatewayConfig )
                 {
-                    transportService.getGatewayMap().remove( BULK_GATEWAY);
+                    
                 }
                 
                 if ( gatewayConfig instanceof ClickatellGatewayConfig )
                 {
-                    transportService.getGatewayMap().remove( CLICKATELL_GATEWAY );
                 }
                 
                 if ( gatewayConfig instanceof ModemGatewayConfig )
                 {
-                    transportService.getGatewayMap().remove( MODEM_GATEWAY );
                 }
                 
                 if ( gatewayConfig instanceof GenericHttpGatewayConfig)
                 {
-                    transportService.getGatewayMap().remove( HTTP_GATEWAY );
                 }
                 
                 if ( gatewayConfig instanceof SMPPGatewayConfig )
                 {
-                    transportService.getGatewayMap().remove( SMPP_GATEWAY );
                 }
                 
                 break;

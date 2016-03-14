@@ -37,7 +37,6 @@ import org.hisp.dhis.sms.config.BulkSmsGatewayConfig;
 import org.hisp.dhis.sms.config.ClickatellGatewayConfig;
 import org.hisp.dhis.sms.config.GatewayAdministratonService;
 import org.hisp.dhis.sms.config.GenericHttpGatewayConfig;
-import org.hisp.dhis.sms.config.ModemGatewayConfig;
 import org.hisp.dhis.sms.config.SMPPGatewayConfig;
 import org.hisp.dhis.sms.config.SmsGatewayConfig;
 import org.hisp.dhis.sms.outbound.OutboundSmsTransportService;
@@ -100,7 +99,7 @@ public class SmsGatewayController
             throw new WebMessageException( WebMessageUtils.conflict( "Transport service is not available" ) );
         }
 
-        String defaultGateway = outboundSmsTransportService.getDefaultGateway();
+        String defaultGateway = gatewayAdminService.getDefaultGateway().getName();
 
         webMessageService.send( WebMessageUtils.ok( "Default Gateway " + defaultGateway ), response, request );
     }
@@ -136,8 +135,14 @@ public class SmsGatewayController
 
         SmsGatewayConfig payLoad = renderService.fromJson( request.getInputStream(), ClickatellGatewayConfig.class );
 
-        renderService.toJson( response.getOutputStream(),
-            gatewayAdminService.addOrUpdateGateway( payLoad, ClickatellGatewayConfig.class ) );
+        if ( gatewayAdminService.addOrUpdateGateway( payLoad, ClickatellGatewayConfig.class ) )
+        {
+            webMessageService.send( WebMessageUtils.ok( "SAVED" ), response, request );
+        }
+        else
+        {
+            webMessageService.send( WebMessageUtils.error( "NOT_SAVED" ), response, request );
+        }
     }
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_MOBILE_SENDSMS')" )
@@ -153,8 +158,14 @@ public class SmsGatewayController
 
         BulkSmsGatewayConfig payLoad = renderService.fromJson( request.getInputStream(), BulkSmsGatewayConfig.class );
 
-        renderService.toJson( response.getOutputStream(),
-            gatewayAdminService.addOrUpdateGateway( payLoad, BulkSmsGatewayConfig.class ) );
+        if ( gatewayAdminService.addOrUpdateGateway( payLoad, BulkSmsGatewayConfig.class ) )
+        {
+            webMessageService.send( WebMessageUtils.ok( "SAVED" ), response, request );
+        }
+        else
+        {
+            webMessageService.send( WebMessageUtils.error( "NOT_SAVED" ), response, request );
+        }
     }
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_MOBILE_SENDSMS')" )
@@ -170,8 +181,14 @@ public class SmsGatewayController
 
         SMPPGatewayConfig payLoad = renderService.fromJson( request.getInputStream(), SMPPGatewayConfig.class );
 
-        renderService.toJson( response.getOutputStream(),
-            gatewayAdminService.addOrUpdateGateway( payLoad, SMPPGatewayConfig.class ) );
+        if ( gatewayAdminService.addOrUpdateGateway( payLoad, SMPPGatewayConfig.class ) )
+        {
+            webMessageService.send( WebMessageUtils.ok( "SAVED" ), response, request );
+        }
+        else
+        {
+            webMessageService.send( WebMessageUtils.error( "NOT_SAVED" ), response, request );
+        }
     }
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_MOBILE_SENDSMS')" )
@@ -188,25 +205,14 @@ public class SmsGatewayController
         GenericHttpGatewayConfig payLoad = renderService.fromJson( request.getInputStream(),
             GenericHttpGatewayConfig.class );
 
-        renderService.toJson( response.getOutputStream(),
-            gatewayAdminService.addOrUpdateGateway( payLoad, GenericHttpGatewayConfig.class ) );
-    }
-
-    @PreAuthorize( "hasRole('ALL') or hasRole('F_MOBILE_SENDSMS')" )
-    @RequestMapping( value = "/modem", method = { RequestMethod.POST,
-        RequestMethod.PUT }, produces = "application/json" )
-    public void addOrUpdateModemConfiguration( HttpServletRequest request, HttpServletResponse response )
-        throws WebMessageException, IOException
-    {
-        if ( gatewayAdminService == null )
+        if ( gatewayAdminService.addOrUpdateGateway( payLoad, GenericHttpGatewayConfig.class ) )
         {
-            throw new WebMessageException( WebMessageUtils.conflict( "Gateway admin service is not available" ) );
+            webMessageService.send( WebMessageUtils.ok( "SAVED" ), response, request );
         }
-
-        ModemGatewayConfig payLoad = renderService.fromJson( request.getInputStream(), ModemGatewayConfig.class );
-
-        renderService.toJson( response.getOutputStream(),
-            gatewayAdminService.addOrUpdateGateway( payLoad, ModemGatewayConfig.class ) );
+        else
+        {
+            webMessageService.send( WebMessageUtils.error( "NOT_SAVED" ), response, request );
+        }
     }
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_MOBILE_SENDSMS')" )
@@ -219,7 +225,7 @@ public class SmsGatewayController
             throw new WebMessageException( WebMessageUtils.conflict( "Gateway admin service is not available" ) );
         }
 
-        String gateway = gatewayAdminService.setDefault( uid );
+        String gateway = gatewayAdminService.setDefaultGateway( uid );
 
         if ( gateway == null )
         {
