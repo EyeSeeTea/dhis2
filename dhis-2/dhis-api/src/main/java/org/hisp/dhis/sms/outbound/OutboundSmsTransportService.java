@@ -1,5 +1,7 @@
 package org.hisp.dhis.sms.outbound;
 
+import java.util.List;
+
 /*
  * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
@@ -29,18 +31,17 @@ package org.hisp.dhis.sms.outbound;
  */
 
 
-import org.hisp.dhis.sms.SmsServiceException;
-
 /**
  * Marker interface for {@code OutboundSmsService outbound sms services}
  * providing actual SMS sending.
  */
 public interface OutboundSmsTransportService
 {
-    String getMessageStatus();
+    GatewayResponse sendMessage( OutboundSms sms );
 
-    String sendMessage( OutboundSms sms, String gatewayId )
-        throws SmsServiceException;
-    
-    boolean sendAyncMessage( OutboundSms sms, String gatewayId );
+    GatewayResponse sendMessage( List<OutboundSms> smsBatch );
+
+    GatewayResponse sendMessage( OutboundSms sms, String gatewayName );
+
+    GatewayResponse sendMessage( List<OutboundSms> smsBatch, String gatewayId );
 }

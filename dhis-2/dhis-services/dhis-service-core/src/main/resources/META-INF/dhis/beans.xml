@@ -1136,12 +1136,13 @@
 
   <bean id="org.hisp.dhis.sms.MessageQueue" class="org.hisp.dhis.sms.DatabaseSupportedInternalMemoryMessageQueue" />
 
-  <bean id="org.hisp.dhis.sms.SmsPublisher" class="org.hisp.dhis.sms.SmsPublisher" />
-
   <bean id="org.hisp.dhis.sms.config.SmsConfigurationManager" class="org.hisp.dhis.sms.config.DefaultSmsConfigurationManager" />
 
   <bean id="org.hisp.dhis.sms.incoming.SmsConsumerService" class="org.hisp.dhis.sms.incoming.DefaultSmsConsumerService" />
-
+  
+  <bean id="org.hisp.dhis.sms.SmsPublisher" class="org.hisp.dhis.sms.SmsPublisher" />
+  
+    <bean id="org.hisp.dhis.sms.SmsConsumerThread" class="org.hisp.dhis.sms.SmsConsumerThread" />
 
   <bean id="org.hisp.dhis.sms.incoming.IncomingSmsService" class="org.hisp.dhis.sms.incoming.DefaultIncomingSmsService">
     <property name="incomingSmsStore" ref="org.hisp.dhis.sms.hibernate.IncomingSmsStore" />
@@ -1155,17 +1156,15 @@
   <bean id="org.hisp.dhis.sms.outbound.OutboundSmsTransportService" class="org.hisp.dhis.sms.outbound.DefaultOutboundSmsTransportService">
     <property name="outboundSmsService" ref="org.hisp.dhis.sms.outbound.OutboundSmsService" />
   </bean>
+  
+   <bean id="org.hisp.dhis.sms.config.GatewayAdministratonService"
+    class="org.hisp.dhis.sms.config.DefaultGatewayAdministrationService" />
 
   <bean id="org.hisp.dhis.sms.SmsSender" class="org.hisp.dhis.sms.DefaultSmsSender" />
 
   <bean id="org.hisp.dhis.sms.SmsMessageSender" class="org.hisp.dhis.sms.SmsMessageSender" />
 
   <bean id="org.hisp.dhis.sms.task.SendSmsTask" class="org.hisp.dhis.sms.task.SendSmsTask" scope="prototype" />
-
-  <bean id="org.hisp.dhis.sms.SmsConsumerThread" class="org.hisp.dhis.sms.SmsConsumerThread" />
-
-  <bean id="org.hisp.dhis.sms.config.GatewayAdministratonService"
-    class="org.hisp.dhis.sms.config.DefaultGatewayAdministrationService" />
 
   <!-- I18nService -->
 

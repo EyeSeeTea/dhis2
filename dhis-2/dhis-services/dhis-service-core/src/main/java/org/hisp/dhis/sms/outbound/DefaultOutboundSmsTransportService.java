@@ -28,21 +28,20 @@ package org.hisp.dhis.sms.outbound;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.sms.SmsServiceException;
+import org.hisp.dhis.sms.config.BulkSmsGatewayConfig;
+import org.hisp.dhis.sms.config.ClickatellGatewayConfig;
+import org.hisp.dhis.sms.config.GatewayAdministratonService;
+import org.hisp.dhis.sms.config.SmsGatewayConfig;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class DefaultOutboundSmsTransportService
     implements OutboundSmsTransportService
 {
     private static final Log log = LogFactory.getLog( DefaultOutboundSmsTransportService.class );
-
-    public static final Map<String, String> GATEWAY_MAP = new HashMap<>();
-
-    private String message = "success";
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -55,25 +54,17 @@ public class DefaultOutboundSmsTransportService
         this.outboundSmsService = outboundSmsService;
     }
 
+    @Autowired
+    private GatewayAdministratonService gatewayAdminService;
+
     // -------------------------------------------------------------------------
     // OutboundSmsTransportService implementation
     // -------------------------------------------------------------------------
 
     @Override
-    public String getMessageStatus()
+    public GatewayResponse sendMessage( OutboundSms sms, String gatewayName )
     {
-        return message;
-    }
-
-    @Override
-    public String sendMessage( OutboundSms sms, String gatewayId )
-        throws SmsServiceException
-    {
-
-        if ( message != null && (message.equals( "service_stopped" ) || message.equals( "service_stopping" )) )
-        {
-            return message = "service_stopped_cannot_send_sms";
-        }
+        SmsGatewayConfig gatewayConfiguration = gatewayAdminService.getGatewayConfigurationMap().get( gatewayName );
 
         String recipient = null;
 
@@ -83,7 +74,7 @@ public class DefaultOutboundSmsTransportService
         {
             log.warn( "Trying to send sms without recipients: " + sms );
 
-            return message = "no_recipient";
+            return GatewayResponse.DELIVERED;
         }
         else if ( recipients.size() == 1 )
         {
@@ -103,26 +94,27 @@ public class DefaultOutboundSmsTransportService
             outboundSmsService.updateOutboundSms( sms );
         }
 
-        return message;
+        return GatewayResponse.DELIVERED;
     }
 
     @Override
-    public boolean sendAyncMessage( OutboundSms sms, String gatewayId )
+    public GatewayResponse sendMessage( OutboundSms sms )
     {
-        String recipient = null;
+        SmsGatewayConfig gatewayConfiguration = gatewayAdminService.getDefaultGateway();
 
-        Set<String> recipients = sms.getRecipients();
+        return GatewayResponse.PENDING;
+    }
 
-        if ( recipients.size() == 1 )
-        {
-            recipient = recipients.iterator().next();
-        }
-        else
-        {
-            recipient = createTmpGroup( recipients );
-        }
+    @Override
+    public GatewayResponse sendMessage( List<OutboundSms> smsBatch )
+    {
+        return null;
+    }
 
-        return false;
+    @Override
+    public GatewayResponse sendMessage( List<OutboundSms> smsBatch, String gatewayId )
+    {
+        return null;
     }
 
     // -------------------------------------------------------------------------

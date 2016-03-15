@@ -1,5 +1,7 @@
 package org.hisp.dhis.sms.config;
 
+import java.util.HashMap;
+
 /*
  * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
@@ -29,6 +31,7 @@ package org.hisp.dhis.sms.config;
  */
 
 import java.util.List;
+import java.util.Map;
 
 import org.hisp.dhis.common.CodeGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,12 +43,14 @@ public class DefaultGatewayAdministrationService
     implements GatewayAdministratonService
 {
 
+    private Map<String, SmsGatewayConfig> gatewayConfigurationMap = new HashMap<>();
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
     @Autowired
-    private SmsConfigurationManager smsConfigMgr;
+    private SmsConfigurationManager smsConfigurationManager;
 
     // -------------------------------------------------------------------------
     // GatewayAdministratonService implementation
@@ -95,7 +100,7 @@ public class DefaultGatewayAdministrationService
 
         if ( smsConfig != null )
         {
-            SmsGatewayConfig gatewayConfig = smsConfigMgr.checkInstanceOfGateway( klass );
+            SmsGatewayConfig gatewayConfig = smsConfigurationManager.checkInstanceOfGateway( klass );
 
             int index = -1;
 
@@ -115,13 +120,17 @@ public class DefaultGatewayAdministrationService
             if ( index >= 0 )
             {
                 smsConfig.getGateways().set( index, gatewayConfig );
+
+                gatewayConfigurationMap.put( gatewayConfig.getName(), gatewayConfig );
             }
             else
             {
                 smsConfig.getGateways().add( gatewayConfig );
+
+                gatewayConfigurationMap.put( gatewayConfig.getName(), gatewayConfig );
             }
 
-            smsConfigMgr.updateSmsConfiguration( smsConfig );
+            smsConfigurationManager.updateSmsConfiguration( smsConfig );
 
             return true;
         }
@@ -130,7 +139,7 @@ public class DefaultGatewayAdministrationService
     }
 
     @Override
-    public boolean removeGateway( String uid )
+    public boolean removeGatewayByUid( String uid )
     {
         List<SmsGatewayConfig> list = getGatewayList();
 
@@ -138,12 +147,13 @@ public class DefaultGatewayAdministrationService
         {
             if ( gateway.getUid().equals( uid ) )
             {
-                getSmsConfiguration().getGateways().remove( gateway );
+                SmsConfiguration smsConfiguration = getSmsConfiguration();
 
-                // transportService.updateGatewayMap(
-                // gateway.getClass().getTypeName() );
+                smsConfiguration.getGateways().remove( gateway );
 
-                smsConfigMgr.updateSmsConfiguration( getSmsConfiguration() );
+                gatewayConfigurationMap.remove( gateway.getName() );
+
+                smsConfigurationManager.updateSmsConfiguration( smsConfiguration );
 
                 return true;
             }
@@ -153,15 +163,18 @@ public class DefaultGatewayAdministrationService
     }
 
     @Override
-    public SmsGatewayConfig getGatewayConfiguration( String uid )
+    public SmsGatewayConfig getGatewayConfigurationByUid( String uid )
     {
         List<SmsGatewayConfig> list = getGatewayList();
 
-        for ( SmsGatewayConfig gw : list )
+        if ( list != null && !list.isEmpty() )
         {
-            if ( gw.getUid().equals( uid ) )
+            for ( SmsGatewayConfig gw : list )
             {
-                return gw;
+                if ( gw.getUid().equals( uid ) )
+                {
+                    return gw;
+                }
             }
         }
 
@@ -169,21 +182,15 @@ public class DefaultGatewayAdministrationService
     }
 
     @Override
-    public SmsGatewayConfig getGatewayConfiguration( Object gatewayName )
+    public SmsGatewayConfig getGatewayConfigurationByName( String gatewayName )
     {
-        return getGatewayConfiguration( getUidByGatewayName( gatewayName.toString() ) );
+        return getGatewayConfigurationByUid( getUidByGatewayName( gatewayName ) );
     }
 
     @Override
-    public String setDefaultGateway( Object gatewayName )
+    public boolean removeGatewayByName( String gatewayName )
     {
-        return setDefaultGateway( getUidByGatewayName( gatewayName.toString() ) );
-    }
-
-    @Override
-    public boolean removeGateway( Object gatewayName )
-    {
-        return removeGateway( getUidByGatewayName( gatewayName.toString() ) );
+        return removeGatewayByUid( getUidByGatewayName( gatewayName ) );
     }
 
     @Override
@@ -203,6 +210,31 @@ public class DefaultGatewayAdministrationService
         }
 
         return null;
+    }
+
+    @Override
+    public boolean loadGatewayConfigurationMap( SmsConfiguration smsConfiguration )
+    {
+        List<SmsGatewayConfig> gatewayList = smsConfiguration.getGateways();
+
+        if ( gatewayList != null && !gatewayList.isEmpty() )
+        {
+            for ( SmsGatewayConfig smsGatewayConfig : gatewayList )
+            {
+                gatewayConfigurationMap.put( smsGatewayConfig.getName(), smsGatewayConfig );
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+    
+
+    @Override
+    public Map<String, SmsGatewayConfig> getGatewayConfigurationMap()
+    {
+        return gatewayConfigurationMap;
     }
 
     // -------------------------------------------------------------------------
@@ -246,6 +278,6 @@ public class DefaultGatewayAdministrationService
 
     private SmsConfiguration getSmsConfiguration()
     {
-        return smsConfigMgr.getSmsConfiguration();
+        return smsConfigurationManager.getSmsConfiguration();
     }
 }

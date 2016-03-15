@@ -28,6 +28,8 @@
  */
 package org.hisp.dhis.sms.config;
 
+import java.util.Map;
+
 /**
  * @author Zubair <rajazubair.asghar@gmail.com>
  *
@@ -36,19 +38,21 @@ public interface GatewayAdministratonService
 {
     String setDefaultGateway( String uid );
 
-    String setDefaultGateway( Object gatewayName );
+    boolean removeGatewayByUid( String uid );
 
-    boolean removeGateway( String uid );
-
-    boolean removeGateway( Object gatewayName );
+    boolean removeGatewayByName( String gatewayName );
+    
+    Map<String, SmsGatewayConfig> getGatewayConfigurationMap();
 
     SmsGatewayConfig getDefaultGateway();
 
     SmsConfiguration listGateways();
 
-    SmsGatewayConfig getGatewayConfiguration( String uid );
+    SmsGatewayConfig getGatewayConfigurationByUid( String uid );
 
-    SmsGatewayConfig getGatewayConfiguration( Object gatewayName );
+    SmsGatewayConfig getGatewayConfigurationByName( String gatewayName );
 
     boolean addOrUpdateGateway( SmsGatewayConfig config, Class<?> klass );
+
+    boolean loadGatewayConfigurationMap( SmsConfiguration smsConfiguration );
 }
