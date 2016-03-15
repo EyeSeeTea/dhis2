@@ -1,5 +1,13 @@
 package org.hisp.dhis.sms.outbound;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
+
 /*
  * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
@@ -30,13 +38,16 @@ package org.hisp.dhis.sms.outbound;
 
 import java.util.List;
 import java.util.Set;
+
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.sms.config.BulkSmsGatewayConfig;
-import org.hisp.dhis.sms.config.ClickatellGatewayConfig;
 import org.hisp.dhis.sms.config.GatewayAdministratonService;
 import org.hisp.dhis.sms.config.SmsGatewayConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+
+
 
 public class DefaultOutboundSmsTransportService
     implements OutboundSmsTransportService
@@ -66,35 +77,33 @@ public class DefaultOutboundSmsTransportService
     {
         SmsGatewayConfig gatewayConfiguration = gatewayAdminService.getGatewayConfigurationMap().get( gatewayName );
 
-        String recipient = null;
+        boolean gatewayResponse = false;
 
-        Set<String> recipients = sms.getRecipients();
-
-        if ( recipients.size() == 0 )
+        if ( gatewayConfiguration instanceof BulkSmsGatewayConfig )
         {
-            log.warn( "Trying to send sms without recipients: " + sms );
-
-            return GatewayResponse.DELIVERED;
-        }
-        else if ( recipients.size() == 1 )
-        {
-            recipient = recipients.iterator().next();
-        }
-        else
-        {
-            recipient = createTmpGroup( recipients );
+            BulkSmsGatewayConfig bulkSmsConfiguration = (BulkSmsGatewayConfig) gatewayConfiguration;
+            gatewayResponse = sendThroughBulkSms( sms, bulkSmsConfiguration );
         }
 
-        if ( sms.getId() == 0 )
+        if ( gatewayResponse )
         {
-            outboundSmsService.saveOutboundSms( sms );
+            sms.setStatus( OutboundSmsStatus.SENT );
+            saveMessage( sms );
+
+            log.info( "Following Message Sent:" + sms );
+
+            return GatewayResponse.SENT;
+
         }
         else
         {
-            outboundSmsService.updateOutboundSms( sms );
-        }
+            sms.setStatus( OutboundSmsStatus.ERROR );
+            saveMessage( sms );
 
-        return GatewayResponse.DELIVERED;
+            log.info( "Following Message Failed:" + sms );
+
+            return GatewayResponse.FAILED;
+        }
     }
 
     @Override
@@ -102,7 +111,7 @@ public class DefaultOutboundSmsTransportService
     {
         SmsGatewayConfig gatewayConfiguration = gatewayAdminService.getDefaultGateway();
 
-        return GatewayResponse.PENDING;
+        return sendMessage( sms, gatewayConfiguration.getName() );
     }
 
     @Override
@@ -112,7 +121,15 @@ public class DefaultOutboundSmsTransportService
     }
 
     @Override
-    public GatewayResponse sendMessage( List<OutboundSms> smsBatch, String gatewayId )
+    public GatewayResponse sendMessage( String message, String recipient )
+    {
+        OutboundSms sms = new OutboundSms( message, recipient );
+        
+        return sendMessage( sms );
+    }
+
+    @Override
+    public GatewayResponse sendMessage( List<OutboundSms> smsBatch, String gatewayName )
     {
         return null;
     }
@@ -121,18 +138,64 @@ public class DefaultOutboundSmsTransportService
     // Supportive methods
     // -------------------------------------------------------------------------
 
-    private String createTmpGroup( Set<String> recipients )
+    private boolean sendThroughBulkSms( OutboundSms sms, BulkSmsGatewayConfig bulkSmsConfiguration )
     {
-        String recipientList = "";
-
-        for ( String recipient : recipients )
+        String data = "";
+        try
         {
-            recipientList += recipient;
-            recipientList += ",";
+            data += "username=" + URLEncoder.encode( bulkSmsConfiguration.getUsername(), "ISO-8859-1" );
+            data += "&password=" + URLEncoder.encode( bulkSmsConfiguration.getPassword(), "ISO-8859-1" );
+            data += "&message=" + URLEncoder.encode( sms.getMessage(), "ISO-8859-1" );
+            data += "&want_report=1";
+            data += "&msisdn=" + getRecipients( sms.getRecipients() );
+            
+            URL url = new URL( "https://bulksms.vsms.net/eapi/submission/send_sms/2/2.0" );
+
+            URLConnection conn = url.openConnection();
+            conn.setDoOutput( true );
+
+            OutputStreamWriter writer = new OutputStreamWriter( conn.getOutputStream() );
+            writer.write( data );
+            writer.flush();
+
+            BufferedReader reader = new BufferedReader( new InputStreamReader( conn.getInputStream() ) );
+            String line;
+
+            while ( (line = reader.readLine()) != null )
+            {
+                System.out.println( line );
+            }
+
+            HttpURLConnection httpConnection = (HttpURLConnection) conn;
+
+            if ( httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK )
+            {
+                return true;
+            }
+
+            return false;
         }
+        catch ( Exception e )
+        {
+            log.error( "Error:" + e.getMessage() );
+            return false;
+        }
+    }
 
-        recipientList = recipientList.substring( 0, recipientList.length() - 1 );
+    private String getRecipients( Set<String> recipients )
+    {
+         return StringUtils.join( recipients, "," );
+    }
 
-        return recipientList;
+    private void saveMessage( OutboundSms sms )
+    {
+        if ( sms.getId() == 0 )
+        {
+            outboundSmsService.saveOutboundSms( sms );
+        }
+        else
+        {
+            outboundSmsService.updateOutboundSms( sms );
+        }
     }
 }

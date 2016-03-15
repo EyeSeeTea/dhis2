@@ -45,6 +45,4 @@ public interface SmsSender
         throws SmsServiceException;
 
     String sendMessage( String subject, String text, User sender, List<User> users, boolean forceSend );
-    
-    String sendAyncMessage( OutboundSms sms );
 }

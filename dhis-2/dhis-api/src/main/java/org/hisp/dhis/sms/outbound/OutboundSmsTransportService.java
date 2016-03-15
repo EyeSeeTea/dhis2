@@ -30,7 +30,6 @@ import java.util.List;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 /**
  * Marker interface for {@code OutboundSmsService outbound sms services}
  * providing actual SMS sending.
@@ -38,6 +37,8 @@ import java.util.List;
 public interface OutboundSmsTransportService
 {
     GatewayResponse sendMessage( OutboundSms sms );
+
+    GatewayResponse sendMessage( String message, String recipient );
 
     GatewayResponse sendMessage( List<OutboundSms> smsBatch );
 

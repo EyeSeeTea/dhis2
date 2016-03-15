@@ -2,7 +2,7 @@ package org.hisp.dhis.sms.outbound;
 
 public enum GatewayResponse
 {
-    DELIVERED( "success" ), SENT( "success" ), FAILED( "failed" ), PENDING( "pending" ), PROCESSING(
+    SUCCESS( "success" ), SENT( "success" ), FAILED( "failed" ), PENDING( "pending" ), PROCESSING(
         "processing" ), QUEUED( "queued" );
 
     private final String responseMessage;

@@ -72,7 +72,6 @@ public class DefaultSmsSender
     @Transactional
     @Override
     public String sendMessage( OutboundSms sms, String gatewayId )
-        throws SmsServiceException
     {
         if ( transportService == null )
         {
@@ -92,8 +91,7 @@ public class DefaultSmsSender
             throw new SmsServiceNotEnabledException();
         }
 
-        return transportService.sendMessage( sms, gatewayAdminService.getDefaultGateway().getName() )
-            .getResponseMessage();
+        return transportService.sendMessage( sms, gatewayAdminService.getDefaultGateway().getName() ).getResponseMessage();
     }
 
     @Transactional
@@ -164,23 +162,31 @@ public class DefaultSmsSender
                 // Bulk is limited in sending long SMS, need to cut into small
                 // pieces
                 // Check if text contain any specific unicode character
-                for ( char each : text.toCharArray() )
-                {
-                    if ( !Character.UnicodeBlock.of( each ).equals( UnicodeBlock.BASIC_LATIN ) )
+                    for ( char each : text.toCharArray() )
                     {
-                        maxChar = 40;
-                        break;
+                        if ( !Character.UnicodeBlock.of( each ).equals( UnicodeBlock.BASIC_LATIN ) )
+                        {
+                            maxChar = 40;
+                            break;
+                        }
                     }
-                }
-                if ( text.length() > maxChar )
-                {
-                    List<String> splitTextList = new ArrayList<>();
-                    splitTextList = SmsUtils.splitLongUnicodeString( text, splitTextList );
-                    for ( String each : splitTextList )
+                    if ( text.length() > maxChar )
+                    {
+                        List<String> splitTextList = new ArrayList<>();
+                        splitTextList = SmsUtils.splitLongUnicodeString( text, splitTextList );
+                        for ( String each : splitTextList )
+                        {
+                            if ( !phoneNumbers.isEmpty() && phoneNumbers.size() > 0 )
+                            {
+                                message = sendMessage( each, phoneNumbers, gatewayId );
+                            }
+                        }
+                    }
+                    else
                     {
                         if ( !phoneNumbers.isEmpty() && phoneNumbers.size() > 0 )
                         {
-                            message = sendMessage( each, phoneNumbers, gatewayId );
+                            message = sendMessage( text, phoneNumbers, gatewayId );
                         }
                     }
                 }
@@ -191,32 +197,10 @@ public class DefaultSmsSender
                         message = sendMessage( text, phoneNumbers, gatewayId );
                     }
                 }
-            }
-            else
-            {
-                if ( !phoneNumbers.isEmpty() && phoneNumbers.size() > 0 )
-                {
-                    message = sendMessage( text, phoneNumbers, gatewayId );
-                }
-            }
-
+            
         }
 
         return message;
-    }
-
-    @Transactional
-    @Override
-    public String sendAyncMessage( OutboundSms sms )
-        throws SmsServiceException
-    {
-        if ( transportService == null )
-        {
-            throw new SmsServiceNotEnabledException();
-        }
-
-        return transportService.sendAyncMessage( sms, gatewayAdminService.getDefaultGateway().getName() )
-            .getResponseMessage();
     }
 
     // -------------------------------------------------------------------------

@@ -111,27 +111,17 @@ public class SmsController
     {
         OutboundSms sms = renderService.fromJson( request.getInputStream(), OutboundSms.class );
 
-        if ( async )
+        String result = smsSender.sendMessage( sms );
+
+        if ( result.equals( "success" ) )
         {
-            smsSender.sendAyncMessage( sms );
-
-            webMessageService.send( WebMessageUtils.ok( "Message Sent asynchronously" ), response, request );
-
+            webMessageService.send( WebMessageUtils.ok( "Message sent" ), response, request );
         }
         else
         {
-            String result = smsSender.sendMessage( sms );
-
-            if ( result.equals( "success" ) )
-            {
-                webMessageService.send( WebMessageUtils.ok( "Message sent" ), response, request );
-            }
-            else
-            {
-                throw new WebMessageException( WebMessageUtils.error( "Message sending failed" ) );
-            }
-
+            throw new WebMessageException( WebMessageUtils.error( "Message sending failed" ) );
         }
+
     }
 
     @RequestMapping( value = "/inbound", method = RequestMethod.POST )
