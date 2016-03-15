@@ -3,7 +3,6 @@ package org.hisp.dhis.sms.outbound;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -46,8 +45,6 @@ import org.hisp.dhis.sms.config.BulkSmsGatewayConfig;
 import org.hisp.dhis.sms.config.GatewayAdministratonService;
 import org.hisp.dhis.sms.config.SmsGatewayConfig;
 import org.springframework.beans.factory.annotation.Autowired;
-
-
 
 public class DefaultOutboundSmsTransportService
     implements OutboundSmsTransportService
@@ -124,7 +121,7 @@ public class DefaultOutboundSmsTransportService
     public GatewayResponse sendMessage( String message, String recipient )
     {
         OutboundSms sms = new OutboundSms( message, recipient );
-        
+
         return sendMessage( sms );
     }
 
@@ -148,8 +145,8 @@ public class DefaultOutboundSmsTransportService
             data += "&message=" + URLEncoder.encode( sms.getMessage(), "ISO-8859-1" );
             data += "&want_report=1";
             data += "&msisdn=" + getRecipients( sms.getRecipients() );
-            
-            URL url = new URL( "https://bulksms.vsms.net/eapi/submission/send_sms/2/2.0" );
+
+            URL url = new URL( bulkSmsConfiguration.getUrlTemplate() );
 
             URLConnection conn = url.openConnection();
             conn.setDoOutput( true );
@@ -159,16 +156,8 @@ public class DefaultOutboundSmsTransportService
             writer.flush();
 
             BufferedReader reader = new BufferedReader( new InputStreamReader( conn.getInputStream() ) );
-            String line;
 
-            while ( (line = reader.readLine()) != null )
-            {
-                System.out.println( line );
-            }
-
-            HttpURLConnection httpConnection = (HttpURLConnection) conn;
-
-            if ( httpConnection.getResponseCode() == HttpURLConnection.HTTP_OK )
+            if ( checkGatewayResponse( reader.readLine() ) )
             {
                 return true;
             }
@@ -182,9 +171,14 @@ public class DefaultOutboundSmsTransportService
         }
     }
 
+    private boolean checkGatewayResponse( String response )
+    {
+        return response.startsWith( "0" ) ? true : false;    
+    }
+
     private String getRecipients( Set<String> recipients )
     {
-         return StringUtils.join( recipients, "," );
+        return StringUtils.join( recipients, "," );
     }
 
     private void saveMessage( OutboundSms sms )
