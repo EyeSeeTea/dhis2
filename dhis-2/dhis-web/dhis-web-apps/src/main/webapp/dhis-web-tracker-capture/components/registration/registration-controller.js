@@ -6,6 +6,7 @@ trackerCapture.controller('RegistrationController',
                 $location,
                 $timeout,
                 $modal,
+                $translate,
                 AttributesFactory,
                 DHIS2EventFactory,
                 TEService,
@@ -28,12 +29,10 @@ trackerCapture.controller('RegistrationController',
     $scope.trackedEntityForm = null;
     $scope.customForm = null;    
     $scope.selectedTei = {};
-    $scope.tei = {};
-    $scope.registrationMode = 'REGISTRATION';    
-    $scope.hiddenFields = {};
-    
+    $scope.tei = {};    
+    $scope.hiddenFields = {};    
     $scope.helpTexts = {};
-    
+    $scope.registrationMode = 'REGISTRATION';    
 
     $scope.attributesById = CurrentSelection.getAttributesById();
     if(!$scope.attributesById){
@@ -251,86 +250,32 @@ trackerCapture.controller('RegistrationController',
         if(!$scope.selectedTei.trackedEntityInstance){
             $scope.selectedTei.trackedEntity = $scope.tei.trackedEntity = $scope.selectedProgram && $scope.selectedProgram.trackedEntity && $scope.selectedProgram.trackedEntity.id ? $scope.selectedProgram.trackedEntity.id : $scope.trackedEntities.selected.id;
             $scope.selectedTei.orgUnit = $scope.tei.orgUnit = $scope.selectedOrgUnit.id;
-            $scope.selectedTei.attributes = $scope.selectedTei.attributes = [];
+            $scope.selectedTei.attributes = $scope.tei.attributes = [];
         }
         
         //get tei attributes and their values
         //but there could be a case where attributes are non-mandatory and
         //registration form comes empty, in this case enforce at least one value        
-        
         var result = RegistrationService.processForm($scope.tei, $scope.selectedTei, $scope.attributesById);
         $scope.formEmpty = result.formEmpty;
         $scope.tei = result.tei;
         
         if($scope.formEmpty){//registration form is empty
-            return false;
+            var dialogOptions = {
+                    headerText: 'error',
+                    bodyText: $translate.instant('form_is_empty_fill_at_least_one')
+                };
+            DialogService.showDialog({}, dialogOptions);
+            return;
         }        
         performRegistration(destination);
     }; 
-    
-    var processRuleEffect = function(){        
-        $scope.warningMessages = [];        
-        angular.forEach($rootScope.ruleeffects['registration'], function (effect) {
-            if (effect.trackedEntityAttribute) {
-                //in the data entry controller we only care about the "hidefield", showerror and showwarning actions
-                if (effect.action === "HIDEFIELD") {
-                    if (effect.trackedEntityAttribute) {
-                        if (effect.ineffect && $scope.selectedTei[effect.trackedEntityAttribute.id]) {
-                            //If a field is going to be hidden, but contains a value, we need to take action;
-                            if (effect.content) {
-                                //TODO: Alerts is going to be replaced with a proper display mecanism.
-                                alert(effect.content);
-                            }
-                            else {
-                                //TODO: Alerts is going to be replaced with a proper display mecanism.
-                                alert($scope.attributesById[effect.trackedEntityAttribute.id].displayName + "Was blanked out and hidden by your last action");
-                            }
-
-                            //Blank out the value:
-                            $scope.selectedTei[effect.trackedEntityAttribute.id] = "";
-                        }
-
-                        $scope.hiddenFields[effect.trackedEntityAttribute.id] = effect.ineffect;
-                    }
-                    else {
-                        $log.warn("ProgramRuleAction " + effect.id + " is of type HIDEFIELD, bot does not have an attribute defined");
-                    }
-                } else if (effect.action === "SHOWERROR") {
-                    if (effect.trackedEntityAttribute) {                        
-                        if(effect.ineffect) {
-                            var dialogOptions = {
-                                headerText: 'validation_error',
-                                bodyText: effect.content + (effect.data ? effect.data : "")
-                            };
-                            DialogService.showDialog({}, dialogOptions);
-                            $scope.selectedTei[effect.trackedEntityAttribute.id] = $scope.tei[effect.trackedEntityAttribute.id];
-                        }
-                    }
-                    else {
-                        $log.warn("ProgramRuleAction " + effect.id + " is of type HIDEFIELD, bot does not have an attribute defined");
-                    }
-                } else if (effect.action === "SHOWWARNING") {
-                    if (effect.trackedEntityAttribute) {
-                        if(effect.ineffect) {
-                            var message = effect.content + (angular.isDefined(effect.data) ? effect.data : "");
-                            $scope.warningMessages.push(message);
-                            $scope.warningMessages[effect.trackedEntityAttribute.id] = message;
-                        }
-                    }
-                    else {
-                        $log.warn("ProgramRuleAction " + effect.id + " is of type HIDEFIELD, bot does not have an attribute defined");
-                    }
-                }
-            }
-        });
-    };
     
     $scope.executeRules = function () {
         var flag = {debug: true, verbose: false};
         
         //repopulate attributes with updated values
-        $scope.selectedTei.attributes = [];
-        
+        $scope.selectedTei.attributes = [];        
         angular.forEach($scope.attributes, function(metaAttribute){
             var newAttributeInArray = {attribute:metaAttribute.id,
                 code:metaAttribute.code,
@@ -361,10 +306,13 @@ trackerCapture.controller('RegistrationController',
     };
     
     //listen for rule effect changes
-    $scope.$on('ruleeffectsupdated', function (event, args) {
-        processRuleEffect(args.event);
+    $scope.$on('ruleeffectsupdated', function(){
+        $scope.warningMessages = [];
+        var effectResult = TrackerRulesExecutionService.processRuleEffectAttribute('registration', $scope.selectedTei, $scope.tei, $scope.attributesById, $scope.hiddenFields, $scope.warningMessages);
+        $scope.selectedTei = effectResult.selectedTei;
+        $scope.hiddenFields = effectResult.hiddenFields;
+        $scope.warningMessages = effectResult.warningMessages;
     });
-
 
     $scope.interacted = function(field) {
         var status = false;
@@ -374,8 +322,7 @@ trackerCapture.controller('RegistrationController',
         return status;        
     };
     
-    $scope.getTrackerAssociate = function(selectedAttribute, existingAssociateUid){        
-
+    $scope.getTrackerAssociate = function(selectedAttribute, existingAssociateUid){
         var modalInstance = $modal.open({
             templateUrl: 'components/teiadd/tei-add.html',
             controller: 'TEIAddController',
@@ -407,13 +354,13 @@ trackerCapture.controller('RegistrationController',
                 }
             }
         });
-
         modalInstance.result.then(function (res) {
             if(res && res.id){
                 $scope.selectedTei[selectedAttribute.id] = res.id;
             }
         });
     };
+    
     $scope.cancelRegistrationWarning = function(cancelFunction){
         
         var modalOptions = {

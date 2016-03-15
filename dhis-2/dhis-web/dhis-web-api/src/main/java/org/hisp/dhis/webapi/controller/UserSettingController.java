@@ -29,18 +29,9 @@ package org.hisp.dhis.webapi.controller;
  */
 
 import com.google.common.collect.Sets;
-import org.hisp.dhis.render.RenderService;
-
 import org.hisp.dhis.dxf2.webmessage.WebMessageException;
-import org.hisp.dhis.setting.SettingKey;
-import org.hisp.dhis.setting.SystemSettingManager;
-import org.hisp.dhis.user.CurrentUserService;
-import org.hisp.dhis.user.User;
-import org.hisp.dhis.user.UserCredentials;
-import org.hisp.dhis.user.UserService;
-import org.hisp.dhis.user.UserSetting;
-import org.hisp.dhis.user.UserSettingKey;
-import org.hisp.dhis.user.UserSettingService;
+import org.hisp.dhis.render.RenderService;
+import org.hisp.dhis.user.*;
 import org.hisp.dhis.util.ObjectUtils;
 import org.hisp.dhis.webapi.service.WebMessageService;
 import org.hisp.dhis.webapi.utils.ContextUtils;
@@ -48,18 +39,15 @@ import org.hisp.dhis.webapi.utils.WebMessageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.*;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -85,8 +73,7 @@ public class UserSettingController
     private RenderService renderService;
 
     private static final Set<String> USER_SETTING_NAMES = Sets.newHashSet(
-        UserSettingKey.values() ).stream().map(UserSettingKey::getName).collect( Collectors.toSet() );
-
+        UserSettingKey.values() ).stream().map( UserSettingKey::getName ).collect( Collectors.toSet() );
 
     // -------------------------------------------------------------------------
     // Resources
@@ -203,7 +190,8 @@ public class UserSettingController
             us = currentUserService.getCurrentUser();
         }
 
-        Map<String, Serializable> result = userSettingService.getUserSettingsWithFallbackByUserAsMap( us, USER_SETTING_NAMES);
+        Map<String, Serializable> result = userSettingService
+            .getUserSettingsWithFallbackByUserAsMap( us, USER_SETTING_NAMES );
 
         renderService.toJson( response.getOutputStream(), result );
     }
@@ -220,16 +208,5 @@ public class UserSettingController
         }
 
         userSettingService.deleteUserSetting( keyEnum.get() );
-    }
-
-    // -------------------------------------------------------------------------
-    // Supportive methods
-    // -------------------------------------------------------------------------
-
-    private Map<String, Serializable> asMap( List<UserSetting> settings )
-    {
-        return settings.stream().
-            filter( s -> s.getName() != null && s.getValue() != null ).
-            collect( Collectors.toMap( UserSetting::getName, UserSetting::getValue ) );
     }
 }
