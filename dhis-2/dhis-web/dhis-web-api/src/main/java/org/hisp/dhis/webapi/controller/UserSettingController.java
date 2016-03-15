@@ -84,11 +84,8 @@ public class UserSettingController
     @Autowired
     private RenderService renderService;
 
-    @Autowired
-    private SystemSettingManager systemSettingManager;
-
-    private static final Map<String, SettingKey> NAME_SETTING_KEY_MAP = Sets.newHashSet(
-        SettingKey.values() ).stream().collect( Collectors.toMap( SettingKey::getName, s -> s ) );
+    private static final Set<String> USER_SETTING_NAMES = Sets.newHashSet(
+        UserSettingKey.values() ).stream().map(UserSettingKey::getName).collect( Collectors.toSet() );
 
 
     // -------------------------------------------------------------------------
@@ -206,23 +203,9 @@ public class UserSettingController
             us = currentUserService.getCurrentUser();
         }
 
-        Map<String, Serializable> settings = new HashMap<>();
+        Map<String, Serializable> result = userSettingService.getUserSettingsWithFallbackByUserAsMap( us, USER_SETTING_NAMES);
 
-        // Find fallback for missing userSettings; Creating new objects to separate from hibernate
-        userSettingService.getUserSettings( us ).stream().filter( UserSetting::hasValue )
-            .forEach( userSetting -> settings.put( userSetting.getName(), userSetting.getValue() ) );
-
-        // Add remaining userSettings user doesn't have set yet
-        for ( UserSettingKey userSettingKey : UserSettingKey.values() )
-        {
-            if ( !settings.containsKey( userSettingKey.getName() ) )
-            {
-                settings.put( userSettingKey.getName(),
-                    systemSettingManager.getSystemSetting( NAME_SETTING_KEY_MAP.get( userSettingKey.getName() ) ) );
-            }
-        }
-
-        renderService.toJson( response.getOutputStream(), settings );
+        renderService.toJson( response.getOutputStream(), result );
     }
 
     @RequestMapping( value = "/{key}", method = RequestMethod.DELETE )
