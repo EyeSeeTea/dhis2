@@ -29,16 +29,17 @@ package org.hisp.dhis.mobile.action;
  */
 
 import java.util.Iterator;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.hisp.dhis.sms.config.BulkSmsGatewayConfig;
 import org.hisp.dhis.sms.config.ClickatellGatewayConfig;
+import org.hisp.dhis.sms.config.GatewayAdministratonService;
 import org.hisp.dhis.sms.config.GenericHttpGatewayConfig;
-import org.hisp.dhis.sms.config.ModemGatewayConfig;
 import org.hisp.dhis.sms.config.SMPPGatewayConfig;
 import org.hisp.dhis.sms.config.SmsConfiguration;
 import org.hisp.dhis.sms.config.SmsConfigurationManager;
 import org.hisp.dhis.sms.config.SmsGatewayConfig;
-import org.hisp.dhis.sms.outbound.OutboundSmsTransportService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
@@ -49,25 +50,18 @@ import com.opensymphony.xwork2.Action;
 public class RemoveGatewayConfigAction
     implements Action
 {
-    private final String BULK_GATEWAY = "bulk_gw";
 
-    private final String CLICKATELL_GATEWAY = "clickatell_gw";
+    private static final Log log = LogFactory.getLog( RemoveGatewayConfigAction.class );
 
-    private final String HTTP_GATEWAY = "generic_http_gw";
-
-    private final String MODEM_GATEWAY = "modem_gw";
-
-    private final String SMPP_GATEWAY = "smpp_gw";
-    
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
     @Autowired
     private SmsConfigurationManager smsConfigurationManager;
-    
+
     @Autowired
-    private OutboundSmsTransportService transportService;
+    private GatewayAdministratonService gatewayAdminService;
 
     // -------------------------------------------------------------------------
     // Input
@@ -97,32 +91,33 @@ public class RemoveGatewayConfigAction
             if ( smsConfig.getGateways().indexOf( it.next() ) == id )
             {
                 SmsGatewayConfig gatewayConfig = smsConfig.getGateways().get( id );
-                
+
                 it.remove();
 
                 smsConfigurationManager.updateSmsConfiguration( smsConfig );
-                
+
                 if ( gatewayConfig instanceof BulkSmsGatewayConfig )
                 {
-                    
+                    gatewayAdminService.getGatewayConfigurationMap().remove( gatewayConfig.getName() );
                 }
-                
+
                 if ( gatewayConfig instanceof ClickatellGatewayConfig )
                 {
+                    gatewayAdminService.getGatewayConfigurationMap().remove( gatewayConfig.getName() );
                 }
-                
-                if ( gatewayConfig instanceof ModemGatewayConfig )
+
+                if ( gatewayConfig instanceof GenericHttpGatewayConfig )
                 {
+                    gatewayAdminService.getGatewayConfigurationMap().remove( gatewayConfig.getName() );
                 }
-                
-                if ( gatewayConfig instanceof GenericHttpGatewayConfig)
-                {
-                }
-                
+
                 if ( gatewayConfig instanceof SMPPGatewayConfig )
                 {
+                    gatewayAdminService.getGatewayConfigurationMap().remove( gatewayConfig.getName() );
                 }
-                
+
+                log.info( gatewayConfig.getName() + " configuration has been removed" );
+
                 break;
             }
         }

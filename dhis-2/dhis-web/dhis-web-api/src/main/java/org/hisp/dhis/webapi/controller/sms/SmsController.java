@@ -95,11 +95,11 @@ public class SmsController
 
         if ( result.equals( "success" ) )
         {
-            webMessageService.send( WebMessageUtils.ok( "Message sent" ), response, request );
+            webMessageService.send( WebMessageUtils.ok( "SENT" ), response, request );
         }
         else
         {
-            throw new WebMessageException( WebMessageUtils.error( "Message sending failed" ) );
+            throw new WebMessageException( WebMessageUtils.error( result ) );
         }
     }
 
@@ -115,11 +115,11 @@ public class SmsController
 
         if ( result.equals( "success" ) )
         {
-            webMessageService.send( WebMessageUtils.ok( "Message sent" ), response, request );
+            webMessageService.send( WebMessageUtils.ok( "SENT" ), response, request );
         }
         else
         {
-            throw new WebMessageException( WebMessageUtils.error( "Message sending failed" ) );
+            throw new WebMessageException( WebMessageUtils.error( result ) );
         }
 
     }

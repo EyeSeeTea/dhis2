@@ -203,7 +203,7 @@ public class SmsMessageSender
 
         try
         {
-            message = outboundSmsTransportService.sendMessage( sms, gateWayId );
+            message = outboundSmsTransportService.sendMessage( sms, gateWayId ).getResponseMessage();
         }
         catch ( SmsServiceException e )
         {

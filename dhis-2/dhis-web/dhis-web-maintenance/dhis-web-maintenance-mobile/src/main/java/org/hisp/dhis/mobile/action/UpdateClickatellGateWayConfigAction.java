@@ -31,6 +31,7 @@ import org.hisp.dhis.common.CodeGenerator;
  */
 
 import org.hisp.dhis.sms.config.ClickatellGatewayConfig;
+import org.hisp.dhis.sms.config.GatewayAdministratonService;
 import org.hisp.dhis.sms.config.SmsConfiguration;
 import org.hisp.dhis.sms.config.SmsConfigurationManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,9 @@ public class UpdateClickatellGateWayConfigAction
 
     @Autowired
     private SmsConfigurationManager smsConfigurationManager;
+
+    @Autowired
+    private GatewayAdministratonService gatewayAdminService;
 
     // -------------------------------------------------------------------------
     // Input
@@ -73,6 +77,13 @@ public class UpdateClickatellGateWayConfigAction
     public void setUsername( String username )
     {
         this.username = username;
+    }
+    
+    private String urlTemplate;
+
+    public void setUrlTemplate( String url )
+    {
+        this.urlTemplate = url;
     }
 
     private String apiId;
@@ -121,6 +132,7 @@ public class UpdateClickatellGateWayConfigAction
                 gatewayConfig.setPassword( password );
                 gatewayConfig.setUsername( username );
                 gatewayConfig.setApiId( apiId );
+                gatewayConfig.setUrlTemplate( urlTemplate );
                 gatewayConfig.setUid( CodeGenerator.generateCode( 10 ) );
 
                 if ( config.getGateways() == null || config.getGateways().isEmpty() )
@@ -136,6 +148,8 @@ public class UpdateClickatellGateWayConfigAction
                 {
                     config.getGateways().add( gatewayConfig );
                 }
+
+                gatewayAdminService.getGatewayConfigurationMap().put( name, gatewayConfig );
 
                 smsConfigurationManager.updateSmsConfiguration( config );
             }

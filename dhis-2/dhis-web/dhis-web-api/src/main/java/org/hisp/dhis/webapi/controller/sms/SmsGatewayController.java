@@ -115,7 +115,7 @@ public class SmsGatewayController
             throw new WebMessageException( WebMessageUtils.conflict( "Gateway admin service is not available" ) );
         }
 
-        renderService.toJson( response.getOutputStream(), gatewayAdminService.getGatewayConfiguration( uid ) );
+        renderService.toJson( response.getOutputStream(), gatewayAdminService.getGatewayConfigurationByUid( uid ) );
     }
 
     // -------------------------------------------------------------------------
@@ -251,7 +251,7 @@ public class SmsGatewayController
             throw new WebMessageException( WebMessageUtils.conflict( "Gateway admin service is not available" ) );
         }
 
-        if ( gatewayAdminService.removeGateway( uid ) )
+        if ( gatewayAdminService.removeGatewayByUid( uid ) )
         {
             webMessageService.send( WebMessageUtils.ok( "Gateway removed successfully" ), response, request );
         }

@@ -2,6 +2,7 @@ package org.hisp.dhis.sms.outbound;
 
 import java.util.List;
 
+
 /*
  * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
@@ -38,11 +39,11 @@ public interface OutboundSmsTransportService
 {
     GatewayResponse sendMessage( OutboundSms sms );
 
-    GatewayResponse sendMessage( String message, String recipient );
-
-    GatewayResponse sendMessage( List<OutboundSms> smsBatch );
-
     GatewayResponse sendMessage( OutboundSms sms, String gatewayName );
 
-    GatewayResponse sendMessage( List<OutboundSms> smsBatch, String gatewayId );
+    GatewayResponse sendMessage( List<OutboundSms> smsBatch ); 
+
+    GatewayResponse sendMessage( List<OutboundSms> smsBatch, String gatewayName );
+    
+    GatewayResponse sendMessage( String message, String recipient );
 }

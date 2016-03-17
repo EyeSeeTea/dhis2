@@ -2,9 +2,7 @@ currentType = '';
 function changeValueType( value )
 {
 	hideAll();
-    if ( value == 'modem' ) {
-        showById( "modemFields" );
-    } else if ( value == 'bulksms' ) {
+    if ( value == 'bulksms' ) {
     	showById( "bulksmsFields" );
     } else if ( value == 'clickatell' ) {
     	showById( "clickatellFields" );
@@ -86,35 +84,7 @@ function getValidationRulesUpdateClient()
 function saveGatewayConfig()
 {
 	
-	if ( currentType == 'modem' )
-	{
-		var port = getFieldValue( 'modemFields input[id=port]' );
-		var baudRate = getFieldValue( 'modemFields input[id=baudRate]' );
-		if ( port == "" || baudRate == "")
-		{	
-			showErrorMessage( i18n_required_data_error );
-		}
-		else
-		{
-			lockScreen();		
-			jQuery.postJSON( "saveModemConfig.action", {
-				gatewayType: getFieldValue( 'gatewayType' ),
-				name: getFieldValue( 'modemFields input[id=name]' ),
-				port: getFieldValue( 'modemFields input[id=port]' ),
-				baudRate: getFieldValue( 'modemFields input[id=baudRate]' ),
-				pollingInterval: getFieldValue( 'modemFields input[id=pollingInterval]' ),
-				manufacturer: getFieldValue( 'modemFields input[id=manufacturer]' ),
-				model: getFieldValue( 'modemFields input[id=model]' ),
-				pin: getFieldValue( 'modemFields input[id=pin]' ),
-				inbound: getFieldValue( 'modemFields select[id=inbound]' ),
-				outbound: getFieldValue( 'modemFields select[id=outbound]' )
-			}, function ( json ) {
-				unLockScreen();
-				showMessage( json );
-			} );
-		}
-	}
-	else if ( currentType == 'bulksms' )
+	if ( currentType == 'bulksms' )
 	{
 		var username = getFieldValue( 'bulksmsFields input[id=username]' );
 		var password = getFieldValue( 'bulksmsFields input[id=password]' );
@@ -130,6 +100,7 @@ function saveGatewayConfig()
 				name: getFieldValue( 'bulksmsFields input[id=name]' ),
 				username: getFieldValue( 'bulksmsFields input[id=username]' ),
 				password: getFieldValue( 'bulksmsFields input[id=password]' ),
+				urlTemplate: getFieldValue( 'bulksmsFields input[id=urlTemplate]' ),
 				region: getFieldValue( 'bulksmsFields select[id=region]' )
 			}, function ( json ) {
 				unLockScreen();
@@ -177,7 +148,8 @@ function saveGatewayConfig()
 				name: getFieldValue( 'clickatellFields input[id=name]' ),
 				username: getFieldValue( 'clickatellFields input[id=username]' ),
 				password: getFieldValue( 'clickatellFields input[id=password]' ),
-				apiId: getFieldValue( 'clickatellFields input[id=apiId]' )
+				apiId: getFieldValue( 'clickatellFields input[id=apiId]' ),
+				urlTemplate: getFieldValue( 'clickatellFields input[id=urlTemplate]' )
 			}, function ( json ) {
 				unLockScreen();
 				showMessage( json );
@@ -229,7 +201,7 @@ function removeItem( itemId, itemName, confirmation, action, success )
     	$.postJSON(
     	    action,
     	    {
-    	        "id": itemId   
+    	        "id": itemId
     	    },
     	    function( json )
     	    { 

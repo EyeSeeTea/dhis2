@@ -1159,8 +1159,12 @@
   
    <bean id="org.hisp.dhis.sms.config.GatewayAdministratonService"
     class="org.hisp.dhis.sms.config.DefaultGatewayAdministrationService" />
+    
+    <bean id="org.hisp.dhis.sms.SmsSender" class="org.hisp.dhis.sms.DefaultSmsSender" />
+    
+    <bean id="org.hisp.dhis.sms.outbound.BulkSmsGateway" class="org.hisp.dhis.sms.outbound.BulkSmsGateway" />
 
-  <bean id="org.hisp.dhis.sms.SmsSender" class="org.hisp.dhis.sms.DefaultSmsSender" />
+  <bean id="org.hisp.dhis.sms.outbound.ClickatellGateway" class="org.hisp.dhis.sms.outbound.ClickatellGateway" />
 
   <bean id="org.hisp.dhis.sms.SmsMessageSender" class="org.hisp.dhis.sms.SmsMessageSender" />
 
