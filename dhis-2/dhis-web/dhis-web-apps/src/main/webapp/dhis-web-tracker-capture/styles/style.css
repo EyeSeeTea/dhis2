@@ -847,6 +847,7 @@ div#searchOuTree h4{
 .section-label{
     font-size: 14pt;
     color: #585D61;
+    padding-bottom: 5px;
     border-bottom: 1px solid #e3e3e3;
 }
 
@@ -884,7 +885,7 @@ div#searchOuTree h4{
     font-size: 14px;
     line-height: 1.0;
     color: #555;
-    padding: 6px 6px;
+    padding: 2px;
     margin-bottom: 5px;
     margin-top: 5px;
     vertical-align: middle;
@@ -1474,7 +1475,7 @@ input, button, select, textarea {
 }
 
 .custom-radio-group {
-    margin-left: -8px;
+    /*margin-left: -8px;*/
 }
 
 .custom-radio-container{
@@ -1921,7 +1922,21 @@ a.disable-link-effects:focus {
     margin-left: 5px;
 }
 
+.scroll {
+    height: 400px;
+    overflow: auto;
+}
+
 .row-with-go-button {
     margin-top: 46%;
     margin-left: 1%;
+}
+
+.select2-hidden-accessible {
+    display: none !important; 
+    visibility: hidden !important;
+}
+
+.section-spacing {
+    margin-top: 20px;
 }

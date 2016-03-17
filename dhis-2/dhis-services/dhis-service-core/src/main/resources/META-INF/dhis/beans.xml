@@ -5,17 +5,27 @@
     http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.1.xsd
     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.1.xsd">
 
-  <context:component-scan base-package="org.hisp.dhis.schema" />
-
-  <context:component-scan base-package="org.hisp.dhis.calendar" />
-
-  <context:component-scan base-package="org.hisp.dhis.node" />
+  <context:component-scan base-package="org.hisp.dhis.schema.descriptors" />
 
   <bean id="org.hisp.dhis.preheat.PreheatService" class="org.hisp.dhis.preheat.DefaultPreheatService" scope="prototype">
     <aop:scoped-proxy proxy-target-class="false" />
   </bean>
 
   <bean id="org.hisp.dhis.calendar.CalendarService" class="org.hisp.dhis.calendar.DefaultCalendarService" />
+
+  <bean class="org.hisp.dhis.calendar.impl.Iso8601Calendar" />
+
+  <bean class="org.hisp.dhis.calendar.impl.CopticCalendar" />
+
+  <bean class="org.hisp.dhis.calendar.impl.EthiopianCalendar" />
+
+  <bean class="org.hisp.dhis.calendar.impl.GregorianCalendar" />
+
+  <bean class="org.hisp.dhis.calendar.impl.IslamicCalendar" />
+
+  <bean class="org.hisp.dhis.calendar.impl.NepaliCalendar" />
+
+  <bean class="org.hisp.dhis.calendar.impl.ThaiCalendar" />
 
   <bean id="org.hisp.dhis.schema.SchemaService" class="org.hisp.dhis.schema.DefaultSchemaService" />
 
@@ -33,6 +43,34 @@
 
   <bean id="org.hisp.dhis.node.NodeService" class="org.hisp.dhis.node.DefaultNodeService" />
 
+  <bean class="org.hisp.dhis.node.transformers.RenameNodeTransformer" />
+
+  <bean class="org.hisp.dhis.node.converters.IsEmptyNodePropertyConverter" />
+
+  <bean class="org.hisp.dhis.node.converters.IsNotEmptyNodePropertyConverter" />
+
+  <bean class="org.hisp.dhis.node.converters.SizeNodePropertyConverter" />
+
+  <bean class="org.hisp.dhis.node.serializers.CsvNodeSerializer" scope="prototype">
+    <aop:scoped-proxy proxy-target-class="false" />
+  </bean>
+
+  <bean class="org.hisp.dhis.node.serializers.ExcelNodeSerializer" scope="prototype">
+    <aop:scoped-proxy proxy-target-class="false" />
+  </bean>
+
+  <bean class="org.hisp.dhis.node.serializers.Jackson2JsonNodeSerializer" scope="prototype">
+    <aop:scoped-proxy proxy-target-class="false" />
+  </bean>
+
+  <bean class="org.hisp.dhis.node.serializers.PdfNodeSerializer" scope="prototype">
+    <aop:scoped-proxy proxy-target-class="false" />
+  </bean>
+
+  <bean class="org.hisp.dhis.node.serializers.StAXNodeSerializer" scope="prototype">
+    <aop:scoped-proxy proxy-target-class="false" />
+  </bean>
+
   <bean id="org.hisp.dhis.fieldfilter.FieldParser" class="org.hisp.dhis.fieldfilter.DefaultFieldParser" />
 
   <bean id="org.hisp.dhis.fieldfilter.FieldFilterService" class="org.hisp.dhis.fieldfilter.DefaultFieldFilterService" />
@@ -42,6 +80,47 @@
   <bean id="org.hisp.dhis.schema.validation.SchemaValidator" class="org.hisp.dhis.schema.validation.DefaultSchemaValidator" />
 
   <!-- Store definitions -->
+
+  <bean id="org.hisp.dhis.report.ReportStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
+    <property name="clazz" value="org.hisp.dhis.report.Report" />
+    <property name="sessionFactory" ref="sessionFactory" />
+    <property name="cacheable" value="true" />
+  </bean>
+
+  <bean id="org.hisp.dhis.chart.ChartStore" class="org.hisp.dhis.common.hibernate.HibernateAnalyticalObjectStore">
+    <property name="clazz" value="org.hisp.dhis.chart.Chart" />
+    <property name="sessionFactory" ref="sessionFactory" />
+    <property name="cacheable" value="true" />
+  </bean>
+
+  <bean id="org.hisp.dhis.document.DocumentStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
+    <property name="clazz" value="org.hisp.dhis.document.Document" />
+    <property name="sessionFactory" ref="sessionFactory" />
+    <property name="cacheable" value="true" />
+  </bean>
+
+  <bean id="org.hisp.dhis.reporttable.ReportTableStore" class="org.hisp.dhis.common.hibernate.HibernateAnalyticalObjectStore">
+    <property name="clazz" value="org.hisp.dhis.reporttable.ReportTable" />
+    <property name="sessionFactory" ref="sessionFactory" />
+    <property name="cacheable" value="true" />
+  </bean>
+
+  <bean id="org.hisp.dhis.dashboard.DashboardStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
+    <property name="clazz" value="org.hisp.dhis.dashboard.Dashboard" />
+    <property name="sessionFactory" ref="sessionFactory" />
+    <property name="cacheable" value="true" />
+  </bean>
+
+  <bean id="org.hisp.dhis.dashboard.DashboardItemStore" class="org.hisp.dhis.dashboard.hibernate.HibernateDashboardItemStore">
+    <property name="clazz" value="org.hisp.dhis.dashboard.DashboardItem" />
+    <property name="sessionFactory" ref="sessionFactory" />
+    <property name="cacheable" value="true" />
+  </bean>
+
+  <bean id="org.hisp.dhis.interpretation.InterpretationStore" class="org.hisp.dhis.interpretation.hibernate.HibernateInterpretationStore">
+    <property name="clazz" value="org.hisp.dhis.interpretation.Interpretation" />
+    <property name="sessionFactory" ref="sessionFactory" />
+  </bean>
 
   <bean id="org.hisp.dhis.dataentryform.DataEntryFormStore" class="org.hisp.dhis.dataentryform.hibernate.HibernateDataEntryFormStore">
     <property name="clazz" value="org.hisp.dhis.dataentryform.DataEntryForm" />
@@ -276,7 +355,7 @@
     <property name="clazz" value="org.hisp.dhis.user.User" />
     <property name="cacheable" value="true" />
   </bean>
-  
+
   <bean id="org.hisp.dhis.user.CurrentUserStore" class="org.hisp.dhis.user.hibernate.HibernateCurrentUserStore" />
 
   <bean id="org.hisp.dhis.user.UserSettingStore" class="org.hisp.dhis.user.hibernate.HibernateUserSettingStore">
@@ -834,6 +913,7 @@
     <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
     <property name="userSettingStore" ref="org.hisp.dhis.user.UserSettingStore" />
     <property name="userService" ref="org.hisp.dhis.user.UserService" />
+    <property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
   </bean>
 
   <bean id="org.hisp.dhis.user.UserService" class="org.hisp.dhis.user.DefaultUserService">
@@ -1102,9 +1182,8 @@
   <bean id="org.hisp.dhis.sms.SmsPublisher" class="org.hisp.dhis.sms.SmsPublisher" />
 
   <bean id="org.hisp.dhis.sms.config.SmsConfigurationManager" class="org.hisp.dhis.sms.config.DefaultSmsConfigurationManager" />
-  
+
   <bean id="org.hisp.dhis.sms.incoming.SmsConsumerService" class="org.hisp.dhis.sms.incoming.DefaultSmsConsumerService" />
-  
 
 
   <bean id="org.hisp.dhis.sms.incoming.IncomingSmsService" class="org.hisp.dhis.sms.incoming.DefaultIncomingSmsService">
@@ -1113,15 +1192,15 @@
   </bean>
 
   <bean id="org.smslib.IInboundMessageNotification" class="org.hisp.dhis.sms.incoming.SMPPInboundNotification" />
-  
+
   <bean id="org.smslib.IOutboundMessageNotification" class="org.hisp.dhis.sms.outbound.DefaultOutboundNotification" />
-  
+
   <bean id="org.hisp.dhis.sms.outbound.OutboundSmsService" class="org.hisp.dhis.sms.outbound.DefaultOutboundSmsService">
     <property name="outboundSmsStore" ref="org.hisp.dhis.sms.hibernate.OutboundSmsStore" />
   </bean>
 
   <bean id="org.hisp.dhis.sms.outbound.OutboundSmsTransportService" class="org.hisp.dhis.sms.outbound.DefaultOutboundSmsTransportService">
-    <property name="smppInboundMessageNotification" ref="org.smslib.IInboundMessageNotification" />  
+    <property name="smppInboundMessageNotification" ref="org.smslib.IInboundMessageNotification" />
     <property name="outboundMessageNotification" ref="org.smslib.IOutboundMessageNotification" />
     <property name="outboundSmsService" ref="org.hisp.dhis.sms.outbound.OutboundSmsService" />
   </bean>
@@ -1376,6 +1455,7 @@
     <property name="name" value="IdentityPopulator" />
     <property name="runlevel" value="4" />
     <property name="skipInTests" value="true" />
+    <property name="jdbcTemplate" ref="jdbcTemplate" />
     <property name="tables">
       <list>
         <value>constant</value>
@@ -1402,6 +1482,7 @@
         <value>categoryoptioncombo</value>
         <value>translation</value>
         <value>userinfo</value>
+        <value>users</value>
         <value>usergroup</value>
         <value>userrole</value>
         <value>optionset</value>
@@ -1435,6 +1516,7 @@
   <bean id="org.hisp.dhis.startup.TableCreator" class="org.hisp.dhis.startup.TableCreator">
     <property name="name" value="TableCreator" />
     <property name="runlevel" value="5" />
+    <property name="jdbcTemplate" ref="jdbcTemplate" />
   </bean>
 
   <bean id="org.hisp.dhis.startup.TableAlteror" class="org.hisp.dhis.startup.TableAlteror">
@@ -1448,12 +1530,14 @@
     <property name="name" value="TrackedEntityTableAlteror" />
     <property name="runlevel" value="7" />
     <property name="skipInTests" value="true" />
+    <property name="jdbcTemplate" ref="jdbcTemplate" />
   </bean>
 
   <bean id="org.hisp.dhis.startup.FavoriteDataItemUpgrader" class="org.hisp.dhis.startup.FavoriteDataItemUpgrader">
     <property name="name" value="FavoriteDataItemUpgrader" />
     <property name="runlevel" value="9" />
     <property name="skipInTests" value="true" />
+    <property name="jdbcTemplate" ref="jdbcTemplate" />
   </bean>
 
   <bean id="org.hisp.dhis.dataentryform.DataEntryFormUpgrader" class="org.hisp.dhis.dataentryform.DataEntryFormUpgrader">
@@ -1510,7 +1594,9 @@
     <property name="jdbcTemplate" ref="jdbcTemplate" />
   </bean>
 
-  <bean id="org.hisp.dhis.dataelement.DataElementDeletionHandler" class="org.hisp.dhis.dataelement.DataElementDeletionHandler" />
+  <bean id="org.hisp.dhis.dataelement.DataElementDeletionHandler" class="org.hisp.dhis.dataelement.DataElementDeletionHandler">
+    <property name="jdbcTemplate" ref="jdbcTemplate" />
+  </bean>
 
   <bean id="org.hisp.dhis.dataelement.DataElementGroupDeletionHandler" class="org.hisp.dhis.dataelement.DataElementGroupDeletionHandler" />
 
@@ -1529,7 +1615,9 @@
   </bean>
 
   <bean id="org.hisp.dhis.dataelement.DataElementCategoryDimensionDeletionHandler"
-    class="org.hisp.dhis.dataelement.DataElementCategoryDimensionDeletionHandler" />
+    class="org.hisp.dhis.dataelement.DataElementCategoryDimensionDeletionHandler">
+    <property name="jdbcTemplate" ref="jdbcTemplate" />
+  </bean>
 
   <bean id="org.hisp.dhis.dataset.DataSetDeletionHandler" class="org.hisp.dhis.dataset.DataSetDeletionHandler" />
 
@@ -1582,7 +1670,9 @@
 
   <bean id="org.hisp.dhis.user.UserDeletionHandler" class="org.hisp.dhis.user.UserDeletionHandler" />
 
-  <bean id="org.hisp.dhis.user.UserGroupDeletionHandler" class="org.hisp.dhis.user.UserGroupDeletionHandler" />
+  <bean id="org.hisp.dhis.user.UserGroupDeletionHandler" class="org.hisp.dhis.user.UserGroupDeletionHandler">
+    <property name="jdbcTemplate" ref="jdbcTemplate" />
+  </bean>
 
   <bean id="org.hisp.dhis.user.UserAuthorityGroupDeletionHandler" class="org.hisp.dhis.user.UserAuthorityGroupDeletionHandler">
     <property name="userService" ref="org.hisp.dhis.user.UserService" />
@@ -1651,6 +1741,7 @@
   <bean id="org.hisp.dhis.trackedentity.TrackedEntityInstanceDeletionHandler"
     class="org.hisp.dhis.trackedentity.TrackedEntityInstanceDeletionHandler">
     <property name="instanceService" ref="org.hisp.dhis.trackedentity.TrackedEntityInstanceService" />
+    <property name="jdbcTemplate" ref="jdbcTemplate" />
   </bean>
 
   <bean id="org.hisp.dhis.program.ProgramStageDataElementDeletionHandler"
@@ -1716,7 +1807,9 @@
     class="org.hisp.dhis.sms.command.SMSCommandDeletionHandler" />
 
   <bean id="org.hisp.dhis.sms.command.code.SMSCodesDeletionHandler"
-    class="org.hisp.dhis.sms.command.code.SMSCodesDeletionHandler" />
+    class="org.hisp.dhis.sms.command.code.SMSCodesDeletionHandler">
+    <property name="jdbcTemplate" ref="jdbcTemplate" />
+  </bean>    
 
   <!-- AOP definitions -->
 

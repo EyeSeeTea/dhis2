@@ -75,7 +75,6 @@ import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementGroupSet;
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dxf2.common.JacksonUtils;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.period.Period;
@@ -287,7 +286,7 @@ public class DataQueryParams
         params.displayProperty = this.displayProperty;
         params.outputIdScheme = this.outputIdScheme;
         params.approvalLevel = this.approvalLevel;
-        //params.program = this.program;
+        //params.program = this.program; //TODO
         //params.programStage = this.programStage;
         
         params.partitions = new Partitions( this.partitions );
@@ -1226,7 +1225,7 @@ public class DataQueryParams
         map.put( "Filters", filters );
         map.put( "Aggregation type", aggregationType );
         
-        return JacksonUtils.toJsonAsStringSilent( map );
+        return map.toString(); //TODO
     }
     
     // -------------------------------------------------------------------------

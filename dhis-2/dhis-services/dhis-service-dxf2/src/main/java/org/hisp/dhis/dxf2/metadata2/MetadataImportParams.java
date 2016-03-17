@@ -56,9 +56,11 @@ public class MetadataImportParams
 
     private PreheatMode preheatMode = PreheatMode.REFERENCE;
 
-    private ImportStrategy importMode = ImportStrategy.CREATE_AND_UPDATE;
+    private ImportStrategy importMode = ImportStrategy.ATOMIC_CREATE_AND_UPDATE;
 
     private MergeMode mergeMode = MergeMode.MERGE;
+
+    private FlushMode flushMode = FlushMode.AUTO;
 
     private Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> objects = new HashMap<>();
 
@@ -126,6 +128,16 @@ public class MetadataImportParams
         this.mergeMode = mergeMode;
     }
 
+    public FlushMode getFlushMode()
+    {
+        return flushMode;
+    }
+
+    public void setFlushMode( FlushMode flushMode )
+    {
+        this.flushMode = flushMode;
+    }
+
     public Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> getObjects()
     {
         return objects;
@@ -181,6 +193,7 @@ public class MetadataImportParams
         params.setPreheatMode( preheatMode );
         params.setObjectBundleMode( objectBundleMode );
         params.setMergeMode( mergeMode );
+        params.setFlushMode( flushMode );
 
         return params;
     }

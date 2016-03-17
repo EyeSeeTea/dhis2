@@ -30,11 +30,13 @@ package org.hisp.dhis.datastatistics;
 
 import org.hisp.dhis.DhisSpringTest;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -73,20 +75,29 @@ public class DefaultDataStatisticsServiceTest extends DhisSpringTest
         c.add( Calendar.DATE, -2 );
         startDate = c.getTime();
 
-       /* SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+        Calendar d = Calendar.getInstance();
+        d.setTime( now );
+        d.add( Calendar.DATE, 0);
+        now = d.getTime();
+
+        /*SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
         now = dateFormat.parse( now.toString() );
         startDate = dateFormat.parse( startDate.toString() );*/
+       DateTime test = new DateTime(  );
 
-
+        DateTimeFormatter fmt = DateTimeFormat.forPattern( "yyyyMMdd HHmmss" );
+        test = fmt.parseDateTime( test.toString() );
+        now = test.toDate();
+        System.out.println(now);
 
         dse1 = new DataStatisticsEvent();
         dse2 = new DataStatisticsEvent( EventType.EVENT_CHART_VIEW, now, "TestUser" );
         ds = new DataStatistics( 10, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18 );
 
-        snapId1 = hibernateDataStatisticsStore.save( ds );
+       // snapId1 = hibernateDataStatisticsStore.save( ds );
     }
 
-
+    @Ignore
     @Test
     public void testAddEvent() throws Exception
     {
@@ -94,7 +105,7 @@ public class DefaultDataStatisticsServiceTest extends DhisSpringTest
         assertNotEquals( 0, id );
 
     }
-
+    @Ignore
     @Test
     public void testAddEventWithParams() throws Exception
     {

@@ -1,24 +1,7 @@
-<h3 ng-if="widget !== 'PROFILE'">{{'profile'| translate}}</h3>
-<script type="text/ng-template" id="attribute-details.html">
-    <table class="table table-bordered">
-        <tr>
-            <td class="bold">{{'description' | translate}}</td>
-            <td>{{content.description ? content.description : 'not_available' | translate}}</td>
-        </tr>
-        <!--<tr>
-            <td class="bold">{{'url' | translate}}</td>
-            <td>
-                <span ng-if="content.url">
-                    <a href="{{content.url}}" target="_blank">{{content.url}}</a>
-                </span>
-                <span ng-if="!content.url">
-                    {{'not_available' | translate}}
-                </span>
-            </td>
-        </tr>-->
-    </table>
-</script>
-<table class="dhis2-list-table-striped dhis2-table-hover">
+<div ng-if="widget !== 'PROFILE'" class="section-label section-spacing vertical-spacing">
+    {{'profile'| translate}}
+</div>
+<table class="dhis2-list-table-striped default-form-table">
     <tr ng-repeat="attribute in attributes | filter: {attribute: 'true'} " ng-if="!hiddenFields[attribute.id] && ((editingDisabled  && attribute.show) || !editingDisabled)">
         <td>
             <span d2-pop-over 
@@ -27,7 +10,7 @@
                 template="attribute-details.html"
                 trigger="click"
                 placement="right">
-                <a href >{{attribute.displayName}}</a>
+                <a href title="{{'details'| translate}}">{{attribute.displayName}}</a>
             </span>
             <span ng-if="attribute.mandatory || attribute.unique" class="required">*</span>
         </td>

@@ -1,18 +1,13 @@
-<table class="dhis2-list-table-striped dhis2-table-hover">
+<div class="section-label vertical-spacing">
+    {{'enrollment'| translate}}
+</div>
+<table class="dhis2-list-table-striped default-form-table">
     <tr>
         <td>
             {{'enrolling_orgunit' | translate}}
         </td>
         <td>
             <input type="text" class="form-control" value={{selectedEnrollment.orgUnitName}} ng-disabled="true"/>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            {{'program' | translate}}
-        </td>
-        <td>
-            <input type="text" class="form-control" value={{selectedProgram.displayName}} ng-disabled="true"/>
         </td>
     </tr>
     <tr>
@@ -50,4 +45,3 @@
         </td>
     </tr>
 </table>
-<hr>

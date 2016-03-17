@@ -57,6 +57,7 @@ import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.resourcetable.ResourceTableService;
 import org.hisp.dhis.setting.SystemSettingManager;
+import org.hisp.dhis.system.database.DatabaseInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -99,7 +100,14 @@ public abstract class AbstractJdbcTableManager
     protected StatementBuilder statementBuilder;
     
     @Autowired
+    protected DatabaseInfo databaseInfo;
+
     protected JdbcTemplate jdbcTemplate;
+
+    public void setJdbcTemplate( JdbcTemplate jdbcTemplate )
+    {
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
     // -------------------------------------------------------------------------
     // Abstract methods

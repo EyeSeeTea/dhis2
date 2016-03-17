@@ -59,12 +59,14 @@ public class HibernateDataStatisticsStoreTest extends DhisSpringTest
     DataStatistics ds5;
     DataStatistics ds6;
 
+    Calendar c;
+    Calendar d;
+
     int ds1Id;
     int ds2Id;
 
-    Date startDate;
-    Date endDate;
-    Date testDate;
+    String testBefore;
+    String testAfter;
 
     @Override
     public void setUpTest() throws Exception
@@ -73,24 +75,20 @@ public class HibernateDataStatisticsStoreTest extends DhisSpringTest
         ds2 = new DataStatistics( 10, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18 );
         ds3 = new DataStatistics();
         ds4 = new DataStatistics( 10, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 );
-        ds5 = new DataStatistics(3,2,1,6,5,4,8,7,6,3,4,4,5,9,7,6,4,2);
-        ds6 = new DataStatistics(5,6,4,3,5,7,8,5,3,2,1,5,6,8,8,9,9,9);
+        ds5 = new DataStatistics( 3, 2, 1, 6, 5, 4, 8, 7, 6, 3, 4, 4, 5, 9, 7, 6, 4, 2 );
+        ds6 = new DataStatistics( 5, 6, 4, 3, 5, 7, 8, 5, 3, 2, 1, 5, 6, 8, 8, 9, 9, 9 );
 
         ds1Id = 0;
         ds2Id = 0;
 
-        startDate = new Date();
-        endDate = new Date();
-        testDate = new Date();
+        Date now = new Date();
 
-        Calendar c = Calendar.getInstance();
-        c.setTime( startDate );
-        c.add( Calendar.DATE, -1 );
-        startDate = c.getTime();
+        c = Calendar.getInstance();
+        d = Calendar.getInstance();
 
-        c.setTime( testDate );
-        c.add( Calendar.DATE, -2 );
-        testDate = c.getTime();
+        c.setTime( now );
+        d.setTime( now );
+
 
     }
 
@@ -104,45 +102,249 @@ public class HibernateDataStatisticsStoreTest extends DhisSpringTest
         assertTrue( ds2Id != 0 );
     }
 
+
     @Test
-    public void getSnapshotsInIntervalGetAllTest(){
-      /*  dataStatisticsStore.save( ds1 );
+    public void getSnapshotsInIntervalGetInDAYTest()
+    {
+
+        c.add( Calendar.YEAR, -1 );
+        d.add( Calendar.YEAR, 1 );
+
+        testBefore = c.get( Calendar.YEAR ) + "-" + (c.get( Calendar.MONTH ) + 1) + "-" + c.get( Calendar.DAY_OF_MONTH );
+        testAfter = d.get( Calendar.YEAR ) + "-" + (d.get( Calendar.MONTH ) + 1) + "-" + d.get( Calendar.DAY_OF_MONTH );
+
         dataStatisticsStore.save( ds2 );
-        dataStatisticsStore.save( ds3 );
         dataStatisticsStore.save( ds4 );
         dataStatisticsStore.save( ds5 );
         dataStatisticsStore.save( ds6 );
+        double expected = ds2.getSavedMaps() + ds4.getSavedMaps() + ds5.getSavedMaps() + ds6.getSavedMaps();
 
-        List<AggregatedStatistics> asList = dataStatisticsStore.getSnapshotsInInterval( "select * from datastatistics", EventInterval.DAY );
-
-        assertTrue( asList.size() == 6 );*/
+        String sql = "select extract(year from created) as yr, extract(day from created) as day, " +
+            "max(active_users) as activeUsers," +
+            "sum(mapviews) as mapViews," +
+            "sum(chartviews) as chartViews," +
+            "sum(reporttableviews) as reportTablesViews," +
+            "sum(eventreportviews) as eventReportViews," +
+            "sum(eventchartviews) as eventChartViews," +
+            "sum(dashboardviews) as dashboardViews," +
+            "sum(indicatorviews) as indicatorsViews," +
+            "sum(totalviews) as totalViews," +
+            "sum(average_views) as averageViews," +
+            "sum(maps) as savedMaps," +
+            "sum(charts) as savedCharts," +
+            "sum(reporttables) as savedReportTables," +
+            "sum(eventreports) as savedEventReports," +
+            "sum(eventcharts) as savedEventCharts," +
+            "sum(dashborards) as savedDashboards," +
+            "sum(indicators) as savedIndicators," +
+            "max(users) as users from datastatistics " +
+            "where (created between '" + testBefore + "' and '" + testAfter + "') group by yr, day;";
+        List<AggregatedStatistics> asList = dataStatisticsStore.getSnapshotsInInterval( sql, EventInterval.DAY );
+        assertTrue( asList.get( 0 ).getSavedMaps() == expected );
+        assertTrue( asList.size() == 1 );
 
     }
 
     @Test
-    public void getSnapshotsInIntervalGetInDAYTest(){
-       /* dataStatisticsStore.save( ds1 );
+    public void getSnapshotsInIntervalGetInDAY_DifferenDAyesSavedTest()
+    {   c.add( Calendar.DATE, -1 );
+
+        ds2.setCreated( c.getTime() );
+        c.add( Calendar.YEAR, -1 );
+        d.add( Calendar.YEAR, 1 );
+
+        testBefore = c.get( Calendar.YEAR ) + "-" + (c.get( Calendar.MONTH ) + 1) + "-" + c.get( Calendar.DAY_OF_MONTH );
+        testAfter = d.get( Calendar.YEAR ) + "-" + (d.get( Calendar.MONTH ) + 1) + "-" + d.get( Calendar.DAY_OF_MONTH );
+
+
         dataStatisticsStore.save( ds2 );
-        dataStatisticsStore.save( ds3 );
         dataStatisticsStore.save( ds4 );
         dataStatisticsStore.save( ds5 );
         dataStatisticsStore.save( ds6 );
+        double expected = ds2.getSavedMaps() + ds4.getSavedMaps() + ds5.getSavedMaps() + ds6.getSavedMaps();
 
-        List<AggregatedStatistics> asList = dataStatisticsStore.getSnapshotsInInterval( "select extract(day from created) as yr from datastatistics ", EventInterval.DAY );
+        String sql = "select extract(year from created) as yr, extract(day from created) as day, " +
+            "max(active_users) as activeUsers," +
+            "sum(mapviews) as mapViews," +
+            "sum(chartviews) as chartViews," +
+            "sum(reporttableviews) as reportTablesViews," +
+            "sum(eventreportviews) as eventReportViews," +
+            "sum(eventchartviews) as eventChartViews," +
+            "sum(dashboardviews) as dashboardViews," +
+            "sum(indicatorviews) as indicatorsViews," +
+            "sum(totalviews) as totalViews," +
+            "sum(average_views) as averageViews," +
+            "sum(maps) as savedMaps," +
+            "sum(charts) as savedCharts," +
+            "sum(reporttables) as savedReportTables," +
+            "sum(eventreports) as savedEventReports," +
+            "sum(eventcharts) as savedEventCharts," +
+            "sum(dashborards) as savedDashboards," +
+            "sum(indicators) as savedIndicators," +
+            "max(users) as users from datastatistics " +
+            "where (created between '" + testBefore + "' and '" + testAfter + "') group by yr, day;";
+        List<AggregatedStatistics> asList = dataStatisticsStore.getSnapshotsInInterval( sql, EventInterval.DAY );
+        assertTrue( asList.size() == 2 );
 
-        assertTrue( asList.size() == 6 );*/
     }
 
     @Test
-    public void getSnapshotsInIntervalGetInWEEKTest(){}
+    public void getSnapshotsInIntervalGetInDAY_GEDatesTest()
+    {
+        c.add( Calendar.YEAR, 1 );
+        d.add( Calendar.YEAR, 1 );
+
+        testBefore = c.get( Calendar.YEAR ) + "-" + (c.get( Calendar.MONTH ) + 1) + "-" + c.get( Calendar.DAY_OF_MONTH );
+        testAfter = d.get( Calendar.YEAR ) + "-" + (d.get( Calendar.MONTH ) + 1) + "-" + d.get( Calendar.DAY_OF_MONTH );
+
+
+        dataStatisticsStore.save( ds2 );
+        dataStatisticsStore.save( ds4 );
+        dataStatisticsStore.save( ds5 );
+        dataStatisticsStore.save( ds6 );
+        double expected = ds2.getSavedMaps() + ds4.getSavedMaps() + ds5.getSavedMaps() + ds6.getSavedMaps();
+
+        String sql = "select extract(year from created) as yr, extract(day from created) as day, " +
+            "max(active_users) as activeUsers," +
+            "sum(mapviews) as mapViews," +
+            "sum(chartviews) as chartViews," +
+            "sum(reporttableviews) as reportTablesViews," +
+            "sum(eventreportviews) as eventReportViews," +
+            "sum(eventchartviews) as eventChartViews," +
+            "sum(dashboardviews) as dashboardViews," +
+            "sum(indicatorviews) as indicatorsViews," +
+            "sum(totalviews) as totalViews," +
+            "sum(average_views) as averageViews," +
+            "sum(maps) as savedMaps," +
+            "sum(charts) as savedCharts," +
+            "sum(reporttables) as savedReportTables," +
+            "sum(eventreports) as savedEventReports," +
+            "sum(eventcharts) as savedEventCharts," +
+            "sum(dashborards) as savedDashboards," +
+            "sum(indicators) as savedIndicators," +
+            "max(users) as users from datastatistics " +
+            "where (created between '" + testBefore + "' and '" + testAfter + "') group by yr, day;";
+        List<AggregatedStatistics> asList = dataStatisticsStore.getSnapshotsInInterval( sql, EventInterval.DAY );
+        assertTrue( asList.size() == 0);
+
+    }
 
     @Test
-    public void getSnapshotsInIntervalGetInMONTHTest(){}
+    public void getSnapshotsInIntervalGetInWEEKTest()
+    {
+        c.add( Calendar.YEAR, -1 );
+        d.add( Calendar.YEAR, 1 );
+
+        testBefore = c.get( Calendar.YEAR ) + "-" + (c.get( Calendar.MONTH ) + 1) + "-" + c.get( Calendar.DAY_OF_MONTH );
+        testAfter = d.get( Calendar.YEAR ) + "-" + (d.get( Calendar.MONTH ) + 1) + "-" + d.get( Calendar.DAY_OF_MONTH );
+        dataStatisticsStore.save( ds2 );
+        dataStatisticsStore.save( ds4 );
+        dataStatisticsStore.save( ds5 );
+        dataStatisticsStore.save( ds6 );
+        double expected = ds2.getSavedMaps() + ds4.getSavedMaps() + ds5.getSavedMaps() + ds6.getSavedMaps();
+
+        String sql = "select extract(year from created) as yr, extract(week from created) as week, " +
+            "max(active_users) as activeUsers," +
+            "sum(mapviews) as mapViews," +
+            "sum(chartviews) as chartViews," +
+            "sum(reporttableviews) as reportTablesViews," +
+            "sum(eventreportviews) as eventReportViews," +
+            "sum(eventchartviews) as eventChartViews," +
+            "sum(dashboardviews) as dashboardViews," +
+            "sum(indicatorviews) as indicatorsViews," +
+            "sum(totalviews) as totalViews," +
+            "sum(average_views) as averageViews," +
+            "sum(maps) as savedMaps," +
+            "sum(charts) as savedCharts," +
+            "sum(reporttables) as savedReportTables," +
+            "sum(eventreports) as savedEventReports," +
+            "sum(eventcharts) as savedEventCharts," +
+            "sum(dashborards) as savedDashboards," +
+            "sum(indicators) as savedIndicators," +
+            "max(users) as users from datastatistics " +
+            "where (created between '" + testBefore + "' and '" + testAfter + "') group by yr, week;";
+        List<AggregatedStatistics> asList = dataStatisticsStore.getSnapshotsInInterval( sql, EventInterval.WEEK );
+        assertTrue( asList.get( 0 ).getSavedMaps() == expected );
+        assertTrue( asList.size() == 1 );
+    }
 
     @Test
-    public void getSnapshotsInIntervalGetInYEARTest(){}
+    public void getSnapshotsInIntervalGetInMONTHTest()
+    {
+        c.add( Calendar.YEAR, -1 );
+        d.add( Calendar.YEAR, 1 );
 
+        testBefore = c.get( Calendar.YEAR ) + "-" + (c.get( Calendar.MONTH ) + 1) + "-" + c.get( Calendar.DAY_OF_MONTH );
+        testAfter = d.get( Calendar.YEAR ) + "-" + (d.get( Calendar.MONTH ) + 1) + "-" + d.get( Calendar.DAY_OF_MONTH );
+        dataStatisticsStore.save( ds2 );
+        dataStatisticsStore.save( ds4 );
+        dataStatisticsStore.save( ds5 );
+        dataStatisticsStore.save( ds6 );
+        double expected = ds2.getSavedMaps() + ds4.getSavedMaps() + ds5.getSavedMaps() + ds6.getSavedMaps();
 
+        String sql = "select extract(year from created) as yr, extract(month from created) as mnt, " +
+            "max(active_users) as activeUsers," +
+            "sum(mapviews) as mapViews," +
+            "sum(chartviews) as chartViews," +
+            "sum(reporttableviews) as reportTablesViews," +
+            "sum(eventreportviews) as eventReportViews," +
+            "sum(eventchartviews) as eventChartViews," +
+            "sum(dashboardviews) as dashboardViews," +
+            "sum(indicatorviews) as indicatorsViews," +
+            "sum(totalviews) as totalViews," +
+            "sum(average_views) as averageViews," +
+            "sum(maps) as savedMaps," +
+            "sum(charts) as savedCharts," +
+            "sum(reporttables) as savedReportTables," +
+            "sum(eventreports) as savedEventReports," +
+            "sum(eventcharts) as savedEventCharts," +
+            "sum(dashborards) as savedDashboards," +
+            "sum(indicators) as savedIndicators," +
+            "max(users) as users from datastatistics " +
+            "where (created between '" + testBefore + "' and '" + testAfter + "') group by yr, mnt;";
+        List<AggregatedStatistics> asList = dataStatisticsStore.getSnapshotsInInterval( sql, EventInterval.MONTH );
+        assertTrue( asList.get( 0 ).getSavedMaps() == expected );
+        assertTrue( asList.size() == 1 );
+    }
+
+    @Test
+    public void getSnapshotsInIntervalGetInYEARTest()
+    {
+        c.add( Calendar.YEAR, -1 );
+        d.add( Calendar.YEAR, 1 );
+
+        testBefore = c.get( Calendar.YEAR ) + "-" + (c.get( Calendar.MONTH ) + 1) + "-" + c.get( Calendar.DAY_OF_MONTH );
+        testAfter = d.get( Calendar.YEAR ) + "-" + (d.get( Calendar.MONTH ) + 1) + "-" + d.get( Calendar.DAY_OF_MONTH );
+        dataStatisticsStore.save( ds2 );
+        dataStatisticsStore.save( ds4 );
+        dataStatisticsStore.save( ds5 );
+        dataStatisticsStore.save( ds6 );
+        double expected = ds2.getSavedMaps() + ds4.getSavedMaps() + ds5.getSavedMaps() + ds6.getSavedMaps();
+
+        String sql = "select extract(year from created) as yr, " +
+            "max(active_users) as activeUsers," +
+            "sum(mapviews) as mapViews," +
+            "sum(chartviews) as chartViews," +
+            "sum(reporttableviews) as reportTablesViews," +
+            "sum(eventreportviews) as eventReportViews," +
+            "sum(eventchartviews) as eventChartViews," +
+            "sum(dashboardviews) as dashboardViews," +
+            "sum(indicatorviews) as indicatorsViews," +
+            "sum(totalviews) as totalViews," +
+            "sum(average_views) as averageViews," +
+            "sum(maps) as savedMaps," +
+            "sum(charts) as savedCharts," +
+            "sum(reporttables) as savedReportTables," +
+            "sum(eventreports) as savedEventReports," +
+            "sum(eventcharts) as savedEventCharts," +
+            "sum(dashborards) as savedDashboards," +
+            "sum(indicators) as savedIndicators," +
+            "max(users) as users from datastatistics " +
+            "where (created between '" + testBefore + "' and '" + testAfter + "') group by yr;";
+        List<AggregatedStatistics> asList = dataStatisticsStore.getSnapshotsInInterval( sql, EventInterval.YEAR );
+        assertTrue( asList.get( 0 ).getSavedMaps() == expected );
+        assertTrue( asList.size() == 1 );
+    }
 
 
 }

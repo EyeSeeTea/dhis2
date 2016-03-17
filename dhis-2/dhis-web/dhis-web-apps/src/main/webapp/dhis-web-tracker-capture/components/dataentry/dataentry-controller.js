@@ -1231,9 +1231,9 @@ trackerCapture.controller('DataEntryController',
         
         $scope.setDisplayTypeForStage($scope.currentStage);
         
-        $scope.customForm = CustomFormService.getForProgramStage($scope.currentStage, $scope.prStDes);        
+        $scope.customDataEntryForm = CustomFormService.getForProgramStage($scope.currentStage, $scope.prStDes);        
         
-        if ($scope.customForm) {
+        if ($scope.customDataEntryForm) {
             $scope.displayCustomForm = "CUSTOM";
         }
         else if ($scope.currentStage.displayEventsInTable) {
@@ -1307,20 +1307,23 @@ trackerCapture.controller('DataEntryController',
             //check for input validity
             $scope.updateSuccess = false;
         }
-        if (field && field.$invalid && angular.isDefined(value) && value !== "") {
+        
+        var oldValue = null;
+        for(var i=0; i<$scope.currentStageEventsOriginal.length; i++){
+            if($scope.currentStageEventsOriginal[i].event === eventToSave.event) {
+                oldValue = $scope.currentStageEventsOriginal[i][prStDe.dataElement.id];
+                break;
+            }
+        }
+        
+        if (field && field.$invalid) {
+            $scope.currentEvent[prStDe.dataElement.id] = oldValue;
             $scope.currentElement = {id: prStDe.dataElement.id, saved: false, event: eventToSave.event};
             return false;
         }
 
         //input is valid
         var value = eventToSave[prStDe.dataElement.id];
-
-        var oldValue = null;
-        angular.forEach($scope.currentStageEventsOriginal, function (eventOriginal) {
-            if (eventOriginal.event === eventToSave.event) {
-                oldValue = eventOriginal[prStDe.dataElement.id];
-            }
-        });
 
         if (oldValue !== value) {
             
@@ -1416,22 +1419,6 @@ trackerCapture.controller('DataEntryController',
 
     $scope.saveEventDateForEvent = function (eventToSave, reOrder) {
         $scope.eventDateSaved = false;
-        if (angular.isUndefined(eventToSave.eventDate) || eventToSave.eventDate === '') {
-            $scope.invalidDate = eventToSave.event;
-            $scope.validatedDateSetForEvent = {date: '', event: eventToSave};
-            $scope.currentElement = {id: "eventDate", saved: false};
-            return false;
-        }
-
-        var rawDate = angular.copy(eventToSave.eventDate);
-        var convertedDate = DateUtils.format(eventToSave.eventDate);
-
-        if (rawDate !== convertedDate) {
-            $scope.invalidDate = eventToSave.event;
-            $scope.validatedDateSetForEvent = {date: '', event: eventToSave};
-            $scope.currentElement = {id: "eventDate", saved: false};
-            return false;
-        }
         
         $scope.currentElement = {id: "eventDate", event: eventToSave.event, saved: false};
         
@@ -1466,21 +1453,7 @@ trackerCapture.controller('DataEntryController',
     };
 
     $scope.saveDueDate = function () {
-
         $scope.dueDateSaved = false;
-
-        if ($scope.currentEvent.dueDate === '') {
-            $scope.invalidDueDate = $scope.currentEvent.event;
-            return false;
-        }
-
-        var rawDate = angular.copy($scope.currentEvent.dueDate);
-        var convertedDate = DateUtils.format($scope.currentEvent.dueDate);
-
-        if (rawDate !== convertedDate) {
-            $scope.invalidDueDate = $scope.currentEvent.event;
-            return false;
-        }
 
         var e = {event: $scope.currentEvent.event,
             enrollment: $scope.currentEvent.enrollment,

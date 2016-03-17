@@ -29,13 +29,13 @@ package org.hisp.dhis.dxf2.common;
  */
 
 import com.google.common.base.MoreObjects;
+
 import org.hisp.dhis.query.Order;
 import org.hisp.dhis.schema.Property;
 import org.hisp.dhis.schema.Schema;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -64,20 +64,27 @@ public class OrderParams
 
     public List<Order> getOrders( Schema schema )
     {
-        Map<String, Order> orders = new HashMap<>();
+        Map<String, Order> orders = new LinkedHashMap<String,Order>();
 
         for ( String o : order )
         {
             String[] split = o.split( ":" );
 
-            if ( split.length <= 1 )
+            //Using ascending as default direction. 
+            String direction = "asc";
+            
+            if ( split.length < 1 )
             {
                 continue;
+            }
+            else if ( split.length == 2 )
+            {
+                direction = split[1].toLowerCase();
             }
 
             String propertyName = split[0];
             Property property = schema.getProperty( propertyName );
-            String direction = split[1].toLowerCase();
+            
 
             if ( orders.containsKey( propertyName ) || !schema.haveProperty( propertyName )
                 || !validProperty( property ) || !validDirection( direction ) )

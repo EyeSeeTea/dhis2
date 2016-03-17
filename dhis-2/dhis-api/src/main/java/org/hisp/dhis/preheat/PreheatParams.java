@@ -1,6 +1,14 @@
 package org.hisp.dhis.preheat;
 
 import com.google.common.base.MoreObjects;
+import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.user.User;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -30,14 +38,6 @@ import com.google.common.base.MoreObjects;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.IdentifiableObject;
-import org.hisp.dhis.user.User;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
@@ -51,7 +51,7 @@ public class PreheatParams
 
     private Set<Class<? extends IdentifiableObject>> classes = new HashSet<>();
 
-    private Map<PreheatIdentifier, Map<Class<? extends IdentifiableObject>, Set<String>>> references = new HashMap<>();
+    private Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> objects = new HashMap<>();
 
     public PreheatParams()
     {
@@ -100,17 +100,15 @@ public class PreheatParams
         return this;
     }
 
-    public Map<PreheatIdentifier, Map<Class<? extends IdentifiableObject>, Set<String>>> getReferences()
+    public Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> getObjects()
     {
-        return references;
+        return objects;
     }
 
-    public PreheatParams setReferences( Map<PreheatIdentifier, Map<Class<? extends IdentifiableObject>, Set<String>>> references )
+    public void setObjects( Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> objects )
     {
-        this.references = references;
-        return this;
+        this.objects = objects;
     }
-
 
     @Override
     public String toString()
@@ -120,7 +118,7 @@ public class PreheatParams
             .add( "preheatMode", preheatMode )
             .add( "preheatIdentifier", preheatIdentifier )
             .add( "classes", classes )
-            .add( "references", references )
+            .add( "objects", objects )
             .toString();
     }
 }

@@ -36,12 +36,14 @@ import org.hisp.dhis.dxf2.metadata2.objectbundle.ObjectBundleMode;
 import org.hisp.dhis.dxf2.metadata2.objectbundle.ObjectBundleParams;
 import org.hisp.dhis.dxf2.metadata2.objectbundle.ObjectBundleService;
 import org.hisp.dhis.dxf2.metadata2.objectbundle.ObjectBundleValidation;
+import org.hisp.dhis.feedback.TypeReport;
 import org.hisp.dhis.importexport.ImportStrategy;
 import org.hisp.dhis.preheat.PreheatIdentifier;
 import org.hisp.dhis.preheat.PreheatMode;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -50,6 +52,7 @@ import java.util.Map;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Component
+@Transactional
 public class DefaultMetadataImportService implements MetadataImportService
 {
     @Autowired
@@ -72,9 +75,13 @@ public class DefaultMetadataImportService implements MetadataImportService
         ObjectBundle bundle = objectBundleService.create( bundleParams );
 
         ObjectBundleValidation validation = objectBundleService.validate( bundle );
-        report.setObjectErrorReports( validation.getObjectErrorReportsMap() );
+        report.addTypeReports( validation.getTypeReportMap() );
 
-        objectBundleService.commit( bundle );
+        if ( !(bundleParams.getImportMode().isAtomic() && !validation.getTypeReportMap().isEmpty()) )
+        {
+            Map<Class<?>, TypeReport> typeReports = objectBundleService.commit( bundle );
+            report.addTypeReports( typeReports );
+        }
 
         return report;
     }
@@ -86,8 +93,9 @@ public class DefaultMetadataImportService implements MetadataImportService
         params.setObjectBundleMode( getEnumWithDefault( ObjectBundleMode.class, parameters, "objectBundleMode", ObjectBundleMode.COMMIT ) );
         params.setPreheatMode( getEnumWithDefault( PreheatMode.class, parameters, "preheatMode", PreheatMode.REFERENCE ) );
         params.setPreheatIdentifier( getEnumWithDefault( PreheatIdentifier.class, parameters, "preheatIdentifier", PreheatIdentifier.UID ) );
-        params.setImportMode( getEnumWithDefault( ImportStrategy.class, parameters, "importMode", ImportStrategy.CREATE_AND_UPDATE ) );
+        params.setImportMode( getEnumWithDefault( ImportStrategy.class, parameters, "importMode", ImportStrategy.ATOMIC_CREATE_AND_UPDATE ) );
         params.setMergeMode( getEnumWithDefault( MergeMode.class, parameters, "mergeMode", MergeMode.MERGE ) );
+        params.setFlushMode( getEnumWithDefault( FlushMode.class, parameters, "flushMode", FlushMode.AUTO ) );
 
         return params;
     }

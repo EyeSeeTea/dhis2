@@ -533,11 +533,14 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 return def.promise;
             }            
         },
-        processForm: function(existingTei, formTei, attributesById){
+        processForm: function(existingTei, formTei, originalTei, attributesById){
             var tei = angular.copy(existingTei);            
             tei.attributes = [];
             var formEmpty = true;            
             for(var k in attributesById){
+                if(formTei[k] !== originalTei[k] && !formTei[k] && !originalTei[k]){
+                    formChanged = true;
+                }
                 if( formTei[k] ){
                     var att = attributesById[k];
                     tei.attributes.push({attribute: att.id, value: formTei[k], displayName: att.displayName, valueType: att.valueType});
@@ -546,7 +549,22 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 delete tei[k];
             }
             formTei.attributes = tei.attributes;
-            return {tei: tei, formEmpty: formEmpty};
+            
+            var formChanged = false;
+            for(var k in attributesById){                
+                if(formTei[k] !== originalTei[k]){
+                    if(!formEmpty){
+                        formChanged = true;
+                        break;
+                    }
+                    if(formEmpty && (formTei[k] || originalTei[k]) ){
+                        formChanged = true;
+                        break;
+                    }                    
+                }
+            }
+            
+            return {tei: tei, formEmpty: formEmpty, formChanged: formChanged};
         }
     };
 })
@@ -993,17 +1011,18 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 /* factory for handling events */
 .factory('DHIS2EventFactory', function($http, DialogService, $translate) {   
     
+    var skipPaging = "&skipPaging=true";
     return {     
         
         getEventsByStatus: function(entity, orgUnit, program, programStatus){   
-            var promise = $http.get( '../api/events.json?ouMode=ACCESSIBLE&' + 'trackedEntityInstance=' + entity + '&orgUnit=' + orgUnit + '&program=' + program + '&programStatus=' + programStatus  + '&paging=false').then(function(response){
+            var promise = $http.get( '../api/events.json?ouMode=ACCESSIBLE&' + 'trackedEntityInstance=' + entity + '&orgUnit=' + orgUnit + '&program=' + program + '&programStatus=' + programStatus  + skipPaging).then(function(response){
                 return response.data.events;
             });            
             return promise;
         },
         getEventsByProgram: function(entity, program){   
             
-            var url = '../api/events.json?ouMode=ACCESSIBLE&' + 'trackedEntityInstance=' + entity + '&paging=false';            
+            var url = '../api/events.json?ouMode=ACCESSIBLE&' + 'trackedEntityInstance=' + entity + skipPaging;            
             if(program){
                 url = url + '&program=' + program;
             }
@@ -1013,7 +1032,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             return promise;
         },
         getEventsByProgramStage: function(entity, programStage){
-          var url = '../api/events.json?ouMode=ACCESSIBLE&' + 'trackedEntityInstance=' + entity + '&paging=false'; 
+          var url = '../api/events.json?ouMode=ACCESSIBLE&' + 'trackedEntityInstance=' + entity + skipPaging; 
           if(programStage){
               url += '&programStage='+programStage;
           }
@@ -1025,10 +1044,10 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         getByOrgUnitAndProgram: function(orgUnit, ouMode, program, startDate, endDate){
             var url;
             if(startDate && endDate){
-                url = '../api/events.json?' + 'orgUnit=' + orgUnit + '&ouMode='+ ouMode + '&program=' + program + '&startDate=' + startDate + '&endDate=' + endDate + '&paging=false';
+                url = '../api/events.json?' + 'orgUnit=' + orgUnit + '&ouMode='+ ouMode + '&program=' + program + '&startDate=' + startDate + '&endDate=' + endDate + skipPaging;
             }
             else{
-                url = '../api/events.json?' + 'orgUnit=' + orgUnit + '&ouMode='+ ouMode + '&program=' + program + '&paging=false';
+                url = '../api/events.json?' + 'orgUnit=' + orgUnit + '&ouMode='+ ouMode + '&program=' + program + skipPaging;
             }
             var promise = $http.get( url ).then(function(response){
                 return response.data.events;
@@ -1193,6 +1212,19 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 
 /* Returns a function for getting rules for a specific program */
 .factory('TrackerRulesFactory', function($q,MetaDataFactory,$filter){
+    var staticReplacements = 
+                        [{regExp:new RegExp("([^\w\d])(and)([^\w\d])","gi"), replacement:"$1&&$3"},
+                        {regExp:new RegExp("([^\w\d])(or)([^\w\d])","gi"), replacement:"$1||$3"},
+                        {regExp:new RegExp("V{execution_date}","g"), replacement:"V{event_date}"}];
+                    
+    var performStaticReplacements = function(expression) {
+        angular.forEach(staticReplacements, function(staticReplacement) {
+            expression = expression.replace(staticReplacement.regExp, staticReplacement.replacement);
+        });
+        
+        return expression;
+    };
+    
     return{                
         getRules : function(programUid){            
             var def = $q.defer();            
@@ -1239,7 +1271,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                                 if(variableNameParts.length === 2) {
                                     //this is a programstage and dataelement specification. translate to program variable:
                                     newVariableObject = {
-                                        name:variableName,
+                                        displayName:variableName,
                                         programRuleVariableSourceType:'DATAELEMENT_NEWEST_EVENT_PROGRAM_STAGE',
                                         dataElement:variableNameParts[1],
                                         programStage:variableNameParts[0],
@@ -1250,7 +1282,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                                 {
                                     //This is an attribute - let us translate to program variable:
                                     newVariableObject = {
-                                        name:variableName,
+                                        displayName:variableName,
                                         programRuleVariableSourceType:'TEI_ATTRIBUTE',
                                         trackedEntityAttribute:variableNameParts[0],
                                         program:programUid
@@ -1316,6 +1348,9 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                                 newRule.condition = newRule.condition.replace(new RegExp("V{zero_pos_value_count}", 'g'),zeroPosValueCountText);
                                 newAction.data = newAction.data.replace(new RegExp("V{zero_pos_value_count}", 'g'),zeroPosValueCountText);
                             }
+                            
+                            newAction.data = performStaticReplacements(newAction.data);
+                            newRule.condition = performStaticReplacements(newRule.condition);
                         }
                     });
 
@@ -1427,22 +1462,22 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         
         if(enrollment){
             var q = '';
-            if(enrollment.operator === OperatorFactory.defaultOperators[0]){
-                if(enrollment.programExactDate && enrollment.programExactDate !== ''){
-                    query.hasValue = true;
-                    q += '&programStartDate=' + DateUtils.formatFromUserToApi(enrollment.programExactDate) + '&programEndDate=' + DateUtils.formatFromUserToApi(enrollment.programExactDate);
-                }
+            if(enrollment.programEnrollmentStartDate && enrollment.programEnrollmentStartDate !== ''){                
+                query.hasValue = true;
+                q += '&programEnrollmentStartDate=' + DateUtils.formatFromUserToApi(enrollment.programEnrollmentStartDate);
             }
-            if(enrollment.operator === OperatorFactory.defaultOperators[1]){
-                if(enrollment.programStartDate && enrollment.programStartDate !== ''){                
-                    query.hasValue = true;
-                    q += '&programStartDate=' + DateUtils.formatFromUserToApi(enrollment.programStartDate);
-                }
-                if(enrollment.programEndDate && enrollment.programEndDate !== ''){
-                    query.hasValue = true;
-                    q += '&programEndDate=' + DateUtils.formatFromUserToApi(enrollment.programEndDate);
-                }
-            }            
+            if(enrollment.programEnrollmentEndDate && enrollment.programEnrollmentEndDate !== ''){
+                query.hasValue = true;
+                q += '&programEnrollmentEndDate=' + DateUtils.formatFromUserToApi(enrollment.programEnrollmentEndDate);
+            }
+            if(enrollment.programIncidentStartDate && enrollment.programIncidentStartDate !== ''){                
+                query.hasValue = true;
+                q += '&programIncidentStartDate=' + DateUtils.formatFromUserToApi(enrollment.programIncidentStartDate);
+            }
+            if(enrollment.programIncidentEndDate && enrollment.programIncidentEndDate !== ''){
+                query.hasValue = true;
+                q += '&programIncidentEndDate=' + DateUtils.formatFromUserToApi(enrollment.programIncidentEndDate);
+            }
             if(q){
                 if(query.url){
                     query.url = query.url + q;
@@ -1552,7 +1587,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 
             var entityList = {own: [], other: []};
             
-            var attributes = CurrentSelection.getAttributesById();
+            var attributesById = CurrentSelection.getAttributesById();
             
             angular.forEach(grid.rows, function(row){
                 if(invalidTeis.indexOf(row[0]) === -1 ){
@@ -1573,14 +1608,14 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                             isEmpty = false;
                             var val = row[i];
 
-                            if(attributes[grid.headers[i].name] && 
-                                    attributes[grid.headers[i].name].optionSetValue && 
+                            if(attributesById[grid.headers[i].name] && 
+                                    attributesById[grid.headers[i].name].optionSetValue && 
                                     optionSets &&    
-                                    attributes[grid.headers[i].name].optionSet &&
-                                    optionSets[attributes[grid.headers[i].name].optionSet.id] ){
-                                val = OptionSetService.getName(optionSets[attributes[grid.headers[i].name].optionSet.id].options, val);
+                                    attributesById[grid.headers[i].name].optionSet &&
+                                    optionSets[attributesById[grid.headers[i].name].optionSet.id] ){
+                                val = OptionSetService.getName(optionSets[attributesById[grid.headers[i].name].optionSet.id].options, val);
                             }
-                            if(attributes[grid.headers[i].name] && attributes[grid.headers[i].name].valueType === 'date'){                                    
+                            if(attributesById[grid.headers[i].name] && attributesById[grid.headers[i].name].valueType === 'date'){                                    
                                 val = DateUtils.formatFromApiToUser( val );
                             }
 
