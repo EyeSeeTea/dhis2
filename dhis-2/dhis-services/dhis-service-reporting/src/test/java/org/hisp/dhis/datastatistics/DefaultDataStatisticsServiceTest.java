@@ -33,13 +33,14 @@ import org.hisp.dhis.DhisSpringTest;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.junit.Ignore;
+
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
+
 
 import static org.junit.Assert.*;
 
@@ -64,6 +65,8 @@ public class DefaultDataStatisticsServiceTest extends DhisSpringTest
     private int snapId1;
     private int snapId2;
 
+    DateTimeFormatter fmt;
+
     @Override
     public void setUpTest() throws Exception
     {
@@ -71,33 +74,22 @@ public class DefaultDataStatisticsServiceTest extends DhisSpringTest
         startDate = new Date();
 
         Calendar c = Calendar.getInstance();
-        c.setTime( startDate );
-        c.add( Calendar.DATE, -2 );
-        startDate = c.getTime();
 
-        Calendar d = Calendar.getInstance();
-        d.setTime( now );
-        d.add( Calendar.DATE, 0);
-        now = d.getTime();
 
-        /*SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
-        now = dateFormat.parse( now.toString() );
-        startDate = dateFormat.parse( startDate.toString() );*/
-       DateTime test = new DateTime(  );
+        DateTime formatdate;
+        fmt = DateTimeFormat.forPattern( "yyyy-mm-dd" );
+        formatdate = fmt.parseDateTime( c.get( Calendar.YEAR ) + "-" + (c.get( Calendar.MONTH ) + 1) + "-" + c.get( Calendar.DAY_OF_MONTH ) );
+        now = formatdate.toDate();
 
-        DateTimeFormatter fmt = DateTimeFormat.forPattern( "yyyyMMdd HHmmss" );
-        test = fmt.parseDateTime( test.toString() );
-        now = test.toDate();
-        System.out.println(now);
 
         dse1 = new DataStatisticsEvent();
         dse2 = new DataStatisticsEvent( EventType.EVENT_CHART_VIEW, now, "TestUser" );
         ds = new DataStatistics( 10, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18 );
 
-       // snapId1 = hibernateDataStatisticsStore.save( ds );
+        snapId1 = hibernateDataStatisticsStore.save( ds );
     }
 
-    @Ignore
+
     @Test
     public void testAddEvent() throws Exception
     {
@@ -105,7 +97,7 @@ public class DefaultDataStatisticsServiceTest extends DhisSpringTest
         assertNotEquals( 0, id );
 
     }
-    @Ignore
+
     @Test
     public void testAddEventWithParams() throws Exception
     {
@@ -113,95 +105,25 @@ public class DefaultDataStatisticsServiceTest extends DhisSpringTest
         assertNotEquals( 0, id );
     }
 
-    @Ignore
+
     @Test
     public void testSaveSnapshot() throws Exception
     {
-        dataStatisticsService.addEvent( dse1);
+        Calendar c = Calendar.getInstance();
+        DateTime formatdate;
+        fmt = DateTimeFormat.forPattern( "yyyy-mm-dd" );
+        c.add( Calendar.DAY_OF_MONTH, -2 );
+        formatdate = fmt.parseDateTime( c.get( Calendar.YEAR ) + "-" + (c.get( Calendar.MONTH ) + 1) + "-" + c.get( Calendar.DAY_OF_MONTH ) );
+        startDate = formatdate.toDate();
+
+        dse1 = new DataStatisticsEvent( EventType.EVENT_CHART_VIEW, startDate, "TestUser" );
+        dataStatisticsService.addEvent( dse1 );
         dataStatisticsService.addEvent( dse2 );
         snapId2 = dataStatisticsService.saveSnapshot();
 
-        assertTrue( dataStatisticsService.getReports( startDate, now, EventInterval.DAY ).size() == 2 );
+        assertTrue( snapId2 != 0 );
+        assertTrue( snapId1 != snapId2 );
+
     }
-
-    @Ignore
-    @Test
-    public void testSaveSnapshotWithInvalidInterval() throws Exception
-    {
-        assertTrue( dataStatisticsService.getReports( now, startDate, EventInterval.DAY ).size() == 0 );
-    }
-
-    @Ignore
-    @Test
-    public void testGetReportsDayInterval() throws Exception
-    {
-        dataStatisticsService.addEvent( dse1);
-        dataStatisticsService.addEvent( dse2 );
-        Date startDate = new Date();
-        Calendar c = Calendar.getInstance();
-        c.setTime( startDate );
-        c.add( Calendar.DATE, -1 );
-        startDate = c.getTime();
-
-        List<AggregatedStatistics> asList = dataStatisticsService.getReports( startDate, now, EventInterval.DAY );
-
-        assertNotNull( asList );
-        assertTrue( asList.size() == 2 );
-    }
-
-
-
-    @Ignore
-    @Test
-    public void testGetReportsWEEKInterval() throws Exception
-    {
-        dataStatisticsService.addEvent( dse1 );
-        dataStatisticsService.addEvent( dse2 );
-        Date startDate = new Date();
-        Calendar c = Calendar.getInstance();
-        c.setTime( startDate );
-        c.add( Calendar.DATE, -1 );
-        startDate = c.getTime();
-
-        List<AggregatedStatistics> asList = dataStatisticsService.getReports( now, new Date(  ), EventInterval.WEEK );
-
-        assertNotNull( asList );
-        assertTrue( asList.size() == 1 );
-    }
-
-    @Ignore
-    @Test
-    public void testGetReportsMONTHInterval() throws Exception
-    {
-        dataStatisticsService.addEvent( dse1);
-        dataStatisticsService.addEvent( dse2 );
-        Date startDate = new Date();
-        Calendar c = Calendar.getInstance();
-        c.setTime( startDate );
-        c.add( Calendar.DATE, -1 );
-        startDate = c.getTime();
-
-        List<AggregatedStatistics> asList = dataStatisticsService.getReports( startDate, now, EventInterval.MONTH );
-
-        assertNotNull( asList );
-        assertTrue( asList.size() == 1 );    }
-
-    @Ignore
-    @Test
-    public void testGetReportsYEAHInterval() throws Exception
-    {
-        dataStatisticsService.addEvent( dse1);
-        dataStatisticsService.addEvent( dse2 );
-        Date startDate = new Date();
-        Calendar c = Calendar.getInstance();
-        c.setTime( startDate );
-        c.add( Calendar.DATE, -1 );
-        startDate = c.getTime();
-
-        List<AggregatedStatistics> asList = dataStatisticsService.getReports( startDate, now, EventInterval.YEAR );
-
-        assertNotNull( asList );
-        assertTrue( asList.size() == 1 );    }
-
 
 }
