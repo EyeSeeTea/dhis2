@@ -106,7 +106,7 @@ public class SmsGatewayController
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_MOBILE_SENDSMS')" )
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET, produces = "application/json" )
-    public void getClickatellConfiguration( @PathVariable String uid, HttpServletRequest request,
+    public void getGatewayConfiguration( @PathVariable String uid, HttpServletRequest request,
         HttpServletResponse response )
             throws WebMessageException, IOException
     {

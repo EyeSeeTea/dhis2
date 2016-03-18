@@ -29,12 +29,17 @@ package org.hisp.dhis.dxf2.metadata2.feedback;
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.google.common.base.MoreObjects;
 import org.hisp.dhis.common.DxfNamespaces;
-import org.hisp.dhis.feedback.ObjectErrorReport;
+import org.hisp.dhis.feedback.Stats;
+import org.hisp.dhis.feedback.TypeReport;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -43,30 +48,65 @@ import java.util.Map;
 @JacksonXmlRootElement( localName = "importReport", namespace = DxfNamespaces.DXF_2_0 )
 public class ImportReport
 {
-    private ImportStats stats = new ImportStats();
-
-    private Map<Class<?>, Map<Integer, ObjectErrorReport>> objectErrorReports = new HashMap<>();
+    private Map<Class<?>, TypeReport> typeReportMap = new HashMap<>();
 
     public ImportReport()
     {
     }
 
+    //-----------------------------------------------------------------------------------
+    // Utility Methods
+    //-----------------------------------------------------------------------------------
+
+    public void addTypeReport( TypeReport typeReport )
+    {
+        if ( !typeReportMap.containsKey( typeReport.getKlass() ) ) typeReportMap.put( typeReport.getKlass(), new TypeReport( typeReport.getKlass() ) );
+        typeReportMap.get( typeReport.getKlass() ).merge( typeReport );
+    }
+
+    public void addTypeReports( List<TypeReport> typeReports )
+    {
+        typeReports.forEach( this::addTypeReport );
+    }
+
+    public void addTypeReports( Map<Class<?>, TypeReport> typeReportMap )
+    {
+        typeReportMap.values().forEach( this::addTypeReport );
+    }
+
+    //-----------------------------------------------------------------------------------
+    // Getters and Setters
+    //-----------------------------------------------------------------------------------
+
     @JsonProperty
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public ImportStats getStats()
+    public Stats getStats()
     {
+        Stats stats = new Stats();
+        typeReportMap.values().forEach( typeReport -> stats.merge( typeReport.getStats() ) );
+
         return stats;
     }
 
     @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public Map<Class<?>, Map<Integer, ObjectErrorReport>> getObjectErrorReports()
+    @JacksonXmlElementWrapper( localName = "typeReports", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "typeReport", namespace = DxfNamespaces.DXF_2_0 )
+    public List<TypeReport> getTypeReports()
     {
-        return objectErrorReports;
+        return new ArrayList<>( typeReportMap.values() );
     }
 
-    public void setObjectErrorReports( Map<Class<?>, Map<Integer, ObjectErrorReport>> objectErrorReports )
+    public Map<Class<?>, TypeReport> getTypeReportMap()
     {
-        this.objectErrorReports = objectErrorReports;
+        return typeReportMap;
+    }
+
+    @Override
+    public String toString()
+    {
+        return MoreObjects.toStringHelper( this )
+            .add( "stats", getStats() )
+            .add( "typeReports", getTypeReports() )
+            .toString();
     }
 }

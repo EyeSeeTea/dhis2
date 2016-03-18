@@ -36,13 +36,34 @@ public class AnalyticsIndex
     private String table;
     
     private String column;
+    
+    private String type;
 
-    public AnalyticsIndex( String table, String column )
+    /**
+     * @param table table name.
+     * @param column column name.
+     * @param type index type.
+     */
+    public AnalyticsIndex( String table, String column, String type )
     {
         this.table = table;
         this.column = column;
+        this.type = type;
     }
-    
+
+    // -------------------------------------------------------------------------
+    // Logic
+    // -------------------------------------------------------------------------
+
+    public boolean hasType()
+    {
+        return type != null;
+    }
+
+    // -------------------------------------------------------------------------
+    // Get and set methods
+    // -------------------------------------------------------------------------
+
     public String getTable()
     {
         return table;
@@ -61,6 +82,16 @@ public class AnalyticsIndex
     public void setColumn( String column )
     {
         this.column = column;
+    }
+
+    public String getType()
+    {
+        return type;
+    }
+
+    public void setType( String type )
+    {
+        this.type = type;
     }
 
     @Override

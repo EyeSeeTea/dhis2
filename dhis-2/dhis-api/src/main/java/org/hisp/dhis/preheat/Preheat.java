@@ -33,8 +33,11 @@ import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
+import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserCredentials;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -55,6 +58,12 @@ public class Preheat
 
     private Map<String, UserCredentials> usernames = new HashMap<>();
 
+    private Map<Class<? extends IdentifiableObject>, Map<String, Map<Object, String>>> uniquenessMap = new HashMap<>();
+
+    private Map<String, Period> periodMap = new HashMap<>();
+
+    private Map<String, PeriodType> periodTypeMap = new HashMap<>();
+
     public Preheat()
     {
     }
@@ -67,6 +76,11 @@ public class Preheat
     public void setUser( User user )
     {
         this.user = user;
+    }
+
+    public <T extends IdentifiableObject> T get( PreheatIdentifier identifier, Class<? extends IdentifiableObject> klass, IdentifiableObject object )
+    {
+        return get( identifier, klass, identifier.getIdentifier( object ) );
     }
 
     @SuppressWarnings( "unchecked" )
@@ -152,9 +166,30 @@ public class Preheat
             if ( !map.containsKey( PreheatIdentifier.UID ) ) map.put( PreheatIdentifier.UID, new HashMap<>() );
             if ( !map.get( PreheatIdentifier.UID ).containsKey( klass ) ) map.get( PreheatIdentifier.UID ).put( klass, new HashMap<>() );
 
+            if ( User.class.isAssignableFrom( klass ) )
+            {
+                if ( !map.get( PreheatIdentifier.UID ).containsKey( UserCredentials.class ) )
+                {
+                    map.get( PreheatIdentifier.UID ).put( UserCredentials.class, new HashMap<>() );
+                }
+
+                User user = (User) object;
+
+                Map<String, IdentifiableObject> identifierMap = map.get( PreheatIdentifier.UID ).get( UserCredentials.class );
+
+                if ( !StringUtils.isEmpty( user.getUid() ) && !identifierMap.containsKey( user.getUid() ) )
+                {
+                    identifierMap.put( user.getUid(), user.getUserCredentials() );
+                }
+            }
+
             Map<String, IdentifiableObject> identifierMap = map.get( PreheatIdentifier.UID ).get( klass );
             String key = PreheatIdentifier.UID.getIdentifier( object );
-            identifierMap.put( key, object );
+
+            if ( !StringUtils.isEmpty( key ) && !identifierMap.containsKey( key ) )
+            {
+                identifierMap.put( key, object );
+            }
         }
 
         if ( PreheatIdentifier.CODE == identifier || PreheatIdentifier.AUTO == identifier )
@@ -162,9 +197,94 @@ public class Preheat
             if ( !map.containsKey( PreheatIdentifier.CODE ) ) map.put( PreheatIdentifier.CODE, new HashMap<>() );
             if ( !map.get( PreheatIdentifier.CODE ).containsKey( klass ) ) map.get( PreheatIdentifier.CODE ).put( klass, new HashMap<>() );
 
+            if ( User.class.isAssignableFrom( klass ) )
+            {
+                if ( !map.get( PreheatIdentifier.CODE ).containsKey( UserCredentials.class ) )
+                {
+                    map.get( PreheatIdentifier.CODE ).put( UserCredentials.class, new HashMap<>() );
+                }
+
+                User user = (User) object;
+
+                Map<String, IdentifiableObject> identifierMap = map.get( PreheatIdentifier.CODE ).get( UserCredentials.class );
+                identifierMap.put( user.getCode(), user.getUserCredentials() );
+            }
+
             Map<String, IdentifiableObject> identifierMap = map.get( PreheatIdentifier.CODE ).get( klass );
             String key = PreheatIdentifier.CODE.getIdentifier( object );
-            identifierMap.put( key, object );
+
+            if ( !StringUtils.isEmpty( key ) && !identifierMap.containsKey( key ) )
+            {
+                identifierMap.put( key, object );
+            }
+        }
+
+        return this;
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public <T extends IdentifiableObject> Preheat replace( PreheatIdentifier identifier, T object )
+    {
+        if ( object == null ) return this;
+
+        Class<? extends IdentifiableObject> klass = (Class<? extends IdentifiableObject>) getRealClass( object.getClass() );
+
+        if ( PreheatIdentifier.UID == identifier || PreheatIdentifier.AUTO == identifier )
+        {
+            if ( !map.containsKey( PreheatIdentifier.UID ) ) map.put( PreheatIdentifier.UID, new HashMap<>() );
+            if ( !map.get( PreheatIdentifier.UID ).containsKey( klass ) ) map.get( PreheatIdentifier.UID ).put( klass, new HashMap<>() );
+
+            if ( User.class.isAssignableFrom( klass ) )
+            {
+                if ( !map.get( PreheatIdentifier.UID ).containsKey( UserCredentials.class ) )
+                {
+                    map.get( PreheatIdentifier.UID ).put( UserCredentials.class, new HashMap<>() );
+                }
+
+                User user = (User) object;
+
+                Map<String, IdentifiableObject> identifierMap = map.get( PreheatIdentifier.UID ).get( UserCredentials.class );
+
+                if ( !StringUtils.isEmpty( user.getUid() ) && !identifierMap.containsKey( user.getUid() ) )
+                {
+                    identifierMap.put( user.getUid(), user.getUserCredentials() );
+                }
+            }
+
+            Map<String, IdentifiableObject> identifierMap = map.get( PreheatIdentifier.UID ).get( klass );
+            String key = PreheatIdentifier.UID.getIdentifier( object );
+
+            if ( !StringUtils.isEmpty( key ) )
+            {
+                identifierMap.put( key, object );
+            }
+        }
+
+        if ( PreheatIdentifier.CODE == identifier || PreheatIdentifier.AUTO == identifier )
+        {
+            if ( !map.containsKey( PreheatIdentifier.CODE ) ) map.put( PreheatIdentifier.CODE, new HashMap<>() );
+            if ( !map.get( PreheatIdentifier.CODE ).containsKey( klass ) ) map.get( PreheatIdentifier.CODE ).put( klass, new HashMap<>() );
+
+            if ( User.class.isAssignableFrom( klass ) )
+            {
+                if ( !map.get( PreheatIdentifier.CODE ).containsKey( UserCredentials.class ) )
+                {
+                    map.get( PreheatIdentifier.CODE ).put( UserCredentials.class, new HashMap<>() );
+                }
+
+                User user = (User) object;
+
+                Map<String, IdentifiableObject> identifierMap = map.get( PreheatIdentifier.CODE ).get( UserCredentials.class );
+                identifierMap.put( user.getCode(), user.getUserCredentials() );
+            }
+
+            Map<String, IdentifiableObject> identifierMap = map.get( PreheatIdentifier.CODE ).get( klass );
+            String key = PreheatIdentifier.CODE.getIdentifier( object );
+
+            if ( !StringUtils.isEmpty( key ) )
+            {
+                identifierMap.put( key, object );
+            }
         }
 
         return this;
@@ -174,6 +294,7 @@ public class Preheat
     {
         for ( T object : objects )
         {
+            if ( Preheat.isDefault( object ) ) continue;
             put( identifier, object );
         }
 
@@ -276,5 +397,35 @@ public class Preheat
         }
 
         return klass;
+    }
+
+    public void setUniquenessMap( Map<Class<? extends IdentifiableObject>, Map<String, Map<Object, String>>> uniquenessMap )
+    {
+        this.uniquenessMap = uniquenessMap;
+    }
+
+    public Map<Class<? extends IdentifiableObject>, Map<String, Map<Object, String>>> getUniquenessMap()
+    {
+        return uniquenessMap;
+    }
+
+    public Map<String, Period> getPeriodMap()
+    {
+        return periodMap;
+    }
+
+    public void setPeriodMap( Map<String, Period> periodMap )
+    {
+        this.periodMap = periodMap;
+    }
+
+    public Map<String, PeriodType> getPeriodTypeMap()
+    {
+        return periodTypeMap;
+    }
+
+    public void setPeriodTypeMap( Map<String, PeriodType> periodTypeMap )
+    {
+        this.periodTypeMap = periodTypeMap;
     }
 }

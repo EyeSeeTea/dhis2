@@ -103,7 +103,7 @@ public class SystemInfo
     private String memoryInfo;
 
     private Integer cpuCores;
-
+    
     private String systemId;
 
     public SystemInfo instance()

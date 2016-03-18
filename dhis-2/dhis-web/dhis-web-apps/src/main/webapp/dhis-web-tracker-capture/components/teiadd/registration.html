@@ -4,7 +4,9 @@
 
         <!-- Entity type begins -->
         <div ng-if="!selectedProgramForRelative">
-            <h3>{{'category'| translate}}</h3>
+            <div class="section-label section-spacing vertical-spacing">
+                {{'category'| translate}}
+            </div>
             <table class="dhis2-list-table-striped dhis2-table-hover">
                 <tr>
                     <td>
@@ -19,7 +21,6 @@
                     </td>
                 </tr>                   
             </table>
-            <hr>
         </div>
         <!-- Entity type ends -->        
 
@@ -32,7 +33,7 @@
             </div>
             <!-- enrollment and incidence dates end -->
 
-            <div ng-include="'../dhis-web-commons/angular-forms/custom-form.html'"></div>
+            <div ng-include="'../dhis-web-commons/angular-forms/custom-registration-form.html'"></div>
 
         </div>
         <!-- custom registration form ends-->
@@ -48,8 +49,8 @@
             <div class="alert alert-warning">{{'form_is_empty_fill_at_least_one'| translate}}</div> 
         </div>
 
-        <button type="button" class="btn btn-primary small-horizonal-spacing" ng-click="registerEntity()">{{'save'| translate}}</button>        
-        <button type="button" class="btn btn-default small-horizonal-spacing" ng-click="showRegistration()">{{'cancel'| translate}}</button>
+        <button type="button" class="btn btn-primary" ng-click="registerEntity()">{{'save'| translate}}</button>        
+        <button type="button" class="btn btn-default small-horizontal-spacing" ng-click="showRegistration()">{{'cancel'| translate}}</button>
 
     </form>
     <!--registration form ends -->

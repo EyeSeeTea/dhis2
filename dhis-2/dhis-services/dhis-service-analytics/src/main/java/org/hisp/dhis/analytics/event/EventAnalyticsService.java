@@ -1,5 +1,7 @@
 package org.hisp.dhis.analytics.event;
 
+import java.util.Map;
+
 /*
  * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
@@ -44,10 +46,18 @@ public interface EventAnalyticsService
     String ITEM_LATITUDE = "latitude";
     String ITEM_ORG_UNIT_NAME = "ouname";
     String ITEM_ORG_UNIT_CODE = "oucode";
+    String ITEM_COUNT = "count";
+    String ITEM_CENTER = "center";
+    String ITEM_EXTENT = "extent";
+    String ITEM_POINTS = "points";
     
     Grid getAggregatedEventData( EventQueryParams params );
     
     Grid getAggregatedEventData( AnalyticalObject object, I18nFormat format );
     
     Grid getEvents( EventQueryParams params );
+    
+    Grid getEventClusters( EventQueryParams params );
+    
+    Map<String, Object> getEventCountAndExtent( EventQueryParams params );
 }

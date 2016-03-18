@@ -6,6 +6,8 @@
 
   <bean class="org.hisp.dhis.dxf2.metadata2.objectbundle.hooks.IdentifiableObjectBundleHook" />
 
+  <bean class="org.hisp.dhis.dxf2.metadata2.objectbundle.hooks.AnalyticalObjectObjectBundleHook" />
+
   <bean class="org.hisp.dhis.dxf2.metadata2.objectbundle.hooks.UserObjectBundleHook" />
 
   <bean class="org.hisp.dhis.dxf2.metadata2.objectbundle.hooks.DataSetObjectBundleHook" />
@@ -40,9 +42,13 @@
     class="org.hisp.dhis.dxf2.datavalueset.DefaultDataValueSetService" />
 
   <bean id="org.hisp.dhis.dxf2.datavalueset.DataValueSetStore"
-    class="org.hisp.dhis.dxf2.datavalueset.SpringDataValueSetStore" />
+    class="org.hisp.dhis.dxf2.datavalueset.SpringDataValueSetStore">
+    <property name="jdbcTemplate" ref="jdbcTemplate" />
+  </bean>
 
-  <bean id="org.hisp.dhis.dxf2.events.event.EventStore" class="org.hisp.dhis.dxf2.events.event.JdbcEventStore" />
+  <bean id="org.hisp.dhis.dxf2.events.event.EventStore" class="org.hisp.dhis.dxf2.events.event.JdbcEventStore">
+    <property name="jdbcTemplate" ref="jdbcTemplate" />
+  </bean>
 
   <bean id="org.hisp.dhis.dxf2.events.event.EventService" class="org.hisp.dhis.dxf2.events.event.JacksonEventService" scope="prototype">
     <aop:scoped-proxy proxy-target-class="false" />

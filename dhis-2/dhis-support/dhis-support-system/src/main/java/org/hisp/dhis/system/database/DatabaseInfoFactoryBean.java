@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.metadata2.feedback;
+package org.hisp.dhis.system.database;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -28,13 +28,37 @@ package org.hisp.dhis.dxf2.metadata2.feedback;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.common.DxfNamespaces;
+import org.springframework.beans.factory.FactoryBean;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Lars Helge Overland
  */
-@JacksonXmlRootElement( localName = "importStats", namespace = DxfNamespaces.DXF_2_0 )
-public class ImportStats
+public class DatabaseInfoFactoryBean
+    implements FactoryBean<DatabaseInfo>
 {
+    private DatabaseInfoProvider databaseInfoProvider;
+
+    public void setDatabaseInfoProvider( DatabaseInfoProvider databaseInfoProvider )
+    {
+        this.databaseInfoProvider = databaseInfoProvider;
+    }
+
+    @Override
+    public DatabaseInfo getObject()
+        throws Exception
+    {
+        return databaseInfoProvider.getDatabaseInfo();
+    }
+
+    @Override
+    public Class<?> getObjectType()
+    {
+        return DatabaseInfo.class;
+    }
+
+    @Override
+    public boolean isSingleton()
+    {
+        return true;
+    }
 }

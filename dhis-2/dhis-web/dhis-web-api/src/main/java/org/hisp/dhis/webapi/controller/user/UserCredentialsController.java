@@ -1,4 +1,4 @@
-package org.hisp.dhis.organisationunit.comparator;
+package org.hisp.dhis.webapi.controller.user;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -28,35 +28,35 @@ package org.hisp.dhis.organisationunit.comparator;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.dxf2.common.ImportOptions;
+import org.hisp.dhis.schema.descriptors.UserCredentialsSchemaDescriptor;
+import org.hisp.dhis.user.UserCredentials;
+import org.hisp.dhis.webapi.controller.AbstractCrudController;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.client.HttpServerErrorException;
 
-import java.util.Comparator;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class OrganisationUnitComparator
-    implements Comparator<OrganisationUnit>
+@Controller
+@RequestMapping( value = UserCredentialsSchemaDescriptor.API_ENDPOINT )
+public class UserCredentialsController
+    extends AbstractCrudController<UserCredentials>
 {
-    private int countParents( OrganisationUnit organisationUnit )
+    @Override
+    public void postXmlObject( ImportOptions importOptions, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
-        int parents = 0;
-        OrganisationUnit currentOrganisationUnit = organisationUnit;
-
-        while ( (currentOrganisationUnit = currentOrganisationUnit.getParent()) != null )
-        {
-            parents++;
-        }
-
-        return parents;
+        throw new HttpServerErrorException( HttpStatus.BAD_REQUEST );
     }
 
     @Override
-    public int compare( OrganisationUnit organisationUnit1, OrganisationUnit organisationUnit2 )
+    public void postJsonObject( ImportOptions importOptions, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
-        Integer parents1 = countParents( organisationUnit1 );
-        Integer parents2 = countParents( organisationUnit2 );
-
-        return parents1.compareTo( parents2 );
+        throw new HttpServerErrorException( HttpStatus.BAD_REQUEST );
     }
 }

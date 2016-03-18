@@ -39,12 +39,12 @@ import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageDataElement;
 import org.hisp.dhis.program.ProgramStageSection;
+import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.render.RenderFormat;
 import org.hisp.dhis.render.RenderService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.validation.ValidationRule;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -89,7 +89,7 @@ public class ObjectBundleServiceProgramTest
 
         ObjectBundle bundle = objectBundleService.create( params );
         ObjectBundleValidation validate = objectBundleService.validate( bundle );
-        assertTrue( validate.getObjectErrorReportsMap().isEmpty() );
+        assertTrue( validate.getAllObjectErrorReports().isEmpty() );
 
         objectBundleService.commit( bundle );
 
@@ -130,7 +130,7 @@ public class ObjectBundleServiceProgramTest
 
         ObjectBundle bundle = objectBundleService.create( params );
         ObjectBundleValidation validate = objectBundleService.validate( bundle );
-        assertTrue( validate.getObjectErrorReportsMap().isEmpty() );
+        assertTrue( validate.getAllObjectErrorReports().isEmpty() );
 
         objectBundleService.commit( bundle );
 
@@ -162,7 +162,6 @@ public class ObjectBundleServiceProgramTest
     }
 
     @Test
-    @Ignore
     public void testCreateSimpleProgramReg() throws IOException
     {
         Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> metadata = renderService.fromMetadata(
@@ -175,12 +174,10 @@ public class ObjectBundleServiceProgramTest
 
         ObjectBundle bundle = objectBundleService.create( params );
         ObjectBundleValidation validate = objectBundleService.validate( bundle );
-        System.err.println( validate.getObjectErrorReportsMap() );
-        assertTrue( validate.getObjectErrorReportsMap().isEmpty() );
+        assertTrue( validate.getAllObjectErrorReports().isEmpty() );
 
         objectBundleService.commit( bundle );
 
-        List<DataSet> dataSets = manager.getAll( DataSet.class );
         List<OrganisationUnit> organisationUnits = manager.getAll( OrganisationUnit.class );
         List<DataElement> dataElements = manager.getAll( DataElement.class );
         List<UserAuthorityGroup> userRoles = manager.getAll( UserAuthorityGroup.class );
@@ -188,14 +185,15 @@ public class ObjectBundleServiceProgramTest
         List<Program> programs = manager.getAll( Program.class );
         List<ProgramStage> programStages = manager.getAll( ProgramStage.class );
         List<ProgramStageDataElement> programStageDataElements = manager.getAll( ProgramStageDataElement.class );
+        List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes = manager.getAll( ProgramTrackedEntityAttribute.class );
 
-        assertFalse( dataSets.isEmpty() );
         assertFalse( organisationUnits.isEmpty() );
         assertFalse( dataElements.isEmpty() );
         assertFalse( users.isEmpty() );
         assertFalse( userRoles.isEmpty() );
         assertEquals( 1, programs.size() );
-        assertEquals( 1, programStages.size() );
+        assertEquals( 2, programStages.size() );
         assertEquals( 4, programStageDataElements.size() );
+        assertEquals( 2, programTrackedEntityAttributes.size() );
     }
 }

@@ -32,7 +32,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.system.startup.AbstractStartupRoutine;
 import org.hisp.dhis.system.util.DateUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
@@ -52,10 +51,12 @@ public class IdentityPopulator
     private static final Map<String, String> TABLE_ID_MAP = DimensionalObjectUtils.asMap(
         "dataelementcategoryoption", "categoryoptionid",
         "dataelementcategory", "categoryid",
-        "program_attributes", "programtrackedentityattributeid" );
+        "program_attributes", "programtrackedentityattributeid",
+        "users", "userid"
+    );
 
     private List<String> tables = new ArrayList<>();
-    
+
     public void setTables( List<String> tables )
     {
         this.tables = tables;
@@ -65,8 +66,12 @@ public class IdentityPopulator
     // Dependencies
     // -------------------------------------------------------------------------
 
-    @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    public void setJdbcTemplate( JdbcTemplate jdbcTemplate )
+    {
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
     // -------------------------------------------------------------------------
     // Execute
@@ -83,7 +88,7 @@ public class IdentityPopulator
                 log.debug( "Checking table: " + table );
 
                 int count = 0;
-
+                
                 SqlRowSet resultSet = jdbcTemplate.queryForRowSet( "SELECT * from " + table + " WHERE uid IS NULL" );
 
                 while ( resultSet.next() )
@@ -177,7 +182,7 @@ public class IdentityPopulator
 
     private String getIdColumn( String table )
     {
-        return TABLE_ID_MAP.getOrDefault( table, ( table + "id" ) );
+        return TABLE_ID_MAP.getOrDefault( table, (table + "id") );
     }
 
     private void createOrgUnitUuids()

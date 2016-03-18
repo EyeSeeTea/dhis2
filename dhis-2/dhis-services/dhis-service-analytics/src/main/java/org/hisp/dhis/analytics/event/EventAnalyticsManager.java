@@ -1,5 +1,7 @@
 package org.hisp.dhis.analytics.event;
 
+import java.util.Map;
+
 /*
  * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
@@ -39,5 +41,9 @@ public interface EventAnalyticsManager
     
     Grid getEvents( EventQueryParams params, Grid grid, int maxLimit );
     
-    int getEventCount( EventQueryParams params );
+    Grid getEventClusters( EventQueryParams params, Grid grid, int maxLimit );
+    
+    long getEventCount( EventQueryParams params );
+    
+    Map<String, Object> getCountAndExtent( EventQueryParams params );
 }

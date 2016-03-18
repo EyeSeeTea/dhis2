@@ -40,6 +40,7 @@ import static org.hisp.dhis.system.util.MathUtils.getRounded;
 import static org.hisp.dhis.common.DimensionalObjectUtils.COMPOSITE_DIM_OBJECT_PLAIN_SEP;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -75,6 +76,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 /**
  * TODO could use row_number() and filtering for paging, but not supported on MySQL.
@@ -89,10 +91,16 @@ public class JdbcEventAnalyticsManager
     private static final String QUERY_ERR_MSG = "Query failed, likely because the requested analytics table does not exist";
     private static final String ITEM_NAME_SEP = ": ";
     private static final String NA = "[N/A]";
-    
-    @Autowired
+    private static final String COL_COUNT = "count";
+    private static final String COL_EXTENT = "extent";
+
     private JdbcTemplate jdbcTemplate;
-    
+
+    public void setJdbcTemplate( JdbcTemplate jdbcTemplate )
+    {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
     @Autowired
     private StatementBuilder statementBuilder;
     
@@ -310,35 +318,87 @@ public class JdbcEventAnalyticsManager
             }
         }
     }
-    
+
     @Override
-    public int getEventCount( EventQueryParams params )
+    public Grid getEventClusters( EventQueryParams params, Grid grid, int maxLimit )
+    {
+        params.setGeometryOnly( true );
+        
+        List<String> columns = Lists.newArrayList( "count(psi) as count", 
+            "ST_AsText(ST_Centroid(ST_Collect(geom))) as center", "ST_Extent(geom) as extent" );
+
+        columns.add( params.isIncludeClusterPoints() ?
+            "array_to_string(array_agg(psi), ',') as points" :
+            "case when count(psi) = 1 then array_to_string(array_agg(psi), ',') end as points" );
+        
+        String sql = "select " + StringUtils.join( columns, "," ) + " ";
+        
+        sql += getFromWhereClause( params, Lists.newArrayList( "psi", "geom" ) );
+        
+        sql += "group by ST_SnapToGrid(ST_Transform(geom, 3785), " + params.getClusterSize() + ") ";
+        
+        SqlRowSet rowSet = jdbcTemplate.queryForRowSet( sql );
+
+        log.info( "Analytics event cluster SQL: " + sql );
+        
+        while ( rowSet.next() )
+        {
+            grid.addRow();
+            
+            grid.addValue( rowSet.getLong( "count" ) );
+            grid.addValue( rowSet.getString( "center" ) );
+            grid.addValue( rowSet.getString( "extent" ) );
+            grid.addValue( rowSet.getString( "points" ) );         
+        }
+        
+        return grid;
+    }
+
+    @Override
+    public long getEventCount( EventQueryParams params )
     {
         String sql = "select count(psi) ";
         
         sql += getFromWhereClause( params, Lists.newArrayList( "psi" ) );
-                
-        int count = 0;
+        
+        long count = 0;
         
         try
         {
-            count = getEventCount( sql );          
+            count = jdbcTemplate.queryForObject( sql, Long.class );
+            
+            log.debug( "Analytics event count SQL: " + sql );
         }
         catch ( BadSqlGrammarException ex )
         {
             log.info( QUERY_ERR_MSG, ex );
         }
-
+        
         return count;
     }
     
-    private int getEventCount( String sql )
+    @Override
+    public Map<String, Object> getCountAndExtent( EventQueryParams params )
     {
-        int count = jdbcTemplate.queryForObject( sql, Integer.class );
-
-        log.debug( "Analytics event count SQL: " + sql );
+        Map<String, Object> map = Maps.newHashMap();
         
-        return count;
+        params.setGeometryOnly( true );
+        
+        String sql = "select count(psi) as " + COL_COUNT + ", ST_Extent(geom) AS " + COL_EXTENT + " ";
+        
+        sql += getFromWhereClause( params, Lists.newArrayList( "psi", "geom" ) );
+        
+        SqlRowSet rowSet = jdbcTemplate.queryForRowSet( sql );
+        
+        log.debug( "Analytics event count and extent SQL: " + sql );
+        
+        if ( rowSet.next() )
+        {
+            map.put( COL_COUNT, rowSet.getLong( COL_COUNT ) );
+            map.put( COL_EXTENT, String.valueOf( rowSet.getObject( COL_EXTENT ) ) );
+        }
+        
+        return map;
     }
     
     // -------------------------------------------------------------------------
@@ -491,6 +551,12 @@ public class JdbcEventAnalyticsManager
         return columns;
     }
     
+    /**
+     * Returns a from and where SQL clause.
+     * 
+     * @param params the event query parameters.
+     * @param fixedColumns the list of fixed column names to include.
+     */
     private String getFromWhereClause( EventQueryParams params, List<String> fixedColumns )
     {
         if ( params.spansMultiplePartitions() )
@@ -502,7 +568,14 @@ public class JdbcEventAnalyticsManager
             return getFromWhereSinglePartitionClause( params, params.getPartitions().getSinglePartition() );
         }
     }
-    
+
+    /**
+     * Returns a from and where SQL clause for all partitions part of the given
+     * query parameters.
+     * 
+     * @param params the event query parameters.
+     * @param fixedColumns the list of fixed column names to include.
+     */
     private String getFromWhereMultiplePartitionsClause( EventQueryParams params, List<String> fixedColumns )
     {
         List<String> cols = ListUtils.distinctUnion( fixedColumns, getAggregateColumns( params ), getPartitionSelectColumns( params ) );
@@ -524,7 +597,14 @@ public class JdbcEventAnalyticsManager
         
         return sql;
     }
-    
+
+    /**
+     * Returns a from and where SQL clause for the given analytics table 
+     * partition.
+     * 
+     * @param params the event query parameters.
+     * @param partition the partition name.
+     */
     private String getFromWhereSinglePartitionClause( EventQueryParams params, String partition )
     {
         String sql = "from " + partition + " ";
@@ -646,9 +726,19 @@ public class JdbcEventAnalyticsManager
             sql += "and (longitude is not null and latitude is not null) ";
         }
         
+        if ( params.isGeometryOnly() )
+        {
+            sql += "and geom is not null ";
+        }
+        
         if ( params.isCompletedOnly() )
         {
             sql += "and completeddate is not null ";
+        }
+        
+        if ( params.hasBbox() )
+        {
+            sql += "and geom && ST_MakeEnvelope(" + params.getBbox() + ",4326)";
         }
 
         return sql;

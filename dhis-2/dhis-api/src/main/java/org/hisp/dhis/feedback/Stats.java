@@ -34,81 +34,119 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.google.common.base.MoreObjects;
 import org.hisp.dhis.common.DxfNamespaces;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JacksonXmlRootElement( localName = "objectErrorReport", namespace = DxfNamespaces.DXF_2_0 )
-public class ObjectErrorReport
+@JacksonXmlRootElement( localName = "stats", namespace = DxfNamespaces.DXF_2_0 )
+public class Stats
 {
-    private final Class<?> objectClass;
+    private int total;
 
-    private Integer objectIndex;
+    private int created;
 
-    private Map<ErrorCode, List<ErrorReport>> errorReportsByCode = new HashMap<>();
+    private int updated;
 
-    public ObjectErrorReport( Class<?> objectClass )
+    private int deleted;
+
+    private int ignored;
+
+    public Stats()
     {
-        this.objectClass = objectClass;
     }
 
-    public ObjectErrorReport( Class<?> objectClass, Integer objectIndex )
+    public void merge( Stats stats )
     {
-        this.objectClass = objectClass;
-        this.objectIndex = objectIndex;
-    }
-
-    @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public Class<?> getObjectClass()
-    {
-        return objectClass;
-    }
-
-    @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public Integer getObjectIndex()
-    {
-        return objectIndex;
-    }
-
-    public void addErrorReports( List<? extends ErrorReport> errorReports )
-    {
-        errorReports.forEach( this::addErrorReport );
-    }
-
-    public void addErrorReport( ErrorReport errorReport )
-    {
-        if ( !errorReportsByCode.containsKey( errorReport.getErrorCode() ) )
-        {
-            errorReportsByCode.put( errorReport.getErrorCode(), new ArrayList<>() );
-        }
-
-        errorReportsByCode.get( errorReport.getErrorCode() ).add( errorReport );
-    }
-
-    public List<ErrorCode> getErrorCodes()
-    {
-        return new ArrayList<>( errorReportsByCode.keySet() );
+        total += stats.getTotal();
+        created += stats.getCreated();
+        updated += stats.getUpdated();
+        deleted += stats.getDeleted();
+        ignored += stats.getIgnored();
     }
 
     @JsonProperty
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public List<ErrorReport> getErrorReports()
+    public int getTotal()
     {
-        List<ErrorReport> errorReports = new ArrayList<>();
-        errorReportsByCode.values().forEach( errorReports::addAll );
-
-        return errorReports;
+        return total;
     }
 
-    public Map<ErrorCode, List<ErrorReport>> getErrorReportsByCode()
+    public void incTotal()
     {
-        return errorReportsByCode;
+        total++;
+    }
+
+    public void incTotal( int n )
+    {
+        total += n;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public int getCreated()
+    {
+        return created;
+    }
+
+    public void incCreated()
+    {
+        created++;
+    }
+
+    public void incCreated( int n )
+    {
+        created += n;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public int getUpdated()
+    {
+        return updated;
+    }
+
+    public void incUpdated()
+    {
+        updated++;
+    }
+
+    public void incUpdated( int n )
+    {
+        updated += n;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public int getDeleted()
+    {
+        return deleted;
+    }
+
+    public void incDeleted()
+    {
+        deleted++;
+        total++;
+    }
+
+    public void incDeleted( int n )
+    {
+        deleted += n;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public int getIgnored()
+    {
+        return ignored;
+    }
+
+    public void incIgnored()
+    {
+        ignored++;
+    }
+
+    public void incIgnored( int n )
+    {
+        ignored += n;
     }
 
 
@@ -116,9 +154,11 @@ public class ObjectErrorReport
     public String toString()
     {
         return MoreObjects.toStringHelper( this )
-            .add( "objectClass", objectClass )
-            .add( "objectIndex", objectIndex )
-            .add( "errorReportsByCode", errorReportsByCode )
+            .add( "total", total )
+            .add( "created", created )
+            .add( "updated", updated )
+            .add( "deleted", deleted )
+            .add( "ignored", ignored )
             .toString();
     }
 }

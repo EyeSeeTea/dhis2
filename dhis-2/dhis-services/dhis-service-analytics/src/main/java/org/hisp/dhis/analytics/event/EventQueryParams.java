@@ -52,7 +52,6 @@ import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.commons.collection.ListUtils;
 import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dxf2.common.JacksonUtils;
 import org.hisp.dhis.legend.Legend;
 import org.hisp.dhis.option.OptionSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -151,15 +150,35 @@ public class EventQueryParams
     private boolean collapseDataDimensions;
 
     /**
-     * Indicates whether request is intended to fetch coordinates only.
+     * Indicates whether request is intended to fetch events with coordinates only.
      */
     private boolean coordinatesOnly;
+    
+    /**
+     * Indicates whether request is intended to fetch events with geometry only.
+     */
+    private boolean geometryOnly;
 
     /**
      * Indicates whether the query originates from an aggregate data query.
      */
     private boolean aggregateData;
+    
+    /**
+     * Size of cluster in meter.
+     */
+    private Long clusterSize;
 
+    /**
+     * Bounding box for events to include in clustering.
+     */
+    private String bbox;
+    
+    /**
+     * Indicates whether to include underlying points for each cluster.
+     */
+    private boolean includeClusterPoints;
+    
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -202,7 +221,11 @@ public class EventQueryParams
         params.outputType = this.outputType;
         params.collapseDataDimensions = this.collapseDataDimensions;
         params.coordinatesOnly = this.coordinatesOnly;
+        params.geometryOnly = this.geometryOnly;
         params.aggregateData = this.aggregateData;
+        params.clusterSize = this.clusterSize;
+        params.bbox = this.bbox;
+        params.includeClusterPoints = this.includeClusterPoints;
 
         params.periodType = this.periodType;
 
@@ -504,6 +527,16 @@ public class EventQueryParams
     {
         return program != null && program.isRegistration();
     }
+    
+    public boolean hasClusterSize()
+    {
+        return clusterSize != null;
+    }
+    
+    public boolean hasBbox()
+    {
+        return bbox != null && !bbox.isEmpty();
+    }
 
     /**
      * Returns a negative integer in case of ascending sort order, a positive in
@@ -532,7 +565,7 @@ public class EventQueryParams
         map.put( "Dimensions", dimensions );
         map.put( "Filters", filters );
         
-        return JacksonUtils.toJsonAsStringSilent( map );
+        return map.toString(); //TODO
     }
 
     // -------------------------------------------------------------------------
@@ -721,6 +754,16 @@ public class EventQueryParams
         this.coordinatesOnly = coordinatesOnly;
     }
 
+    public boolean isGeometryOnly()
+    {
+        return geometryOnly;
+    }
+
+    public void setGeometryOnly( boolean geometryOnly )
+    {
+        this.geometryOnly = geometryOnly;
+    }
+
     public boolean isAggregateData()
     {
         return aggregateData;
@@ -729,5 +772,35 @@ public class EventQueryParams
     public void setAggregateData( boolean aggregateData )
     {
         this.aggregateData = aggregateData;
+    }
+
+    public Long getClusterSize()
+    {
+        return clusterSize;
+    }
+
+    public void setClusterSize( Long clusterSize )
+    {
+        this.clusterSize = clusterSize;
+    }
+
+    public String getBbox()
+    {
+        return bbox;
+    }
+
+    public void setBbox( String bbox )
+    {
+        this.bbox = bbox;
+    }
+
+    public boolean isIncludeClusterPoints()
+    {
+        return includeClusterPoints;
+    }
+
+    public void setIncludeClusterPoints( boolean includeClusterPoints )
+    {
+        this.includeClusterPoints = includeClusterPoints;
     }
 }

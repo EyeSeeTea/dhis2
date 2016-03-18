@@ -1,24 +1,7 @@
-<h3 ng-if="widget !== 'PROFILE'">{{'profile'| translate}}</h3>
-<script type="text/ng-template" id="attribute-details.html">
-    <table class="table table-bordered">
-        <tr>
-            <td class="bold">{{'description' | translate}}</td>
-            <td>{{content.description ? content.description : 'not_available' | translate}}</td>
-        </tr>
-        <!--<tr>
-            <td class="bold">{{'url' | translate}}</td>
-            <td>
-                <span ng-if="content.url">
-                    <a href="{{content.url}}" target="_blank">{{content.url}}</a>
-                </span>
-                <span ng-if="!content.url">
-                    {{'not_available' | translate}}
-                </span>
-            </td>
-        </tr>-->
-    </table>
-</script>
-<table class="dhis2-list-table-striped dhis2-table-hover">
+<div ng-if="widget !== 'PROFILE'" class="section-label section-spacing vertical-spacing">
+    {{'profile'| translate}}
+</div>
+<table class="dhis2-list-table-striped default-form-table">
     <tr ng-repeat="attribute in attributes | filter: {attribute: 'true'} " ng-if="!hiddenFields[attribute.id] && ((editingDisabled  && attribute.show) || !editingDisabled)">
         <td>
             <span d2-pop-over 
@@ -162,6 +145,24 @@
                             <a href ng-if="selectedTei[attribute.id]" ng-class="{true: 'disable-clicks', false: ''} [editingDisabled]" ng-click="selectedTei[attribute.id] = null" title="{{'add'| translate}} {{attribute.displayName}}">
                                 <i class="fa fa-trash-o fa-2x vertical-center"></i>
                             </a>
+                        </span>
+                    </span>
+                    <span ng-switch-when="COORDINATE">
+                        <input type="text"
+                               name="foo" 
+                               placeholder="{{'latitude_longitude_format' | translate}}"
+                               class="form-control"
+                               ng-model="selectedTei[attribute.id]" 
+                               ng-model-options="{ updateOn: 'default blur', allowInvalid: true }"
+                               d2-custom-coordinate-validator 
+                               attribute-data={{attribute}}
+                               selected-program-id={{selectedProgram.id}}  
+                               selected-tei-id={{selectedTei.trackedEntityInstance}}
+                               ng-disabled="editingDisabled" 
+                               ng-blur="teiValueUpdated(selectedTei, attribute.id)"
+                               ng-required="attribute.mandatory || attribute.unique"/>
+                        <span class="hideInPrint" ng-if="!editingDisabled">
+                            <a href ng-click="showAttributeMap(selectedTei, attribute.id)" title="{{'get_from_map'| translate}}"><i class="fa fa-map-marker fa-2x"></i></a>
                         </span>
                     </span>
                     <span ng-switch-default>

@@ -49,6 +49,7 @@ import org.hisp.dhis.period.Period;
 import org.hisp.dhis.program.ProgramIndicator;
 import org.hisp.dhis.setting.SettingKey;
 import org.hisp.dhis.setting.SystemSettingManager;
+import org.hisp.dhis.system.util.ValidationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -122,17 +123,27 @@ public class DefaultEventQueryPlanner
 
         if ( params.getPage() != null && params.getPage() <= 0 )
         {
-            violation = "Page number must be positive: " + params.getPage();
+            violation = "Page number must be a positive number: " + params.getPage();
         }
         
         if ( params.getPageSize() != null && params.getPageSize() < 0 )
         {
-            violation = "Page size must be zero or positive: " + params.getPageSize();
+            violation = "Page size must be zero or a positive number: " + params.getPageSize();
         }
         
         if ( params.hasLimit() && getMaxLimit() > 0 && params.getLimit() > getMaxLimit() )
         {
             violation = "Limit of: " + params.getLimit() + " is larger than max limit: " + getMaxLimit();
+        }
+        
+        if ( params.hasClusterSize() && params.getClusterSize() <= 0 )
+        {
+            violation = "Cluster size must be a positive number: " + params.getClusterSize();
+        }
+        
+        if ( params.hasBbox() && !ValidationUtils.bboxIsValid( params.getBbox() ) )
+        {
+            violation = "Bbox is invalid: " + params.getBbox() + ", must be on format: 'min-lng,min-lat,max-lng,max-lat'";
         }
         
         if ( violation != null )

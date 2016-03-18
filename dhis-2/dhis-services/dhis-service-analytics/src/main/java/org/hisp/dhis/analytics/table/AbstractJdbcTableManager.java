@@ -35,12 +35,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.analytics.AnalyticsIndex;
 import org.hisp.dhis.analytics.AnalyticsTable;
+import org.hisp.dhis.analytics.AnalyticsTableColumn;
 import org.hisp.dhis.analytics.AnalyticsTableManager;
 import org.hisp.dhis.calendar.Calendar;
 import org.hisp.dhis.common.CodeGenerator;
@@ -57,6 +59,7 @@ import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.resourcetable.ResourceTableService;
 import org.hisp.dhis.setting.SystemSettingManager;
+import org.hisp.dhis.system.database.DatabaseInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -99,27 +102,26 @@ public abstract class AbstractJdbcTableManager
     protected StatementBuilder statementBuilder;
     
     @Autowired
+    protected DatabaseInfo databaseInfo;
+
     protected JdbcTemplate jdbcTemplate;
+
+    public void setJdbcTemplate( JdbcTemplate jdbcTemplate )
+    {
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
     // -------------------------------------------------------------------------
     // Abstract methods
     // -------------------------------------------------------------------------
 
     /**
-     * Returns a list of string arrays in where the first index holds the database
-     * column name, the second index holds the database column data type and the 
-     * third column holds a table alias and name. Column names are quoted.
-     * 
-     * <ul>
-     * <li>0 = database column name (quoted)</li>
-     * <li>1 = database column data type</li>
-     * <li>2 = column alias and name</li>
-     * </ul>
+     * Returns a list of analytics table columns. Column names are quoted.
      */
-    protected abstract List<String[]> getDimensionColumns( AnalyticsTable table );
+    protected abstract List<AnalyticsTableColumn> getDimensionColumns( AnalyticsTable table );
     
     /**
-     * Override to perform work before tables are being generated.
+     * Override in order to perform work before tables are being generated.
      */
     @Override
     public void preCreateTables()
@@ -185,9 +187,10 @@ public abstract class AbstractJdbcTableManager
                 break taskLoop;
             }
             
-            final String indexName = getIndexName( inx );
+            final String indexName = getIndexName( inx );            
+            final String indexType = inx.hasType() ? " using " + inx.getType() : "";
             
-            final String sql = "create index " + indexName + " on " + inx.getTable() + " (" + inx.getColumn() + ")";
+            final String sql = "create index " + indexName + " on " + inx.getTable() + indexType + " (" + inx.getColumn() + ")";
             
             log.debug( "Create index: " + indexName + " SQL: " + sql );
             
@@ -297,26 +300,21 @@ public abstract class AbstractJdbcTableManager
     }
     
     /**
-     * Checks whether the given list of dimensions are valid.
+     * Checks whether the given list of columns are valid.
      * @throws IllegalStateException if not valid.
      */
-    protected void validateDimensionColumns( List<String[]> dimensions )
+    protected void validateDimensionColumns( List<AnalyticsTableColumn> columns )
     {        
-        if ( dimensions == null || dimensions.isEmpty() )
+        if ( columns == null || columns.isEmpty() )
         {
             throw new IllegalStateException( "Analytics table dimensions are empty" );
         }
         
-        dimensions = new ArrayList<>( dimensions );
+        columns = new ArrayList<>( columns );
         
-        List<String> columns = new ArrayList<>();
-        
-        for ( String[] dimension : dimensions )
-        {
-            columns.add( dimension[0] );
-        }
-        
-        Set<String> duplicates = ListUtils.getDuplicates( columns );
+        List<String> columnNames = columns.stream().map( d -> d.getName() ).collect( Collectors.toList() );
+                
+        Set<String> duplicates = ListUtils.getDuplicates( columnNames );
         
         if ( !duplicates.isEmpty() )
         {

@@ -1,22 +1,3 @@
-<script type="text/ng-template" id="dataelement-details.html">
-    <table class="table table-bordered">
-        <tr>
-            <td class="bold">{{'description' | translate}}</td>
-            <td>{{content.description ? content.description : 'not_available' | translate}}</td>
-        </tr>
-        <tr>
-            <td class="bold">{{'url' | translate}}</td>
-            <td>
-                <span ng-if="content.url">
-                    <a href="{{content.url}}" target="_blank">{{content.url}}</a>
-                </span>
-                <span ng-if="!content.url">
-                    {{'not_available' | translate}}
-                </span>
-            </td>
-        </tr>
-    </table>
-</script>
 <div  ng-if='!selectedProgramStage.programStageSections.length'>
     <div ng-include="'views/event-details.html'"></div>
     <table class="dhis2-list-table-striped table-with-fixed-layout">
@@ -169,7 +150,7 @@
                                         class="form-control">
                                     </textarea>
                             </div>
-                            <div ng-switch-when="BOOLEAN">
+                            <div ng-switch-when="BOOLEAN" class="form-control">
                                 <d2-radio-button
                                     dh-required="eventGridColumn.compulsory"
                                     dh-disabled="assignedFields[eventGridColumn.id]"
@@ -277,7 +258,7 @@
         <div class="vertical-spacing" ng-if="!section.programStageDataElements || section.programStageDataElements.length === 0">
             <div class="alert alert-warning">{{'section'| translate}} {{section.displayName}} {{'has_no_dataelements'| translate}}</div>
         </div>  
-        <table class="dhis2-list-table-striped">
+        <table class="dhis2-list-table-striped small-vertical-spacing">
             <thead>                        
                 <tr>
                     <th>
@@ -430,7 +411,7 @@
                                             class="form-control"/>
                                     </textarea>
                                 </div>
-                                <div ng-switch-when="BOOLEAN">
+                                <div ng-switch-when="BOOLEAN" class="form-control">
                                     <d2-radio-button
                                         dh-required="prStDes[de.dataElement.id].compulsory"
                                         dh-disabled="assignedFields[de.dataElement.id]"

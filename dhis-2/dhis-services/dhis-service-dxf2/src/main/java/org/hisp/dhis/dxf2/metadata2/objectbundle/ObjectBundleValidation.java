@@ -31,82 +31,42 @@ package org.hisp.dhis.dxf2.metadata2.objectbundle;
 import com.google.common.base.MoreObjects;
 import org.hisp.dhis.feedback.ErrorCode;
 import org.hisp.dhis.feedback.ErrorReport;
-import org.hisp.dhis.feedback.ObjectErrorReport;
+import org.hisp.dhis.feedback.ErrorReports;
+import org.hisp.dhis.feedback.TypeReport;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public class ObjectBundleValidation
 {
-    private Map<Class<?>, Map<Integer, ObjectErrorReport>> objectErrorReportsMap = new HashMap<>();
+    private Map<Class<?>, TypeReport> typeReportMap = new HashMap<>();
 
     public ObjectBundleValidation()
     {
     }
 
-    public void addObjectErrorReports( List<ObjectErrorReport> objectErrorReports )
-    {
-        objectErrorReports.forEach( this::addObjectErrorReport );
-    }
-
-    public void addObjectErrorReport( ObjectErrorReport objectErrorReport )
-    {
-        if ( objectErrorReport == null || objectErrorReport.getErrorCodes().isEmpty() )
-        {
-            return;
-        }
-
-        Class<?> objectClass = objectErrorReport.getObjectClass();
-
-        if ( !objectErrorReportsMap.containsKey( objectClass ) )
-        {
-            objectErrorReportsMap.put( objectClass, new HashMap<>() );
-        }
-
-        Map<Integer, ObjectErrorReport> indexMap = objectErrorReportsMap.get( objectClass );
-
-        if ( !indexMap.containsKey( objectErrorReport.getObjectIndex() ) )
-        {
-            indexMap.put( objectErrorReport.getObjectIndex(), objectErrorReport );
-        }
-        else
-        {
-            indexMap.get( objectErrorReport.getObjectIndex() ).addErrorReports( objectErrorReport.getErrorReports() );
-        }
-    }
-
-    public List<ObjectErrorReport> getAllObjectErrorReports( Class<?> klass )
-    {
-        List<ObjectErrorReport> objectErrorReports = new ArrayList<>();
-        Map<Integer, ObjectErrorReport> errorReportMap = objectErrorReportsMap.get( klass );
-        errorReportMap.values().forEach( objectErrorReports::add );
-
-        return objectErrorReports;
-    }
-
-    public Map<Integer, ObjectErrorReport> getObjectErrorReports( Class<?> klass )
-    {
-        return objectErrorReportsMap.get( klass );
-    }
+    //-----------------------------------------------------------------------------------
+    // Utility Methods
+    //-----------------------------------------------------------------------------------
 
     public List<ErrorReport> getErrorReportsByCode( Class<?> klass, ErrorCode errorCode )
     {
         List<ErrorReport> errorReports = new ArrayList<>();
 
-        if ( !objectErrorReportsMap.containsKey( klass ) )
+        if ( !typeReportMap.containsKey( klass ) )
         {
             return errorReports;
         }
 
-        Collection<ObjectErrorReport> objectErrorReports = objectErrorReportsMap.get( klass ).values();
+        List<ErrorReports> objectReports = typeReportMap.get( klass ).getObjectErrorReports();
 
-        for ( ObjectErrorReport objectErrorReport : objectErrorReports )
+        for ( ErrorReports objectErrorReport : objectReports )
         {
             List<ErrorReport> byCode = objectErrorReport.getErrorReportsByCode().get( errorCode );
 
@@ -119,16 +79,63 @@ public class ObjectBundleValidation
         return errorReports;
     }
 
-    public Map<Class<?>, Map<Integer, ObjectErrorReport>> getObjectErrorReportsMap()
+    public void addTypeReport( TypeReport report )
     {
-        return objectErrorReportsMap;
+        if ( report == null ) return;
+
+        if ( !typeReportMap.containsKey( report.getKlass() ) )
+        {
+            typeReportMap.put( report.getKlass(), report );
+            return;
+        }
+
+        TypeReport typeReport = typeReportMap.get( report.getKlass() );
+        typeReport.merge( typeReport );
+    }
+
+    //-----------------------------------------------------------------------------------
+    // Getters and Setters
+    //-----------------------------------------------------------------------------------
+
+    public boolean isEmpty()
+    {
+        return typeReportMap.isEmpty();
+    }
+
+    public boolean isEmpty( Class<?> klass )
+    {
+        return typeReportMap.containsKey( klass ) && typeReportMap.get( klass ).getObjectReportMap().isEmpty();
+    }
+
+    public Map<Class<?>, TypeReport> getTypeReportMap()
+    {
+        return typeReportMap;
+    }
+
+    public TypeReport getTypeReportMap( Class<?> klass )
+    {
+        return typeReportMap.get( klass );
+    }
+
+    public List<ErrorReports> getAllObjectErrorReports( Class<?> klass )
+    {
+        if ( !typeReportMap.containsKey( klass ) ) new ArrayList<>();
+        return typeReportMap.get( klass ).getObjectErrorReports().stream().collect( Collectors.toList() );
+    }
+
+    public List<ErrorReports> getAllObjectErrorReports()
+    {
+        List<ErrorReports> errorReportses = new ArrayList<>();
+        typeReportMap.values().forEach( typeReport -> errorReportses.addAll( typeReport.getObjectErrorReports() ) );
+
+        return errorReportses;
     }
 
     @Override
     public String toString()
     {
         return MoreObjects.toStringHelper( this )
-            .add( "objectErrorReportsMap", objectErrorReportsMap )
+            .add( "typeReportMap", typeReportMap )
             .toString();
     }
 }
