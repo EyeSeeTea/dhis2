@@ -28,19 +28,18 @@ public class BulkSmsGateway
     @Autowired
     private RestTemplate restTemplate;
 
-    public GatewayResponse send( OutboundSms sms, BulkSmsGatewayConfig bulkSmsConfiguration, SubmissionType type )
+    public GatewayResponse send( OutboundSms sms, BulkSmsGatewayConfig bulkSmsConfiguration )
     {
-        UriComponentsBuilder uriBuilder = buildBaseUrl( bulkSmsConfiguration, type );
+        UriComponentsBuilder uriBuilder = buildBaseUrl( bulkSmsConfiguration, SubmissionType.SINGLE );
         uriBuilder.queryParam( "msisdn", getRecipients( sms.getRecipients() ) );
         uriBuilder.queryParam( "message", sms.getMessage() );
 
         return send( uriBuilder );
     }
 
-    public GatewayResponse send( List<OutboundSms> smsBatch, BulkSmsGatewayConfig bulkSmsConfiguration,
-        SubmissionType type )
+    public GatewayResponse send( List<OutboundSms> smsBatch, BulkSmsGatewayConfig bulkSmsConfiguration )
     {
-        UriComponentsBuilder uriBuilder = buildBaseUrl( bulkSmsConfiguration, type );
+        UriComponentsBuilder uriBuilder = buildBaseUrl( bulkSmsConfiguration, SubmissionType.BATCH );
         uriBuilder.queryParam( "batch_data", builCsvUrl( smsBatch ) );
 
         return send( uriBuilder );
@@ -57,17 +56,19 @@ public class BulkSmsGateway
         }
         catch ( RestClientException ex )
         {
-            log.error( "Error" + ex.getMessage() );
+            log.error( "Error: " + ex.getMessage() );
 
-            return GatewayResponse.ENCODING_FAILURE;
+            return GatewayResponse.RESULT_CODE_28;
         }
         catch ( UnsupportedEncodingException ex )
         {
-            log.error( "Error" + ex.getMessage() );
+            log.error( "Error: " + ex.getMessage() );
 
             return GatewayResponse.ENCODING_FAILURE;
         }
 
+        log.info( "Response status code: " + responseEntity.getStatusCode() );
+        
         return parseGatewayResponse( responseEntity.getBody() );
     }
 
@@ -109,36 +110,26 @@ public class BulkSmsGateway
 
         switch ( responseCode[0] )
         {
-            case "0":
-                log.info( "Message Sent" );
-                return GatewayResponse.RESULT_CODE_0;
-            case "1":
-                log.info( "Message Scheduled" );
-                return GatewayResponse.RESULT_CODE_1;
-            case "22":
-                log.info( "Internal Fatal Error" );
-                return GatewayResponse.RESULT_CODE_22;
-            case "23":
-                log.info( "Authentication Failure" );
-                return GatewayResponse.RESULT_CODE_23;
-            case "24":
-                log.info( "Data Validation Failed" );
-                return GatewayResponse.RESULT_CODE_24;
-            case "25":
-                log.info( "You do not have sufficient credits" );
-                return GatewayResponse.RESULT_CODE_25;
-            case "26":
-                log.info( "Upstream credits not available" );
-                return GatewayResponse.RESULT_CODE_26;
-            case "27":
-                log.info( "You have exceeded your daily quota" );
-                return GatewayResponse.RESULT_CODE_27;
-            case "40":
-                log.info( "Temporarily unavailable" );
-                return GatewayResponse.RESULT_CODE_40;
-            default:
-                log.info( "Internal Fatal Error" );
-                return GatewayResponse.RESULT_CODE_22;
+        case "0":
+            return GatewayResponse.RESULT_CODE_0;
+        case "1":
+            return GatewayResponse.RESULT_CODE_1;
+        case "22":
+            return GatewayResponse.RESULT_CODE_22;
+        case "23":
+            return GatewayResponse.RESULT_CODE_23;
+        case "24":
+            return GatewayResponse.RESULT_CODE_24;
+        case "25":
+            return GatewayResponse.RESULT_CODE_25;
+        case "26":
+            return GatewayResponse.RESULT_CODE_26;
+        case "27":
+            return GatewayResponse.RESULT_CODE_27;
+        case "40":
+            return GatewayResponse.RESULT_CODE_40;
+        default:
+            return GatewayResponse.RESULT_CODE_22;
         }
     }
 

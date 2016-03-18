@@ -430,13 +430,12 @@ public class ProgramStageInstanceServiceTest
         assertTrue( stageInstances.contains( programStageInstanceB ) );
     }
 
-    @Ignore
     @Test
     public void testCompleteProgramStageInstance()
     {
-        this.createSMSConfiguration();
-        SmsConfiguration smsConfiguration = new SmsConfiguration();
-        smsConfiguration.setEnabled( true );
+//        this.createSMSConfiguration();
+//        SmsConfiguration smsConfiguration = new SmsConfiguration();
+//        smsConfiguration.setEnabled( true );
 
         int idA = programStageInstanceService.addProgramStageInstance( programStageInstanceA );
 

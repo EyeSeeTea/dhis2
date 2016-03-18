@@ -16,46 +16,35 @@ function changeValueType( value )
 
 function hideAll() 
 {
-	 hideById( "modemFields" );
 	 hideById( "bulksmsFields" );
 	 hideById( "smppFields" );
 	 hideById( "clickatellFields" );
-	 hideById( "genericHTTPFields" );
-	 
+	 hideById( "genericHTTPFields" ); 
 }
 
 function getValidationRulesGateway()
 {
 	var rules = {};
-	if ( currentType == 'modem' ) {
-		rules = {
-			'modemFields input[id=name]' : { 'required' : true },
-			'modemFields input[id=port]' : { 'required' : true },
-			'modemFields input[id=baudrate]' : { 'required' : true },
-			'modemFields input[id=pollingInterval]' : { 'required' : true },
-			'modemFields input[id=manufacturer]' : { 'required' : true },
-			'modemFields input[id=model]' : { 'required' : true },
-			'modemFields input[id=pin]' : { 'required' : true },
-			'modemFields select[id=inbound]' : { 'required' : true },
-			'modemFields select[id=outbound]' : { 'required' : true }
-		};
-	} else if ( currentType == 'bulksms' ) {
+	if ( currentType == 'bulksms' ) {
 		rules = {
 			'bulksmsFields input[id=name]' : { 'required' : true },
 			'bulksmsFields input[id=username]' : { 'required' : true },
+			'bulksmsFields input[id=urlTemplate]' : { 'required' : true },
 			'bulksmsFields input[id=password]' : { 'required' : true }
 		};
 	} else if ( currentType == 'smpp_gw' ) {
 		rules = {
-			'bulksmsFields input[id=name]' : { 'required' : true },
-			'bulksmsFields input[id=username]' : { 'required' : true },
-			'bulksmsFields input[id=password]' : { 'required' : true }
+			'smppFields input[id=name]' : { 'required' : true },
+			'smppFields input[id=username]' : { 'required' : true },
+			'smppFields input[id=password]' : { 'required' : true }
 		};
 	} else if ( currentType == 'clickatell' ) {
 		rules = {
 			'clickatellFields input[id=name]' : { 'required' : true },
 			'clickatellFields input[id=username]' : { 'required' : true },
 			'clickatellFields input[id=password]' : { 'required' : true },
+			'clickatellFields input[id=urlTemplate]' : { 'required' : true },
+			'clickatellFields input[id=authToken]' : { 'required' : true },
 			'clickatellFields input[id=apiId]' : { 'required' : true }
 		};
 	} else {
@@ -149,7 +138,8 @@ function saveGatewayConfig()
 				username: getFieldValue( 'clickatellFields input[id=username]' ),
 				password: getFieldValue( 'clickatellFields input[id=password]' ),
 				apiId: getFieldValue( 'clickatellFields input[id=apiId]' ),
-				urlTemplate: getFieldValue( 'clickatellFields input[id=urlTemplate]' )
+				urlTemplate: getFieldValue( 'clickatellFields input[id=urlTemplate]' ),
+				authToken: getFieldValue( 'clickatellFields input[id=authToken]' )
 			}, function ( json ) {
 				unLockScreen();
 				showMessage( json );

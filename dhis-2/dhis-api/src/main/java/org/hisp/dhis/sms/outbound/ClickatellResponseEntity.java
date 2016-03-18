@@ -1,6 +1,11 @@
-package org.hisp.dhis.sms.config;
+package org.hisp.dhis.sms.outbound;
+
+import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -30,84 +35,32 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class ClickatellGatewayConfig
-    extends SmsGatewayConfig
+@JacksonXmlRootElement( localName = "responseEntity" )
+public class ClickatellResponseEntity
 {
-    private static final long serialVersionUID = -4286107769356591957L;
 
-    private String username;
+    private Map<String, List<Map<String, String>>> data;
 
-    private String password;
-
-    private String apiId;
-    
-    private String authToken;
-
-    @JsonProperty( value = "authtoken" )
-    public String getAuthToken()
+    public ClickatellResponseEntity( Map<String, List<Map<String, String>>> data )
     {
-        return authToken;
+        super();
+        this.data = data;
     }
 
-    public void setAuthToken( String authToken )
+    public ClickatellResponseEntity()
     {
-        this.authToken = authToken;
+        super();
     }
 
-    @JsonProperty( value = "username" )
-    public String getUsername()
+    @JsonProperty( value = "data" )
+    @JacksonXmlProperty( localName = "data" )
+    public Map<String, List<Map<String, String>>> getData()
     {
-        return username;
+        return data;
     }
 
-    public void setUsername( String username )
+    public void setData( Map<String, List<Map<String, String>>> data )
     {
-        this.username = username;
-    }
-
-    @JsonProperty( value = "password" )
-    public String getPassword()
-    {
-        return password;
-    }
-
-    @JsonProperty( value = "default" )
-    public boolean getStatus()
-    {
-        return super.isDefault();
-    }
-
-    public void setPassword( String password )
-    {
-        this.password = password;
-    }
-
-    @JsonProperty( value = "apiid" )
-    public String getApiId()
-    {
-        return apiId;
-    }
-
-    @JsonProperty( value = "name" )
-    public String getName()
-    {
-        return super.getName();
-    }
-
-    public void setApiId( String apiId )
-    {
-        this.apiId = apiId;
-    }
-
-    @Override
-    public boolean isInbound()
-    {
-        return false;
-    }
-
-    @Override
-    public boolean isOutbound()
-    {
-        return true;
+        this.data = data;
     }
 }

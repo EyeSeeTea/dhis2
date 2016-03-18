@@ -36,7 +36,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.sms.config.GatewayAdministratonService;
-import org.hisp.dhis.sms.outbound.DefaultOutboundSmsTransportService;
 import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.sms.outbound.OutboundSmsService;
 import org.hisp.dhis.sms.outbound.OutboundSmsTransportService;
@@ -78,7 +77,14 @@ public class DefaultSmsSender
             throw new SmsServiceNotEnabledException();
         }
 
-        return transportService.sendMessage( sms, gatewayId ).getResponseMessage();
+        if ( gatewayId == null || gatewayId.isEmpty() )
+        {
+            return transportService.sendMessage( sms ).getResponseMessage();
+        }
+        else
+        {
+            return transportService.sendMessage( sms, gatewayId ).getResponseMessage();
+        }
     }
 
     @Transactional
@@ -91,7 +97,8 @@ public class DefaultSmsSender
             throw new SmsServiceNotEnabledException();
         }
 
-        return transportService.sendMessage( sms, gatewayAdminService.getDefaultGateway().getName() ).getResponseMessage();
+        return transportService.sendMessage( sms, gatewayAdminService.getDefaultGateway().getName() )
+            .getResponseMessage();
     }
 
     @Transactional
@@ -162,31 +169,23 @@ public class DefaultSmsSender
                 // Bulk is limited in sending long SMS, need to cut into small
                 // pieces
                 // Check if text contain any specific unicode character
-                    for ( char each : text.toCharArray() )
+                for ( char each : text.toCharArray() )
+                {
+                    if ( !Character.UnicodeBlock.of( each ).equals( UnicodeBlock.BASIC_LATIN ) )
                     {
-                        if ( !Character.UnicodeBlock.of( each ).equals( UnicodeBlock.BASIC_LATIN ) )
-                        {
-                            maxChar = 40;
-                            break;
-                        }
+                        maxChar = 40;
+                        break;
                     }
-                    if ( text.length() > maxChar )
-                    {
-                        List<String> splitTextList = new ArrayList<>();
-                        splitTextList = SmsUtils.splitLongUnicodeString( text, splitTextList );
-                        for ( String each : splitTextList )
-                        {
-                            if ( !phoneNumbers.isEmpty() && phoneNumbers.size() > 0 )
-                            {
-                                message = sendMessage( each, phoneNumbers, gatewayId );
-                            }
-                        }
-                    }
-                    else
+                }
+                if ( text.length() > maxChar )
+                {
+                    List<String> splitTextList = new ArrayList<>();
+                    splitTextList = SmsUtils.splitLongUnicodeString( text, splitTextList );
+                    for ( String each : splitTextList )
                     {
                         if ( !phoneNumbers.isEmpty() && phoneNumbers.size() > 0 )
                         {
-                            message = sendMessage( text, phoneNumbers, gatewayId );
+                            message = sendMessage( each, phoneNumbers, gatewayId );
                         }
                     }
                 }
@@ -197,7 +196,15 @@ public class DefaultSmsSender
                         message = sendMessage( text, phoneNumbers, gatewayId );
                     }
                 }
-            
+            }
+            else
+            {
+                if ( !phoneNumbers.isEmpty() && phoneNumbers.size() > 0 )
+                {
+                    message = sendMessage( text, phoneNumbers, gatewayId );
+                }
+            }
+
         }
 
         return message;

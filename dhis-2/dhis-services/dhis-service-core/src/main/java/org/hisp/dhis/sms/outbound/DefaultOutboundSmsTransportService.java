@@ -57,10 +57,10 @@ public class DefaultOutboundSmsTransportService
 
     @Autowired
     private GatewayAdministratonService gatewayAdminService;
-    
+
     @Autowired
     private BulkSmsGateway bulkSmsGateway;
-    
+
     @Autowired
     private ClickatellGateway clickatellGateway;
 
@@ -139,17 +139,18 @@ public class DefaultOutboundSmsTransportService
         {
             BulkSmsGatewayConfig bulkSmsConfiguration = (BulkSmsGatewayConfig) gatewayConfiguration;
 
-            gatewayResponse = bulkSmsGateway.send( sms, bulkSmsConfiguration, SubmissionType.SINGLE );
+            gatewayResponse = bulkSmsGateway.send( sms, bulkSmsConfiguration );
         }
 
         if ( gatewayConfiguration instanceof ClickatellGatewayConfig )
         {
             ClickatellGatewayConfig clickatellConfiguration = (ClickatellGatewayConfig) gatewayConfiguration;
-         
-            gatewayResponse = clickatellGateway.send( sms );
+
+            gatewayResponse = clickatellGateway.send( sms, clickatellConfiguration );
         }
 
-        if ( GatewayResponse.RESULT_CODE_0 == gatewayResponse )
+        if ( GatewayResponse.RESULT_CODE_0 == gatewayResponse || GatewayResponse.RESULT_CODE_200 == gatewayResponse
+            || GatewayResponse.RESULT_CODE_202 == gatewayResponse )
         {
             sms.setStatus( OutboundSmsStatus.SENT );
             saveMessage( sms );
@@ -178,17 +179,17 @@ public class DefaultOutboundSmsTransportService
         {
             BulkSmsGatewayConfig bulkSmsConfiguration = (BulkSmsGatewayConfig) gatewayConfiguration;
 
-            gatewayResponse = bulkSmsGateway.send( smsBatch, bulkSmsConfiguration, SubmissionType.BATCH );
+            gatewayResponse = bulkSmsGateway.send( smsBatch, bulkSmsConfiguration );
         }
 
         if ( gatewayConfiguration instanceof ClickatellGatewayConfig )
         {
             ClickatellGatewayConfig clickatellConfiguration = (ClickatellGatewayConfig) gatewayConfiguration;
 
-            gatewayResponse = clickatellGateway.send( smsBatch );
+            gatewayResponse = clickatellGateway.send( smsBatch, clickatellConfiguration );
         }
 
-        if ( GatewayResponse.SENT == gatewayResponse )
+        if ( GatewayResponse.RESULT_CODE_0 == gatewayResponse )
         {
             for ( OutboundSms sms : smsBatch )
             {

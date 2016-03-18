@@ -85,6 +85,13 @@ public class UpdateClickatellGateWayConfigAction
     {
         this.urlTemplate = url;
     }
+    
+    private String authToken;
+
+    public void setAuthToken( String authToken )
+    {
+        this.authToken = authToken;
+    }
 
     private String apiId;
 
@@ -134,6 +141,7 @@ public class UpdateClickatellGateWayConfigAction
                 gatewayConfig.setApiId( apiId );
                 gatewayConfig.setUrlTemplate( urlTemplate );
                 gatewayConfig.setUid( CodeGenerator.generateCode( 10 ) );
+                gatewayConfig.setAuthToken( authToken );
 
                 if ( config.getGateways() == null || config.getGateways().isEmpty() )
                 {

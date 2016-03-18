@@ -168,7 +168,6 @@ public class MessageServiceTest
         messageService.deleteMessages( sender );
     }
 
-    @Ignore
     @Test
     public void testSendMessage()
     {
@@ -183,7 +182,6 @@ public class MessageServiceTest
         assertTrue( conversation.getMessages().iterator().next().getText().equals( "Text" ) );
     }
     
-    @Ignore
     @Test
     public void testSendFeedback()
     {
@@ -197,7 +195,6 @@ public class MessageServiceTest
         assertTrue( conversation.getMessages().iterator().next().getText().equals( "Text" ) );
     }
     
-    @Ignore
     @Test
     public void testSendReply()
     {
