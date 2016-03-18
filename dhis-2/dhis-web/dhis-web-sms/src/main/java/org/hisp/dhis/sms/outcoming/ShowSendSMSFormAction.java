@@ -34,7 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hisp.dhis.sms.config.GatewayAdministratonService;
+import org.hisp.dhis.sms.config.GatewayAdministrationService;
 import org.hisp.dhis.sms.config.SmsGatewayConfig;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupService;
@@ -53,7 +53,7 @@ public class ShowSendSMSFormAction
     // -------------------------------------------------------------------------
 
     @Autowired
-    private GatewayAdministratonService gatewayAdminService;
+    private GatewayAdministrationService gatewayAdminService;
 
     @Autowired
     private UserGroupService userGroupService;

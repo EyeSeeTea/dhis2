@@ -40,7 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author Zubair <rajazubair.asghar@gmail.com>
  */
 public class DefaultGatewayAdministrationService
-    implements GatewayAdministratonService
+    implements GatewayAdministrationService
 {
 
     private Map<String, SmsGatewayConfig> gatewayConfigurationMap = new HashMap<>();

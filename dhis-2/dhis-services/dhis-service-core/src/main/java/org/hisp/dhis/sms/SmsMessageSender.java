@@ -38,7 +38,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.message.MessageSender;
 import org.hisp.dhis.sms.config.BulkSmsGatewayConfig;
-import org.hisp.dhis.sms.config.GatewayAdministratonService;
+import org.hisp.dhis.sms.config.GatewayAdministrationService;
 import org.hisp.dhis.sms.config.SmsGatewayConfig;
 import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.sms.outbound.OutboundSmsTransportService;
@@ -75,7 +75,7 @@ public class SmsMessageSender
     private OutboundSmsTransportService outboundSmsTransportService;
 
     @Autowired
-    private GatewayAdministratonService gatewayAdminService;
+    private GatewayAdministrationService gatewayAdminService;
 
     @Override
     public String sendMessage( String subject, String text, String footer, User sender, Set<User> users,

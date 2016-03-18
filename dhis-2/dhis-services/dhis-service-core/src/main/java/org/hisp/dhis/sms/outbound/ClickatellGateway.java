@@ -1,7 +1,5 @@
 package org.hisp.dhis.sms.outbound;
 
-import java.util.ArrayList;
-
 /*
  * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
@@ -30,6 +28,8 @@ import java.util.ArrayList;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;

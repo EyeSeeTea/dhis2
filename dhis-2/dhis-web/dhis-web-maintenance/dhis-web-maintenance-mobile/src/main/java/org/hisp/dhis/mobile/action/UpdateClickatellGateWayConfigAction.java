@@ -31,7 +31,7 @@ import org.hisp.dhis.common.CodeGenerator;
  */
 
 import org.hisp.dhis.sms.config.ClickatellGatewayConfig;
-import org.hisp.dhis.sms.config.GatewayAdministratonService;
+import org.hisp.dhis.sms.config.GatewayAdministrationService;
 import org.hisp.dhis.sms.config.SmsConfiguration;
 import org.hisp.dhis.sms.config.SmsConfigurationManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +52,7 @@ public class UpdateClickatellGateWayConfigAction
     private SmsConfigurationManager smsConfigurationManager;
 
     @Autowired
-    private GatewayAdministratonService gatewayAdminService;
+    private GatewayAdministrationService gatewayAdminService;
 
     // -------------------------------------------------------------------------
     // Input

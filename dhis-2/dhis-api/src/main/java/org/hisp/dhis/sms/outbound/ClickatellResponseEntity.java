@@ -1,11 +1,5 @@
 package org.hisp.dhis.sms.outbound;
 
-import java.util.List;
-import java.util.Map;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -34,6 +28,13 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+import java.util.List;
+import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 @JacksonXmlRootElement( localName = "responseEntity" )
 public class ClickatellResponseEntity

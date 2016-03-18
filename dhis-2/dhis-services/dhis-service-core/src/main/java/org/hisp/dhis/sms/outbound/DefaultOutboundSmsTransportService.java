@@ -34,7 +34,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.hisp.dhis.sms.config.BulkSmsGatewayConfig;
 import org.hisp.dhis.sms.config.ClickatellGatewayConfig;
-import org.hisp.dhis.sms.config.GatewayAdministratonService;
+import org.hisp.dhis.sms.config.GatewayAdministrationService;
 import org.hisp.dhis.sms.config.SmsGatewayConfig;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +56,7 @@ public class DefaultOutboundSmsTransportService
     }
 
     @Autowired
-    private GatewayAdministratonService gatewayAdminService;
+    private GatewayAdministrationService gatewayAdminService;
 
     @Autowired
     private BulkSmsGateway bulkSmsGateway;

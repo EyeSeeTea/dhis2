@@ -433,10 +433,6 @@ public class ProgramStageInstanceServiceTest
     @Test
     public void testCompleteProgramStageInstance()
     {
-//        this.createSMSConfiguration();
-//        SmsConfiguration smsConfiguration = new SmsConfiguration();
-//        smsConfiguration.setEnabled( true );
-
         int idA = programStageInstanceService.addProgramStageInstance( programStageInstanceA );
 
         programStageInstanceService.completeProgramStageInstance( programStageInstanceA, mockFormat );
@@ -455,22 +451,4 @@ public class ProgramStageInstanceServiceTest
 
         assertNotNull( programStageInstanceService.getProgramStageInstance( programStageInstance.getUid() ) );
     }
-
-    private void createSMSConfiguration()
-    {
-        BulkSmsGatewayConfig bulkGatewayConfig = new BulkSmsGatewayConfig();
-        bulkGatewayConfig.setName( "bulksms" );
-        bulkGatewayConfig.setPassword( "bulk" );
-        bulkGatewayConfig.setUsername( "bulk" );
-        bulkGatewayConfig.setRegion( "uk" );
-        bulkGatewayConfig.setDefault( true );
-
-        SmsConfiguration smsConfig = new SmsConfiguration();
-        smsConfig.setPollingInterval( 3000 );
-        smsConfig.getGateways().add( bulkGatewayConfig );
-        smsConfig.setEnabled( true );
-        smsConfigurationManager.updateSmsConfiguration( smsConfig );
-
-    }
-
 }

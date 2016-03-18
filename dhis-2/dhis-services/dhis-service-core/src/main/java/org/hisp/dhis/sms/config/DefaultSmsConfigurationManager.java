@@ -55,7 +55,7 @@ public class DefaultSmsConfigurationManager
     private SystemSettingManager systemSettingManager;
     
     @Autowired
-    private GatewayAdministratonService gatewayAdminService;
+    private GatewayAdministrationService gatewayAdminService;
 
     @Override
     public void onApplicationEvent( ContextRefreshedEvent contextRefreshedEvent )

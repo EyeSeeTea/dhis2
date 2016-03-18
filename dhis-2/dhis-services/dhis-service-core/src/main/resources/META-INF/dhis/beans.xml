@@ -1200,7 +1200,7 @@
     <property name="outboundSmsService" ref="org.hisp.dhis.sms.outbound.OutboundSmsService" />
   </bean>
   
-   <bean id="org.hisp.dhis.sms.config.GatewayAdministratonService"
+   <bean id="org.hisp.dhis.sms.config.GatewayAdministrationService"
     class="org.hisp.dhis.sms.config.DefaultGatewayAdministrationService" />
     
     <bean id="org.hisp.dhis.sms.SmsSender" class="org.hisp.dhis.sms.DefaultSmsSender" />

@@ -29,7 +29,7 @@ package org.hisp.dhis.mobile.action;
  */
 
 import org.hisp.dhis.sms.config.BulkSmsGatewayConfig;
-import org.hisp.dhis.sms.config.GatewayAdministratonService;
+import org.hisp.dhis.sms.config.GatewayAdministrationService;
 import org.hisp.dhis.sms.config.SmsConfiguration;
 import org.hisp.dhis.sms.config.SmsConfigurationManager;
 import org.hisp.dhis.common.CodeGenerator;
@@ -53,7 +53,7 @@ public class UpdateBulkGateWayConfigAction
     private SmsConfigurationManager smsConfigurationManager;
 
     @Autowired
-    private GatewayAdministratonService gatewayAdminService;
+    private GatewayAdministrationService gatewayAdminService;
 
     // -------------------------------------------------------------------------
     // Input

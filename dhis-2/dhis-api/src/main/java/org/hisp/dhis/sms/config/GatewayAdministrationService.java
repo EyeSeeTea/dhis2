@@ -1,7 +1,6 @@
-package org.hisp.dhis.sms.config;
 
 /*
- * Copyright (c) 2004-2016, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,51 +26,33 @@ package org.hisp.dhis.sms.config;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.hisp.dhis.sms.config;
 
-import org.hisp.dhis.sms.SmsServiceException;
+import java.util.Map;
 
-
-public class GateWayFactory
+/**
+ * @author Zubair <rajazubair.asghar@gmail.com>
+ *
+ */
+public interface GatewayAdministrationService
 {
-    public SmsGatewayConfig create( SmsGatewayConfig config )
-    {
-        if ( config instanceof BulkSmsGatewayConfig )
-        {
-            return createBulkSmsGateway( (BulkSmsGatewayConfig) config );
-        }
-        else if ( config instanceof GenericHttpGatewayConfig )
-        {
-            return createSimplisticHttpGetGateway( (GenericHttpGatewayConfig) config );
-        }
-        else if ( config instanceof ClickatellGatewayConfig )
-        {
-            return createClickatellGateway( (ClickatellGatewayConfig) config );
-        }
-        else if ( config instanceof SMPPGatewayConfig )
-        {
-            return createSMPPGatewayConfig( (SMPPGatewayConfig) config );
-        }
+    String setDefaultGateway( String uid );
 
-        throw new SmsServiceException( "Gateway config of unknown type: " + config.getClass().getName() );
-    }
+    boolean removeGatewayByUid( String uid );
 
-    public SmsGatewayConfig createSMPPGatewayConfig( SMPPGatewayConfig config )
-    {
-        return null;
-    }
+    boolean removeGatewayByName( String gatewayName );
+    
+    Map<String, SmsGatewayConfig> getGatewayConfigurationMap();
 
-    public SmsGatewayConfig createBulkSmsGateway( BulkSmsGatewayConfig config )
-    {
-        return null;
-    }
+    SmsGatewayConfig getDefaultGateway();
 
-    public SmsGatewayConfig createClickatellGateway( ClickatellGatewayConfig c )
-    {
-        return null;
-    }
+    SmsConfiguration listGateways();
 
-    public SmsGatewayConfig createSimplisticHttpGetGateway( GenericHttpGatewayConfig c )
-    {
-        return null;
-    }
+    SmsGatewayConfig getGatewayConfigurationByUid( String uid );
+
+    SmsGatewayConfig getGatewayConfigurationByName( String gatewayName );
+
+    boolean addOrUpdateGateway( SmsGatewayConfig config, Class<?> klass );
+
+    boolean loadGatewayConfigurationMap( SmsConfiguration smsConfiguration );
 }

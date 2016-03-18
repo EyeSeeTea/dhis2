@@ -34,7 +34,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.hisp.dhis.sms.config.BulkSmsGatewayConfig;
 import org.hisp.dhis.sms.config.ClickatellGatewayConfig;
-import org.hisp.dhis.sms.config.GatewayAdministratonService;
+import org.hisp.dhis.sms.config.GatewayAdministrationService;
 import org.hisp.dhis.sms.config.GenericHttpGatewayConfig;
 import org.hisp.dhis.sms.config.SMPPGatewayConfig;
 import org.hisp.dhis.sms.config.SmsConfiguration;
@@ -61,7 +61,7 @@ public class RemoveGatewayConfigAction
     private SmsConfigurationManager smsConfigurationManager;
 
     @Autowired
-    private GatewayAdministratonService gatewayAdminService;
+    private GatewayAdministrationService gatewayAdminService;
 
     // -------------------------------------------------------------------------
     // Input

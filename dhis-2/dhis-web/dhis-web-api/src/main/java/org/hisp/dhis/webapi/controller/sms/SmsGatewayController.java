@@ -35,7 +35,7 @@ import org.hisp.dhis.render.RenderService;
 import org.hisp.dhis.dxf2.webmessage.WebMessageException;
 import org.hisp.dhis.sms.config.BulkSmsGatewayConfig;
 import org.hisp.dhis.sms.config.ClickatellGatewayConfig;
-import org.hisp.dhis.sms.config.GatewayAdministratonService;
+import org.hisp.dhis.sms.config.GatewayAdministrationService;
 import org.hisp.dhis.sms.config.GenericHttpGatewayConfig;
 import org.hisp.dhis.sms.config.SMPPGatewayConfig;
 import org.hisp.dhis.sms.config.SmsGatewayConfig;
@@ -70,7 +70,7 @@ public class SmsGatewayController
     private RenderService renderService;
 
     @Autowired
-    private GatewayAdministratonService gatewayAdminService;
+    private GatewayAdministrationService gatewayAdminService;
 
     // -------------------------------------------------------------------------
     // GET
