@@ -74,6 +74,10 @@
 				<td>$i18n.getString( "url_template" ) <em title="$i18n.getString( 'required' )" class="required">*</em>:</td>
 				<td><input type="text" name="urlTemplate" id="urlTemplate" style="width: 28em" value="$!encoder.htmlEncode( $!bulkGateway.urlTemplate )"/></td>
 			</tr>
+				<tr>
+				<td>$i18n.getString( "urlTemplateForBatchSms" ):</td>
+				<td><input type="text" name="urlTemplateForBatchSms" id="urlTemplateForBatchSms" style="width: 28em" value="$!encoder.htmlEncode( $!bulkGateway.urlTemplateForBatchSms )"/></td>
+			</tr>
 			<tr>
 				<td>$i18n.getString( "region" ):</td>
 				<td>

@@ -90,6 +90,7 @@ function saveGatewayConfig()
 				username: getFieldValue( 'bulksmsFields input[id=username]' ),
 				password: getFieldValue( 'bulksmsFields input[id=password]' ),
 				urlTemplate: getFieldValue( 'bulksmsFields input[id=urlTemplate]' ),
+				urlTemplateForBatchSms: getFieldValue( 'bulksmsFields input[id=urlTemplateForBatchSms]' ),
 				region: getFieldValue( 'bulksmsFields select[id=region]' )
 			}, function ( json ) {
 				unLockScreen();

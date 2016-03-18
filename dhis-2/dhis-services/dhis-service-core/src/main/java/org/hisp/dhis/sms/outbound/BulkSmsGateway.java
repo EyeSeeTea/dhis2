@@ -12,7 +12,10 @@ import org.hisp.dhis.sms.config.BulkSmsGatewayConfig;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -48,26 +51,32 @@ public class BulkSmsGateway
     private GatewayResponse send( UriComponentsBuilder uriBuilder )
     {
         ResponseEntity<String> responseEntity = null;
+        
+        HttpStatus statusCode = null;
 
         try
         {
             responseEntity = restTemplate.exchange( uriBuilder.build().encode( "ISO-8859-1" ).toUri(), HttpMethod.POST,
                 null, String.class );
         }
-        catch ( RestClientException ex )
+        catch ( HttpClientErrorException ex )
         {
             log.error( "Error: " + ex.getMessage() );
 
-            return GatewayResponse.RESULT_CODE_28;
+            statusCode = ex.getStatusCode();
         }
-        catch ( UnsupportedEncodingException ex )
+        catch ( HttpServerErrorException ex )
         {
             log.error( "Error: " + ex.getMessage() );
 
-            return GatewayResponse.ENCODING_FAILURE;
+            statusCode = ex.getStatusCode();
+        }
+        catch ( Exception ex )
+        {
+            log.error( "Error: " + ex.getMessage() );
         }
 
-        log.info( "Response status code: " + responseEntity.getStatusCode() );
+        log.info( "Response status code: " + statusCode );
         
         return parseGatewayResponse( responseEntity.getBody() );
     }
