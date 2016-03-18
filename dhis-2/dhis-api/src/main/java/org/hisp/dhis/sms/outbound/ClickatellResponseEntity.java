@@ -36,6 +36,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
+/**
+ * Zubair <rajazubair.asghar@gmail.com>
+ */
+
 @JacksonXmlRootElement( localName = "responseEntity" )
 public class ClickatellResponseEntity
 {

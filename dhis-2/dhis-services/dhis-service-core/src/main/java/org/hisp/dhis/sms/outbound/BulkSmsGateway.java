@@ -47,6 +47,10 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+/**
+ * Zubair <rajazubair.asghar@gmail.com>
+ */
+
 public class BulkSmsGateway
 {
     private static final Log log = LogFactory.getLog( BulkSmsGateway.class );
