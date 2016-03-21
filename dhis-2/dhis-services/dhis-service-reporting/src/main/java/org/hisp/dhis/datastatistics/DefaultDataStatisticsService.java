@@ -386,7 +386,7 @@ public class DefaultDataStatisticsService implements DataStatisticsService
         }
         if(activeUsers != 0)
             averageNumberofViews = totalNumberOfViews/activeUsers;
-
+        else averageNumberofViews = totalNumberOfViews;
 
         DataStatistics dataStatistics = new DataStatistics( activeUsers, mapViews, chartViews,
             reportTablesViews, eventReportViews, eventChartViews, dashboardViews,
