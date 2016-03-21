@@ -54,11 +54,11 @@ function getConstantsPage()
 	var target = jQuery( "#expression-container select[id=constantId]" );
 	target.children().remove();
 	
-	jQuery.get( '../api/constants.json?paging=false&links=false', {}, function( json ) 
+	jQuery.get( '../api/constants.json?fields=id,name&paging=false&links=false', {}, function( json ) 
 	{
 		if ( !json.constants || json.constants.length == 0 )
 		{
-			setInnerHTML( 'constantHeader', "<i style='color:red'>"+i18n_no_constant_to_select+"</i>" );
+			setInnerHTML( 'constantHeader', "<i style='color:red'>" + i18n_no_constant_to_select + "</i>" );
 			return;
 		}
 		
@@ -170,4 +170,23 @@ function clearRuleExpression()
 
 	enable( "ruleType" );
 	enable( "periodTypeName" );
+}
+
+function saveExpression( side, description, expression, textualDescription )
+{
+    if ( side == "left" )
+    {
+        $( "#leftSideDescription" ).val( description );
+        $( "#leftSideExpression" ).val( expression );
+        $( "#leftSideTextualExpression" ).val( textualDescription );
+    } 
+    else if ( side == "right" )
+    {
+    	$( "#rightSideDescription" ).val( description );
+    	$( "#rightSideExpression" ).val( expression );
+    	$( "#rightSideTextualExpression" ).val( textualDescription );
+    }
+
+    hideById( 'dynamicContent' );
+    unLockScreen();
 }

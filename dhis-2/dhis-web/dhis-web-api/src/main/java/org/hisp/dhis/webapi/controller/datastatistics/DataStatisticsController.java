@@ -83,7 +83,7 @@ public class DataStatisticsController
         Date timestamp = new Date();
         User user = currentUserService.getCurrentUser();
 
-        DataStatisticsEvent event = new DataStatisticsEvent( eventType, timestamp, user.getName() );
+        DataStatisticsEvent event = new DataStatisticsEvent( eventType, timestamp, user.getUsername() );
         int id = defaultDataStatisticsService.addEvent( event );
     }
 

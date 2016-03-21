@@ -39,7 +39,6 @@ import org.hisp.dhis.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -89,7 +88,6 @@ public class DefaultDataStatisticsService implements DataStatisticsService
      * @param event - object to be saved
      * @return id of the object in the database
      */
-    @Override
     public int addEvent( DataStatisticsEvent event )
     {
         return hibernateDataStatisticsEventStore.save( event );
@@ -106,23 +104,25 @@ public class DefaultDataStatisticsService implements DataStatisticsService
     @Override
     public List<AggregatedStatistics> getReports( Date startDate, Date endDate, EventInterval eventInterval )
     {
+        String sql = "";
         switch ( eventInterval )
         {
             case DAY:
-                System.out.println(getDaySql( startDate, endDate ));
-                return hibernateDataStatisticsStore.getSnapshotsInInterval( getDaySql( startDate, endDate ), eventInterval );
-
+                sql = getDaySql( startDate, endDate );
+                break;
             case WEEK:
-                return hibernateDataStatisticsStore.getSnapshotsInInterval( getWeekSql( startDate, endDate ), eventInterval );
-
+                sql = getWeekSql( startDate, endDate );
+                break;
             case MONTH:
-                return hibernateDataStatisticsStore.getSnapshotsInInterval( getMonthSql( startDate, endDate ), eventInterval );
-
+                sql = getMonthSql( startDate, endDate );
+                break;
             case YEAR:
-                return hibernateDataStatisticsStore.getSnapshotsInInterval( getYearSql( startDate, endDate ), eventInterval );
+                sql = getYearSql( startDate, endDate );
+                break;
             default:
-                return hibernateDataStatisticsStore.getSnapshotsInInterval( getDaySql( startDate, endDate ), eventInterval );
+                sql = getDaySql( startDate, endDate );
         }
+        return hibernateDataStatisticsStore.getSnapshotsInInterval( sql, eventInterval );
     }
 
     /**
@@ -185,9 +185,10 @@ public class DefaultDataStatisticsService implements DataStatisticsService
     private String getDaySql( Date start, Date end )
     {
         return "select extract(year from created) as yr, " +
+            "extract(month from created) as mnt,"+
             "extract(day from created) as day, " +
             commonSql( start, end ) +
-            ", day order by yr, day;";
+            ", mnt, day order by yr, mnt, day;";
 
     }
 
@@ -222,180 +223,177 @@ public class DefaultDataStatisticsService implements DataStatisticsService
     }
 
     /**
-     * gets number of saved Charts from a date till now
+     * private method to get number of saved Charts from a date till now
      *
      * @param date - From date
      * @return number of Charts saved in db
      */
-    @Override
-    public int getNumberOfCharts( Date date )
+    private int getCharts( Date date )
     {
         return chartService.countChartGeCreated( date );
     }
 
     /**
-     * gets number of saved Report tables from a date till now
+     * private method to get number of saved Report tables from a date till now
      *
      * @param date - From date
      * @return number of Report tables saved in db
      */
-    @Override
-    public int getNumberOfReportTables( Date date )
+    private int getReportTables( Date date )
     {
         return reportTableService.getCountGeCreated( date );
     }
 
 
     /**
-     * gets number of saved Maps from a date till now
+     * private method to get number of saved Maps from a date till now
      *
      * @param date - From date
      * @return number of Maps saved in db
      */
-    @Override
-    public int getNumberOfMaps( Date date )
+    private int getMaps( Date date )
     {
         return mappingService.getCountGeCreated( date );
     }
 
     /**
-     * gets number of saved Event Reports from a date till now
+     * private method to get number of saved Event Reports from a date till now
      *
      * @param date - From date
      * @return number of Event Reports saved in db
      */
-    @Override
-    public int getNumberOfEventReports( Date date )
+    private int getEventReports( Date date )
     {
         return eventReportService.getCountGeCreated( date );
     }
 
     /**
-     * gets number of saved Event Charts from a date till now
+     * private method to get number of saved Event Charts from a date till now
      *
      * @param date - From date
      * @return number of Event Charts saved in db
      */
-    @Override
-    public int getNumberOfEventCharts( Date date )
+    private int getEventCharts( Date date )
     {
         return eventChartService.countGeCreated( date );
     }
 
     /**
-     * gets number of saved dashboards from a date till now
+     * private method to get number of saved dashboards from a date till now
      *
      * @param date - From date
      * @return number of dashboards saved in db
      */
-
-    @Override
-    public int getNumberOfDashboards( Date date )
+    private int getDashboards( Date date )
     {
         return dashboardService.countGeCreated( date );
     }
 
     /**
-     * Gets the number of indicators saved from a date till now
+     * private method to get the number of indicators saved from a date till now
      *
      * @param date - From date
      * @return number of indicators saved in db
      */
-    @Override
-    public int getNumberOfIndicators( Date date )
+    private int getIndicators( Date date )
     {
         return indicatorService.getCountGeCreated( date );
     }
 
     /**
-     * Gets a number of active users that day.
+     * private method to get a number of users in db
      *
      * @return number og active users
      */
-    @Override
-    public int getNumberOfUsers()
+    private int getUsers( )
     {
         return userService.getUserCount();
     }
 
     /**
+     * private method to get a number of active/logged in users that day.
+     *
+     * @return number og active users
+     */
+    private int getActiveUsers( ){
+        return userService.getActiveUsersCount( 1 );
+    }
+
+
+    /**
      * Gets all important information and creates a Datastatistics object and saves it in db
      */
-    @Override public int saveSnapshot()
+    @Override public int saveSnapshot( )
     {
-        Date startDate = new Date();
+        Date now = new Date(  );
+        Date startDate = new Date( );
         Calendar c = Calendar.getInstance();
         c.setTime( startDate );
         c.add( Calendar.DATE, -1 );
-        startDate = c.getTime();
+        startDate = c.getTime( );
 
-        List<DataStatisticsEvent> events = hibernateDataStatisticsEventStore.getDataStatisticsEventCount( startDate );
-        List<String> uniqueUsers = new ArrayList<>();
-        int numberOfActiveUsers = 0;
-        double numberOfMapViews = 0;
-        double numberOfChartViews = 0;
-        double numberOfReportTablesViews = 0;
-        double numberOfEventReportViews = 0;
-        double numberOfEventChartViews = 0;
-        double totalNumberOfViews = events.size();
+        int totalUsers = getUsers();
+        double savedMaps = getMaps( startDate );
+        double savedCharts = getCharts( startDate );
+        double savedReportTables = getReportTables( startDate );
+        double savedEventReports = getEventReports( startDate );
+        double savedEventCharts = getEventCharts( startDate );
+        double savedDashboards = getDashboards( startDate );
+        double savedIndicators = getIndicators( startDate );
+        int activeUsers = getActiveUsers();
+
+        double chartViews = 0;
+        double mapViews = 0;
+        double dashboardViews = 0;
+        double reportTablesViews = 0;
+        double eventReportViews = 0;
+        double eventChartViews = 0;
+        double indicatorsViews = 0;
+        double totalNumberOfViews = 0;
         double averageNumberofViews = 0;
-        double numberOfDashboardViews = 0;
-        double numberOfIndicatorsViews = 0;
 
-        int totalNumberOfUsers = getNumberOfUsers();
+        String sql = "select eventtype as eventtype, count(eventtype) as numberofviews from datastatisticsevent where (timestamp between '"+startDate+"' and '"+now+"') group by eventtype;";
 
-        for ( DataStatisticsEvent e : events )
-        {
-            switch ( e.getType() )
-            {
-                case CHART_VIEW:
-                    numberOfChartViews++;
+        List list = hibernateDataStatisticsEventStore.getDataStatisticsEventCount( sql );
+
+        for(int i = 0; i<list.size(); i++){
+            int[] temp = (int[])list.get(i);
+            switch (temp[0]){
+                case 0: chartViews = temp[1];
+                    totalNumberOfViews += chartViews;
                     break;
-                case MAP_VIEW:
-                    numberOfMapViews++;
+                case 1: mapViews = temp[1];
+                    totalNumberOfViews += mapViews;
                     break;
-                case DASHBOARD_VIEW:
-                    numberOfDashboardViews++;
+                case 2: dashboardViews = temp[1];
+                    totalNumberOfViews += dashboardViews;
                     break;
-                case REPORT_TABLE_VIEW:
-                    numberOfReportTablesViews++;
+                case 3: reportTablesViews = temp[1];
+                    totalNumberOfViews += reportTablesViews;
                     break;
-                case EVENT_REPORT_VIEW:
-                    numberOfEventReportViews++;
+                case 4: eventReportViews = temp[1];
+                    totalNumberOfViews += eventReportViews;
                     break;
-                case EVENT_CHART_VIEW:
-                    numberOfEventChartViews++;
+                case 5: eventChartViews = temp[1];
+                    totalNumberOfViews += eventChartViews;
                     break;
-                case INDICATOR_VIEW:
-                    numberOfIndicatorsViews++;
+                case 6: indicatorsViews = temp[1];
+                    totalNumberOfViews += indicatorsViews;
                     break;
+
             }
 
-            if ( !uniqueUsers.contains( e.getUserName() ) )
-            {
-                uniqueUsers.add( e.getUserName() );
-            }
         }
+        if(activeUsers != 0)
+            averageNumberofViews = totalNumberOfViews/activeUsers;
 
-        double numberOfSavedMaps = getNumberOfMaps( startDate );
-        double numberOfSavedCharts = getNumberOfCharts( startDate );
-        double numberOfSavedReportTables = getNumberOfReportTables( startDate );
-        double numberOfSavedEventReports = getNumberOfEventReports( startDate );
-        double numberOfSavedEventCharts = getNumberOfEventCharts( startDate );
-        double numberOfSavedDashboards = getNumberOfDashboards( startDate );
-        double numberOfSavedIndicators = getNumberOfIndicators( startDate );
 
-        numberOfActiveUsers = uniqueUsers.size();
-
-        if ( numberOfActiveUsers != 0 )
-            averageNumberofViews = totalNumberOfViews / numberOfActiveUsers;
-
-        DataStatistics dataStatistics = new DataStatistics( numberOfActiveUsers, numberOfMapViews, numberOfChartViews,
-            numberOfReportTablesViews, numberOfEventReportViews, numberOfEventChartViews, numberOfDashboardViews,
-            numberOfIndicatorsViews, totalNumberOfViews, averageNumberofViews, numberOfSavedMaps,
-            numberOfSavedCharts, numberOfSavedReportTables, numberOfSavedEventReports,
-            numberOfSavedEventCharts, numberOfSavedDashboards, numberOfSavedIndicators,
-            totalNumberOfUsers );
+        DataStatistics dataStatistics = new DataStatistics( activeUsers, mapViews, chartViews,
+            reportTablesViews, eventReportViews, eventChartViews, dashboardViews,
+            indicatorsViews, totalNumberOfViews, averageNumberofViews, savedMaps,
+            savedCharts, savedReportTables, savedEventReports,
+            savedEventCharts, savedDashboards, savedIndicators,
+            totalUsers );
 
         int id = hibernateDataStatisticsStore.save( dataStatistics );
         return id;

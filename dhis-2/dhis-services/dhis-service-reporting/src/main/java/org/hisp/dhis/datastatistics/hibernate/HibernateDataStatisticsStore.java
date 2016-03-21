@@ -70,6 +70,7 @@ public class HibernateDataStatisticsStore extends HibernateGenericStore<DataStat
             {
                 case DAY:
                     ads.setDay( resultSet.getInt( "day" ) );
+                    ads.setMonth( resultSet.getInt( "mnt" ) );
                     break;
                 case WEEK:
                     ads.setWeek( resultSet.getInt( "week" ) );

@@ -32,8 +32,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                 CommonUtils,
                 FileService,
                 AuthorityService,
-                TrackerRulesExecutionService,
-                TrackerRulesFactory) {
+                TrackerRulesExecutionService) {
     
     $scope.maxOptionSize = 30;
     //selected org unit
@@ -120,7 +119,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
 
     $scope.completeEnrollment = function() {
         $scope.currentEvent.status = !$scope.currentEvent.status;
-    }
+    };
     
     //load programs associated with the selected org unit.
     $scope.loadPrograms = function() {
@@ -240,12 +239,9 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                     $scope.optionsReady = true;
                 }
                 
-                TrackerRulesFactory.getRules($scope.selectedProgram.id).then(function(rules){                    
-                    $scope.allProgramRules = rules;
-                    if($scope.selectedCategories.length === 0){
-                        $scope.loadEvents();
-                    }                        
-                });
+                if($scope.selectedCategories.length === 0){
+                    $scope.loadEvents();
+                }   
         }
     };
     
@@ -919,7 +915,33 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
     $scope.getHelpContent = function(){
     };
     
-    $scope.showMap = function(event){
+    $scope.showAuditHistory = function(){
+        
+        var dhis2Event = ContextMenuSelectedItem.getSelectedItem();
+        
+        var modalInstance = $modal.open({
+            templateUrl: '../dhis-web-commons/angular-forms/audit-history.html',
+            controller: 'AuditHistoryController',
+            resolve: {
+                eventId: function () {
+                    return dhis2Event.event;
+                },
+                dataType: function () {
+                    return 'dataElement';
+                },
+                nameIdMap: function () {
+                    return $scope.prStDes;
+                }
+            }
+        });
+
+        modalInstance.result.then(function () {            
+        },function(){
+        });
+        
+    };
+    
+    $scope.showProgramStageMap = function(event){
         var modalInstance = $modal.open({
             templateUrl: '../dhis-web-commons/angular-forms/map.html',
             controller: 'MapController',
@@ -935,6 +957,33 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
             if(angular.isObject(location)){
                 event.coordinate.latitude = location.lat;
                 event.coordinate.longitude = location.lng;
+            }
+        }, function () {
+        });
+    };
+    
+    $scope.showDataElementMap = function(obj, id, fieldId){
+        var lat = "",
+            lng = "";
+        if(obj[id] && obj[id].length > 0){
+            var coordinates = obj[id].split(",");
+            lng = coordinates[0];
+            lat = coordinates[1];
+        }
+        var modalInstance = $modal.open({
+            templateUrl: '../dhis-web-commons/angular-forms/map.html',
+            controller: 'MapController',
+            windowClass: 'modal-full-window',
+            resolve: {
+                location: function () {
+                    return {lat: lat, lng: lng};
+                }
+            }
+        });
+
+        modalInstance.result.then(function (location) {
+            if(angular.isObject(location)){
+                obj[id] = location.lng + ',' + location.lat;
             }
         }, function () {
         });
@@ -1094,12 +1143,8 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
     
     $scope.executeRules = function() {
         $scope.currentEvent.event = !$scope.currentEvent.event ? 'SINGLE_EVENT' : $scope.currentEvent.event;
-        $scope.eventsByStage = [];
-        $scope.eventsByStage[$scope.selectedProgramStage.id] = [$scope.currentEvent];
-        var evs = {all: [$scope.currentEvent], byStage: $scope.eventsByStage};
-        
-        var flag = {debug: true, verbose: false};        
-        TrackerRulesExecutionService.executeRules($scope.allProgramRules, $scope.currentEvent, evs, $scope.prStDes, $scope.selectedTei, $scope.selectedEnrollment, flag);
+        var flags = {debug: true, verbose: false};
+        TrackerRulesExecutionService.loadAndExecuteRulesScope($scope.currentEvent,$scope.selectedProgram.id,$scope.selectedProgramStage.id,$scope.prStDes,$scope.selectedOrgUnit.id,flags);
     };
        
     
@@ -1117,8 +1162,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         else {
             return $scope.hiddenFields[id];
         }
-    }; 
-    
+    };
     
     $scope.saveDatavalue = function(){        
         $scope.executeRules();
@@ -1157,7 +1201,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
             return "showNotes(" + dhis2Event + ")"; 
         }
         else{
-            if(dhis2Event.event ===$scope.currentEvent.evnet){
+            if(dhis2Event.event ===$scope.currentEvent.event){
                 return '';
             }
             else{

@@ -31,9 +31,10 @@ package org.hisp.dhis.datastatistics.hibernate;
 import org.hisp.dhis.datastatistics.DataStatisticsEvent;
 import org.hisp.dhis.datastatistics.DataStatisticsEventStore;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
-import org.hibernate.criterion.Restrictions;
 
-import java.util.Date;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+
 import java.util.List;
 
 /**
@@ -44,17 +45,22 @@ import java.util.List;
  */
 public class HibernateDataStatisticsEventStore extends HibernateGenericStore<DataStatisticsEvent> implements DataStatisticsEventStore
 {
+    @Autowired
+    JdbcTemplate jdbcTemplate;
+
     /**
-     * Method for getting a list of all events saved from a specific date
-     *
-     * @param date - get all saved from this date
-     * @return List of datastatisticsevents
+     * Creates a list of DataStatisticsEvent objects in interval date to current date
+     * @param sql
+     * @return list of objects
      */
-    public List<DataStatisticsEvent> getDataStatisticsEventCount( Date date )
+    public List<int[]> getDataStatisticsEventCount( String sql )
     {
-        return getSharingCriteria()
-            .add( Restrictions.ge( "timestamp", date ) )
-            .list();
+        return jdbcTemplate.query( sql, ( resultSet, i ) -> {
+            int[] l = new int[2];
+            l[0] = resultSet.getInt( "eventtype" );
+            l[1] = resultSet.getInt( "numberofviews");
+            return l;
+        });
 
 
     }

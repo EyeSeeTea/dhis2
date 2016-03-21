@@ -30,7 +30,6 @@ package org.hisp.dhis.datastatistics;
 
 import org.hisp.dhis.common.GenericStore;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -39,11 +38,11 @@ import java.util.List;
  */
 public interface DataStatisticsEventStore extends GenericStore<DataStatisticsEvent>
 {
+
     /**
      * Creates a list of DataStatisticsEvent objects in interval date to current date
-     *
-     * @param date start of interval
-     * @return list og objects
+     * @param sql
+     * @return list of objects
      */
-    List<DataStatisticsEvent> getDataStatisticsEventCount( Date date );
+    List getDataStatisticsEventCount( String sql);
 }

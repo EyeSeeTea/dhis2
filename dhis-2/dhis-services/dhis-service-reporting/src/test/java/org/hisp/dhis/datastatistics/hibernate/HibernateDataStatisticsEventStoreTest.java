@@ -36,9 +36,10 @@ import org.hisp.dhis.datastatistics.EventType;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Calendar;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+
 
 import static org.junit.Assert.*;
 
@@ -57,34 +58,29 @@ public class HibernateDataStatisticsEventStoreTest extends DhisSpringTest
     DataStatisticsEvent dse3;
     DataStatisticsEvent dse4;
 
-
-
-
     int dse1Id;
     int dse2Id;
 
-    Date startDate;
     Date endDate;
     Date testDate;
+
+    String start;
+    String end;
+
 
     @Override
     public void setUpTest() throws Exception
     {
-        startDate = new Date();
+
         endDate = new Date();
-        testDate = new Date();
 
-        Calendar c = Calendar.getInstance();
-        endDate = c.getTime();
-        c.setTime( startDate );
-        c.add( Calendar.DATE, -2 );
-        startDate = c.getTime();
+        end = "2016-03-21";
+        start = "2016-03-19";
 
+        SimpleDateFormat fm = new SimpleDateFormat( "yyyy/MM/dd" );
+        endDate = fm.parse( "2016/03/20" );
 
-        c.setTime( testDate );
-        c.add( Calendar.DATE, -5 );
-        testDate = c.getTime();
-
+        testDate = fm.parse( "2016/03/16" );
 
         dse1 = new DataStatisticsEvent( EventType.REPORT_TABLE_VIEW, endDate, "Testuser" );
         dse2 = new DataStatisticsEvent( EventType.EVENT_CHART_VIEW, endDate, "TestUser" );
@@ -110,49 +106,57 @@ public class HibernateDataStatisticsEventStoreTest extends DhisSpringTest
     public void getDataStatisticsEventCountTest()
     {
 
+        String sql = "select eventtype as eventtype, count(eventtype) as numberofviews from datastatisticsevent where (timestamp between '"+start+"' and '"+end+"') group by eventtype;";
+
         dataStatisticsEventStore.save( dse1 );
         dataStatisticsEventStore.save( dse4 );
 
-        List<DataStatisticsEvent> dsList = dataStatisticsEventStore.getDataStatisticsEventCount( startDate );
+        List<int[]> dsList = dataStatisticsEventStore.getDataStatisticsEventCount( sql );
 
         assertTrue( dsList.size() == 2 );
 
     }
 
+
     @Test
     public void getDataStatisticsEventCountCorrectContentTest()
     {
+        String sql = "select eventtype as eventtype, count(eventtype) as numberofviews from datastatisticsevent where (timestamp between '"+start+"' and '"+end+"') group by eventtype;";
 
         dataStatisticsEventStore.save( dse1 );
         dataStatisticsEventStore.save( dse4 );
 
-        List<DataStatisticsEvent> dsList = dataStatisticsEventStore.getDataStatisticsEventCount( startDate );
-        assertEquals( dse1, dsList.get( 0 ) );
-        assertEquals( dse4, dsList.get( 1 ) );
+        List<int[]> dsList = dataStatisticsEventStore.getDataStatisticsEventCount( sql );
+        assertEquals( 2, dsList.get( 0 )[0] );
+        assertEquals( 3, dsList.get( 1 )[0] );
     }
+
 
     @Test
     public void getDataStatisticsEventCountCorrectDatesTest()
     {
+        String sql = "select eventtype as eventtype, count(eventtype) as numberofviews from datastatisticsevent where (timestamp between '"+start+"' and '"+end+"') group by eventtype;";
+
         dataStatisticsEventStore.save( dse1 );
         dataStatisticsEventStore.save( dse4 );
-        dataStatisticsEventStore.save( dse3 );
+        dataStatisticsEventStore.save( dse2 );
 
-        List<DataStatisticsEvent> dsList = dataStatisticsEventStore.getDataStatisticsEventCount( testDate );
-
+        List<int[]> dsList = dataStatisticsEventStore.getDataStatisticsEventCount( sql );
         assertTrue( dsList.size() == 3 );
 
     }
 
+
     @Test
     public void getDataStatisticsEventCountWrongDatesTest()
     {
+        String sql = "select eventtype as eventtype, count(eventtype) as numberofviews from datastatisticsevent where (timestamp between '"+start+"' and '"+end+"') group by eventtype;";
+
         dataStatisticsEventStore.save( dse1 );
         dataStatisticsEventStore.save( dse4 );
         dataStatisticsEventStore.save( dse3 );
 
-        List<DataStatisticsEvent> dsList = dataStatisticsEventStore.getDataStatisticsEventCount( startDate );
-
+        List<int[]> dsList = dataStatisticsEventStore.getDataStatisticsEventCount( sql );
         assertTrue( dsList.size() == 2 );
 
     }

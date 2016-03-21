@@ -37,7 +37,7 @@ import org.hisp.dhis.datastatistics.EventInterval;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Calendar;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -59,35 +59,38 @@ public class HibernateDataStatisticsStoreTest extends DhisSpringTest
     DataStatistics ds5;
     DataStatistics ds6;
 
-    Calendar c;
-    Calendar d;
-
     int ds1Id;
     int ds2Id;
 
     String testBefore;
     String testAfter;
+    SimpleDateFormat fm;
+
+    Date d;
+
 
     @Override
     public void setUpTest() throws Exception
     {
         ds1 = new DataStatistics();
-        ds2 = new DataStatistics( 10, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18 );
+        ds2 = new DataStatistics( 10, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18 );
         ds3 = new DataStatistics();
-        ds4 = new DataStatistics( 10, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 );
-        ds5 = new DataStatistics( 3, 2, 1, 6, 5, 4, 8, 7, 6, 3, 4, 4, 5, 9, 7, 6, 4, 2 );
-        ds6 = new DataStatistics( 5, 6, 4, 3, 5, 7, 8, 5, 3, 2, 1, 5, 6, 8, 8, 9, 9, 9 );
+        ds4 = new DataStatistics( 10, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19 );
+        ds5 = new DataStatistics( 3, 2.0, 1.0, 6.0, 5.0, 4.0, 8.0, 7.0, 6.0, 3.0, 4.0, 4.0, 5.0, 9.0, 7.0, 6.0, 4.0, 2 );
+        ds6 = new DataStatistics( 5, 6.0, 4.0, 3.0, 5.0, 7.0, 8.0, 5.0, 3.9, 2.8, 1.6, 5.5, 6.4, 8.3, 8.2, 9.4, 9.6, 9 );
 
         ds1Id = 0;
         ds2Id = 0;
 
-        Date now = new Date();
+        fm = new SimpleDateFormat( "yyyy/MM/dd" );
+        d = fm.parse( "2016/03/21" );
 
-        c = Calendar.getInstance();
-        d = Calendar.getInstance();
-
-        c.setTime( now );
-        d.setTime( now );
+        ds1.setCreated( d );
+        ds2.setCreated( d );
+        ds3.setCreated( d );
+        ds4.setCreated( d );
+        ds5.setCreated( d );
+        ds6.setCreated( d );
 
 
     }
@@ -106,20 +109,15 @@ public class HibernateDataStatisticsStoreTest extends DhisSpringTest
     @Test
     public void getSnapshotsInIntervalGetInDAYTest()
     {
-
-        c.add( Calendar.YEAR, -1 );
-        d.add( Calendar.YEAR, 1 );
-
-        testBefore = c.get( Calendar.YEAR ) + "-" + (c.get( Calendar.MONTH ) + 1) + "-" + c.get( Calendar.DAY_OF_MONTH );
-        testAfter = d.get( Calendar.YEAR ) + "-" + (d.get( Calendar.MONTH ) + 1) + "-" + d.get( Calendar.DAY_OF_MONTH );
-
+        testBefore="2015-03-21";
+        testAfter="2016-03-21";
         dataStatisticsStore.save( ds2 );
         dataStatisticsStore.save( ds4 );
         dataStatisticsStore.save( ds5 );
         dataStatisticsStore.save( ds6 );
         double expected = ds2.getSavedMaps() + ds4.getSavedMaps() + ds5.getSavedMaps() + ds6.getSavedMaps();
 
-        String sql = "select extract(year from created) as yr, extract(day from created) as day, " +
+        String sql = "select extract(year from created) as yr, extract(month from created) as mnt, extract(day from created) as day, " +
             "max(active_users) as activeUsers," +
             "sum(mapviews) as mapViews," +
             "sum(chartviews) as chartViews," +
@@ -138,7 +136,7 @@ public class HibernateDataStatisticsStoreTest extends DhisSpringTest
             "sum(dashborards) as savedDashboards," +
             "sum(indicators) as savedIndicators," +
             "max(users) as users from datastatistics " +
-            "where (created between '" + testBefore + "' and '" + testAfter + "') group by yr, day;";
+            "where (created between '" + testBefore + "' and '" + testAfter + "') group by yr, mnt, day;";
         List<AggregatedStatistics> asList = dataStatisticsStore.getSnapshotsInInterval( sql, EventInterval.DAY );
         assertTrue( asList.get( 0 ).getSavedMaps() == expected );
         assertTrue( asList.size() == 1 );
@@ -146,24 +144,21 @@ public class HibernateDataStatisticsStoreTest extends DhisSpringTest
     }
 
     @Test
-    public void getSnapshotsInIntervalGetInDAY_DifferenDAyesSavedTest()
-    {   c.add( Calendar.DATE, -1 );
+    public void getSnapshotsInIntervalGetInDAY_DifferenDayesSavedTest() throws Exception
+    {
+        fm = new SimpleDateFormat( "yyyy/MM/dd" );
+        d = fm.parse( "2016/03/20" );
+        ds2.setCreated( d );
 
-        ds2.setCreated( c.getTime() );
-        c.add( Calendar.YEAR, -1 );
-        d.add( Calendar.YEAR, 1 );
-
-        testBefore = c.get( Calendar.YEAR ) + "-" + (c.get( Calendar.MONTH ) + 1) + "-" + c.get( Calendar.DAY_OF_MONTH );
-        testAfter = d.get( Calendar.YEAR ) + "-" + (d.get( Calendar.MONTH ) + 1) + "-" + d.get( Calendar.DAY_OF_MONTH );
-
+        testBefore="2015-03-19";
+        testAfter="2016-03-21";
 
         dataStatisticsStore.save( ds2 );
         dataStatisticsStore.save( ds4 );
         dataStatisticsStore.save( ds5 );
         dataStatisticsStore.save( ds6 );
-        double expected = ds2.getSavedMaps() + ds4.getSavedMaps() + ds5.getSavedMaps() + ds6.getSavedMaps();
 
-        String sql = "select extract(year from created) as yr, extract(day from created) as day, " +
+        String sql = "select extract(year from created) as yr, extract(month from created) as mnt, extract(day from created) as day, " +
             "max(active_users) as activeUsers," +
             "sum(mapviews) as mapViews," +
             "sum(chartviews) as chartViews," +
@@ -182,7 +177,7 @@ public class HibernateDataStatisticsStoreTest extends DhisSpringTest
             "sum(dashborards) as savedDashboards," +
             "sum(indicators) as savedIndicators," +
             "max(users) as users from datastatistics " +
-            "where (created between '" + testBefore + "' and '" + testAfter + "') group by yr, day;";
+            "where (created between '" + testBefore + "' and '" + testAfter + "') group by yr, mnt,day;";
         List<AggregatedStatistics> asList = dataStatisticsStore.getSnapshotsInInterval( sql, EventInterval.DAY );
         assertTrue( asList.size() == 2 );
 
@@ -191,11 +186,8 @@ public class HibernateDataStatisticsStoreTest extends DhisSpringTest
     @Test
     public void getSnapshotsInIntervalGetInDAY_GEDatesTest()
     {
-        c.add( Calendar.YEAR, 1 );
-        d.add( Calendar.YEAR, 1 );
-
-        testBefore = c.get( Calendar.YEAR ) + "-" + (c.get( Calendar.MONTH ) + 1) + "-" + c.get( Calendar.DAY_OF_MONTH );
-        testAfter = d.get( Calendar.YEAR ) + "-" + (d.get( Calendar.MONTH ) + 1) + "-" + d.get( Calendar.DAY_OF_MONTH );
+        testBefore="2017-03-21";
+        testAfter="2017-03-22";
 
 
         dataStatisticsStore.save( ds2 );
@@ -204,7 +196,7 @@ public class HibernateDataStatisticsStoreTest extends DhisSpringTest
         dataStatisticsStore.save( ds6 );
         double expected = ds2.getSavedMaps() + ds4.getSavedMaps() + ds5.getSavedMaps() + ds6.getSavedMaps();
 
-        String sql = "select extract(year from created) as yr, extract(day from created) as day, " +
+        String sql = "select extract(year from created) as yr, extract(month from created) as mnt, extract(day from created) as day, " +
             "max(active_users) as activeUsers," +
             "sum(mapviews) as mapViews," +
             "sum(chartviews) as chartViews," +
@@ -223,7 +215,7 @@ public class HibernateDataStatisticsStoreTest extends DhisSpringTest
             "sum(dashborards) as savedDashboards," +
             "sum(indicators) as savedIndicators," +
             "max(users) as users from datastatistics " +
-            "where (created between '" + testBefore + "' and '" + testAfter + "') group by yr, day;";
+            "where (created between '" + testBefore + "' and '" + testAfter + "') group by yr, mnt, day;";
         List<AggregatedStatistics> asList = dataStatisticsStore.getSnapshotsInInterval( sql, EventInterval.DAY );
         assertTrue( asList.size() == 0);
 
@@ -232,11 +224,9 @@ public class HibernateDataStatisticsStoreTest extends DhisSpringTest
     @Test
     public void getSnapshotsInIntervalGetInWEEKTest()
     {
-        c.add( Calendar.YEAR, -1 );
-        d.add( Calendar.YEAR, 1 );
+        testBefore="2015-03-21";
+        testAfter="2016-03-21";
 
-        testBefore = c.get( Calendar.YEAR ) + "-" + (c.get( Calendar.MONTH ) + 1) + "-" + c.get( Calendar.DAY_OF_MONTH );
-        testAfter = d.get( Calendar.YEAR ) + "-" + (d.get( Calendar.MONTH ) + 1) + "-" + d.get( Calendar.DAY_OF_MONTH );
         dataStatisticsStore.save( ds2 );
         dataStatisticsStore.save( ds4 );
         dataStatisticsStore.save( ds5 );
@@ -271,11 +261,8 @@ public class HibernateDataStatisticsStoreTest extends DhisSpringTest
     @Test
     public void getSnapshotsInIntervalGetInMONTHTest()
     {
-        c.add( Calendar.YEAR, -1 );
-        d.add( Calendar.YEAR, 1 );
-
-        testBefore = c.get( Calendar.YEAR ) + "-" + (c.get( Calendar.MONTH ) + 1) + "-" + c.get( Calendar.DAY_OF_MONTH );
-        testAfter = d.get( Calendar.YEAR ) + "-" + (d.get( Calendar.MONTH ) + 1) + "-" + d.get( Calendar.DAY_OF_MONTH );
+        testBefore="2015-03-21";
+        testAfter="2016-03-21";
         dataStatisticsStore.save( ds2 );
         dataStatisticsStore.save( ds4 );
         dataStatisticsStore.save( ds5 );
@@ -310,11 +297,8 @@ public class HibernateDataStatisticsStoreTest extends DhisSpringTest
     @Test
     public void getSnapshotsInIntervalGetInYEARTest()
     {
-        c.add( Calendar.YEAR, -1 );
-        d.add( Calendar.YEAR, 1 );
-
-        testBefore = c.get( Calendar.YEAR ) + "-" + (c.get( Calendar.MONTH ) + 1) + "-" + c.get( Calendar.DAY_OF_MONTH );
-        testAfter = d.get( Calendar.YEAR ) + "-" + (d.get( Calendar.MONTH ) + 1) + "-" + d.get( Calendar.DAY_OF_MONTH );
+        testBefore="2015-03-21";
+        testAfter="2016-03-21";
         dataStatisticsStore.save( ds2 );
         dataStatisticsStore.save( ds4 );
         dataStatisticsStore.save( ds5 );

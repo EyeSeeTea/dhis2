@@ -14,7 +14,7 @@
         <param name="enumClass">org.hisp.dhis.datastatistics.EventType</param>
       </type>
     </property>
-    <property name="timestamp" column="timestamp" type="java.util.Date" />
+    <property name="timestamp" column="timestamp" type="timestamp" />
     <property name="userName" column="username" type="string" />
   </class>
 </hibernate-mapping>

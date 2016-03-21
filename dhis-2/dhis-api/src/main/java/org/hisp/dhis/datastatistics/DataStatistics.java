@@ -89,32 +89,6 @@ public class DataStatistics extends BaseIdentifiableObject
         this.users = users;
     }
 
-    public DataStatistics( int activeUsers, double mapViews, double chartViews, double reportTablesViews, double eventReportViews,
-        double eventChartViews, double dashboardViews, double indicatorsViews, double totalViews, double averageViews, double savedMaps,
-        double savedCharts, double savedReportTables, double savedEventReports, double savedEventCharts, double savedDashboards,
-        double savedIndicators, int users )
-    {
-        super.setAutoFields();
-        this.activeUsers = activeUsers;
-        this.mapViews = mapViews;
-        this.chartViews = chartViews;
-        this.reportTablesViews = reportTablesViews;
-        this.eventReportViews = eventReportViews;
-        this.eventChartViews = eventChartViews;
-        this.dashboardViews = dashboardViews;
-        this.indicatorsViews = indicatorsViews;
-        this.totalViews = totalViews;
-        this.averageViews = averageViews;
-        this.savedMaps = savedMaps;
-        this.savedCharts = savedCharts;
-        this.savedReportTables = savedReportTables;
-        this.savedEventReports = savedEventReports;
-        this.savedEventCharts = savedEventCharts;
-        this.savedDashboards = savedDashboards;
-        this.savedIndicators = savedIndicators;
-        this.users = users;
-    }
-
     @JsonProperty
     public Integer getActiveUsers()
     {
