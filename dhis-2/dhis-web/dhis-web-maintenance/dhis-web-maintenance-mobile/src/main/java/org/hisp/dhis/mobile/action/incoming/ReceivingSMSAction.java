@@ -1,5 +1,4 @@
 package org.hisp.dhis.mobile.action.incoming;
-
 /*
  * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
@@ -32,10 +31,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.paging.ActionPagingSupport;
-import org.hisp.dhis.sms.config.ModemGatewayConfig;
-import org.hisp.dhis.sms.config.SmsConfigurationManager;
 import org.hisp.dhis.sms.incoming.IncomingSms;
 import org.hisp.dhis.sms.incoming.IncomingSmsService;
 import org.hisp.dhis.sms.incoming.SmsMessageStatus;
@@ -43,7 +39,6 @@ import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserQueryParams;
 import org.hisp.dhis.user.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Nguyen Kim Lai
@@ -61,13 +56,6 @@ public class ReceivingSMSAction
     {
         this.incomingSmsService = incomingSmsService;
     }
-
-    private I18n i18n;
-
-    public void setI18n( I18n i18n )
-    {
-        this.i18n = i18n;
-    }
     
     private UserService userService;
 
@@ -82,9 +70,6 @@ public class ReceivingSMSAction
     {
         this.currentUserService = currentUserService;
     }
-
-    @Autowired
-    private SmsConfigurationManager smsConfigurationManager;
 
     // -------------------------------------------------------------------------
     // Input & Output
@@ -102,13 +87,6 @@ public class ReceivingSMSAction
     public String getMessage()
     {
         return message;
-    }
-
-    private Integer pollingInterval;
-
-    public Integer getPollingInterval()
-    {
-        return pollingInterval;
     }
 
     private String smsStatus;
@@ -164,31 +142,6 @@ public class ReceivingSMSAction
         throws Exception
     {
         this.user = currentUserService.getCurrentUser();
-        
-        ModemGatewayConfig gatewayConfig = (ModemGatewayConfig) smsConfigurationManager
-            .checkInstanceOfGateway( ModemGatewayConfig.class );
-
-        if ( gatewayConfig != null )
-        {
-            pollingInterval = gatewayConfig.getPollingInterval() * 1000;
-        }
-        else
-        {
-            pollingInterval = 4000;
-        }
-        listIncomingSms = incomingSmsService.listAllMessageFromModem();
-
-        if ( listIncomingSms.size() > 0 )
-        {
-            for ( IncomingSms each : listIncomingSms )
-            {
-                incomingSmsService.save( each );
-            }
-
-            message = i18n.getString( "new_message" );
-
-            incomingSmsService.deleteAllFromModem();
-        }
 
         if ( keyword == null )
         {
@@ -224,7 +177,7 @@ public class ReceivingSMSAction
             }
         }
         
-        // Get the name of senders
+        // Get the name of senders      
         senderNames = new ArrayList<>();
         senderNames.add( "" );
         String tempString;

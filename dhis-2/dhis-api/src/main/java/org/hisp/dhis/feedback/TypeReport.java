@@ -29,10 +29,16 @@ package org.hisp.dhis.feedback;
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.google.common.base.MoreObjects;
 import org.hisp.dhis.common.DxfNamespaces;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -44,18 +50,40 @@ public class TypeReport
 
     private Stats stats = new Stats();
 
-    private ObjectReport objectReport = new ObjectReport();
+    private Map<Integer, ObjectReport> objectReportMap = new HashMap<>();
 
     public TypeReport( Class<?> klass )
     {
         this.klass = klass;
     }
 
-    public TypeReport( Class<?> klass, ObjectReport objectReport )
+    //-----------------------------------------------------------------------------------
+    // Utility Methods
+    //-----------------------------------------------------------------------------------
+
+    public void merge( TypeReport typeReport )
     {
-        this.klass = klass;
-        this.objectReport = objectReport;
+        stats.merge( typeReport.getStats() );
+
+        typeReport.getObjectReportMap().forEach( ( index, objectReport ) -> {
+            if ( !objectReportMap.containsKey( index ) ) objectReportMap.put( index, new ObjectReport( objectReport.getKlass(), objectReport.getIndex() ) );
+            objectReportMap.get( index ).addErrorReports( objectReport.getErrorReports() );
+        } );
     }
+
+    public void addObjectReport( ObjectReport objectReport )
+    {
+        if ( !objectReportMap.containsKey( objectReport.getIndex() ) )
+        {
+            objectReportMap.put( objectReport.getIndex(), new ObjectReport( objectReport.getKlass(), objectReport.getIndex() ) );
+        }
+
+        objectReportMap.get( objectReport.getIndex() ).merge( objectReport );
+    }
+
+    //-----------------------------------------------------------------------------------
+    // Getters and Setters
+    //-----------------------------------------------------------------------------------
 
     @JsonProperty
     @JacksonXmlProperty( isAttribute = true )
@@ -72,12 +100,28 @@ public class TypeReport
     }
 
     @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public ObjectReport getObjectReport()
+    @JacksonXmlElementWrapper( localName = "objectReports", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "objectReport", namespace = DxfNamespaces.DXF_2_0 )
+    public List<ObjectReport> getObjectReports()
     {
-        return objectReport;
+        List<ObjectReport> objectReports = new ArrayList<>();
+        objectReportMap.values().forEach( objectReports::add );
+
+        return objectReports;
     }
 
+    public List<ErrorReport> getErrorReports()
+    {
+        List<ErrorReport> errorReports = new ArrayList<>();
+        objectReportMap.values().forEach( objectReport -> errorReports.addAll( objectReport.getErrorReports() ) );
+
+        return errorReports;
+    }
+
+    public Map<Integer, ObjectReport> getObjectReportMap()
+    {
+        return objectReportMap;
+    }
 
     @Override
     public String toString()
@@ -85,7 +129,7 @@ public class TypeReport
         return MoreObjects.toStringHelper( this )
             .add( "klass", klass )
             .add( "stats", stats )
-            .add( "errorReports", objectReport )
+            .add( "objectReports", getObjectReports() )
             .toString();
     }
 }

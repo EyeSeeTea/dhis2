@@ -31,11 +31,10 @@ package org.hisp.dhis.dxf2.metadata2.objectbundle;
 import com.google.common.base.MoreObjects;
 import org.hisp.dhis.feedback.ErrorCode;
 import org.hisp.dhis.feedback.ErrorReport;
-import org.hisp.dhis.feedback.ObjectErrorReport;
+import org.hisp.dhis.feedback.ObjectReport;
 import org.hisp.dhis.feedback.TypeReport;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +51,10 @@ public class ObjectBundleValidation
     {
     }
 
+    //-----------------------------------------------------------------------------------
+    // Utility Methods
+    //-----------------------------------------------------------------------------------
+
     public List<ErrorReport> getErrorReportsByCode( Class<?> klass, ErrorCode errorCode )
     {
         List<ErrorReport> errorReports = new ArrayList<>();
@@ -61,11 +64,11 @@ public class ObjectBundleValidation
             return errorReports;
         }
 
-        Collection<ObjectErrorReport> objectErrorReports = typeReportMap.get( klass ).getObjectReport().getErrorReports();
+        List<ObjectReport> objectReports = typeReportMap.get( klass ).getObjectReports();
 
-        for ( ObjectErrorReport objectErrorReport : objectErrorReports )
+        for ( ObjectReport objectReport : objectReports )
         {
-            List<ErrorReport> byCode = objectErrorReport.getErrorReportsByCode().get( errorCode );
+            List<ErrorReport> byCode = objectReport.getErrorReportsByCode().get( errorCode );
 
             if ( byCode != null )
             {
@@ -87,14 +90,12 @@ public class ObjectBundleValidation
         }
 
         TypeReport typeReport = typeReportMap.get( report.getKlass() );
-        typeReport.getStats().merge( report.getStats() );
-        typeReport.getObjectReport().addErrorReports( report.getObjectReport() );
+        typeReport.merge( typeReport );
     }
 
-    public void addTypeReports( Collection<TypeReport> typeReports )
-    {
-        typeReports.forEach( this::addTypeReport );
-    }
+    //-----------------------------------------------------------------------------------
+    // Getters and Setters
+    //-----------------------------------------------------------------------------------
 
     public boolean isEmpty()
     {
@@ -103,7 +104,7 @@ public class ObjectBundleValidation
 
     public boolean isEmpty( Class<?> klass )
     {
-        return typeReportMap.containsKey( klass ) && typeReportMap.get( klass ).getObjectReport().isEmpty();
+        return typeReportMap.containsKey( klass ) && typeReportMap.get( klass ).getObjectReportMap().isEmpty();
     }
 
     public Map<Class<?>, TypeReport> getTypeReportMap()
@@ -116,18 +117,24 @@ public class ObjectBundleValidation
         return typeReportMap.get( klass );
     }
 
-    public List<ObjectErrorReport> getAllObjectErrorReports( Class<?> klass )
+    public List<ObjectReport> getObjectReports( Class<?> klass )
     {
         if ( !typeReportMap.containsKey( klass ) ) new ArrayList<>();
-        return typeReportMap.get( klass ).getObjectReport().getErrorReports().stream().collect( Collectors.toList() );
+        return typeReportMap.get( klass ).getObjectReports();
     }
 
-    public List<ObjectErrorReport> getAllObjectErrorReports()
+    public List<ErrorReport> getErrorReports( Class<?> klass )
     {
-        List<ObjectErrorReport> objectErrorReports = new ArrayList<>();
-        typeReportMap.values().forEach( typeReport -> objectErrorReports.addAll( typeReport.getObjectReport().getErrorReports() ) );
+        if ( !typeReportMap.containsKey( klass ) ) new ArrayList<>();
+        return typeReportMap.get( klass ).getErrorReports().stream().collect( Collectors.toList() );
+    }
 
-        return objectErrorReports;
+    public List<ErrorReport> getErrorReports()
+    {
+        List<ErrorReport> errorReports = new ArrayList<>();
+        typeReportMap.values().forEach( typeReport -> errorReports.addAll( typeReport.getErrorReports() ) );
+
+        return errorReports;
     }
 
     @Override

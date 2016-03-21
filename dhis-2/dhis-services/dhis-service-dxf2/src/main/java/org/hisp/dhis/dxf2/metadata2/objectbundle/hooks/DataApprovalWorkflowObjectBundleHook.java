@@ -1,4 +1,4 @@
-package org.hisp.dhis.sms.outbound;
+package org.hisp.dhis.dxf2.metadata2.objectbundle.hooks;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -28,10 +28,39 @@ package org.hisp.dhis.sms.outbound;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.dataapproval.DataApprovalWorkflow;
+import org.hisp.dhis.dxf2.metadata2.objectbundle.ObjectBundle;
+import org.hisp.dhis.period.PeriodType;
+
 /**
- * Zubair <rajazubair.asghar@gmail.com>
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public enum SMSServiceStatus
+public class DataApprovalWorkflowObjectBundleHook extends AbstractObjectBundleHook
 {
-    STARTED, STOPPED, STARTING, STOPPING
+    @Override
+    public <T extends IdentifiableObject> void preCreate( T object, ObjectBundle bundle )
+    {
+        if ( !DataApprovalWorkflow.class.isInstance( object ) ) return;
+        DataApprovalWorkflow dataApprovalWorkflow = (DataApprovalWorkflow) object;
+
+        if ( dataApprovalWorkflow.getPeriodType() != null )
+        {
+            PeriodType periodType = bundle.getPreheat().getPeriodTypeMap().get( dataApprovalWorkflow.getPeriodType().getName() );
+            dataApprovalWorkflow.setPeriodType( periodType );
+        }
+    }
+
+    @Override
+    public <T extends IdentifiableObject> void preUpdate( T object, ObjectBundle bundle )
+    {
+        if ( !DataApprovalWorkflow.class.isInstance( object ) ) return;
+        DataApprovalWorkflow dataApprovalWorkflow = (DataApprovalWorkflow) object;
+
+        if ( dataApprovalWorkflow.getPeriodType() != null )
+        {
+            PeriodType periodType = bundle.getPreheat().getPeriodTypeMap().get( dataApprovalWorkflow.getPeriodType().getName() );
+            dataApprovalWorkflow.setPeriodType( periodType );
+        }
+    }
 }

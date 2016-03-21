@@ -36,8 +36,9 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.analytics.QueryPlanner;
+import org.hisp.dhis.analytics.QueryPlannerParams;
+import org.hisp.dhis.analytics.data.QueryPlannerUtils;
 import org.hisp.dhis.analytics.event.EventQueryParams;
 import org.hisp.dhis.analytics.event.EventQueryPlanner;
 import org.hisp.dhis.analytics.partition.PartitionManager;
@@ -49,6 +50,7 @@ import org.hisp.dhis.period.Period;
 import org.hisp.dhis.program.ProgramIndicator;
 import org.hisp.dhis.setting.SettingKey;
 import org.hisp.dhis.setting.SystemSettingManager;
+import org.hisp.dhis.system.util.ValidationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -140,6 +142,11 @@ public class DefaultEventQueryPlanner
             violation = "Cluster size must be a positive number: " + params.getClusterSize();
         }
         
+        if ( params.hasBbox() && !ValidationUtils.bboxIsValid( params.getBbox() ) )
+        {
+            violation = "Bbox is invalid: " + params.getBbox() + ", must be on format: 'min-lng,min-lat,max-lng,max-lat'";
+        }
+        
         if ( violation != null )
         {
             log.warn( "Event analytics validation failed: " + violation );
@@ -163,11 +170,11 @@ public class DefaultEventQueryPlanner
             
             for ( EventQueryParams byPartition : groupedByPartition )
             {
-                List<EventQueryParams> groupedByOrgUnitLevel = convert( queryPlanner.groupByOrgUnitLevel( byPartition ) );
+                List<EventQueryParams> groupedByOrgUnitLevel = QueryPlannerUtils.convert( queryPlanner.groupByOrgUnitLevel( byPartition ) );
                 
                 for ( EventQueryParams byOrgUnitLevel : groupedByOrgUnitLevel )
                 {
-                    queries.addAll( convert( queryPlanner.groupByPeriodType( byOrgUnitLevel ) ) );
+                    queries.addAll( QueryPlannerUtils.convert( queryPlanner.groupByPeriodType( byOrgUnitLevel ) ) );
                 }
             }
         }
@@ -235,7 +242,9 @@ public class DefaultEventQueryPlanner
         }
         else // Aggregate only
         {
-            return convert( queryPlanner.groupByPartition( params, EVENT_ANALYTICS_TABLE_NAME, tableSuffix ) );
+            QueryPlannerParams plannerParams = QueryPlannerParams.instance().setTableName( EVENT_ANALYTICS_TABLE_NAME ).setTableSuffix( tableSuffix );
+
+            return QueryPlannerUtils.convert( queryPlanner.groupByPartition( params, plannerParams ) );
         }
     }
     
@@ -292,16 +301,4 @@ public class DefaultEventQueryPlanner
         
         return queries;
     }
-        
-    private static List<EventQueryParams> convert( List<DataQueryParams> params )
-    {
-        List<EventQueryParams> eventParams = new ArrayList<>();
-        
-        for ( DataQueryParams param : params )
-        {
-            eventParams.add( (EventQueryParams) param );
-        }
-        
-        return eventParams;
-    }    
 }

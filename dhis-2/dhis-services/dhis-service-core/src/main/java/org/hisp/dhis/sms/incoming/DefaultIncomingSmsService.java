@@ -28,13 +28,10 @@ package org.hisp.dhis.sms.incoming;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import org.hisp.dhis.sms.MessageQueue;
-import org.smslib.InboundMessage;
-import org.smslib.Service;
 
 public class DefaultIncomingSmsService
     implements IncomingSmsService
@@ -58,70 +55,15 @@ public class DefaultIncomingSmsService
     }
 
     // -------------------------------------------------------------------------
-    // Input & Output
-    // -------------------------------------------------------------------------
-
-    private List<InboundMessage> msgList = new ArrayList<>();
-
-    public void setMsgList( List<InboundMessage> msgList )
-    {
-        this.msgList = msgList;
-    }
-
-    // -------------------------------------------------------------------------
     // Implementation
     // -------------------------------------------------------------------------
-
-    @Override
-    public List<IncomingSms> listAllMessageFromModem()
-    {
-        List<IncomingSms> result = new ArrayList<>();
-
-        try
-        {
-            Service.getInstance().readMessages( msgList, InboundMessage.MessageClasses.ALL );
-        }
-        catch ( Exception e )
-        {
-            e.printStackTrace();
-        }
-
-        if ( msgList.size() > 0 )
-        {
-            for ( InboundMessage each : msgList )
-            {
-                IncomingSms incomingSms = convertToIncomingSms( each );
-
-                result.add( incomingSms );
-            }
-
-            msgList.clear();
-        }
-
-        return result;
-    }
 
     @Override
     public List<IncomingSms> listAllMessage()
     {
         return (List<IncomingSms>) incomingSmsStore.getAllSmses();
     }
-
-    @Override
-    public List<InboundMessage> getMsgList()
-    {
-        try
-        {
-            Service.getInstance().readMessages( msgList, InboundMessage.MessageClasses.ALL );
-        }
-        catch ( Exception e )
-        {
-            e.printStackTrace();
-        }
-
-        return msgList;
-    }
-
+    
     @Override
     public int save( IncomingSms incomingSms )
     {
@@ -155,26 +97,6 @@ public class DefaultIncomingSmsService
     }
 
     @Override
-    public void deleteAllFromModem()
-    {
-        try
-        {
-            Service.getInstance().readMessages( msgList, InboundMessage.MessageClasses.ALL );
-
-            for ( InboundMessage each : msgList )
-            {
-                Service.getInstance().deleteMessage( each );
-            }
-        }
-        catch ( Exception e )
-        {
-            e.printStackTrace();
-        }
-
-        msgList.clear();
-    }
-
-    @Override
     public void deleteById( Integer id )
     {
         IncomingSms incomingSms = incomingSmsStore.get( id );
@@ -204,21 +126,6 @@ public class DefaultIncomingSmsService
     public List<IncomingSms> getSmsByStatus( SmsMessageStatus status, String keyword )
     {
         return incomingSmsStore.getSmsByStatus( status, keyword );
-    }
-
-    @Override
-    public IncomingSms convertToIncomingSms( InboundMessage message )
-    {
-        IncomingSms incomingSms = new IncomingSms();
-        incomingSms.setOriginator( message.getOriginator() );
-        incomingSms.setEncoding( SmsMessageEncoding.ENC7BIT );
-        incomingSms.setSentDate( message.getDate() );
-        incomingSms.setReceivedDate( message.getDate() );
-        incomingSms.setText( message.getText() );
-        incomingSms.setGatewayId( message.getGatewayId() );
-        incomingSms.setStatus( SmsMessageStatus.PROCESSED );
-        incomingSms.setStatusMessage( "imported" );
-        return incomingSms;
     }
 
     @Override

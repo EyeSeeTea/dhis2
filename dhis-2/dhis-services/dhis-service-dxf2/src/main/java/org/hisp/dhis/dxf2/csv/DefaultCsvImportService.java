@@ -333,9 +333,6 @@ public class DefaultCsvImportService
                 {
                     OrganisationUnit parent = new OrganisationUnit();
                     parent.setUid( parentUid );
-                    parent.setCode( parentUid );
-                    parent.setName( parentUid );
-
                     object.setParent( parent );
                 }
 
@@ -394,6 +391,7 @@ public class DefaultCsvImportService
             {
                 OptionSet optionSet = new OptionSet();
                 setIdentifiableObject( optionSet, values );
+                optionSet.setValueType( ValueType.TEXT );
 
                 Option option = new Option();
                 option.setName( getSafe( values, 3, null, 230 ) );

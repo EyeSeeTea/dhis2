@@ -28,63 +28,32 @@ package org.hisp.dhis.sms.outbound;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.IOException;
-import java.lang.Character.UnicodeBlock;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.List;
+import java.util.Arrays;
+import java.util.Collection;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.sms.SmsServiceException;
+
 import org.hisp.dhis.sms.config.BulkSmsGatewayConfig;
 import org.hisp.dhis.sms.config.ClickatellGatewayConfig;
-import org.hisp.dhis.sms.config.GateWayFactory;
-import org.hisp.dhis.sms.config.GenericHttpGatewayConfig;
-import org.hisp.dhis.sms.config.ModemGatewayConfig;
-import org.hisp.dhis.sms.config.SMPPGatewayConfig;
-import org.hisp.dhis.sms.config.SMSGatewayStatus;
-import org.hisp.dhis.sms.config.SmsConfiguration;
+import org.hisp.dhis.sms.config.GatewayAdministrationService;
 import org.hisp.dhis.sms.config.SmsGatewayConfig;
-import org.smslib.AGateway;
-import org.smslib.AGateway.GatewayStatuses;
-import org.smslib.GatewayException;
-import org.smslib.IInboundMessageNotification;
-import org.smslib.IOutboundMessageNotification;
-import org.smslib.OutboundMessage;
-import org.smslib.OutboundMessage.MessageStatuses;
-import org.smslib.SMSLibException;
-import org.smslib.Service;
-import org.smslib.Message.MessageEncodings;
-import org.smslib.Service.ServiceStatus;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+/**
+ * Zubair <rajazubair.asghar@gmail.com>
+ */
 
 public class DefaultOutboundSmsTransportService
     implements OutboundSmsTransportService
 {
     private static final Log log = LogFactory.getLog( DefaultOutboundSmsTransportService.class );
 
-    public static final Map<String, String> GATEWAY_MAP = new HashMap<>();
-
-    private SmsConfiguration config;
-
-    private String message = "success";
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
-    private IInboundMessageNotification smppInboundMessageNotification;
-
-    public void setSmppInboundMessageNotification( IInboundMessageNotification smppInboundMessageNotification )
-    {
-        this.smppInboundMessageNotification = smppInboundMessageNotification;
-    }
-    
-    private IOutboundMessageNotification outboundMessageNotification;
-
-    public void setOutboundMessageNotification( IOutboundMessageNotification outboundMessageNotification )
-    {
-        this.outboundMessageNotification = outboundMessageNotification;
-    }
 
     private OutboundSmsService outboundSmsService;
 
@@ -93,377 +62,156 @@ public class DefaultOutboundSmsTransportService
         this.outboundSmsService = outboundSmsService;
     }
 
+    @Autowired
+    private GatewayAdministrationService gatewayAdminService;
+
+    @Autowired
+    private BulkSmsGateway bulkSmsGateway;
+
+    @Autowired
+    private ClickatellGateway clickatellGateway;
+
     // -------------------------------------------------------------------------
     // OutboundSmsTransportService implementation
     // -------------------------------------------------------------------------
 
     @Override
-    public Map<String, String> getGatewayMap()
+    public GatewayResponse sendMessage( OutboundSms sms, String gatewayName )
     {
-        if ( GATEWAY_MAP == null || GATEWAY_MAP.isEmpty() )
+        SmsGatewayConfig gatewayConfiguration = gatewayAdminService.getGatewayConfigurationByName( gatewayName );
+
+        if ( gatewayConfiguration == null )
         {
-            reloadConfig();
+            return GatewayResponse.NO_GATWAY_CONFIGURATION;
         }
 
-        return GATEWAY_MAP;
-    }
-
-    public void updateGatewayMap( String key )
-    {
-        GATEWAY_MAP.remove( key );
+        return sendMessage( sms, gatewayConfiguration );
     }
 
     @Override
-    public void stopService()
+    public GatewayResponse sendMessage( OutboundSms sms )
     {
-        message = "success";
+        SmsGatewayConfig gatewayConfiguration = gatewayAdminService.getDefaultGateway();
 
-        try
+        if ( gatewayConfiguration == null )
         {
-            getService().stopService();       
+            return GatewayResponse.NO_GATWAY_CONFIGURATION;
         }
-        catch ( SMSLibException e )
-        {
-            message = "Unable to stop smsLib service " + e.getCause().getMessage();
-            log.warn( "Unable to stop smsLib service", e );
-        }
-        catch ( IOException e )
-        {
-            message = "Unable to stop smsLib service" + e.getCause().getMessage();
-            log.warn( "Unable to stop smsLib service", e );
-        }
-        catch ( InterruptedException e )
-        {
-            message = "Unable to stop smsLib service" + e.getCause().getMessage();
-            log.warn( "Unable to stop smsLib service", e );
-        }
+
+        return sendMessage( sms, gatewayConfiguration );
     }
 
     @Override
-    public void startService()
+    public GatewayResponse sendMessage( String message, String recipient )
     {
-        message = "success";
+        OutboundSms sms = new OutboundSms( message, recipient );
 
-        if ( config != null && config.isEnabled() && (config.getGateways() != null && !config.getGateways().isEmpty()) )
+        return sendMessage( sms );
+    }
+
+    @Override
+    public GatewayResponse sendMessage( List<OutboundSms> smsBatch )
+    {
+        SmsGatewayConfig gatewayConfiguration = gatewayAdminService.getDefaultGateway();
+
+        if ( gatewayConfiguration == null )
         {
-            try
+            return GatewayResponse.NO_GATWAY_CONFIGURATION;
+        }
+
+        return sendMessage( smsBatch, gatewayConfiguration );
+    }
+
+    @Override
+    public GatewayResponse sendMessage( List<OutboundSms> smsBatch, String gatewayName )
+    {
+        SmsGatewayConfig gatewayConfiguration = gatewayAdminService.getGatewayConfigurationByName( gatewayName );
+
+        if ( gatewayConfiguration == null )
+        {
+            return GatewayResponse.NO_GATWAY_CONFIGURATION;
+        }
+        return sendMessage( smsBatch, gatewayConfiguration );
+    }
+
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+
+    private GatewayResponse sendMessage( OutboundSms sms, SmsGatewayConfig gatewayConfiguration )
+    {
+        GatewayResponse gatewayResponse = null;
+
+        if ( gatewayConfiguration instanceof BulkSmsGatewayConfig )
+        {
+            BulkSmsGatewayConfig bulkSmsConfiguration = (BulkSmsGatewayConfig) gatewayConfiguration;
+
+            gatewayResponse = bulkSmsGateway.send( sms, bulkSmsConfiguration );
+        }
+
+        if ( gatewayConfiguration instanceof ClickatellGatewayConfig )
+        {
+            ClickatellGatewayConfig clickatellConfiguration = (ClickatellGatewayConfig) gatewayConfiguration;
+
+            gatewayResponse = clickatellGateway.send( sms, clickatellConfiguration );
+        }
+
+        return responseHanlder( Arrays.asList( sms ), gatewayResponse );
+    }
+
+    private GatewayResponse sendMessage( List<OutboundSms> smsBatch, SmsGatewayConfig gatewayConfiguration )
+    {
+        GatewayResponse gatewayResponse = null;
+
+        if ( gatewayConfiguration instanceof BulkSmsGatewayConfig )
+        {
+            BulkSmsGatewayConfig bulkSmsConfiguration = (BulkSmsGatewayConfig) gatewayConfiguration;
+
+            gatewayResponse = bulkSmsGateway.send( smsBatch, bulkSmsConfiguration );
+        }
+
+        if ( gatewayConfiguration instanceof ClickatellGatewayConfig )
+        {
+            ClickatellGatewayConfig clickatellConfiguration = (ClickatellGatewayConfig) gatewayConfiguration;
+
+            gatewayResponse = clickatellGateway.send( smsBatch, clickatellConfiguration );
+        }
+
+        return responseHanlder( smsBatch, gatewayResponse );
+    }
+
+    private GatewayResponse responseHanlder( Collection<OutboundSms> smsBatch, GatewayResponse gatewayResponse )
+    {
+        if ( GatewayResponse.RESULT_CODE_0 == gatewayResponse || GatewayResponse.RESULT_CODE_200 == gatewayResponse
+            || GatewayResponse.RESULT_CODE_202 == gatewayResponse )
+        {
+            for ( OutboundSms sms : smsBatch )
             {
-                getService().startService();
-                if ( GATEWAY_MAP.containsKey( SMPPGatewayConfig.class.getTypeName() ) )
-                {
-                    getService().setInboundMessageNotification( smppInboundMessageNotification );
-                }
+                sms.setStatus( OutboundSmsStatus.SENT );
+                saveMessage( sms );
+
+                log.info( "Following Message Sent:" + sms );
             }
-            catch ( SMSLibException e )
-            {
-                message = "Unable to start smsLib service " + e.getMessage();
-                log.warn( "Unable to start smsLib service", e );
-            }
-            catch ( IOException e )
-            {
-                message = "Unable to start smsLib service" + e.getMessage();
-                log.warn( "Unable to start smsLib service", e );
-            }
-            catch ( InterruptedException e )
-            {
-                message = "Unable to start smsLib service" + e.getMessage();
-                log.warn( "Unable to start smsLib service", e );
-            }
+
+            return GatewayResponse.SENT;
         }
         else
         {
-            message = "sms_unable_or_there_is_no_gateway_service_not_started";
-            log.debug( "Sms not enabled or there is no any gateway, won't start service" );
-        }
-    }
-
-    @Override
-    public void reloadConfig()
-        throws SmsServiceException
-    {
-        Service service = Service.getInstance();
-
-        service.setOutboundMessageNotification( new OutboundNotification() );
-
-        service.getGateways().clear();
-
-        AGateway gateway = null;
-
-        message = "success";
-
-        if ( config == null )
-        {
-            message = "unable_to_load_configure";
-        }
-        else if ( config.getGateways() == null || config.getGateways().isEmpty() )
-        {
-            message = "unable_load_configuration_cause_of_there_is_no_gateway";
-        }
-        else
-        {
-            GateWayFactory gatewayFactory = new GateWayFactory();
-
-            for ( SmsGatewayConfig gatewayConfig : config.getGateways() )
+            for ( OutboundSms sms : smsBatch )
             {
-                try
-                {
-                    gateway = gatewayFactory.create( gatewayConfig );
+                sms.setStatus( OutboundSmsStatus.ERROR );
+                saveMessage( sms );
 
-                    service.addGateway( gateway );
-
-                    if ( gatewayConfig instanceof BulkSmsGatewayConfig )
-                    {
-                        GATEWAY_MAP.put( BulkSmsGatewayConfig.class.getTypeName(), gateway.getGatewayId() );
-                    }
-                    else if ( gatewayConfig instanceof ClickatellGatewayConfig )
-                    {
-                        GATEWAY_MAP.put( ClickatellGatewayConfig.class.getTypeName(), gateway.getGatewayId() );
-                    }
-                    else if ( gatewayConfig instanceof GenericHttpGatewayConfig )
-                    {
-                        GATEWAY_MAP.put( GenericHttpGatewayConfig.class.getTypeName(), gateway.getGatewayId() );
-                    }
-                    else if ( gatewayConfig instanceof SMPPGatewayConfig )
-                    {
-                        GATEWAY_MAP.put( SMPPGatewayConfig.class.getTypeName(), gateway.getGatewayId() );
-                    }
-                    else
-                    {
-                        GATEWAY_MAP.put( ModemGatewayConfig.class.getTypeName(), gateway.getGatewayId() );
-                    }
-
-                    log.debug( "Added gateway " + gatewayConfig.getName() );
-                }
-                catch ( GatewayException e )
-                {
-                    log.warn( "Unable to load gateway " + gatewayConfig.getName(), e );
-                    message = "Unable to load gateway " + gatewayConfig.getName() + e.getCause().getMessage();
-                }
+                log.info( "Following Message Failed:" + sms );
+                log.info( "Failure cause : " + gatewayResponse );
             }
-        }
 
-    }
-
-    @Override
-    public String getServiceStatus()
-    {
-        ServiceStatus serviceStatus = getService().getServiceStatus();
-
-        if ( serviceStatus == ServiceStatus.STARTED )
-        {
-            return "service_started";
-        }
-        else if ( serviceStatus == ServiceStatus.STARTING )
-        {
-            return "service_starting";
-        }
-        else if ( serviceStatus == ServiceStatus.STOPPED )
-        {
-            return "service_stopped";
-        }
-        else
-        {
-            return "service_stopping";
+            return gatewayResponse;
         }
     }
 
-    @Override
-    public String getMessageStatus()
+    private void saveMessage( OutboundSms sms )
     {
-        return message;
-    }
-
-    @Override
-    public String getDefaultGateway()
-    {
-        if ( config == null )
-        {
-            return null;
-        }
-
-        SmsGatewayConfig gatewayConfig = config.getDefaultGateway();
-
-        if ( gatewayConfig == null )
-        {
-            return null;
-        }
-
-        if ( getGatewayMap() == null )
-        {
-            return null;
-        }
-
-        String gatewayId = null;
-
-        if ( gatewayConfig instanceof BulkSmsGatewayConfig )
-        {
-            gatewayId = GATEWAY_MAP.get( BulkSmsGatewayConfig.class.getTypeName() );
-        }
-        else if ( gatewayConfig instanceof ClickatellGatewayConfig )
-        {
-            gatewayId = GATEWAY_MAP.get( ClickatellGatewayConfig.class.getTypeName() );
-        }
-        else if ( gatewayConfig instanceof GenericHttpGatewayConfig )
-        {
-            gatewayId = GATEWAY_MAP.get( GenericHttpGatewayConfig.class.getTypeName() );
-        }
-        else if ( gatewayConfig instanceof SMPPGatewayConfig )
-        {
-            gatewayId = GATEWAY_MAP.get( SMPPGatewayConfig.class.getTypeName() );
-        }
-        else
-        {
-            gatewayId = GATEWAY_MAP.get( ModemGatewayConfig.class.getTypeName() );
-        }
-
-        return gatewayId;
-    }
-
-    @Override
-    public boolean isEnabled()
-    {
-        return config != null && config.isEnabled();
-    }
-
-    @Override
-    public String initialize( SmsConfiguration smsConfiguration )
-        throws SmsServiceException
-    {
-        log.debug( "Initializing SmsLib" );
-
-        this.config = smsConfiguration;
-
-        ServiceStatus status = getService().getServiceStatus();
-
-        if ( status == ServiceStatus.STARTED || status == ServiceStatus.STARTING )
-        {
-            log.debug( "Stopping SmsLib" );
-            stopService();
-
-            if ( message != null && !message.equals( "success" ) )
-            {
-                return message;
-            }
-        }
-
-        log.debug( "Loading configuration" );
-        reloadConfig();
-
-        if ( message != null && !message.equals( "success" ) )
-        {
-            return message;
-        }
-
-        log.debug( "Starting SmsLib" );
-        startService();
-
-        if ( message != null && !message.equals( "success" ) )
-        {
-            return message;
-        }
-
-        return message;
-    }
-
-    @Override
-    public String sendMessage( OutboundSms sms, String gatewayId )
-        throws SmsServiceException
-    {
-        message = getServiceStatus();
-
-        if ( message != null && (message.equals( "service_stopped" ) || message.equals( "service_stopping" )) )
-        {
-            return message = "service_stopped_cannot_send_sms";
-        }
-
-        String recipient = null;
-
-        Set<String> recipients = sms.getRecipients();
-
-        if ( recipients.size() == 0 )
-        {
-            log.warn( "Trying to send sms without recipients: " + sms );
-
-            return message = "no_recipient";
-        }
-        else if ( recipients.size() == 1 )
-        {
-            recipient = recipients.iterator().next();
-        }
-        else
-        {
-            recipient = createTmpGroup( recipients );
-        }
-
-        OutboundMessage outboundMessage = new OutboundMessage( recipient, sms.getMessage() );
-
-        // Check if text contain any specific unicode character
-
-        for ( char each : sms.getMessage().toCharArray() )
-        {
-            if ( !Character.UnicodeBlock.of( each ).equals( UnicodeBlock.BASIC_LATIN ) )
-            {
-                outboundMessage.setEncoding( MessageEncodings.ENCUCS2 );
-                break;
-            }
-        }
-
-        outboundMessage.setStatusReport( true );
-
-        String longNumber = config.getLongNumber();
-
-        if ( longNumber != null && !longNumber.isEmpty() )
-        {
-            outboundMessage.setFrom( longNumber );
-        }
-
-        try
-        {
-            log.info( "Sending message " + sms );
-
-            if ( gatewayId == null || gatewayId.isEmpty() )
-            {
-                getService().sendMessage( outboundMessage );
-            }
-            else
-            {
-                getService().sendMessage( outboundMessage, gatewayId );
-            }
-        }
-        catch ( SMSLibException e )
-        {
-            log.warn( "Unable to send message: " + sms, e );
-            message = "Unable to send message: " + sms + " " + e.getCause().getMessage();
-        }
-        catch ( IOException e )
-        {
-            log.warn( "Unable to send message: " + sms, e );
-            message = "Unable to send message: " + sms + " " + e.getCause().getMessage();
-        }
-        catch ( InterruptedException e )
-        {
-            log.warn( "Unable to send message: " + sms, e );
-            message = "Unable to send message: " + sms + " " + e.getCause().getMessage();
-        }
-        catch ( Exception e )
-        {
-            log.warn( "Unable to send message: " + sms, e );
-            message = "Unable to send message: " + sms + " " + e.getCause().getMessage();
-        }
-
-        if ( outboundMessage.getMessageStatus() == MessageStatuses.SENT )
-        {
-            message = "success";
-            sms.setStatus( OutboundSmsStatus.SENT );
-        }
-        else
-        {
-            log.error( "Message not sent Failure " + outboundMessage.getFailureCause().toString() );
-            log.error( "Message not sent Status " + outboundMessage.getMessageStatus().toString() );
-            message = "message_not_sent";
-            sms.setStatus( OutboundSmsStatus.ERROR );
-        }
-
         if ( sms.getId() == 0 )
         {
             outboundSmsService.saveOutboundSms( sms );
@@ -472,147 +220,5 @@ public class DefaultOutboundSmsTransportService
         {
             outboundSmsService.updateOutboundSms( sms );
         }
-
-        return message;
-    }
-
-    @Override
-    public boolean sendAyncMessage( OutboundSms sms, String gatewayId )
-    {
-        String recipient = null;
-
-        Set<String> recipients = sms.getRecipients();
-
-        if ( recipients.size() == 1 )
-        {
-            recipient = recipients.iterator().next();
-        }
-        else
-        {
-            recipient = createTmpGroup( recipients );
-        }
-
-        OutboundMessage outboundMessage = new OutboundMessage( recipient, sms.getMessage() );
-
-        for ( char each : sms.getMessage().toCharArray() )
-        {
-            if ( !Character.UnicodeBlock.of( each ).equals( UnicodeBlock.BASIC_LATIN ) )
-            {
-                outboundMessage.setEncoding( MessageEncodings.ENCUCS2 );
-                break;
-            }
-        }
-
-        outboundMessage.setStatusReport( true );
-
-        String longNumber = config.getLongNumber();
-
-        if ( longNumber != null && !longNumber.isEmpty() )
-        {
-            outboundMessage.setFrom( longNumber );
-        }
-
-        try
-        {
-            getService().setOutboundMessageNotification( outboundMessageNotification );
-            getService().queueMessage( outboundMessage, gatewayId );
-            return true;
-        }
-        catch ( Exception e )
-        {
-            log.warn( "ASYNC Message sending failed ", e );
-        }
-
-        return false;
-    }
-
-    // -------------------------------------------------------------------------
-    // Supportive methods
-    // -------------------------------------------------------------------------
-
-    private Service getService()
-    {
-        return Service.getInstance();
-    }
-
-    private static class OutboundNotification
-        implements IOutboundMessageNotification
-    {
-        @Override
-        public void process( AGateway gateway, OutboundMessage msg )
-        {
-            log.debug( "Sent message through gateway " + gateway.getGatewayId() + ": " + msg );
-        }
-    }
-
-    private String createTmpGroup( Set<String> recipients )
-    {
-        String recipientList = "";
-
-        for ( String recipient : recipients )
-        {
-            recipientList += recipient;
-            recipientList += ",";
-        }
-
-        recipientList = recipientList.substring( 0, recipientList.length() - 1 );
-
-        return recipientList;
-    }
-
-    @Override
-    public SMSServiceStatus getServiceStatusEnum()
-    {
-        ServiceStatus serviceStatus = getService().getServiceStatus();
-
-        if ( serviceStatus == ServiceStatus.STARTED )
-        {
-            return SMSServiceStatus.STARTED;
-        }
-        else if ( serviceStatus == ServiceStatus.STARTING )
-        {
-            return SMSServiceStatus.STARTING;
-        }
-        else if ( serviceStatus == ServiceStatus.STOPPED )
-        {
-            return SMSServiceStatus.STOPPED;
-        }
-        else
-        {
-            return SMSServiceStatus.STOPPING;
-        }
-    }
-
-    @Override
-    public SMSGatewayStatus getGatewayStatus()
-    {
-        if ( getDefaultGateway() == null )
-        {
-            return SMSGatewayStatus.UNDEFINED;
-        }
-
-        AGateway aGateway = getService().getGateway( getDefaultGateway() );
-
-        if ( aGateway.getStatus() == GatewayStatuses.STARTED )
-        {
-            return SMSGatewayStatus.STARTED;
-        }
-
-        if ( aGateway.getStatus() == GatewayStatuses.STOPPED )
-        {
-            return SMSGatewayStatus.STOPPED;
-        }
-
-        if ( aGateway.getStatus() == GatewayStatuses.STARTING )
-        {
-            return SMSGatewayStatus.STARTING;
-        }
-
-        if ( aGateway.getStatus() == GatewayStatuses.STOPPING )
-        {
-            return SMSGatewayStatus.STOPPING;
-        }
-
-        return SMSGatewayStatus.UNDEFINED;
     }
 }

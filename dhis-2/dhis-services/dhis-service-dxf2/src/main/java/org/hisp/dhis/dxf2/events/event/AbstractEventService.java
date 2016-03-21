@@ -30,6 +30,8 @@ package org.hisp.dhis.dxf2.events.event;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Maps;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -95,11 +97,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.hisp.dhis.system.notification.NotificationLevel.ERROR;
 
@@ -177,6 +179,10 @@ public abstract class AbstractEventService
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
+    // -------------------------------------------------------------------------
+    // Caches
+    // -------------------------------------------------------------------------
+
     private CachingMap<String, OrganisationUnit> organisationUnitCache = new CachingMap<>();
 
     private CachingMap<String, Program> programCache = new CachingMap<>();
@@ -185,7 +191,7 @@ public abstract class AbstractEventService
 
     private CachingMap<String, DataElement> dataElementCache = new CachingMap<>();
 
-    private Set<Program> accessiblePrograms = new HashSet<>();
+    private Set<Program> accessibleProgramsCache = new HashSet<>();
 
     // -------------------------------------------------------------------------
     // CREATE
@@ -236,7 +242,6 @@ public abstract class AbstractEventService
             notifier.notify( taskId, ERROR, "Process failed: " + ex.getMessage(), true );
             return new ImportSummaries().addImportSummary( new ImportSummary( ImportStatus.ERROR, "The import process failed: " + ex.getMessage() ) );
         }
-
     }
 
     @Override
@@ -260,7 +265,8 @@ public abstract class AbstractEventService
 
         if ( program == null )
         {
-            return new ImportSummary( ImportStatus.ERROR, "Event.program does not point to a valid program: " + event.getProgram() ).incrementIgnored();
+            return new ImportSummary( ImportStatus.ERROR, 
+                "Event.program does not point to a valid program: " + event.getProgram() ).incrementIgnored();
         }
 
         if ( programStage == null && program.isRegistration() )
@@ -276,7 +282,7 @@ public abstract class AbstractEventService
         Assert.notNull( program );
         Assert.notNull( programStage );
 
-        if ( verifyProgramAccess( program, user ) )
+        if ( !canAccess( program, user ) )
         {
             return new ImportSummary( ImportStatus.ERROR,
                 "Current user does not have permission to access this program" ).incrementIgnored();
@@ -364,7 +370,7 @@ public abstract class AbstractEventService
 
             if ( programInstances.isEmpty() )
             {
-                // this is a WOR program, so just create the PI if it doesn't exist (should only be one)
+                // Create PI if it doesn't exist (should only be one)
                 ProgramInstance pi = new ProgramInstance();
                 pi.setEnrollmentDate( new Date() );
                 pi.setIncidentDate( new Date() );
@@ -404,7 +410,7 @@ public abstract class AbstractEventService
             return new ImportSummary( ImportStatus.ERROR, "Event.orgUnit does not point to a valid organisation unit: " + event.getOrgUnit() ).incrementIgnored();
         }
 
-        if ( verifyProgramOrganisationUnitAssociation( program, organisationUnit ) )
+        if ( !program.hasOrganisationUnit( organisationUnit ) )
         {
             return new ImportSummary( ImportStatus.ERROR, "Program is not assigned to this organisation unit: " + event.getOrgUnit() ).incrementIgnored();
         }
@@ -573,7 +579,7 @@ public abstract class AbstractEventService
         params.setSkipPaging( skipPaging );
         params.setIncludeAttributes( includeAttributes );
         params.setOrders( orders );
-        
+
         return params;
     }
 
@@ -976,26 +982,14 @@ public abstract class AbstractEventService
         return event;
     }
 
-    private boolean verifyProgramOrganisationUnitAssociation( Program program, OrganisationUnit organisationUnit )
+    private boolean canAccess( Program program, User user )
     {
-        boolean assignedToOrganisationUnit = false;
-
-        if ( program.getOrganisationUnits().contains( organisationUnit ) )
+        if ( accessibleProgramsCache.isEmpty() )
         {
-            assignedToOrganisationUnit = true;
+            accessibleProgramsCache = programService.getCurrentUserPrograms();
         }
 
-        return !assignedToOrganisationUnit;
-    }
-
-    private boolean verifyProgramAccess( Program program, User user )
-    {
-        if ( accessiblePrograms.isEmpty() )
-        {
-            accessiblePrograms = programService.getCurrentUserPrograms();
-        }
-
-        return !accessiblePrograms.contains( program );
+        return accessibleProgramsCache.contains( program );
     }
 
     private boolean validateDataValue( DataElement dataElement, String value, ImportSummary importSummary )
@@ -1012,50 +1006,110 @@ public abstract class AbstractEventService
         return true;
     }
 
-    private String getStoredBy( Event event, ImportSummary importSummary, User fallbackUser )
+    private ImportSummary saveEvent( Program program, ProgramInstance programInstance, ProgramStage programStage,
+        ProgramStageInstance programStageInstance, OrganisationUnit organisationUnit, Event event, User user,
+        ImportOptions importOptions )
     {
-        String storedBy = event.getStoredBy();
+        Assert.notNull( program );
+        Assert.notNull( programInstance );
+        Assert.notNull( programStage );
 
-        if ( storedBy == null )
+        ImportSummary importSummary = new ImportSummary();
+        importSummary.setStatus( ImportStatus.SUCCESS );
+
+        if ( importOptions == null )
         {
-            storedBy = User.getSafeUsername( fallbackUser );
+            importOptions = new ImportOptions();
         }
-        else if ( storedBy.length() >= 31 )
+
+        boolean existingEvent = programStageInstance != null;        
+        boolean dryRun = importOptions.isDryRun();
+
+        Date eventDate = DateUtils.parseDate( event.getEventDate() );
+        Date dueDate = DateUtils.parseDate( event.getDueDate() );
+
+        String storedBy = getStoredBy( event, importSummary, user );
+        String completedBy = getCompletedBy( event, importSummary, user );
+
+        DataElementCategoryOptionCombo coc = null;
+
+        if ( event.getAttributeCategoryOptions() != null && program.getCategoryCombo() != null )
         {
-            if ( importSummary != null )
+            coc = inputUtils.getAttributeOptionCombo( program.getCategoryCombo(), event.getAttributeCategoryOptions() );
+
+            if ( coc == null )
             {
-                importSummary.getConflicts().add(
-                    new ImportConflict( "stored by", storedBy
-                        + " is more than 31 characters, using current username instead" ) );
+                importSummary.getConflicts().add( new ImportConflict( "Invalid attribute option combo for option names.", event.getAttributeCategoryOptions() ) );
+            }
+        }
+        else
+        {
+            coc = categoryService.getDefaultDataElementCategoryOptionCombo();
+        }
+
+        if ( !dryRun )
+        {
+            if ( programStageInstance == null )
+            {
+                programStageInstance = createProgramStageInstance( programStage, programInstance, organisationUnit,
+                    dueDate, eventDate, event.getStatus().getValue(), event.getCoordinate(), completedBy, event.getEvent(), coc );
+            }
+            else
+            {
+                updateProgramStageInstance( programStage, programInstance, organisationUnit, dueDate, eventDate, event
+                    .getStatus().getValue(), event.getCoordinate(), completedBy, programStageInstance, coc );
             }
 
-            storedBy = User.getSafeUsername( fallbackUser );
+            saveTrackedEntityComment( programStageInstance, event, storedBy );
+
+            importSummary.setReference( programStageInstance.getUid() );
         }
 
-        return storedBy;
-    }
-
-    private String getCompletedBy( Event event, ImportSummary importSummary, User fallbackUser )
-    {
-        String completedBy = event.getCompletedBy();
-
-        if ( completedBy == null )
+        Map<String, TrackedEntityDataValue> dataElementValueMap = Maps.newHashMap();
+        
+        if ( existingEvent )
         {
-            completedBy = User.getSafeUsername( fallbackUser );
+            dataElementValueMap = getDataElementDataValueMap( 
+                dataValueService.getTrackedEntityDataValues( programStageInstance ) );
         }
-        else if ( completedBy.length() >= 31 )
+
+        for ( DataValue dataValue : event.getDataValues() )
         {
-            if ( importSummary != null )
+            DataElement dataElement;
+
+            if ( dataElementValueMap.containsKey( dataValue.getDataElement() ) )
             {
-                importSummary.getConflicts().add(
-                    new ImportConflict( "completed by", completedBy
-                        + " is more than 31 characters, using current username instead" ) );
+                dataElement = dataElementValueMap.get( dataValue.getDataElement() ).getDataElement();
+            }
+            else
+            {
+                dataElement = getDataElement( importOptions.getIdSchemes().getDataElementIdScheme(), dataValue.getDataElement() );
             }
 
-            completedBy = User.getSafeUsername( fallbackUser );
+            if ( dataElement != null )
+            {
+                if ( validateDataValue( dataElement, dataValue.getValue(), importSummary ) )
+                {
+                    String dataValueStoredBy = dataValue.getStoredBy() != null ? dataValue.getStoredBy() : storedBy;
+
+                    if ( !dryRun )
+                    {
+                        TrackedEntityDataValue existingDataValue = dataElementValueMap.get( dataValue.getDataElement() );
+
+                        saveDataValue( programStageInstance, dataValueStoredBy, dataElement, dataValue.getValue(),
+                            dataValue.getProvidedElsewhere(), existingDataValue, importSummary );
+                    }
+                }
+            }
+            else
+            {
+                importSummary.getConflicts().add(
+                    new ImportConflict( "dataElement", dataValue.getDataElement() + " is not a valid data element" ) );
+                importSummary.getImportCount().incrementIgnored();
+            }
         }
 
-        return completedBy;
+        return importSummary;
     }
 
     private void saveDataValue( ProgramStageInstance programStageInstance, String storedBy, DataElement dataElement,
@@ -1161,115 +1215,6 @@ public abstract class AbstractEventService
         }
     }
 
-    private ImportSummary saveEvent( Program program, ProgramInstance programInstance, ProgramStage programStage,
-        ProgramStageInstance programStageInstance, OrganisationUnit organisationUnit, Event event, User user,
-        ImportOptions importOptions )
-    {
-        Assert.notNull( program );
-        Assert.notNull( programInstance );
-        Assert.notNull( programStage );
-
-        ImportSummary importSummary = new ImportSummary();
-        importSummary.setStatus( ImportStatus.SUCCESS );
-
-        if ( importOptions == null )
-        {
-            importOptions = new ImportOptions();
-        }
-
-        boolean dryRun = importOptions.isDryRun();
-
-        Date eventDate = DateUtils.parseDate( event.getEventDate() );
-
-        Date dueDate = DateUtils.parseDate( event.getDueDate() );
-
-        String storedBy = getStoredBy( event, importSummary, user );
-        String completedBy = getCompletedBy( event, importSummary, user );
-
-        DataElementCategoryOptionCombo coc = categoryService.getDefaultDataElementCategoryOptionCombo();
-
-        if ( event.getAttributeCategoryOptions() != null && program.getCategoryCombo() != null )
-        {
-            coc = inputUtils.getAttributeOptionCombo( program.getCategoryCombo(), event.getAttributeCategoryOptions() );
-
-            if ( coc == null )
-            {
-                importSummary.getConflicts().add( new ImportConflict( "Invalid attribute option combo for option names.", event.getAttributeCategoryOptions() ) );
-            }
-        }
-
-        if ( !dryRun )
-        {
-            if ( programStageInstance == null )
-            {
-                programStageInstance = createProgramStageInstance( programStage, programInstance, organisationUnit,
-                    dueDate, eventDate, event.getStatus().getValue(), event.getCoordinate(), completedBy, event.getEvent(), coc );
-            }
-            else
-            {
-                updateProgramStageInstance( programStage, programInstance, organisationUnit, dueDate, eventDate, event
-                    .getStatus().getValue(), event.getCoordinate(), completedBy, programStageInstance, coc );
-            }
-
-            saveTrackedEntityComment( programStageInstance, event, storedBy );
-
-            importSummary.setReference( programStageInstance.getUid() );
-        }
-
-        Collection<TrackedEntityDataValue> existingDataValues = dataValueService.getTrackedEntityDataValues( programStageInstance );
-        Map<String, TrackedEntityDataValue> dataElementValueMap = getDataElementDataValueMap( existingDataValues );
-
-        for ( DataValue dataValue : event.getDataValues() )
-        {
-            DataElement dataElement;
-
-            if ( dataElementValueMap.containsKey( dataValue.getDataElement() ) )
-            {
-                dataElement = dataElementValueMap.get( dataValue.getDataElement() ).getDataElement();
-            }
-            else
-            {
-                dataElement = getDataElement( importOptions.getIdSchemes().getDataElementIdScheme(), dataValue.getDataElement() );
-            }
-
-            if ( dataElement != null )
-            {
-                if ( validateDataValue( dataElement, dataValue.getValue(), importSummary ) )
-                {
-                    String dataValueStoredBy = dataValue.getStoredBy() != null ? dataValue.getStoredBy() : storedBy;
-
-                    if ( !dryRun )
-                    {
-                        TrackedEntityDataValue existingDataValue = dataElementValueMap.get( dataValue.getDataElement() );
-
-                        saveDataValue( programStageInstance, dataValueStoredBy, dataElement, dataValue.getValue(),
-                            dataValue.getProvidedElsewhere(), existingDataValue, importSummary );
-                    }
-                }
-            }
-            else
-            {
-                importSummary.getConflicts().add(
-                    new ImportConflict( "dataElement", dataValue.getDataElement() + " is not a valid data element" ) );
-                importSummary.getImportCount().incrementIgnored();
-            }
-        }
-
-        return importSummary;
-    }
-
-    private Map<String, TrackedEntityDataValue> getDataElementDataValueMap( Collection<TrackedEntityDataValue> dataValues )
-    {
-        Map<String, TrackedEntityDataValue> map = new HashMap<>();
-
-        for ( TrackedEntityDataValue value : dataValues )
-        {
-            map.put( value.getDataElement().getUid(), value );
-        }
-
-        return map;
-    }
-
     private void saveTrackedEntityComment( ProgramStageInstance programStageInstance, Event event, String storedBy )
     {
         for ( Note note : event.getNotes() )
@@ -1285,6 +1230,57 @@ public abstract class AbstractEventService
 
             programStageInstanceService.updateProgramStageInstance( programStageInstance );
         }
+    }
+
+    private String getCompletedBy( Event event, ImportSummary importSummary, User fallbackUser )
+    {
+        String completedBy = event.getCompletedBy();
+
+        if ( completedBy == null )
+        {
+            completedBy = User.getSafeUsername( fallbackUser );
+        }
+        else if ( completedBy.length() >= 31 )
+        {
+            if ( importSummary != null )
+            {
+                importSummary.getConflicts().add(
+                    new ImportConflict( "completed by", completedBy
+                        + " is more than 31 characters, using current username instead" ) );
+            }
+
+            completedBy = User.getSafeUsername( fallbackUser );
+        }
+
+        return completedBy;
+    }
+
+    private String getStoredBy( Event event, ImportSummary importSummary, User fallbackUser )
+    {
+        String storedBy = event.getStoredBy();
+
+        if ( storedBy == null )
+        {
+            storedBy = User.getSafeUsername( fallbackUser );
+        }
+        else if ( storedBy.length() >= 31 )
+        {
+            if ( importSummary != null )
+            {
+                importSummary.getConflicts().add(
+                    new ImportConflict( "stored by", storedBy
+                        + " is more than 31 characters, using current username instead" ) );
+            }
+
+            storedBy = User.getSafeUsername( fallbackUser );
+        }
+
+        return storedBy;
+    }
+
+    private Map<String, TrackedEntityDataValue> getDataElementDataValueMap( Collection<TrackedEntityDataValue> dataValues )
+    {
+        return dataValues.stream().collect( Collectors.toMap( dv -> dv.getDataElement().getUid(), dv -> dv ) );
     }
 
     private OrganisationUnit getOrganisationUnit( IdSchemes idSchemes, String id )

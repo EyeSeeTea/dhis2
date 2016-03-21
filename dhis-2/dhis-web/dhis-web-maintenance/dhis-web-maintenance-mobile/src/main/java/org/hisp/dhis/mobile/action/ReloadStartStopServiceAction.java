@@ -31,7 +31,6 @@ package org.hisp.dhis.mobile.action;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.sms.config.SmsConfigurationManager;
 import org.hisp.dhis.sms.incoming.SmsConsumerService;
-import org.hisp.dhis.sms.outbound.OutboundSmsTransportService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
@@ -40,7 +39,6 @@ import com.opensymphony.xwork2.Action;
  * @author Dang Duy Hieu
  * @version $Id$
  */
-
 public class ReloadStartStopServiceAction
     implements Action
 {
@@ -50,9 +48,6 @@ public class ReloadStartStopServiceAction
 
     @Autowired
     private SmsConfigurationManager smsConfigurationManager;
-
-    @Autowired
-    private OutboundSmsTransportService outboundSmsTransportService;
     
     @Autowired
     private SmsConsumerService smsConsumerService;
@@ -102,23 +97,17 @@ public class ReloadStartStopServiceAction
         }
 
         if ( actionType != null && actionType.equals( "start" ) )
-        {
-            outboundSmsTransportService.startService();
-            
+        {                      
             smsConsumerService.startSmsConsumer();
         }
         else if ( actionType.equals( "stop" ) )
-        {
-            outboundSmsTransportService.stopService();
-            
+        {            
             smsConsumerService.stopSmsConsumer();
         }
         else
         {
-            outboundSmsTransportService.reloadConfig();
+            
         }
-
-        message = outboundSmsTransportService.getMessageStatus();
         
         if ( message != null && !message.equals( "success" ) )
         {

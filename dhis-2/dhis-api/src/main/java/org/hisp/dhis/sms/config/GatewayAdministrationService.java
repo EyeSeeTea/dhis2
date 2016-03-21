@@ -1,7 +1,6 @@
-package org.hisp.dhis.external.conf;
 
 /*
- * Copyright (c) 2004-2016, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,31 +26,33 @@ package org.hisp.dhis.external.conf;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.hisp.dhis.sms.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.annotation.Transactional;
-
-import static org.junit.Assert.*;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.Map;
 
 /**
- * @author Lars Helge Overland
+ * @author Zubair <rajazubair.asghar@gmail.com>
+ *
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration( locations = { "classpath*:/META-INF/dhis/beans.xml" } )
-@Transactional
-public class DhisConfigurationProviderTest
+public interface GatewayAdministrationService
 {
-    @Autowired
-    private DhisConfigurationProvider provider;
+    String setDefaultGateway( String uid );
 
-    @Test
-    public void testGetProperty()
-    {
-        assertEquals( ConfigurationKey.FILESTORE_PROVIDER.getDefaultValue(), provider.getProperty( ConfigurationKey.FILESTORE_PROVIDER ) );
-    }
+    boolean removeGatewayByUid( String uid );
+
+    boolean removeGatewayByName( String gatewayName );
+    
+    Map<String, SmsGatewayConfig> getGatewayConfigurationMap();
+
+    SmsGatewayConfig getDefaultGateway();
+
+    SmsConfiguration listGateways();
+
+    SmsGatewayConfig getGatewayConfigurationByUid( String uid );
+
+    SmsGatewayConfig getGatewayConfigurationByName( String gatewayName );
+
+    boolean addOrUpdateGateway( SmsGatewayConfig config, Class<?> klass );
+
+    boolean loadGatewayConfigurationMap( SmsConfiguration smsConfiguration );
 }

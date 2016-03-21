@@ -41,9 +41,11 @@ import org.hisp.dhis.dataelement.DataElementCategoryDimension;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.feedback.ErrorCode;
 import org.hisp.dhis.feedback.ErrorReport;
-import org.hisp.dhis.feedback.ObjectErrorReport;
+import org.hisp.dhis.feedback.ObjectReport;
+import org.hisp.dhis.feedback.TypeReport;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.period.PeriodStore;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.query.Query;
 import org.hisp.dhis.query.QueryService;
@@ -91,6 +93,9 @@ public class DefaultPreheatService implements PreheatService
 
     @Autowired
     private CurrentUserService currentUserService;
+
+    @Autowired
+    private PeriodStore periodStore;
 
     @Autowired
     private PeriodService periodService;
@@ -229,8 +234,8 @@ public class DefaultPreheatService implements PreheatService
             preheat.put( params.getPreheatIdentifier(), objects );
         }
 
-        periodService.getAllPeriods().forEach( period -> preheat.getPeriodMap().put( period.getName(), period ) );
-        periodService.getAllPeriodTypes().forEach( periodType -> preheat.getPeriodTypeMap().put( periodType.getName(), periodType ) );
+        periodStore.getAll().forEach( period -> preheat.getPeriodMap().put( period.getName(), period ) );
+        periodStore.getAllPeriodTypes().forEach( periodType -> preheat.getPeriodTypeMap().put( periodType.getName(), periodType ) );
 
         return preheat;
     }
@@ -412,26 +417,6 @@ public class DefaultPreheatService implements PreheatService
         return map;
     }
 
-    private void cleanEmptyEntries( Map<Class<? extends IdentifiableObject>, Set<String>> map )
-    {
-        Set<Class<? extends IdentifiableObject>> classes = new HashSet<>( map.keySet() );
-        classes.stream().filter( klass -> map.get( klass ).isEmpty() ).forEach( map::remove );
-    }
-
-    private void addIdentifiers( Map<PreheatIdentifier, Map<Class<? extends IdentifiableObject>, Set<String>>> map, IdentifiableObject identifiableObject )
-    {
-        if ( identifiableObject == null ) return;
-
-        Map<Class<? extends IdentifiableObject>, Set<String>> uidMap = map.get( PreheatIdentifier.UID );
-        Map<Class<? extends IdentifiableObject>, Set<String>> codeMap = map.get( PreheatIdentifier.CODE );
-
-        if ( !uidMap.containsKey( identifiableObject.getClass() ) ) uidMap.put( identifiableObject.getClass(), new HashSet<>() );
-        if ( !codeMap.containsKey( identifiableObject.getClass() ) ) codeMap.put( identifiableObject.getClass(), new HashSet<>() );
-
-        if ( !StringUtils.isEmpty( identifiableObject.getUid() ) ) uidMap.get( identifiableObject.getClass() ).add( identifiableObject.getUid() );
-        if ( !StringUtils.isEmpty( identifiableObject.getCode() ) ) codeMap.get( identifiableObject.getClass() ).add( identifiableObject.getCode() );
-    }
-
     @Override
     public Map<Class<? extends IdentifiableObject>, Map<String, Map<Object, String>>> collectUniqueness( Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> objects )
     {
@@ -450,26 +435,6 @@ public class DefaultPreheatService implements PreheatService
         }
 
         return uniqueMap;
-    }
-
-    private Map<String, Map<Object, String>> handleUniqueProperties( Schema schema, List<IdentifiableObject> objects )
-    {
-        List<Property> uniqueProperties = schema.getProperties().stream()
-            .filter( p -> p.isPersisted() && p.isOwner() && p.isUnique() && p.isSimple() )
-            .collect( Collectors.toList() );
-
-        Map<String, Map<Object, String>> map = new HashMap<>();
-
-        for ( IdentifiableObject object : objects )
-        {
-            uniqueProperties.forEach( property -> {
-                if ( !map.containsKey( property.getName() ) ) map.put( property.getName(), new HashMap<>() );
-                Object value = ReflectionUtils.invokeMethod( object, property.getGetterMethod() );
-                if ( value != null ) map.get( property.getName() ).put( value, object.getUid() );
-            } );
-        }
-
-        return map;
     }
 
     @Override
@@ -568,33 +533,32 @@ public class DefaultPreheatService implements PreheatService
     }
 
     @Override
-    public List<ObjectErrorReport> checkReferences( List<IdentifiableObject> objects, Preheat preheat, PreheatIdentifier identifier )
+    public TypeReport checkReferences( Class<?> klass, List<IdentifiableObject> objects, Preheat preheat, PreheatIdentifier identifier )
     {
-        List<ObjectErrorReport> objectErrorReports = new ArrayList<>();
+        TypeReport typeReport = new TypeReport( klass );
 
         if ( objects.isEmpty() )
         {
-            return objectErrorReports;
+            return typeReport;
         }
 
-        for ( int i = 0; i < objects.size(); i++ )
+        for ( int idx = 0; idx < objects.size(); idx++ )
         {
-            IdentifiableObject object = objects.get( i );
-            List<PreheatErrorReport> errorReports = checkReferences( object, preheat, identifier );
+            IdentifiableObject object = objects.get( idx );
+            List<PreheatErrorReport> errorReports = checkReferences( klass, object, preheat, identifier );
 
             if ( errorReports.isEmpty() ) continue;
 
-            ObjectErrorReport objectErrorReport = new ObjectErrorReport( object.getClass(), i );
-            objectErrorReport.addErrorReports( errorReports );
-            objectErrorReports.add( objectErrorReport );
-
+            ObjectReport objectReport = new ObjectReport( object.getClass(), idx );
+            objectReport.addErrorReports( errorReports );
+            typeReport.addObjectReport( objectReport );
         }
 
-        return objectErrorReports;
+        return typeReport;
     }
 
     @Override
-    public List<PreheatErrorReport> checkReferences( IdentifiableObject object, Preheat preheat, PreheatIdentifier identifier )
+    public List<PreheatErrorReport> checkReferences( Class<?> klass, IdentifiableObject object, Preheat preheat, PreheatIdentifier identifier )
     {
         List<PreheatErrorReport> preheatErrorReports = new ArrayList<>();
 
@@ -669,13 +633,13 @@ public class DefaultPreheatService implements PreheatService
     }
 
     @Override
-    public List<ObjectErrorReport> checkUniqueness( List<IdentifiableObject> objects, Preheat preheat, PreheatIdentifier identifier )
+    public TypeReport checkUniqueness( Class<?> klass, List<IdentifiableObject> objects, Preheat preheat, PreheatIdentifier identifier )
     {
-        List<ObjectErrorReport> objectErrorReports = new ArrayList<>();
+        TypeReport typeReport = new TypeReport( klass );
 
         if ( objects.isEmpty() )
         {
-            return objectErrorReports;
+            return typeReport;
         }
 
         Iterator<IdentifiableObject> iterator = objects.iterator();
@@ -689,32 +653,31 @@ public class DefaultPreheatService implements PreheatService
             if ( User.class.isInstance( object ) )
             {
                 User user = (User) object;
-                errorReports.addAll( checkUniqueness( user, preheat, identifier ) );
-                errorReports.addAll( checkUniqueness( user.getUserCredentials(), preheat, identifier ) );
+                errorReports.addAll( checkUniqueness( klass, user, preheat, identifier ) );
+                errorReports.addAll( checkUniqueness( klass, user.getUserCredentials(), preheat, identifier ) );
             }
             else
             {
-                errorReports = checkUniqueness( object, preheat, identifier );
+                errorReports = checkUniqueness( klass, object, preheat, identifier );
             }
 
 
             if ( !errorReports.isEmpty() )
             {
-                ObjectErrorReport objectErrorReport = new ObjectErrorReport( object.getClass(), idx );
-                objectErrorReport.addErrorReports( errorReports );
-                objectErrorReports.add( objectErrorReport );
-
+                ObjectReport objectReport = new ObjectReport( object.getClass(), idx );
+                objectReport.addErrorReports( errorReports );
+                typeReport.addObjectReport( objectReport );
                 iterator.remove();
             }
 
             idx++;
         }
 
-        return objectErrorReports;
+        return typeReport;
     }
 
     @Override
-    public List<ErrorReport> checkUniqueness( IdentifiableObject object, Preheat preheat, PreheatIdentifier identifier )
+    public List<ErrorReport> checkUniqueness( Class<?> klass, IdentifiableObject object, Preheat preheat, PreheatIdentifier identifier )
     {
         List<ErrorReport> errorReports = new ArrayList<>();
 
@@ -820,6 +783,50 @@ public class DefaultPreheatService implements PreheatService
                     ReflectionUtils.invokeMethod( object, p.getSetterMethod(), objects );
                 }
             } );
+    }
+
+    //-----------------------------------------------------------------------------------
+    // Utility Methods
+    //-----------------------------------------------------------------------------------
+
+    private void cleanEmptyEntries( Map<Class<? extends IdentifiableObject>, Set<String>> map )
+    {
+        Set<Class<? extends IdentifiableObject>> classes = new HashSet<>( map.keySet() );
+        classes.stream().filter( klass -> map.get( klass ).isEmpty() ).forEach( map::remove );
+    }
+
+    private void addIdentifiers( Map<PreheatIdentifier, Map<Class<? extends IdentifiableObject>, Set<String>>> map, IdentifiableObject identifiableObject )
+    {
+        if ( identifiableObject == null ) return;
+
+        Map<Class<? extends IdentifiableObject>, Set<String>> uidMap = map.get( PreheatIdentifier.UID );
+        Map<Class<? extends IdentifiableObject>, Set<String>> codeMap = map.get( PreheatIdentifier.CODE );
+
+        if ( !uidMap.containsKey( identifiableObject.getClass() ) ) uidMap.put( identifiableObject.getClass(), new HashSet<>() );
+        if ( !codeMap.containsKey( identifiableObject.getClass() ) ) codeMap.put( identifiableObject.getClass(), new HashSet<>() );
+
+        if ( !StringUtils.isEmpty( identifiableObject.getUid() ) ) uidMap.get( identifiableObject.getClass() ).add( identifiableObject.getUid() );
+        if ( !StringUtils.isEmpty( identifiableObject.getCode() ) ) codeMap.get( identifiableObject.getClass() ).add( identifiableObject.getCode() );
+    }
+
+    private Map<String, Map<Object, String>> handleUniqueProperties( Schema schema, List<IdentifiableObject> objects )
+    {
+        List<Property> uniqueProperties = schema.getProperties().stream()
+            .filter( p -> p.isPersisted() && p.isOwner() && p.isUnique() && p.isSimple() )
+            .collect( Collectors.toList() );
+
+        Map<String, Map<Object, String>> map = new HashMap<>();
+
+        for ( IdentifiableObject object : objects )
+        {
+            uniqueProperties.forEach( property -> {
+                if ( !map.containsKey( property.getName() ) ) map.put( property.getName(), new HashMap<>() );
+                Object value = ReflectionUtils.invokeMethod( object, property.getGetterMethod() );
+                if ( value != null ) map.get( property.getName() ).put( value, object.getUid() );
+            } );
+        }
+
+        return map;
     }
 
     private IdentifiableObject getPersistedObject( Preheat preheat, PreheatIdentifier identifier, IdentifiableObject ref )

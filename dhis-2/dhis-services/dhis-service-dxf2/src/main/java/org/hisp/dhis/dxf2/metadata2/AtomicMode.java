@@ -1,4 +1,4 @@
-package org.hisp.dhis.sms.config;
+package org.hisp.dhis.dxf2.metadata2;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -28,22 +28,24 @@ package org.hisp.dhis.sms.config;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.sms.SmsServiceException;
-
 /**
- * Interface for any service requiring an {@link SmsConfiguration}.
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface SmsConfigurable
+public enum AtomicMode
 {
     /**
-     * Initialize the service with the provided configuration. Services
-     * implementing this interface are also expected to be able to reinitialize
-     * based on these setting in a safe way when running.
-     * 
-     * @param smsConfiguration The SMS configuration
-     * @throws SmsServiceException if the service cannot be initialized with the
-     *         provided {@link SmsConfiguration}
+     * Import object if it passes all validation tests (including references)
+     * (not supported at the moment)
      */
-    String initialize( SmsConfiguration smsConfiguration )
-        throws SmsServiceException;
+    OBJECT,
+
+    /**
+     * Import objects only if they all pass the validation phase (including references)
+     */
+    ALL,
+
+    /**
+     * Legacy mode. Allow non-valid references when importing.
+     */
+    NONE
 }

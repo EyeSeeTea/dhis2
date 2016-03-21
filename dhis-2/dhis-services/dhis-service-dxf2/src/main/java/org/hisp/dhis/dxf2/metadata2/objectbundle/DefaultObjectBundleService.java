@@ -36,18 +36,21 @@ import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.dbms.DbmsManager;
+import org.hisp.dhis.dxf2.metadata2.AtomicMode;
 import org.hisp.dhis.dxf2.metadata2.FlushMode;
 import org.hisp.dhis.dxf2.metadata2.objectbundle.hooks.ObjectBundleHook;
 import org.hisp.dhis.feedback.ErrorCode;
 import org.hisp.dhis.feedback.ErrorReport;
-import org.hisp.dhis.feedback.ObjectErrorReport;
 import org.hisp.dhis.feedback.ObjectReport;
 import org.hisp.dhis.feedback.TypeReport;
+import org.hisp.dhis.importexport.ImportStrategy;
 import org.hisp.dhis.preheat.Preheat;
+import org.hisp.dhis.preheat.PreheatIdentifier;
 import org.hisp.dhis.preheat.PreheatParams;
 import org.hisp.dhis.preheat.PreheatService;
 import org.hisp.dhis.schema.SchemaService;
 import org.hisp.dhis.schema.validation.SchemaValidator;
+import org.hisp.dhis.security.acl.AclService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -90,6 +93,9 @@ public class DefaultObjectBundleService implements ObjectBundleService
     @Autowired
     private DbmsManager dbmsManager;
 
+    @Autowired
+    private AclService aclService;
+
     @Autowired( required = false )
     private List<ObjectBundleHook> objectBundleHooks = new ArrayList<>();
 
@@ -122,105 +128,72 @@ public class DefaultObjectBundleService implements ObjectBundleService
         for ( Class<? extends IdentifiableObject> klass : klasses )
         {
             TypeReport typeReport = new TypeReport( klass );
-            ObjectReport objectReport = typeReport.getObjectReport();
+
+            List<IdentifiableObject> nonPersistedObjects = bundle.getObjects( klass, false );
+            List<IdentifiableObject> persistedObjects = bundle.getObjects( klass, true );
+            List<IdentifiableObject> allObjects = bundle.getObjectMap().get( klass );
+
+            typeReport.getStats().incTotal( allObjects.size() );
 
             if ( bundle.getImportMode().isCreateAndUpdate() )
             {
-                TypeReport validateBySchemas1 = validateBySchemas( klass, bundle.getObjects( klass, false ), bundle );
-                TypeReport validateBySchemas2 = validateBySchemas( klass, bundle.getObjects( klass, true ), bundle );
-
-                typeReport.getStats().merge( validateBySchemas1.getStats() );
-                typeReport.getStats().merge( validateBySchemas2.getStats() );
-
-                objectReport.addErrorReports( validateBySchemas1.getObjectReport() );
-                objectReport.addErrorReports( validateBySchemas2.getObjectReport() );
-
-                List<ObjectErrorReport> checkUniqueness1 = preheatService.checkUniqueness( bundle.getObjects( klass, false ), bundle.getPreheat(), bundle.getPreheatIdentifier() );
-                List<ObjectErrorReport> checkUniqueness2 = preheatService.checkUniqueness( bundle.getObjects( klass, true ), bundle.getPreheat(), bundle.getPreheatIdentifier() );
-
-                typeReport.getStats().incIgnored( checkUniqueness1.size() );
-                typeReport.getStats().incIgnored( checkUniqueness2.size() );
-
-                objectReport.addErrorReports( checkUniqueness1 );
-                objectReport.addErrorReports( checkUniqueness2 );
-
-                List<ObjectErrorReport> checkReferences = preheatService.checkReferences( bundle.getObjectMap().get( klass ), bundle.getPreheat(), bundle.getPreheatIdentifier() );
-
-                if ( bundle.getImportMode().isAtomic() ) // if mode is atomic, report reference errors as ignored objects
-                {
-                    typeReport.getStats().incIgnored( checkReferences.size() );
-                }
-
-                objectReport.addErrorReports( checkReferences );
+                typeReport.merge( validateSecurity( klass, nonPersistedObjects, bundle, ImportStrategy.CREATE ) );
+                typeReport.merge( validateSecurity( klass, persistedObjects, bundle, ImportStrategy.UPDATE ) );
+                typeReport.merge( validateBySchemas( klass, nonPersistedObjects, bundle ) );
+                typeReport.merge( validateBySchemas( klass, persistedObjects, bundle ) );
+                typeReport.merge( preheatService.checkUniqueness( klass, nonPersistedObjects, bundle.getPreheat(), bundle.getPreheatIdentifier() ) );
+                typeReport.merge( preheatService.checkUniqueness( klass, persistedObjects, bundle.getPreheat(), bundle.getPreheatIdentifier() ) );
+                typeReport.merge( preheatService.checkReferences( klass, allObjects, bundle.getPreheat(), bundle.getPreheatIdentifier() ) );
             }
-
-            if ( bundle.getImportMode().isCreate() )
+            else if ( bundle.getImportMode().isCreate() )
             {
-                TypeReport validateForCreate = validateForCreate( klass, bundle.getObjects( klass, true ), bundle );
-                TypeReport validateBySchemas = validateBySchemas( klass, bundle.getObjects( klass, false ), bundle );
-
-                typeReport.getStats().merge( validateForCreate.getStats() );
-                typeReport.getStats().merge( validateBySchemas.getStats() );
-
-                objectReport.addErrorReports( validateBySchemas.getObjectReport() );
-                objectReport.addErrorReports( validateForCreate.getObjectReport() );
-
-                List<ObjectErrorReport> checkUniqueness = preheatService.checkUniqueness( bundle.getObjects( klass, false ), bundle.getPreheat(),
-                    bundle.getPreheatIdentifier() );
-                typeReport.getStats().incIgnored( checkUniqueness.size() );
-                objectReport.addErrorReports( checkUniqueness );
-
-                List<ObjectErrorReport> checkReferences = preheatService.checkReferences( bundle.getObjectMap().get( klass ),
-                    bundle.getPreheat(), bundle.getPreheatIdentifier() );
-
-                if ( bundle.getImportMode().isAtomic() ) // if mode is atomic, report reference errors as ignored objects
-                {
-                    typeReport.getStats().incIgnored( checkReferences.size() );
-                }
-
-                objectReport.addErrorReports( checkReferences );
+                typeReport.merge( validateSecurity( klass, nonPersistedObjects, bundle, ImportStrategy.CREATE ) );
+                typeReport.merge( validateForCreate( klass, persistedObjects, bundle ) );
+                typeReport.merge( validateBySchemas( klass, nonPersistedObjects, bundle ) );
+                typeReport.merge( preheatService.checkUniqueness( klass, nonPersistedObjects, bundle.getPreheat(), bundle.getPreheatIdentifier() ) );
+                typeReport.merge( preheatService.checkReferences( klass, allObjects, bundle.getPreheat(), bundle.getPreheatIdentifier() ) );
             }
-
-            if ( bundle.getImportMode().isUpdate() )
+            else if ( bundle.getImportMode().isUpdate() )
             {
-                TypeReport validateForUpdate = validateForUpdate( klass, bundle.getObjects( klass, false ), bundle );
-                TypeReport validateBySchemas = validateBySchemas( klass, bundle.getObjects( klass, true ), bundle );
-
-                typeReport.getStats().merge( validateForUpdate.getStats() );
-                typeReport.getStats().merge( validateBySchemas.getStats() );
-
-                objectReport.addErrorReports( validateForUpdate.getObjectReport() );
-                objectReport.addErrorReports( validateBySchemas.getObjectReport() );
-
-                List<ObjectErrorReport> checkUniqueness = preheatService.checkUniqueness( bundle.getObjects( klass, true ), bundle.getPreheat(),
-                    bundle.getPreheatIdentifier() );
-                typeReport.getStats().incIgnored( checkUniqueness.size() );
-                objectReport.addErrorReports( checkUniqueness );
-
-                List<ObjectErrorReport> checkReferences = preheatService.checkReferences( bundle.getObjectMap().get( klass ),
-                    bundle.getPreheat(), bundle.getPreheatIdentifier() );
-
-                if ( bundle.getImportMode().isAtomic() ) // if mode is atomic, report reference errors as ignored objects
-                {
-                    typeReport.getStats().incIgnored( checkReferences.size() );
-                }
-
-                objectReport.addErrorReports( checkReferences );
+                typeReport.merge( validateSecurity( klass, persistedObjects, bundle, ImportStrategy.UPDATE ) );
+                typeReport.merge( validateForUpdate( klass, nonPersistedObjects, bundle ) );
+                typeReport.merge( validateBySchemas( klass, persistedObjects, bundle ) );
+                typeReport.merge( preheatService.checkUniqueness( klass, persistedObjects, bundle.getPreheat(), bundle.getPreheatIdentifier() ) );
+                typeReport.merge( preheatService.checkReferences( klass, allObjects, bundle.getPreheat(), bundle.getPreheatIdentifier() ) );
             }
-
-            if ( bundle.getImportMode().isDelete() )
+            else if ( bundle.getImportMode().isDelete() )
             {
-                TypeReport validateForDelete = validateForDelete( klass, bundle.getObjects( klass, false ), bundle );
-                typeReport.getStats().merge( validateForDelete.getStats() );
-                objectReport.addErrorReports( validateForDelete.getObjectReport() );
+                typeReport.merge( validateSecurity( klass, persistedObjects, bundle, ImportStrategy.DELETE ) );
+                typeReport.merge( validateForDelete( klass, nonPersistedObjects, bundle ) );
             }
 
             validation.addTypeReport( typeReport );
         }
 
+        validateAtomicity( bundle, validation );
         bundle.setObjectBundleStatus( ObjectBundleStatus.VALIDATED );
 
         return validation;
+    }
+
+    private void validateAtomicity( ObjectBundle bundle, ObjectBundleValidation validation )
+    {
+        if ( AtomicMode.NONE == bundle.getAtomicMode() )
+        {
+            return;
+        }
+
+        Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> nonPersistedObjects = bundle.getObjects( false );
+        Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> persistedObjects = bundle.getObjects( true );
+
+        if ( AtomicMode.ALL == bundle.getAtomicMode() )
+        {
+            if ( !validation.getErrorReports().isEmpty() )
+            {
+                nonPersistedObjects.clear();
+                persistedObjects.clear();
+            }
+        }
     }
 
     @Override
@@ -241,17 +214,14 @@ public class DefaultObjectBundleService implements ObjectBundleService
 
         for ( Class<? extends IdentifiableObject> klass : klasses )
         {
-            List<IdentifiableObject> persistedObjects = bundle.getObjects( klass, true );
             List<IdentifiableObject> nonPersistedObjects = bundle.getObjects( klass, false );
+            List<IdentifiableObject> persistedObjects = bundle.getObjects( klass, true );
 
             if ( bundle.getImportMode().isCreateAndUpdate() )
             {
-                TypeReport createTypeReport = handleCreates( session, klass, nonPersistedObjects, bundle );
-                TypeReport updateTypeReport = handleUpdates( session, klass, persistedObjects, bundle );
-
                 TypeReport typeReport = new TypeReport( klass );
-                typeReport.getStats().merge( createTypeReport.getStats() );
-                typeReport.getStats().merge( updateTypeReport.getStats() );
+                typeReport.merge( handleCreates( session, klass, nonPersistedObjects, bundle ) );
+                typeReport.merge( handleUpdates( session, klass, persistedObjects, bundle ) );
 
                 typeReports.put( klass, typeReport );
             }
@@ -279,6 +249,10 @@ public class DefaultObjectBundleService implements ObjectBundleService
 
         return typeReports;
     }
+
+    //-----------------------------------------------------------------------------------
+    // Utility Methods
+    //-----------------------------------------------------------------------------------
 
     private TypeReport handleCreates( Session session, Class<? extends IdentifiableObject> klass, List<IdentifiableObject> objects, ObjectBundle bundle )
     {
@@ -384,10 +358,6 @@ public class DefaultObjectBundleService implements ObjectBundleService
         return typeReport;
     }
 
-    //----------------------------------------------------------------------------------------------------------
-    // Helpers
-    //----------------------------------------------------------------------------------------------------------
-
     @SuppressWarnings( "unchecked" )
     private List<Class<? extends IdentifiableObject>> getSortedClasses( ObjectBundle bundle )
     {
@@ -413,7 +383,76 @@ public class DefaultObjectBundleService implements ObjectBundleService
         if ( identifiableObject.getUserGroupAccesses() == null ) identifiableObject.setUserGroupAccesses( new HashSet<>() );
     }
 
-    public TypeReport validateForCreate( Class<? extends IdentifiableObject> klass, List<IdentifiableObject> objects, ObjectBundle bundle )
+    private TypeReport validateSecurity( Class<? extends IdentifiableObject> klass, List<IdentifiableObject> objects, ObjectBundle bundle, ImportStrategy importMode )
+    {
+        TypeReport typeReport = new TypeReport( klass );
+
+        if ( objects == null || objects.isEmpty() )
+        {
+            return typeReport;
+        }
+
+        Iterator<IdentifiableObject> iterator = objects.iterator();
+        PreheatIdentifier identifier = bundle.getPreheatIdentifier();
+        int idx = 0;
+
+        while ( iterator.hasNext() )
+        {
+            IdentifiableObject object = iterator.next();
+
+            if ( importMode.isCreate() )
+            {
+                if ( !aclService.canCreate( bundle.getUser(), klass ) )
+                {
+                    ObjectReport objectReport = new ObjectReport( klass, idx );
+                    objectReport.addErrorReport( new ErrorReport( klass, ErrorCode.E3000, identifier.getIdentifiersWithName( bundle.getUser() ),
+                        identifier.getIdentifiersWithName( object ) ) );
+
+                    typeReport.addObjectReport( objectReport );
+                    typeReport.getStats().incIgnored();
+
+                    iterator.remove();
+                }
+            }
+            else
+            {
+                if ( importMode.isUpdate() )
+                {
+                    if ( !aclService.canUpdate( bundle.getUser(), object ) )
+                    {
+                        ObjectReport objectReport = new ObjectReport( klass, idx );
+                        objectReport.addErrorReport( new ErrorReport( klass, ErrorCode.E3001, identifier.getIdentifiersWithName( bundle.getUser() ),
+                            identifier.getIdentifiersWithName( object ) ) );
+
+                        typeReport.addObjectReport( objectReport );
+                        typeReport.getStats().incIgnored();
+
+                        iterator.remove();
+                    }
+                }
+                else if ( importMode.isDelete() )
+                {
+                    if ( !aclService.canDelete( bundle.getUser(), object ) )
+                    {
+                        ObjectReport objectReport = new ObjectReport( klass, idx );
+                        objectReport.addErrorReport( new ErrorReport( klass, ErrorCode.E3002, identifier.getIdentifiersWithName( bundle.getUser() ),
+                            identifier.getIdentifiersWithName( object ) ) );
+
+                        typeReport.addObjectReport( objectReport );
+                        typeReport.getStats().incIgnored();
+
+                        iterator.remove();
+                    }
+                }
+            }
+
+            idx++;
+        }
+
+        return typeReport;
+    }
+
+    private TypeReport validateForCreate( Class<? extends IdentifiableObject> klass, List<IdentifiableObject> objects, ObjectBundle bundle )
     {
         TypeReport typeReport = new TypeReport( klass );
 
@@ -432,11 +471,11 @@ public class DefaultObjectBundleService implements ObjectBundleService
 
             if ( object != null && object.getId() > 0 )
             {
-                ObjectErrorReport objectErrorReport = new ObjectErrorReport( klass, idx );
-                objectErrorReport.addErrorReport( new ErrorReport( klass, ErrorCode.E5000, bundle.getPreheatIdentifier(),
+                ObjectReport objectReport = new ObjectReport( klass, idx );
+                objectReport.addErrorReport( new ErrorReport( klass, ErrorCode.E5000, bundle.getPreheatIdentifier(),
                     bundle.getPreheatIdentifier().getIdentifiersWithName( identifiableObject ) ) );
 
-                typeReport.getObjectReport().addErrorReport( objectErrorReport );
+                typeReport.addObjectReport( objectReport );
                 typeReport.getStats().incIgnored();
 
                 iterator.remove();
@@ -448,7 +487,7 @@ public class DefaultObjectBundleService implements ObjectBundleService
         return typeReport;
     }
 
-    public TypeReport validateForUpdate( Class<? extends IdentifiableObject> klass, List<IdentifiableObject> objects, ObjectBundle bundle )
+    private TypeReport validateForUpdate( Class<? extends IdentifiableObject> klass, List<IdentifiableObject> objects, ObjectBundle bundle )
     {
         TypeReport typeReport = new TypeReport( klass );
 
@@ -469,11 +508,11 @@ public class DefaultObjectBundleService implements ObjectBundleService
             {
                 if ( Preheat.isDefaultClass( identifiableObject.getClass() ) ) continue;
 
-                ObjectErrorReport objectErrorReport = new ObjectErrorReport( klass, idx );
-                objectErrorReport.addErrorReport( new ErrorReport( klass, ErrorCode.E5001, bundle.getPreheatIdentifier(),
+                ObjectReport objectReport = new ObjectReport( klass, idx );
+                objectReport.addErrorReport( new ErrorReport( klass, ErrorCode.E5001, bundle.getPreheatIdentifier(),
                     bundle.getPreheatIdentifier().getIdentifiersWithName( identifiableObject ) ) );
 
-                typeReport.getObjectReport().addErrorReport( objectErrorReport );
+                typeReport.addObjectReport( objectReport );
                 typeReport.getStats().incIgnored();
 
                 iterator.remove();
@@ -485,7 +524,7 @@ public class DefaultObjectBundleService implements ObjectBundleService
         return typeReport;
     }
 
-    public TypeReport validateForDelete( Class<? extends IdentifiableObject> klass, List<IdentifiableObject> objects, ObjectBundle bundle )
+    private TypeReport validateForDelete( Class<? extends IdentifiableObject> klass, List<IdentifiableObject> objects, ObjectBundle bundle )
     {
         TypeReport typeReport = new TypeReport( klass );
 
@@ -506,10 +545,11 @@ public class DefaultObjectBundleService implements ObjectBundleService
             {
                 if ( Preheat.isDefaultClass( identifiableObject.getClass() ) ) continue;
 
-                ObjectErrorReport objectErrorReport = new ObjectErrorReport( klass, idx );
-                objectErrorReport.addErrorReport( new ErrorReport( klass, ErrorCode.E5001, bundle.getPreheatIdentifier(),
+                ObjectReport objectReport = new ObjectReport( klass, idx );
+                objectReport.addErrorReport( new ErrorReport( klass, ErrorCode.E5001, bundle.getPreheatIdentifier(),
                     bundle.getPreheatIdentifier().getIdentifiersWithName( identifiableObject ) ) );
-                typeReport.getObjectReport().addErrorReport( objectErrorReport );
+
+                typeReport.addObjectReport( objectReport );
                 typeReport.getStats().incIgnored();
 
                 iterator.remove();
@@ -521,7 +561,7 @@ public class DefaultObjectBundleService implements ObjectBundleService
         return typeReport;
     }
 
-    public TypeReport validateBySchemas( Class<? extends IdentifiableObject> klass, List<IdentifiableObject> objects, ObjectBundle bundle )
+    private TypeReport validateBySchemas( Class<? extends IdentifiableObject> klass, List<IdentifiableObject> objects, ObjectBundle bundle )
     {
         TypeReport typeReport = new TypeReport( klass );
 
@@ -540,10 +580,10 @@ public class DefaultObjectBundleService implements ObjectBundleService
 
             if ( !validationErrorReports.isEmpty() )
             {
-                ObjectErrorReport objectErrorReport = new ObjectErrorReport( klass, idx );
-                objectErrorReport.addErrorReports( validationErrorReports );
+                ObjectReport objectReport = new ObjectReport( klass, idx );
+                objectReport.addErrorReports( validationErrorReports );
 
-                typeReport.getObjectReport().addErrorReport( objectErrorReport );
+                typeReport.addObjectReport( objectReport );
                 typeReport.getStats().incIgnored();
 
                 iterator.remove();

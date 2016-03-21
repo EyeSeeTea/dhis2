@@ -23,7 +23,7 @@
 
 	<bean id="org.hisp.dhis.mobile.action.NoAction" class="org.hisp.dhis.mobile.action.NoAction"
 		scope="prototype" />
-
+		
 	<bean id="org.hisp.dhis.mobile.action.incoming.ReceivingSMSAction"
 		class="org.hisp.dhis.mobile.action.incoming.ReceivingSMSAction" 
 		scope="prototype">
@@ -74,10 +74,6 @@
 
 	<bean id="org.hisp.dhis.mobile.action.UpdateBulkGateWayConfigAction"
 		class="org.hisp.dhis.mobile.action.UpdateBulkGateWayConfigAction"
-		scope="prototype" />
-
-	<bean id="org.hisp.dhis.mobile.action.UpdateModemGateWayConfigAction"
-		class="org.hisp.dhis.mobile.action.UpdateModemGateWayConfigAction"
 		scope="prototype" />
 
 	<bean id="org.hisp.dhis.mobile.action.UpdateClickatellGateWayConfigAction"

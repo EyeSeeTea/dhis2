@@ -1,4 +1,4 @@
-package org.hisp.dhis.sms.incoming;
+package org.hisp.dhis.dxf2.metadata2.objectbundle.hooks;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -28,31 +28,31 @@ package org.hisp.dhis.sms.incoming;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.smslib.AGateway;
-import org.smslib.IInboundMessageNotification;
-import org.smslib.InboundMessage;
-import org.smslib.Message.MessageTypes;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.dxf2.metadata2.objectbundle.ObjectBundle;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.comparator.OrganisationUnitParentCountComparator;
 
-public class SMPPInboundNotification
-    implements IInboundMessageNotification
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
+ */
+public class OrganisationUnitObjectBundleHook extends AbstractObjectBundleHook
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
-    @Autowired
-    private IncomingSmsService incomingSmsService;
-
-    // -------------------------------------------------------------------------
-    // Implementation
-    // -------------------------------------------------------------------------
-
     @Override
-    public void process( AGateway gateway, MessageTypes msgType, InboundMessage message )
+    public void preImport( ObjectBundle objectBundle )
     {
-        IncomingSms incomingSms = incomingSmsService.convertToIncomingSms( message );
+        sortOrganisationUnits( objectBundle );
+    }
 
-        incomingSmsService.save( incomingSms );
+    private void sortOrganisationUnits( ObjectBundle objectBundle )
+    {
+        List<IdentifiableObject> nonPersistedObjects = objectBundle.getObjects( OrganisationUnit.class, false );
+        List<IdentifiableObject> persistedObjects = objectBundle.getObjects( OrganisationUnit.class, true );
+
+        Collections.sort( nonPersistedObjects, new OrganisationUnitParentCountComparator() );
+        Collections.sort( persistedObjects, new OrganisationUnitParentCountComparator() );
     }
 }

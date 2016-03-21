@@ -1,6 +1,7 @@
+package org.hisp.dhis.dxf2.metadata2.objectbundle.hooks;
 
 /*
- * Copyright (c) 2004-2015, University of Oslo
+ * Copyright (c) 2004-2016, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,21 +27,40 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.sms.config;
+
+import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.dxf2.metadata2.objectbundle.ObjectBundle;
+import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.program.ProgramStage;
 
 /**
- * @author Zubair <rajazubair.asghar@gmail.com>
- *
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface GatewayAdministratonService
+public class ProgramStageObjectBundleHook extends AbstractObjectBundleHook
 {
-    String setDefault( String uid );
+    @Override
+    public <T extends IdentifiableObject> void preCreate( T object, ObjectBundle bundle )
+    {
+        if ( !ProgramStage.class.isInstance( object ) ) return;
+        ProgramStage programStage = (ProgramStage) object;
 
-    boolean removeGateway( String uid );
+        if ( programStage.getPeriodType() != null )
+        {
+            PeriodType periodType = bundle.getPreheat().getPeriodTypeMap().get( programStage.getPeriodType().getName() );
+            programStage.setPeriodType( periodType );
+        }
+    }
 
-    SmsConfiguration listGateways();
+    @Override
+    public <T extends IdentifiableObject> void preUpdate( T object, ObjectBundle bundle )
+    {
+        if ( !ProgramStage.class.isInstance( object ) ) return;
+        ProgramStage programStage = (ProgramStage) object;
 
-    SmsGatewayConfig getGatewayConfiguration( String uid );
-
-    boolean addOrUpdateGateway( SmsGatewayConfig config, Class<?> klass );
+        if ( programStage.getPeriodType() != null )
+        {
+            PeriodType periodType = bundle.getPreheat().getPeriodTypeMap().get( programStage.getPeriodType().getName() );
+            programStage.setPeriodType( periodType );
+        }
+    }
 }

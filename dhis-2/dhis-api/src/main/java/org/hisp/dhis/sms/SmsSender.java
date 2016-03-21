@@ -41,10 +41,12 @@ public interface SmsSender
     String sendMessage( OutboundSms sms )
         throws SmsServiceException;
 
+    String sendMessage( List<OutboundSms> smsBatch );
+    
+    String sendMessage( List<OutboundSms> smsBatch, String gatewayId );
+
     String sendMessage( String message, String phoneNumber )
         throws SmsServiceException;
 
     String sendMessage( String subject, String text, User sender, List<User> users, boolean forceSend );
-    
-    boolean sendAyncMessage( OutboundSms sms );
 }

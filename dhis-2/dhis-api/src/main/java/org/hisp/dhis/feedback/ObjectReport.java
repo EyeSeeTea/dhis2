@@ -29,7 +29,6 @@ package org.hisp.dhis.feedback;
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
@@ -47,64 +46,96 @@ import java.util.Map;
 @JacksonXmlRootElement( localName = "objectReport", namespace = DxfNamespaces.DXF_2_0 )
 public class ObjectReport
 {
-    private Map<Integer, ObjectErrorReport> errorReportsMap = new HashMap<>();
+    private final Class<?> klass;
 
-    public ObjectReport()
+    private Integer index;
+
+    private Map<ErrorCode, List<ErrorReport>> errorReportsByCode = new HashMap<>();
+
+    public ObjectReport( Class<?> klass, Integer index )
     {
+        this.klass = klass;
+        this.index = index;
     }
 
-    public void addErrorReports( ObjectReport objectReport )
+    //-----------------------------------------------------------------------------------
+    // Utility Methods
+    //-----------------------------------------------------------------------------------
+
+    public void merge( ObjectReport objectReport )
     {
-        objectReport.getErrorReports().forEach( this::addErrorReport );
+        addErrorReports( objectReport.getErrorReports() );
     }
 
-    public void addErrorReports( List<ObjectErrorReport> objectErrorReports )
+    public void addErrorReports( List<? extends ErrorReport> errorReports )
     {
-        objectErrorReports.forEach( this::addErrorReport );
+        errorReports.forEach( this::addErrorReport );
     }
 
-    public void addErrorReport( ObjectErrorReport objectErrorReport )
+    public void addErrorReport( ErrorReport errorReport )
     {
-        if ( !errorReportsMap.containsKey( objectErrorReport.getObjectIndex() ) )
+        if ( !errorReportsByCode.containsKey( errorReport.getErrorCode() ) )
         {
-            errorReportsMap.put( objectErrorReport.getObjectIndex(), objectErrorReport );
+            errorReportsByCode.put( errorReport.getErrorCode(), new ArrayList<>() );
         }
-        else
-        {
-            errorReportsMap.get( objectErrorReport.getObjectIndex() ).addErrorReports( objectErrorReport.getErrorReports() );
-        }
+
+        errorReportsByCode.get( errorReport.getErrorCode() ).add( errorReport );
+    }
+
+    //-----------------------------------------------------------------------------------
+    // Getters and Setters
+    //-----------------------------------------------------------------------------------
+
+    @JsonProperty
+    @JacksonXmlProperty( isAttribute = true )
+    public Class<?> getKlass()
+    {
+        return klass;
     }
 
     @JsonProperty
-    @JsonValue
-    @JacksonXmlElementWrapper( useWrapping = false, localName = "errorReports", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "errorReport", namespace = DxfNamespaces.DXF_2_0 )
-    public List<ObjectErrorReport> getErrorReports()
+    @JacksonXmlProperty( isAttribute = true )
+    public Integer getIndex()
     {
-        return new ArrayList<>( errorReportsMap.values() );
+        return index;
     }
 
-    public Map<Integer, ObjectErrorReport> getErrorReportsMap()
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "errorReports", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "errorReport", namespace = DxfNamespaces.DXF_2_0 )
+    public List<ErrorReport> getErrorReports()
     {
-        return errorReportsMap;
+        List<ErrorReport> errorReports = new ArrayList<>();
+        errorReportsByCode.values().forEach( errorReports::addAll );
+
+        return errorReports;
+    }
+
+    public List<ErrorCode> getErrorCodes()
+    {
+        return new ArrayList<>( errorReportsByCode.keySet() );
+    }
+
+    public Map<ErrorCode, List<ErrorReport>> getErrorReportsByCode()
+    {
+        return errorReportsByCode;
     }
 
     public boolean isEmpty()
     {
-        return errorReportsMap.isEmpty();
+        return errorReportsByCode.isEmpty();
     }
 
     public int size()
     {
-        return errorReportsMap.size();
+        return errorReportsByCode.size();
     }
-
 
     @Override
     public String toString()
     {
         return MoreObjects.toStringHelper( this )
-            .add( "objectErrorReports", getErrorReports() )
+            .add( "errorReports", getErrorReports() )
             .toString();
     }
 }
