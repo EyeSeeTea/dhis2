@@ -49,16 +49,7 @@ import org.hisp.dhis.analytics.EventOutputType;
 import org.hisp.dhis.analytics.SortOrder;
 import org.hisp.dhis.analytics.event.EventDataQueryService;
 import org.hisp.dhis.analytics.event.EventQueryParams;
-import org.hisp.dhis.common.DimensionalItemObject;
-import org.hisp.dhis.common.DimensionalObject;
-import org.hisp.dhis.common.DisplayProperty;
-import org.hisp.dhis.common.EventAnalyticalObject;
-import org.hisp.dhis.common.IllegalQueryException;
-import org.hisp.dhis.common.OrganisationUnitSelectionMode;
-import org.hisp.dhis.common.QueryFilter;
-import org.hisp.dhis.common.QueryItem;
-import org.hisp.dhis.common.QueryOperator;
-import org.hisp.dhis.common.ValueType;
+import org.hisp.dhis.common.*;
 import org.hisp.dhis.commons.collection.ListUtils;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
@@ -141,6 +132,7 @@ public class DefaultEventDataQueryService
         DisplayProperty displayProperty, String userOrgUnit, Integer page, Integer pageSize, I18nFormat format )
     {
         EventQueryParams params = new EventQueryParams();
+        IdScheme defaultIdScheme = IdScheme.UID;
         
         List<OrganisationUnit> userOrgUnits = dataQueryService.getUserOrgUnits( userOrgUnit );
 
@@ -180,7 +172,7 @@ public class DefaultEventDataQueryService
             {
                 String dimensionId = getDimensionFromParam( dim );
                 List<String> items = getDimensionItemsFromParam( dim );                
-                DimensionalObject dimObj = dataQueryService.getDimension( dimensionId, items, null, userOrgUnits, format, true );
+                DimensionalObject dimObj = dataQueryService.getDimension( dimensionId, items, null, userOrgUnits, format, true, defaultIdScheme );
                 
                 if ( dimObj != null )
                 {
@@ -199,7 +191,7 @@ public class DefaultEventDataQueryService
             {
                 String dimensionId = getDimensionFromParam( dim );
                 List<String> items = getDimensionItemsFromParam( dim );                
-                DimensionalObject dimObj = dataQueryService.getDimension( dimensionId, items, null, userOrgUnits, format, true );
+                DimensionalObject dimObj = dataQueryService.getDimension( dimensionId, items, null, userOrgUnits, format, true, defaultIdScheme );
                 
                 if ( dimObj != null )
                 {
@@ -249,6 +241,7 @@ public class DefaultEventDataQueryService
     public EventQueryParams getFromAnalyticalObject( EventAnalyticalObject object, I18nFormat format )
     {        
         EventQueryParams params = new EventQueryParams();
+        IdScheme defaultIdScheme = IdScheme.UID;
 
         if ( object != null )
         {
@@ -259,7 +252,7 @@ public class DefaultEventDataQueryService
             for ( DimensionalObject dimension : ListUtils.union( object.getColumns(), object.getRows() ) )
             {
                 DimensionalObject dimObj = dataQueryService.
-                    getDimension( dimension.getDimension(), getDimensionalItemIds( dimension.getItems() ), date, null, format, true );
+                    getDimension( dimension.getDimension(), getDimensionalItemIds( dimension.getItems() ), date, null, format, true, defaultIdScheme );
                 
                 if ( dimObj != null )
                 {
@@ -274,7 +267,7 @@ public class DefaultEventDataQueryService
             for ( DimensionalObject filter : object.getFilters() )
             {
                 DimensionalObject dimObj = dataQueryService.
-                    getDimension( filter.getDimension(), getDimensionalItemIds( filter.getItems() ), date, null, format, true );
+                    getDimension( filter.getDimension(), getDimensionalItemIds( filter.getItems() ), date, null, format, true, defaultIdScheme );
                 
                 if ( dimObj != null )
                 {
