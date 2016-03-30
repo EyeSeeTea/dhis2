@@ -1,0 +1,6 @@
+[submodule "webapps/dhis-web-pivot"]
+	path = webapps/dhis-web-pivot
+	url = https://github.com/dhis2/dhis2-pivot
+[submodule "webapps/dhis-d2-analysis"]
+	path = webapps/dhis-d2-analysis
+	url = https://github.com/dhis2/d2-analysis
