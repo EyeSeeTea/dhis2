@@ -161,14 +161,14 @@ public class AddValidationRuleAction
 
     private String skipTestExpression;
 
-    public void setRightSideExpression( String skipTestExpression )
+    public void setSkipTestExpression( String skipTestExpression )
     {
         this.skipTestExpression = skipTestExpression;
     }
 
     private String skipTestDescription;
 
-    public void setRightSideDescription( String skipTestDescription )
+    public void setSkipTestDescription( String skipTestDescription )
     {
         this.skipTestDescription = skipTestDescription;
     }
@@ -240,17 +240,17 @@ public class AddValidationRuleAction
 
         Expression skipTest = null;
 
-	if ((skipTestExpression)&&(!(skipTest.length==0))) 
-	    {
-		skipTest=new Expression();
-		skipTest.setExpression( skipTestExpression );
-		skipTest.setDescription( skipTestDescription );
+        if ( (skipTestExpression != null) && (!(skipTestExpression.isEmpty())) )
+        {
+            skipTest = new Expression();
+            skipTest.setExpression( skipTestExpression );
+            skipTest.setDescription( skipTestDescription );
 
-		skipTest.setDataElementsInExpression
-		    ( expressionService.getDataElementsInExpression
-		      ( skipTestExpression ) );
-		skipTest.setSampleElementsInExpression( expressionService.getSampleElementsInExpression( skipTestExpression ) );
-	    }
+            skipTest.setDataElementsInExpression
+                ( expressionService.getDataElementsInExpression
+                    ( skipTestExpression ) );
+            skipTest.setSampleElementsInExpression( expressionService.getSampleElementsInExpression( skipTestExpression ) );
+        }
 
         ValidationRule validationRule = new ValidationRule();
 
@@ -262,7 +262,7 @@ public class AddValidationRuleAction
         validationRule.setOperator( Operator.valueOf( operator ) );
         validationRule.setLeftSide( leftSide );
         validationRule.setRightSide( rightSide );
-        if (skipTest) validationRule.setSkipTest( skipTest );
+        if ( skipTest != null ) validationRule.setSkipTest( skipTest );
         validationRule.setOrganisationUnitLevel( organisationUnitLevel );
 
         PeriodType periodType = periodService.getPeriodTypeByName( periodTypeName );
