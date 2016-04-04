@@ -205,6 +205,9 @@ public class UpdateValidationRuleAction
     public String execute()
     {
         ValidationRule validationRule = validationRuleService.getValidationRule( id );
+	Expression leftSide=validationRule.getLeftSide();
+	Expression rightSide=validationRule.getLeftSide();
+	Expression skipTest=validationRule.getSkipTest();
 
         validationRule.setName( StringUtils.trimToNull( name ) );
         validationRule.setDescription( StringUtils.trimToNull( description ) );
@@ -213,16 +216,32 @@ public class UpdateValidationRuleAction
         validationRule.setRuleType( RuleType.valueOf( StringUtils.trimToNull( ruleType ) ) );
         validationRule.setOperator( Operator.valueOf( operator ) );
 
-        validationRule.getLeftSide().setExpression( leftSideExpression );
-        validationRule.getLeftSide().setDescription( leftSideDescription );
-        validationRule.getLeftSide().setMissingValueStrategy( safeValueOf( leftSideMissingValueStrategy, SKIP_IF_ANY_VALUE_MISSING ) );
-        validationRule.getLeftSide().setDataElementsInExpression( expressionService.getDataElementsInExpression( leftSideExpression ) );
+	leftSide.setExpression( leftSideExpression );
+        leftSide.setDescription( leftSideDescription );
+        leftSide.setMissingValueStrategy( safeValueOf( leftSideMissingValueStrategy, SKIP_IF_ANY_VALUE_MISSING ) );
+        leftSide.setDataElementsInExpression( expressionService.getDataElementsInExpression( leftSideExpression ) );
+        leftSide.setSampleElementsInExpression( expressionService.getSampleElementsInExpression( leftSideExpression ) );
 
-        validationRule.getRightSide().setExpression( rightSideExpression );
-        validationRule.getRightSide().setDescription( rightSideDescription );
-        validationRule.getRightSide().setMissingValueStrategy( safeValueOf( rightSideMissingValueStrategy, SKIP_IF_ANY_VALUE_MISSING ) );
-        validationRule.getRightSide().setDataElementsInExpression( expressionService.getDataElementsInExpression( rightSideExpression ) );
-        validationRule.setOrganisationUnitLevel( organisationUnitLevel );
+	rightSide.setExpression( rightSideExpression );
+        rightSide.setDescription( rightSideDescription );
+        rightSide.setMissingValueStrategy( safeValueOf( rightSideMissingValueStrategy, SKIP_IF_ANY_VALUE_MISSING ) );
+        rightSide.setDataElementsInExpression( expressionService.getDataElementsInExpression( rightSideExpression ) );
+        rightSide.setSampleElementsInExpression( expressionService.getSampleElementsInExpression( rightSideExpression ) );
+
+	if ((skipTestExpression != null) && (skipTest == null)) 
+	    {
+	    skipTest=new Expression();
+	    validationRule.setSkipTest(skipTest);
+	    }
+	if (skipTest != null) 
+	    {
+		skipTest.setExpression( skipTestExpression );
+		skipTest.setDescription( skipTestDescription );
+		skipTest.setMissingValueStrategy( safeValueOf( skipTestMissingValueStrategy, SKIP_IF_ANY_VALUE_MISSING ) );
+		skipTest.setDataElementsInExpression( expressionService.getDataElementsInExpression( skipTestExpression ) );
+		skipTest.setSampleElementsInExpression( expressionService.getSampleElementsInExpression( skipTestExpression ) );
+	    }
+	    
 
         PeriodType periodType = periodService.getPeriodTypeByName( periodTypeName );
         validationRule.setPeriodType( periodType == null ? null : periodService.getPeriodTypeByClass( periodType.getClass() ) );

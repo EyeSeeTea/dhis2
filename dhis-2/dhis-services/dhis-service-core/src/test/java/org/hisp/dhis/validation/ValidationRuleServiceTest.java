@@ -295,16 +295,16 @@ public class ValidationRuleServiceTest
         expressionC = new Expression( "#{" + dataElementB.getUid() + suffix + "} * 2", "descriptionC", dataElementsC );
         expressionD = new Expression( "#{" + dataElementB.getUid() + suffix + "}", "descriptionD", dataElementsC );
         expressionE = new Expression( "AVG(#{" + dataElementB.getUid() + suffix + "} * 1.5)", "descriptionE",
-            dataElementsC );
+				      dataElementsC, dataElementSet(dataElementB));
         expressionF = new Expression(
             "#{" + dataElementB.getUid() + suffix + "} / #{" + dataElementE.getUid() + suffix + "}", "descriptionF",
             dataElementsD );
         expressionG = new Expression(
             "AVG(#{" + dataElementB.getUid() + suffix + "} * 1.5 / #{" + dataElementE.getUid() + suffix + "})",
-            "descriptionG", dataElementsD );
+            "descriptionG", dataElementsD, dataElementSet(dataElementB,dataElementE));
         expressionH = new Expression(
             "AVG(#{" + dataElementB.getUid() + suffix + "}) + 1.5*STDDEV(#{" + dataElementB.getUid() + suffix + "})",
-            "descriptionE1", dataElementsC );
+            "descriptionE1", dataElementSet(), dataElementSet(dataElementB) );
 
         expressionService.addExpression( expressionA );
         expressionService.addExpression( expressionB );
@@ -487,6 +487,18 @@ public class ValidationRuleServiceTest
         Collections.sort( resultList );
         return resultList;
     }
+
+    private Set<DataElement> dataElementSet(){
+	return new HashSet<DataElement>();}
+    private Set<DataElement> dataElementSet(DataElement elt1){
+	HashSet<DataElement> result=new HashSet<DataElement>();
+	result.add(elt1);
+	return result;}
+    private Set<DataElement> dataElementSet(DataElement elt1,DataElement elt2){
+	HashSet<DataElement> result=new HashSet<DataElement>();
+	result.add(elt1);
+	result.add(elt2);
+	return result;}
 
     // -------------------------------------------------------------------------
     // Business logic tests

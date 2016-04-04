@@ -363,11 +363,15 @@ public class DataValidationTask
 
         for ( ValidationRule rule : rules )
         {
-            if ( rule.getRuleType() == RuleType.SURVEILLANCE && rule.getCurrentDataElements() != null )
-            {
-                recursiveCurrentDataElements.addAll( rule.getCurrentDataElements() );
-            }
-        }
+            if ( rule.getRuleType() == RuleType.SURVEILLANCE)
+		{
+		    Set<DataElement> cur=rule.getCurrentDataElements();
+		    if (cur != null)
+			{
+			    recursiveCurrentDataElements.addAll( cur );
+			}
+		}
+	}
 
         return recursiveCurrentDataElements;
     }

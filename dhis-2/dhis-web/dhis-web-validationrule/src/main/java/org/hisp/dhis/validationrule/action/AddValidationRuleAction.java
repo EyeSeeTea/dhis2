@@ -159,6 +159,20 @@ public class AddValidationRuleAction
         this.rightSideDescription = rightSideDescription;
     }
 
+    private String skipTestExpression;
+
+    public void setRightSideExpression( String skipTestExpression )
+    {
+        this.skipTestExpression = skipTestExpression;
+    }
+
+    private String skipTestDescription;
+
+    public void setRightSideDescription( String skipTestDescription )
+    {
+        this.skipTestDescription = skipTestDescription;
+    }
+
     private String rightSideMissingValueStrategy;
 
     public void setRightSideMissingValueStrategy( String rightSideMissingValueStrategy )
@@ -194,6 +208,13 @@ public class AddValidationRuleAction
         this.annualSampleCount = annualSampleCount;
     }
 
+    private Integer sequentialSkipCount;
+
+    public void setSequentialSkipCount( Integer sequentialSkipCount )
+    {
+        this.sequentialSkipCount = sequentialSkipCount;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -207,6 +228,7 @@ public class AddValidationRuleAction
         leftSide.setDescription( leftSideDescription );
         leftSide.setMissingValueStrategy( safeValueOf( leftSideMissingValueStrategy, SKIP_IF_ANY_VALUE_MISSING ) );
         leftSide.setDataElementsInExpression( expressionService.getDataElementsInExpression( leftSideExpression ) );
+        leftSide.setSampleElementsInExpression( expressionService.getSampleElementsInExpression( leftSideExpression ) );
 
         Expression rightSide = new Expression();
 
@@ -214,6 +236,21 @@ public class AddValidationRuleAction
         rightSide.setDescription( rightSideDescription );
         rightSide.setMissingValueStrategy( safeValueOf( rightSideMissingValueStrategy, SKIP_IF_ANY_VALUE_MISSING ) );
         rightSide.setDataElementsInExpression( expressionService.getDataElementsInExpression( rightSideExpression ) );
+        rightSide.setSampleElementsInExpression( expressionService.getSampleElementsInExpression( rightSideExpression ) );
+
+        Expression skipTest = null;
+
+	if ((skipTestExpression)&&(!(skipTest.length==0))) 
+	    {
+		skipTest=new Expression();
+		skipTest.setExpression( skipTestExpression );
+		skipTest.setDescription( skipTestDescription );
+
+		skipTest.setDataElementsInExpression
+		    ( expressionService.getDataElementsInExpression
+		      ( skipTestExpression ) );
+		skipTest.setSampleElementsInExpression( expressionService.getSampleElementsInExpression( skipTestExpression ) );
+	    }
 
         ValidationRule validationRule = new ValidationRule();
 
@@ -225,6 +262,7 @@ public class AddValidationRuleAction
         validationRule.setOperator( Operator.valueOf( operator ) );
         validationRule.setLeftSide( leftSide );
         validationRule.setRightSide( rightSide );
+        if (skipTest) validationRule.setSkipTest( skipTest );
         validationRule.setOrganisationUnitLevel( organisationUnitLevel );
 
         PeriodType periodType = periodService.getPeriodTypeByName( periodTypeName );
@@ -232,6 +270,7 @@ public class AddValidationRuleAction
 
         validationRule.setSequentialSampleCount( sequentialSampleCount );
         validationRule.setAnnualSampleCount( annualSampleCount );
+        validationRule.setSequentialSkipCount( sequentialSampleCount );
         validationRuleService.saveValidationRule( validationRule );
 
         return SUCCESS;

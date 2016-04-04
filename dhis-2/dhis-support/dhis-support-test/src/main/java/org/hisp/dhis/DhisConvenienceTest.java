@@ -965,15 +965,20 @@ public abstract class DhisConvenienceTest
      * @param operator              The operator.
      * @param leftSide              The left side expression.
      * @param rightSide             The right side expression.
+     * @param skipTest              The skiptest expression
      * @param periodType            The period-type.
      * @param organisationUnitLevel The unit level of organisations to be
      *                              evaluated by this rule.
      * @param sequentialSampleCount How many sequential past periods to sample.
      * @param annualSampleCount     How many years of past periods to sample.
+     * @param sequentialSkipCount   How many periods in the current year to skip
      */
-    public static ValidationRule createMonitoringRule( char uniqueCharacter, Operator operator, Expression leftSide,
-        Expression rightSide, PeriodType periodType, int organisationUnitLevel, int sequentialSampleCount,
-        int annualSampleCount )
+    public static ValidationRule createMonitoringRule
+	(char uniqueCharacter, Operator operator, 
+	 Expression leftSide,Expression rightSide, Expression skipTest,
+	 PeriodType periodType, int organisationUnitLevel, int sequentialSampleCount,
+	 int annualSampleCount,
+	 int sequentialSkipCount)
     {
         ValidationRule validationRule = new ValidationRule();
         validationRule.setAutoFields();
@@ -984,12 +989,41 @@ public abstract class DhisConvenienceTest
         validationRule.setOperator( operator );
         validationRule.setLeftSide( leftSide );
         validationRule.setRightSide( rightSide );
+        validationRule.setSkipTest( skipTest );
         validationRule.setPeriodType( periodType );
         validationRule.setOrganisationUnitLevel( organisationUnitLevel );
         validationRule.setSequentialSampleCount( sequentialSampleCount );
         validationRule.setAnnualSampleCount( annualSampleCount );
+        validationRule.setSequentialSkipCount( sequentialSkipCount );
 
         return validationRule;
+    }
+
+    /**
+     * Creates a ValidationRule of RULE_TYPE_MONITORING
+     *
+     * @param uniqueCharacter       A unique character to identify the object.
+     * @param operator              The operator.
+     * @param leftSide              The left side expression.
+     * @param rightSide             The right side expression.
+     * @param periodType            The period-type.
+     * @param organisationUnitLevel The unit level of organisations to be
+     *                              evaluated by this rule.
+     * @param sequentialSampleCount How many sequential past periods to sample.
+     * @param annualSampleCount     How many years of past periods to sample.
+     */
+    public static ValidationRule createMonitoringRule
+	( char uniqueCharacter, Operator operator, 
+	  Expression leftSide, Expression rightSide, 
+	  PeriodType periodType, int organisationUnitLevel, 
+	  int sequentialSampleCount, int annualSampleCount)
+    {
+	return createMonitoringRule(uniqueCharacter,operator,
+				    leftSide,rightSide,null,
+				    periodType,organisationUnitLevel,
+				    sequentialSampleCount,
+				    annualSampleCount,
+				    0);
     }
 
     /**

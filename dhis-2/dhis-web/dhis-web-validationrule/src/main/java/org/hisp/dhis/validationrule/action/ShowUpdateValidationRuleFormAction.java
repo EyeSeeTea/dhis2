@@ -122,6 +122,13 @@ public class ShowUpdateValidationRuleFormAction
         return rightSideTextualExpression;
     }
 
+    private String skipTestTextualExpression;
+
+    public String getSkipTestTextualExpression()
+    {
+        return skipTestTextualExpression;
+    }
+
     private Collection<PeriodType> periodTypes;
 
     public Collection<PeriodType> getPeriodTypes()
