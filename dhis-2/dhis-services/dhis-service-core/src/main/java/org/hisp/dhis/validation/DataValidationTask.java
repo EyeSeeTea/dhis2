@@ -154,14 +154,17 @@ public class DataValidationTask
                                 int n_years = rule.getAnnualSampleCount() == null ? 0 : rule.getAnnualSampleCount();
                                 int window = rule.getSequentialSampleCount() == null ? 0
                                     : rule.getSequentialSampleCount();
+                                int skip = rule.getSequentialSkipCount() == null ? 0
+                                    : rule.getSequentialSkipCount();
                                 Collection<PeriodType> periodTypes = context.getRuleXMap().get( rule )
                                     .getAllowedPastPeriodTypes();
 
                                 log.debug( "Rule " + rule.getName() + " @" + period.getDisplayShortName() + " & "
                                     + sourceX.getSource() + " window=" + window + ", years=" + n_years );
-                                Map<Integer, Double> leftSideValues = getRuleExpressionValueMap( rule.getLeftSide(),
-                                    currentValueMap, incompleteValuesMap, sourceX.getSource(), period, window, n_years,
-                                    periodTypeX, periodTypes, lastUpdatedMap, sourceDataElements );
+                                Map<Integer, Double> leftSideValues = getRuleExpressionValueMap
+				    ( rule.getLeftSide(), currentValueMap, incompleteValuesMap, 
+				      sourceX.getSource(), period, window, n_years, skip,
+				      periodTypeX, periodTypes, lastUpdatedMap, sourceDataElements );
 
                                 if ( !leftSideValues.isEmpty()
                                     || Operator.compulsory_pair.equals( rule.getOperator() )
@@ -169,7 +172,7 @@ public class DataValidationTask
                                 {
                                     Map<Integer, Double> rightSideValues = getRuleExpressionValueMap(
                                         rule.getRightSide(), currentValueMap, incompleteValuesMap, sourceX.getSource(),
-                                        period, window, n_years, periodTypeX, periodTypes, lastUpdatedMap,
+                                        period, window, n_years, skip, periodTypeX, periodTypes, lastUpdatedMap,
                                         sourceDataElements );
 
                                     if ( !rightSideValues.isEmpty()
@@ -526,9 +529,10 @@ public class DataValidationTask
      *        unit
      * @return the right-side values, map by attribute category combo
      */
-    private ListMap<Integer, Double> getAggregateValueMap( Expression expression, OrganisationUnit source,
-        Period period, int window, int n_years, PeriodTypeExtended px, Collection<PeriodType> periodTypes,
-        MapMap<Integer, DataElementOperand, Date> lastUpdatedMap, Collection<DataElement> sourceDataElements )
+    private ListMap<Integer, Double> getAggregateValueMap
+	( Expression expression, OrganisationUnit source,
+	  Period period, int window, int n_years, int skip, PeriodTypeExtended px, Collection<PeriodType> periodTypes,
+	  MapMap<Integer, DataElementOperand, Date> lastUpdatedMap, Collection<DataElement> sourceDataElements )
     {
         ListMap<Integer, Double> results = new ListMap<Integer, Double>();
         PeriodType periodType = period.getPeriodType();
@@ -545,20 +549,35 @@ public class DataValidationTask
             {
                 // For past years, fetch a window around the period at the
                 // same time of year as this period.
+
+		// This first call gets the value for the same period in the previous year:
                 gatherPeriodValues( results, expression, source, base_period, 0, px, 
-                    periodTypes, lastUpdatedMap, sourceDataElements );
-                
+				    periodTypes, lastUpdatedMap, sourceDataElements );
+		// And if we're taking a window, this gets values for periods both before and after
+		//  the same period
                 if ( window != 0 )
-                {
-                    gatherPeriodValues( results, expression, source, periodType.getNextPeriod( base_period ),
-                        window - 1, px, periodTypes, lastUpdatedMap, sourceDataElements );
+		{
+			gatherPeriodValues( results, expression, source, periodType.getNextPeriod( base_period ),
+					    window - 1, px, periodTypes, lastUpdatedMap, sourceDataElements );
+			gatherPeriodValues( results, expression, source, periodType.getPreviousPeriod( base_period ),
+					    1 - window, px, periodTypes, lastUpdatedMap, sourceDataElements );
+
                 }
             }
-            
-            if ( window != 0 )
+            else if ( window != 0 )
             {
-                gatherPeriodValues( results, expression, source, periodType.getPreviousPeriod( base_period ),
-                    1 - window, px, periodTypes, lastUpdatedMap, sourceDataElements );
+		int steps=window-1, skipping=skip;
+		Period start=periodType.getPreviousPeriod( base_period );
+		while (skipping>0)
+		    {
+			start=periodType.getPreviousPeriod( start );
+			skipping--; steps--;
+		    }
+		if (steps>=0)
+		    {
+		gatherPeriodValues( results, expression, source, start,
+				    - steps, px, periodTypes, lastUpdatedMap, sourceDataElements );
+		    }
             }
 
             // Move to the previous year.
@@ -659,11 +678,12 @@ public class DataValidationTask
      * @param incompleteValuesMap map of values that were incomplete.
      * @return map of values.
      */
-    private Map<Integer, Double> getRuleExpressionValueMap( Expression expression,
-        MapMap<Integer, DataElementOperand, Double> valueMap, SetMap<Integer, DataElementOperand> incompleteValuesMap,
-        OrganisationUnit source, Period period, int window, int n_years, PeriodTypeExtended px,
-        Collection<PeriodType> periodTypes, MapMap<Integer, DataElementOperand, Date> lastUpdatedMap,
-        Collection<DataElement> sourceElements )
+    private Map<Integer, Double> getRuleExpressionValueMap
+	( Expression expression,
+	  MapMap<Integer, DataElementOperand, Double> valueMap, SetMap<Integer, DataElementOperand> incompleteValuesMap,
+	  OrganisationUnit source, Period period, int window, int n_years, int skip, PeriodTypeExtended px,
+	  Collection<PeriodType> periodTypes, MapMap<Integer, DataElementOperand, Date> lastUpdatedMap,
+	  Collection<DataElement> sourceElements )
     {
         Map<Integer, Double> expressionValueMap = new HashMap<>();
         Map<Integer, ListMap<String, Double>> aggregateValuesMap = new HashMap<>();
@@ -678,8 +698,9 @@ public class DataValidationTask
         {
             Expression subexp = new Expression( subExpression, "aggregated", new HashSet<DataElement>( sourceElements ) );
             
-            ListMap<Integer, Double> aggregateValues = getAggregateValueMap( subexp, source, period, window, n_years,
-                px, periodTypes, lastUpdatedMap, sourceElements );
+            ListMap<Integer, Double> aggregateValues = getAggregateValueMap
+		( subexp, source, period, window, n_years, skip,
+		  px, periodTypes, lastUpdatedMap, sourceElements );
             
             for ( Integer attributeOptionCombo : aggregateValues.keySet() )
             {
