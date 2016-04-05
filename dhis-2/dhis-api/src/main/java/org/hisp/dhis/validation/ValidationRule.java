@@ -164,7 +164,7 @@ public class ValidationRule
     }
 
     public ValidationRule( String name, String description, Operator operator, Expression leftSide,
-			   Expression rightSide, Expression skipTest )
+        Expression rightSide, Expression skipTest )
     {
         this.name = name;
         this.description = description;
@@ -232,13 +232,13 @@ public class ValidationRule
      */
     public Set<DataElement> getCurrentDataElements()
     {
-        Set<DataElement> currentDataElements = 
-	    new HashSet<>(leftSide.getDataElementsInExpression());
+        Set<DataElement> currentDataElements =
+            new HashSet<>( leftSide.getDataElementsInExpression() );
 
-	currentDataElements.addAll( rightSide.getDataElementsInExpression() );
-	if (skipTest!=null)
-	    currentDataElements.addAll( skipTest.getDataElementsInExpression() );
-	    
+        currentDataElements.addAll( rightSide.getDataElementsInExpression() );
+        if ( skipTest != null )
+            currentDataElements.addAll( skipTest.getDataElementsInExpression() );
+
         return currentDataElements;
     }
 
@@ -251,16 +251,16 @@ public class ValidationRule
      */
     public Set<DataElement> getPastDataElements()
     {
-	HashSet<DataElement> past=new HashSet<DataElement>();
-	Set<DataElement> elts=leftSide.getSampleElementsInExpression();
-	if (elts!=null) past.addAll(elts);
-	elts=rightSide.getSampleElementsInExpression();
-	if (elts!=null) past.addAll(elts);
-	if (skipTest==null)
-	    elts=null;
-	else elts=skipTest.getSampleElementsInExpression();
-	if (elts!=null) past.addAll(elts);
-	return past;
+        HashSet<DataElement> past = new HashSet<DataElement>();
+        Set<DataElement> elts = leftSide.getSampleElementsInExpression();
+        if ( elts != null ) past.addAll( elts );
+        elts = rightSide.getSampleElementsInExpression();
+        if ( elts != null ) past.addAll( elts );
+        if ( skipTest == null )
+            elts = null;
+        else elts = skipTest.getSampleElementsInExpression();
+        if ( elts != null ) past.addAll( elts );
+        return past;
     }
 
     /**
