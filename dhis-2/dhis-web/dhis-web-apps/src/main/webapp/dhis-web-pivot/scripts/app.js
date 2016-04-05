@@ -5122,6 +5122,11 @@ console.log(table);
 									xtype: 'checkbox',
 									relativePeriodId: 'LAST_4_QUARTERS',
 									boxLabel: NS.i18n.last_4_quarters
+								},
+								{
+									xtype: 'checkbox',
+									relativePeriodId: 'QUARTERS_THIS_YEAR',
+									boxLabel: NS.i18n.quarters_this_year
 								}
 							]
 						},
@@ -5195,6 +5200,11 @@ console.log(table);
 									xtype: 'checkbox',
 									relativePeriodId: 'LAST_12_MONTHS',
 									boxLabel: NS.i18n.last_12_months
+								},
+								{
+									xtype: 'checkbox',
+									relativePeriodId: 'MONTHS_THIS_YEAR',
+									boxLabel: NS.i18n.months_this_year
 								}
 							]
 						},
