@@ -164,6 +164,4 @@ public interface IndicatorService
     int getIndicatorGroupSetCount();
 
     int getIndicatorGroupSetCountByName( String name );
-
-    int getCountGeCreated(Date date);
 }

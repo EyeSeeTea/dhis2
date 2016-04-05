@@ -44,6 +44,7 @@ import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.Section;
 import org.hisp.dhis.dxf2.metadata2.AtomicMode;
+import org.hisp.dhis.dxf2.metadata2.objectbundle.feedback.ObjectBundleValidationReport;
 import org.hisp.dhis.feedback.ErrorCode;
 import org.hisp.dhis.feedback.ErrorReport;
 import org.hisp.dhis.feedback.ObjectReport;
@@ -53,7 +54,6 @@ import org.hisp.dhis.option.Option;
 import org.hisp.dhis.option.OptionSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
-import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.preheat.PreheatErrorReport;
 import org.hisp.dhis.preheat.PreheatIdentifier;
@@ -87,9 +87,6 @@ public class ObjectBundleServiceTest
 
     @Autowired
     private IdentifiableObjectManager manager;
-
-    @Autowired
-    private PeriodService periodService;
 
     @Autowired
     private RenderService _renderService;
@@ -163,7 +160,7 @@ public class ObjectBundleServiceTest
         params.setObjects( metadata );
 
         ObjectBundle bundle = objectBundleService.create( params );
-        ObjectBundleValidation validate = objectBundleService.validate( bundle );
+        ObjectBundleValidationReport validate = objectBundleService.validate( bundle );
         assertFalse( validate.isEmpty() );
 
         List<ObjectReport> objectReports = validate.getObjectReports( DataElement.class );
@@ -221,7 +218,7 @@ public class ObjectBundleServiceTest
         params.setObjects( metadata );
 
         ObjectBundle bundle = objectBundleService.create( params );
-        ObjectBundleValidation validate = objectBundleService.validate( bundle );
+        ObjectBundleValidationReport validate = objectBundleService.validate( bundle );
         assertFalse( validate.getTypeReportMap().isEmpty() );
 
         List<ObjectReport> objectReports = validate.getObjectReports( DataElement.class );
@@ -270,7 +267,7 @@ public class ObjectBundleServiceTest
         params.setObjects( metadata );
 
         ObjectBundle bundle = objectBundleService.create( params );
-        ObjectBundleValidation validate = objectBundleService.validate( bundle );
+        ObjectBundleValidationReport validate = objectBundleService.validate( bundle );
 
         assertFalse( validate.getTypeReportMap().isEmpty() );
 
@@ -292,7 +289,7 @@ public class ObjectBundleServiceTest
         params.setObjects( metadata );
 
         ObjectBundle bundle = objectBundleService.create( params );
-        ObjectBundleValidation validate = objectBundleService.validate( bundle );
+        ObjectBundleValidationReport validate = objectBundleService.validate( bundle );
 
         assertFalse( validate.getTypeReportMap().isEmpty() );
         assertEquals( 3, validate.getErrorReportsByCode( DataElement.class, ErrorCode.E5001 ).size() );
@@ -311,7 +308,7 @@ public class ObjectBundleServiceTest
         params.setObjects( metadata );
 
         ObjectBundle bundle = objectBundleService.create( params );
-        ObjectBundleValidation validate = objectBundleService.validate( bundle );
+        ObjectBundleValidationReport validate = objectBundleService.validate( bundle );
 
         assertEquals( 3, validate.getTypeReportMap( DataElement.class ).getObjectReports().size() );
     }
@@ -331,7 +328,7 @@ public class ObjectBundleServiceTest
         params.setObjects( metadata );
 
         ObjectBundle bundle = objectBundleService.create( params );
-        ObjectBundleValidation validate = objectBundleService.validate( bundle );
+        ObjectBundleValidationReport validate = objectBundleService.validate( bundle );
 
         assertEquals( 1, validate.getErrorReportsByCode( DataElement.class, ErrorCode.E5001 ).size() );
         assertFalse( validate.getErrorReportsByCode( DataElement.class, ErrorCode.E4000 ).isEmpty() );
@@ -351,7 +348,7 @@ public class ObjectBundleServiceTest
         params.setObjects( metadata );
 
         ObjectBundle bundle = objectBundleService.create( params );
-        ObjectBundleValidation validate = objectBundleService.validate( bundle );
+        ObjectBundleValidationReport validate = objectBundleService.validate( bundle );
 
         assertFalse( validate.getTypeReportMap( DataElement.class ).getObjectReports().isEmpty() );
         assertEquals( 3, validate.getErrorReportsByCode( DataElement.class, ErrorCode.E5001 ).size() );
@@ -370,7 +367,7 @@ public class ObjectBundleServiceTest
         params.setObjects( metadata );
 
         ObjectBundle bundle = objectBundleService.create( params );
-        ObjectBundleValidation validate = objectBundleService.validate( bundle );
+        ObjectBundleValidationReport validate = objectBundleService.validate( bundle );
 
         assertFalse( validate.getTypeReportMap( DataElement.class ).getObjectReports().isEmpty() );
         assertEquals( 3, validate.getErrorReportsByCode( DataElement.class, ErrorCode.E5001 ).size() );
@@ -389,7 +386,7 @@ public class ObjectBundleServiceTest
         params.setObjects( metadata );
 
         ObjectBundle bundle = objectBundleService.create( params );
-        ObjectBundleValidation validate = objectBundleService.validate( bundle );
+        ObjectBundleValidationReport validate = objectBundleService.validate( bundle );
 
         assertFalse( validate.getTypeReportMap( DataElement.class ).getObjectReports().isEmpty() );
         assertEquals( 3, validate.getErrorReportsByCode( DataElement.class, ErrorCode.E5001 ).size() );
@@ -408,7 +405,7 @@ public class ObjectBundleServiceTest
         params.setObjects( metadata );
 
         ObjectBundle bundle = objectBundleService.create( params );
-        ObjectBundleValidation validate = objectBundleService.validate( bundle );
+        ObjectBundleValidationReport validate = objectBundleService.validate( bundle );
 
         assertFalse( validate.getTypeReportMap( DataElement.class ).getObjectReports().isEmpty() );
         assertEquals( 3, validate.getErrorReportsByCode( DataElement.class, ErrorCode.E5001 ).size() );
@@ -427,7 +424,7 @@ public class ObjectBundleServiceTest
         params.setObjects( metadata );
 
         ObjectBundle bundle = objectBundleService.create( params );
-        ObjectBundleValidation validate = objectBundleService.validate( bundle );
+        ObjectBundleValidationReport validate = objectBundleService.validate( bundle );
 
         assertFalse( validate.getTypeReportMap( DataElement.class ).getObjectReports().isEmpty() );
         assertEquals( 3, validate.getErrorReportsByCode( DataElement.class, ErrorCode.E5001 ).size() );
@@ -446,7 +443,7 @@ public class ObjectBundleServiceTest
         params.setObjects( metadata );
 
         ObjectBundle bundle = objectBundleService.create( params );
-        ObjectBundleValidation validate = objectBundleService.validate( bundle );
+        ObjectBundleValidationReport validate = objectBundleService.validate( bundle );
 
         assertNotNull( validate );
     }
@@ -632,7 +629,7 @@ public class ObjectBundleServiceTest
         params.setObjects( metadata );
 
         ObjectBundle bundle = objectBundleService.create( params );
-        ObjectBundleValidation validation = objectBundleService.validate( bundle );
+        objectBundleService.validate( bundle );
     }
 
     @Test
@@ -648,6 +645,50 @@ public class ObjectBundleServiceTest
 
         ObjectBundle bundle = objectBundleService.create( params );
         objectBundleService.validate( bundle );
+        objectBundleService.commit( bundle );
+
+        List<OrganisationUnit> organisationUnits = manager.getAll( OrganisationUnit.class );
+        List<DataElement> dataElements = manager.getAll( DataElement.class );
+        List<UserAuthorityGroup> userRoles = manager.getAll( UserAuthorityGroup.class );
+        List<User> users = manager.getAll( User.class );
+        List<UserGroup> userGroups = manager.getAll( UserGroup.class );
+
+        assertEquals( 1, organisationUnits.size() );
+        assertEquals( 2, dataElements.size() );
+        assertEquals( 1, userRoles.size() );
+        assertEquals( 1, users.size() );
+        assertEquals( 2, userGroups.size() );
+
+        assertEquals( 1, dataElements.get( 0 ).getUserGroupAccesses().size() );
+        assertEquals( 1, dataElements.get( 1 ).getUserGroupAccesses().size() );
+    }
+
+    @Test
+    public void testCreateAndUpdateDataSetsWithUgaUID() throws IOException
+    {
+        Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> metadata = renderService.fromMetadata(
+            new ClassPathResource( "dxf2/simple_metadata_uga.json" ).getInputStream(), RenderFormat.JSON );
+
+        ObjectBundleParams params = new ObjectBundleParams();
+        params.setObjectBundleMode( ObjectBundleMode.COMMIT );
+        params.setImportMode( ImportStrategy.CREATE );
+        params.setObjects( metadata );
+
+        ObjectBundle bundle = objectBundleService.create( params );
+        ObjectBundleValidationReport validate = objectBundleService.validate( bundle );
+        assertTrue( validate.getErrorReports().isEmpty() );
+        objectBundleService.commit( bundle );
+
+        metadata = renderService.fromMetadata( new ClassPathResource( "dxf2/simple_metadata_uga.json" ).getInputStream(), RenderFormat.JSON );
+
+        params = new ObjectBundleParams();
+        params.setObjectBundleMode( ObjectBundleMode.COMMIT );
+        params.setImportMode( ImportStrategy.UPDATE );
+        params.setObjects( metadata );
+
+        bundle = objectBundleService.create( params );
+        validate = objectBundleService.validate( bundle );
+        assertTrue( validate.getErrorReports().isEmpty() );
         objectBundleService.commit( bundle );
 
         List<OrganisationUnit> organisationUnits = manager.getAll( OrganisationUnit.class );
@@ -796,7 +837,7 @@ public class ObjectBundleServiceTest
         params.setObjects( metadata );
 
         ObjectBundle bundle = objectBundleService.create( params );
-        ObjectBundleValidation validate = objectBundleService.validate( bundle );
+        ObjectBundleValidationReport validate = objectBundleService.validate( bundle );
         assertTrue( validate.getErrorReports().isEmpty() );
 
         objectBundleService.commit( bundle );
@@ -842,7 +883,7 @@ public class ObjectBundleServiceTest
         params.setObjects( metadata );
 
         ObjectBundle bundle = objectBundleService.create( params );
-        ObjectBundleValidation validate = objectBundleService.validate( bundle );
+        ObjectBundleValidationReport validate = objectBundleService.validate( bundle );
         assertTrue( validate.getErrorReports().isEmpty() );
 
         objectBundleService.commit( bundle );
@@ -910,7 +951,7 @@ public class ObjectBundleServiceTest
         params.setObjects( metadata );
 
         ObjectBundle bundle = objectBundleService.create( params );
-        ObjectBundleValidation validate = objectBundleService.validate( bundle );
+        ObjectBundleValidationReport validate = objectBundleService.validate( bundle );
         assertTrue( validate.getErrorReports().isEmpty() );
 
         objectBundleService.commit( bundle );
@@ -977,7 +1018,7 @@ public class ObjectBundleServiceTest
         params.setObjects( metadata );
 
         ObjectBundle bundle = objectBundleService.create( params );
-        ObjectBundleValidation validate = objectBundleService.validate( bundle );
+        ObjectBundleValidationReport validate = objectBundleService.validate( bundle );
         assertTrue( validate.getErrorReports().isEmpty() );
 
         objectBundleService.commit( bundle );
@@ -1016,7 +1057,7 @@ public class ObjectBundleServiceTest
         params.setObjects( metadata );
 
         ObjectBundle bundle = objectBundleService.create( params );
-        ObjectBundleValidation validate = objectBundleService.validate( bundle );
+        ObjectBundleValidationReport validate = objectBundleService.validate( bundle );
         assertTrue( validate.getErrorReports().isEmpty() );
 
         objectBundleService.commit( bundle );
@@ -1042,7 +1083,7 @@ public class ObjectBundleServiceTest
         params.setObjects( metadata );
 
         ObjectBundle bundle = objectBundleService.create( params );
-        ObjectBundleValidation validate = objectBundleService.validate( bundle );
+        ObjectBundleValidationReport validate = objectBundleService.validate( bundle );
         assertTrue( validate.getErrorReports().isEmpty() );
 
         objectBundleService.commit( bundle );
@@ -1090,7 +1131,7 @@ public class ObjectBundleServiceTest
         params.setObjects( metadata );
 
         ObjectBundle bundle = objectBundleService.create( params );
-        ObjectBundleValidation validate = objectBundleService.validate( bundle );
+        ObjectBundleValidationReport validate = objectBundleService.validate( bundle );
         assertTrue( validate.getErrorReports().isEmpty() );
 
         objectBundleService.commit( bundle );
@@ -1137,108 +1178,6 @@ public class ObjectBundleServiceTest
         assertFalse( validationRule2.getRightSide().getDataElementsInExpression().isEmpty() );
         assertEquals( "jocQSivF2ry", validationRule2.getLeftSide().getDataElementsInExpression().iterator().next().getUid() );
         assertEquals( "vAczVs4mxna", validationRule2.getRightSide().getDataElementsInExpression().iterator().next().getUid() );
-    }
-
-    @Test
-    public void testCreateUsers() throws IOException
-    {
-        createUserAndInjectSecurityContext( true );
-
-        Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> metadata = renderService.fromMetadata(
-            new ClassPathResource( "dxf2/users.json" ).getInputStream(), RenderFormat.JSON );
-
-        ObjectBundleParams params = new ObjectBundleParams();
-        params.setObjectBundleMode( ObjectBundleMode.COMMIT );
-        params.setImportMode( ImportStrategy.CREATE );
-        params.setAtomicMode( AtomicMode.NONE );
-        params.setObjects( metadata );
-
-        ObjectBundle bundle = objectBundleService.create( params );
-        ObjectBundleValidation validate = objectBundleService.validate( bundle );
-        assertEquals( 1, validate.getErrorReportsByCode( UserAuthorityGroup.class, ErrorCode.E5003 ).size() );
-        objectBundleService.commit( bundle );
-
-        List<User> users = manager.getAll( User.class );
-        assertEquals( 4, users.size() );
-
-        User userA = manager.get( User.class, "sPWjoHSY03y" );
-        User userB = manager.get( User.class, "MwhEJUnTHkn" );
-
-        assertNotNull( userA );
-        assertNotNull( userB );
-
-        assertNotNull( userA.getUserCredentials().getUserInfo() );
-        assertNotNull( userB.getUserCredentials().getUserInfo() );
-        assertNotNull( userA.getUserCredentials().getUserInfo().getUserCredentials() );
-        assertNotNull( userB.getUserCredentials().getUserInfo().getUserCredentials() );
-        assertEquals( "UserA", userA.getUserCredentials().getUserInfo().getUserCredentials().getUsername() );
-        assertEquals( "UserB", userB.getUserCredentials().getUserInfo().getUserCredentials().getUsername() );
-
-        assertNotNull( userA.getUserCredentials().getUser() );
-        assertNotNull( userB.getUserCredentials().getUser() );
-        assertNotNull( userA.getUserCredentials().getUser().getUserCredentials() );
-        assertNotNull( userB.getUserCredentials().getUser().getUserCredentials() );
-        assertEquals( "admin", userA.getUserCredentials().getUser().getUserCredentials().getUsername() );
-        assertEquals( "admin", userB.getUserCredentials().getUser().getUserCredentials().getUsername() );
-
-        assertEquals( 1, userA.getOrganisationUnits().size() );
-        assertEquals( 1, userB.getOrganisationUnits().size() );
-    }
-
-    @Test
-    public void testUpdateUsers() throws IOException
-    {
-        createUserAndInjectSecurityContext( true );
-
-        Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> metadata = renderService.fromMetadata(
-            new ClassPathResource( "dxf2/users.json" ).getInputStream(), RenderFormat.JSON );
-
-        ObjectBundleParams params = new ObjectBundleParams();
-        params.setObjectBundleMode( ObjectBundleMode.COMMIT );
-        params.setImportMode( ImportStrategy.CREATE );
-        params.setAtomicMode( AtomicMode.NONE );
-        params.setObjects( metadata );
-
-        ObjectBundle bundle = objectBundleService.create( params );
-        ObjectBundleValidation validate = objectBundleService.validate( bundle );
-        assertEquals( 1, validate.getErrorReportsByCode( UserAuthorityGroup.class, ErrorCode.E5003 ).size() );
-        objectBundleService.commit( bundle );
-
-        metadata = renderService.fromMetadata( new ClassPathResource( "dxf2/users_update.json" ).getInputStream(), RenderFormat.JSON );
-
-        params = new ObjectBundleParams();
-        params.setObjectBundleMode( ObjectBundleMode.COMMIT );
-        params.setImportMode( ImportStrategy.UPDATE );
-        params.setAtomicMode( AtomicMode.NONE );
-        params.setObjects( metadata );
-
-        bundle = objectBundleService.create( params );
-        validate = objectBundleService.validate( bundle );
-        assertEquals( 1, validate.getErrorReportsByCode( UserAuthorityGroup.class, ErrorCode.E5001 ).size() );
-        objectBundleService.commit( bundle );
-
-        List<User> users = manager.getAll( User.class );
-        assertEquals( 4, users.size() );
-
-        User userA = manager.get( User.class, "sPWjoHSY03y" );
-        User userB = manager.get( User.class, "MwhEJUnTHkn" );
-
-        assertNotNull( userA );
-        assertNotNull( userB );
-
-        assertNotNull( userA.getUserCredentials().getUserInfo() );
-        assertNotNull( userB.getUserCredentials().getUserInfo() );
-        assertNotNull( userA.getUserCredentials().getUserInfo().getUserCredentials() );
-        assertNotNull( userB.getUserCredentials().getUserInfo().getUserCredentials() );
-        assertEquals( "UserAA", userA.getUserCredentials().getUserInfo().getUserCredentials().getUsername() );
-        assertEquals( "UserBB", userB.getUserCredentials().getUserInfo().getUserCredentials().getUsername() );
-
-        assertNotNull( userA.getUserCredentials().getUser() );
-        assertNotNull( userB.getUserCredentials().getUser() );
-        assertNotNull( userA.getUserCredentials().getUser().getUserCredentials() );
-        assertNotNull( userB.getUserCredentials().getUser().getUserCredentials() );
-        assertEquals( "admin", userA.getUserCredentials().getUser().getUserCredentials().getUsername() );
-        assertEquals( "admin", userB.getUserCredentials().getUser().getUserCredentials().getUsername() );
     }
 
     @Test
@@ -1401,7 +1340,7 @@ public class ObjectBundleServiceTest
         params.setObjects( metadata );
 
         ObjectBundle bundle = objectBundleService.create( params );
-        ObjectBundleValidation validate = objectBundleService.validate( bundle );
+        ObjectBundleValidationReport validate = objectBundleService.validate( bundle );
 
         assertFalse( validate.isEmpty() );
         assertEquals( 1, validate.getErrorReportsByCode( UserAuthorityGroup.class, ErrorCode.E5003 ).size() );
@@ -1430,46 +1369,6 @@ public class ObjectBundleServiceTest
         DataElement dataElement = manager.getByCode( DataElement.class, "DataElementCodeA" );
         assertEquals( "SG4HuKlNEFH", dataElement.getUid() );
         assertEquals( "DataElementA", dataElement.getName() );
-    }
-
-    @Test
-    public void testCreateMetadataWithDuplicateUsername() throws IOException
-    {
-        Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> metadata = renderService.fromMetadata(
-            new ClassPathResource( "dxf2/user_duplicate_username.json" ).getInputStream(), RenderFormat.JSON );
-
-        ObjectBundleParams params = new ObjectBundleParams();
-        params.setObjectBundleMode( ObjectBundleMode.COMMIT );
-        params.setImportMode( ImportStrategy.CREATE_AND_UPDATE );
-        params.setAtomicMode( AtomicMode.NONE );
-        params.setObjects( metadata );
-
-        ObjectBundle bundle = objectBundleService.create( params );
-        objectBundleService.validate( bundle );
-        objectBundleService.commit( bundle );
-
-        assertEquals( 1, manager.getAll( User.class ).size() );
-    }
-
-    @Test
-    public void testCreateMetadataWithDuplicateUsernameAndInjectedUser() throws IOException
-    {
-        createUserAndInjectSecurityContext( true );
-
-        Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> metadata = renderService.fromMetadata(
-            new ClassPathResource( "dxf2/user_duplicate_username.json" ).getInputStream(), RenderFormat.JSON );
-
-        ObjectBundleParams params = new ObjectBundleParams();
-        params.setObjectBundleMode( ObjectBundleMode.COMMIT );
-        params.setImportMode( ImportStrategy.CREATE_AND_UPDATE );
-        params.setAtomicMode( AtomicMode.NONE );
-        params.setObjects( metadata );
-
-        ObjectBundle bundle = objectBundleService.create( params );
-        objectBundleService.validate( bundle );
-
-        objectBundleService.commit( bundle );
-        assertEquals( 2, manager.getAll( User.class ).size() );
     }
 
     @Test
@@ -1506,7 +1405,7 @@ public class ObjectBundleServiceTest
         params.setObjects( metadata );
 
         ObjectBundle bundle = objectBundleService.create( params );
-        ObjectBundleValidation validate = objectBundleService.validate( bundle );
+        ObjectBundleValidationReport validate = objectBundleService.validate( bundle );
         assertTrue( validate.getErrorReports().isEmpty() );
 
         objectBundleService.commit( bundle );

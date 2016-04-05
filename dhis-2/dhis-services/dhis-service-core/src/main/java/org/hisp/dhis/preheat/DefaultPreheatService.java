@@ -308,6 +308,24 @@ public class DefaultPreheatService implements PreheatService
         Map<Class<? extends IdentifiableObject>, List<IdentifiableObject>> scanObjects = new HashMap<>();
         scanObjects.putAll( objects ); // clone objects list, we don't want to modify it
 
+        if ( scanObjects.containsKey( User.class ) )
+        {
+            List<IdentifiableObject> users = scanObjects.get( User.class );
+            List<IdentifiableObject> userCredentials = new ArrayList<>();
+
+            for ( IdentifiableObject identifiableObject : users )
+            {
+                User user = (User) identifiableObject;
+
+                if ( user.getUserCredentials() != null )
+                {
+                    userCredentials.add( user.getUserCredentials() );
+                }
+            }
+
+            scanObjects.put( UserCredentials.class, userCredentials );
+        }
+
         for ( Class<? extends IdentifiableObject> objectClass : scanObjects.keySet() )
         {
             Schema schema = schemaService.getDynamicSchema( objectClass );
@@ -653,8 +671,8 @@ public class DefaultPreheatService implements PreheatService
             if ( User.class.isInstance( object ) )
             {
                 User user = (User) object;
-                errorReports.addAll( checkUniqueness( klass, user, preheat, identifier ) );
-                errorReports.addAll( checkUniqueness( klass, user.getUserCredentials(), preheat, identifier ) );
+                errorReports.addAll( checkUniqueness( User.class, user, preheat, identifier ) );
+                errorReports.addAll( checkUniqueness( UserCredentials.class, user.getUserCredentials(), preheat, identifier ) );
             }
             else
             {
@@ -667,6 +685,8 @@ public class DefaultPreheatService implements PreheatService
                 ObjectReport objectReport = new ObjectReport( object.getClass(), idx );
                 objectReport.addErrorReports( errorReports );
                 typeReport.addObjectReport( objectReport );
+                typeReport.getStats().incIgnored();
+
                 iterator.remove();
             }
 

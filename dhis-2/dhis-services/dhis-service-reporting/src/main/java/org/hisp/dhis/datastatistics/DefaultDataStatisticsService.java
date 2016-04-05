@@ -28,14 +28,17 @@ package org.hisp.dhis.datastatistics;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.chart.ChartService;
-import org.hisp.dhis.dashboard.DashboardService;
-import org.hisp.dhis.eventchart.EventChartService;
-import org.hisp.dhis.eventreport.EventReportService;
-import org.hisp.dhis.indicator.IndicatorService;
-import org.hisp.dhis.mapping.MappingService;
-import org.hisp.dhis.reporttable.ReportTableService;
+import org.hisp.dhis.chart.Chart;
+import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.dashboard.Dashboard;
+import org.hisp.dhis.eventchart.EventChart;
+import org.hisp.dhis.eventreport.EventReport;
+import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.mapping.Map;
+import org.hisp.dhis.reporttable.ReportTable;
+import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,28 +61,10 @@ public class DefaultDataStatisticsService implements DataStatisticsService
     DataStatisticsEventStore hibernateDataStatisticsEventStore;
 
     @Autowired
-    ChartService chartService;
-
-    @Autowired
-    ReportTableService reportTableService;
-
-    @Autowired
-    MappingService mappingService;
-
-    @Autowired
-    EventReportService eventReportService;
-
-    @Autowired
     UserService userService;
 
     @Autowired
-    IndicatorService indicatorService;
-
-    @Autowired
-    EventChartService eventChartService;
-
-    @Autowired
-    DashboardService dashboardService;
+    private IdentifiableObjectManager identifiableObjectManager;
 
 
     /**
@@ -223,104 +208,6 @@ public class DefaultDataStatisticsService implements DataStatisticsService
     }
 
     /**
-     * private method to get number of saved Charts from a date till now
-     *
-     * @param date - From date
-     * @return number of Charts saved in db
-     */
-    private int getCharts( Date date )
-    {
-        return chartService.countChartGeCreated( date );
-    }
-
-    /**
-     * private method to get number of saved Report tables from a date till now
-     *
-     * @param date - From date
-     * @return number of Report tables saved in db
-     */
-    private int getReportTables( Date date )
-    {
-        return reportTableService.getCountGeCreated( date );
-    }
-
-
-    /**
-     * private method to get number of saved Maps from a date till now
-     *
-     * @param date - From date
-     * @return number of Maps saved in db
-     */
-    private int getMaps( Date date )
-    {
-        return mappingService.getCountGeCreated( date );
-    }
-
-    /**
-     * private method to get number of saved Event Reports from a date till now
-     *
-     * @param date - From date
-     * @return number of Event Reports saved in db
-     */
-    private int getEventReports( Date date )
-    {
-        return eventReportService.getCountGeCreated( date );
-    }
-
-    /**
-     * private method to get number of saved Event Charts from a date till now
-     *
-     * @param date - From date
-     * @return number of Event Charts saved in db
-     */
-    private int getEventCharts( Date date )
-    {
-        return eventChartService.countGeCreated( date );
-    }
-
-    /**
-     * private method to get number of saved dashboards from a date till now
-     *
-     * @param date - From date
-     * @return number of dashboards saved in db
-     */
-    private int getDashboards( Date date )
-    {
-        return dashboardService.countGeCreated( date );
-    }
-
-    /**
-     * private method to get the number of indicators saved from a date till now
-     *
-     * @param date - From date
-     * @return number of indicators saved in db
-     */
-    private int getIndicators( Date date )
-    {
-        return indicatorService.getCountGeCreated( date );
-    }
-
-    /**
-     * private method to get a number of users in db
-     *
-     * @return number og active users
-     */
-    private int getUsers( )
-    {
-        return userService.getUserCount();
-    }
-
-    /**
-     * private method to get a number of active/logged in users that day.
-     *
-     * @return number og active users
-     */
-    private int getActiveUsers( ){
-        return userService.getActiveUsersCount( 1 );
-    }
-
-
-    /**
      * Gets all important information and creates a Datastatistics object and saves it in db
      */
     @Override public int saveSnapshot( )
@@ -332,15 +219,15 @@ public class DefaultDataStatisticsService implements DataStatisticsService
         c.add( Calendar.DATE, -1 );
         startDate = c.getTime( );
 
-        int totalUsers = getUsers();
-        double savedMaps = getMaps( startDate );
-        double savedCharts = getCharts( startDate );
-        double savedReportTables = getReportTables( startDate );
-        double savedEventReports = getEventReports( startDate );
-        double savedEventCharts = getEventCharts( startDate );
-        double savedDashboards = getDashboards( startDate );
-        double savedIndicators = getIndicators( startDate );
-        int activeUsers = getActiveUsers();
+        int totalUsers = identifiableObjectManager.getCount(User.class);//getUsers();
+        double savedMaps = identifiableObjectManager.getCountByCreated( Map.class, startDate );//getMaps( startDate );
+        double savedCharts = identifiableObjectManager.getCountByCreated( Chart.class, startDate );//getCharts( startDate );
+        double savedReportTables = identifiableObjectManager.getCountByCreated( ReportTable.class, startDate );//getReportTables( startDate );
+        double savedEventReports = identifiableObjectManager.getCountByCreated( EventReport.class, startDate );//getEventReports( startDate );
+        double savedEventCharts = identifiableObjectManager.getCountByCreated( EventChart.class, startDate );//getEventCharts( startDate );
+        double savedDashboards = identifiableObjectManager.getCountByCreated( Dashboard.class, startDate );//getDashboards( startDate );
+        double savedIndicators = identifiableObjectManager.getCountByCreated( Indicator.class, startDate );//getIndicators( startDate );
+        int activeUsers = userService.getActiveUsersCount( 1 );;
 
         double chartViews = 0;
         double mapViews = 0;
@@ -380,7 +267,6 @@ public class DefaultDataStatisticsService implements DataStatisticsService
                 case 6: indicatorsViews = temp[1];
                     totalNumberOfViews += indicatorsViews;
                     break;
-
             }
 
         }

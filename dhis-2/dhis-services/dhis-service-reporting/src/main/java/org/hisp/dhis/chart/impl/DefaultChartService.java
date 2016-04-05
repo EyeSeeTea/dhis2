@@ -910,10 +910,6 @@ public class DefaultChartService
         
         return NumericSortWrapper.getObjectList( list );
     }
-
-    public int countChartGeCreated(Date startDate){
-        return chartStore.getCountGeCreated( startDate );
-    }
     
     // -------------------------------------------------------------------------
     // CRUD operations

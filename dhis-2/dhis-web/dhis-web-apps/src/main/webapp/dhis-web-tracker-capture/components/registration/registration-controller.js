@@ -30,9 +30,21 @@ trackerCapture.controller('RegistrationController',
     $scope.customRegistrationForm = null;    
     $scope.selectedTei = {};
     $scope.tei = {};    
-    $scope.hiddenFields = {};    
+    $scope.warningMessages = [];
+    $scope.hiddenFields = [];    
+    $scope.assignedFields = [];
+    $scope.errorMessages = {};
+    $scope.hiddenSections = [];
+    $scope.currentEvent = null;
+    $scope.prStDes = null;
+    $scope.registrationAndDataEntry = false;
+    
+    
     $scope.helpTexts = {};
-    $scope.registrationMode = 'REGISTRATION';    
+    $scope.registrationMode = 'REGISTRATION';
+    $scope.currentEvent = {};
+    var flag = {debug: true, verbose: false};
+    $rootScope.ruleeffects = {};
 
     $scope.attributesById = CurrentSelection.getAttributesById();
     if(!$scope.attributesById){
@@ -131,11 +143,18 @@ trackerCapture.controller('RegistrationController',
                     $scope.customRegistrationForm = CustomFormService.getForTrackedEntity($scope.trackedEntityForm, mode);
                 }
                 
-                if( $scope.selectedProgram.programStages && $scope.selectedProgram.programStages.length === 1 && $scope.registrationMode === 'REGISTRATION'){
+                if( $scope.selectedProgram.programStages && $scope.selectedProgram.programStages[0] && $scope.selectedProgram.useFirstStageDuringRegistration && $scope.registrationMode === 'REGISTRATION'){
+                    $scope.registrationAndDataEntry = true;
                     $scope.prStDes = [];
-                    $scope.currentEvent = {enrollmentStatus: 'ACTIVE'};
                     $scope.currentStage = $scope.selectedProgram.programStages[0];
-                    $scope.currentEvent.excecutionDateLabel = $scope.currentStage.excecutionDateLabel;                    
+                    $scope.currentEvent.event = 'SINGLE_EVENT';
+                    $scope.currentEvent.providedElsewhere = {};
+                    $scope.currentEvent.orgUnit = $scope.selectedOrgUnit.id;
+                    $scope.currentEvent.program = $scope.selectedProgram.id;
+                    $scope.currentEvent.programStage = $scope.currentStage.id;
+                    $scope.currentEvent.enrollmentStatus = $scope.currentEvent.status = 'ACTIVE';
+                    $scope.currentEvent.excecutionDateLabel = $scope.currentStage.excecutionDateLabel;     
+                    $rootScope.ruleeffects[$scope.currentEvent.event] = {};
                     $scope.selectedEnrollment.status = 'ACTIVE';
                     angular.forEach($scope.currentStage.programStageDataElements, function (prStDe) {
                         $scope.prStDes[prStDe.dataElement.id] = prStDe;
@@ -158,8 +177,7 @@ trackerCapture.controller('RegistrationController',
         $scope.outerForm.$setPristine();
 
         if(destination === 'DASHBOARD') {
-            $location.path('/dashboard').search({tei: teiId,                                            
-                                    program: $scope.selectedProgram ? $scope.selectedProgram.id: null});
+            $location.path('/dashboard').search({tei: teiId, program: $scope.selectedProgram ? $scope.selectedProgram.id: null});
         }
         else if (destination === 'SELF'){
             //notify user
@@ -217,7 +235,7 @@ trackerCapture.controller('RegistrationController',
                             if(en.reference && en.status === 'SUCCESS'){                                
                                 enrollment.enrollment = en.reference;
                                 $scope.selectedEnrollment = enrollment;
-                                var dhis2Events = EventUtils.autoGenerateEvents($scope.tei.trackedEntityInstance, $scope.selectedProgram, $scope.selectedOrgUnit, enrollment);
+                                var dhis2Events = EventUtils.autoGenerateEvents($scope.tei.trackedEntityInstance, $scope.selectedProgram, $scope.selectedOrgUnit, enrollment, $scope.currentEvent);
                                 if(dhis2Events.events.length > 0){
                                     DHIS2EventFactory.create(dhis2Events).then(function(){
                                         notifyRegistrtaionCompletion(destination, $scope.tei.trackedEntityInstance);
@@ -263,7 +281,14 @@ trackerCapture.controller('RegistrationController',
         $scope.outerForm.submitted = true;        
         if( $scope.outerForm.$invalid ){
             return false;
-        }                   
+        }           
+        
+        if( $scope.registrationAndDataEntry ){
+            $scope.outerDataEntryForm.submitted = true;        
+            if( $scope.outerDataEntryForm.$invalid ){
+                return false;
+            }
+        }         
         
         //form is valid, continue the registration
         //get selected entity        
@@ -287,13 +312,12 @@ trackerCapture.controller('RegistrationController',
                 };
             DialogService.showDialog({}, dialogOptions);
             return;
-        }        
+        } 
+
         performRegistration(destination);
     }; 
     
-    $scope.executeRules = function () {
-        var flag = {debug: true, verbose: false};
-        
+    $scope.executeRules = function () {        
         //repopulate attributes with updated values
         $scope.selectedTei.attributes = [];        
         angular.forEach($scope.attributes, function(metaAttribute){
@@ -310,7 +334,8 @@ trackerCapture.controller('RegistrationController',
         });
         
         if($scope.selectedProgram && $scope.selectedProgram.id){
-            TrackerRulesExecutionService.executeRules($scope.allProgramRules, 'registration', null, null, $scope.selectedTei, $scope.selectedEnrollment, flag);
+            var eventExists = $scope.currentEvent && $scope.currentEvent.event;
+            TrackerRulesExecutionService.executeRules($scope.allProgramRules, eventExists ? $scope.currentEvent : 'registration', eventExists ? {all: [$scope.currentEvent], byStage: [$scope.currentStage.id][$scope.currentEvent]} : null, $scope.prStDes, $scope.selectedTei, $scope.selectedEnrollment, flag);
         }        
     };
     
@@ -326,15 +351,23 @@ trackerCapture.controller('RegistrationController',
     };
     
     //listen for rule effect changes
-    $scope.$on('ruleeffectsupdated', function(){
+    $scope.$on('ruleeffectsupdated', function(event, args){
         $scope.warningMessages = [];
-        var effectResult = TrackerRulesExecutionService.processRuleEffectAttribute('registration', $scope.selectedTei, $scope.tei, $scope.attributesById, $scope.hiddenFields, $scope.warningMessages);
+        $scope.hiddenFields = [];    
+        $scope.assignedFields = [];
+        $scope.errorMessages = {};
+        $scope.hiddenSections = [];
+        
+        var effectResult = TrackerRulesExecutionService.processRuleEffectAttribute(args.event, $scope.selectedTei, $scope.tei, $scope.currentEvent, {}, $scope.currentEvent, $scope.attributesById, $scope.hiddenFields, $scope.hiddenSections, $scope.warningMessages, $scope.assignedFields);        
         $scope.selectedTei = effectResult.selectedTei;
+        $scope.currentEvent = effectResult.currentEvent;
         $scope.hiddenFields = effectResult.hiddenFields;
+        $scope.hiddenSections = effectResult.hiddenSections;
+        $scope.assignedFields = effectResult.assignedFields;
         $scope.warningMessages = effectResult.warningMessages;
     });
 
-    $scope.interacted = function(field) {
+    $scope.interacted = function(field) {        
         var status = false;
         if(field){            
             status = $scope.outerForm.submitted || field.$dirty;
@@ -428,4 +461,8 @@ trackerCapture.controller('RegistrationController',
         }, function () {
         });
     };
+    
+    $scope.saveDatavalue = function () {        
+        $scope.executeRules();
+    };    
 });

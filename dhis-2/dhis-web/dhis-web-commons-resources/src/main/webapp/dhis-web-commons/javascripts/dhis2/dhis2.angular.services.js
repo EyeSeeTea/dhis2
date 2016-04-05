@@ -23,8 +23,6 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                 return tx;
             }, function () {
 
-                setHeaderDelayMessage('No translation file is found for the selected locale. Using default translation (English).');
-
                 var p = $http.get(defaultUrl).then(function (response) {
                     tx = {locale: locale, keys: dhis2.util.parseJavaProperties(response.data)};
                     return tx;
@@ -575,7 +573,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                     ' selected-program-id="selectedProgram.id" ' +
                                     ' selected-tei-id="selectedTei.trackedEntityInstance" ' +
                                     ' ng-disabled="editingDisabled || isHidden(attributesById.' + attId + '.id) || ' + isTrackerAssociate + '"' +
-                                    ' d2-validation ' +
+                                    ' d2-attribute-validator ' +
                                     ' ng-required=" ' + (att.mandatory || att.unique) + '" ';
 
                                 //check if attribute has optionset
@@ -762,6 +760,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                 popOverSpanElement.attr("details","{{'details'| translate}}");
                 popOverSpanElement.attr("trigger","click");
                 popOverSpanElement.attr("placement","right");
+                popOverSpanElement.attr("class","popover-label");
 
                 if (attValue.indexOf("attributeId.") > -1) {
                     fieldId = attValue.split(".")[1];
@@ -2037,7 +2036,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                 //Concatenate rules produced by indicator definitions into the other rules:
                 var rules = $filter('filter')(allProgramRules.programRules, {programStageId: null});
 
-                if(executingEvent.programStage){
+                if(executingEvent && executingEvent.programStage){
                     if(!rules) {
                         rules = [];
                     }
@@ -2310,7 +2309,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                     });
                 });
             },
-            processRuleEffectAttribute: function(context, selectedTei, tei, attributesById, hiddenFields, warningMessages){
+            processRuleEffectAttribute: function(context, selectedTei, tei, currentEvent, currentEventOriginialValue, affectedEvent, attributesById, prStDes, hiddenFields, hiddenSections, warningMessages, assignedFields){
                 angular.forEach($rootScope.ruleeffects[context], function (effect) {
                     if (effect.trackedEntityAttribute) {
                         //in the data entry controller we only care about the "hidefield", showerror and showwarning actions
@@ -2363,9 +2362,58 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                             }
                         }
                     }
+                    
+                    if(effect.dataElement && effect.ineffect) {
+                        //in the data entry controller we only care about the "hidefield" actions
+                        if(effect.action === "HIDEFIELD") {
+                            if(effect.dataElement) {
+                                if(affectedEvent[effect.dataElement.id]) {
+                                    //If a field is going to be hidden, but contains a value, we need to take action;
+                                    if(effect.content) {
+                                        //TODO: Alerts is going to be replaced with a proper display mecanism.
+                                        alert(effect.content);
+                                    }
+                                    else {
+                                        //TODO: Alerts is going to be replaced with a proper display mecanism.
+                                        alert(prStDes[effect.dataElement.id].dataElement.formName + "Was blanked out and hidden by your last action");
+                                    }
+
+                                    //Blank out the value:
+                                    affectedEvent[effect.dataElement.id] = "";
+                                }
+                                hiddenFields[effect.dataElement.id] = effect.ineffect;
+                            }
+                            else {
+                                $log.warn("ProgramRuleAction " + effect.id + " is of type HIDEFIELD, bot does not have a dataelement defined");
+                            }
+                        }
+                        else if(effect.action === "HIDESECTION") {
+                            if(effect.programStageSection){
+                                hiddenSections[effect.programStageSection] = effect.programStageSection;
+                            }
+                        }
+                        else if(effect.action === "SHOWERROR" && effect.dataElement.id){
+                            var dialogOptions = {
+                                headerText: 'validation_error',
+                                bodyText: effect.content + (effect.data ? effect.data : "")
+                            };
+                            DialogService.showDialog({}, dialogOptions);
+
+                            currentEvent[effect.dataElement.id] = currentEventOriginialValue[effect.dataElement.id];
+                        }
+                        else if(effect.action === "SHOWWARNING"){
+                            warningMessages.push(effect.content + (effect.data ? effect.data : ""));
+                        }
+                        else if (effect.action === "ASSIGN") {
+
+                            //For "ASSIGN" actions where we have a dataelement, we save the calculated value to the dataelement:
+                            affectedEvent[effect.dataElement.id] = effect.data;
+                            assignedFields[effect.dataElement.id] = true;
+                        }
+                    }
                 });
                 
-                return {selectedTei: selectedTei, hiddenFields: hiddenFields, warningMessages: warningMessages};
+                return {selectedTei: selectedTei, currentEvent: currentEvent, hiddenFields: hiddenFields, hiddenSections: hiddenSections, warningMessages: warningMessages};
             }
         };
     })
@@ -2431,7 +2479,8 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         this.relationshipOwner = {};
         this.selectedTeiEvents = [];
         this.fileNames = [];
-            this.location = null;
+        this.location = null;
+        this.dataElementTranslations = [];
 
         this.set = function(currentSelection){
             this.currentSelection = currentSelection;
@@ -2501,6 +2550,13 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         };
         this.getLocation = function(){
             return this.location;
+        };
+        
+        this.setDataElementTranslations = function(dataElementTranslations){
+            this.dataElementTranslations = dataElementTranslations;
+        };
+        this.getDataElementTranslations = function(){
+            return this.dataElementTranslations;
         };
     })
 

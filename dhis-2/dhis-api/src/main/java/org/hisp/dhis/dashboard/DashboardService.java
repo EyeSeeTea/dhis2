@@ -89,6 +89,4 @@ public interface DashboardService
     int countReportDashboardItems( Report report );
 
     int countDocumentDashboardItems( Document document );
-
-    int countGeCreated(Date date);
 }

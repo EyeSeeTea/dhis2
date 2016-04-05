@@ -40,7 +40,6 @@ trackerCapture.controller('EventCreationController',
     $scope.selectedCategories = selectedCategories;
     $scope.pleaseSelectLabel = $translate.instant('please_select');
 
-    var orgPath = [];
     var dummyEvent = {};
     
     function prepareEvent(){
@@ -90,7 +89,7 @@ trackerCapture.controller('EventCreationController',
                             }
                             else if(eventStage.sortOrder === lastStageForEvents.sortOrder){
                                 if(eventStage.id !== lastStageForEvents.id){
-                                    if(eventStage.name.localeCompare(lastStageForEvents.name) > 0){
+                                    if(eventStage.displayName.localeCompare(lastStageForEvents.displayName) > 0){
                                         lastStageForEvents = eventStage;
                                     }
                                 }                            
@@ -114,7 +113,7 @@ trackerCapture.controller('EventCreationController',
                     break;
                 }
                 else if(availableStage.sortOrder === lastStageForEvents.sortOrder){
-                    if(availableStage.name.localeCompare(lastStageForEvents.name) > 0){
+                    if(availableStage.displayName.localeCompare(lastStageForEvents.displayName) > 0){
                         suggestedStage = availableStage;
                         break;
                     }
@@ -142,37 +141,15 @@ trackerCapture.controller('EventCreationController',
     
     $scope.$watch('model.selectedStage', function(){       
         if(angular.isObject($scope.model.selectedStage)){
-            stage = $scope.model.selectedStage;
+            stage = $scope.model.selectedStage;            
             prepareEvent();
-            
+            $scope.model.selectedStage.excecutionDateLabel = $scope.model.selectedStage.excecutionDateLabel ? $scope.model.selectedStage.excecutionDateLabel : $translate.instant('report_date');
             //If the caller wants to create right away, go ahead and save.
             if (autoCreate) {
                 $scope.save();
             };
         }
     });    
-
-    //watch for changes in due/event-date
-    $scope.$watchCollection('[dhis2Event.dueDate, dhis2Event.eventDate]', function () {
-        if (angular.isObject($scope.dhis2Event)) {
-            if (!$scope.dhis2Event.dueDate) {
-                $scope.model.dueDateInvalid = true;
-                return;
-            }
-
-            if ($scope.dhis2Event.dueDate) {
-                var rDueDate = $scope.dhis2Event.dueDate;
-                var cDueDate = DateUtils.format($scope.dhis2Event.dueDate);
-                $scope.model.dueDateInvalid = rDueDate !== cDueDate;
-            }
-
-            if ($scope.dhis2Event.eventDate) {
-                var rEventDate = $scope.dhis2Event.eventDate;
-                var cEventDate = DateUtils.format($scope.dhis2Event.eventDate);
-                $scope.model.eventDateInvalid = rEventDate !== cEventDate;
-            }
-        }
-    });
 
     $scope.getCategoryOptions = function(){
         $scope.eventFetched = false;
@@ -193,10 +170,14 @@ trackerCapture.controller('EventCreationController',
     $scope.save = function () {
 
         $scope.getCategoryOptions();
+        
         //check for form validity
-        if ($scope.model.dueDateInvalid || $scope.model.eventDateInvalid) {
+        $scope.eventCreationForm.submitted = true;        
+        if( $scope.eventCreationForm.$invalid ){
             return false;
         }
+        
+        
         if($scope.isReferralEvent && !$scope.selectedSearchingOrgUnit){
             $scope.orgUnitError = true;
             return false;
@@ -252,7 +233,8 @@ trackerCapture.controller('EventCreationController',
                     headerText: 'event_creation_error',
                     bodyText: response.message
                 };
-
+                
+                $scope.eventCreationForm.submitted = false;
                 DialogService.showDialog({}, dialogOptions);
             }
         });
@@ -311,8 +293,8 @@ trackerCapture.controller('EventCreationController',
     }
     
     function generateFieldsUrl(){
-        var fieldUrl = "fields=id,name,organisationUnitGroups[shortName]";
-        var parentStartDefault = ",parent[id,name,children[id,name,organisationUnitGroups[shortName],children[id,name,organisationUnitGroups[shortName]]]";
+        var fieldUrl = "fields=id,displayName,organisationUnitGroups[shortName]";
+        var parentStartDefault = ",parent[id,displayName,children[id,displayName,organisationUnitGroups[shortName],children[id,displayName,organisationUnitGroups[shortName]]]";
         var parentEndDefault = "]";
         if(orgUnit.level && orgUnit.level > 1){
             var parentStart = parentStartDefault;
@@ -327,7 +309,6 @@ trackerCapture.controller('EventCreationController',
         return fieldUrl;
     }
     
-
     $scope.expandCollapse = function(orgUnit) {
         orgUnit.show = !orgUnit.show;
         if(!orgUnit.childrenLoaded){
@@ -341,5 +322,13 @@ trackerCapture.controller('EventCreationController',
     //end referral logic
     $scope.cancel = function () {
         $modalInstance.close();
+    };
+    
+    $scope.interacted = function(field) {        
+        var status = false;
+        if(field){            
+            status = $scope.eventCreationForm.submitted || field.$dirty;
+        }
+        return status;        
     };
 });

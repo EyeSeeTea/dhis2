@@ -28,6 +28,7 @@ package org.hisp.dhis;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.collect.Sets;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.analytics.AggregationType;
@@ -368,6 +369,15 @@ public abstract class DhisConvenienceTest
      */
     public static DataElement createDataElement( char uniqueCharacter )
     {
+        return createDataElement( uniqueCharacter, null );
+    }
+
+    /**
+     * @param uniqueCharacter A unique character to identify the object.
+     * @param categoryCombo   The category combo.
+     */
+    public static DataElement createDataElement( char uniqueCharacter, DataElementCategoryCombo categoryCombo )
+    {
         DataElement dataElement = new DataElement();
         dataElement.setAutoFields();
 
@@ -380,37 +390,14 @@ public abstract class DhisConvenienceTest
         dataElement.setDomainType( DataElementDomain.AGGREGATE );
         dataElement.setAggregationType( AggregationType.SUM );
 
-        if ( categoryService != null )
+        if ( categoryCombo != null )
         {
-            DataElementCategoryCombo categoryCombo = categoryService.getDefaultDataElementCategoryCombo();
             dataElement.setCategoryCombo( categoryCombo );
         }
-
-
-        return dataElement;
-    }
-
-    /**
-     * @param uniqueCharacter A unique character to identify the object.
-     */
-    public static DataElement createDataElement( char uniqueCharacter, ValueType valueType )
-    {
-        DataElement dataElement = createDataElement( uniqueCharacter );
-        dataElement.setValueType( valueType );
-
-        return dataElement;
-    }
-
-    /**
-     * @param uniqueCharacter A unique character to identify the object.
-     * @param categoryCombo   The category combo.
-     */
-    public static DataElement createDataElement( char uniqueCharacter, DataElementCategoryCombo categoryCombo )
-    {
-        DataElement dataElement = createDataElement( uniqueCharacter );
-
-        dataElement.setCategoryCombo( categoryCombo );
-        dataElement.setDomainType( DataElementDomain.AGGREGATE );
+        else if ( categoryService != null )
+        {
+            dataElement.setCategoryCombo( categoryService.getDefaultDataElementCategoryCombo() );
+        }
 
         return dataElement;
     }
@@ -424,7 +411,6 @@ public abstract class DhisConvenienceTest
     {
         DataElement dataElement = createDataElement( uniqueCharacter );
         dataElement.setValueType( valueType );
-        dataElement.setDomainType( DataElementDomain.AGGREGATE );
         dataElement.setAggregationType( aggregationType );
 
         return dataElement;
@@ -440,7 +426,6 @@ public abstract class DhisConvenienceTest
     {
         DataElement dataElement = createDataElement( uniqueCharacter );
         dataElement.setValueType( valueType );
-        dataElement.setDomainType( DataElementDomain.AGGREGATE );
         dataElement.setAggregationType( aggregationType );
         dataElement.setDomainType( domainType );
 
@@ -1647,6 +1632,56 @@ public abstract class DhisConvenienceTest
         userService.addUser( user );
         user.getUserCredentials().setUserInfo( user );
         userService.addUserCredentials( user.getUserCredentials() );
+
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add( new SimpleGrantedAuthority( "ALL" ) );
+
+        UserDetails userDetails = new org.springframework.security.core.userdetails.User(
+            user.getUserCredentials().getUsername(), user.getUserCredentials().getPassword(), authorities );
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken( userDetails, "", authorities );
+        SecurityContextHolder.getContext().setAuthentication( authentication );
+
+        return user;
+    }
+
+    protected User createAndInjectAdminUser()
+    {
+        Assert.notNull( userService, "UserService must be injected in test" );
+
+        String username = "admin";
+        String password = "district";
+
+        UserAuthorityGroup userAuthorityGroup = new UserAuthorityGroup();
+        userAuthorityGroup.setUid( "yrB6vc5Ip3r" );
+        userAuthorityGroup.setCode( "Superuser" );
+        userAuthorityGroup.setName( "Superuser" );
+        userAuthorityGroup.setDescription( "Superuser" );
+        userAuthorityGroup.setAuthorities( Sets.newHashSet( "ALL" ) );
+
+        userService.addUserAuthorityGroup( userAuthorityGroup );
+
+        User user = new User();
+        user.setUid( "M5zQapPyTZI" );
+        user.setCode( "admin" );
+        user.setFirstName( username );
+        user.setSurname( username );
+
+        userService.addUser( user );
+
+        UserCredentials userCredentials = new UserCredentials();
+        userCredentials.setUid( "KvMx6c1eoYo" );
+        userCredentials.setCode( username );
+        userCredentials.setUser( user );
+        userCredentials.setUserInfo( user );
+        userCredentials.setUsername( username );
+        userCredentials.getUserAuthorityGroups().add( userAuthorityGroup );
+
+        userService.encodeAndSetPassword( userCredentials, password );
+        userService.addUserCredentials( userCredentials );
+
+        user.setUserCredentials( userCredentials );
+        userService.updateUser( user );
 
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add( new SimpleGrantedAuthority( "ALL" ) );

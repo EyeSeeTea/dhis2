@@ -50,8 +50,6 @@ import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.comparator.DataSetApprovalFrequencyComparator;
 import org.hisp.dhis.dataset.comparator.DataSetFrequencyComparator;
 import org.hisp.dhis.option.OptionSet;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.period.CalendarPeriodType;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.period.YearlyPeriodType;
@@ -280,23 +278,6 @@ public class DataElement
     }
 
     /**
-     * Indicates whether the data sets of this data element is associated with
-     * the given organisation unit.
-     */
-    public boolean hasDataSetOrganisationUnit( OrganisationUnit unit )
-    {
-        for ( DataSet dataSet : dataSets )
-        {
-            if ( dataSet.getSources().contains( unit ) )
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
      * Returns the PeriodType of the DataElement, based on the PeriodType of the
      * DataSet which the DataElement is associated with. If this data element has
      * multiple data sets, the data set with the highest collection frequency is
@@ -363,7 +344,7 @@ public class DataElement
     {        
         int periods = getOpenFuturePeriods();
         
-        CalendarPeriodType periodType = (CalendarPeriodType) getPeriodType();
+        PeriodType periodType = getPeriodType();
         
         if ( periodType != null )
         {
@@ -456,7 +437,7 @@ public class DataElement
      */
     public String getFormNameFallback()
     {
-        return formName != null && !formName.isEmpty() ? getDisplayFormName() : getDisplayName();
+        return formName != null && !formName.isEmpty() ? getFormName() : getDisplayName();
     }
 
     @JsonProperty
@@ -464,7 +445,8 @@ public class DataElement
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getDisplayFormName()
     {
-        return displayFormName != null && !displayFormName.trim().isEmpty() ? displayFormName : formName;
+        return displayFormName != null && !displayFormName.trim().isEmpty() ? displayFormName : 
+            getFormName() != null && !getFormName().isEmpty() ? getFormName() : getDisplayName();
     }
 
     public void setDisplayFormName( String displayFormName )

@@ -96,9 +96,4 @@ public class DefaultEventChartService
     {
         return eventChartStore.getAll();
     }
-
-    @Override
-    public int countGeCreated(Date date) {
-        return eventChartStore.getCountGeCreated(date);
-    }
 }

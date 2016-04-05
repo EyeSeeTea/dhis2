@@ -50,6 +50,4 @@ public interface EventChartService
     void deleteEventChart( EventChart eventChart );
     
     List<EventChart> getAllEventCharts();
-
-    int countGeCreated(Date date);
 }

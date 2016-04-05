@@ -59,6 +59,8 @@ public class ImportOptions
     private boolean skipExistingCheck;
 
     private boolean sharing;
+    
+    private boolean sendNotifications;
 
     private boolean strictPeriods;
 
@@ -137,6 +139,11 @@ public class ImportOptions
     {
         return sharing;
     }
+    
+    public boolean isSendNotifications()
+    {
+        return sendNotifications;
+    }
 
     public boolean isStrictPeriods()
     {
@@ -193,6 +200,12 @@ public class ImportOptions
     public ImportOptions setCategoryOptionComboIdScheme( String idScheme )
     {
         idSchemes.setCategoryOptionComboIdScheme( idScheme );
+        return this;
+    }
+    
+    public ImportOptions setCategoryOptionIdScheme( String idScheme )
+    {
+        idSchemes.setCategoryOptionIdScheme( idScheme );
         return this;
     }
 
@@ -265,6 +278,12 @@ public class ImportOptions
     public ImportOptions setSharing( boolean sharing )
     {
         this.sharing = sharing;
+        return this;
+    }
+
+    public ImportOptions setSendNotifications( boolean sendNotifications )
+    {
+        this.sendNotifications = sendNotifications;
         return this;
     }
 

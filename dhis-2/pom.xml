@@ -11,7 +11,7 @@
   <url>http://dhis2.org</url>
 
   <prerequisites>
-    <maven>2.2.1</maven>
+    <maven>3.0.0</maven>
   </prerequisites>
 
   <description>
@@ -1043,10 +1043,10 @@
   <properties>
     <rootDir></rootDir>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <spring.version>4.1.9.RELEASE</spring.version>
+    <spring.version>4.2.5.RELEASE</spring.version>
     <spring.security.version>3.2.9.RELEASE</spring.security.version>
     <spring.security.oauth2.version>2.0.5.RELEASE</spring.security.oauth2.version>
-    <struts.version>2.3.16.3</struts.version>
+    <struts.version>2.3.24.1</struts.version>
     <hibernate.version>4.2.20.Final</hibernate.version>
     <hibernate-validator.version>4.3.2.Final</hibernate-validator.version>
     <jclouds.version>1.9.1</jclouds.version>

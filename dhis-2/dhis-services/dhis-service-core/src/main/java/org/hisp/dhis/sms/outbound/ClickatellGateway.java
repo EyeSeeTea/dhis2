@@ -34,7 +34,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.sms.config.ClickatellGatewayConfig;
-
+import org.hisp.dhis.sms.config.SmsGatewayConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -46,21 +46,32 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
-/**
- * Zubair <rajazubair.asghar@gmail.com>
- */
+import com.google.common.collect.ImmutableMap;
 
+/**
+ * @author Zubair <rajazubair.asghar@gmail.com>
+ */
 public class ClickatellGateway
+    implements SmsGateway
 {
     private static final Log log = LogFactory.getLog( ClickatellGateway.class );
 
     private static final String CONTENT_TYPE = "Content-Type";
-
     private static final String ACCEPT = "Accept";
-
     private static final String AUTHORIZATION = "Authorization";
-
     private static final String PROTOCOL_VERSION = "X-Version";
+
+    private static final ImmutableMap<HttpStatus, GatewayResponse> CLICKATELL_GATEWAY_RESPONSE_MAP = new ImmutableMap.Builder<HttpStatus, GatewayResponse>()
+        .put( HttpStatus.OK, GatewayResponse.RESULT_CODE_200 )
+        .put( HttpStatus.ACCEPTED, GatewayResponse.RESULT_CODE_202 )
+        .put( HttpStatus.MULTI_STATUS, GatewayResponse.RESULT_CODE_207 )
+        .put( HttpStatus.BAD_REQUEST, GatewayResponse.RESULT_CODE_400 )
+        .put( HttpStatus.UNAUTHORIZED, GatewayResponse.RESULT_CODE_401 )
+        .put( HttpStatus.PAYMENT_REQUIRED, GatewayResponse.RESULT_CODE_402 )
+        .put( HttpStatus.NOT_FOUND, GatewayResponse.RESULT_CODE_404 )
+        .put( HttpStatus.METHOD_NOT_ALLOWED, GatewayResponse.RESULT_CODE_405 )
+        .put( HttpStatus.GONE, GatewayResponse.RESULT_CODE_410 )
+        .put( HttpStatus.SERVICE_UNAVAILABLE, GatewayResponse.RESULT_CODE_503 ).build();
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -68,13 +79,14 @@ public class ClickatellGateway
 
     @Autowired
     private RestTemplate restTemplate;
-    
+
     // -------------------------------------------------------------------------
     // Implementation
     // -------------------------------------------------------------------------
-    
-    public GatewayResponse send( OutboundSms sms, ClickatellGatewayConfig clickatellConfiguration )
+
+    public GatewayResponse send( OutboundSms sms, SmsGatewayConfig config )
     {
+        ClickatellGatewayConfig clickatellConfiguration = (ClickatellGatewayConfig) config;
         HttpEntity<ClickatellRequestEntity> request = new HttpEntity<ClickatellRequestEntity>( getRequestBody( sms ),
             getRequestHeaderParameters( clickatellConfiguration ) );
 
@@ -107,10 +119,16 @@ public class ClickatellGateway
 
         log.info( "Response status code: " + statusCode );
 
-        return parseResponse( statusCode );
+        return responseHandler( statusCode );
     }
 
-    public GatewayResponse send( List<OutboundSms> smsBatch, ClickatellGatewayConfig clickatellConfiguration )
+    @Override
+    public boolean accept( SmsGatewayConfig gatewayConfig )
+    {
+        return gatewayConfig != null && gatewayConfig instanceof ClickatellGatewayConfig;
+    }
+
+    public GatewayResponse send( List<OutboundSms> smsBatch, SmsGatewayConfig config )
     {
         return null;
     }
@@ -119,44 +137,9 @@ public class ClickatellGateway
     // Supportive methods
     // -------------------------------------------------------------------------
 
-    private GatewayResponse parseResponse( HttpStatus status )
+    private GatewayResponse responseHandler( HttpStatus status )
     {
-        if ( HttpStatus.OK == status )
-        {
-            return GatewayResponse.RESULT_CODE_200;
-        }
-        else if ( HttpStatus.ACCEPTED == status )
-        {
-            return GatewayResponse.RESULT_CODE_202;
-        }
-        else if ( HttpStatus.MULTI_STATUS == status )
-        {
-            return GatewayResponse.RESULT_CODE_207;
-        }
-        else if ( HttpStatus.BAD_REQUEST == status )
-        {
-            return GatewayResponse.RESULT_CODE_400;
-        }
-        else if ( HttpStatus.UNAUTHORIZED == status )
-        {
-            return GatewayResponse.RESULT_CODE_401;
-        }
-        else if ( HttpStatus.PAYMENT_REQUIRED == status )
-        {
-            return GatewayResponse.RESULT_CODE_402;
-        }
-        else if ( HttpStatus.NOT_FOUND == status )
-        {
-            return GatewayResponse.RESULT_CODE_404;
-        }
-        else if ( HttpStatus.METHOD_NOT_ALLOWED == status )
-        {
-            return GatewayResponse.RESULT_CODE_405;
-        }
-        else
-        {
-            return GatewayResponse.RESULT_CODE_503;
-        }
+        return CLICKATELL_GATEWAY_RESPONSE_MAP.get( status );
     }
 
     private ClickatellRequestEntity getRequestBody( OutboundSms sms )

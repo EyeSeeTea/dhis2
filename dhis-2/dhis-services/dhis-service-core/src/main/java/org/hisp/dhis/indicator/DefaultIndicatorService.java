@@ -452,9 +452,4 @@ public class DefaultIndicatorService
     {
         return getObjectsBetweenByName( i18nService, indicatorGroupSetStore, name, first, max );
     }
-
-    @Override
-    public int getCountGeCreated(Date date) {
-        return indicatorStore.getCountGeCreated(date);
-    }
 }
