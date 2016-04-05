@@ -589,7 +589,11 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                                 }
                                 else {
                                     //check attribute type and generate corresponding angular input field
-                                    if (att.valueType === "NUMBER" ) {
+                                    if (att.valueType === "NUMBER" ||
+                                    		att.valueType === "INTEGER" ||
+                                    		att.valueType === "INTEGER_POSITIVE" ||
+                                    		att.valueType === "INTEGER_NEGATIVE" ||
+                                    		att.valueType === "INTEGER_ZERO_OR_POSITIVE" ) {
                                         newInputField = '<input type="number"' +
                                             ' d2-number-validator ' +
                                             ' number-type="' + att.valueType + '" ' +
@@ -2479,7 +2483,8 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         this.relationshipOwner = {};
         this.selectedTeiEvents = [];
         this.fileNames = [];
-            this.location = null;
+        this.location = null;
+        this.dataElementTranslations = [];
 
         this.set = function(currentSelection){
             this.currentSelection = currentSelection;
@@ -2549,6 +2554,13 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         };
         this.getLocation = function(){
             return this.location;
+        };
+        
+        this.setDataElementTranslations = function(dataElementTranslations){
+            this.dataElementTranslations = dataElementTranslations;
+        };
+        this.getDataElementTranslations = function(){
+            return this.dataElementTranslations;
         };
     })
 
