@@ -76,7 +76,7 @@ public interface IdentifiableObjectManager
 
     <T extends IdentifiableObject> T get( Collection<Class<? extends IdentifiableObject>> classes, String uid );
 
-    <T extends IdentifiableObject> T get( Collection<Class<? extends IdentifiableObject>> classes, IdScheme idScheme, String value);
+    <T extends IdentifiableObject> T get( Collection<Class<? extends IdentifiableObject>> classes, IdScheme idScheme, String value );
 
     <T extends IdentifiableObject> T getByCode( Class<T> clazz, String code );
 

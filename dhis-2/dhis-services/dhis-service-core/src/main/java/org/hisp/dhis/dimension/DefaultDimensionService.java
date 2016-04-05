@@ -77,7 +77,6 @@ import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.period.RelativePeriodEnum;
 import org.hisp.dhis.period.RelativePeriods;
-import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramDataElement;
 import org.hisp.dhis.program.ProgramIndicator;
 import org.hisp.dhis.program.ProgramService;
@@ -234,11 +233,9 @@ public class DefaultDimensionService
     public List<DimensionalObject> getAllDimensions()
     {
         Collection<DataElementCategory> dcs = identifiableObjectManager.getDataDimensions( DataElementCategory.class );
-        Collection<CategoryOptionGroupSet> cogs = identifiableObjectManager
-            .getDataDimensions( CategoryOptionGroupSet.class );
+        Collection<CategoryOptionGroupSet> cogs = identifiableObjectManager.getDataDimensions( CategoryOptionGroupSet.class );
         Collection<DataElementGroupSet> degs = identifiableObjectManager.getDataDimensions( DataElementGroupSet.class );
-        Collection<OrganisationUnitGroupSet> ougs = identifiableObjectManager
-            .getDataDimensions( OrganisationUnitGroupSet.class );
+        Collection<OrganisationUnitGroupSet> ougs = identifiableObjectManager.getDataDimensions( OrganisationUnitGroupSet.class );
 
         final List<DimensionalObject> dimensions = new ArrayList<>();
 
@@ -255,8 +252,7 @@ public class DefaultDimensionService
     @Override
     public List<DimensionalObject> getDimensionConstraints()
     {
-        Collection<CategoryOptionGroupSet> cogs = identifiableObjectManager
-            .getDataDimensions( CategoryOptionGroupSet.class );
+        Collection<CategoryOptionGroupSet> cogs = identifiableObjectManager.getDataDimensions( CategoryOptionGroupSet.class );
         Collection<DataElementCategory> cs = categoryService.getAttributeCategories();
 
         final List<DimensionalObject> dimensions = new ArrayList<>();
@@ -281,11 +277,6 @@ public class DefaultDimensionService
             else
             {
                 object.setUser( currentUserService.getCurrentUser() );
-            }
-
-            if ( object.getProgram() != null )
-            {
-                object.setProgram( identifiableObjectManager.get( Program.class, object.getProgram().getUid() ) );
             }
 
             mergeDimensionalObjects( object, object.getColumns() );
@@ -350,23 +341,22 @@ public class DefaultDimensionService
             ProgramDataElement programDataElement = null;
             ProgramTrackedEntityAttribute programAttribute = null;
 
-            if ( (operand = operandService.getOrAddDataElementOperand( id0, id1 )) != null )
+            if ( ( operand = operandService.getOrAddDataElementOperand( id0, id1 ) ) != null )
             {
                 return operand;
             }
-            else if ( (programDataElement = programService.getOrAddProgramDataElement( id0, id1 )) != null )
+            else if ( ( programDataElement = programService.getOrAddProgramDataElement( id0, id1 ) ) != null )
             {
                 return programDataElement;
             }
-            else if ( (programAttribute = attributeService.getOrAddProgramTrackedEntityAttribute( id0, id1 )) != null )
+            else if ( ( programAttribute = attributeService.getOrAddProgramTrackedEntityAttribute( id0, id1 ) ) != null )
             {
                 return programAttribute;
             }
         }
-        else if ( !idScheme.is( IdentifiableProperty.UID ) || CodeGenerator.isValidCode( dimensionItem ))
+        else if ( !idScheme.is( IdentifiableProperty.UID ) || CodeGenerator.isValidCode( dimensionItem ) )
         {
-            DimensionalItemObject itemObject = identifiableObjectManager
-                .get( DataDimensionItem.DATA_DIMENSION_CLASSES, idScheme, dimensionItem );
+            DimensionalItemObject itemObject = identifiableObjectManager.get( DataDimensionItem.DATA_DIMENSION_CLASSES, idScheme, dimensionItem );
 
             if ( itemObject != null )
             {
@@ -389,23 +379,23 @@ public class DefaultDimensionService
             ProgramDataElement programDataElement = null;
             ProgramTrackedEntityAttribute programAttribute = null;
 
-            if ( (operand = operandService.getDataElementOperand( id0, id1 )) != null )
+            if ( ( operand = operandService.getDataElementOperand( id0, id1 ) ) != null )
             {
                 return operand;
             }
-            else if ( (programDataElement = programService.getProgramDataElement( id0, id1 )) != null )
+            else if ( ( programDataElement = programService.getProgramDataElement( id0, id1 ) ) != null )
             {
                 return programDataElement;
             }
-            else if ( (programAttribute = attributeService.getProgramTrackedEntityAttribute( id0, id1 )) != null )
+            else if ( ( programAttribute = attributeService.getProgramTrackedEntityAttribute( id0, id1 ) ) != null )
             {
                 return programAttribute;
             }
         }
         else if ( CodeGenerator.isValidCode( dimensionItem ) )
         {
-            DimensionalItemObject itemObject = identifiableObjectManager
-                .get( DataDimensionItem.DATA_DIMENSION_CLASSES, dimensionItem );
+            DimensionalItemObject itemObject = identifiableObjectManager.
+                get( DataDimensionItem.DATA_DIMENSION_CLASSES, dimensionItem );
 
             if ( itemObject != null )
             {
@@ -517,8 +507,7 @@ public class DefaultDimensionService
                         {
                             String uid = DimensionalObjectUtils.getUidFromGroupParam( ou );
 
-                            OrganisationUnitGroup group = identifiableObjectManager
-                                .get( OrganisationUnitGroup.class, uid );
+                            OrganisationUnitGroup group = identifiableObjectManager.get( OrganisationUnitGroup.class, uid );
 
                             if ( group != null )
                             {
@@ -539,36 +528,29 @@ public class DefaultDimensionService
                 else if ( CATEGORY.equals( type ) )
                 {
                     DataElementCategoryDimension categoryDimension = new DataElementCategoryDimension();
-                    categoryDimension
-                        .setDimension( identifiableObjectManager.get( DataElementCategory.class, dimensionId ) );
-                    categoryDimension.getItems()
-                        .addAll( identifiableObjectManager.getByUidOrdered( DataElementCategoryOption.class, uids ) );
+                    categoryDimension.setDimension( identifiableObjectManager.get( DataElementCategory.class, dimensionId ) );
+                    categoryDimension.getItems().addAll( identifiableObjectManager.getByUidOrdered( DataElementCategoryOption.class, uids ) );
 
                     object.getCategoryDimensions().add( categoryDimension );
                 }
                 else if ( DATAELEMENT_GROUPSET.equals( type ) )
                 {
-                    object.getDataElementGroups()
-                        .addAll( identifiableObjectManager.getByUidOrdered( DataElementGroup.class, uids ) );
+                    object.getDataElementGroups().addAll( identifiableObjectManager.getByUidOrdered( DataElementGroup.class, uids ) );
                 }
                 else if ( ORGANISATIONUNIT_GROUPSET.equals( type ) )
                 {
-                    object.getOrganisationUnitGroups()
-                        .addAll( identifiableObjectManager.getByUidOrdered( OrganisationUnitGroup.class, uids ) );
+                    object.getOrganisationUnitGroups().addAll( identifiableObjectManager.getByUidOrdered( OrganisationUnitGroup.class, uids ) );
                 }
                 else if ( CATEGORYOPTION_GROUPSET.equals( type ) )
                 {
-                    object.getCategoryOptionGroups()
-                        .addAll( identifiableObjectManager.getByUidOrdered( CategoryOptionGroup.class, uids ) );
+                    object.getCategoryOptionGroups().addAll( identifiableObjectManager.getByUidOrdered( CategoryOptionGroup.class, uids ) );
                 }
                 else if ( PROGRAM_ATTRIBUTE.equals( type ) )
                 {
                     TrackedEntityAttributeDimension attributeDimension = new TrackedEntityAttributeDimension();
-                    attributeDimension
-                        .setAttribute( identifiableObjectManager.get( TrackedEntityAttribute.class, dimensionId ) );
+                    attributeDimension.setAttribute( identifiableObjectManager.get( TrackedEntityAttribute.class, dimensionId ) );
                     attributeDimension.setLegendSet( dimension.hasLegendSet() ?
-                        identifiableObjectManager.get( LegendSet.class, dimension.getLegendSet().getUid() ) :
-                        null );
+                        identifiableObjectManager.get( LegendSet.class, dimension.getLegendSet().getUid() ) : null );
                     attributeDimension.setFilter( dimension.getFilter() );
 
                     object.getAttributeDimensions().add( attributeDimension );
@@ -576,11 +558,9 @@ public class DefaultDimensionService
                 else if ( PROGRAM_DATAELEMENT.equals( type ) )
                 {
                     TrackedEntityDataElementDimension dataElementDimension = new TrackedEntityDataElementDimension();
-                    dataElementDimension
-                        .setDataElement( identifiableObjectManager.get( DataElement.class, dimensionId ) );
+                    dataElementDimension.setDataElement( identifiableObjectManager.get( DataElement.class, dimensionId ) );
                     dataElementDimension.setLegendSet( dimension.hasLegendSet() ?
-                        identifiableObjectManager.get( LegendSet.class, dimension.getLegendSet().getUid() ) :
-                        null );
+                        identifiableObjectManager.get( LegendSet.class, dimension.getLegendSet().getUid() ) : null );
                     dataElementDimension.setFilter( dimension.getFilter() );
 
                     object.getDataElementDimensions().add( dataElementDimension );
@@ -588,11 +568,9 @@ public class DefaultDimensionService
                 else if ( PROGRAM_INDICATOR.equals( type ) )
                 {
                     TrackedEntityProgramIndicatorDimension programIndicatorDimension = new TrackedEntityProgramIndicatorDimension();
-                    programIndicatorDimension
-                        .setProgramIndicator( identifiableObjectManager.get( ProgramIndicator.class, dimensionId ) );
+                    programIndicatorDimension.setProgramIndicator( identifiableObjectManager.get( ProgramIndicator.class, dimensionId ) );
                     programIndicatorDimension.setLegendSet( dimension.hasLegendSet() ?
-                        identifiableObjectManager.get( LegendSet.class, dimension.getLegendSet().getUid() ) :
-                        null );
+                        identifiableObjectManager.get( LegendSet.class, dimension.getLegendSet().getUid() ) : null );
                     programIndicatorDimension.setFilter( dimension.getFilter() );
 
                     object.getProgramIndicatorDimensions().add( programIndicatorDimension );

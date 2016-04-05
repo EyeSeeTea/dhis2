@@ -159,13 +159,10 @@ public class DefaultDataQueryService
     {
         DataQueryParams params = new DataQueryParams();
 
-        // Only supporting UID as of now
-        IdScheme defaultIdScheme = IdScheme.UID;
+        IdScheme idScheme = IdScheme.UID;
 
         if ( object != null )
         {
-            params.setProgram( object.getProgram() );
-
             List<OrganisationUnit> userOrgUnits = getUserOrgUnits( null );
 
             Date date = object.getRelativePeriodDate();
@@ -174,17 +171,17 @@ public class DefaultDataQueryService
 
             for ( DimensionalObject column : object.getColumns() )
             {
-                params.addDimension( getDimension( column.getDimension(), getDimensionalItemIds( column.getItems() ), date, userOrgUnits, format, false, defaultIdScheme ) );
+                params.addDimension( getDimension( column.getDimension(), getDimensionalItemIds( column.getItems() ), date, userOrgUnits, format, false, idScheme ) );
             }
 
             for ( DimensionalObject row : object.getRows() )
             {
-                params.addDimension( getDimension( row.getDimension(), getDimensionalItemIds( row.getItems() ), date, userOrgUnits, format, false, defaultIdScheme ) );
+                params.addDimension( getDimension( row.getDimension(), getDimensionalItemIds( row.getItems() ), date, userOrgUnits, format, false, idScheme ) );
             }
 
             for ( DimensionalObject filter : object.getFilters() )
             {
-                params.getFilters().add( getDimension( filter.getDimension(), getDimensionalItemIds( filter.getItems() ), date, userOrgUnits, format, false, defaultIdScheme ) );
+                params.getFilters().add( getDimension( filter.getDimension(), getDimensionalItemIds( filter.getItems() ), date, userOrgUnits, format, false, idScheme ) );
             }
         }
 
@@ -390,7 +387,7 @@ public class DefaultDataQueryService
                         groups.add( group );
                     }
                 }
-                else if ( !inputIdScheme.is( IdentifiableProperty.UID ) || CodeGenerator.isValidCode( ou ))
+                else if ( !inputIdScheme.is( IdentifiableProperty.UID ) || CodeGenerator.isValidCode( ou ) )
                 {
                     OrganisationUnit unit = idObjectManager.getObject( OrganisationUnit.class, inputIdScheme, ou );
 

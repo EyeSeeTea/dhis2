@@ -49,12 +49,13 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     
     return {
         saveLayout: function(dashboardLayout, saveAsDefault){
-            var layout = JSON.stringify(dashboardLayout);
-            var url = '../api/userSettings/keyTrackerDashboardLayout?value=';            
-            if(saveAsDefault){
-                url = '../api/systemSettings/keyTrackerDashboardDefaultLayout?value=';
-            }
-            var promise = $http.post( url + layout, '', {headers: {'Content-Type': 'text/plain;charset=utf-8'}}).then(function(response){
+            var url = saveAsDefault ? '../api/systemSettings/keyTrackerDashboardDefaultLayout' : '../api/userSettings/keyTrackerDashboardLayout';
+            var promise = $http({
+                method: "post",
+                url: url,
+                data: dashboardLayout,
+                headers: {'Content-Type': 'text/plain;charset=utf-8'}
+            }).then(function(response){
                 return response.data;
             });
             return promise;            
@@ -497,8 +498,10 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         },
         getSearchTreeRoot: function(){
             if(!rootOrgUnitPromise){
-                var url = '../api/me.json?fields=organisationUnits[id,displayName,level,children[id,displayName,level,children[id,displayName,level]]]&paging=false';                
-                rootOrgUnitPromise = $http.get( url ).then(function(response){
+                var url = '../api/me.json?fields=teiSearchOrganisationUnits[id,displayName,level,children[id,displayName,level,children[id,displayName,level]]],organisationUnits[id,displayName,level,children[id,displayName,level,children[id,displayName,level]]]&paging=false';                
+                rootOrgUnitPromise = $http.get( url ).then(function(response){                    
+                    response.data.organisationUnits = response.data.teiSearchOrganisationUnits && response.data.teiSearchOrganisationUnits.length > 0 ? response.data.teiSearchOrganisationUnits : response.data.organisationUnits;
+                    delete response.data.teiSearchOrganisationUnits;                    
                     return response.data;
                 });
             }
