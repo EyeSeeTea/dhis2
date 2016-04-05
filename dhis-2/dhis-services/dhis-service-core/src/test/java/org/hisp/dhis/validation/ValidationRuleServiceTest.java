@@ -110,14 +110,6 @@ public class ValidationRuleServiceTest
 
     private DataElement dataElementE;
 
-    private Set<DataElement> dataElementsA = new HashSet<>();
-
-    private Set<DataElement> dataElementsB = new HashSet<>();
-
-    private Set<DataElement> dataElementsC = new HashSet<>();
-
-    private Set<DataElement> dataElementsD = new HashSet<>();
-
     private Set<DataElementCategoryOptionCombo> optionCombos;
 
     private DataElementCategoryOptionCombo optionCombo;
@@ -271,14 +263,6 @@ public class ValidationRuleServiceTest
         dataElementService.addDataElement( dataElementD );
         dataElementService.addDataElement( dataElementE );
 
-        dataElementsA.add( dataElementA );
-        dataElementsA.add( dataElementB );
-        dataElementsB.add( dataElementC );
-        dataElementsB.add( dataElementD );
-        dataElementsC.add( dataElementB );
-        dataElementsD.add( dataElementB );
-        dataElementsD.add( dataElementE );
-
         optionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
 
         String suffix = SEPARATOR + optionCombo.getUid();
@@ -288,20 +272,20 @@ public class ValidationRuleServiceTest
 
         expressionA = new Expression(
             "#{" + dataElementA.getUid() + suffix + "} + #{" + dataElementB.getUid() + suffix + "}", "descriptionA",
-            dataElementsA );
+            dataElementSet(dataElementA,dataElementB) );
         expressionB = new Expression(
             "#{" + dataElementC.getUid() + suffix + "} - #{" + dataElementD.getUid() + suffix + "}", "descriptionB",
-            dataElementsB );
-        expressionC = new Expression( "#{" + dataElementB.getUid() + suffix + "} * 2", "descriptionC", dataElementsC );
-        expressionD = new Expression( "#{" + dataElementB.getUid() + suffix + "}", "descriptionD", dataElementsC );
+            dataElementSet(dataElementC,dataElementD) );
+        expressionC = new Expression( "#{" + dataElementB.getUid() + suffix + "} * 2", "descriptionC", dataElementSet(dataElementB) );
+        expressionD = new Expression( "#{" + dataElementB.getUid() + suffix + "}", "descriptionD", dataElementSet(dataElementB) );
         expressionE = new Expression( "AVG(#{" + dataElementB.getUid() + suffix + "} * 1.5)", "descriptionE",
-				      dataElementsC, dataElementSet(dataElementB));
+				      dataElementSet(dataElementB), dataElementSet(dataElementB));
         expressionF = new Expression(
             "#{" + dataElementB.getUid() + suffix + "} / #{" + dataElementE.getUid() + suffix + "}", "descriptionF",
-            dataElementsD );
+            dataElementSet(dataElementB,dataElementE) );
         expressionG = new Expression(
             "AVG(#{" + dataElementB.getUid() + suffix + "} * 1.5 / #{" + dataElementE.getUid() + suffix + "})",
-            "descriptionG", dataElementsD, dataElementSet(dataElementB,dataElementE));
+            "descriptionG", dataElementSet(dataElementB,dataElementE), dataElementSet(dataElementB,dataElementE));
         expressionH = new Expression(
             "AVG(#{" + dataElementB.getUid() + suffix + "}) + 1.5*STDDEV(#{" + dataElementB.getUid() + suffix + "})",
             "descriptionE1", dataElementSet(), dataElementSet(dataElementB) );
@@ -488,17 +472,44 @@ public class ValidationRuleServiceTest
         return resultList;
     }
 
-    private Set<DataElement> dataElementSet(){
-	return new HashSet<DataElement>();}
-    private Set<DataElement> dataElementSet(DataElement elt1){
-	HashSet<DataElement> result=new HashSet<DataElement>();
-	result.add(elt1);
-	return result;}
-    private Set<DataElement> dataElementSet(DataElement elt1,DataElement elt2){
-	HashSet<DataElement> result=new HashSet<DataElement>();
-	result.add(elt1);
-	result.add(elt2);
-	return result;}
+    private Set<DataElement> dataElementSet()
+    {
+        return new HashSet<DataElement>();
+    }
+
+    private Set<DataElement> dataElementSet( DataElement elt1 )
+    {
+        HashSet<DataElement> result = new HashSet<DataElement>();
+        result.add( elt1 );
+        return result;
+    }
+
+    private Set<DataElement> dataElementSet( DataElement elt1, DataElement elt2 )
+    {
+        HashSet<DataElement> result = new HashSet<DataElement>();
+        result.add( elt1 );
+        result.add( elt2 );
+        return result;
+    }
+
+    private Set<DataElement> dataElementSet( DataElement elt1, DataElement elt2, DataElement elt3 )
+    {
+        HashSet<DataElement> result = new HashSet<DataElement>();
+        result.add( elt1 );
+        result.add( elt2 );
+        result.add( elt3 );
+        return result;
+    }
+
+    private Set<DataElement> dataElementSet( DataElement elt1, DataElement elt2, DataElement elt3, DataElement elt4 )
+    {
+        HashSet<DataElement> result = new HashSet<DataElement>();
+        result.add( elt1 );
+        result.add( elt2 );
+        result.add( elt3 );
+        result.add( elt4 );
+        return result;
+    }
 
     // -------------------------------------------------------------------------
     // Business logic tests
