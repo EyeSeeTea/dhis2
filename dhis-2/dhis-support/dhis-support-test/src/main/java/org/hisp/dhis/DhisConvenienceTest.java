@@ -942,7 +942,7 @@ public abstract class DhisConvenienceTest
      * @param rightSide       The right side expression.
      * @param periodType      The period-type.
      */
-    public static ValidationRule createValidationRule( char uniqueCharacter, Operator operator, Expression leftSide,
+    public static ValidationRule createValidationRule( String uniqueCharacter, Operator operator, Expression leftSide,
         Expression rightSide, PeriodType periodType )
     {
         ValidationRule validationRule = new ValidationRule();
@@ -956,6 +956,19 @@ public abstract class DhisConvenienceTest
         validationRule.setPeriodType( periodType );
 
         return validationRule;
+    }
+
+    /**
+     * @param uniqueCharacter A unique character to identify the object.
+     * @param operator        The operator.
+     * @param leftSide        The left side expression.
+     * @param rightSide       The right side expression.
+     * @param periodType      The period-type.
+     */
+    public static ValidationRule createValidationRule( char uniqueCharacter, Operator operator, Expression leftSide,
+        Expression rightSide, PeriodType periodType )
+    {
+	return createValidationRule( Character.toString(uniqueCharacter),operator,leftSide,rightSide,periodType );
     }
 
     /**
@@ -974,7 +987,7 @@ public abstract class DhisConvenienceTest
      * @param sequentialSkipCount   How many periods in the current year to skip
      */
     public static ValidationRule createMonitoringRule
-	(char uniqueCharacter, Operator operator, 
+	(String uniqueCharacter, Operator operator,
 	 Expression leftSide,Expression rightSide, Expression skipTest,
 	 PeriodType periodType, int organisationUnitLevel, int sequentialSampleCount,
 	 int annualSampleCount,
@@ -1013,7 +1026,7 @@ public abstract class DhisConvenienceTest
      * @param annualSampleCount     How many years of past periods to sample.
      */
     public static ValidationRule createMonitoringRule
-	( char uniqueCharacter, Operator operator, 
+	( String uniqueCharacter, Operator operator,
 	  Expression leftSide, Expression rightSide, 
 	  PeriodType periodType, int organisationUnitLevel, 
 	  int sequentialSampleCount, int annualSampleCount)
