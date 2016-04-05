@@ -80,22 +80,22 @@ public class HibernateDataStatisticsStore extends HibernateGenericStore<DataStat
                     break;
             }
             ads.setActiveUsers( resultSet.getInt( "activeUsers" ) );
-            ads.setMapViews( resultSet.getDouble( "mapViews" ) );
-            ads.setChartViews( resultSet.getDouble( "chartViews" ) );
-            ads.setReportTablesViews( resultSet.getDouble( "reportTablesViews" ) );
-            ads.setEventReportViews( resultSet.getDouble( "reportTablesViews" ) );
-            ads.setEventChartViews( resultSet.getDouble( "eventChartViews" ) );
-            ads.setDashboardViews( resultSet.getDouble( "dashboardViews" ) );
-            ads.setIndicatorsViews( resultSet.getDouble( "indicatorsViews" ) );
-            ads.setTotalViews( resultSet.getDouble( "totalViews" ) );
-            ads.setAverageViews( resultSet.getDouble( "averageViews" ) );
-            ads.setSavedMaps( resultSet.getDouble( "savedMaps" ) );
-            ads.setSavedCharts( resultSet.getDouble( "savedCharts" ) );
-            ads.setSavedReportTables( resultSet.getDouble( "savedReportTables" ) );
-            ads.setSavedEventReports( resultSet.getDouble( "savedEventReports" ) );
-            ads.setSavedEventCharts( resultSet.getDouble( "savedEventCharts" ) );
-            ads.setSavedDashboards( resultSet.getDouble( "savedDashboards" ) );
-            ads.setSavedIndicators( resultSet.getDouble( "savedIndicators" ) );
+            ads.setMapViews( resultSet.getInt( "mapViews" ) );
+            ads.setChartViews( resultSet.getInt( "chartViews" ) );
+            ads.setReportTablesViews( resultSet.getInt( "reportTablesViews" ) );
+            ads.setEventReportViews( resultSet.getInt( "reportTablesViews" ) );
+            ads.setEventChartViews( resultSet.getInt( "eventChartViews" ) );
+            ads.setDashboardViews( resultSet.getInt( "dashboardViews" ) );
+            ads.setIndicatorsViews( resultSet.getInt( "indicatorsViews" ) );
+            ads.setTotalViews( resultSet.getInt( "totalViews" ) );
+            ads.setAverageViews( resultSet.getInt( "averageViews" ) );
+            ads.setSavedMaps( resultSet.getInt( "savedMaps" ) );
+            ads.setSavedCharts( resultSet.getInt( "savedCharts" ) );
+            ads.setSavedReportTables( resultSet.getInt( "savedReportTables" ) );
+            ads.setSavedEventReports( resultSet.getInt( "savedEventReports" ) );
+            ads.setSavedEventCharts( resultSet.getInt( "savedEventCharts" ) );
+            ads.setSavedDashboards( resultSet.getInt( "savedDashboards" ) );
+            ads.setSavedIndicators( resultSet.getInt( "savedIndicators" ) );
             ads.setusers( resultSet.getInt( "users" ) );
             return ads;
 

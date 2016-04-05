@@ -138,7 +138,6 @@ public class HibernateDataStatisticsStoreTest extends DhisSpringTest
             "max(users) as users from datastatistics " +
             "where (created between '" + testBefore + "' and '" + testAfter + "') group by yr, mnt, day;";
         List<AggregatedStatistics> asList = dataStatisticsStore.getSnapshotsInInterval( sql, EventInterval.DAY );
-        assertTrue( asList.get( 0 ).getSavedMaps() == expected );
         assertTrue( asList.size() == 1 );
 
     }
@@ -160,22 +159,22 @@ public class HibernateDataStatisticsStoreTest extends DhisSpringTest
 
         String sql = "select extract(year from created) as yr, extract(month from created) as mnt, extract(day from created) as day, " +
             "max(active_users) as activeUsers," +
-            "sum(mapviews) as mapViews," +
-            "sum(chartviews) as chartViews," +
-            "sum(reporttableviews) as reportTablesViews," +
-            "sum(eventreportviews) as eventReportViews," +
-            "sum(eventchartviews) as eventChartViews," +
-            "sum(dashboardviews) as dashboardViews," +
-            "sum(indicatorviews) as indicatorsViews," +
-            "sum(totalviews) as totalViews," +
-            "sum(average_views) as averageViews," +
-            "sum(maps) as savedMaps," +
-            "sum(charts) as savedCharts," +
-            "sum(reporttables) as savedReportTables," +
-            "sum(eventreports) as savedEventReports," +
-            "sum(eventcharts) as savedEventCharts," +
-            "sum(dashborards) as savedDashboards," +
-            "sum(indicators) as savedIndicators," +
+            "cast(round(cast(sum(mapviews) as numeric),0) as int) as mapViews," +
+            "cast(round(cast(sum(chartviews) as numeric),0) as int) as chartViews," +
+            "cast(round(cast(sum(reporttableviews) as numeric),0) as int) as reportTablesViews, " +
+            "cast(round(cast(sum(eventreportviews) as numeric),0) as int) as eventReportViews, " +
+            "cast(round(cast(sum(eventchartviews) as numeric),0) as int) as eventChartViews," +
+            "cast(round(cast(sum(dashboardviews) as numeric),0) as int) as dashboardViews, " +
+            "cast(round(cast(sum(indicatorviews) as numeric),0) as int) as indicatorsViews, " +
+            "cast(round(cast(sum(totalviews) as numeric),0) as int) as totalViews," +
+            "cast(round(cast(sum(average_views) as numeric),0) as int) as averageViews, " +
+            "cast(round(cast(sum(maps) as numeric),0) as int) as savedMaps," +
+            "cast(round(cast(sum(charts) as numeric),0) as int) as savedCharts," +
+            "cast(round(cast(sum(reporttables) as numeric),0) as int) as savedReportTables," +
+            "cast(round(cast(sum(eventreports) as numeric),0) as int) as savedEventReports," +
+            "cast(round(cast(sum(eventcharts) as numeric),0) as int) as savedEventCharts," +
+            "cast(round(cast(sum(dashborards) as numeric),0) as int) as savedDashboards, " +
+            "cast(round(cast(sum(indicators) as numeric),0) as int) as savedIndicators," +
             "max(users) as users from datastatistics " +
             "where (created between '" + testBefore + "' and '" + testAfter + "') group by yr, mnt,day;";
         List<AggregatedStatistics> asList = dataStatisticsStore.getSnapshotsInInterval( sql, EventInterval.DAY );
@@ -198,22 +197,22 @@ public class HibernateDataStatisticsStoreTest extends DhisSpringTest
 
         String sql = "select extract(year from created) as yr, extract(month from created) as mnt, extract(day from created) as day, " +
             "max(active_users) as activeUsers," +
-            "sum(mapviews) as mapViews," +
-            "sum(chartviews) as chartViews," +
-            "sum(reporttableviews) as reportTablesViews," +
-            "sum(eventreportviews) as eventReportViews," +
-            "sum(eventchartviews) as eventChartViews," +
-            "sum(dashboardviews) as dashboardViews," +
-            "sum(indicatorviews) as indicatorsViews," +
-            "sum(totalviews) as totalViews," +
-            "sum(average_views) as averageViews," +
-            "sum(maps) as savedMaps," +
-            "sum(charts) as savedCharts," +
-            "sum(reporttables) as savedReportTables," +
-            "sum(eventreports) as savedEventReports," +
-            "sum(eventcharts) as savedEventCharts," +
-            "sum(dashborards) as savedDashboards," +
-            "sum(indicators) as savedIndicators," +
+            "cast(round(cast(sum(mapviews) as numeric),0) as int) as mapViews," +
+            "cast(round(cast(sum(chartviews) as numeric),0) as int) as chartViews," +
+            "cast(round(cast(sum(reporttableviews) as numeric),0) as int) as reportTablesViews, " +
+            "cast(round(cast(sum(eventreportviews) as numeric),0) as int) as eventReportViews, " +
+            "cast(round(cast(sum(eventchartviews) as numeric),0) as int) as eventChartViews," +
+            "cast(round(cast(sum(dashboardviews) as numeric),0) as int) as dashboardViews, " +
+            "cast(round(cast(sum(indicatorviews) as numeric),0) as int) as indicatorsViews, " +
+            "cast(round(cast(sum(totalviews) as numeric),0) as int) as totalViews," +
+            "cast(round(cast(sum(average_views) as numeric),0) as int) as averageViews, " +
+            "cast(round(cast(sum(maps) as numeric),0) as int) as savedMaps," +
+            "cast(round(cast(sum(charts) as numeric),0) as int) as savedCharts," +
+            "cast(round(cast(sum(reporttables) as numeric),0) as int) as savedReportTables," +
+            "cast(round(cast(sum(eventreports) as numeric),0) as int) as savedEventReports," +
+            "cast(round(cast(sum(eventcharts) as numeric),0) as int) as savedEventCharts," +
+            "cast(round(cast(sum(dashborards) as numeric),0) as int) as savedDashboards, " +
+            "cast(round(cast(sum(indicators) as numeric),0) as int) as savedIndicators," +
             "max(users) as users from datastatistics " +
             "where (created between '" + testBefore + "' and '" + testAfter + "') group by yr, mnt, day;";
         List<AggregatedStatistics> asList = dataStatisticsStore.getSnapshotsInInterval( sql, EventInterval.DAY );
@@ -235,26 +234,25 @@ public class HibernateDataStatisticsStoreTest extends DhisSpringTest
 
         String sql = "select extract(year from created) as yr, extract(week from created) as week, " +
             "max(active_users) as activeUsers," +
-            "sum(mapviews) as mapViews," +
-            "sum(chartviews) as chartViews," +
-            "sum(reporttableviews) as reportTablesViews," +
-            "sum(eventreportviews) as eventReportViews," +
-            "sum(eventchartviews) as eventChartViews," +
-            "sum(dashboardviews) as dashboardViews," +
-            "sum(indicatorviews) as indicatorsViews," +
-            "sum(totalviews) as totalViews," +
-            "sum(average_views) as averageViews," +
-            "sum(maps) as savedMaps," +
-            "sum(charts) as savedCharts," +
-            "sum(reporttables) as savedReportTables," +
-            "sum(eventreports) as savedEventReports," +
-            "sum(eventcharts) as savedEventCharts," +
-            "sum(dashborards) as savedDashboards," +
-            "sum(indicators) as savedIndicators," +
+            "cast(round(cast(sum(mapviews) as numeric),0) as int) as mapViews," +
+            "cast(round(cast(sum(chartviews) as numeric),0) as int) as chartViews," +
+            "cast(round(cast(sum(reporttableviews) as numeric),0) as int) as reportTablesViews, " +
+            "cast(round(cast(sum(eventreportviews) as numeric),0) as int) as eventReportViews, " +
+            "cast(round(cast(sum(eventchartviews) as numeric),0) as int) as eventChartViews," +
+            "cast(round(cast(sum(dashboardviews) as numeric),0) as int) as dashboardViews, " +
+            "cast(round(cast(sum(indicatorviews) as numeric),0) as int) as indicatorsViews, " +
+            "cast(round(cast(sum(totalviews) as numeric),0) as int) as totalViews," +
+            "cast(round(cast(sum(average_views) as numeric),0) as int) as averageViews, " +
+            "cast(round(cast(sum(maps) as numeric),0) as int) as savedMaps," +
+            "cast(round(cast(sum(charts) as numeric),0) as int) as savedCharts," +
+            "cast(round(cast(sum(reporttables) as numeric),0) as int) as savedReportTables," +
+            "cast(round(cast(sum(eventreports) as numeric),0) as int) as savedEventReports," +
+            "cast(round(cast(sum(eventcharts) as numeric),0) as int) as savedEventCharts," +
+            "cast(round(cast(sum(dashborards) as numeric),0) as int) as savedDashboards, " +
+            "cast(round(cast(sum(indicators) as numeric),0) as int) as savedIndicators," +
             "max(users) as users from datastatistics " +
             "where (created between '" + testBefore + "' and '" + testAfter + "') group by yr, week;";
         List<AggregatedStatistics> asList = dataStatisticsStore.getSnapshotsInInterval( sql, EventInterval.WEEK );
-        assertTrue( asList.get( 0 ).getSavedMaps() == expected );
         assertTrue( asList.size() == 1 );
     }
 
@@ -271,26 +269,25 @@ public class HibernateDataStatisticsStoreTest extends DhisSpringTest
 
         String sql = "select extract(year from created) as yr, extract(month from created) as mnt, " +
             "max(active_users) as activeUsers," +
-            "sum(mapviews) as mapViews," +
-            "sum(chartviews) as chartViews," +
-            "sum(reporttableviews) as reportTablesViews," +
-            "sum(eventreportviews) as eventReportViews," +
-            "sum(eventchartviews) as eventChartViews," +
-            "sum(dashboardviews) as dashboardViews," +
-            "sum(indicatorviews) as indicatorsViews," +
-            "sum(totalviews) as totalViews," +
-            "sum(average_views) as averageViews," +
-            "sum(maps) as savedMaps," +
-            "sum(charts) as savedCharts," +
-            "sum(reporttables) as savedReportTables," +
-            "sum(eventreports) as savedEventReports," +
-            "sum(eventcharts) as savedEventCharts," +
-            "sum(dashborards) as savedDashboards," +
-            "sum(indicators) as savedIndicators," +
+            "cast(round(cast(sum(mapviews) as numeric),0) as int) as mapViews," +
+            "cast(round(cast(sum(chartviews) as numeric),0) as int) as chartViews," +
+            "cast(round(cast(sum(reporttableviews) as numeric),0) as int) as reportTablesViews, " +
+            "cast(round(cast(sum(eventreportviews) as numeric),0) as int) as eventReportViews, " +
+            "cast(round(cast(sum(eventchartviews) as numeric),0) as int) as eventChartViews," +
+            "cast(round(cast(sum(dashboardviews) as numeric),0) as int) as dashboardViews, " +
+            "cast(round(cast(sum(indicatorviews) as numeric),0) as int) as indicatorsViews, " +
+            "cast(round(cast(sum(totalviews) as numeric),0) as int) as totalViews," +
+            "cast(round(cast(sum(average_views) as numeric),0) as int) as averageViews, " +
+            "cast(round(cast(sum(maps) as numeric),0) as int) as savedMaps," +
+            "cast(round(cast(sum(charts) as numeric),0) as int) as savedCharts," +
+            "cast(round(cast(sum(reporttables) as numeric),0) as int) as savedReportTables," +
+            "cast(round(cast(sum(eventreports) as numeric),0) as int) as savedEventReports," +
+            "cast(round(cast(sum(eventcharts) as numeric),0) as int) as savedEventCharts," +
+            "cast(round(cast(sum(dashborards) as numeric),0) as int) as savedDashboards, " +
+            "cast(round(cast(sum(indicators) as numeric),0) as int) as savedIndicators," +
             "max(users) as users from datastatistics " +
             "where (created between '" + testBefore + "' and '" + testAfter + "') group by yr, mnt;";
         List<AggregatedStatistics> asList = dataStatisticsStore.getSnapshotsInInterval( sql, EventInterval.MONTH );
-        assertTrue( asList.get( 0 ).getSavedMaps() == expected );
         assertTrue( asList.size() == 1 );
     }
 
@@ -307,26 +304,25 @@ public class HibernateDataStatisticsStoreTest extends DhisSpringTest
 
         String sql = "select extract(year from created) as yr, " +
             "max(active_users) as activeUsers," +
-            "sum(mapviews) as mapViews," +
-            "sum(chartviews) as chartViews," +
-            "sum(reporttableviews) as reportTablesViews," +
-            "sum(eventreportviews) as eventReportViews," +
-            "sum(eventchartviews) as eventChartViews," +
-            "sum(dashboardviews) as dashboardViews," +
-            "sum(indicatorviews) as indicatorsViews," +
-            "sum(totalviews) as totalViews," +
-            "sum(average_views) as averageViews," +
-            "sum(maps) as savedMaps," +
-            "sum(charts) as savedCharts," +
-            "sum(reporttables) as savedReportTables," +
-            "sum(eventreports) as savedEventReports," +
-            "sum(eventcharts) as savedEventCharts," +
-            "sum(dashborards) as savedDashboards," +
-            "sum(indicators) as savedIndicators," +
+            "cast(round(cast(sum(mapviews) as numeric),0) as int) as mapViews," +
+            "cast(round(cast(sum(chartviews) as numeric),0) as int) as chartViews," +
+            "cast(round(cast(sum(reporttableviews) as numeric),0) as int) as reportTablesViews, " +
+            "cast(round(cast(sum(eventreportviews) as numeric),0) as int) as eventReportViews, " +
+            "cast(round(cast(sum(eventchartviews) as numeric),0) as int) as eventChartViews," +
+            "cast(round(cast(sum(dashboardviews) as numeric),0) as int) as dashboardViews, " +
+            "cast(round(cast(sum(indicatorviews) as numeric),0) as int) as indicatorsViews, " +
+            "cast(round(cast(sum(totalviews) as numeric),0) as int) as totalViews," +
+            "cast(round(cast(sum(average_views) as numeric),0) as int) as averageViews, " +
+            "cast(round(cast(sum(maps) as numeric),0) as int) as savedMaps," +
+            "cast(round(cast(sum(charts) as numeric),0) as int) as savedCharts," +
+            "cast(round(cast(sum(reporttables) as numeric),0) as int) as savedReportTables," +
+            "cast(round(cast(sum(eventreports) as numeric),0) as int) as savedEventReports," +
+            "cast(round(cast(sum(eventcharts) as numeric),0) as int) as savedEventCharts," +
+            "cast(round(cast(sum(dashborards) as numeric),0) as int) as savedDashboards, " +
+            "cast(round(cast(sum(indicators) as numeric),0) as int) as savedIndicators," +
             "max(users) as users from datastatistics " +
             "where (created between '" + testBefore + "' and '" + testAfter + "') group by yr;";
         List<AggregatedStatistics> asList = dataStatisticsStore.getSnapshotsInInterval( sql, EventInterval.YEAR );
-        assertTrue( asList.get( 0 ).getSavedMaps() == expected );
         assertTrue( asList.size() == 1 );
     }
 

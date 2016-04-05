@@ -178,7 +178,7 @@ public class DefaultDataStatisticsService implements DataStatisticsService
     }
 
     /**
-     * private method: part of sql witch is always the same in the different intervall YEAR, MONTH, WEEK and DAY
+     * private method: part of sql witch is always the same in the different intervals YEAR, MONTH, WEEK and DAY
      *
      * @param start - start date
      * @param end   - end date
@@ -187,22 +187,22 @@ public class DefaultDataStatisticsService implements DataStatisticsService
     private String commonSql( Date start, Date end )
     {
         return "max(active_users) as activeUsers," +
-            "sum(mapviews) as mapViews," +
-            "sum(chartviews) as chartViews," +
-            "sum(reporttableviews) as reportTablesViews, " +
-            "sum(eventreportviews) as eventReportViews, " +
-            "sum(eventchartviews) as eventChartViews," +
-            "sum(dashboardviews) as dashboardViews, " +
-            "sum(indicatorviews) as indicatorsViews, " +
-            "sum(totalviews) as totalViews," +
-            "sum(average_views) as averageViews, " +
-            "sum(maps) as savedMaps," +
-            "sum(charts) as savedCharts," +
-            "sum(reporttables) as savedReportTables," +
-            "sum(eventreports) as savedEventReports," +
-            "sum(eventcharts) as savedEventCharts," +
-            "sum(dashborards) as savedDashboards, " +
-            "sum(indicators) as savedIndicators," +
+            "cast(round(cast(sum(mapviews) as numeric),0) as int) as mapViews," +
+            "cast(round(cast(sum(chartviews) as numeric),0) as int) as chartViews," +
+            "cast(round(cast(sum(reporttableviews) as numeric),0) as int) as reportTablesViews, " +
+            "cast(round(cast(sum(eventreportviews) as numeric),0) as int) as eventReportViews, " +
+            "cast(round(cast(sum(eventchartviews) as numeric),0) as int) as eventChartViews," +
+            "cast(round(cast(sum(dashboardviews) as numeric),0) as int) as dashboardViews, " +
+            "cast(round(cast(sum(indicatorviews) as numeric),0) as int) as indicatorsViews, " +
+            "cast(round(cast(sum(totalviews) as numeric),0) as int) as totalViews," +
+            "cast(round(cast(sum(average_views) as numeric),0) as int) as averageViews, " +
+            "cast(round(cast(sum(maps) as numeric),0) as int) as savedMaps," +
+            "cast(round(cast(sum(charts) as numeric),0) as int) as savedCharts," +
+            "cast(round(cast(sum(reporttables) as numeric),0) as int) as savedReportTables," +
+            "cast(round(cast(sum(eventreports) as numeric),0) as int) as savedEventReports," +
+            "cast(round(cast(sum(eventcharts) as numeric),0) as int) as savedEventCharts," +
+            "cast(round(cast(sum(dashborards) as numeric),0) as int) as savedDashboards, " +
+            "cast(round(cast(sum(indicators) as numeric),0) as int) as savedIndicators," +
             "max(users) as users from datastatistics " +
             "where (created between '" + start + "'and '" + end + "') group by yr";
     }

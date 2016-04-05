@@ -45,22 +45,22 @@ public class AggregatedStatistics
     Integer week;
     Integer day;
     Integer activeUsers;
-    Double mapViews;
-    Double chartViews;
-    Double reportTablesViews;
-    Double eventReportViews;
-    Double eventChartViews;
-    Double dashboardViews;
-    Double indicatorsViews;
-    Double totalViews;
-    Double averageViews;
-    Double savedMaps;
-    Double savedCharts;
-    Double savedReportTables;
-    Double savedEventReports;
-    Double savedEventCharts;
-    Double savedDashboards;
-    Double savedIndicators;
+    Integer mapViews;
+    Integer chartViews;
+    Integer reportTablesViews;
+    Integer eventReportViews;
+    Integer eventChartViews;
+    Integer dashboardViews;
+    Integer indicatorsViews;
+    Integer totalViews;
+    Integer averageViews;
+    Integer savedMaps;
+    Integer savedCharts;
+    Integer savedReportTables;
+    Integer savedEventReports;
+    Integer savedEventCharts;
+    Integer savedDashboards;
+    Integer savedIndicators;
     Integer users;
 
     public AggregatedStatistics()
@@ -124,177 +124,177 @@ public class AggregatedStatistics
     }
 
     @JsonProperty
-    public Double getMapViews()
+    public Integer getMapViews()
     {
         return mapViews;
     }
 
-    public void setMapViews( Double mapViews )
+    public void setMapViews( Integer mapViews )
     {
         this.mapViews = mapViews;
     }
 
     @JsonProperty
-    public Double getChartViews()
+    public Integer getChartViews()
     {
         return chartViews;
     }
 
-    public void setChartViews( Double chartViews )
+    public void setChartViews( Integer chartViews )
     {
         this.chartViews = chartViews;
     }
 
     @JsonProperty
-    public Double getReportTablesViews()
+    public Integer getReportTablesViews()
     {
         return reportTablesViews;
     }
 
-    public void setReportTablesViews( Double reportTablesViews )
+    public void setReportTablesViews( Integer reportTablesViews )
     {
         this.reportTablesViews = reportTablesViews;
     }
 
     @JsonProperty
-    public Double getEventReportViews()
+    public Integer getEventReportViews()
     {
         return eventReportViews;
     }
 
-    public void setEventReportViews( Double eventReportViews )
+    public void setEventReportViews( Integer eventReportViews )
     {
         this.eventReportViews = eventReportViews;
     }
 
     @JsonProperty
-    public Double getEventChartViews()
+    public Integer getEventChartViews()
     {
         return eventChartViews;
     }
 
-    public void setEventChartViews( Double eventChartViews )
+    public void setEventChartViews( Integer eventChartViews )
     {
         this.eventChartViews = eventChartViews;
     }
 
     @JsonProperty
-    public Double getDashboardViews()
+    public Integer getDashboardViews()
     {
         return dashboardViews;
     }
 
-    public void setDashboardViews( Double dashboardViews )
+    public void setDashboardViews( Integer dashboardViews )
     {
         this.dashboardViews = dashboardViews;
     }
 
     @JsonProperty
-    public Double getIndicatorsViews()
+    public Integer getIndicatorsViews()
     {
         return indicatorsViews;
     }
 
-    public void setIndicatorsViews( Double indicatorsViews )
+    public void setIndicatorsViews( Integer indicatorsViews )
     {
         this.indicatorsViews = indicatorsViews;
     }
 
     @JsonProperty
-    public Double getTotalViews()
+    public Integer getTotalViews()
     {
         return totalViews;
     }
 
-    public void setTotalViews( Double totalViews )
+    public void setTotalViews( Integer totalViews )
     {
         this.totalViews = totalViews;
     }
 
     @JsonProperty
-    public Double getAverageViews()
+    public Integer getAverageViews()
     {
         return averageViews;
     }
 
-    public void setAverageViews( Double averageViews )
+    public void setAverageViews( Integer averageViews )
     {
         this.averageViews = averageViews;
     }
 
     @JsonProperty
-    public Double getSavedMaps()
+    public Integer getSavedMaps()
     {
         return savedMaps;
     }
 
-    public void setSavedMaps( Double savedMaps )
+    public void setSavedMaps( Integer savedMaps )
     {
         this.savedMaps = savedMaps;
     }
 
     @JsonProperty
-    public Double getSavedCharts()
+    public Integer getSavedCharts()
     {
         return savedCharts;
     }
 
-    public void setSavedCharts( Double savedCharts )
+    public void setSavedCharts( Integer savedCharts )
     {
         this.savedCharts = savedCharts;
     }
 
     @JsonProperty
-    public Double getSavedReportTables()
+    public Integer getSavedReportTables()
     {
         return savedReportTables;
     }
 
-    public void setSavedReportTables( Double savedReportTables )
+    public void setSavedReportTables( Integer savedReportTables )
     {
         this.savedReportTables = savedReportTables;
     }
 
     @JsonProperty
-    public Double getSavedEventReports()
+    public Integer getSavedEventReports()
     {
         return savedEventReports;
     }
 
-    public void setSavedEventReports( Double savedEventReports )
+    public void setSavedEventReports( Integer savedEventReports )
     {
         this.savedEventReports = savedEventReports;
     }
 
     @JsonProperty
-    public Double getSavedEventCharts()
+    public Integer getSavedEventCharts()
     {
         return savedEventCharts;
     }
 
-    public void setSavedEventCharts( Double savedEventCharts )
+    public void setSavedEventCharts( Integer savedEventCharts )
     {
         this.savedEventCharts = savedEventCharts;
     }
 
     @JsonProperty
-    public Double getSavedDashboards()
+    public Integer getSavedDashboards()
     {
         return savedDashboards;
     }
 
-    public void setSavedDashboards( Double savedDashboards )
+    public void setSavedDashboards( Integer savedDashboards )
     {
         this.savedDashboards = savedDashboards;
     }
 
     @JsonProperty
-    public Double getSavedIndicators()
+    public Integer getSavedIndicators()
     {
         return savedIndicators;
     }
 
-    public void setSavedIndicators( Double savedIndicators )
+    public void setSavedIndicators( Integer savedIndicators )
     {
         this.savedIndicators = savedIndicators;
     }
