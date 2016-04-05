@@ -132,6 +132,8 @@ public class ValidationRuleServiceTest
 
     private Expression expressionI;
 
+    private Expression expressionX;
+
     private DataSet dataSetWeekly;
 
     private DataSet dataSetMonthly;
@@ -230,6 +232,8 @@ public class ValidationRuleServiceTest
 
     private ValidationRule monitoringRuleLx;
 
+    private ValidationRule monitoringRuleLxx;
+
     private ValidationRule monitoringRuleM;
 
     private ValidationRuleGroup group;
@@ -283,24 +287,26 @@ public class ValidationRuleServiceTest
         optionCombos.add( optionCombo );
 
         expressionA = new Expression(
-            "#{" + dataElementA.getUid() + suffix + "} + #{" + dataElementB.getUid() + suffix + "}", "descriptionA",
-            dataElementSet(dataElementA,dataElementB) );
+            "#{" + dataElementA.getUid() + suffix + "} + #{" + dataElementB.getUid() + suffix + "}", "expressionA",
+            dataElementSet( dataElementA, dataElementB ) );
         expressionB = new Expression(
-            "#{" + dataElementC.getUid() + suffix + "} - #{" + dataElementD.getUid() + suffix + "}", "descriptionB",
-            dataElementSet(dataElementC,dataElementD) );
-        expressionC = new Expression( "#{" + dataElementB.getUid() + suffix + "} * 2", "descriptionC", dataElementSet(dataElementB) );
-        expressionD = new Expression( "#{" + dataElementB.getUid() + suffix + "}", "descriptionD", dataElementSet(dataElementB) );
-        expressionE = new Expression( "AVG(#{" + dataElementB.getUid() + suffix + "} * 1.5)", "descriptionE",
-				      dataElementSet(dataElementB), dataElementSet(dataElementB));
+            "#{" + dataElementC.getUid() + suffix + "} - #{" + dataElementD.getUid() + suffix + "}", "expressionB",
+            dataElementSet( dataElementC, dataElementD ) );
+        expressionC = new Expression( "#{" + dataElementB.getUid() + suffix + "} * 2", "expressionC", dataElementSet( dataElementB ) );
+        expressionD = new Expression( "#{" + dataElementB.getUid() + suffix + "}", "expressionD", dataElementSet( dataElementB ) );
+        expressionE = new Expression( "AVG(#{" + dataElementB.getUid() + suffix + "} * 1.5)", "expressionE",
+            dataElementSet( dataElementB ), dataElementSet( dataElementB ) );
         expressionF = new Expression(
-            "#{" + dataElementB.getUid() + suffix + "} / #{" + dataElementE.getUid() + suffix + "}", "descriptionF",
-            dataElementSet(dataElementB,dataElementE) );
+            "#{" + dataElementB.getUid() + suffix + "} / #{" + dataElementE.getUid() + suffix + "}", "expressionF",
+            dataElementSet( dataElementB, dataElementE ) );
         expressionG = new Expression(
             "AVG(#{" + dataElementB.getUid() + suffix + "} * 1.5 / #{" + dataElementE.getUid() + suffix + "})",
-            "descriptionG", dataElementSet(dataElementB,dataElementE), dataElementSet(dataElementB,dataElementE));
+            "expressionG", dataElementSet( dataElementB, dataElementE ), dataElementSet( dataElementB, dataElementE ) );
         expressionH = new Expression(
             "AVG(#{" + dataElementB.getUid() + suffix + "}) + 1.5*STDDEV(#{" + dataElementB.getUid() + suffix + "})",
-            "descriptionH", dataElementSet(), dataElementSet(dataElementB) );
+            "expressionH", dataElementSet(), dataElementSet( dataElementB ) );
+        expressionX = new Expression( "#{" + dataElementB.getUid() + suffix + "}>250",
+            "expressionX", dataElementSet( dataElementB ), dataElementSet() );
 
         expressionService.addExpression( expressionA );
         expressionService.addExpression( expressionB );
@@ -437,7 +443,7 @@ public class ValidationRuleServiceTest
         monitoringRuleI = createMonitoringRule( "I", less_than_or_equal_to, expressionD, expressionH, periodTypeMonthly, 1, 2, 0 );
         // Compare dataElementB with its average plus 1.5 standard deviations for the two periods before the last (window=3,skip=1)
         monitoringRuleIx = createMonitoringRule( "Ix", less_than_or_equal_to, expressionD, expressionH, null,
-						 periodTypeMonthly, 1, 3, 0, 1);
+            periodTypeMonthly, 1, 3, 0, 1 );
 
         // Compare dataElementB with its average plus 1.5 standard deviations for one annual previous period.
         monitoringRuleJ = createMonitoringRule( "J", less_than_or_equal_to, expressionD, expressionH, periodTypeMonthly, 1, 0, 1 );
@@ -449,7 +455,9 @@ public class ValidationRuleServiceTest
         // Compare dataElementB with its average plus 1.5 standard deviations for two sequential and two annual previous periods.
         monitoringRuleL = createMonitoringRule( "L", less_than_or_equal_to, expressionD, expressionH, periodTypeMonthly, 1, 2, 2 );
         monitoringRuleLx = createMonitoringRule( "Lx", less_than_or_equal_to, expressionD, expressionH, null,
-						 periodTypeMonthly, 1, 2, 2, 2 );
+            periodTypeMonthly, 1, 2, 2, 2 );
+        monitoringRuleLxx = createMonitoringRule( "Lxx", less_than_or_equal_to, expressionD, expressionH, expressionX,
+            periodTypeMonthly, 1, 2, 2, 0 );
 
         monitoringRuleM = createMonitoringRule( "M", less_than_or_equal_to, expressionF, expressionG, periodTypeMonthly,
             1, 0, 1 );
@@ -471,16 +479,16 @@ public class ValidationRuleServiceTest
 
     /**
      * Returns a naturally ordered list of ValidationResults.
-     * 
+     * <p>
      * When comparing two collections, this assures that all the items are in
      * the same order for comparison. It also means that when there are
      * different values for the same period/rule/source, etc., the results are
      * more likely to be in the same order to make it easier to see the
      * difference.
-     * 
+     * <p>
      * By making this a List instead of, say a TreeSet, duplicate values (if any
      * should exist by mistake!) are preserved.
-     * 
+     *
      * @param results collection of ValidationResult to order
      * @return ValidationResults in their natural order
      */
@@ -530,13 +538,13 @@ public class ValidationRuleServiceTest
         return result;
     }
 
-    private void useDataValue(DataElement e, Period p, OrganisationUnit s, String value)
+    private void useDataValue( DataElement e, Period p, OrganisationUnit s, String value )
     {
         dataValueService.addDataValue( createDataValue( e, p, s, value, optionCombo, optionCombo ) );
     }
 
-    private void useDataValue(DataElement e, Period p, OrganisationUnit s, String value,
-			      DataElementCategoryOptionCombo oc1, DataElementCategoryOptionCombo oc2)
+    private void useDataValue( DataElement e, Period p, OrganisationUnit s, String value,
+        DataElementCategoryOptionCombo oc1, DataElementCategoryOptionCombo oc2 )
     {
         dataValueService.addDataValue( createDataValue( e, p, s, value, oc1, oc2 ) );
     }
@@ -548,25 +556,25 @@ public class ValidationRuleServiceTest
     @Test
     public void testValidateDateDateSources()
     {
-	useDataValue( dataElementA, periodA, sourceA, "1");
-	useDataValue( dataElementB, periodA, sourceA, "2");
-	useDataValue( dataElementC, periodA, sourceA, "3");
-	useDataValue( dataElementD, periodA, sourceA, "4" );
+        useDataValue( dataElementA, periodA, sourceA, "1" );
+        useDataValue( dataElementB, periodA, sourceA, "2" );
+        useDataValue( dataElementC, periodA, sourceA, "3" );
+        useDataValue( dataElementD, periodA, sourceA, "4" );
 
-	useDataValue( dataElementA, periodB, sourceA, "1" );
-	useDataValue( dataElementB, periodB, sourceA, "2" );
-	useDataValue( dataElementC, periodB, sourceA, "3" );
-	useDataValue( dataElementD, periodB, sourceA, "4" );
+        useDataValue( dataElementA, periodB, sourceA, "1" );
+        useDataValue( dataElementB, periodB, sourceA, "2" );
+        useDataValue( dataElementC, periodB, sourceA, "3" );
+        useDataValue( dataElementD, periodB, sourceA, "4" );
 
-	useDataValue( dataElementA, periodA, sourceB, "1" );
-	useDataValue( dataElementB, periodA, sourceB, "2" );
-	useDataValue( dataElementC, periodA, sourceB, "3" );
-	useDataValue( dataElementD, periodA, sourceB, "4" );
+        useDataValue( dataElementA, periodA, sourceB, "1" );
+        useDataValue( dataElementB, periodA, sourceB, "2" );
+        useDataValue( dataElementC, periodA, sourceB, "3" );
+        useDataValue( dataElementD, periodA, sourceB, "4" );
 
-	useDataValue( dataElementA, periodB, sourceB, "1" );
-	useDataValue( dataElementB, periodB, sourceB, "2" );
-	useDataValue( dataElementC, periodB, sourceB, "3" );
-	useDataValue( dataElementD, periodB, sourceB, "4" );
+        useDataValue( dataElementA, periodB, sourceB, "1" );
+        useDataValue( dataElementB, periodB, sourceB, "2" );
+        useDataValue( dataElementC, periodB, sourceB, "3" );
+        useDataValue( dataElementD, periodB, sourceB, "4" );
 
         validationRuleService.saveValidationRule( validationRuleA ); // Invalid
         validationRuleService.saveValidationRule( validationRuleB ); // Invalid
@@ -606,25 +614,25 @@ public class ValidationRuleServiceTest
     @Test
     public void testValidateDateDateSourcesGroup()
     {
-	useDataValue( dataElementA, periodA, sourceA, "1" );
-	useDataValue( dataElementB, periodA, sourceA, "2" );
-	useDataValue( dataElementC, periodA, sourceA, "3" );
-	useDataValue( dataElementD, periodA, sourceA, "4" );
+        useDataValue( dataElementA, periodA, sourceA, "1" );
+        useDataValue( dataElementB, periodA, sourceA, "2" );
+        useDataValue( dataElementC, periodA, sourceA, "3" );
+        useDataValue( dataElementD, periodA, sourceA, "4" );
 
-	useDataValue( dataElementA, periodB, sourceA, "1" );
-	useDataValue( dataElementB, periodB, sourceA, "2" );
-	useDataValue( dataElementC, periodB, sourceA, "3" );
-	useDataValue( dataElementD, periodB, sourceA, "4" );
+        useDataValue( dataElementA, periodB, sourceA, "1" );
+        useDataValue( dataElementB, periodB, sourceA, "2" );
+        useDataValue( dataElementC, periodB, sourceA, "3" );
+        useDataValue( dataElementD, periodB, sourceA, "4" );
 
-	useDataValue( dataElementA, periodA, sourceB, "1" );
-	useDataValue( dataElementB, periodA, sourceB, "2" );
-	useDataValue( dataElementC, periodA, sourceB, "3" );
-	useDataValue( dataElementD, periodA, sourceB, "4" );
+        useDataValue( dataElementA, periodA, sourceB, "1" );
+        useDataValue( dataElementB, periodA, sourceB, "2" );
+        useDataValue( dataElementC, periodA, sourceB, "3" );
+        useDataValue( dataElementD, periodA, sourceB, "4" );
 
-	useDataValue( dataElementA, periodB, sourceB, "1" );
-	useDataValue( dataElementB, periodB, sourceB, "2" );
-	useDataValue( dataElementC, periodB, sourceB, "3" );
-	useDataValue( dataElementD, periodB, sourceB, "4" );
+        useDataValue( dataElementA, periodB, sourceB, "1" );
+        useDataValue( dataElementB, periodB, sourceB, "2" );
+        useDataValue( dataElementC, periodB, sourceB, "3" );
+        useDataValue( dataElementD, periodB, sourceB, "4" );
 
         validationRuleService.saveValidationRule( validationRuleA ); // Invalid
         validationRuleService.saveValidationRule( validationRuleB ); // Invalid
@@ -659,15 +667,15 @@ public class ValidationRuleServiceTest
     @Test
     public void testValidateDateDateSource()
     {
-	useDataValue( dataElementA, periodA, sourceA, "1" );
-	useDataValue( dataElementB, periodA, sourceA, "2" );
-	useDataValue( dataElementC, periodA, sourceA, "3" );
-	useDataValue( dataElementD, periodA, sourceA, "4" );
+        useDataValue( dataElementA, periodA, sourceA, "1" );
+        useDataValue( dataElementB, periodA, sourceA, "2" );
+        useDataValue( dataElementC, periodA, sourceA, "3" );
+        useDataValue( dataElementD, periodA, sourceA, "4" );
 
-	useDataValue( dataElementA, periodB, sourceA, "1" );
-	useDataValue( dataElementB, periodB, sourceA, "2" );
-	useDataValue( dataElementC, periodB, sourceA, "3" );
-	useDataValue( dataElementD, periodB, sourceA, "4" );
+        useDataValue( dataElementA, periodB, sourceA, "1" );
+        useDataValue( dataElementB, periodB, sourceA, "2" );
+        useDataValue( dataElementC, periodB, sourceA, "3" );
+        useDataValue( dataElementD, periodB, sourceA, "4" );
 
         validationRuleService.saveValidationRule( validationRuleA );
         validationRuleService.saveValidationRule( validationRuleB );
@@ -697,10 +705,10 @@ public class ValidationRuleServiceTest
     @Test
     public void testValidateDataSetPeriodSource()
     {
-	useDataValue( dataElementA, periodA, sourceA, "1" );
-	useDataValue( dataElementB, periodA, sourceA, "2" );
-	useDataValue( dataElementC, periodA, sourceA, "3" );
-	useDataValue( dataElementD, periodA, sourceA, "4" );
+        useDataValue( dataElementA, periodA, sourceA, "1" );
+        useDataValue( dataElementB, periodA, sourceA, "2" );
+        useDataValue( dataElementC, periodA, sourceA, "3" );
+        useDataValue( dataElementD, periodA, sourceA, "4" );
 
         validationRuleService.saveValidationRule( validationRuleA );
         validationRuleService.saveValidationRule( validationRuleB );
@@ -730,28 +738,29 @@ public class ValidationRuleServiceTest
         // Note: for some monitoring tests, we enter more data than needed, to
         // be sure the extra data *isn't* used.
 
-	useDataValue( dataElementB, periodA, sourceA, "11" ); // Mar 2000
-	useDataValue( dataElementB, periodB, sourceA, "12" ); // Apr 2000
-	useDataValue( dataElementB, periodC, sourceA, "13" ); // May 2000
-	useDataValue( dataElementB, periodD, sourceA, "14" ); // Jun 2000
-	useDataValue( dataElementB, periodE, sourceA, "15" ); // Jul 2000
+        useDataValue( dataElementB, periodA, sourceA, "11" ); // Mar 2000
+        useDataValue( dataElementB, periodB, sourceA, "12" ); // Apr 2000
+        useDataValue( dataElementB, periodC, sourceA, "13" ); // May 2000
+        useDataValue( dataElementB, periodD, sourceA, "14" ); // Jun 2000
+        useDataValue( dataElementB, periodE, sourceA, "15" ); // Jul 2000
 
-	useDataValue( dataElementB, periodF, sourceA, "30" ); // Mar 2001
-	useDataValue( dataElementB, periodG, sourceA, "35" ); // Apr 2001
-	useDataValue( dataElementB, periodH, sourceA, "40" ); // May 2001
-	useDataValue( dataElementB, periodI, sourceA, "45" ); // Jun 2001
-	useDataValue( dataElementB, periodJ, sourceA, "50" ); // Jul 2001
+        useDataValue( dataElementB, periodF, sourceA, "30" ); // Mar 2001
+        useDataValue( dataElementB, periodG, sourceA, "35" ); // Apr 2001
+        useDataValue( dataElementB, periodH, sourceA, "40" ); // May 2001
+        useDataValue( dataElementB, periodI, sourceA, "45" ); // Jun 2001
+        useDataValue( dataElementB, periodJ, sourceA, "50" ); // Jul 2001
 
-	useDataValue( dataElementB, periodK, sourceA, "100" ); // Mar 2002
-	useDataValue( dataElementB, periodL, sourceA, "200" ); // Apr 2002
-	useDataValue( dataElementB, periodM, sourceA, "400" ); // May 2002
-	useDataValue( dataElementB, periodN, sourceA, "600" ); // Jun 2002
-	useDataValue( dataElementB, periodO, sourceA, "800" ); // Jul 2002
-	useDataValue( dataElementB, periodP, sourceA, "700" ); // Aug 2002
+        useDataValue( dataElementB, periodK, sourceA, "100" ); // Mar 2002
+        useDataValue( dataElementB, periodL, sourceA, "200" ); // Apr 2002
+        useDataValue( dataElementB, periodM, sourceA, "400" ); // May 2002
+        useDataValue( dataElementB, periodN, sourceA, "600" ); // Jun 2002
+        useDataValue( dataElementB, periodO, sourceA, "800" ); // Jul 2002
+        useDataValue( dataElementB, periodP, sourceA, "700" ); // Aug 2002
 
         validationRuleService.saveValidationRule( monitoringRuleE );
         validationRuleService.saveValidationRule( monitoringRuleI );
         validationRuleService.saveValidationRule( monitoringRuleIx );
+
 
         Collection<ValidationResult> results = validationRuleService.validate( getDate( 2002, 1, 15 ),
             getDate( 2002, 9, 15 ), sourceA );
@@ -766,13 +775,13 @@ public class ValidationRuleServiceTest
         // Note that when using AVG*1.5 with a single period
         // (MonitoringRuleI), it just compares the previous period
         // to the current one since the sample size is one and the average is 
-	// just the single sample value.
+        // just the single sample value.
         reference.add( new ValidationResult( periodL, sourceA, defaultCombo, monitoringRuleI, 200.0, 100.0 ) );
         reference.add( new ValidationResult( periodM, sourceA, defaultCombo, monitoringRuleI, 400.0, 225.0 ) );
         reference.add( new ValidationResult( periodN, sourceA, defaultCombo, monitoringRuleI, 600.0, 450.0 ) );
         reference.add( new ValidationResult( periodO, sourceA, defaultCombo, monitoringRuleI, 800.0, 650.0 ) );
 
-	// This is the same, but for the skip test (compares with the period before last)
+        // This is the same, but for the skip count (compares with the period before last)
         // reference.add( new ValidationResult( periodL, sourceA, defaultCombo, monitoringRuleI, 200.0, 100.0 ) );
         reference.add( new ValidationResult( periodM, sourceA, defaultCombo, monitoringRuleIx, 400.0, 100.0 ) );
         reference.add( new ValidationResult( periodN, sourceA, defaultCombo, monitoringRuleIx, 600.0, 225.0 ) );
@@ -791,23 +800,23 @@ public class ValidationRuleServiceTest
     @Test
     public void testValidateMonitoringAnnual()
     {
-	useDataValue( dataElementB, periodA, sourceA, "11" ); // Mar 2000
-	useDataValue( dataElementB, periodB, sourceA, "12" ); // Apr 2000
-	useDataValue( dataElementB, periodC, sourceA, "13" ); // May 2000
-	useDataValue( dataElementB, periodD, sourceA, "14" ); // Jun 2000
-	useDataValue( dataElementB, periodE, sourceA, "15" ); // Jul 2000
+        useDataValue( dataElementB, periodA, sourceA, "11" ); // Mar 2000
+        useDataValue( dataElementB, periodB, sourceA, "12" ); // Apr 2000
+        useDataValue( dataElementB, periodC, sourceA, "13" ); // May 2000
+        useDataValue( dataElementB, periodD, sourceA, "14" ); // Jun 2000
+        useDataValue( dataElementB, periodE, sourceA, "15" ); // Jul 2000
 
-	useDataValue( dataElementB, periodF, sourceA, "50" ); // Mar 2001
-	useDataValue( dataElementB, periodG, sourceA, "150" ); // Apr 2001
-	useDataValue( dataElementB, periodH, sourceA, "200" ); // May 2001
-	useDataValue( dataElementB, periodI, sourceA, "600" ); // Jun 2001
-	useDataValue( dataElementB, periodJ, sourceA, "400" ); // Jul 2001
+        useDataValue( dataElementB, periodF, sourceA, "50" ); // Mar 2001
+        useDataValue( dataElementB, periodG, sourceA, "150" ); // Apr 2001
+        useDataValue( dataElementB, periodH, sourceA, "200" ); // May 2001
+        useDataValue( dataElementB, periodI, sourceA, "600" ); // Jun 2001
+        useDataValue( dataElementB, periodJ, sourceA, "400" ); // Jul 2001
 
-	useDataValue( dataElementB, periodK, sourceA, "100" ); // Mar 2002
-	useDataValue( dataElementB, periodL, sourceA, "200" ); // Apr 2002
-	useDataValue( dataElementB, periodM, sourceA, "400" ); // May 2002
-	useDataValue( dataElementB, periodN, sourceA, "700" ); // Jun 2002
-	useDataValue( dataElementB, periodO, sourceA, "800" ); // Jul 2002
+        useDataValue( dataElementB, periodK, sourceA, "100" ); // Mar 2002
+        useDataValue( dataElementB, periodL, sourceA, "200" ); // Apr 2002
+        useDataValue( dataElementB, periodM, sourceA, "400" ); // May 2002
+        useDataValue( dataElementB, periodN, sourceA, "700" ); // Jun 2002
+        useDataValue( dataElementB, periodO, sourceA, "800" ); // Jul 2002
 
         validationRuleService.saveValidationRule( monitoringRuleF );
         validationRuleService.saveValidationRule( monitoringRuleJ );
@@ -848,30 +857,30 @@ public class ValidationRuleServiceTest
     @Test
     public void testValidateMonitoring1Sequential2Annual()
     {
-	useDataValue( dataElementB, periodA, sourceA, "11" ); // Mar 2000
-	useDataValue( dataElementB, periodB, sourceA, "12" ); // Apr 2000
-	useDataValue( dataElementB, periodC, sourceA, "13" ); // May 2000
-	useDataValue( dataElementB, periodD, sourceA, "14" ); // Jun 2000
-	useDataValue( dataElementB, periodE, sourceA, "15" ); // Jul 2000
+        useDataValue( dataElementB, periodA, sourceA, "11" ); // Mar 2000
+        useDataValue( dataElementB, periodB, sourceA, "12" ); // Apr 2000
+        useDataValue( dataElementB, periodC, sourceA, "13" ); // May 2000
+        useDataValue( dataElementB, periodD, sourceA, "14" ); // Jun 2000
+        useDataValue( dataElementB, periodE, sourceA, "15" ); // Jul 2000
 
-	useDataValue( dataElementB, periodF, sourceA, "50" ); // Mar 2001
-	useDataValue( dataElementB, periodG, sourceA, "150" ); // Apr 2001
-	useDataValue( dataElementB, periodH, sourceA, "200" ); // May 2001
-	useDataValue( dataElementB, periodI, sourceA, "600" ); // Jun 2001
-	useDataValue( dataElementB, periodJ, sourceA, "400" ); // Jul 2001
+        useDataValue( dataElementB, periodF, sourceA, "50" ); // Mar 2001
+        useDataValue( dataElementB, periodG, sourceA, "150" ); // Apr 2001
+        useDataValue( dataElementB, periodH, sourceA, "200" ); // May 2001
+        useDataValue( dataElementB, periodI, sourceA, "600" ); // Jun 2001
+        useDataValue( dataElementB, periodJ, sourceA, "400" ); // Jul 2001
 
-	useDataValue( dataElementB, periodK, sourceA, "100" ); // Mar 2002
-	useDataValue( dataElementB, periodL, sourceA, "200" ); // Apr 2002
-	useDataValue( dataElementB, periodM, sourceA, "400" ); // May 2002
-	useDataValue( dataElementB, periodN, sourceA, "800" ); // Jun 2002
-	useDataValue( dataElementB, periodO, sourceA, "800" ); // Jul 2002
+        useDataValue( dataElementB, periodK, sourceA, "100" ); // Mar 2002
+        useDataValue( dataElementB, periodL, sourceA, "200" ); // Apr 2002
+        useDataValue( dataElementB, periodM, sourceA, "400" ); // May 2002
+        useDataValue( dataElementB, periodN, sourceA, "800" ); // Jun 2002
+        useDataValue( dataElementB, periodO, sourceA, "800" ); // Jul 2002
 
-	// compare with 1.5*average for 1 sequential and 2 annual periods
+        // compare with 1.5*average for 1 sequential and 2 annual periods
         validationRuleService.saveValidationRule( monitoringRuleG );
-	// compare with avg+1.5stdev for 1 sequential and 2 annual periods
-        validationRuleService.saveValidationRule( monitoringRuleK ); 
-	// compare with avg+1.5stdev for 1 sequential and 2 annual periods, 
-	// skipping most recent period
+        // compare with avg+1.5stdev for 1 sequential and 2 annual periods
+        validationRuleService.saveValidationRule( monitoringRuleK );
+        // compare with avg+1.5stdev for 1 sequential and 2 annual periods,
+        // skipping most recent period
         validationRuleService.saveValidationRule( monitoringRuleKx );
 
         Collection<ValidationResult> results = validationRuleService.validate( getDate( 2002, 1, 15 ),
@@ -916,23 +925,23 @@ public class ValidationRuleServiceTest
     @Test
     public void testValidateMonitoring2Sequential2Annual()
     {
-	useDataValue( dataElementB, periodA, sourceA, "11" ); // Mar 2000
-	useDataValue( dataElementB, periodB, sourceA, "12" ); // Apr 2000
-	useDataValue( dataElementB, periodC, sourceA, "13" ); // May 2000
-	useDataValue( dataElementB, periodD, sourceA, "14" ); // Jun 2000
-	useDataValue( dataElementB, periodE, sourceA, "15" ); // Jul 2000
+        useDataValue( dataElementB, periodA, sourceA, "11" ); // Mar 2000
+        useDataValue( dataElementB, periodB, sourceA, "12" ); // Apr 2000
+        useDataValue( dataElementB, periodC, sourceA, "13" ); // May 2000
+        useDataValue( dataElementB, periodD, sourceA, "14" ); // Jun 2000
+        useDataValue( dataElementB, periodE, sourceA, "15" ); // Jul 2000
 
-	useDataValue( dataElementB, periodF, sourceA, "50" ); // Mar 2001
-	useDataValue( dataElementB, periodG, sourceA, "150" ); // Apr 2001
-	useDataValue( dataElementB, periodH, sourceA, "200" ); // May 2001
-	useDataValue( dataElementB, periodI, sourceA, "600" ); // Jun 2001
-	useDataValue( dataElementB, periodJ, sourceA, "400" ); // Jul 2001
+        useDataValue( dataElementB, periodF, sourceA, "50" ); // Mar 2001
+        useDataValue( dataElementB, periodG, sourceA, "150" ); // Apr 2001
+        useDataValue( dataElementB, periodH, sourceA, "200" ); // May 2001
+        useDataValue( dataElementB, periodI, sourceA, "600" ); // Jun 2001
+        useDataValue( dataElementB, periodJ, sourceA, "400" ); // Jul 2001
 
-	useDataValue( dataElementB, periodK, sourceA, "100" ); // Mar 2002
-	useDataValue( dataElementB, periodL, sourceA, "200" ); // Apr 2002
-	useDataValue( dataElementB, periodM, sourceA, "400" ); // May 2002
-	useDataValue( dataElementB, periodN, sourceA, "800" ); // Jun 2002 	
-	useDataValue( dataElementB, periodO, sourceA, "800" ); // Jul 2002
+        useDataValue( dataElementB, periodK, sourceA, "100" ); // Mar 2002
+        useDataValue( dataElementB, periodL, sourceA, "200" ); // Apr 2002
+        useDataValue( dataElementB, periodM, sourceA, "400" ); // May 2002
+        useDataValue( dataElementB, periodN, sourceA, "800" ); // Jun 2002
+        useDataValue( dataElementB, periodO, sourceA, "800" ); // Jul 2002
 
         validationRuleService.saveValidationRule( monitoringRuleH ); // 2 sequential and 2 annual periods
         validationRuleService.saveValidationRule( monitoringRuleL ); // 2 sequential and 2 annual periods
@@ -984,32 +993,32 @@ public class ValidationRuleServiceTest
     @Test
     public void testValidateMonitoringWithBaseline()
     {
-	useDataValue( dataElementB, periodA, sourceB, "11" ); // Mar 2000
-	useDataValue( dataElementB, periodB, sourceB, "12" ); // Apr 2000
-	useDataValue( dataElementB, periodC, sourceB, "13" ); // May 2000
-	useDataValue( dataElementB, periodD, sourceB, "14" ); // Jun 2000
-	useDataValue( dataElementB, periodE, sourceB, "15" ); // Jul 2000
+        useDataValue( dataElementB, periodA, sourceB, "11" ); // Mar 2000
+        useDataValue( dataElementB, periodB, sourceB, "12" ); // Apr 2000
+        useDataValue( dataElementB, periodC, sourceB, "13" ); // May 2000
+        useDataValue( dataElementB, periodD, sourceB, "14" ); // Jun 2000
+        useDataValue( dataElementB, periodE, sourceB, "15" ); // Jul 2000
 
-	useDataValue( dataElementB, periodF, sourceB, "50" ); // Mar 2001
-	useDataValue( dataElementB, periodG, sourceB, "150" ); // Apr 2001
-	useDataValue( dataElementB, periodH, sourceB, "200" ); // May 2001
-	useDataValue( dataElementB, periodI, sourceB, "600" ); // Jun 2001
-	useDataValue( dataElementB, periodJ, sourceB, "400" ); // Jul 2001
+        useDataValue( dataElementB, periodF, sourceB, "50" ); // Mar 2001
+        useDataValue( dataElementB, periodG, sourceB, "150" ); // Apr 2001
+        useDataValue( dataElementB, periodH, sourceB, "200" ); // May 2001
+        useDataValue( dataElementB, periodI, sourceB, "600" ); // Jun 2001
+        useDataValue( dataElementB, periodJ, sourceB, "400" ); // Jul 2001
 
-	useDataValue( dataElementB, periodK, sourceB, "100" ); // Mar 2002
-	useDataValue( dataElementB, periodL, sourceB, "200" ); // Apr 2002
-	useDataValue( dataElementB, periodM, sourceB, "400" ); // May 2002
-	useDataValue( dataElementB, periodN, sourceB, "700" ); // Jun 2002
-	useDataValue( dataElementB, periodO, sourceB, "800" ); // Jul 2002
+        useDataValue( dataElementB, periodK, sourceB, "100" ); // Mar 2002
+        useDataValue( dataElementB, periodL, sourceB, "200" ); // Apr 2002
+        useDataValue( dataElementB, periodM, sourceB, "400" ); // May 2002
+        useDataValue( dataElementB, periodN, sourceB, "700" ); // Jun 2002
+        useDataValue( dataElementB, periodO, sourceB, "800" ); // Jul 2002
 
         // This weekly baseline data should be ignored because the period length
         // is less than monthly:
-	useDataValue( dataElementE, periodW, sourceB, "1000" ); // Week:
-                          
-	useDataValue( dataElementE, periodX, sourceB, "40" ); // Year: 2000
-	useDataValue( dataElementE, periodY, sourceB, "50" ); // Year: 2001
-	useDataValue( dataElementE, periodZ, sourceB, "10" ); // Year:
-        
+        useDataValue( dataElementE, periodW, sourceB, "1000" ); // Week:
+
+        useDataValue( dataElementE, periodX, sourceB, "40" ); // Year: 2000
+        useDataValue( dataElementE, periodY, sourceB, "50" ); // Year: 2001
+        useDataValue( dataElementE, periodZ, sourceB, "10" ); // Year:
+
         validationRuleService.saveValidationRule( monitoringRuleM );
 
         Collection<ValidationResult> results = validationRuleService.validate( getDate( 2002, 1, 15 ),
@@ -1069,11 +1078,11 @@ public class ValidationRuleServiceTest
         categoryService.addDataElementCategoryOptionCombo( optionComboAC );
         categoryService.addDataElementCategoryOptionCombo( optionComboBC );
 
-	useDataValue( dataElementA, periodA, sourceA, "4", optionCombo, optionComboAC );
-	useDataValue( dataElementB, periodA, sourceA, "3", optionCombo, optionComboAC );
+        useDataValue( dataElementA, periodA, sourceA, "4", optionCombo, optionComboAC );
+        useDataValue( dataElementB, periodA, sourceA, "3", optionCombo, optionComboAC );
 
-	useDataValue( dataElementA, periodA, sourceA, "2", optionCombo, optionComboBC );
-	useDataValue( dataElementB, periodA, sourceA, "1", optionCombo, optionComboBC );
+        useDataValue( dataElementA, periodA, sourceA, "2", optionCombo, optionComboBC );
+        useDataValue( dataElementB, periodA, sourceA, "1", optionCombo, optionComboBC );
 
         validationRuleService.saveValidationRule( validationRuleD ); // deA + deB < deB * 2
         validationRuleService.saveValidationRule( validationRuleX ); // deA + deB = deB * 2
@@ -1125,6 +1134,48 @@ public class ValidationRuleServiceTest
         results = validationRuleService.validate( dataSetMonthly, periodA, sourceA, optionCombo );
 
         assertEquals( 0, results.size() );
+    }
+
+    @Test
+    public void testValidateMonitoringSkipTest()
+    {
+        // Note: for some monitoring tests, we enter more data than needed, to
+        // be sure the extra data *isn't* used.
+
+        useDataValue( dataElementB, periodA, sourceA, "11" ); // Mar 2000
+        useDataValue( dataElementB, periodB, sourceA, "12" ); // Apr 2000
+        useDataValue( dataElementB, periodC, sourceA, "13" ); // May 2000
+        useDataValue( dataElementB, periodD, sourceA, "14" ); // Jun 2000
+        useDataValue( dataElementB, periodE, sourceA, "15" ); // Jul 2000
+
+        useDataValue( dataElementB, periodF, sourceA, "100" ); // Mar 2001
+        useDataValue( dataElementB, periodG, sourceA, "200" ); // Apr 2001
+        useDataValue( dataElementB, periodH, sourceA, "400" ); // May 2001
+        useDataValue( dataElementB, periodI, sourceA, "600" ); // Jun 2001
+        useDataValue( dataElementB, periodJ, sourceA, "800" ); // Jul 2001
+
+        useDataValue( dataElementB, periodK, sourceA, "30" ); // Mar 2002
+        useDataValue( dataElementB, periodL, sourceA, "35" ); // Apr 2002
+        useDataValue( dataElementB, periodM, sourceA, "40" ); // May 2002
+        useDataValue( dataElementB, periodN, sourceA, "45" ); // Jun 2002
+        useDataValue( dataElementB, periodO, sourceA, "50" ); // Jul 2002
+
+        validationRuleService.saveValidationRule( monitoringRuleLxx );
+
+        Collection<ValidationResult> results = validationRuleService.validate( getDate( 2002, 1, 15 ),
+            getDate( 2002, 9, 15 ), sourceA );
+
+        Collection<ValidationResult> reference = new HashSet<>();
+
+        reference.add( new ValidationResult( periodO, sourceA, optionCombo, monitoringRuleLxx, 50.0, 46.5 ) );
+
+        for ( ValidationResult result : results )
+        {
+            assertFalse( MathUtils.expressionIsTrue( result.getLeftsideValue(),
+                result.getValidationRule().getOperator(), result.getRightsideValue() ) );
+        }
+
+        assertEquals( orderedList( reference ), orderedList( results ) );
     }
 
     // -------------------------------------------------------------------------

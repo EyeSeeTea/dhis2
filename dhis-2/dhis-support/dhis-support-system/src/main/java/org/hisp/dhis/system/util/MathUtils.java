@@ -139,7 +139,9 @@ public class MathUtils
         final JEP parser = getJep();
         parser.parseExpression( expression );
 
-        return parser.getValueAsObject();
+        Object result=parser.getValueAsObject();
+
+        return result;
     }
 
     private static double calculateExpressionInternal( String expression )

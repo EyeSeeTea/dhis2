@@ -272,7 +272,7 @@ public class DefaultExpressionService
         String expressionString = generateExpression( expression.getExplodedExpressionFallback(), valueMap, constantMap,
             orgUnitCountMap, days, expression.getMissingValueStrategy(), incompleteValues, aggregateMap );
 
-        Double result = (expressionString != null) ? calculateExpression( expressionString ) : null;
+        Object result = (expressionString != null) ? calculateGenericExpression( expressionString ) : null;
 
         return result;
     }

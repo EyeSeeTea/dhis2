@@ -381,6 +381,29 @@ public class DataValidationTask
         return recursiveCurrentDataElements;
     }
 
+    boolean falsy( Object o )
+    {
+        if ( o instanceof Boolean )
+        {
+            Boolean b = (Boolean) o;
+            return b.booleanValue();
+        }
+        else if ( o instanceof Number )
+        {
+            Number n = (Number) o;
+            return (n.intValue() == 0);
+        }
+        else if ( o instanceof String )
+        {
+            String s = (String) o;
+            return s.isEmpty();
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     /**
      * Evaluates an expression, returning a map of values by attribute option
      * combo.
@@ -390,11 +413,15 @@ public class DataValidationTask
      * @param incompleteValuesMap map of values that were incomplete.
      * @return map of values.
      */
-    private Map<Integer, Double> getExpressionValueMap( Expression expression,
-        MapMap<Integer, DataElementOperand, Double> valueMap, SetMap<Integer, DataElementOperand> incompleteValuesMap )
+    private Map<Integer, Double>getExpressionValueMap
+	(Expression expression,
+	 Set<Integer> skipCombos,
+	 MapMap<Integer, DataElementOperand, Double> valueMap, 
+	 SetMap<Integer, DataElementOperand> incompleteValuesMap )
     {
         Map<Integer, Double> expressionValueMap = new HashMap<>();
 
+	if (skipCombos == null) {
         for ( Map.Entry<Integer, Map<DataElementOperand, Double>> entry : valueMap.entrySet() )
         {
             Double value = expressionService.getExpressionValue( expression, entry.getValue(),
@@ -405,6 +432,22 @@ public class DataValidationTask
                 expressionValueMap.put( entry.getKey(), value );
             }
         }
+	}
+	else 
+	    {
+        for ( Map.Entry<Integer, Map<DataElementOperand, Double>> entry : valueMap.entrySet() )
+	    if (!(skipCombos.contains(entry.getKey())))
+        {
+            Double value = expressionService.getExpressionValue( expression, entry.getValue(),
+                context.getConstantMap(), null, null, incompleteValuesMap.getSet( entry.getKey() ), null );
+
+            if ( MathUtils.isValidDouble( value ) )
+            {
+                expressionValueMap.put( entry.getKey(), value );
+            }
+        }
+
+	    }
 
         return expressionValueMap;
     }
@@ -651,13 +694,16 @@ public class DataValidationTask
 
         SetMap<Integer, DataElementOperand> incompleteValuesMap = new SetMap<Integer, DataElementOperand>();
 
-        if ( (skipTest == null) || (evalSkipTest( skipTest, source, sourceElements, px, periodTypes, periodInstance, lastUpdatedMap, incompleteValuesMap )) )
         {
             Set<DataElement> dataElements = getExpressionDataElements( expression );
+            Set<Integer> skipCombos = (skipTest == null) ? (null) :
+                (getSkipCombos( skipTest, source, sourceElements,
+                    px, periodTypes, periodInstance,
+                    lastUpdatedMap, incompleteValuesMap ));
 
             MapMap<Integer, DataElementOperand, Double> dataValueMapByAttributeCombo = getValueMap
                 ( px, dataElements, sourceElements, dataElements, periodTypes, periodInstance, source, lastUpdatedMap, incompleteValuesMap );
-            Map<Integer, Double> eValues = getExpressionValueMap( expression, dataValueMapByAttributeCombo,
+            Map<Integer, Double> eValues = getExpressionValueMap( expression, skipCombos, dataValueMapByAttributeCombo,
                 incompleteValuesMap );
             results.putValueMap( eValues );
         }
@@ -692,47 +738,27 @@ public class DataValidationTask
     }
 
 
-    private boolean evalSkipTest( Expression skipTest, OrganisationUnit source, Collection<DataElement> sourceElements,
+    private Set<Integer> getSkipCombos( Expression skipTest, OrganisationUnit source, Collection<DataElement> sourceElements,
         PeriodTypeExtended px, Collection<PeriodType> periodTypes, Period period,
         MapMap<Integer, DataElementOperand, Date> lastUpdatedMap,
         SetMap<Integer, DataElementOperand> incompleteValuesMap )
     {
+        Set<Integer> results = new HashSet<Integer>();
         Set<DataElement> dataElements = getExpressionDataElements( skipTest );
 
-        MapMap<Integer, DataElementOperand, Double> dataValueMapByAttributeCombo = getValueMap
+        MapMap<Integer, DataElementOperand, Double> skipMap = getValueMap
             ( px, dataElements, sourceElements, dataElements, periodTypes, period, source, lastUpdatedMap, incompleteValuesMap );
-        Map<Integer, Object> eValues = getExpressionObjectValueMap( skipTest, dataValueMapByAttributeCombo, incompleteValuesMap );
-        boolean result = false;
-        for ( Object v : eValues.values() )
+        for ( Map.Entry<Integer, Map<DataElementOperand, Double>> entry : skipMap.entrySet() )
         {
-            if ( v instanceof Boolean )
-            {
-                Boolean b = (Boolean) v;
-                if ( b )
-                {
-                    result = true;
-                    break;
-                }
-            }
-            else if ( v instanceof Number )
-            {
-                Number n = (Number) v;
-                if ( n.equals( 0 ) )
-                {
-                    result = true;
-                    break;
-                }
-            }
-            else if ( v instanceof String )
-            {
-                if ( !(((String) v).isEmpty()) )
-                {
-                    result = true;
-                    break;
-                }
-            }
-        }
-        return result;
+	    Integer combo=entry.getKey();
+            Object value = expressionService.getExpressionObjectValue( skipTest, entry.getValue(),
+                context.getConstantMap(), null, null, incompleteValuesMap.getSet( entry.getKey() ), null );
+
+	    if (!(falsy(value))) results.add(combo);
+	}
+
+	if (results.size()==0) return null;
+	else return results;
     }
 
 
@@ -772,15 +798,7 @@ public class DataValidationTask
 
         if ( aggregates.isEmpty() )
         {
-            if ( (skipTest == null) || (evalSkipTest( skipTest, source, sourceElements, px, periodTypes, period, lastUpdatedMap,
-                incompleteValuesMap )) )
-            {
-                return getExpressionValueMap( expression, valueMap, incompleteValuesMap );
-            }
-            else
-            {
-                return expressionValueMap;
-            }
+            return getExpressionValueMap( expression, null, valueMap, incompleteValuesMap );
         }
 
         for ( String subExpression : aggregates )
