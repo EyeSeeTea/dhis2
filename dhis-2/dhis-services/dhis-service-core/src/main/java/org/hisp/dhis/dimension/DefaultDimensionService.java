@@ -363,8 +363,7 @@ public class DefaultDimensionService
                 return programAttribute;
             }
         }
-        else if ( (idScheme.is( IdentifiableProperty.UID ) && CodeGenerator.isValidCode( dimensionItem )) ||
-            !idScheme.is( IdentifiableProperty.UID ) )
+        else if ( !idScheme.is( IdentifiableProperty.UID ) || CodeGenerator.isValidCode( dimensionItem ))
         {
             DimensionalItemObject itemObject = identifiableObjectManager
                 .get( DataDimensionItem.DATA_DIMENSION_CLASSES, idScheme, dimensionItem );

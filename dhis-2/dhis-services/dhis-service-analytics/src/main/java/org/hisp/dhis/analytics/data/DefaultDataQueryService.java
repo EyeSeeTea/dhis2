@@ -224,8 +224,6 @@ public class DefaultDataQueryService
     {
         final boolean allItems = items.isEmpty();
 
-        System.out.println("Using IdScheme CODE: " + inputIdScheme.is( IdentifiableProperty.CODE ));
-
         if ( DATA_X_DIM_ID.equals( dimension ) )
         {
             List<DimensionalItemObject> dataDimensionItems = new ArrayList<>();
@@ -392,8 +390,7 @@ public class DefaultDataQueryService
                         groups.add( group );
                     }
                 }
-                else if ( (inputIdScheme.is( IdentifiableProperty.UID ) && CodeGenerator.isValidCode( ou )) ||
-                    !inputIdScheme.is( IdentifiableProperty.UID ) )
+                else if ( !inputIdScheme.is( IdentifiableProperty.UID ) || CodeGenerator.isValidCode( ou ))
                 {
                     OrganisationUnit unit = idObjectManager.getObject( OrganisationUnit.class, inputIdScheme, ou );
 
