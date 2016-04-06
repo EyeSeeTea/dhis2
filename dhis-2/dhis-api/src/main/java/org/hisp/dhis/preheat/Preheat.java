@@ -64,6 +64,12 @@ public class Preheat
 
     private Map<String, PeriodType> periodTypeMap = new HashMap<>();
 
+    private Map<Class<? extends IdentifiableObject>, List<String>> mandatoryAttributes = new HashMap<>();
+
+    private Map<Class<? extends IdentifiableObject>, List<String>> uniqueAttributes = new HashMap<>();
+
+    private Map<Class<? extends IdentifiableObject>, Map<String, List<String>>> uniqueAttributeValues = new HashMap<>();
+
     public Preheat()
     {
     }
@@ -427,5 +433,35 @@ public class Preheat
     public void setPeriodTypeMap( Map<String, PeriodType> periodTypeMap )
     {
         this.periodTypeMap = periodTypeMap;
+    }
+
+    public Map<Class<? extends IdentifiableObject>, List<String>> getMandatoryAttributes()
+    {
+        return mandatoryAttributes;
+    }
+
+    public void setMandatoryAttributes( Map<Class<? extends IdentifiableObject>, List<String>> mandatoryAttributes )
+    {
+        this.mandatoryAttributes = mandatoryAttributes;
+    }
+
+    public Map<Class<? extends IdentifiableObject>, List<String>> getUniqueAttributes()
+    {
+        return uniqueAttributes;
+    }
+
+    public void setUniqueAttributes( Map<Class<? extends IdentifiableObject>, List<String>> uniqueAttributes )
+    {
+        this.uniqueAttributes = uniqueAttributes;
+    }
+
+    public Map<Class<? extends IdentifiableObject>, Map<String, List<String>>> getUniqueAttributeValues()
+    {
+        return uniqueAttributeValues;
+    }
+
+    public void setUniqueAttributeValues( Map<Class<? extends IdentifiableObject>, Map<String, List<String>>> uniqueAttributeValues )
+    {
+        this.uniqueAttributeValues = uniqueAttributeValues;
     }
 }
