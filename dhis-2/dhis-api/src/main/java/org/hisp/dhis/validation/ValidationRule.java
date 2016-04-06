@@ -106,7 +106,7 @@ public class ValidationRule
      * When non-empty, this is a boolean valued expression which
      * indicates when this rule should be skipped
      */
-    private Expression skipTest;
+    private Expression sampleSkipTest;
 
     /**
      * The set of ValidationRuleGroups to which this ValidationRule belongs.
@@ -158,7 +158,7 @@ public class ValidationRule
         this.operator = operator;
         this.leftSide = leftSide;
         this.rightSide = rightSide;
-        this.skipTest = null;
+        this.sampleSkipTest = null;
     }
 
     public ValidationRule( String name, String description, Operator operator, Expression leftSide,
@@ -169,7 +169,7 @@ public class ValidationRule
         this.operator = operator;
         this.leftSide = leftSide;
         this.rightSide = rightSide;
-        this.skipTest = skipTest;
+        this.sampleSkipTest = skipTest;
     }
 
     // -------------------------------------------------------------------------
@@ -185,7 +185,7 @@ public class ValidationRule
     {
         this.leftSide = null;
         this.rightSide = null;
-        this.skipTest = null;
+        this.sampleSkipTest = null;
     }
 
     /**
@@ -234,8 +234,8 @@ public class ValidationRule
             new HashSet<>( leftSide.getDataElementsInExpression() );
 
         currentDataElements.addAll( rightSide.getDataElementsInExpression() );
-        if ( skipTest != null )
-            currentDataElements.addAll( skipTest.getDataElementsInExpression() );
+        if ( sampleSkipTest != null )
+            currentDataElements.addAll( sampleSkipTest.getDataElementsInExpression() );
 
         return currentDataElements;
     }
@@ -254,9 +254,9 @@ public class ValidationRule
         if ( elts != null ) past.addAll( elts );
         elts = rightSide.getSampleElementsInExpression();
         if ( elts != null ) past.addAll( elts );
-        if ( skipTest == null )
+        if ( sampleSkipTest == null )
             elts = null;
-        else elts = skipTest.getSampleElementsInExpression();
+        else elts = sampleSkipTest.getSampleElementsInExpression();
         if ( elts != null ) past.addAll( elts );
         return past;
     }
@@ -455,14 +455,14 @@ public class ValidationRule
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public Expression getSkipTest()
+    public Expression getSampleSkipTest()
     {
-        return skipTest;
+        return sampleSkipTest;
     }
 
-    public void setSkipTest( Expression skipTest )
+    public void setSampleSkipTest( Expression sampleSkipTest )
     {
-        this.skipTest = skipTest;
+        this.sampleSkipTest = sampleSkipTest;
     }
 
     @JsonProperty

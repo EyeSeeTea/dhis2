@@ -1004,7 +1004,7 @@ public abstract class DhisConvenienceTest
         validationRule.setOperator( operator );
         validationRule.setLeftSide( leftSide );
         validationRule.setRightSide( rightSide );
-        validationRule.setSkipTest( skipTest );
+        validationRule.setSampleSkipTest( skipTest );
         validationRule.setPeriodType( periodType );
         validationRule.setOrganisationUnitLevel( organisationUnitLevel );
         validationRule.setSequentialSampleCount( sequentialSampleCount );

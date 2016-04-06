@@ -45,7 +45,7 @@
     <many-to-one name="rightSide" column="rightexpressionid" class="org.hisp.dhis.expression.Expression"
       cascade="all" foreign-key="fk_validationrule_rightexpressionid" />
 
-    <many-to-one name="skipTest" column="skiptestexpressionid" class="org.hisp.dhis.expression.Expression"
+    <many-to-one name="getSampleSkipTest" column="skiptestexpressionid" class="org.hisp.dhis.expression.Expression"
                  cascade="all" foreign-key="fk_validationrule_skiptestexpressionid" />
 
     <set name="groups" table="validationrulegroupmembers" inverse="true">

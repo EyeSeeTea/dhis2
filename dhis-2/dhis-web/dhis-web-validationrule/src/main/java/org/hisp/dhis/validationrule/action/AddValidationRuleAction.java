@@ -262,7 +262,7 @@ public class AddValidationRuleAction
         validationRule.setOperator( Operator.valueOf( operator ) );
         validationRule.setLeftSide( leftSide );
         validationRule.setRightSide( rightSide );
-        if ( skipTest != null ) validationRule.setSkipTest( skipTest );
+        if ( skipTest != null ) validationRule.setSampleSkipTest( skipTest );
         validationRule.setOrganisationUnitLevel( organisationUnitLevel );
 
         PeriodType periodType = periodService.getPeriodTypeByName( periodTypeName );

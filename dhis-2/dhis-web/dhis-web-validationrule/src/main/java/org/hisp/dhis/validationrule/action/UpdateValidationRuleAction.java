@@ -229,7 +229,7 @@ public class UpdateValidationRuleAction
         ValidationRule validationRule = validationRuleService.getValidationRule( id );
         Expression leftSide = validationRule.getLeftSide();
         Expression rightSide = validationRule.getLeftSide();
-        Expression skipTest = validationRule.getSkipTest();
+        Expression skipTest = validationRule.getSampleSkipTest();
 
         validationRule.setName( StringUtils.trimToNull( name ) );
         validationRule.setDescription( StringUtils.trimToNull( description ) );
@@ -253,7 +253,7 @@ public class UpdateValidationRuleAction
         if ( (skipTestExpression != null) && (skipTest == null) )
         {
             skipTest = new Expression();
-            validationRule.setSkipTest( skipTest );
+            validationRule.setSampleSkipTest( skipTest );
         }
         if ( skipTest != null )
         {

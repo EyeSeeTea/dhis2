@@ -162,7 +162,7 @@ public class DataValidationTask
                                 log.debug( "Rule " + rule.getName() + " @" + period.getDisplayShortName() + " & "
                                     + sourceX.getSource() + " window=" + window + ", years=" + n_years );
                                 Map<Integer, Double> leftSideValues = getRuleExpressionValueMap
-                                    ( rule.getLeftSide(), rule.getSkipTest(),
+                                    ( rule.getLeftSide(), rule.getSampleSkipTest(),
                                         currentValueMap, incompleteValuesMap, sourceX.getSource(),
                                         period, window, n_years, skip,
                                         periodTypeX, periodTypes, lastUpdatedMap, sourceDataElements );
@@ -172,7 +172,7 @@ public class DataValidationTask
                                     || Operator.exclusive_pair.equals( rule.getOperator() ) )
                                 {
                                     Map<Integer, Double> rightSideValues = getRuleExpressionValueMap
-                                        ( rule.getRightSide(), rule.getSkipTest(),
+                                        ( rule.getRightSide(), rule.getSampleSkipTest(),
                                             currentValueMap, incompleteValuesMap, sourceX.getSource(),
                                             period, window, n_years, skip, periodTypeX, periodTypes, lastUpdatedMap,
                                             sourceDataElements );
