@@ -900,6 +900,8 @@ public class TableAlteror
         executeSql( "alter table trackedentitydatavalue alter column storedby TYPE character varying(255)" );
         executeSql( "alter table datavalue alter column storedby TYPE character varying(255)" );
 
+
+
         log.info( "Tables updated" );
     }
 
