@@ -212,6 +212,13 @@ public class UpdateValidationRuleAction
         this.annualSampleCount = annualSampleCount;
     }
 
+    private String sequentialSampleCount;
+
+    public void setSequentialSkipCount( String sequentialSkipCount )
+    {
+        this.sequentialSkipCount = sequentialSkipCount;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -263,6 +270,7 @@ public class UpdateValidationRuleAction
         validationRule.setSequentialSampleCount( sequentialSampleCount != null && !sequentialSampleCount.isEmpty() ? Integer.parseInt( sequentialSampleCount ) : null );
         validationRule.setAnnualSampleCount( annualSampleCount != null && !annualSampleCount.isEmpty() ? Integer.parseInt( annualSampleCount ) : null );
 
+        validationRule.setSequentialSkipCount( sequentialSkipCount != null && !sequentialSkipCount.isEmpty() ? Integer.parseInt( sequentialSkipCount ) : null );
         validationRuleService.updateValidationRule( validationRule );
 
         return SUCCESS;

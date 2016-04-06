@@ -136,10 +136,8 @@ public class ValidationRule
     private Integer annualSampleCount;
 
     /**
-     * The number of sequential periods from which to collect samples
-     * to average (Monitoring-type rules only). Sequential periods are those
-     * immediately preceding (or immediately following in previous years) the
-     * selected period.
+     * The number of immediate sequential periods to skip (in the current year)
+     * when collecting samples for aggregate functions
      */
     private Integer sequentialSkipCount;
 

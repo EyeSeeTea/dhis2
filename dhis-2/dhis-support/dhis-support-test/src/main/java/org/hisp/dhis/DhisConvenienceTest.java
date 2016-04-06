@@ -990,7 +990,8 @@ public abstract class DhisConvenienceTest
     public static ValidationRule createMonitoringRule
 	(String uniqueCharacter, Operator operator,
 	 Expression leftSide,Expression rightSide, Expression skipTest,
-	 PeriodType periodType, int organisationUnitLevel, int sequentialSampleCount,
+	 PeriodType periodType, int organisationUnitLevel, 
+	 int sequentialSampleCount,
 	 int annualSampleCount,
 	 int sequentialSkipCount)
     {
