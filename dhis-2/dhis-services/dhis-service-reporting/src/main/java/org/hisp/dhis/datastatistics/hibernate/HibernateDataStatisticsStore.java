@@ -42,18 +42,18 @@ import java.util.List;
  * @author Yrjan A. F. Fraschetti
  * @author Julie Hill Roa
  */
-public class HibernateDataStatisticsStore 
-    extends HibernateGenericStore<DataStatistics> 
+public class HibernateDataStatisticsStore
+    extends HibernateGenericStore<DataStatistics>
     implements DataStatisticsStore
 {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
     /**
-     * Retrieves data from database and maps aggregated data to 
+     * Retrieves data from database and maps aggregated data to
      * AggregatedStatistic object.
      *
-     * @param sql for data to be retrieved
+     * @param sql           for data to be retrieved
      * @param eventInterval interval: DAY,MONTH,WEEK,YEAR
      * @return List of aggregated data
      */
@@ -64,7 +64,7 @@ public class HibernateDataStatisticsStore
 
             AggregatedStatistics ads = new AggregatedStatistics();
             ads.setYear( resultSet.getInt( "yr" ) );
-            
+
             switch ( eventInterval )
             {
                 case DAY:
@@ -96,7 +96,7 @@ public class HibernateDataStatisticsStore
             ads.setSavedDashboards( resultSet.getInt( "savedDashboards" ) );
             ads.setSavedIndicators( resultSet.getInt( "savedIndicators" ) );
             ads.setusers( resultSet.getInt( "users" ) );
-            
+
             return ads;
         } );
     }

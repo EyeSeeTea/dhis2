@@ -51,7 +51,7 @@ import java.util.List;
  * @author Julie Hill Roa
  */
 @Transactional
-public class DefaultDataStatisticsService 
+public class DefaultDataStatisticsService
     implements DataStatisticsService
 {
     @Autowired
@@ -80,8 +80,8 @@ public class DefaultDataStatisticsService
     /**
      * Gets number of saved Reports from a start date too a end date
      *
-     * @param startDate start date
-     * @param endDate end date
+     * @param startDate     start date
+     * @param endDate       end date
      * @param eventInterval event interval.
      * @return list of reports
      */
@@ -89,7 +89,7 @@ public class DefaultDataStatisticsService
     public List<AggregatedStatistics> getReports( Date startDate, Date endDate, EventInterval eventInterval )
     {
         String sql = "";
-        
+
         switch ( eventInterval )
         {
             case DAY:
@@ -107,7 +107,7 @@ public class DefaultDataStatisticsService
             default:
                 sql = getDaySql( startDate, endDate );
         }
-        
+
         return dataStatisticsStore.getSnapshotsInInterval( sql, eventInterval );
     }
 
@@ -115,7 +115,7 @@ public class DefaultDataStatisticsService
      * Creating a SQL for retrieving aggregated data with group by YEAR
      *
      * @param start start date
-     * @param end  end date
+     * @param end   end date
      * @return SQL string
      */
     private String getYearSql( Date start, Date end )
@@ -129,7 +129,7 @@ public class DefaultDataStatisticsService
      * Creating a SQL for retrieving aggregated data with group by YEAR, MONTH
      *
      * @param start start date
-     * @param end  end date
+     * @param end   end date
      * @return SQL string
      */
     private String getMonthSql( Date start, Date end )
@@ -144,7 +144,7 @@ public class DefaultDataStatisticsService
      * Creating a SQL for retrieving aggregated data with group by YEAR, WEEK
      *
      * @param start start date
-     * @param end end date
+     * @param end   end date
      * @return SQL string
      */
     private String getWeekSql( Date start, Date end )
@@ -159,13 +159,13 @@ public class DefaultDataStatisticsService
      * Creating a SQL for retrieving aggregated data with group by YEAR, DAY
      *
      * @param start start date
-     * @param end end date
+     * @param end   end date
      * @return SQL string
      */
     private String getDaySql( Date start, Date end )
     {
         return "select extract(year from created) as yr, " +
-            "extract(month from created) as mnt,"+
+            "extract(month from created) as mnt," +
             "extract(day from created) as day, " +
             commonSql( start, end ) +
             ", mnt, day order by yr, mnt, day;";
@@ -175,7 +175,7 @@ public class DefaultDataStatisticsService
      * private method: part of sql witch is always the same in the different intervals YEAR, MONTH, WEEK and DAY
      *
      * @param start start date
-     * @param end end date
+     * @param end   end date
      * @return sql string
      */
     private String commonSql( Date start, Date end )
@@ -202,11 +202,11 @@ public class DefaultDataStatisticsService
     }
 
     /**
-     * Gets all important information and creates a DataStatistics object 
+     * Gets all important information and creates a DataStatistics object
      * and persists it.
      */
     @Override
-    public int saveSnapshot( )
+    public int saveSnapshot()
     {
         Date now = new Date();
         Date startDate = new Date();
@@ -225,67 +225,33 @@ public class DefaultDataStatisticsService
         double savedIndicators = identifiableObjectManager.getCountByCreated( Indicator.class, startDate );
         int activeUsers = userService.getActiveUsersCount( 1 );
 
-        double chartViews = 0;
-        double mapViews = 0;
-        double dashboardViews = 0;
-        double reportTablesViews = 0;
-        double eventReportViews = 0;
-        double eventChartViews = 0;
-        double indicatorsViews = 0;
-        double totalNumberOfViews = 0;
-        double averageNumberofViews = 0;
+        double mapView = 0;
+        double chartView = 0;
+        double reportTableView = 0;
+        double eventReportView = 0;
+        double eventChartView = 0;
+        double dashbordView = 0;
+        double indicatorView = 0;
 
-        List<int[]> list = dataStatisticsEventStore.getDataStatisticsEventCount( startDate, now );
+        java.util.Map<DataStatisticsEventType, Double> eventCount = dataStatisticsEventStore.getDataStatisticsEventCount( startDate, now );
+        if ( eventCount.containsKey( DataStatisticsEventType.MAP_VIEW ) )
+            mapView = eventCount.get( DataStatisticsEventType.MAP_VIEW );
+        if ( eventCount.containsKey( DataStatisticsEventType.CHART_VIEW ) )
+            chartView = eventCount.get( DataStatisticsEventType.CHART_VIEW );
+        if ( eventCount.containsKey( DataStatisticsEventType.REPORT_TABLE_VIEW ) )
+            reportTableView = eventCount.get( DataStatisticsEventType.REPORT_TABLE_VIEW );
+        if ( eventCount.containsKey( DataStatisticsEventType.EVENT_REPORT_VIEW ) )
+            eventReportView = eventCount.get( DataStatisticsEventType.EVENT_REPORT_VIEW );
+        if ( eventCount.containsKey( DataStatisticsEventType.EVENT_CHART_VIEW ) )
+            eventChartView = eventCount.get( DataStatisticsEventType.EVENT_CHART_VIEW );
+        if ( eventCount.containsKey( DataStatisticsEventType.DASHBOARD_VIEW ) )
+            dashbordView = eventCount.get( DataStatisticsEventType.DASHBOARD_VIEW );
+        if ( eventCount.containsKey( DataStatisticsEventType.INDICATOR_VIEW ) )
+            indicatorView = eventCount.get( DataStatisticsEventType.INDICATOR_VIEW );
 
-        for ( int i = 0; i < list.size(); i++ )
-        {
-            int[] temp = (int[]) list.get( i );
-            
-            switch ( temp[0] )
-            {
-                case 0:
-                    chartViews = temp[1];
-                    totalNumberOfViews += chartViews;
-                    break;
-                case 1: 
-                    mapViews = temp[1];
-                    totalNumberOfViews += mapViews;
-                    break;
-                case 2: 
-                    dashboardViews = temp[1];
-                    totalNumberOfViews += dashboardViews;
-                    break;
-                case 3: 
-                    reportTablesViews = temp[1];
-                    totalNumberOfViews += reportTablesViews;
-                    break;
-                case 4: 
-                    eventReportViews = temp[1];
-                    totalNumberOfViews += eventReportViews;
-                    break;
-                case 5: 
-                    eventChartViews = temp[1];
-                    totalNumberOfViews += eventChartViews;
-                    break;
-                case 6: 
-                    indicatorsViews = temp[1];
-                    totalNumberOfViews += indicatorsViews;
-                    break;
-            }
-        }
-        
-        if ( activeUsers != 0 )
-        {
-            averageNumberofViews = totalNumberOfViews/activeUsers;
-        }
-        else
-        {
-            averageNumberofViews = totalNumberOfViews;
-        }
-
-        DataStatistics dataStatistics = new DataStatistics( activeUsers, mapViews, chartViews,
-            reportTablesViews, eventReportViews, eventChartViews, dashboardViews,
-            indicatorsViews, totalNumberOfViews, averageNumberofViews, savedMaps,
+        DataStatistics dataStatistics = new DataStatistics( activeUsers, mapView, chartView,
+            reportTableView, eventReportView, eventChartView, dashbordView,
+            indicatorView, savedMaps,
             savedCharts, savedReportTables, savedEventReports,
             savedEventCharts, savedDashboards, savedIndicators,
             totalUsers );

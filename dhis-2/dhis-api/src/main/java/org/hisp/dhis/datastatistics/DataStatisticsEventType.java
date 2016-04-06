@@ -34,7 +34,7 @@ package org.hisp.dhis.datastatistics;
  * @author Yrjan A. F. Fraschetti
  * @author Julie Hill Roa
  */
-public enum EventType
+public enum DataStatisticsEventType
 {
     CHART_VIEW, 
     MAP_VIEW, 

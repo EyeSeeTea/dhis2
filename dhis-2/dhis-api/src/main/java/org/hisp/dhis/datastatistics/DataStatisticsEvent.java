@@ -39,7 +39,7 @@ import java.util.Date;
 public class DataStatisticsEvent
 {
     private int id;
-    private EventType type;
+    private DataStatisticsEventType type;
     private Date timestamp;
     private String userName;
 
@@ -47,7 +47,7 @@ public class DataStatisticsEvent
     {
     }
 
-    public DataStatisticsEvent( EventType type, Date timestamp, String userName )
+    public DataStatisticsEvent( DataStatisticsEventType type, Date timestamp, String userName )
     {
         this.type = type;
         this.timestamp = timestamp;
@@ -64,7 +64,7 @@ public class DataStatisticsEvent
         return timestamp;
     }
 
-    public EventType getType()
+    public DataStatisticsEventType getType()
     {
         return type;
     }
@@ -84,7 +84,7 @@ public class DataStatisticsEvent
         this.timestamp = timestamp;
     }
 
-    public void setType( EventType type )
+    public void setType( DataStatisticsEventType type )
     {
         this.type = type;
     }

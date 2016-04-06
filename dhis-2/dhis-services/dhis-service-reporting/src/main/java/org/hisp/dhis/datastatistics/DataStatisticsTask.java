@@ -54,7 +54,7 @@ public class DataStatisticsTask
     @Override
     public void run()
     {
-        dataStatisticsService.saveSnapshot();
+        int id = dataStatisticsService.saveSnapshot();
         
         //TODO find some level of verification that save actually was successful
         

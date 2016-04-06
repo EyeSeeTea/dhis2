@@ -44,7 +44,7 @@ import org.hisp.dhis.datastatistics.DataStatisticsEvent;
 import org.hisp.dhis.datastatistics.AggregatedStatistics;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
-import org.hisp.dhis.datastatistics.EventType;
+import org.hisp.dhis.datastatistics.DataStatisticsEventType;
 import org.hisp.dhis.datastatistics.DataStatisticsService;
 import org.hisp.dhis.datastatistics.EventInterval;
 
@@ -66,12 +66,12 @@ public class DataStatisticsController
 
     @RequestMapping( value = "/dataStatistics", method = RequestMethod.POST )
     @ResponseStatus( HttpStatus.CREATED )
-    public void saveEvent( @RequestParam EventType eventType )
+    public void saveEvent( @RequestParam DataStatisticsEventType dataStatisticsEventType )
     {
         Date timestamp = new Date();
         User user = currentUserService.getCurrentUser();
 
-        DataStatisticsEvent event = new DataStatisticsEvent( eventType, timestamp, user.getUsername() );
+        DataStatisticsEvent event = new DataStatisticsEvent( dataStatisticsEventType, timestamp, user.getUsername() );
         dataStatisticsService.addEvent( event );
     }
 
