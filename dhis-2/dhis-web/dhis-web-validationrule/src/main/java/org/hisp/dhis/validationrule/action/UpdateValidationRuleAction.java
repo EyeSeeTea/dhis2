@@ -212,7 +212,7 @@ public class UpdateValidationRuleAction
         this.annualSampleCount = annualSampleCount;
     }
 
-    private String sequentialSampleCount;
+    private String sequentialSkipCount;
 
     public void setSequentialSkipCount( String sequentialSkipCount )
     {
