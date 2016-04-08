@@ -251,13 +251,25 @@ public class ValidationRule
     {
         HashSet<DataElement> past = new HashSet<DataElement>();
         Set<DataElement> elts = leftSide.getSampleElementsInExpression();
-        if ( elts != null ) past.addAll( elts );
+        if ( elts != null )
+        {
+            past.addAll( elts );
+        }
         elts = rightSide.getSampleElementsInExpression();
-        if ( elts != null ) past.addAll( elts );
+        if ( elts != null )
+        {
+            past.addAll( elts );
+        }
         if ( sampleSkipTest == null )
             elts = null;
-        else elts = sampleSkipTest.getSampleElementsInExpression();
-        if ( elts != null ) past.addAll( elts );
+        else
+        {
+            elts = sampleSkipTest.getSampleElementsInExpression();
+        }
+        if ( elts != null )
+        {
+            past.addAll( elts );
+        }
         return past;
     }
 

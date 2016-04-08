@@ -413,41 +413,42 @@ public class DataValidationTask
      * @param incompleteValuesMap map of values that were incomplete.
      * @return map of values.
      */
-    private Map<Integer, Double>getExpressionValueMap
-	(Expression expression,
-	 Set<Integer> skipCombos,
-	 MapMap<Integer, DataElementOperand, Double> valueMap, 
-	 SetMap<Integer, DataElementOperand> incompleteValuesMap )
+    private Map<Integer, Double> getExpressionValueMap
+    ( Expression expression,
+        Set<Integer> skipCombos,
+        MapMap<Integer, DataElementOperand, Double> valueMap,
+        SetMap<Integer, DataElementOperand> incompleteValuesMap )
     {
         Map<Integer, Double> expressionValueMap = new HashMap<>();
 
-	if (skipCombos == null) {
-        for ( Map.Entry<Integer, Map<DataElementOperand, Double>> entry : valueMap.entrySet() )
+        if ( skipCombos == null )
         {
-            Double value = expressionService.getExpressionValue( expression, entry.getValue(),
-                context.getConstantMap(), null, null, incompleteValuesMap.getSet( entry.getKey() ), null );
-
-            if ( MathUtils.isValidDouble( value ) )
+            for ( Map.Entry<Integer, Map<DataElementOperand, Double>> entry : valueMap.entrySet() )
             {
-                expressionValueMap.put( entry.getKey(), value );
+                Double value = expressionService.getExpressionValue( expression, entry.getValue(),
+                    context.getConstantMap(), null, null, incompleteValuesMap.getSet( entry.getKey() ), null );
+
+                if ( MathUtils.isValidDouble( value ) )
+                {
+                    expressionValueMap.put( entry.getKey(), value );
+                }
             }
         }
-	}
-	else 
-	    {
-        for ( Map.Entry<Integer, Map<DataElementOperand, Double>> entry : valueMap.entrySet() )
-	    if (!(skipCombos.contains(entry.getKey())))
+        else
         {
-            Double value = expressionService.getExpressionValue( expression, entry.getValue(),
-                context.getConstantMap(), null, null, incompleteValuesMap.getSet( entry.getKey() ), null );
+            for ( Map.Entry<Integer, Map<DataElementOperand, Double>> entry : valueMap.entrySet() )
+                if ( !(skipCombos.contains( entry.getKey() )) )
+                {
+                    Double value = expressionService.getExpressionValue( expression, entry.getValue(),
+                        context.getConstantMap(), null, null, incompleteValuesMap.getSet( entry.getKey() ), null );
 
-            if ( MathUtils.isValidDouble( value ) )
-            {
-                expressionValueMap.put( entry.getKey(), value );
-            }
+                    if ( MathUtils.isValidDouble( value ) )
+                    {
+                        expressionValueMap.put( entry.getKey(), value );
+                    }
+                }
+
         }
-
-	    }
 
         return expressionValueMap;
     }
@@ -750,15 +751,15 @@ public class DataValidationTask
             ( px, dataElements, sourceElements, dataElements, periodTypes, period, source, lastUpdatedMap, incompleteValuesMap );
         for ( Map.Entry<Integer, Map<DataElementOperand, Double>> entry : skipMap.entrySet() )
         {
-	    Integer combo=entry.getKey();
+            Integer combo = entry.getKey();
             Object value = expressionService.getExpressionObjectValue( skipTest, entry.getValue(),
                 context.getConstantMap(), null, null, incompleteValuesMap.getSet( entry.getKey() ), null );
 
-	    if (!(falsy(value))) results.add(combo);
-	}
+            if ( !(falsy( value )) ) results.add( combo );
+        }
 
-	if (results.size()==0) return null;
-	else return results;
+        if ( results.size() == 0 ) return null;
+        else return results;
     }
 
 

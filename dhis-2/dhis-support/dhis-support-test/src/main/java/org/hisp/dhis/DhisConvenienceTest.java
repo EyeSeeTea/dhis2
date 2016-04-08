@@ -969,7 +969,7 @@ public abstract class DhisConvenienceTest
     public static ValidationRule createValidationRule( char uniqueCharacter, Operator operator, Expression leftSide,
         Expression rightSide, PeriodType periodType )
     {
-	return createValidationRule( Character.toString(uniqueCharacter),operator,leftSide,rightSide,periodType );
+        return createValidationRule( Character.toString( uniqueCharacter ), operator, leftSide, rightSide, periodType );
     }
 
     /**
@@ -988,12 +988,12 @@ public abstract class DhisConvenienceTest
      * @param sequentialSkipCount   How many periods in the current year to skip
      */
     public static ValidationRule createMonitoringRule
-	(String uniqueCharacter, Operator operator,
-	 Expression leftSide,Expression rightSide, Expression skipTest,
-	 PeriodType periodType, int organisationUnitLevel, 
-	 int sequentialSampleCount,
-	 int annualSampleCount,
-	 int sequentialSkipCount)
+    ( String uniqueCharacter, Operator operator,
+        Expression leftSide, Expression rightSide, Expression skipTest,
+        PeriodType periodType, int organisationUnitLevel,
+        int sequentialSampleCount,
+        int annualSampleCount,
+        int sequentialSkipCount )
     {
         ValidationRule validationRule = new ValidationRule();
         validationRule.setAutoFields();
@@ -1028,17 +1028,17 @@ public abstract class DhisConvenienceTest
      * @param annualSampleCount     How many years of past periods to sample.
      */
     public static ValidationRule createMonitoringRule
-	( String uniqueCharacter, Operator operator,
-	  Expression leftSide, Expression rightSide, 
-	  PeriodType periodType, int organisationUnitLevel, 
-	  int sequentialSampleCount, int annualSampleCount)
+    ( String uniqueCharacter, Operator operator,
+        Expression leftSide, Expression rightSide,
+        PeriodType periodType, int organisationUnitLevel,
+        int sequentialSampleCount, int annualSampleCount )
     {
-	return createMonitoringRule(uniqueCharacter,operator,
-				    leftSide,rightSide,null,
-				    periodType,organisationUnitLevel,
-				    sequentialSampleCount,
-				    annualSampleCount,
-				    0);
+        return createMonitoringRule( uniqueCharacter, operator,
+            leftSide, rightSide, null,
+            periodType, organisationUnitLevel,
+            sequentialSampleCount,
+            annualSampleCount,
+            0 );
     }
 
     /**
