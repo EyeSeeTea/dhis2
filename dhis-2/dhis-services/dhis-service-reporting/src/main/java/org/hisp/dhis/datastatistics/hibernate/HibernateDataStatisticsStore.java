@@ -37,6 +37,8 @@ import org.hisp.dhis.system.util.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.Date;
 import java.util.List;
 
@@ -44,45 +46,42 @@ import java.util.List;
  * @author Yrjan A. F. Fraschetti
  * @author Julie Hill Roa
  */
-public class HibernateDataStatisticsStore 
-    extends HibernateGenericStore<DataStatistics> 
+public class HibernateDataStatisticsStore
+    extends HibernateGenericStore<DataStatistics>
     implements DataStatisticsStore
 {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    /**
-     * Retrieves data from database and maps aggregated data to 
-     * AggregatedStatistic object.
-     *
-     * @param sql for data to be retrieved
-     * @param eventInterval interval: DAY,MONTH,WEEK,YEAR
-     * @return List of aggregated data
-     */
+    // -------------------------------------------------------------------------
+    // DataStatisticsStore implementation
+    // -------------------------------------------------------------------------
+
     @Override
     public List<AggregatedStatistics> getSnapshotsInInterval( EventInterval eventInterval, Date startDate, Date endDate )
     {
         final String sql = getQuery( eventInterval, startDate, endDate );
-        
+
         return jdbcTemplate.query( sql, ( resultSet, i ) -> {
 
             AggregatedStatistics ads = new AggregatedStatistics();
+
             ads.setYear( resultSet.getInt( "yr" ) );
-            
-            switch ( eventInterval )
+
+            if ( eventInterval == EventInterval.DAY )
             {
-                case DAY:
-                    ads.setDay( resultSet.getInt( "day" ) );
-                    ads.setMonth( resultSet.getInt( "mnt" ) );
-                    break;
-                case WEEK:
-                    ads.setWeek( resultSet.getInt( "week" ) );
-                    break;
-                case MONTH:
-                    ads.setMonth( resultSet.getInt( "mnt" ) );
-                    break;
+                ads.setDay( resultSet.getInt( "day" ) );
+                ads.setMonth( resultSet.getInt( "mnt" ) );
             }
-            
+            else if ( eventInterval == EventInterval.WEEK )
+            {
+                ads.setWeek( resultSet.getInt( "week" ) );
+            }
+            else if ( eventInterval == EventInterval.MONTH )
+            {
+                ads.setMonth( resultSet.getInt( "mnt" ) );
+            }
+
             ads.setActiveUsers( resultSet.getInt( "activeUsers" ) );
             ads.setMapViews( resultSet.getInt( "mapViews" ) );
             ads.setChartViews( resultSet.getInt( "chartViews" ) );
@@ -101,101 +100,101 @@ public class HibernateDataStatisticsStore
             ads.setSavedDashboards( resultSet.getInt( "savedDashboards" ) );
             ads.setSavedIndicators( resultSet.getInt( "savedIndicators" ) );
             ads.setusers( resultSet.getInt( "users" ) );
-            
+
             return ads;
         } );
     }
 
     private String getQuery( EventInterval eventInterval, Date startDate, Date endDate )
     {
-        String sql = "";
-        
-        switch ( eventInterval )
+        String sql = StringUtils.EMPTY;
+
+        if ( eventInterval == EventInterval.DAY )
         {
-            case DAY:
-                sql = getDaySql( startDate, endDate );
-                break;
-            case WEEK:
-                sql = getWeekSql( startDate, endDate );
-                break;
-            case MONTH:
-                sql = getMonthSql( startDate, endDate );
-                break;
-            case YEAR:
-                sql = getYearSql( startDate, endDate );
-                break;
-            default:
-                sql = getDaySql( startDate, endDate );
+            sql = getDaySql( startDate, endDate );
         }
-        
+        else if ( eventInterval == EventInterval.WEEK )
+        {
+            sql = getWeekSql( startDate, endDate );
+        }
+        else if ( eventInterval == EventInterval.MONTH )
+        {
+            sql = getMonthSql( startDate, endDate );
+        }
+        else if ( eventInterval == EventInterval.YEAR )
+        {
+            sql = getYearSql( startDate, endDate );
+        }
+        else
+        {
+            sql = getDaySql( startDate, endDate );
+        }
+
         return sql;
     }
-    
+
     /**
      * Creating a SQL for retrieving aggregated data with group by YEAR
      *
      * @param start start date
-     * @param end  end date
+     * @param end   end date
      * @return SQL string
      */
     private String getYearSql( Date start, Date end )
     {
         return "select extract(year from created) as yr, " +
-            commonSql( start, end ) +
-            " order by yr;";
+            commonSql( start, end ) + " order by yr;";
     }
 
     /**
      * Creating a SQL for retrieving aggregated data with group by YEAR, MONTH
      *
      * @param start start date
-     * @param end  end date
+     * @param end   end date
      * @return SQL string
      */
     private String getMonthSql( Date start, Date end )
     {
         return "select extract(year from created) as yr, " +
             "extract(month from created) as mnt, " +
-            commonSql( start, end ) +
-            ", mnt order by yr, mnt;";
+            commonSql( start, end ) + ", mnt order by yr, mnt;";
     }
 
     /**
      * Creating a SQL for retrieving aggregated data with group by YEAR, WEEK
      *
      * @param start start date
-     * @param end end date
+     * @param end   end date
      * @return SQL string
      */
     private String getWeekSql( Date start, Date end )
     {
         return "select extract(year from created) as yr, " +
             "extract(week from created) as week, " +
-            commonSql( start, end ) +
-            ", week order by yr, week;";
+            commonSql( start, end ) + ", week order by yr, week;";
     }
 
     /**
      * Creating a SQL for retrieving aggregated data with group by YEAR, DAY
      *
      * @param start start date
-     * @param end end date
+     * @param end   end date
      * @return SQL string
      */
     private String getDaySql( Date start, Date end )
     {
         return "select extract(year from created) as yr, " +
-            "extract(month from created) as mnt,"+
+            "extract(month from created) as mnt," +
             "extract(day from created) as day, " +
-            commonSql( start, end ) +
-            ", mnt, day order by yr, mnt, day;";
+            commonSql( start, end ) + ", mnt, day order by yr, mnt, day;";
     }
 
     /**
-     * Part of SQL witch is always the same in the different intervals YEAR, MONTH, WEEK and DAY
+     * Part of SQL witch is always the same in the different intervals YEAR,
+     * MONTH, WEEK and DAY
      *
      * @param start start date
-     * @param end end date
+     * @param end   end date
      * @return SQL string
      */
     private String commonSql( Date start, Date end )
@@ -218,7 +217,7 @@ public class HibernateDataStatisticsStore
             "cast(round(cast(sum(dashborards) as numeric),0) as int) as savedDashboards, " +
             "cast(round(cast(sum(indicators) as numeric),0) as int) as savedIndicators," +
             "max(users) as users from datastatistics " +
-            "where (created between '" + DateUtils.getMediumDateString( start ) + 
+            "where (created between '" + DateUtils.getMediumDateString( start ) +
             "' and '" + DateUtils.getMediumDateString( end ) + "') " +
             "group by yr";
     }

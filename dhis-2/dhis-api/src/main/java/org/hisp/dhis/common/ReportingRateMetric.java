@@ -1,4 +1,4 @@
-package org.hisp.dhis.datastatistics;
+package org.hisp.dhis.common;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -28,24 +28,31 @@ package org.hisp.dhis.datastatistics;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.GenericStore;
-
-import java.util.Date;
-import java.util.Map;
-
 /**
- * @author Yrjan A. F. Fraschetti
- * @author Julie Hill Roa
- */
-public interface DataStatisticsEventStore
-    extends GenericStore<DataStatisticsEvent>
+* @author Lars Helge Overland
+*/
+public enum ReportingRateMetric
 {
-    /**
-     * Method for retrieving aggregated event count data.
-     *
-     * @param startDate the start date.
-     * @param endDate the end date.
-     * @return a map between DataStatisticsEventTypes and counts.
-     */
-    Map<DataStatisticsEventType, Double> getDataStatisticsEventCount( Date startDate, Date endDate );
+    REPORTING_RATE( "reporting_rate", "Reporting rate" ), 
+    ACTUAL_REPORTS( "actual_reports", "Actual reports" ), 
+    EXPECTED_REPORTS( "expected_reports", "Expected reports" );
+    
+    private String key;
+    
+    private String displayName;
+    
+    private ReportingRateMetric( String key, String displayName )
+    {
+        this.displayName = displayName;
+    }
+    
+    public String key()
+    {
+        return key;
+    }
+    
+    public String displayName()
+    {
+        return displayName;
+    }
 }

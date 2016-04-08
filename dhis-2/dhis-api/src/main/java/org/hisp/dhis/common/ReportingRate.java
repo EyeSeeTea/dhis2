@@ -1,4 +1,4 @@
-package org.hisp.dhis.program;
+package org.hisp.dhis.common;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -28,17 +28,10 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.common.DimensionalObjectUtils.COMPOSITE_DIM_OBJECT_PLAIN_SEP;
-
-import org.hisp.dhis.analytics.AggregationType;
-import org.hisp.dhis.common.BaseDimensionalItemObject;
-import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.DimensionItemType;
-import org.hisp.dhis.common.DxfNamespaces;
-import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
-import org.hisp.dhis.dataelement.DataElement;
+
+import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.legend.LegendSet;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -47,67 +40,33 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
+import static org.hisp.dhis.common.DimensionalObjectUtils.COMPOSITE_DIM_OBJECT_PLAIN_SEP;
+
 /**
- * @author Lars Helge Overland
- */
-@JacksonXmlRootElement( localName = "programDataElement", namespace = DxfNamespaces.DXF_2_0 )
-public class ProgramDataElement
+* @author Lars Helge Overland
+*/
+@JacksonXmlRootElement( localName = "reportingRate", namespace = DxfNamespaces.DXF_2_0 )
+public class ReportingRate
     extends BaseDimensionalItemObject
 {
-    private Program program;
+    private DataSet dataSet;
     
-    private DataElement dataElement;
-
-    // -------------------------------------------------------------------------
-    // Constructors
-    // -------------------------------------------------------------------------
-
-    public ProgramDataElement()
-    {
-    }
+    private ReportingRateMetric metric;
     
-    public ProgramDataElement( Program program, DataElement dataElement )
+    public ReportingRate()
     {
-        this.program = program;
-        this.dataElement = dataElement;
     }
 
-    // -------------------------------------------------------------------------
-    // Logic
-    // -------------------------------------------------------------------------
-
-    @Override
-    public String getName()
+    public ReportingRate( DataSet dataSet )
     {
-        return program.getDisplayName() + " " + dataElement.getDisplayName();
-    }
-
-    @Override
-    public String getShortName()
-    {
-        return program.getDisplayShortName() + " " + dataElement.getDisplayShortName();
+        this.dataSet = dataSet;
+        this.metric = ReportingRateMetric.REPORTING_RATE;
     }
     
-    @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public ValueType getValueType()
+    public ReportingRate( DataSet dataSet, ReportingRateMetric metric )
     {
-        return dataElement.getValueType();
-    }
-
-    @Override
-    public String toString()
-    {
-        return "{" +
-            "\"class\":\"" + getClass() + "\", " +
-            "\"id\":\"" + id + "\", " +
-            "\"uid\":\"" + uid + "\", " +
-            "\"program\":" + program + ", " +
-            "\"dataElement\":" + dataElement + ", " +
-            "\"created\":\"" + created + "\", " +
-            "\"lastUpdated\":\"" + lastUpdated + "\" " +
-            "}";
+        this.dataSet = dataSet;
+        this.metric = metric;
     }
 
     // -------------------------------------------------------------------------
@@ -115,58 +74,73 @@ public class ProgramDataElement
     // -------------------------------------------------------------------------
 
     @Override
-    public String getDimensionItem()
+    public String getUid()
     {
-        return program.getUid() + COMPOSITE_DIM_OBJECT_PLAIN_SEP + dataElement.getUid();
+        return dataSet.getUid();
+    }
+    
+    @Override
+    public String getName()
+    {
+        String metricName = metric != null ? metric.displayName() : ReportingRateMetric.REPORTING_RATE.displayName();
+        
+        return dataSet.getName() + " " + metricName;
+    }
+
+    @Override
+    public String getShortName()
+    {
+        String metricName = metric != null ? metric.displayName() : ReportingRateMetric.REPORTING_RATE.displayName();
+        
+        return dataSet.getShortName() + " " + metricName;
+    }
+    
+    @Override
+    public String getDimensionItem()
+    {        
+        return dataSet.getUid() + COMPOSITE_DIM_OBJECT_PLAIN_SEP + metric.name();
     }
 
     @Override
     public DimensionItemType getDimensionItemType()
     {
-        return DimensionItemType.PROGRAM_DATA_ELEMENT;
+        return DimensionItemType.REPORTING_RATE;
     }
     
     @Override
     public LegendSet getLegendSet()
     {
-        return dataElement.getLegendSet();
+        return dataSet.getLegendSet();
     }
     
-    @Override
-    public AggregationType getAggregationType()
-    {
-        return dataElement.getAggregationType();
-    }
-
     // -------------------------------------------------------------------------
-    // Get and set methods
+    // Logic
     // -------------------------------------------------------------------------
 
     @JsonProperty
-    @JsonSerialize( as = BaseIdentifiableObject.class )
+    @JsonSerialize( as = BaseNameableObject.class )
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public Program getProgram()
+    public DataSet getDataSet()
     {
-        return program;
+        return dataSet;
     }
 
-    public void setProgram( Program program )
+    public void setDataSet( DataSet dataSet )
     {
-        this.program = program;
+        this.dataSet = dataSet;
     }
 
     @JsonProperty
-    @JsonSerialize( as = BaseIdentifiableObject.class )
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public DataElement getDataElement()
+    public ReportingRateMetric getMetric()
     {
-        return dataElement;
+        return metric;
     }
 
-    public void setDataElement( DataElement dataElement )
+    public void setMetric( ReportingRateMetric metric )
     {
-        this.dataElement = dataElement;
-    }
+        this.metric = metric;
+    }    
 }

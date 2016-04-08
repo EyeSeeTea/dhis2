@@ -128,9 +128,9 @@ public class DefaultQueryPlanner
             violation = "Indicators cannot be specified as filter";
         }
 
-        if ( !params.getFilterDataSets().isEmpty() )
+        if ( !params.getFilterReportingRates().isEmpty() )
         {
-            violation = "Data sets cannot be specified as filter";
+            violation = "Reporting rates cannot be specified as filter";
         }
 
         if ( params.getFilters().contains( new BaseDimensionalObject( CATEGORYOPTIONCOMBO_DIM_ID ) ) )
@@ -143,9 +143,9 @@ public class DefaultQueryPlanner
             violation = "Dimensions cannot be specified more than once: " + params.getDuplicateDimensions();
         }
 
-        if ( !params.getAllDataSets().isEmpty() && !params.getDataElementGroupSets().isEmpty() )
+        if ( !params.getAllReportingRates().isEmpty() && !params.getDataElementGroupSets().isEmpty() )
         {
-            violation = "Data sets and data element group sets cannot be specified simultaneously";
+            violation = "Reporting rates and data element group sets cannot be specified simultaneously";
         }
 
         if ( params.hasDimensionOrFilter( CATEGORYOPTIONCOMBO_DIM_ID ) && params.getAllDataElements().isEmpty() )
@@ -448,7 +448,7 @@ public class DefaultQueryPlanner
             for ( Integer level : levelOrgUnitMap.keySet() )
             {
                 DataQueryParams query = params.instance();
-                query.setDimensionOptions( ORGUNIT_DIM_ID, DimensionType.ORGANISATIONUNIT, LEVEL_PREFIX + level, levelOrgUnitMap.get( level ) );
+                query.setDimensionOptions( ORGUNIT_DIM_ID, DimensionType.ORGANISATION_UNIT, LEVEL_PREFIX + level, levelOrgUnitMap.get( level ) );
                 queries.add( query );
             }
         }

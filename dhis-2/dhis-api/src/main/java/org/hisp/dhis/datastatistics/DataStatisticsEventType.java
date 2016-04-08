@@ -28,24 +28,20 @@ package org.hisp.dhis.datastatistics;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.GenericStore;
-
-import java.util.Date;
-import java.util.Map;
-
 /**
+ * Enum of EventTypes to be used as identifiers in DataStatisticsEvent
+ *
  * @author Yrjan A. F. Fraschetti
  * @author Julie Hill Roa
  */
-public interface DataStatisticsEventStore
-    extends GenericStore<DataStatisticsEvent>
+public enum DataStatisticsEventType
 {
-    /**
-     * Method for retrieving aggregated event count data.
-     *
-     * @param startDate the start date.
-     * @param endDate the end date.
-     * @return a map between DataStatisticsEventTypes and counts.
-     */
-    Map<DataStatisticsEventType, Double> getDataStatisticsEventCount( Date startDate, Date endDate );
+    CHART_VIEW,
+    MAP_VIEW,
+    DASHBOARD_VIEW,
+    REPORT_TABLE_VIEW,
+    EVENT_REPORT_VIEW,
+    EVENT_CHART_VIEW,
+    INDICATOR_VIEW,
+    TOTAL_VIEW
 }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.datastatistics;
+package org.hisp.dhis.common;
 
 /*
  * Copyright (c) 2004-2016, University of Oslo
@@ -29,18 +29,21 @@ package org.hisp.dhis.datastatistics;
  */
 
 /**
- * Enum of EventTypes to be used as identifiers in DataStatisticsEvent
- * 
- * @author Yrjan A. F. Fraschetti
- * @author Julie Hill Roa
+ * @author Lars Helge Overland
  */
-public enum EventType
+public enum DimensionItemType
 {
-    CHART_VIEW, 
-    MAP_VIEW, 
-    DASHBOARD_VIEW, 
-    REPORT_TABLE_VIEW, 
-    EVENT_REPORT_VIEW, 
-    EVENT_CHART_VIEW, 
-    INDICATOR_VIEW
+    DATA_ELEMENT,
+    DATA_ELEMENT_OPERAND,
+    INDICATOR,
+    REPORTING_RATE,
+    PROGRAM_DATA_ELEMENT,
+    PROGRAM_ATTRIBUTE,
+    PROGRAM_INDICATOR,
+    PERIOD,
+    ORGANISATION_UNIT,
+    CATEGORY_OPTION,
+    DATA_ELEMENT_GROUP,
+    ORGANISATION_UNIT_GROUP,
+    CATEGORY_OPTION_GROUP
 }

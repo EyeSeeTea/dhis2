@@ -29,14 +29,14 @@ package org.hisp.dhis.dimension;
  */
 
 import static org.hisp.dhis.common.DimensionType.CATEGORY;
-import static org.hisp.dhis.common.DimensionType.CATEGORYOPTION_GROUPSET;
-import static org.hisp.dhis.common.DimensionType.DATAELEMENT_GROUPSET;
+import static org.hisp.dhis.common.DimensionType.CATEGORY_OPTION_GROUP_SET;
+import static org.hisp.dhis.common.DimensionType.DATA_ELEMENT_GROUP_SET;
 import static org.hisp.dhis.common.DimensionType.DATA_X;
-import static org.hisp.dhis.common.DimensionType.ORGANISATIONUNIT;
-import static org.hisp.dhis.common.DimensionType.ORGANISATIONUNIT_GROUPSET;
+import static org.hisp.dhis.common.DimensionType.ORGANISATION_UNIT;
+import static org.hisp.dhis.common.DimensionType.ORGANISATION_UNIT_GROUP_SET;
 import static org.hisp.dhis.common.DimensionType.PERIOD;
 import static org.hisp.dhis.common.DimensionType.PROGRAM_ATTRIBUTE;
-import static org.hisp.dhis.common.DimensionType.PROGRAM_DATAELEMENT;
+import static org.hisp.dhis.common.DimensionType.PROGRAM_DATA_ELEMENT;
 import static org.hisp.dhis.common.DimensionType.PROGRAM_INDICATOR;
 import static org.hisp.dhis.common.DimensionalObjectUtils.COMPOSITE_DIM_OBJECT_ESCAPED_SEP;
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
@@ -68,6 +68,7 @@ import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementGroupSet;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataelement.DataElementOperandService;
+import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.legend.LegendSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
@@ -182,21 +183,21 @@ public class DefaultDimensionService
 
         if ( degs != null )
         {
-            return DimensionType.DATAELEMENT_GROUPSET;
+            return DimensionType.DATA_ELEMENT_GROUP_SET;
         }
 
         OrganisationUnitGroupSet ougs = identifiableObjectManager.get( OrganisationUnitGroupSet.class, uid );
 
         if ( ougs != null )
         {
-            return DimensionType.ORGANISATIONUNIT_GROUPSET;
+            return DimensionType.ORGANISATION_UNIT_GROUP_SET;
         }
 
         CategoryOptionGroupSet cogs = identifiableObjectManager.get( CategoryOptionGroupSet.class, uid );
 
         if ( cogs != null )
         {
-            return DimensionType.CATEGORYOPTION_GROUPSET;
+            return DimensionType.CATEGORY_OPTION_GROUP_SET;
         }
 
         TrackedEntityAttribute tea = identifiableObjectManager.get( TrackedEntityAttribute.class, uid );
@@ -210,7 +211,7 @@ public class DefaultDimensionService
 
         if ( pde != null && DataElementDomain.TRACKER.equals( pde.getDomainType() ) )
         {
-            return DimensionType.PROGRAM_DATAELEMENT;
+            return DimensionType.PROGRAM_DATA_ELEMENT;
         }
 
         ProgramIndicator pin = identifiableObjectManager.get( ProgramIndicator.class, uid );
@@ -224,7 +225,7 @@ public class DefaultDimensionService
 
         dimObjectTypeMap.put( DimensionalObject.DATA_X_DIM_ID, DimensionType.DATA_X );
         dimObjectTypeMap.put( DimensionalObject.PERIOD_DIM_ID, DimensionType.PERIOD );
-        dimObjectTypeMap.put( DimensionalObject.ORGUNIT_DIM_ID, DimensionType.ORGANISATIONUNIT );
+        dimObjectTypeMap.put( DimensionalObject.ORGUNIT_DIM_ID, DimensionType.ORGANISATION_UNIT );
 
         return dimObjectTypeMap.get( uid );
     }
@@ -338,12 +339,17 @@ public class DefaultDimensionService
             String id1 = splitSafe( dimensionItem, COMPOSITE_DIM_OBJECT_ESCAPED_SEP, 1 );
 
             DataElementOperand operand = null;
+            DataSet dataSet = null;
             ProgramDataElement programDataElement = null;
             ProgramTrackedEntityAttribute programAttribute = null;
-
+            
             if ( ( operand = operandService.getOrAddDataElementOperand( id0, id1 ) ) != null )
             {
                 return operand;
+            }
+            else if ( ( dataSet = identifiableObjectManager.getObject( DataSet.class, idScheme, id0 ) ) != null )
+            {
+                return new ReportingRate( dataSet, ReportingRateMetric.valueOf( id1 ) );
             }
             else if ( ( programDataElement = programService.getOrAddProgramDataElement( id0, id1 ) ) != null )
             {
@@ -355,12 +361,22 @@ public class DefaultDimensionService
             }
         }
         else if ( !idScheme.is( IdentifiableProperty.UID ) || CodeGenerator.isValidCode( dimensionItem ) )
-        {
-            DimensionalItemObject itemObject = identifiableObjectManager.get( DataDimensionItem.DATA_DIMENSION_CLASSES, idScheme, dimensionItem );
+        {            
+            DimensionalItemObject itemObject = identifiableObjectManager.
+                get( DataDimensionItem.DATA_DIMENSION_CLASSES, idScheme, dimensionItem );
 
             if ( itemObject != null )
             {
-                return itemObject;
+                return itemObject;   
+            }
+            
+            // TODO Maintain DataSet compatibility from 2.23 until 2.25
+            
+            DataSet dataSet = identifiableObjectManager.getObject( DataSet.class, idScheme, dimensionItem );
+            
+            if ( dataSet != null )
+            {
+                return new ReportingRate( dataSet );
             }
         }
 
@@ -376,12 +392,17 @@ public class DefaultDimensionService
             String id1 = splitSafe( dimensionItem, COMPOSITE_DIM_OBJECT_ESCAPED_SEP, 1 );
 
             DataElementOperand operand = null;
+            DataSet dataSet = null;
             ProgramDataElement programDataElement = null;
             ProgramTrackedEntityAttribute programAttribute = null;
 
             if ( ( operand = operandService.getDataElementOperand( id0, id1 ) ) != null )
             {
                 return operand;
+            }
+            else if ( ( dataSet = identifiableObjectManager.get( DataSet.class, id0 ) ) != null )
+            {
+                return new ReportingRate( dataSet, ReportingRateMetric.valueOf( id1 ) );
             }
             else if ( ( programDataElement = programService.getProgramDataElement( id0, id1 ) ) != null )
             {
@@ -396,10 +417,19 @@ public class DefaultDimensionService
         {
             DimensionalItemObject itemObject = identifiableObjectManager.
                 get( DataDimensionItem.DATA_DIMENSION_CLASSES, dimensionItem );
-
+            
             if ( itemObject != null )
             {
                 return itemObject;
+            }
+
+            // TODO Maintain DataSet compatibility from 2.23 until 2.25
+            
+            DataSet dataSet = identifiableObjectManager.get( DataSet.class, dimensionItem );
+            
+            if ( dataSet != null )
+            {
+                return new ReportingRate( dataSet );
             }
         }
 
@@ -478,7 +508,7 @@ public class DefaultDimensionService
                     object.setRelatives( new RelativePeriods().setRelativePeriodsFromEnums( enums ) );
                     object.setPeriods( periodService.reloadPeriods( new ArrayList<>( periods ) ) );
                 }
-                else if ( ORGANISATIONUNIT.equals( type ) )
+                else if ( ORGANISATION_UNIT.equals( type ) )
                 {
                     for ( String ou : uids )
                     {
@@ -533,15 +563,15 @@ public class DefaultDimensionService
 
                     object.getCategoryDimensions().add( categoryDimension );
                 }
-                else if ( DATAELEMENT_GROUPSET.equals( type ) )
+                else if ( DATA_ELEMENT_GROUP_SET.equals( type ) )
                 {
                     object.getDataElementGroups().addAll( identifiableObjectManager.getByUidOrdered( DataElementGroup.class, uids ) );
                 }
-                else if ( ORGANISATIONUNIT_GROUPSET.equals( type ) )
+                else if ( ORGANISATION_UNIT_GROUP_SET.equals( type ) )
                 {
                     object.getOrganisationUnitGroups().addAll( identifiableObjectManager.getByUidOrdered( OrganisationUnitGroup.class, uids ) );
                 }
-                else if ( CATEGORYOPTION_GROUPSET.equals( type ) )
+                else if ( CATEGORY_OPTION_GROUP_SET.equals( type ) )
                 {
                     object.getCategoryOptionGroups().addAll( identifiableObjectManager.getByUidOrdered( CategoryOptionGroup.class, uids ) );
                 }
@@ -555,7 +585,7 @@ public class DefaultDimensionService
 
                     object.getAttributeDimensions().add( attributeDimension );
                 }
-                else if ( PROGRAM_DATAELEMENT.equals( type ) )
+                else if ( PROGRAM_DATA_ELEMENT.equals( type ) )
                 {
                     TrackedEntityDataElementDimension dataElementDimension = new TrackedEntityDataElementDimension();
                     dataElementDimension.setDataElement( identifiableObjectManager.get( DataElement.class, dimensionId ) );
