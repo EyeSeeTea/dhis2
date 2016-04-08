@@ -164,7 +164,7 @@ public class DefaultValidationRuleService
     {
         this.systemSettingManager = systemSettingManager;
     }
-
+    
     @Autowired
     private ApplicationContext applicationContext;
 
@@ -182,10 +182,10 @@ public class DefaultValidationRuleService
         Collection<ValidationRule> rules = group != null ? group.getMembers() : getAllValidationRules();
 
         User user = currentUserService.getCurrentUser();
-
-        Collection<ValidationResult> results = Validator.validate( ValidationRunContext.getNewContext(
-            sources, periods, rules, attributeCombo,
-            null, ValidationRunType.SCHEDULED, constantService.getConstantMap(),
+        
+        Collection<ValidationResult> results = Validator.validate( ValidationRunContext.getNewContext( 
+            sources, periods, rules, attributeCombo, 
+            null, ValidationRunType.SCHEDULED, constantService.getConstantMap(), 
             categoryService.getCogDimensionConstraints( user.getUserCredentials() ),
             categoryService.getCoDimensionConstraints( user.getUserCredentials() ) ), applicationContext );
 
@@ -212,10 +212,10 @@ public class DefaultValidationRuleService
         sources.add( source );
 
         User user = currentUserService.getCurrentUser();
-
-        return Validator.validate( ValidationRunContext.getNewContext(
+        
+        return Validator.validate( ValidationRunContext.getNewContext( 
             sources, periods, rules, null, null,
-            ValidationRunType.SCHEDULED, constantService.getConstantMap(),
+            ValidationRunType.SCHEDULED, constantService.getConstantMap(), 
             categoryService.getCogDimensionConstraints( user.getUserCredentials() ),
             categoryService.getCoDimensionConstraints( user.getUserCredentials() ) ), applicationContext );
     }
@@ -239,10 +239,10 @@ public class DefaultValidationRuleService
         sources.add( source );
 
         User user = currentUserService.getCurrentUser();
-
-        return Validator.validate( ValidationRunContext.getNewContext(
+        
+        return Validator.validate( ValidationRunContext.getNewContext( 
             sources, periods, rules, attributeCombo, null,
-            ValidationRunType.SCHEDULED, constantService.getConstantMap(),
+            ValidationRunType.SCHEDULED, constantService.getConstantMap(), 
             categoryService.getCogDimensionConstraints( user.getUserCredentials() ),
             categoryService.getCoDimensionConstraints( user.getUserCredentials() ) ), applicationContext );
     }
@@ -270,10 +270,10 @@ public class DefaultValidationRuleService
             + ", last run: " + (lastScheduledRun == null ? "[none]" : lastScheduledRun) );
 
         User user = currentUserService.getCurrentUser();
-
-        Collection<ValidationResult> results = Validator.validate( ValidationRunContext.getNewContext(
+        
+        Collection<ValidationResult> results = Validator.validate( ValidationRunContext.getNewContext( 
             sources, periods, rules, null, lastScheduledRun,
-            ValidationRunType.SCHEDULED, constantService.getConstantMap(),
+            ValidationRunType.SCHEDULED, constantService.getConstantMap(), 
             categoryService.getCogDimensionConstraints( user.getUserCredentials() ),
             categoryService.getCoDimensionConstraints( user.getUserCredentials() ) ), applicationContext );
 
