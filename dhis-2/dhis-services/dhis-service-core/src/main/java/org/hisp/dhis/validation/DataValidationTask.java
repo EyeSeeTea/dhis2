@@ -381,7 +381,7 @@ public class DataValidationTask
         return recursiveCurrentDataElements;
     }
 
-    boolean falsy( Object o )
+    private boolean falsy( Object o )
     {
         if ( o instanceof Boolean )
         {
@@ -755,7 +755,10 @@ public class DataValidationTask
             Object value = expressionService.getExpressionObjectValue( skipTest, entry.getValue(),
                 context.getConstantMap(), null, null, incompleteValuesMap.getSet( entry.getKey() ), null );
 
-            if ( !(falsy( value )) ) results.add( combo );
+            if ( !(falsy( value )) )
+            {
+                results.add( combo );
+            }
         }
 
         if ( results.size() == 0 ) return null;

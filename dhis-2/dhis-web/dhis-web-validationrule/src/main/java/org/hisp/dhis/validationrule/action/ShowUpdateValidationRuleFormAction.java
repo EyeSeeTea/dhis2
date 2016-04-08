@@ -46,6 +46,7 @@ import com.opensymphony.xwork2.Action;
 /**
  * @author Chau Thu Tran
  * @version $ ShowUpdateValidationRuleFormAction.java May 31, 2011 10:48:14 AM $
+ * 
  */
 public class ShowUpdateValidationRuleFormAction
     implements Action
@@ -76,12 +77,12 @@ public class ShowUpdateValidationRuleFormAction
     }
 
     private OrganisationUnitService organisationUnitService;
-
+    
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
     {
         this.organisationUnitService = organisationUnitService;
     }
-
+    
     private I18n i18n;
 
     public void setI18n( I18n i18n )
@@ -121,13 +122,6 @@ public class ShowUpdateValidationRuleFormAction
         return rightSideTextualExpression;
     }
 
-    private String skipTestTextualExpression;
-
-    public String getSkipTestTextualExpression()
-    {
-        return skipTestTextualExpression;
-    }
-
     private Collection<PeriodType> periodTypes;
 
     public Collection<PeriodType> getPeriodTypes()
@@ -136,10 +130,10 @@ public class ShowUpdateValidationRuleFormAction
     }
 
     private List<OrganisationUnitLevel> organisationUnitLevels;
-
+    
     public List<OrganisationUnitLevel> getOrganisationUnitLevels()
     {
-        return organisationUnitLevels;
+    	return organisationUnitLevels;
     }
 
     // -------------------------------------------------------------------------
@@ -153,15 +147,15 @@ public class ShowUpdateValidationRuleFormAction
         // ---------------------------------------------------------------------
         // Get periodTypes
         // ---------------------------------------------------------------------
-
+        
         periodTypes = periodService.getAllPeriodTypes();
-
+        
         // ---------------------------------------------------------------------
         // Get organisationUnitLevels
         // ---------------------------------------------------------------------
 
         organisationUnitLevels = organisationUnitService.getOrganisationUnitLevels();
-
+        
         // ---------------------------------------------------------------------
         // Get validationRule
         // ---------------------------------------------------------------------

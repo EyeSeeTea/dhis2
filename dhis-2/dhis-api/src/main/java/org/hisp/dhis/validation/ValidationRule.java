@@ -235,7 +235,9 @@ public class ValidationRule
 
         currentDataElements.addAll( rightSide.getDataElementsInExpression() );
         if ( sampleSkipTest != null )
+        {
             currentDataElements.addAll( sampleSkipTest.getDataElementsInExpression() );
+        }
 
         return currentDataElements;
     }

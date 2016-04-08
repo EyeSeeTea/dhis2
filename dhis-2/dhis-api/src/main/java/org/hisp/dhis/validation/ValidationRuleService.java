@@ -59,13 +59,13 @@ public interface ValidationRuleService
     /**
      * Validate DataValues.
      *
-     * @param startDate      the start date.
-     * @param endDate        the end date.
-     * @param sources        a collection of Sources.
+     * @param startDate the start date.
+     * @param endDate the end date.
+     * @param sources a collection of Sources.
      * @param attributeCombo attribute category option combo (null for all).
-     * @param group          validation rule group (null for all validationRules).
-     * @param sendAlerts     whether to send alerts for surveillance.
-     * @param format         the i18n format.
+     * @param group validation rule group (null for all validationRules).
+     * @param sendAlerts whether to send alerts for surveillance.
+     * @param format the i18n format.
      * @return a LiCollectionst of ValidationResults for each validation violation.
      */
     Collection<ValidationResult> validate( Date startDate, Date endDate, Collection<OrganisationUnit> sources, DataElementCategoryOptionCombo attributeCombo, ValidationRuleGroup group, boolean sendAlerts, I18nFormat format );
@@ -73,9 +73,9 @@ public interface ValidationRuleService
     /**
      * Validate DataValues.
      *
-     * @param dataSet        the DataSet.
-     * @param period         the Period.
-     * @param source         the Organisation unit.
+     * @param dataSet the DataSet.
+     * @param period the Period.
+     * @param source the Organisation unit.
      * @param attributeCombo attribute category option combo (null for all).
      * @return a Collection of ValidationResults for each validation violation.
      */
@@ -96,29 +96,29 @@ public interface ValidationRuleService
      * and sends results (if any) to users who should be notified.
      */
     void scheduledRun();
-
+    
     /**
      * Validate that missing data values have a corresponding comment, assuming
      * that the given data set has the noValueRequiresComment property set to true.
-     *
-     * @param dataSet              the data set.
-     * @param period               the period.
-     * @param organisationUnit     the organisation unit.
+     * 
+     * @param dataSet the data set.
+     * @param period the period.
+     * @param organisationUnit the organisation unit.
      * @param attributeOptionCombo the attribute option combo.
      * @return a list of operands representing missing comments.
      */
     List<DataElementOperand> validateRequiredComments( DataSet dataSet, Period period, OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo );
-
+    
 
     /**
      * Returns all validation-type rules which have specified data elements
      * assigned to them.
-     *
+     * 
      * @param dataElements the data elements to look for.
      * @return all validation rules which have the data elements assigned.
      */
     Collection<ValidationRule> getValidationTypeRulesForDataElements( Set<DataElement> dataElements );
-
+    
     // -------------------------------------------------------------------------
     // ValidationRule
     // -------------------------------------------------------------------------
@@ -229,7 +229,7 @@ public interface ValidationRuleService
     /**
      * Get ValidationRuleGroup with the given identifier.
      *
-     * @param id                  the unique identifier of the ValidationRuleGroup.
+     * @param id the unique identifier of the ValidationRuleGroup.
      * @param i18nValidationRules whether to i18n the rules of this group.
      * @return the ValidationRuleGroup or null if it doesn't exist.
      */

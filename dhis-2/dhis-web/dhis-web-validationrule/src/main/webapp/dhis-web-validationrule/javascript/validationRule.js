@@ -5,7 +5,6 @@ function changeRuleType() {
     hideById('organisationUnitLevelTR');
     hideById('sequentialSampleCountTR');
     hideById('annualSampleCountTR');
-    hideById('sequentialSkipCountTR');
 
     showById('compulsory_pair');
     showById('exclusive_pair');
@@ -14,7 +13,6 @@ function changeRuleType() {
     showById('organisationUnitLevelTR');
     showById('sequentialSampleCountTR');
     showById('annualSampleCountTR');
-    showById('sequentialSkipCountTR');
 
     var op = document.getElementById('operator');
     if( 'compulsory_pair' == op.value || 'exclusive_pair' == op.value ) {
