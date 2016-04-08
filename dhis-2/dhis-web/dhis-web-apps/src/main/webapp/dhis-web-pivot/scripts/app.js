@@ -511,6 +511,7 @@ Ext.onReady( function() {
 	OptionsWindow = function() {
 		var showColTotals,
             showRowTotals,
+            showRowCumulativeTotals,
 			showColSubTotals,
             showRowSubTotals,
 			showDimensionLabels,
@@ -549,6 +550,12 @@ Ext.onReady( function() {
 			boxLabel: NS.i18n.show_row_totals,
 			style: 'margin-bottom:' + checkboxBottomMargin + 'px',
 			checked: true
+		});
+
+		showRowCumulativeTotals = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: NS.i18n.show_row_cumulative_totals,
+			style: 'margin-bottom:' + checkboxBottomMargin + 'px',
+			checked: false
 		});
 
 		showColSubTotals = Ext.create('Ext.form.field.Checkbox', {
@@ -799,6 +806,7 @@ Ext.onReady( function() {
 			items: [
                 showColTotals,
 				showRowTotals,
+				showRowCumulativeTotals,
 				showColSubTotals,
                 showRowSubTotals,
                 showDimensionLabels,
@@ -863,6 +871,7 @@ Ext.onReady( function() {
 				return {
 					showRowTotals: showRowTotals.getValue(),
                     showColTotals: showColTotals.getValue(),
+          showRowCumulativeTotals: showRowCumulativeTotals.getValue(),
 					showColSubTotals: showColSubTotals.getValue(),
                     showRowSubTotals: showRowSubTotals.getValue(),
                     showDimensionLabels: showDimensionLabels.getValue(),
@@ -887,6 +896,7 @@ Ext.onReady( function() {
 			},
 			setOptions: function(layout) {
 				showRowTotals.setValue(Ext.isBoolean(layout.showRowTotals) ? layout.showRowTotals : true);
+				showRowCumulativeTotals.setValue(Ext.isBoolean(layout.showRowCumulativeTotals) ? layout.howRowCumulativeTotals : false);
 				showColTotals.setValue(Ext.isBoolean(layout.showColTotals) ? layout.showColTotals : true);
 				showColSubTotals.setValue(Ext.isBoolean(layout.showColSubTotals) ? layout.showColSubTotals : true);
 				showRowSubTotals.setValue(Ext.isBoolean(layout.showRowSubTotals) ? layout.showRowSubTotals : true);
@@ -1015,6 +1025,7 @@ Ext.onReady( function() {
 					// cmp
                     w.showColTotals = showColTotals;
 					w.showRowTotals = showRowTotals;
+					w.showRowCumulativeTotals = showRowCumulativeTotals;
 					w.showColSubTotals = showColSubTotals
 					w.showRowSubTotals = showRowSubTotals;
                     w.showDimensionLabels = showDimensionLabels;
@@ -1099,7 +1110,10 @@ Ext.onReady( function() {
 
 				// Server sync
 				favorite.rowTotals = favorite.showRowTotals;
+				// Field not present in DB, so for now it's not saved
+				favorite.rowCumulativeTotals = favorite.showRowCumulativeTotals;
 				delete favorite.showRowTotals;
+				delete favorite.showRowCumulativeTotals;
 
                 favorite.colTotals = favorite.showColTotals;
 				delete favorite.showColTotals;
