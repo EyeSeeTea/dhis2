@@ -183,6 +183,10 @@ body,
 	text-align: right !important;
 }
 
+.ns-container-inner .x-panel-body {
+	border: 0 none;
+}
+
 
 /*----------------------------------------------------------------------------
  * Spinner
@@ -387,6 +391,9 @@ table.pivot.fontsize-SMALL td {
     border-style: none;
 }
 
+.ns-panel-html-title {
+	font-weight: bold;
+}
 
 /*----------------------------------------------------------------------------
  * PT Panel
@@ -928,6 +935,11 @@ table.pivot.fontsize-SMALL td {
     padding-left: 19px;
     background-image: url('../images/favorite.png');
 }
+
+.ns-window-title-icon-legendset {
+	background: url('../images/legendset_14.png') no-repeat;
+}
+
 .ns-window-title-interpretation {
     padding-left: 19px;
     background-image: url('../images/interpretation.png');
