@@ -10,7 +10,7 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
     var store = new dhis2.storage.Store({
         name: 'dhis2ec',
         adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
-        objectStores: ['programs', 'optionSets', 'events', 'programValidations', 'programRules', 'programRuleVariables', 'programIndicators', 'ouLevels', 'constants']
+        objectStores: ['programs', 'optionSets', 'events', 'programValidations', 'programRules', 'programRuleVariables', 'programIndicators', 'ouLevels', 'constants', 'dataElements']
     });
     return{
         currentStore: store
@@ -225,8 +225,13 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
 
 /* factory for handling events */
 .factory('DHIS2EventFactory', function($http, $q, ECStorageService, $rootScope) {   
-    var internalGetByFilters = function(orgUnit, attributeCategoryUrl, pager, paging, ordering, filterings) {
-        var url = '../api/events.json?' + 'orgUnit=' + orgUnit;
+    var internalGetByFilters = function(orgUnit, attributeCategoryUrl, pager, paging, ordering, filterings, format) {
+        var url;
+           if (format === "csv") {
+            	url = '../api/events.csv?' + 'orgUnit=' + orgUnit;
+        	} else {
+            	url = '../api/events.json?' + 'orgUnit=' + orgUnit;
+        	}
             
             if(filterings) {
                 angular.forEach(filterings,function(filtering) {
@@ -240,7 +245,7 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
                 
             if(paging){
                 var pgSize = pager.pageSize ? pager.pageSize : 50;
-                var pg = pager.pg ? pager.page : 1;
+                var pg = pager.page ? pager.page : 1;
                 pgSize = pgSize > 1 ? pgSize  : 1;
                 pg = pg > 1 ? pg : 1; 
                 url = url  + '&pageSize=' + pgSize + '&page=' + pg + '&totalPages=true';
@@ -281,9 +286,9 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
     };
     
     return {
-        getByStage: function(orgUnit, programStage, attributeCategoryUrl, pager, paging){
+        getByStage: function(orgUnit, programStage, attributeCategoryUrl, pager, paging, format){
             var filterings = [{field:'programStage',value:programStage}];
-            return internalGetByFilters(orgUnit, attributeCategoryUrl, pager, paging, null, filterings);
+            return internalGetByFilters(orgUnit, attributeCategoryUrl, pager, paging, null, filterings, format);
         },  
         getByFilters: function(orgUnit, pager, paging, ordering, filterings){
             return internalGetByFilters(orgUnit, null, pager, paging, ordering, filterings);

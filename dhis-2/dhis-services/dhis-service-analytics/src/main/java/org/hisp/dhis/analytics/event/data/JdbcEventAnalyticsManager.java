@@ -394,8 +394,10 @@ public class JdbcEventAnalyticsManager
         
         if ( rowSet.next() )
         {
+            Object extent = rowSet.getObject( COL_EXTENT );
+            
             map.put( COL_COUNT, rowSet.getLong( COL_COUNT ) );
-            map.put( COL_EXTENT, String.valueOf( rowSet.getObject( COL_EXTENT ) ) );
+            map.put( COL_EXTENT, extent != null ? String.valueOf( rowSet.getObject( COL_EXTENT ) ) : null );
         }
         
         return map;
@@ -652,7 +654,7 @@ public class JdbcEventAnalyticsManager
         // Organisation unit group sets
         // ---------------------------------------------------------------------
 
-        for ( DimensionalObject dim : params.getDimensionsAndFilters( DimensionType.ORGANISATIONUNIT_GROUPSET ) )
+        for ( DimensionalObject dim : params.getDimensionsAndFilters( DimensionType.ORGANISATION_UNIT_GROUP_SET ) )
         {            
             String col = statementBuilder.columnQuote( dim.getDimensionName() );
                 

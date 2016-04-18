@@ -60,10 +60,12 @@ public class InputUtils
      *
      * @param cc the category combo identifier.
      * @param cp the category and option query string.
+     * @param skipFallback whether to skip fallback to default option combo if
+     *        attribute option combo is not found.
      * @return the attribute option combo identified from the given input, or null
      * if the input was invalid.
      */
-    public DataElementCategoryOptionCombo getAttributeOptionCombo( String cc, String cp )
+    public DataElementCategoryOptionCombo getAttributeOptionCombo( String cc, String cp, boolean skipFallback )
     {
         Set<String> opts = TextUtils.splitToArray( cp, TextUtils.SEMICOLON );
 
@@ -85,6 +87,11 @@ public class InputUtils
         
         if ( categoryCombo == null && opts == null )
         {
+            if ( skipFallback )
+            {
+                return null;
+            }
+            
             categoryCombo = categoryService.getDefaultDataElementCategoryCombo();
         }
 

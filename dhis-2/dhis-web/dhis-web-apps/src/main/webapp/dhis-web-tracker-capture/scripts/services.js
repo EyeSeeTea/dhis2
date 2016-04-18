@@ -9,8 +9,8 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 .factory('TCStorageService', function(){
     var store = new dhis2.storage.Store({
         name: "dhis2tc",
-        adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
-        objectStores: ['programs', 'programStages', 'trackedEntities', 'attributes', 'relationshipTypes', 'optionSets', 'programValidations', 'ouLevels', 'programRuleVariables', 'programRules', 'programIndicators', 'constants']
+        adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],        
+        objectStores: ['programs', 'programStages', 'trackedEntities', 'attributes', 'relationshipTypes', 'optionSets', 'programValidations', 'programIndicators', 'ouLevels', 'programRuleVariables', 'programRules','constants', 'dataElements']
     });
     return{
         currentStore: store
@@ -49,12 +49,13 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     
     return {
         saveLayout: function(dashboardLayout, saveAsDefault){
-            var layout = JSON.stringify(dashboardLayout);
-            var url = '../api/userSettings/keyTrackerDashboardLayout?value=';            
-            if(saveAsDefault){
-                url = '../api/systemSettings/keyTrackerDashboardDefaultLayout?value=';
-            }
-            var promise = $http.post( url + layout, '', {headers: {'Content-Type': 'text/plain;charset=utf-8'}}).then(function(response){
+            var url = saveAsDefault ? '../api/systemSettings/keyTrackerDashboardDefaultLayout' : '../api/userSettings/keyTrackerDashboardLayout';
+            var promise = $http({
+                method: "post",
+                url: url,
+                data: dashboardLayout,
+                headers: {'Content-Type': 'text/plain;charset=utf-8'}
+            }).then(function(response){
                 return response.data;
             });
             return promise;            
@@ -497,8 +498,10 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         },
         getSearchTreeRoot: function(){
             if(!rootOrgUnitPromise){
-                var url = '../api/me.json?fields=organisationUnits[id,displayName,level,children[id,displayName,level,children[id,displayName,level]]]&paging=false';                
-                rootOrgUnitPromise = $http.get( url ).then(function(response){
+                var url = '../api/me.json?fields=teiSearchOrganisationUnits[id,displayName,level,children[id,displayName,level,children[id,displayName,level]]],organisationUnits[id,displayName,level,children[id,displayName,level,children[id,displayName,level]]]&paging=false';                
+                rootOrgUnitPromise = $http.get( url ).then(function(response){                    
+                    response.data.organisationUnits = response.data.teiSearchOrganisationUnits && response.data.teiSearchOrganisationUnits.length > 0 ? response.data.teiSearchOrganisationUnits : response.data.organisationUnits;
+                    delete response.data.teiSearchOrganisationUnits;                    
                     return response.data;
                 });
             }
@@ -724,9 +727,17 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             
             return promise;
         },
-        search: function(ouId, ouMode, queryUrl, programUrl, attributeUrl, pager, paging) {
-                
-            var url =  '../api/trackedEntityInstances/query.json?ou=' + ouId + '&ouMode='+ ouMode;
+        search: function(ouId, ouMode, queryUrl, programUrl, attributeUrl, pager, paging, format, attributesList, attrNamesIdMap) {
+            var url;
+            var deferred = $q.defer();
+
+            if (format === "csv") {
+                url = '../api/trackedEntityInstances/query.csv?ou=' + ouId + '&ouMode=' + ouMode;
+            } else if (format === "xml") {
+                url = '../api/trackedEntityInstances/query.json?ou=' + ouId + '&ouMode=' + ouMode;
+            }else {
+                url = '../api/trackedEntityInstances/query.json?ou=' + ouId + '&ouMode=' + ouMode;
+            }
             
             if(queryUrl){
                 url = url + '&'+ queryUrl;
@@ -737,7 +748,6 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             if(attributeUrl){
                 url = url + '&' + attributeUrl;
             }
-            
             if(paging){
                 var pgSize = pager ? pager.pageSize : 50;
                 var pg = pager ? pager.page : 1;
@@ -749,8 +759,75 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 url = url + '&paging=false';
             }
             
-            var promise = $http.get( url ).then(function(response){
-                return response.data;
+            $http.get( url ).then(function(response){
+                var xmlData, rows, headers, index, itemName, value, jsonData;
+                var trackedEntityInstance;
+                if (format) {
+                    if (format === "json") {
+                        jsonData = {"trackedEntityInstances": []};
+                        rows = response.data.rows;
+                        headers = response.data.headers;
+                        for (var i = 0; i < rows.length; i++) {
+                            trackedEntityInstance = null;
+                            for (var j = 0; j < rows[i].length; j++) {
+                                index = attributesList.indexOf(headers[j].name);
+                                itemName = headers[j].column;
+                                value = rows[i][j].replace(/&/g, "&amp;");
+                                if (trackedEntityInstance === null) {
+                                    trackedEntityInstance = {};
+                                }
+
+                                if (index > -1) {
+                                    if (!trackedEntityInstance["attributes"]) {
+                                        trackedEntityInstance["attributes"] = [];
+                                    }
+                                    trackedEntityInstance["attributes"].push({
+                                        id: attrNamesIdMap[itemName], name: itemName,
+                                        value: value
+                                    });
+                                } else {
+                                    trackedEntityInstance[headers[j].name] = value;
+                                }
+                            }
+                            if (trackedEntityInstance !== null) {
+                                jsonData["trackedEntityInstances"].push(trackedEntityInstance);
+                            }
+                        }
+                        if (jsonData) {
+                            deferred.resolve(JSON.stringify(jsonData, null, 2));
+                        }
+                    } else if (format === "xml") {
+                        xmlData = "";
+                        if (response.data && response.data.rows) {
+                            xmlData += "<trackedEntityInstances>";
+                            rows = response.data.rows;
+                            headers = response.data.headers;
+                            for (var i = 0; i < rows.length; i++) {
+                                xmlData += "<trackedEntityInstance>";
+                                for (var j = 0; j < rows[i].length; j++) {
+                                    index = attributesList.indexOf(headers[j].name);
+                                    itemName = headers[j].column;
+                                    value = rows[i][j].replace(/&/g, "&amp;");
+                                    if (index > -1) {
+                                        xmlData += '<attribute id="' + attrNamesIdMap[itemName] + '" ' +
+                                            'name="' + itemName + '" value="' + value + '"></attribute>';
+                                    } else {
+                                        xmlData += '<' + headers[j].name + ' value="' + value + '"></' + headers[j].name + '>';
+                                    }
+
+                                }
+                                xmlData += "</trackedEntityInstance>";
+
+                            }
+                            xmlData += "</trackedEntityInstances>";
+                            deferred.resolve(xmlData);
+                        }
+                    } else if (format === "csv") {
+                        deferred.resolve(response.data);
+                    }
+                } else {
+                    deferred.resolve(response.data);
+                }
             }, function(error){
                 if(error && error.status === 403){
                     var dialogOptions = {
@@ -759,8 +836,9 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                     };		
                     DialogService.showDialog({}, dialogOptions);
                 }
+                deferred.resolve(null);
             });            
-            return promise;
+            return deferred.promise;
         },                
         update: function(tei, optionSets, attributesById){
             var formattedTei = angular.copy(tei);
@@ -1020,12 +1098,17 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             });            
             return promise;
         },
-        getEventsByProgram: function(entity, program){   
-            
+        getEventsByProgram: function(entity, program, attributeCategory){            
             var url = '../api/events.json?ouMode=ACCESSIBLE&' + 'trackedEntityInstance=' + entity + skipPaging;            
+            
             if(program){
                 url = url + '&program=' + program;
             }
+            
+            if( attributeCategory && !attributeCategory.default){
+                url = url + '&attributeCc=' + attributeCategory.cc + '&attributeCos=' + attributeCategory.cp;
+            }
+            
             var promise = $http.get( url ).then(function(response){
                 return response.data.events;
             });            

@@ -28,6 +28,7 @@ package org.hisp.dhis;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.collect.Sets;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.analytics.AggregationType;
@@ -942,7 +943,7 @@ public abstract class DhisConvenienceTest
      * @param rightSide       The right side expression.
      * @param periodType      The period-type.
      */
-    public static ValidationRule createValidationRule( char uniqueCharacter, Operator operator, Expression leftSide,
+    public static ValidationRule createValidationRule( String uniqueCharacter, Operator operator, Expression leftSide,
         Expression rightSide, PeriodType periodType )
     {
         ValidationRule validationRule = new ValidationRule();
@@ -954,6 +955,58 @@ public abstract class DhisConvenienceTest
         validationRule.setLeftSide( leftSide );
         validationRule.setRightSide( rightSide );
         validationRule.setPeriodType( periodType );
+
+        return validationRule;
+    }
+
+    /**
+     * @param uniqueCharacter A unique character to identify the object.
+     * @param operator        The operator.
+     * @param leftSide        The left side expression.
+     * @param rightSide       The right side expression.
+     * @param periodType      The period-type.
+     */
+    public static ValidationRule createValidationRule( char uniqueCharacter, Operator operator, Expression leftSide,
+        Expression rightSide, PeriodType periodType )
+    {
+        return createValidationRule( Character.toString( uniqueCharacter ), operator, leftSide, rightSide, periodType );
+    }
+
+    /**
+     * Creates a ValidationRule of RULE_TYPE_MONITORING
+     *
+     * @param uniqueCharacter       A unique character to identify the object.
+     * @param operator              The operator.
+     * @param leftSide              The left side expression.
+     * @param rightSide             The right side expression.
+     * @param skipTest              The skiptest expression
+     * @param periodType            The period-type.
+     * @param organisationUnitLevel The unit level of organisations to be
+     *                              evaluated by this rule.
+     * @param sequentialSampleCount How many sequential past periods to sample.
+     * @param annualSampleCount     How many years of past periods to sample.
+     * @param sequentialSkipCount   How many periods in the current year to skip
+     */
+    public static ValidationRule createMonitoringRule( String uniqueCharacter, Operator operator,
+        Expression leftSide, Expression rightSide, Expression skipTest,
+        PeriodType periodType, int organisationUnitLevel, int sequentialSampleCount, 
+        int annualSampleCount, int sequentialSkipCount )
+    {
+        ValidationRule validationRule = new ValidationRule();
+        validationRule.setAutoFields();
+
+        validationRule.setName( "MonitoringRule" + uniqueCharacter );
+        validationRule.setDescription( "Description" + uniqueCharacter );
+        validationRule.setRuleType( RuleType.SURVEILLANCE );
+        validationRule.setOperator( operator );
+        validationRule.setLeftSide( leftSide );
+        validationRule.setRightSide( rightSide );
+        validationRule.setSampleSkipTest( skipTest );
+        validationRule.setPeriodType( periodType );
+        validationRule.setOrganisationUnitLevel( organisationUnitLevel );
+        validationRule.setSequentialSampleCount( sequentialSampleCount );
+        validationRule.setAnnualSampleCount( annualSampleCount );
+        validationRule.setSequentialSkipCount( sequentialSkipCount );
 
         return validationRule;
     }
@@ -971,25 +1024,16 @@ public abstract class DhisConvenienceTest
      * @param sequentialSampleCount How many sequential past periods to sample.
      * @param annualSampleCount     How many years of past periods to sample.
      */
-    public static ValidationRule createMonitoringRule( char uniqueCharacter, Operator operator, Expression leftSide,
-        Expression rightSide, PeriodType periodType, int organisationUnitLevel, int sequentialSampleCount,
-        int annualSampleCount )
+    public static ValidationRule createMonitoringRule( String uniqueCharacter, 
+        Operator operator, Expression leftSide, Expression rightSide,
+        PeriodType periodType, int organisationUnitLevel,
+        int sequentialSampleCount, int annualSampleCount )
     {
-        ValidationRule validationRule = new ValidationRule();
-        validationRule.setAutoFields();
-
-        validationRule.setName( "MonitoringRule" + uniqueCharacter );
-        validationRule.setDescription( "Description" + uniqueCharacter );
-        validationRule.setRuleType( RuleType.SURVEILLANCE );
-        validationRule.setOperator( operator );
-        validationRule.setLeftSide( leftSide );
-        validationRule.setRightSide( rightSide );
-        validationRule.setPeriodType( periodType );
-        validationRule.setOrganisationUnitLevel( organisationUnitLevel );
-        validationRule.setSequentialSampleCount( sequentialSampleCount );
-        validationRule.setAnnualSampleCount( annualSampleCount );
-
-        return validationRule;
+        return createMonitoringRule( uniqueCharacter, operator,
+            leftSide, rightSide, null,
+            periodType, organisationUnitLevel,
+            sequentialSampleCount,
+            annualSampleCount, 0 );
     }
 
     /**
@@ -1631,6 +1675,56 @@ public abstract class DhisConvenienceTest
         userService.addUser( user );
         user.getUserCredentials().setUserInfo( user );
         userService.addUserCredentials( user.getUserCredentials() );
+
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add( new SimpleGrantedAuthority( "ALL" ) );
+
+        UserDetails userDetails = new org.springframework.security.core.userdetails.User(
+            user.getUserCredentials().getUsername(), user.getUserCredentials().getPassword(), authorities );
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken( userDetails, "", authorities );
+        SecurityContextHolder.getContext().setAuthentication( authentication );
+
+        return user;
+    }
+
+    protected User createAndInjectAdminUser()
+    {
+        Assert.notNull( userService, "UserService must be injected in test" );
+
+        String username = "admin";
+        String password = "district";
+
+        UserAuthorityGroup userAuthorityGroup = new UserAuthorityGroup();
+        userAuthorityGroup.setUid( "yrB6vc5Ip3r" );
+        userAuthorityGroup.setCode( "Superuser" );
+        userAuthorityGroup.setName( "Superuser" );
+        userAuthorityGroup.setDescription( "Superuser" );
+        userAuthorityGroup.setAuthorities( Sets.newHashSet( "ALL" ) );
+
+        userService.addUserAuthorityGroup( userAuthorityGroup );
+
+        User user = new User();
+        user.setUid( "M5zQapPyTZI" );
+        user.setCode( "admin" );
+        user.setFirstName( username );
+        user.setSurname( username );
+
+        userService.addUser( user );
+
+        UserCredentials userCredentials = new UserCredentials();
+        userCredentials.setUid( "KvMx6c1eoYo" );
+        userCredentials.setCode( username );
+        userCredentials.setUser( user );
+        userCredentials.setUserInfo( user );
+        userCredentials.setUsername( username );
+        userCredentials.getUserAuthorityGroups().add( userAuthorityGroup );
+
+        userService.encodeAndSetPassword( userCredentials, password );
+        userService.addUserCredentials( userCredentials );
+
+        user.setUserCredentials( userCredentials );
+        userService.updateUser( user );
 
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add( new SimpleGrantedAuthority( "ALL" ) );

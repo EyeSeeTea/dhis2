@@ -33,7 +33,8 @@ var d2Controllers = angular.module('d2Controllers', [])
         function($scope, 
                 $modalInstance,
                 CurrentSelection,
-                DHIS2URL,                
+                DHIS2URL,
+                DialogService,
                 location) {
     
     $scope.home = function(){        
@@ -47,8 +48,19 @@ var d2Controllers = angular.module('d2Controllers', [])
     };
     
     $scope.captureCoordinate = function(){
-        $scope.location = CurrentSelection.getLocation();
-        $modalInstance.close($scope.location);
+    	if( $scope.location && $scope.location.lng && $scope.location.lat ){
+    		$scope.location = CurrentSelection.getLocation();
+            $modalInstance.close($scope.location);
+    	}
+    	else{
+    		//notify user
+            var dialogOptions = {
+                headerText: 'error',
+                bodyText: 'nothing_captured'
+            };
+            DialogService.showDialog({}, dialogOptions);
+            return;
+    	}
     };
 })
 
@@ -90,12 +102,12 @@ var d2Controllers = angular.module('d2Controllers', [])
                 obj.created = DateUtils.formatToHrsMinsSecs(dataValue.created);
                 
                 if (dataType === "attribute") {
-                    if (nameIdMap[dataValue.trackedEntityAttribute.id] && nameIdMap[dataValue.trackedEntityAttribute.id].displayName) {                        
+                    if (nameIdMap[dataValue.trackedEntityAttribute.id]) {                        
                         obj.name = nameIdMap[dataValue.trackedEntityAttribute.id].displayName;
                     }
                 } else if (dataType === "dataElement") {
                     if (nameIdMap[dataValue.dataElement.id] && nameIdMap[dataValue.dataElement.id].dataElement) {                        
-                        obj.name = nameIdMap[dataValue.dataElement.id].dataElement.displayName;
+                        obj.name = nameIdMap[dataValue.dataElement.id].dataElement.displayFormName;
                     }
                 }                
                 $scope.itemList.push(obj);
@@ -110,4 +122,14 @@ var d2Controllers = angular.module('d2Controllers', [])
             }
         }
     });
+})
+.controller('ExportController', function($scope, $modalInstance) {
+
+    $scope.export = function (format) {
+        $modalInstance.close(format);
+    };
+
+    $scope.close = function() {
+        $modalInstance.close();
+    }
 });

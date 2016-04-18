@@ -60,17 +60,16 @@ public class DefaultSmsConfigurationManager
     @EventListener
     public void handleContextRefresh( ContextRefreshedEvent contextRefreshedEvent )
     {
-        initializeSmsConfigurables();
+        initializeSmsConfig();
     }
 
-    public void initializeSmsConfigurables()
+    private void initializeSmsConfig()
     {
         SmsConfiguration smsConfiguration = getSmsConfiguration();
 
         if ( smsConfiguration == null )
         {
             log.info( "SMS configuration not found" );
-
             return;
         }
 
@@ -79,11 +78,10 @@ public class DefaultSmsConfigurationManager
         if ( gatewayList == null || gatewayList.isEmpty() )
         {
             log.info( "Gateway configuration not found" );
-
             return;
         }
 
-        log.info( "Found the following gateway configurations: " + gatewayList );
+        log.info( "Gateway configurations found: " + gatewayList );
 
         gatewayAdminService.loadGatewayConfigurationMap( smsConfiguration );
     }
@@ -99,7 +97,7 @@ public class DefaultSmsConfigurationManager
     {
         systemSettingManager.saveSystemSetting( SettingKey.SMS_CONFIG, config );
 
-        initializeSmsConfigurables();
+        initializeSmsConfig();
     }
 
     @Override

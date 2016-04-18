@@ -28,6 +28,7 @@ package org.hisp.dhis.webapi.controller.metadata;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.commons.util.StreamUtils;
 import org.hisp.dhis.dxf2.metadata2.MetadataImportParams;
 import org.hisp.dhis.dxf2.metadata2.MetadataImportService;
 import org.hisp.dhis.dxf2.metadata2.feedback.ImportReport;
@@ -49,7 +50,7 @@ import java.io.IOException;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Controller
-@RequestMapping( "/metadata/import" )
+@RequestMapping( "/23/metadata" )
 public class MetadataImportController
 {
     @Autowired
@@ -66,7 +67,7 @@ public class MetadataImportController
     public void postMetadata( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
         MetadataImportParams params = metadataImportService.getParamsFromMap( contextService.getParameterValuesMap() );
-        params.setObjects( renderService.fromMetadata( request.getInputStream(), RenderFormat.JSON ) );
+        params.setObjects( renderService.fromMetadata( StreamUtils.wrapAndCheckCompressionFormat( request.getInputStream() ), RenderFormat.JSON ) );
 
         ImportReport importReport = metadataImportService.importMetadata( params );
         renderService.toJson( response.getOutputStream(), importReport );

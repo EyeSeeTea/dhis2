@@ -29,6 +29,20 @@
 
 dhis2.util.namespace('dhis2.tracker');
 
+dhis2.tracker.chunk = function( array, size ){
+	if( !array.length || !size || size < 1 ){
+		return []
+	}
+	
+	var groups = [];
+	var chunks = array.length / size;
+	for (var i = 0, j = 0; i < chunks; i++, j += size) {
+        groups[i] = array.slice(j, j + size);
+    }
+	
+    return groups;
+}
+
 dhis2.tracker.getTrackerMetaObjects = function( programs, objNames, url, filter )
 {
     if( !programs || !programs.programIds || programs.programIds.length === 0 ){
@@ -51,7 +65,8 @@ dhis2.tracker.getTrackerMetaObjects = function( programs, objNames, url, filter 
         def.resolve( null );
     });
     
-    return def.promise();    
+    return def.promise();
+    
 };
 
 dhis2.tracker.checkAndGetTrackerObjects  = function( obj, store, url, filter, db )
@@ -93,7 +108,7 @@ dhis2.tracker.checkAndGetTrackerObjects  = function( obj, store, url, filter, db
                 var _ids = ids.toString();
                 _ids = '[' + _ids + ']';
                 filter = filter + '&filter=id:in:' + _ids + '&paging=false';
-                promise = promise.then( dhis2.tracker.getTrackerObjects( store, store, url, filter, 'idb', db ) );
+                mainPromise = mainPromise.then( dhis2.tracker.getTrackerObjects( store, store, url, filter, 'idb', db ) );
             }
             
             mainDef.resolve( obj.programs, obj.programIds );
@@ -118,7 +133,7 @@ dhis2.tracker.getTrackerObjects = function( store, objs, url, filter, storage, d
     }).done(function(response) {
         if(response[objs]){
             if(storage === 'idb'){
-                db.setAll( store, response[objs] );
+                db.setAll( store, response[objs] );                
             }
             if(storage === 'localStorage'){                
                 localStorage[store] = JSON.stringify(response[objs]);
@@ -136,7 +151,7 @@ dhis2.tracker.getTrackerObjects = function( store, objs, url, filter, storage, d
             def.resolve();
         }    
     }).fail(function(){
-        def.resolve();
+        def.resolve( null );
     });
 
     return def.promise();
@@ -144,27 +159,79 @@ dhis2.tracker.getTrackerObjects = function( store, objs, url, filter, storage, d
 
 dhis2.tracker.getTrackerObject = function( id, store, url, filter, storage, db )
 {
-    return function() {
-        if(id){
-            url = url + '/' + id + '.json';
-        }
-        return $.ajax( {
-            url: url,
-            type: 'GET',            
-            data: filter
-        }).done( function( response ){
-            if(storage === 'idb'){
-                if( response && response.id) {
-                    db.set( store, response );
-                }
+    var def = $.Deferred();
+    
+    if(id){
+        url = url + '/' + id + '.json';
+    }
+        
+    $.ajax({
+        url: url,
+        type: 'GET',            
+        data: filter
+    }).done( function( response ){
+        if(storage === 'idb'){
+            if( response && response.id) {
+                db.set( store, response );
             }
-            if(storage === 'localStorage'){
-                localStorage[store] = JSON.stringify(response);
-            }            
-            if(storage === 'sessionStorage'){
-                var SessionStorageService = angular.element('body').injector().get('SessionStorageService');
-                SessionStorageService.set(store, response);
-            }            
+        }
+        if(storage === 'localStorage'){
+            localStorage[store] = JSON.stringify(response);
+        }            
+        if(storage === 'sessionStorage'){
+            var SessionStorageService = angular.element('body').injector().get('SessionStorageService');
+            SessionStorageService.set(store, response);
+        } 
+        
+        def.resolve();
+    }).fail(function(){
+        def.resolve();
+    });
+    
+    return def.promise();
+};
+
+dhis2.tracker.getBatches = function( ids, batchSize, data, store, objs, url, filter, storage, db )
+{
+    if( !ids || !ids.length || ids.length < 1){
+        return;
+    }
+    
+    var batches = dhis2.tracker.chunk( ids, batchSize );
+
+    var mainDef = $.Deferred();
+    var mainPromise = mainDef.promise();
+
+    var def = $.Deferred();
+    var promise = def.promise();
+
+    var builder = $.Deferred();
+    var build = builder.promise();
+    
+    _.each( _.values( batches ), function ( batch ) {        
+        promise = promise.then(function(){
+            return dhis2.tracker.fetchBatchItems( batch, store, objs, url, filter, storage, db );
         });
-    };
+    });
+
+    build.done(function() {
+        def.resolve();
+        promise = promise.done( function () {
+            mainDef.resolve( data );
+        } );        
+        
+    }).fail(function(){
+        mainDef.resolve( null );
+    });
+
+    builder.resolve();
+
+    return mainPromise;
+};
+
+dhis2.tracker.fetchBatchItems = function( batch, store, objs, url, filter, storage, db )
+{   
+    var ids = '[' + batch.toString() + ']';             
+    filter = filter + '&filter=id:in:' + ids;    
+    return dhis2.tracker.getTrackerObjects( store, objs, url, filter, storage, db );    
 };

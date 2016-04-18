@@ -89,7 +89,7 @@ trackerCapture.controller('EventCreationController',
                             }
                             else if(eventStage.sortOrder === lastStageForEvents.sortOrder){
                                 if(eventStage.id !== lastStageForEvents.id){
-                                    if(eventStage.name.localeCompare(lastStageForEvents.name) > 0){
+                                    if(eventStage.displayName.localeCompare(lastStageForEvents.displayName) > 0){
                                         lastStageForEvents = eventStage;
                                     }
                                 }                            
@@ -113,7 +113,7 @@ trackerCapture.controller('EventCreationController',
                     break;
                 }
                 else if(availableStage.sortOrder === lastStageForEvents.sortOrder){
-                    if(availableStage.name.localeCompare(lastStageForEvents.name) > 0){
+                    if(availableStage.displayName.localeCompare(lastStageForEvents.displayName) > 0){
                         suggestedStage = availableStage;
                         break;
                     }
@@ -152,17 +152,10 @@ trackerCapture.controller('EventCreationController',
     });    
 
     $scope.getCategoryOptions = function(){
-        $scope.eventFetched = false;
-        $scope.optionsReady = false;
         $scope.selectedOptions = [];
         for (var i = 0; i < $scope.selectedCategories.length; i++) {
             if ($scope.selectedCategories[i].selectedOption && $scope.selectedCategories[i].selectedOption.id) {
-                $scope.optionsReady = true;
                 $scope.selectedOptions.push($scope.selectedCategories[i].selectedOption.id);
-            }
-            else {
-                $scope.optionsReady = false;
-                break;
             }
         }
     };
@@ -209,7 +202,7 @@ trackerCapture.controller('EventCreationController',
         newEvent.status = newEvent.eventDate ? 'ACTIVE' : 'SCHEDULE';
 
         /*for saving category combo*/
-        if (!$scope.selectedProgram.categoryCombo.isDefault) {
+        if ($scope.selectedProgram.categoryCombo && !$scope.selectedProgram.categoryCombo.isDefault) {
             if ($scope.selectedOptions.length !== $scope.selectedCategories.length) {
                 var dialogOptions = {
                     headerText: 'error',
@@ -293,8 +286,8 @@ trackerCapture.controller('EventCreationController',
     }
     
     function generateFieldsUrl(){
-        var fieldUrl = "fields=id,name,organisationUnitGroups[shortName]";
-        var parentStartDefault = ",parent[id,name,children[id,name,organisationUnitGroups[shortName],children[id,name,organisationUnitGroups[shortName]]]";
+        var fieldUrl = "fields=id,displayName,organisationUnitGroups[shortName]";
+        var parentStartDefault = ",parent[id,displayName,children[id,displayName,organisationUnitGroups[shortName],children[id,displayName,organisationUnitGroups[shortName]]]";
         var parentEndDefault = "]";
         if(orgUnit.level && orgUnit.level > 1){
             var parentStart = parentStartDefault;

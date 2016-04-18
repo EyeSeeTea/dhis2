@@ -758,16 +758,11 @@ div#searchOuTree h4{
 }
 
 .modal-full-window .modal-dialog {
-    width: 100%;
-    height: 100%;
+    width: 75%;
 }
 
 .modal {
     padding-top: 50px;
-}
-
-.modal-dialog {
-    top: 50%;
 }
 
 .expanded{
@@ -1249,7 +1244,7 @@ ul.tree ul li:last-child:before {
 }
 
 #map-container {
-    height: 800px;
+    height: 600px;
     width: 100%;
 }
 
@@ -1516,6 +1511,7 @@ input, button, select, textarea {
 
 .wrap-text {
     word-wrap: break-word;
+    white-space: normal;
 }
 
 
@@ -1948,4 +1944,10 @@ a.disable-link-effects:focus {
 .popover-label > a {
     color: #333 !important;
     text-decoration: none !important;
+}
+
+.btn-grp { 
+    border-color:  #b7b7b7; 
+    background-color: #cccccc;
+    color: #555 !important;
 }

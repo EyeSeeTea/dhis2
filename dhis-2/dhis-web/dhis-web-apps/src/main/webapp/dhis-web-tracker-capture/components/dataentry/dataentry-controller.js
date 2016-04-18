@@ -35,7 +35,7 @@ trackerCapture.controller('DataEntryController',
     $scope.eventPagingEnd = $scope.eventPageSize;
     
     //Data entry form
-    $scope.outerDataEntryForm = {};
+    $scope.outerDataEntryForm = {longitude: {}, latitude: {}};
     $scope.displayCustomForm = false;
     $scope.currentElement = {};
     $scope.schedulingEnabled = false;
@@ -220,7 +220,7 @@ trackerCapture.controller('DataEntryController',
                         }
                         else {
                             //TODO: Alerts is going to be replaced with a proper display mecanism.
-                            alert($scope.prStDes[effect.dataElement.id].dataElement.formName + "Was blanked out and hidden by your last action");
+                            alert($scope.prStDes[effect.dataElement.id].dataElement.displayFormName + " was blanked out and hidden by your last action");
                         }
 
                         //Blank out the value:
@@ -382,12 +382,12 @@ trackerCapture.controller('DataEntryController',
     $scope.headerCurrentStageName = function(){
         
         var name = "";
-        if($scope.selectedMainMenuStage && angular.isDefined($scope.selectedMainMenuStage.name)){
-            name = $scope.selectedMainMenuStage.name;
+        if($scope.selectedMainMenuStage && angular.isDefined($scope.selectedMainMenuStage.displayName)){
+            name = $scope.selectedMainMenuStage.displayName;
             if(angular.isDefined($scope.headerCombineStages) && $scope.headerCombineStages[$scope.selectedMainMenuStage.id]){
                 var stageWithName = $scope.stagesById[$scope.headerCombineStages[$scope.selectedMainMenuStage.id]];
                 if(angular.isDefined(stageWithName) && angular.isObject(stageWithName)){
-                    name = stageWithName.name;
+                    name = stageWithName.displayName;
                 }
             }
         }        
@@ -543,7 +543,7 @@ trackerCapture.controller('DataEntryController',
         $scope.eventsByStage = [];
         $scope.eventsByStageDesc = [];
         $scope.programStages = [];
-        $rootScope.ruleeffects = {};
+        $rootScope.ruleeffects = {};        
         $scope.prStDes = [];
         $scope.allProgramRules = [];
         $scope.allowProvidedElsewhereExists = [];
@@ -568,6 +568,7 @@ trackerCapture.controller('DataEntryController',
         $scope.optionSets = selections.optionSets;
 
         $scope.stagesById = [];
+        $scope.dataElementTranslations = CurrentSelection.getDataElementTranslations();
         if ($scope.selectedOrgUnit && $scope.selectedProgram && $scope.selectedProgram.id && $scope.selectedEntity && $scope.selectedEnrollment && $scope.selectedEnrollment.enrollment) {
             ProgramStageFactory.getByProgram($scope.selectedProgram).then(function (stages) {
                 
@@ -579,7 +580,9 @@ trackerCapture.controller('DataEntryController',
                     }
                     
                     stage.excecutionDateLabel ? stage.excecutionDateLabel : $translate.instant('report_date');
-                    angular.forEach(stage.programStageDataElements, function (prStDe) {
+                    angular.forEach(stage.programStageDataElements, function (prStDe) {                        
+                        var tx = $scope.dataElementTranslations[prStDe.dataElement.id];
+                        prStDe.dataElement.displayFormName = tx.displayFormName && tx.displayFormName !== "" ? tx.displayFormName : tx.displayName ? tx.displayName : prStDe.dataElement.displayName;
                         $scope.prStDes[prStDe.dataElement.id] = prStDe;
                         if(prStDe.allowProvidedElsewhere){
                             $scope.allowProvidedElsewhereExists[stage.id] = true;
@@ -621,19 +624,11 @@ trackerCapture.controller('DataEntryController',
                     $scope.allProgramRules = rules;
                     $scope.getEvents();                    
                     broadcastDataEntryControllerData();
-                    executeRulesOnInit();
                 });    
                 
             });
         }
     });
-    
-    function executeRulesOnInit(){
-        var flag = {debug: true, verbose: true};        
-        TrackerRulesExecutionService.executeRules($scope.allProgramRules, 'dataEntryInit', null, null, $scope.selectedTei, $scope.selectedEnrollment, flag);
-    }
-    
-    
     
     $scope.openEventExternal = function(event){
         if($scope.useMainMenu){
@@ -660,6 +655,7 @@ trackerCapture.controller('DataEntryController',
     function broadcastDataEntryControllerData(){
         $rootScope.$broadcast('dataEntryControllerData', {programStages: $scope.programStages, eventsByStage: $scope.eventsByStage, addNewEvent: $scope.addNewEvent, openEvent: $scope.openEventExternal, deleteScheduleOverDueEvents: $scope.deleteScheduleAndOverdueEvents, executeRules: $scope.executeRules });
     }
+    
     $scope.getEvents = function () {
 
         $scope.allEventsSorted = [];
@@ -1255,7 +1251,7 @@ trackerCapture.controller('DataEntryController',
         $scope.currentEventOriginal = angular.copy($scope.currentEvent);
         
         $scope.currentStageEventsOriginal = angular.copy($scope.currentStageEvents);
-
+        
         var period = {event: $scope.currentEvent.event, stage: $scope.currentEvent.programStage, name: $scope.currentEvent.sortingDate};
         $scope.currentPeriod[$scope.currentEvent.programStage] = period;        
         
@@ -1495,7 +1491,7 @@ trackerCapture.controller('DataEntryController',
         if (type === 'LAT' || type === 'LATLNG') {
             $scope.latitudeSaved = false;
         }
-        if (type === 'LAT' || type === 'LATLNG') {
+        if (type === 'LNG' || type === 'LATLNG') {
             $scope.longitudeSaved = false;
         }
 
@@ -2917,7 +2913,35 @@ trackerCapture.controller('DataEntryController',
                 $scope.fileNames[$scope.currentEvent.event][dataElement] = $scope.currentFileNames[dataElement];
             }
         }
-    };    
+    };
+    
+    $scope.categoryOptionComboFilter = function(){
+        
+        var modalInstance = $modal.open({
+            templateUrl: 'components/dataentry/modal-category-option.html',
+            controller: 'EventCategoryComboController',
+            resolve: {
+                selectedProgram: function () {
+                    return $scope.selectedProgram;
+                },
+                selectedCategories: function(){
+                    return $scope.selectedCategories;
+                },
+                selectedTeiId: function(){
+                    return $scope.selectedTei.trackedEntityInstance;
+                }
+            }
+        });
+
+        modalInstance.result.then(function (events) {
+            if (angular.isObject(events)) {
+                CurrentSelection.setSelectedTeiEvents( events );
+                $scope.getEvents();
+            }
+        }, function () {
+        });
+        
+    };
 })
 .controller('EventOptionsInTableController', function($scope, $translate){
     
@@ -2943,7 +2967,6 @@ trackerCapture.controller('DataEntryController',
             $scope.completeIncompleteEvent(true);
         }
     };
-    
     
     $scope.eventTableOptions = {};    
     $scope.eventTableOptions[COMPLETE] = {text: "Complete", tooltip: 'Complete', icon: "<span class='glyphicon glyphicon-check'></span>", value: COMPLETE, onClick: $scope.completeIncompleteEventFromTable, sort: 0};

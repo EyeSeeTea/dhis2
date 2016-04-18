@@ -147,7 +147,7 @@ public class JacksonEventService extends AbstractEventService
             Events fromXml = fromXml( input, Events.class );
             events.addAll( fromXml.getEvents() );
         }
-        catch ( Exception ex )
+        catch ( JsonMappingException ex )
         {
             Event fromXml = fromXml( input, Event.class );
             events.add( fromXml );
@@ -173,10 +173,11 @@ public class JacksonEventService extends AbstractEventService
             Events fromJson = fromJson( input, Events.class );
             events.addAll( fromJson.getEvents() );
         }
-        catch ( Exception ex )
+        catch ( JsonMappingException ex )
         {
             Event fromJson = fromJson( input, Event.class );
             events.add( fromJson );
+            importOptions.setSendNotifications( true );
         }
 
         return addEvents( events, taskId, importOptions );

@@ -38,7 +38,7 @@ import com.google.common.collect.Sets;
 
 import org.hisp.dhis.common.BaseDimensionalItemObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.DimensionType;
+import org.hisp.dhis.common.DimensionItemType;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeMode;
@@ -437,7 +437,7 @@ public class DataElement
      */
     public String getFormNameFallback()
     {
-        return formName != null && !formName.isEmpty() ? getDisplayFormName() : getDisplayName();
+        return formName != null && !formName.isEmpty() ? getFormName() : getDisplayName();
     }
 
     @JsonProperty
@@ -445,7 +445,8 @@ public class DataElement
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getDisplayFormName()
     {
-        return displayFormName != null && !displayFormName.trim().isEmpty() ? displayFormName : formName;
+        return displayFormName != null && !displayFormName.trim().isEmpty() ? displayFormName : 
+            getFormName() != null && !getFormName().isEmpty() ? getFormName() : getDisplayName();
     }
 
     public void setDisplayFormName( String displayFormName )
@@ -504,13 +505,15 @@ public class DataElement
     }
 
     // -------------------------------------------------------------------------
-    // DimensionalObject
+    // DimensionalItemObject
     // -------------------------------------------------------------------------
 
+    //TODO can also be dimension
+    
     @Override
-    public DimensionType getDimensionType()
+    public DimensionItemType getDimensionItemType()
     {
-        return DimensionType.PROGRAM_DATAELEMENT;
+        return DimensionItemType.DATA_ELEMENT;
     }
 
     // -------------------------------------------------------------------------

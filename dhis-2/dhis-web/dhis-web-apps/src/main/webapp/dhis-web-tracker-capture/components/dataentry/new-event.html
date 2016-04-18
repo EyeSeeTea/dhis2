@@ -1,7 +1,7 @@
 <div class="modal-header page">
-    <h3 ng-if="isNewEvent">{{'add'| translate}}<span ng-if="model.selectedStage"> - {{model.selectedStage.displayName}}</span></h3>
-    <h3 ng-if="isScheduleEvent && !isReferralEvent">{{'schedule'| translate}}<span ng-if="model.selectedStage"> - {{model.selectedStage.displayName}}</span></h3>
-    <h3 ng-if="isReferralEvent">{{'referral' | translate}}<span ng-if="model.selectedStage"> - {{model.selectedStage.displayName}}</span></h3>
+    <h3 ng-if="isNewEvent">{{'add_new_event_for_stage'| translate}}<span ng-if="model.selectedStage"> {{model.selectedStage.displayName}}</span></h3>
+    <h3 ng-if="isScheduleEvent && !isReferralEvent">{{'schedule_new_event_for_stage'| translate}}<span ng-if="model.selectedStage"> {{model.selectedStage.displayName}}</span></h3>
+    <h3 ng-if="isReferralEvent">{{'refer_new_event_for_stage' | translate}}<span ng-if="model.selectedStage"> {{model.selectedStage.displayName}}</span></h3>
 </div>
 <div class="modal-body page">    
     <form name="eventCreationForm" class="form-horizontal" role="form" novalidate>
@@ -105,18 +105,7 @@
                 <button ng-disabled="true" type="button" class="btn btn-default small-horizontal-spacing trim" ng-click="fetchPeriod('NEXT')" title="{{'nxt_period'| translate}}"><i class="fa fa-forward"></i></button>        
             </div>        
         </div>
-        <div class="row" ng-if="selectedProgram" ng-repeat="category in selectedCategories">
-            <div class="col-sm-3">{{category.displayName}}</div>
-            <div class="col-sm-9">
-                <select class="form-control"
-                        name="option"
-                        ng-model="category.selectedOption"
-                        ng-options="option as option.displayName for option in category.categoryOptions"
-                        ng-change="getCategoryOptions()">
-                    <option value="" ng-selected="selectDefault.selected">{{pleaseSelectLabel}}</option>
-                </select>
-            </div>
-        </div>
+        <div ng-include="'components/dataentry/category-option-form.html'"></div>        
 
     </form>  
 </div>

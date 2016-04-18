@@ -167,8 +167,6 @@ public class TableAlteror
         // mapping
         executeSql( "DROP TABLE maporganisationunitrelation" );
         executeSql( "ALTER TABLE mapview DROP COLUMN mapid" );
-        executeSql( "ALTER TABLE mapview DROP COLUMN startdate" );
-        executeSql( "ALTER TABLE mapview DROP COLUMN enddate" );
         executeSql( "ALTER TABLE mapview DROP COLUMN mapsource" );
         executeSql( "ALTER TABLE mapview DROP COLUMN mapsourcetype" );
         executeSql( "ALTER TABLE mapview DROP COLUMN mapdatetype" );
@@ -182,6 +180,8 @@ public class TableAlteror
 
         executeSql( "UPDATE mapview SET layer = 'thematic1' WHERE layer IS NULL" );
         executeSql( "UPDATE mapview SET hidden = false WHERE hidden IS NULL" );
+        executeSql( "UPDATE mapview SET eventclustering = false WHERE eventclustering IS NULL" );
+        executeSql( "UPDATE mapview SET eventpointradius = 0 WHERE eventpointradius IS NULL" );
 
         executeSql( "DELETE FROM systemsetting WHERE name = 'longitude'" );
         executeSql( "DELETE FROM systemsetting WHERE name = 'latitude'" );
@@ -653,6 +653,9 @@ public class TableAlteror
         executeSql( "DELETE FROM userroleauthorities WHERE authority='F_PATIENTIDENTIFIERTYPE_UPDATE'" );
         executeSql( "DELETE FROM userroleauthorities WHERE authority='F_PROGRAM_ATTRIBUTE_UPDATE'" );
         executeSql( "DELETE FROM userroleauthorities WHERE authority='F_PATIENT_DATAVALUE_UPDATE'" );
+        
+        // remove unused configurations
+        executeSql( "delete from systemsetting where name='keySmsConfig'" );
 
         // update denominator of indicator which has indicatortype as 'number'
         executeSql( "UPDATE indicator SET denominator = 1, denominatordescription = '' WHERE indicatortypeid IN (SELECT DISTINCT indicatortypeid FROM indicatortype WHERE indicatornumber = true) AND denominator IS NULL" );
@@ -747,6 +750,8 @@ public class TableAlteror
         executeSql( "UPDATE attribute SET documentattribute=false WHERE documentattribute IS NULL" );
         executeSql( "UPDATE attribute SET optionattribute=false WHERE optionattribute IS NULL" );
         executeSql( "UPDATE attribute SET optionsetattribute=false WHERE optionsetattribute IS NULL" );
+        executeSql( "UPDATE attribute SET constantattribute=false WHERE constantattribute IS NULL" );
+        executeSql( "UPDATE attribute SET legendsetattribute=false WHERE legendsetattribute IS NULL" );
 
         executeSql( "update attribute set isunique=false where isunique is null" );
 
@@ -850,7 +855,7 @@ public class TableAlteror
         executeSql( "update programstage set repeatable = irregular where repeatable is null" );
         executeSql( "update programstage set repeatable = false where repeatable is null" );
         executeSql( "alter table programstage drop column reportdatedescription" );
-        executeSql( "alter table programstage drop column irregular" );        
+        executeSql( "alter table programstage drop column irregular" );
 
         executeSql( "alter table programindicator drop column missingvaluereplacement" );
 
@@ -872,6 +877,12 @@ public class TableAlteror
         executeSql( "drop table aggregatedorgunitdatavalue_temp" );
         executeSql( "drop table aggregatedorgunitindicatorvalue" );
         executeSql( "drop table aggregatedorgunitindicatorvalue_temp" );
+
+        executeSql( "alter table trackedentitydatavalue alter column storedby TYPE character varying(255)" );
+        executeSql( "alter table datavalue alter column storedby TYPE character varying(255)" );
+        
+        executeSql( "alter table datastatisticsevent alter column eventtype type character varying" );
+        executeSql( "alter table orgunitlevel drop constraint orgunitlevel_name_key" );
 
         updateEnums();
 
@@ -895,8 +906,8 @@ public class TableAlteror
         updateRelativePeriods();
         updateNameColumnLengths();
         
-        executeSql( "alter table trackedentitydatavalue alter column storedby TYPE character varying(255)" );
-        executeSql( "alter table datavalue alter column storedby TYPE character varying(255)" );
+        upgradeMapViewsToColumns();
+        upgradeDataDimensionItemsToReportingRateMetric();
 
         log.info( "Tables updated" );
     }
@@ -1185,22 +1196,22 @@ public class TableAlteror
     {
         if ( executeSql( "update validationrule set lowoutliers = lowoutliers where validationruleid < 0" ) < 0 )
         {
-            return; // Already converted because lowoutliers fields are gone
+            return; // Already converted because lowoutlier fields are gone
         }
 
         // Just to be extra sure, we don't modify any expressions which already contain a call to AVG or STDDEV
-        executeSql( "update expression set expression=" + statementBuilder.concatenate( "'AVG('", "expression", "')'" ) + " from  validationrule where ruletype='SURVEILLANCE' AND rightexpressionid=expressionid AND expression NOT LIKE '%AVG%' and expression " +
-            "NOT LIKE '%STDDEV%';" );
-        executeSql( "update expression set expression=FORMAT('AVG(%s)',expression) from  validationrule where ruletype='SURVEILLANCE' AND rightexpressionid=expressionid AND expression NOT LIKE '%AVG%' and expression NOT LIKE '%STDDEV%';" );
+        executeSql( "update expression set expression=" + statementBuilder.concatenate( "'AVG('", "expression", "')'" ) + 
+            " from  validationrule where ruletype='SURVEILLANCE' AND rightexpressionid=expressionid " +
+            "AND expression NOT LIKE '%AVG%' and expression NOT LIKE '%STDDEV%';" );
+        
+        executeSql( "update expression set expression=FORMAT('AVG(%s)',expression) from  validationrule " +
+            "where ruletype='SURVEILLANCE' AND rightexpressionid=expressionid AND expression NOT LIKE '%AVG%' and expression NOT LIKE '%STDDEV%';" );
 
         executeSql( "ALTER TABLE validationrule DROP COLUMN highoutliers" );
         executeSql( "ALTER TABLE validationrule DROP COLUMN lowoutliers" );
 
         log.info( "Added explicit AVG calls to olid-style implicit average surveillance rules" );
     }
-    /* For testing purposes, this will undo the wrapping functionality above:
-     * update expression set expression=regexp_replace(regexp_replace(expression,'[)]$',''),'^AVG[(]','') from validationrule where ruletype='SURVEILLANCE' AND rightexpressionid=expressionid;
-     */
 
     private List<Integer> getDistinctIdList( String table, String col1 )
     {
@@ -1322,6 +1333,38 @@ public class TableAlteror
         {
             executeSql( "drop table optionsetmembers" );
         }
+    }
+    
+    /**
+     * Upgrades existing map views to use mapview_columns for multiple column
+     * dimensions.
+     */
+    private void upgradeMapViewsToColumns()
+    {
+        String sql = 
+            "insert into mapview_columns " +
+            "select mapviewid, 'dx', 0 " +
+            "from mapview mv " +
+            "where not exists (" +
+                "select mc.mapviewid " +
+                "from mapview_columns mc " +
+                "where mv.mapviewid = mc.mapviewid)";
+        
+        executeSql( sql );
+    }
+    
+    /**
+     * Upgrade data dimension items for legacy data sets to use REPORTING_RATE
+     * as metric.
+     */
+    public void upgradeDataDimensionItemsToReportingRateMetric()
+    {
+        String sql = "update datadimensionitem " +
+            "set metric='REPORTING_RATE' " +
+            "where datasetid is not null " +
+            "and metric is null;";
+        
+        executeSql( sql );
     }
 
     private int executeSql( String sql )

@@ -111,7 +111,7 @@ public class ProgramController
 
         if ( userFilter )
         {
-            Set<Program> programs = programService.getCurrentUserPrograms();
+            Set<Program> programs = programService.getUserPrograms();
             entityList.retainAll( programs );
             metadata.setPager( null );
         }
@@ -119,7 +119,7 @@ public class ProgramController
         return entityList;
     }
 
-    @RequestMapping( value = "/{uid}/export", method = RequestMethod.GET )
+    @RequestMapping( value = "/{uid}/metadata", method = RequestMethod.GET )
     public @ResponseBody RootNode getProgramWithDependencies( @PathVariable( "uid" ) String pvUid, HttpServletResponse response ) throws WebMessageException, IOException
     {
         Program program = programService.getProgram( pvUid );
