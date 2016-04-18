@@ -398,8 +398,6 @@ Ext.onReady( function() {
 
 				// showRowTotals: boolean (true)
 
-				// showRowCumulativeTotals: boolean (false)
-
 				// showColTotals: boolean (true)
 
 				// showColSubTotals: boolean (true)
@@ -589,7 +587,6 @@ Ext.onReady( function() {
 					// properties
 					layout.showColTotals = Ext.isBoolean(config.colTotals) ? config.colTotals : (Ext.isBoolean(config.showColTotals) ? config.showColTotals : true);
 					layout.showRowTotals = Ext.isBoolean(config.rowTotals) ? config.rowTotals : (Ext.isBoolean(config.showRowTotals) ? config.showRowTotals : true);
-					layout.showRowCumulativeTotals = Ext.isBoolean(config.rowCumulativeTotals) ? config.rowCumulativeTotals : (Ext.isBoolean(config.showRowCumulativeTotals) ? config.showRowCumulativeTotals : false);
 					layout.showColSubTotals = Ext.isBoolean(config.colSubTotals) ? config.colSubTotals : (Ext.isBoolean(config.showColSubTotals) ? config.showColSubTotals : true);
 					layout.showRowSubTotals = Ext.isBoolean(config.rowSubTotals) ? config.rowSubTotals : (Ext.isBoolean(config.showRowSubTotals) ? config.showRowSubTotals : true);
 					layout.showDimensionLabels = Ext.isBoolean(config.showDimensionLabels) ? config.showDimensionLabels : (Ext.isBoolean(config.showDimensionLabels) ? config.showDimensionLabels : true);
@@ -1735,10 +1732,6 @@ Ext.onReady( function() {
 					delete layout.showRowTotals;
 				}
 
-				if (!layout.showRowCumulativeTotals) {
-					delete layout.showRowCumulativeTotals;
-				}
-
                 if (layout.showColTotals) {
 					delete layout.showColTotals;
 				}
@@ -2440,10 +2433,6 @@ Ext.onReady( function() {
 					return !!xLayout.showRowTotals;
 				};
 
-				doRowCumulativeTotals = function() {
-					return !!xLayout.showRowCumulativeTotals;
-				};
-
 				doColSubTotals = function() {
 					return !!xLayout.showColSubTotals && xRowAxis && xRowAxis.dims > 1;
 				};
@@ -2587,16 +2576,6 @@ Ext.onReady( function() {
 									htmlValue: 'Total'
 								}, totalId));
 							}
-
-							if (i === 0 && (j === xColAxis.size - 1) && doRowCumulativeTotals()) {
-								dimHtml.push(getTdHtml({
-									uuid: Ext.data.IdGenerator.get('uuid').generate(),
-									type: 'dimensionTotal',
-									cls: 'pivot-dim-total',
-									rowSpan: xColAxis.dims,
-									htmlValue: 'Cumulative Total'
-								}, null));
-							}
 						}
 
 						a.push(dimHtml);
@@ -2610,7 +2589,6 @@ Ext.onReady( function() {
 						axisAllObjects = [],
 						xValueObjects,
 						totalValueObjects = [],
-						cumulativeTotalValueObjects = [],
 						mergedObjects = [],
 						valueItemsCopy,
 						colAxisSize = xColAxis ? xColAxis.size : 1,
@@ -2752,27 +2730,6 @@ Ext.onReady( function() {
 						}
 					}
 
-					// cumulative totals
-					if (xColAxis && doRowCumulativeTotals()) {
-						for (var i = 0, empty = [], total = 0; i < valueObjects.length; i++) {
-							for (j = 0, obj; j < valueObjects[i].length; j++) {
-								obj = valueObjects[i][j];
-								empty.push(obj.empty);
-								total += obj.value;
-							}
-
-							cumulativeTotalValueObjects.push({
-								type: 'valueTotal',
-								cls: 'pivot-value-total',
-								value: total,
-								htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(total) : '',
-								empty: !Ext.Array.contains(empty, false)
-							});
-
-							empty = [];
-						}
-					}
-
 					// hide empty rows (dims/values/totals)
 					if (xColAxis && xRowAxis) {
 						if (xLayout.hideEmptyRows) {
@@ -2791,11 +2748,6 @@ Ext.onReady( function() {
 									// hide totals by adding collapsed = true to all items
 									if (doRowTotals()) {
 										totalValueObjects[i].collapsed = true;
-									}
-
-									// hide totals by adding collapsed = true to all items
-									if (doRowCumulativeTotals()) {
-										cumulativeTotalValueObjects[i].collapsed = true;
 									}
 
 									// hide/reduce parent dim span
@@ -2973,7 +2925,6 @@ Ext.onReady( function() {
 
 						if (xColAxis) {
 							row = row.concat(totalValueObjects[i]);
-							row = row.concat(cumulativeTotalValueObjects[i]);
 						}
 
 						mergedObjects.push(row);
@@ -3068,24 +3019,6 @@ Ext.onReady( function() {
 						for (var i = 0, obj; i < totalColObjects.length; i++) {
 							obj = totalColObjects[i];
 
-							total += obj.value;
-							empty.push(obj.empty);
-						}
-
-						if (xColAxis && xRowAxis) {
-							a.push(getTdHtml({
-								type: 'valueGrandTotal',
-								cls: 'pivot-value-grandtotal',
-								value: total,
-								htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(total) : '',
-								empty: !Ext.Array.contains(empty, false)
-							}));
-						}
-					}
-
-					if (doRowCumulativeTotals() && doColTotals()) {
-						for (var i = 0, obj; i < totalColObjects.length; i++) {
-							obj = totalColObjects[i];
 							total += obj.value;
 							empty.push(obj.empty);
 						}
