@@ -3228,6 +3228,7 @@ Ext.onReady( function() {
 			startValue,
 			endValue,
 			color,
+			bgColor,
 			legendGrid,
 			create,
 			update,
@@ -3274,7 +3275,7 @@ Ext.onReady( function() {
 		});
 
 		legendStore = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name', 'startValue', 'endValue', 'color'],
+			fields: ['id', 'name', 'startValue', 'endValue', 'color', 'bgColor'],
 			proxy: {
 				type: 'ajax',
 				url: '',
@@ -3459,6 +3460,7 @@ Ext.onReady( function() {
                     editStartValue,
                     editEndValue,
                     editColor,
+                    editBgColor,
                     editCancel,
                     editUpdate,
                     showUpdateLegend,
@@ -3498,6 +3500,13 @@ Ext.onReady( function() {
                     value: record.data.color.replace('#', '')
                 });
 
+                editBgColor = Ext.create('Ext.ux.button.ColorButton', {
+                    width: windowWidth - windowBorder - bodyPadding - (2 * legendBodyBorder) - (2 * legendBodyPadding) - fieldLabelWidth + 4,
+                    height: 23,
+                    style: 'border-radius: 1px',
+                    value: record.data.bgColor.replace('#', '')
+                });
+
                 validateEditLegendForm = function() {
                     if (!(editLegendName.getValue() && Ext.isNumber(editStartValue.getValue()) && Ext.isNumber(editEndValue.getValue()) && editColor.getValue())) {
                         return;
@@ -3528,6 +3537,7 @@ Ext.onReady( function() {
                         record.set('startValue', editStartValue.getValue());
                         record.set('endValue', editEndValue.getValue());
                         record.set('color', '#' + editColor.getValue());
+                        record.set('bgColor', '#' + editBgColor.getValue());
 
                         editWindow.destroy();
                         window.isDirty = true;
@@ -3575,6 +3585,19 @@ Ext.onReady( function() {
                                 },
                                 editColor
                             ]
+                        },
+                        {
+                            layout: 'column',
+                            cls: 'gis-container-inner',
+                            bodyStyle: 'background: transparent',
+                            items: [
+                                {
+                                    html: GIS.i18n.legend_symbolizer_background + ':',
+                                    width: fieldLabelWidth,
+                                    bodyStyle: 'background:transparent; padding-top:3px; padding-left:3px'
+                                },
+                                editBgColor
+                            ]
                         }
                     ]
                 });
@@ -3588,7 +3611,7 @@ Ext.onReady( function() {
 
             // legend panel
 			tmpLegendStore = Ext.create('Ext.data.ArrayStore', {
-				fields: ['id', 'name', 'startValue', 'endValue', 'color']
+				fields: ['id', 'name', 'startValue', 'endValue', 'color', 'bgColor']
 			});
 
 			legendSetName = Ext.create('Ext.form.field.Text', {
@@ -3633,6 +3656,13 @@ Ext.onReady( function() {
 				value: 'e1e1e1'
 			});
 
+			bgColor = Ext.create('Ext.ux.button.ColorButton', {
+				width: windowWidth - windowBorder - bodyPadding - (2 * legendBodyBorder) - (2 * legendBodyPadding) - fieldLabelWidth,
+				height: 23,
+				style: 'border-radius: 1px',
+				value: 'ffffff'
+			});
+
 			addLegend = Ext.create('Ext.button.Button', {
 				text: GIS.i18n.add_legend,
 				height: 26,
@@ -3644,6 +3674,7 @@ Ext.onReady( function() {
 						sv = startValue.getValue(),
 						ev = endValue.getValue(),
 						co = color.getValue().toUpperCase(),
+						bgco = bgColor.getValue().toUpperCase(),
 						items = tmpLegendStore.data.items,
 						data = [];
 
@@ -3657,7 +3688,8 @@ Ext.onReady( function() {
 							name: ln,
 							startValue: sv,
 							endValue: ev,
-							color: '#' + co
+							color: '#' + co,
+							bgColor: '#' + bgco
 						});
 
 						Ext.Array.sort(data, function (a, b) {
@@ -3671,6 +3703,7 @@ Ext.onReady( function() {
 						startValue.reset();
 						endValue.reset();
 						color.reset();
+						bgColor.reset();
 
                         window.isDirty = true;
 					}
@@ -3695,7 +3728,9 @@ Ext.onReady( function() {
 						sortable: false,
 						width: 45,
 						renderer: function(value, metaData, record) {
-							return '<span style="color:' + record.data.color + '">Color</span>';
+							return '<span style="color:' + record.data.color + 
+							    '; background-color:' + record.data.bgColor + 
+							    '">Color</span>';
 						}
 					},
 					{
@@ -3817,6 +3852,19 @@ Ext.onReady( function() {
 									},
 									color
 								]
+							},
+							{
+								layout: 'column',
+								cls: 'gis-container-inner',
+								bodyStyle: 'background: transparent',
+								items: [
+									{
+										html: GIS.i18n.legend_symbolizer_background + ':',
+										width: fieldLabelWidth,
+										bodyStyle: 'background:transparent; padding-top:3px; padding-left:3px'
+									},
+									bgColor
+								]
 							}
 						]
 					},
@@ -3842,7 +3890,7 @@ Ext.onReady( function() {
 			});
 
 			if (id) {
-				legendStore.proxy.url = gis.init.contextPath + '/api/legendSets/' + id + '.json?fields=legends[id,displayName|rename(name),startValue,endValue,color]';
+				legendStore.proxy.url = gis.init.contextPath + '/api/legendSets/' + id + '.json?fields=legends[id,displayName|rename(name),startValue,endValue,color,bgColor]';
 				legendStore.load();
 
 				legendSetName.setValue(legendSetStore.getById(id).data.name);
@@ -3899,7 +3947,8 @@ Ext.onReady( function() {
 					name: item.data.name,
 					startValue: item.data.startValue,
 					endValue: item.data.endValue,
-					color: item.data.color
+					color: item.data.color,
+					bgColor: item.data.bgColor
 				});
 			}
 

@@ -2325,7 +2325,8 @@ Ext.onReady( function() {
 				};
 
 				getTdHtml = function(config, metaDataId) {
-					var bgColor,
+					var color,
+					  bgColor,
 						legends,
 						colSpan,
 						rowSpan,
@@ -2380,7 +2381,8 @@ Ext.onReady( function() {
 
 						for (var i = 0; i < legends.length; i++) {
 							if (Ext.Number.constrain(value, legends[i].startValue, legends[i].endValue) === value) {
-								bgColor = legends[i].color;
+								color = legends[i].color;
+								bgColor = legends[i].bgColor;
 							}
 						}
 					}
@@ -2419,7 +2421,9 @@ Ext.onReady( function() {
 						//html += '</div></div></div></td>';
 					//}
 					//else {
-						html += 'style="' + (bgColor && isValue ? 'color:' + bgColor + '; ' : '') + '">' + htmlValue + '</td>';
+						html += 'style="' + (color && isValue ? 'color:' + color + '; ' : '') +
+						  (bgColor && isValue ? 'background-color:' + bgColor + '; ' : '') +
+						  '">' + htmlValue + '</td>';
 					//}
 
 					return html;
@@ -3321,7 +3325,7 @@ Ext.onReady( function() {
 
         // legend sets
         requests.push({
-            url: init.contextPath + '/api/legendSets.json?fields=id,displayName|rename(name),legends[id,displayName|rename(name),startValue,endValue,color]&paging=false',
+            url: init.contextPath + '/api/legendSets.json?fields=id,displayName|rename(name),legends[id,displayName|rename(name),startValue,endValue,color,bgColor]&paging=false',
             success: function(r) {
                 init.legendSets = Ext.decode(r.responseText).legendSets || [];
                 fn();

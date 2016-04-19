@@ -2332,7 +2332,8 @@ Ext.onReady( function() {
 				};
 
 				getTdHtml = function(config, metaDataId) {
-					var bgColor,
+					var color,
+					  bgColor,
 						legends,
 						colSpan,
 						rowSpan,
@@ -2387,7 +2388,8 @@ Ext.onReady( function() {
 
 						for (var i = 0; i < legends.length; i++) {
 							if (Ext.Number.constrain(value, legends[i].startValue, legends[i].endValue) === value) {
-								bgColor = legends[i].color;
+								color = legends[i].color;
+								bgColor = legends[i].bgColor;
 							}
 						}
 					}
@@ -2426,7 +2428,9 @@ Ext.onReady( function() {
 						//html += '</div></div></div></td>';
 					//}
 					//else {
-						html += 'style="' + (bgColor && isValue ? 'color:' + bgColor + '; ' : '') + '">' + htmlValue + '</td>';
+						html += html += 'style="' + (color && isValue ? 'color:' + color + '; ' : '') +
+						  (bgColor && isValue ? 'background-color:' + bgColor + '; ' : '') +
+						  '">' + htmlValue + '</td>';
 					//}
 
 					return html;
