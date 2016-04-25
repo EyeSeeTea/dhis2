@@ -4,3 +4,6 @@
 [submodule "webapps/dhis-d2-analysis"]
 	path = webapps/dhis-d2-analysis
 	url = https://github.com/dhis2/d2-analysis
+[submodule "dhis2-utils"]
+	path = dhis2-utils
+	url = https://github.com/EyeSeeTea/dhis2-utils
