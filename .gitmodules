@@ -1,6 +1,9 @@
 [submodule "webapps/dhis-web-pivot"]
 	path = webapps/dhis-web-pivot
-	url = https://github.com/dhis2/dhis2-pivot
+	url = https://github.com/EyeSeeTea/dhis2-pivot
 [submodule "webapps/dhis-d2-analysis"]
 	path = webapps/dhis-d2-analysis
-	url = https://github.com/dhis2/d2-analysis
+	url = https://github.com/EyeSeeTea/d2-analysis
+[submodule "webapps/dhis2-gis-api"]
+	path = webapps/dhis2-gis-api
+	url = git@github.com:EyeSeeTea/dhis2-gis-api.git
