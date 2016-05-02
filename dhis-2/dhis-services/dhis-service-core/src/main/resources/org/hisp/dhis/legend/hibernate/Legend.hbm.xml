@@ -22,6 +22,8 @@
     <property name="endValue" column="endvalue" index="maplegend_endvalue" />
 
     <property name="color" column="color" />
+    
+    <property name="bgColor" column="bgcolor" />
 
     <property name="image" column="image" />
 
