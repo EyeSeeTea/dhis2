@@ -9,7 +9,7 @@
 	url = https://github.com/EyeSeeTea/dhis2-utils
 [submodule "webapps/dhis2-gis-api"]
 	path = webapps/dhis2-gis-api
-	url = git@github.com:EyeSeeTea/dhis2-gis-api.git
+	url = https://github.com/EyeSeeTea/dhis2-gis-api
 [submodule "webapps/dhis2-gis"]
 	path = webapps/dhis2-gis
 	url = https://github.com/EyeSeeTea/dhis2-gis
