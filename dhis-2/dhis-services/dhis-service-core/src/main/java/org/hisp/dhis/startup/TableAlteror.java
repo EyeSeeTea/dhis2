@@ -471,8 +471,10 @@ public class TableAlteror
         // reporttable col/row totals = keep existing || copy from totals || true
         executeSql( "update reporttable set totals = true where totals is null" );
         executeSql( "update reporttable set coltotals = totals where coltotals is null" );
+        executeSql( "update reporttable set colcumulativetotals = false where colcumulativetotals is null" );
         executeSql( "update reporttable set coltotals = true where coltotals is null" );
         executeSql( "update reporttable set rowtotals = totals where rowtotals is null" );
+        executeSql( "update reporttable set rowcumulativetotals = false where rowcumulativetotals is null" );
         executeSql( "update reporttable set rowtotals = true where rowtotals is null" );
         executeSql( "alter table reporttable drop column totals" );
 

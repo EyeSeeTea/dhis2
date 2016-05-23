@@ -148,9 +148,19 @@ public class ReportTable
     private boolean rowTotals;
 
     /**
+     * Indicates rendering of row cumulative totals for the table.
+     */
+    private boolean rowCumulativeTotals;
+
+    /**
      * Indicates rendering of column totals for the table.
      */
     private boolean colTotals;
+
+    /**
+     * Indicates rendering of column cumulative totals for the table.
+     */
+    private boolean colCumulativeTotals;
 
     /**
      * Indicates rendering of row sub-totals for the table.
@@ -851,6 +861,19 @@ public class ReportTable
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isRowCumulativeTotals()
+    {
+        return rowCumulativeTotals;
+    }
+
+    public void setRowCumulativeTotals( boolean rowCumulativeTotals )
+    {
+        this.rowCumulativeTotals = rowCumulativeTotals;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public boolean isColTotals()
     {
         return colTotals;
@@ -859,6 +882,19 @@ public class ReportTable
     public void setColTotals( boolean colTotals )
     {
         this.colTotals = colTotals;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isColCumulativeTotals()
+    {
+        return colCumulativeTotals;
+    }
+
+    public void setColCumulativeTotals( boolean colCumulativeTotals )
+    {
+        this.colCumulativeTotals = colCumulativeTotals;
     }
 
     @JsonProperty
@@ -1041,7 +1077,9 @@ public class ReportTable
             regression = reportTable.isRegression();
             cumulative = reportTable.isCumulative();
             rowTotals = reportTable.isRowTotals();
+            rowCumulativeTotals = reportTable.isRowCumulativeTotals();
             colTotals = reportTable.isColTotals();
+            colCumulativeTotals = reportTable.isColCumulativeTotals();
             rowSubTotals = reportTable.isRowSubTotals();
             colSubTotals = reportTable.isColSubTotals();
             hideEmptyRows = reportTable.isHideEmptyRows();
