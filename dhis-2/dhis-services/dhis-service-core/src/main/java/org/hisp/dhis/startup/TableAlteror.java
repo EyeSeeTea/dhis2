@@ -1036,6 +1036,9 @@ public class TableAlteror
         executeSql( "update relativeperiods set lastquarter = false where lastquarter is null" );
         executeSql( "update relativeperiods set lastsixmonth = false where lastsixmonth is null" );
         executeSql( "update relativeperiods set lastweek = false where lastweek is null" );
+        
+        executeSql( "update relativeperiods set weeksthisyear = false where weeksthisyear is null" );
+        executeSql( "update relativeperiods set bimonthsthisyear = false where bimonthsthisyear is null" );
     }
 
     private void updateNameColumnLengths()
