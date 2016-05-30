@@ -100,13 +100,22 @@ public class RelativePeriods
         "month11",
         "month12"};
 
-    public static final String[] BIMONTHS_LAST_6 = {
+    public static final String[] BIMONTHS_THIS_YEAR = {
         "bimonth1",
         "bimonth2",
         "bimonth3",
         "bimonth4",
         "bimonth5",
         "bimonth6"};
+
+    public static final String[] WEEKS_THIS_YEAR = {
+        "w1", "w2", "w3", "w4", "w5", "w6", "w7", "w8", "w9", "w10", 
+        "w11", "w12", "w13", "w14", "w15", "w16", "w17", "w18", "w19", "w20",
+        "w21", "w22", "w23", "w24", "w25", "w26", "w27", "w28", "w29", "w30", 
+        "w31", "w32", "w33", "w34", "w35", "w36", "w37", "w38", "w39", "w40",
+        "w41", "w42", "w43", "w44", "w45", "w46", "w47", "w48", "w49", "w50", "w51", "w52" };
+        
+    public static final String[] BIMONTHS_LAST_6 = BIMONTHS_THIS_YEAR;
 
     public static final String[] QUARTERS_THIS_YEAR = {
         "quarter1",
@@ -138,12 +147,7 @@ public class RelativePeriods
         "financial_year_minus_1",
         "financial_year_this" };
     
-    public static final String[] WEEKS_LAST_52 = {
-        "w1", "w2", "w3", "w4", "w5", "w6", "w7", "w8", "w9", "w10", 
-        "w11", "w12", "w13", "w14", "w15", "w16", "w17", "w18", "w19", "w20",
-        "w21", "w22", "w23", "w24", "w25", "w26", "w27", "w28", "w29", "w30", 
-        "w31", "w32", "w33", "w34", "w35", "w36", "w37", "w38", "w39", "w40",
-        "w41", "w42", "w43", "w44", "w45", "w46", "w47", "w48", "w49", "w50", "w51", "w52" };
+    public static final String[] WEEKS_LAST_52 = WEEKS_THIS_YEAR;
     
     private static final int MONTHS_IN_YEAR = 12;
 
@@ -165,7 +169,11 @@ public class RelativePeriods
     
     private boolean lastSixMonth = false;
 
+    private boolean weeksThisYear = false;
+    
     private boolean monthsThisYear = false;
+    
+    private boolean biMonthsThisYear = false;
 
     private boolean quartersThisYear = false;
 
@@ -224,7 +232,9 @@ public class RelativePeriods
      * @param lastQuarter           last quarter
      * @param thisSixMonth          this six month
      * @param lastSixMonth          last six month
+     * @param weeksThisYear         weeks this year
      * @param monthsThisYear        months this year
+     * @param biMonthsThisYear      bi-months this year
      * @param quartersThisYear      quarters this year
      * @param thisYear              this year
      * @param monthsLastYear        months last year
@@ -247,7 +257,7 @@ public class RelativePeriods
      */
     public RelativePeriods( boolean thisMonth, boolean lastMonth, boolean thisBimonth, boolean lastBimonth, 
                             boolean thisQuarter, boolean lastQuarter, boolean thisSixMonth, boolean lastSixMonth,
-                            boolean monthsThisYear, boolean quartersThisYear, boolean thisYear,
+                            boolean weeksThisYear, boolean monthsThisYear, boolean biMonthsThisYear, boolean quartersThisYear, boolean thisYear,
                             boolean monthsLastYear, boolean quartersLastYear, boolean lastYear, boolean last5Years,
                             boolean last12Months, boolean last6Months, boolean last3Months, boolean last6BiMonths, boolean last4Quarters, boolean last2SixMonths,
                             boolean thisFinancialYear, boolean lastFinancialYear, boolean last5FinancialYears, 
@@ -261,7 +271,9 @@ public class RelativePeriods
         this.lastQuarter = lastQuarter;
         this.thisSixMonth = thisSixMonth;
         this.lastSixMonth = lastSixMonth;
+        this.weeksThisYear = weeksThisYear;
         this.monthsThisYear = monthsThisYear;
+        this.biMonthsThisYear = biMonthsThisYear;
         this.quartersThisYear = quartersThisYear;
         this.thisYear = thisYear;
         this.monthsLastYear = monthsLastYear;
@@ -301,7 +313,9 @@ public class RelativePeriods
         this.lastQuarter = false;
         this.thisSixMonth = false;
         this.lastSixMonth = false;
+        this.weeksThisYear = false;
         this.monthsThisYear = false;
+        this.biMonthsThisYear = false;
         this.quartersThisYear = false;
         this.thisYear = false;
         this.monthsLastYear = false;
@@ -534,9 +548,19 @@ public class RelativePeriods
             periods.add( getRelativePeriod( new SixMonthlyPeriodType(), LAST_SIXMONTH, new DateTime( date ).minusMonths( 6 ).toDate(), dynamicNames, format ) );
         }
 
+        if ( isWeeksThisYear() )
+        {
+            periods.addAll( getRelativePeriodList( new WeeklyPeriodType(), WEEKS_THIS_YEAR, date, dynamicNames, format ) );
+        }
+
         if ( isMonthsThisYear() )
         {
             periods.addAll( getRelativePeriodList( new MonthlyPeriodType(), MONTHS_THIS_YEAR, date, dynamicNames, format ) );
+        }
+
+        if ( isBiMonthsThisYear() )
+        {
+            periods.addAll( getRelativePeriodList( new BiMonthlyPeriodType(), BIMONTHS_THIS_YEAR, date, dynamicNames, format ) );
         }
 
         if ( isQuartersThisYear() )
@@ -765,7 +789,9 @@ public class RelativePeriods
         map.put( RelativePeriodEnum.LAST_QUARTER, new RelativePeriods().setLastQuarter( true ) );
         map.put( RelativePeriodEnum.THIS_SIX_MONTH, new RelativePeriods().setThisSixMonth( true ) );
         map.put( RelativePeriodEnum.LAST_SIX_MONTH, new RelativePeriods().setLastSixMonth( true ) );
+        map.put( RelativePeriodEnum.WEEKS_THIS_YEAR, new RelativePeriods().setWeeksThisYear( true ) );
         map.put( RelativePeriodEnum.MONTHS_THIS_YEAR, new RelativePeriods().setMonthsThisYear( true ) );
+        map.put( RelativePeriodEnum.BIMONTHS_THIS_YEAR, new RelativePeriods().setBiMonthsThisYear( true ) );
         map.put( RelativePeriodEnum.QUARTERS_THIS_YEAR, new RelativePeriods().setQuartersThisYear( true ) );
         map.put( RelativePeriodEnum.THIS_YEAR, new RelativePeriods().setThisYear( true ) );
         map.put( RelativePeriodEnum.MONTHS_LAST_YEAR, new RelativePeriods().setMonthsLastYear( true ) );
@@ -807,7 +833,9 @@ public class RelativePeriods
         add( list, RelativePeriodEnum.LAST_QUARTER, lastQuarter );
         add( list, RelativePeriodEnum.THIS_SIX_MONTH, thisSixMonth );
         add( list, RelativePeriodEnum.LAST_SIX_MONTH, lastSixMonth );
+        add( list, RelativePeriodEnum.WEEKS_THIS_YEAR, weeksThisYear );
         add( list, RelativePeriodEnum.MONTHS_THIS_YEAR, monthsThisYear );
+        add( list, RelativePeriodEnum.BIMONTHS_THIS_YEAR, biMonthsThisYear );
         add( list, RelativePeriodEnum.QUARTERS_THIS_YEAR, quartersThisYear );
         add( list, RelativePeriodEnum.THIS_YEAR, thisYear );
         add( list, RelativePeriodEnum.MONTHS_LAST_YEAR, monthsLastYear );
@@ -844,7 +872,9 @@ public class RelativePeriods
             lastQuarter = relativePeriods.contains( RelativePeriodEnum.LAST_QUARTER );
             thisSixMonth = relativePeriods.contains( RelativePeriodEnum.THIS_SIX_MONTH );
             lastSixMonth = relativePeriods.contains( RelativePeriodEnum.LAST_SIX_MONTH );
+            weeksThisYear = relativePeriods.contains( RelativePeriodEnum.WEEKS_THIS_YEAR );
             monthsThisYear = relativePeriods.contains( RelativePeriodEnum.MONTHS_THIS_YEAR );
+            biMonthsThisYear = relativePeriods.contains( RelativePeriodEnum.BIMONTHS_THIS_YEAR );
             quartersThisYear = relativePeriods.contains( RelativePeriodEnum.QUARTERS_THIS_YEAR );
             thisYear = relativePeriods.contains( RelativePeriodEnum.THIS_YEAR );
             monthsLastYear = relativePeriods.contains( RelativePeriodEnum.MONTHS_LAST_YEAR );
@@ -998,6 +1028,19 @@ public class RelativePeriods
 
     @JsonProperty
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public boolean isWeeksThisYear()
+    {
+        return weeksThisYear;
+    }
+
+    public RelativePeriods setWeeksThisYear( boolean weeksThisYear )
+    {
+        this.weeksThisYear = weeksThisYear;
+        return this;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
     public boolean isMonthsThisYear()
     {
         return monthsThisYear;
@@ -1006,6 +1049,19 @@ public class RelativePeriods
     public RelativePeriods setMonthsThisYear( boolean monthsThisYear )
     {
         this.monthsThisYear = monthsThisYear;
+        return this;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public boolean isBiMonthsThisYear()
+    {
+        return biMonthsThisYear;
+    }
+
+    public RelativePeriods setBiMonthsThisYear( boolean biMonthsThisYear )
+    {
+        this.biMonthsThisYear = biMonthsThisYear;
         return this;
     }
 
@@ -1284,7 +1340,9 @@ public class RelativePeriods
         result = prime * result + (lastBimonth ? 1 : 0);
         result = prime * result + (lastQuarter ? 1 : 0);
         result = prime * result + (lastSixMonth ? 1 : 0);
+        result = prime * result + (weeksThisYear ? 1 : 0);
         result = prime * result + (monthsThisYear ? 1 : 0);
+        result = prime * result + (biMonthsThisYear ? 1 : 0);
         result = prime * result + (quartersThisYear ? 1 : 0);
         result = prime * result + (thisYear ? 1 : 0);
         result = prime * result + (monthsLastYear ? 1 : 0);
@@ -1347,7 +1405,17 @@ public class RelativePeriods
             return false;
         }
 
+        if ( !weeksThisYear == other.weeksThisYear )
+        {
+            return false;
+        }
+
         if ( !monthsThisYear == other.monthsThisYear )
+        {
+            return false;
+        }
+
+        if ( !biMonthsThisYear == other.biMonthsThisYear )
         {
             return false;
         }
