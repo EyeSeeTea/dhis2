@@ -130,6 +130,10 @@
     <property name="rowTotals" />
 
     <property name="colTotals" />
+    
+    <property name="rowCumulativeTotals" />
+	  
+    <property name="colCumulativeTotals" />
 
     <property name="rowSubTotals" />
 
