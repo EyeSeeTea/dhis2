@@ -52,18 +52,21 @@ public class Legend
 
     private String color;
 
+    private String bgColor;
+
     private String image;
 
     public Legend()
     {
     }
 
-    public Legend( String name, Double startValue, Double endValue, String color, String image )
+    public Legend( String name, Double startValue, Double endValue, String color, String bgColor, String image )
     {
         this.name = name;
         this.startValue = startValue;
         this.endValue = endValue;
         this.color = color;
+        this.bgColor = bgColor;
         this.image = image;
     }
 
@@ -119,6 +122,19 @@ public class Legend
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getBgColor()
+    {
+        return bgColor;
+    }
+
+    public void setBgColor( String bgColor )
+    {
+        this.bgColor = bgColor;
+    }   
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getImage()
     {
         return image;
@@ -143,6 +159,7 @@ public class Legend
                 startValue = legend.getStartValue();
                 endValue = legend.getEndValue();
                 color = legend.getColor();
+                bgColor = legend.getBgColor();
                 image = legend.getImage();
             }
             else if ( mergeMode.isMerge() )
@@ -150,6 +167,7 @@ public class Legend
                 startValue = legend.getStartValue() == null ? startValue : legend.getStartValue();
                 endValue = legend.getEndValue() == null ? endValue : legend.getEndValue();
                 color = legend.getColor() == null ? color : legend.getColor();
+                bgColor = legend.getBgColor() == null ? bgColor : legend.getBgColor();
                 image = legend.getImage() == null ? image : legend.getImage();
             }
         }
