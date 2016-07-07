@@ -337,13 +337,18 @@ public class DefaultDimensionService
         {
             String id0 = splitSafe( dimensionItem, COMPOSITE_DIM_OBJECT_ESCAPED_SEP, 0 );
             String id1 = splitSafe( dimensionItem, COMPOSITE_DIM_OBJECT_ESCAPED_SEP, 1 );
+            String id2 = splitSafe( dimensionItem, COMPOSITE_DIM_OBJECT_ESCAPED_SEP, 2 );
 
             DataElementOperand operand = null;
             DataSet dataSet = null;
             ProgramDataElement programDataElement = null;
             ProgramTrackedEntityAttribute programAttribute = null;
             
-            if ( ( operand = operandService.getOrAddDataElementOperand( id0, id1 ) ) != null )
+            if ( id2 != null )
+            {
+                return operandService.getOrAddDataElementOperand( id0, id1, id2 );
+            }
+            else if ( ( operand = operandService.getOrAddDataElementOperand( id0, id1 ) ) != null )
             {
                 return operand;
             }
@@ -390,13 +395,18 @@ public class DefaultDimensionService
         {
             String id0 = splitSafe( dimensionItem, COMPOSITE_DIM_OBJECT_ESCAPED_SEP, 0 );
             String id1 = splitSafe( dimensionItem, COMPOSITE_DIM_OBJECT_ESCAPED_SEP, 1 );
+            String id2 = splitSafe( dimensionItem, COMPOSITE_DIM_OBJECT_ESCAPED_SEP, 2 );
 
             DataElementOperand operand = null;
             DataSet dataSet = null;
             ProgramDataElement programDataElement = null;
             ProgramTrackedEntityAttribute programAttribute = null;
 
-            if ( ( operand = operandService.getDataElementOperand( id0, id1 ) ) != null )
+            if ( id2 != null )
+            {
+                return operandService.getDataElementOperand( id0, id1, id2 );
+            }
+            else if ( ( operand = operandService.getDataElementOperand( id0, id1 ) ) != null )
             {
                 return operand;
             }

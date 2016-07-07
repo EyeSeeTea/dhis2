@@ -36,12 +36,16 @@ import org.hisp.dhis.common.DataDimensionType;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.common.IdentifiableProperty;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.user.UserCredentials;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -58,6 +62,9 @@ public class DefaultDataElementCategoryService
     implements DataElementCategoryService
 {
     private static final Log log = LogFactory.getLog( DefaultDataElementCategoryService.class );
+
+    @Autowired
+    private DataSetService dataSetService;
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -806,8 +813,10 @@ public class DefaultDataElementCategoryService
             DataElement dataElement = dataElementService.getDataElement( operand.getDataElementId() );
             DataElementCategoryOptionCombo categoryOptionCombo = getDataElementCategoryOptionCombo( operand
                 .getOptionComboId() );
+            DataElementCategoryOptionCombo attributeOptionCombo = getDataElementCategoryOptionCombo( operand
+                .getAttributeComboId() );
 
-            operand.updateProperties( dataElement, categoryOptionCombo );
+            operand.updateProperties( dataElement, categoryOptionCombo, attributeOptionCombo  );
         }
 
         return operands;
@@ -836,12 +845,32 @@ public class DefaultDataElementCategoryService
                     operands.add( operand );
                 }
 
-                for ( DataElementCategoryOptionCombo categoryOptionCombo : dataElement.getCategoryCombo().getSortedOptionCombos() )
+                List<DataElementCategoryOptionCombo> categoryOptionCombos =
+                    dataElement.getCategoryCombo().getSortedOptionCombos();
+                DataSet dataSet = dataElement.getDataSet();
+                DataElementCategoryCombo categoryCombo =
+                    (dataSet != null) ? dataSet.getCategoryCombo() : null;
+                List<DataElementCategoryOptionCombo> attributeOptionCombos = (categoryCombo != null) ?
+                    categoryCombo.getSortedOptionCombos() : Collections.emptyList();
+
+                for ( DataElementCategoryOptionCombo categoryOptionCombo : categoryOptionCombos )
                 {
                     DataElementOperand operand = new DataElementOperand( dataElement, categoryOptionCombo );
-                    operand.updateProperties( dataElement, categoryOptionCombo );
+                    operand.updateProperties(dataElement, categoryOptionCombo, null);
 
                     operands.add( operand );
+                }
+
+                for ( DataElementCategoryOptionCombo categoryOptionCombo : categoryOptionCombos )
+                {
+                    for ( DataElementCategoryOptionCombo attributeOptionCombo : attributeOptionCombos )
+                    {
+                        DataElementOperand operand =
+                            new DataElementOperand(dataElement, categoryOptionCombo, attributeOptionCombo);
+                        operand.updateProperties(dataElement, categoryOptionCombo, attributeOptionCombo);
+
+                        operands.add(operand);
+                    }
                 }
             }
         }

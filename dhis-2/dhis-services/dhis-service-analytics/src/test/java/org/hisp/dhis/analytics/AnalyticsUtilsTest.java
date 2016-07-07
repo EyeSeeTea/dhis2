@@ -76,15 +76,21 @@ public class AnalyticsUtilsTest
     public void testConvertDxToOperand()
     {
         Map<String, Double> map = new HashMap<>();
-        map.put( "GauDLAiXPKT-kC1OT9Q1n1j-R9U8q7X1aJG", 10d );
+        map.put( "GauDLAiXPKT-kC1OT9Q1n1j", 10d );
         map.put( "YkRvCLedQa4-h1dJ9W4dWor-Zrd4DAf8M99", 11d );
-        map.put( "PcfRp1HETO8-zqXKIEycBck-KBJBZopYMPV", 12d );
+        map.put( "PcfRp1HETO8-zqXKIEycBck-KBJBZopYMPV-Prlt0C1RF0s", 12d );
         
-        Map<String, Double> convertedMap = AnalyticsUtils.convertDxToOperand( map );
+        Map<String, Double> convertedMap1 = AnalyticsUtils.convertDxToOperand( map, 1 );
         
-        assertTrue( convertedMap.containsKey( "GauDLAiXPKT.kC1OT9Q1n1j-R9U8q7X1aJG" ) );
-        assertTrue( convertedMap.containsKey( "YkRvCLedQa4.h1dJ9W4dWor-Zrd4DAf8M99" ) );
-        assertTrue( convertedMap.containsKey( "PcfRp1HETO8.zqXKIEycBck-KBJBZopYMPV" ) );
+        assertTrue( convertedMap1.containsKey( "GauDLAiXPKT.kC1OT9Q1n1j" ) );
+        assertTrue( convertedMap1.containsKey( "YkRvCLedQa4.h1dJ9W4dWor-Zrd4DAf8M99" ) );
+        assertTrue( convertedMap1.containsKey( "PcfRp1HETO8.zqXKIEycBck-KBJBZopYMPV-Prlt0C1RF0s" ) );
+
+        Map<String, Double> convertedMap2 = AnalyticsUtils.convertDxToOperand( map, 2 );
+
+        assertTrue( convertedMap2.containsKey( "GauDLAiXPKT.kC1OT9Q1n1j" ) );
+        assertTrue( convertedMap2.containsKey( "YkRvCLedQa4.h1dJ9W4dWor.Zrd4DAf8M99" ) );
+        assertTrue( convertedMap2.containsKey( "PcfRp1HETO8.zqXKIEycBck.KBJBZopYMPV-Prlt0C1RF0s" ) );
     }
     
     @Test

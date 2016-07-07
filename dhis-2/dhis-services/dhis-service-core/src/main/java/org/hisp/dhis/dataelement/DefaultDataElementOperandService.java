@@ -155,6 +155,14 @@ public class DefaultDataElementOperandService
     }
     
     @Override
+    public DataElementOperand getDataElementOperand( DataElement dataElement,
+                                                     DataElementCategoryOptionCombo categoryOptionCombo,
+                                                     DataElementCategoryOptionCombo attributeOptionCombo)
+    {
+        return dataElementOperandStore.get( dataElement, categoryOptionCombo, attributeOptionCombo);
+    }
+
+    @Override
     public DataElementOperand getDataElementOperand( String dataElementUid, String categoryOptionComboUid )
     {
         DataElement dataElement = dataElementService.getDataElement( dataElementUid );
@@ -166,6 +174,25 @@ public class DefaultDataElementOperandService
         }
         
         return new DataElementOperand( dataElement, categoryOptionCombo );
+    }
+
+    @Override
+    public DataElementOperand getDataElementOperand( String dataElementUid,
+                                                     String categoryOptionComboUid,
+                                                     String attributeOptionComboUid)
+    {
+        DataElement dataElement = dataElementService.getDataElement( dataElementUid );
+        DataElementCategoryOptionCombo categoryOptionCombo =
+            categoryService.getDataElementCategoryOptionCombo( categoryOptionComboUid );
+        DataElementCategoryOptionCombo attributeOptionCombo =
+            categoryService.getDataElementCategoryOptionCombo( attributeOptionComboUid );
+
+        if ( dataElement == null || categoryOptionCombo == null || attributeOptionCombo == null)
+        {
+            return null;
+        }
+
+        return new DataElementOperand( dataElement, categoryOptionCombo, attributeOptionCombo  );
     }
 
     @Override
@@ -184,6 +211,23 @@ public class DefaultDataElementOperandService
     }
 
     @Override
+    public DataElementOperand getOrAddDataElementOperand( DataElement dataElement,
+        DataElementCategoryOptionCombo categoryOptionCombo, DataElementCategoryOptionCombo attributeOptionCombo )
+    {
+        DataElementOperand operand =
+            getDataElementOperand( dataElement, categoryOptionCombo, attributeOptionCombo );
+
+        if ( operand == null )
+        {
+            operand = new DataElementOperand( dataElement, categoryOptionCombo, attributeOptionCombo );
+
+            addDataElementOperand( operand );
+        }
+
+        return operand;
+    }
+
+    @Override
     public DataElementOperand getOrAddDataElementOperand( String dataElementUid, String categoryOptionComboUid )
     {
         DataElement dataElement = dataElementService.getDataElement( dataElementUid );
@@ -195,5 +239,24 @@ public class DefaultDataElementOperandService
         }
         
         return getOrAddDataElementOperand( dataElement, categoryOptionCombo );
+    }
+
+    @Override
+    public DataElementOperand getOrAddDataElementOperand( String dataElementUid,
+                                                          String categoryOptionComboUid,
+                                                          String attributeOptionComboUid )
+    {
+        DataElement dataElement = dataElementService.getDataElement( dataElementUid );
+        DataElementCategoryOptionCombo categoryOptionCombo =
+            categoryService.getDataElementCategoryOptionCombo( categoryOptionComboUid );
+        DataElementCategoryOptionCombo attributeOptionCombo =
+            categoryService.getDataElementCategoryOptionCombo( attributeOptionComboUid );
+
+        if ( dataElement == null || categoryOptionCombo == null || attributeOptionCombo == null)
+        {
+            return null;
+        }
+
+        return getOrAddDataElementOperand( dataElement, categoryOptionCombo, attributeOptionCombo );
     }
 }

@@ -35,6 +35,7 @@ import static org.hisp.dhis.analytics.AnalyticsTableManager.ORGUNIT_TARGET_TABLE
 import static org.hisp.dhis.analytics.DataQueryParams.COMPLETENESS_DIMENSION_TYPES;
 import static org.hisp.dhis.analytics.DataQueryParams.DISPLAY_NAME_DATA_X;
 import static org.hisp.dhis.analytics.DataQueryParams.DX_INDEX;
+import static org.hisp.dhis.common.DimensionalObject.ATTRIBUTEOPTIONCOMBO_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.CATEGORYOPTIONCOMBO_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.DATA_X_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.DIMENSION_SEP;
@@ -51,6 +52,7 @@ import static org.hisp.dhis.common.DimensionalObjectUtils.getDimensionalItemIds;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -58,6 +60,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -348,36 +351,63 @@ public class DefaultAnalyticsService
     {
         if ( !params.getDataElementOperands().isEmpty() && !params.isSkipData() )
         {
-            DataQueryParams dataSourceParams = params.instance();
-            dataSourceParams.retainDataDimension( DataDimensionItemType.DATA_ELEMENT_OPERAND );
-            
             // -----------------------------------------------------------------
-            // Replace operands with data element and option combo dimensions
+            // Replace operands with data element, option combo and attribute combo dimensions
             // -----------------------------------------------------------------
             
-            List<DataElementOperand> operands = asTypedList( dataSourceParams.getDataElementOperands() );
-            List<DimensionalItemObject> dataElements = Lists.newArrayList( DimensionalObjectUtils.getDataElements( operands ) );
-            List<DimensionalItemObject> categoryOptionCombos = Lists.newArrayList( DimensionalObjectUtils.getCategoryOptionCombos( operands ) );
+            List<DataElementOperand> allOperands =
+                asTypedList( params.instance().getDataElementOperands() );
+
+            Collection<List<DataElementOperand>> operandsGroupedByAttributePresence = allOperands
+                .stream()
+                    .collect(Collectors.groupingBy(operand ->
+                        DimensionalObjectUtils.getAttributeOptionCombos(
+                            Collections.singletonList(operand)).isEmpty()))
+                    .values();
+
+            for ( List<DataElementOperand> operands : operandsGroupedByAttributePresence )
+            {
+                DataQueryParams dataSourceParams = params.instance();
+                dataSourceParams.retainDataDimension( DataDimensionItemType.DATA_ELEMENT_OPERAND );
+
+                List<DimensionalItemObject> dataElements =
+                    Lists.newArrayList(DimensionalObjectUtils.getDataElements(operands));
+                List<DimensionalItemObject> categoryOptionCombos =
+                    Lists.newArrayList(DimensionalObjectUtils.getCategoryOptionCombos(operands));
+                List<DimensionalItemObject> attributeOptionCombos =
+                    Lists.newArrayList(DimensionalObjectUtils.getAttributeOptionCombos(operands));
 
             //TODO check if data was dim or filter
             
             dataSourceParams.removeDimension( DATA_X_DIM_ID );
             dataSourceParams.addDimension( new BaseDimensionalObject( DATA_X_DIM_ID, DimensionType.DATA_X, dataElements ) );
-            dataSourceParams.addDimension( new BaseDimensionalObject( CATEGORYOPTIONCOMBO_DIM_ID, DimensionType.CATEGORY_OPTION_COMBO, categoryOptionCombos ) );
 
-            Map<String, Object> aggregatedDataMap = getAggregatedDataValueMapObjectTyped( dataSourceParams );
+                dataSourceParams.addDimension(new BaseDimensionalObject(CATEGORYOPTIONCOMBO_DIM_ID,
+                    DimensionType.CATEGORY_OPTION_COMBO, categoryOptionCombos));
+
+                if ( !attributeOptionCombos.isEmpty() )
+                {
+                    dataSourceParams.addDimension(
+                        new BaseDimensionalObject(ATTRIBUTEOPTIONCOMBO_DIM_ID,
+                        DimensionType.ATTRIBUTE_OPTION_COMBO, attributeOptionCombos));
+                }
             
-            aggregatedDataMap = AnalyticsUtils.convertDxToOperand( aggregatedDataMap );
+                Map<String, Object> aggregatedDataMap =
+                    getAggregatedDataValueMapObjectTyped(dataSourceParams);
 
-            for ( Map.Entry<String, Object> entry : aggregatedDataMap.entrySet() )
-            {
-                grid.addRow();
-                grid.addValues( entry.getKey().split( DIMENSION_SEP ) );
-                grid.addValue( AnalyticsUtils.getRoundedValueObject( dataSourceParams, entry.getValue() ) );
+                Integer replacementsCount = attributeOptionCombos.isEmpty() ? 1 : 2;
+                aggregatedDataMap =
+                    AnalyticsUtils.convertDxToOperand(aggregatedDataMap, replacementsCount);
+
+                for ( Map.Entry<String, Object> entry : aggregatedDataMap.entrySet() ) {
+                    grid.addRow();
+                    grid.addValues(entry.getKey().split(DIMENSION_SEP));
+                    grid.addValue(AnalyticsUtils.getRoundedValueObject(dataSourceParams, entry.getValue()));
+                }
             }
         }
     }
-    
+
     /**
      * Adds reporting rates to the given grid based on the given data query
      * parameters.

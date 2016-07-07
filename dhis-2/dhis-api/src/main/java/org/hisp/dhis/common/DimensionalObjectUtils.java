@@ -46,6 +46,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.common.comparator.ObjectStringValueComparator;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementOperand;
 
 import com.google.common.collect.Sets;
@@ -66,7 +67,7 @@ public class DimensionalObjectUtils
      * Matching data element operand, program data element, program attribute,
      * data set reporting rate metric.
      */
-    private static final Pattern COMPOSITE_DIM_OBJECT_PATTERN = Pattern.compile( "([a-zA-Z]\\w{10})\\.(\\w{5,30})" );
+    private static final Pattern COMPOSITE_DIM_OBJECT_PATTERN = Pattern.compile( "([a-zA-Z]\\w{10})\\.(\\w{5,30})\\.?(\\w{0,30})" );
     
     public static List<DimensionalObject> getCopies( List<DimensionalObject> dimensions )
     {
@@ -432,7 +433,6 @@ public class DimensionalObjectUtils
             if ( value != null )
             {
                 String val = String.valueOf( value );
-                
                 BaseDimensionalItemObject nameableObject = new BaseDimensionalItemObject( val );
                 nameableObject.setShortName( val );
                 objects.add( nameableObject );
@@ -490,6 +490,28 @@ public class DimensionalObjectUtils
         return set;
     }
     
+    /**
+     * Gets a set of unique attribute option combos based on the given collection
+     * of operands.
+     *
+     * @param operands the collection of operands.
+     * @return a set of attribute option combos.
+     */
+    public static Set<DimensionalItemObject> getAttributeOptionCombos( Collection<DataElementOperand> operands )
+    {
+        Set<DimensionalItemObject> set = Sets.newHashSet();
+        DataElementCategoryOptionCombo attributeOptionCombo;
+
+        for ( DataElementOperand operand : operands )
+        {
+            if ( (attributeOptionCombo = operand.getAttributeOptionCombo()) != null ) {
+                set.add(attributeOptionCombo);
+            }
+        }
+
+        return set;
+    }
+
     /**
      * Returns a dimension item identifier for the given data set identifier and
      * reporting date metric.

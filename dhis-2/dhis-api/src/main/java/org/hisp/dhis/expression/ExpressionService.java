@@ -71,12 +71,12 @@ public interface ExpressionService
     String SPACE = " ";
     String DAYS_SYMBOL = "[days]";
 
-    String VARIABLE_EXPRESSION = "(#|D|A|I)\\{(([a-zA-Z]\\w{10})\\.?(\\w*))\\}";
-    String OPERAND_EXPRESSION = "#\\{([a-zA-Z]\\w{10})\\.?(\\w*)\\}";
+    String VARIABLE_EXPRESSION = "(#|D|A|I)\\{(([a-zA-Z]\\w{10})\\.?(\\w*)\\.?(\\w*))\\}";
+    String OPERAND_EXPRESSION = "#\\{([a-zA-Z]\\w{10})\\.?(\\w*)\\.?(\\w*)\\}";
     String PROGRAM_DATA_ELEMENT_EXPRESSION = "D\\{([a-zA-Z]\\w{10})\\.?([a-zA-Z]\\w{10})\\}";
     String OPERAND_UID_EXPRESSION = "([a-zA-Z]\\w{10})\\.?(\\w*)";
     String DATA_ELEMENT_TOTAL_EXPRESSION = "#\\{([a-zA-Z]\\w{10})\\}";
-    String OPTION_COMBO_OPERAND_EXPRESSION = "#\\{([a-zA-Z]\\w{10})\\.([a-zA-Z]\\w{10})\\}";
+    String OPTION_COMBO_OPERAND_EXPRESSION = "#\\{([a-zA-Z]\\w{10})\\.([a-zA-Z]\\w{10})\\.?([a-zA-Z]\\w{10})?\\}";
     String CONSTANT_EXPRESSION = "C\\{([a-zA-Z]\\w{10})\\}";
     String OU_GROUP_EXPRESSION = "OUG\\{([a-zA-Z]\\w{10})\\}";
     String DAYS_EXPRESSION = "\\[days\\]";
