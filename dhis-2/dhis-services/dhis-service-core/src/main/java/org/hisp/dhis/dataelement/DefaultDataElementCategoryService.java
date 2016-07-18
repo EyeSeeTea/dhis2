@@ -37,10 +37,8 @@ import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.common.IdentifiableProperty;
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.user.UserCredentials;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -62,9 +60,6 @@ public class DefaultDataElementCategoryService
     implements DataElementCategoryService
 {
     private static final Log log = LogFactory.getLog( DefaultDataElementCategoryService.class );
-
-    @Autowired
-    private DataSetService dataSetService;
 
     // -------------------------------------------------------------------------
     // Dependencies
