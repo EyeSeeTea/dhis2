@@ -167,6 +167,8 @@
 
     <property name="publicAccess" length="8" />
 
+    <property name="cumulative" />
+
     <set name="userGroupAccesses" table="chartusergroupaccesses">
       <cache usage="read-write" />
       <key column="chartid" />
