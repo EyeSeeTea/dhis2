@@ -152,6 +152,7 @@ public class ExpressionServiceTest
     private String expressionK;
     private String expressionJ;
     private String expressionL;
+    private String expressionM;
 
     private String descriptionA;
     private String descriptionB;
@@ -267,6 +268,7 @@ public class ExpressionServiceTest
         expressionJ = "#{" + opA.getDimensionItem() + "}+#{" + opB.getDimensionItem() + "}";
         expressionK = "1.5*AVG("+expressionJ+")";
         expressionL = "AVG("+expressionJ+")+1.5*STDDEV("+expressionJ+")";
+        expressionM = "#{" + deA.getUid() + SEPARATOR + coc.getUid() + SEPARATOR + coc.getUid() + "}";
 
         descriptionA = "Expression A";
         descriptionB = "Expression B";
@@ -489,7 +491,6 @@ public class ExpressionServiceTest
     @Test
     public void testExpressionIsValid()
     {
-        
     	assertTrue( expressionService.expressionIsValid( expressionA ).isValid() );
         assertTrue( expressionService.expressionIsValid( expressionB ).isValid() );
         assertTrue( expressionService.expressionIsValid( expressionC ).isValid() );
@@ -498,6 +499,7 @@ public class ExpressionServiceTest
         assertTrue( expressionService.expressionIsValid( expressionH ).isValid() );
         assertTrue( expressionService.expressionIsValid( expressionK ).isValid() );
         assertTrue( expressionService.expressionIsValid( expressionL ).isValid() );
+        assertTrue( expressionService.expressionIsValid( expressionM ).isValid() );
 
         expressionA = "#{nonExisting" + SEPARATOR + coc.getUid() + "} + 12";
 
@@ -555,6 +557,7 @@ public class ExpressionServiceTest
         Map<DataElementOperand, Double> valueMap = new HashMap<>();
         valueMap.put( new DataElementOperand( deA.getUid(), coc.getUid() ), 12d );
         valueMap.put( new DataElementOperand( deB.getUid(), coc.getUid() ), 34d );
+        valueMap.put( new DataElementOperand( deA.getUid(), coc.getUid(), coc.getUid() ), 56d );
         
         Map<String, Double> constantMap = new HashMap<>();
         constantMap.put( constantA.getUid(), 2.0 );
@@ -566,6 +569,7 @@ public class ExpressionServiceTest
         assertEquals( "12.0+5", expressionService.generateExpression( expressionD, valueMap, constantMap, null, 5, null ) );
         assertEquals( "12.0*2.0", expressionService.generateExpression( expressionE, valueMap, constantMap, null, null, null ) );
         assertEquals( "12.0*3", expressionService.generateExpression( expressionH, valueMap, constantMap, orgUnitCountMap, null, null ) );
+        assertEquals( "56.0", expressionService.generateExpression( expressionM, valueMap, constantMap, null, null, null ) );
     }
 
     @Test
@@ -587,10 +591,12 @@ public class ExpressionServiceTest
         Expression expD = createExpression( 'D', expressionD, null, null );
         Expression expE = createExpression( 'E', expressionE, null, null );
         Expression expH = createExpression( 'H', expressionH, null, null );
+        Expression expM = createExpression( 'M', expressionM, null, null );
         
         Map<DataElementOperand, Double> valueMap = new HashMap<>();
         valueMap.put( new DataElementOperand( deA.getUid(), coc.getUid() ), 12d );
         valueMap.put( new DataElementOperand( deB.getUid(), coc.getUid() ), 34d );
+        valueMap.put( new DataElementOperand( deA.getUid(), coc.getUid(), coc.getUid() ), 56d );
         
         Map<String, Double> constantMap = new HashMap<>();
         constantMap.put( constantA.getUid(), 2.0 );
@@ -602,6 +608,7 @@ public class ExpressionServiceTest
         assertEquals( 17d, expressionService.getExpressionValue( expD, valueMap, constantMap, null, 5 ), DELTA );
         assertEquals( 24d, expressionService.getExpressionValue( expE, valueMap, constantMap, null, null ), DELTA );
         assertEquals( 36d, expressionService.getExpressionValue( expH, valueMap, constantMap, orgUnitCountMap, null ), DELTA );
+        assertEquals( 56d, expressionService.getExpressionValue( expM, valueMap, constantMap, null, null ), DELTA );
     }
     
     @Test

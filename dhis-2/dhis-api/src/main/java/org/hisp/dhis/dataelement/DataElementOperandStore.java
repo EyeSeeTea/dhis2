@@ -39,4 +39,8 @@ public interface DataElementOperandStore
     String ID = DataElementOperand.class.getName();
 
     DataElementOperand get( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombo );
+
+    DataElementOperand get( DataElement dataElement,
+                            DataElementCategoryOptionCombo categoryOptionCombo,
+                            DataElementCategoryOptionCombo attributeOptionCombo );
 }

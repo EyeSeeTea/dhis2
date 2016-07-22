@@ -54,9 +54,24 @@ public interface DataElementOperandService
     
     DataElementOperand getDataElementOperand( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombo );
     
+    DataElementOperand getDataElementOperand( DataElement dataElement,
+                                              DataElementCategoryOptionCombo categoryOptionCombo,
+                                              DataElementCategoryOptionCombo attributeOptionCombo);
+
     DataElementOperand getDataElementOperand( String dataElementUid, String categoryOptionComboUid );
     
+    DataElementOperand getDataElementOperand( String dataElementUid, String categoryOptionComboUid,
+                                              String attributeOptionComboUid);
+
     DataElementOperand getOrAddDataElementOperand( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombo );
     
+    DataElementOperand getOrAddDataElementOperand( DataElement dataElement,
+                                                   DataElementCategoryOptionCombo categoryOptionCombo,
+                                                   DataElementCategoryOptionCombo attributeOptionCombo );
+
     DataElementOperand getOrAddDataElementOperand( String dataElementUid, String categoryOptionComboUid );
+
+    DataElementOperand getOrAddDataElementOperand( String dataElementUid,
+                                                   String categoryOptionComboUid,
+                                                   String attributeOptionComboUid );
 }

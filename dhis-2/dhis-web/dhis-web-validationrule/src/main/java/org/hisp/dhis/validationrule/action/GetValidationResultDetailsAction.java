@@ -179,12 +179,14 @@ public class GetValidationResultDetailsAction
             DataElement dataElement = dataElementService.getDataElement( operand.getDataElementId() );
             DataElementCategoryOptionCombo categoryOptionCombo = categoryService
                 .getDataElementCategoryOptionCombo( operand.getOptionComboId() );
+            DataElementCategoryOptionCombo attributeOptionCombo = categoryService
+                .getDataElementCategoryOptionCombo( operand.getAttributeComboId() );
 
             DataValue dataValue = dataValueService.getDataValue( dataElement, period, source, categoryOptionCombo );
             
             String value = dataValue != null ? dataValue.getValue() : NULL_REPLACEMENT;
             
-            leftSideMap.put( DataElementOperand.getPrettyName( dataElement, categoryOptionCombo ), value );
+            leftSideMap.put( DataElementOperand.getPrettyName( dataElement, categoryOptionCombo, attributeOptionCombo ), value );
         }
 
         for ( DataElementOperand operand : expressionService.getOperandsInExpression( validationRule.getRightSide().getExpression() ) )
@@ -192,12 +194,14 @@ public class GetValidationResultDetailsAction
             DataElement dataElement = dataElementService.getDataElement( operand.getDataElementId() );
             DataElementCategoryOptionCombo categoryOptionCombo = categoryService
                 .getDataElementCategoryOptionCombo( operand.getOptionComboId() );
+            DataElementCategoryOptionCombo attributeOptionCombo = categoryService
+                .getDataElementCategoryOptionCombo( operand.getAttributeComboId() );
 
             DataValue dataValue = dataValueService.getDataValue( dataElement, period, source, categoryOptionCombo );
 
             String value = dataValue != null ? dataValue.getValue() : NULL_REPLACEMENT;
             
-            rightSideMap.put( DataElementOperand.getPrettyName( dataElement, categoryOptionCombo ), value );
+            rightSideMap.put( DataElementOperand.getPrettyName( dataElement, categoryOptionCombo, attributeOptionCombo ), value );
         }
 
         return SUCCESS;

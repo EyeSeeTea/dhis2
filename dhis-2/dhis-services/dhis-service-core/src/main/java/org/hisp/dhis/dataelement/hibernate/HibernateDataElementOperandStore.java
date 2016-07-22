@@ -68,4 +68,18 @@ public class HibernateDataElementOperandStore
         
         return !operands.isEmpty() ? operands.get( 0 ) : null;
     }
+
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public DataElementOperand get( DataElement dataElement,
+                                   DataElementCategoryOptionCombo categoryOptionCombo,
+                                   DataElementCategoryOptionCombo attributeOptionCombo )
+    {
+        List<DataElementOperand> operands = getCriteria(
+            Restrictions.eq( "dataElement", dataElement ),
+            Restrictions.eq( "categoryOptionCombo", categoryOptionCombo ),
+            Restrictions.eq( "attributeOptionCombo", attributeOptionCombo ) ).list();
+
+        return !operands.isEmpty() ? operands.get( 0 ) : null;
+    }
 }

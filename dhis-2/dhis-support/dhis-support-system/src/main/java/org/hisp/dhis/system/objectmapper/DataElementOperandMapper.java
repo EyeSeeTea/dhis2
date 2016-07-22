@@ -60,6 +60,7 @@ public class DataElementOperandMapper
         final DataElementOperand operand = new DataElementOperand(
             resultSet.getString( 1 ),
             resultSet.getString( 3 ),
+            null,
             operandName );
         
         return operand;

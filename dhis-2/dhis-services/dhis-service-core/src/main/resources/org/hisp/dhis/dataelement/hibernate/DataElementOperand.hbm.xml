@@ -18,5 +18,11 @@
     <many-to-one name="categoryOptionCombo" class="org.hisp.dhis.dataelement.DataElementCategoryOptionCombo"
       column="categoryoptioncomboid" foreign-key="fk_dataelementoperand_dataelementcategoryoptioncombo" unique-key="dataelement_operand_unique_key" />
 
+    <many-to-one name="attributeOptionCombo"
+                 class="org.hisp.dhis.dataelement.DataElementCategoryOptionCombo"
+                 column="attributeoptioncomboid"
+                 foreign-key="fk_dataelementoperand_dataelementattributeoptioncombo"
+                 unique-key="dataelement_operand_unique_key" />
+
   </class>
 </hibernate-mapping>

@@ -35,6 +35,7 @@ import static org.hisp.dhis.common.DimensionType.DATA_X;
 import static org.hisp.dhis.common.DimensionType.ORGANISATION_UNIT;
 import static org.hisp.dhis.common.DimensionType.ORGANISATION_UNIT_GROUP_SET;
 import static org.hisp.dhis.common.DimensionType.PERIOD;
+import static org.hisp.dhis.common.DimensionalObject.ATTRIBUTEOPTIONCOMBO_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.CATEGORYOPTIONCOMBO_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.DATA_X_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.DIMENSION_SEP;
@@ -109,6 +110,7 @@ public class DataQueryParams
 
     public static final int DX_INDEX = 0;
     public static final int CO_INDEX = 1;
+    public static final int AO_INDEX = 2;
 
     public static final Set<Class<? extends IdentifiableObject>> DYNAMIC_DIM_CLASSES = ImmutableSet.<Class<? extends IdentifiableObject>>builder().
         add( OrganisationUnitGroupSet.class ).add( DataElementGroupSet.class ).add( CategoryOptionGroupSet.class ).add( DataElementCategory.class ).build();
@@ -1125,6 +1127,15 @@ public class DataQueryParams
         {
             int index = !dimensions.isEmpty() && DATA_X_DIM_ID.equals( dimensions.get( 0 ).getDimension() ) ? CO_INDEX : DX_INDEX;
             
+            dimensions.add( index, dimension );
+        }
+        else if ( ATTRIBUTEOPTIONCOMBO_DIM_ID.equals( dimension.getDimension() ) )
+        {
+            int index = dimensions.size() > 1 &&
+                DATA_X_DIM_ID.equals( dimensions.get( 0 ).getDimension() ) &&
+                CATEGORYOPTIONCOMBO_DIM_ID.equals( dimensions.get( 1 ).getDimension() )
+                ? AO_INDEX : DX_INDEX;
+
             dimensions.add( index, dimension );
         }
         else

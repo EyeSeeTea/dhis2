@@ -214,6 +214,7 @@ public class DefaultExpressionService
         final double denominatorValue = calculateExpression( denominatorExpression );
 
         if ( !isEqual( denominatorValue, 0d ) )
+
         {
             final String numeratorExpression = generateExpression( indicator.getExplodedNumeratorFallback(), valueMap,
                 constantMap, orgUnitCountMap, days, NEVER_SKIP );
@@ -222,7 +223,6 @@ public class DefaultExpressionService
             {
                 return null;
             }
-
             final double numeratorValue = calculateExpression( numeratorExpression );
 
             final double annualizationFactor = period != null
@@ -324,6 +324,14 @@ public class DefaultExpressionService
                 if ( categoryOptionCombo != null )
                 {
                     optionCombosInExpression.add( categoryOptionCombo );
+                }
+
+                DataElementCategoryOptionCombo attributeOptionCombo = matcher.group( 3 ) == null ?
+                    null : categoryService.getDataElementCategoryOptionCombo( matcher.group( 3 ) );
+
+                if ( attributeOptionCombo != null )
+                {
+                    optionCombosInExpression.add( attributeOptionCombo );
                 }
             }
         }
