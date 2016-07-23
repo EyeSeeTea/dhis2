@@ -611,6 +611,7 @@ Ext.onReady( function() {
 	OptionsWindow = function() {
 		var showValues,
             hideEmptyRows,
+            cumulative,
             showTrendLine,
 			targetLineValue,
 			targetLineTitle,
@@ -653,6 +654,11 @@ Ext.onReady( function() {
 
 		hideEmptyRows = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: NS.i18n.hide_empty_category_items,
+			style: 'margin-bottom:' + checkboxBottomMargin + 'px'
+		});
+
+		cumulative = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: NS.i18n.cumulative,
 			style: 'margin-bottom:' + checkboxBottomMargin + 'px'
 		});
 
@@ -850,6 +856,7 @@ Ext.onReady( function() {
 				showValues,
 				hideEmptyRows,
 				showTrendLine,
+				cumulative,
 				{
 					xtype: 'container',
 					layout: 'column',
@@ -938,6 +945,7 @@ Ext.onReady( function() {
 				return {
 					showValues: showValues.getValue(),
                     hideEmptyRows: hideEmptyRows.getValue(),
+                    cumulative: cumulative.getValue(),
 					showTrendLine: showTrendLine.getValue(),
 					completedOnly: completedOnly.getValue(),
 					targetLineValue: targetLineValue.getValue(),
@@ -960,6 +968,7 @@ Ext.onReady( function() {
 			setOptions: function(layout) {
 				showValues.setValue(Ext.isBoolean(layout.showValues) ? layout.showValues : false);
 				hideEmptyRows.setValue(Ext.isBoolean(layout.hideEmptyRows) ? layout.hideEmptyRows : false);
+				cumulative.setValue(Ext.isBoolean(layout.cumulative) ? layout.cumulative : false);
 				showTrendLine.setValue(Ext.isBoolean(layout.showTrendLine) ? layout.showTrendLine : false);
 
                 completedOnly.setValue(Ext.isBoolean(layout.completedOnly) ? layout.completedOnly : false);
@@ -1121,6 +1130,7 @@ Ext.onReady( function() {
 					// cmp
 					w.showValues = showValues;
                     w.hideEmptyRows = hideEmptyRows;
+                    w.cumulative = cumulative;
 					w.showTrendLine = showTrendLine;
                     w.completedOnly = completedOnly;
 					w.targetLineValue = targetLineValue;

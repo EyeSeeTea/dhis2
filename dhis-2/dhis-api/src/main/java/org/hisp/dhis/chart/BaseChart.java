@@ -92,6 +92,8 @@ public abstract class BaseChart
 
     protected boolean hideEmptyRows;
 
+    protected boolean cumulative;
+
     protected Double rangeAxisMaxValue;
 
     protected Double rangeAxisMinValue;
@@ -425,6 +427,19 @@ public abstract class BaseChart
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isCumulative()
+    {
+        return cumulative;
+    }
+
+    public void setCumulative( boolean cumulative)
+    {
+        this.cumulative = cumulative;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Double getRangeAxisMaxValue()
     {
         return rangeAxisMaxValue;
@@ -507,6 +522,7 @@ public abstract class BaseChart
             hideSubtitle = chart.isHideSubtitle();
             showData = chart.isShowData();
             hideEmptyRows = chart.isHideEmptyRows();
+            cumulative = chart.isCumulative();
 
             if ( mergeMode.isReplace() )
             {

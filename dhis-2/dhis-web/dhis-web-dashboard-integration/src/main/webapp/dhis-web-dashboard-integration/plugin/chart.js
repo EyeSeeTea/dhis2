@@ -1001,6 +1001,8 @@ Ext.onReady(function() {
                 // showValues: boolean (true)
 
                 // hideEmptyRows: boolean (false)
+                
+                // cumulative: boolean (false)
 
                 // hideLegend: boolean (false)
 
@@ -1238,6 +1240,7 @@ Ext.onReady(function() {
                     // properties
                     layout.showValues = Ext.isBoolean(config.showData) ? config.showData : (Ext.isBoolean(config.showValues) ? config.showValues : true);
                     layout.hideEmptyRows = Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : (Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : true);
+                    layout.cumulative = Ext.isBoolean(config.cumulative) ? config.cumulative : (Ext.isBoolean(config.cumulative) ? config.cumulative : false);
                     layout.showTrendLine = Ext.isBoolean(config.regression) ? config.regression : (Ext.isBoolean(config.showTrendLine) ? config.showTrendLine : false);
 
                     layout.completedOnly = Ext.isBoolean(config.completedOnly) ? config.completedOnly : false;
@@ -2030,6 +2033,10 @@ Ext.onReady(function() {
 					delete layout.hideEmptyRows;
 				}
 
+				if (!layout.cumulative) {
+					delete layout.cumulative;
+				}
+
 				if (!layout.showTrendLine) {
 					delete layout.showTrendLine;
 				}
@@ -2559,6 +2566,30 @@ Ext.onReady(function() {
                     // row ids
                     rowIds = xLayout.rowDimensionNames[0] ? xLayout.dimensionNameIdsMap[xLayout.rowDimensionNames[0]] : [],
 
+                    idValueMap = function() {
+                        if (!xLayout.cumulative) {
+                            return xResponse.idValueMap;
+                        } else {
+                            var total, id, value, stringValue, newStringValue;
+                            var numDecimalPlaces, decimalPlaces, captures, output = {};
+                            
+                            for (var c = 0; c < columnIds.length; c++) {
+                                for (var r = 0, total = 0, decimalPlaces = 0; r < rowIds.length; r++) {
+                                    id = columnIds[c] + rowIds[r];
+                                    stringValue = xResponse.idValueMap[id] || "";
+                                    captures = stringValue.match(/^\d+\.(\d+)$/);
+                                    numDecimalPlaces = captures ? captures[1].length : 0;
+                                    decimalPlaces = Math.max(decimalPlaces, numDecimalPlaces);
+                                    value = parseFloat(stringValue) || 0;
+                                    total += value;
+                                    newStringValue = total.toFixed(decimalPlaces)
+                                    output[id] = newStringValue;
+                                }                        
+                            }
+                            return output;
+                        }
+                    }(),
+
                     // filter ids
                     filterIds = function() {
                         var ids = [];
@@ -2630,7 +2661,7 @@ Ext.onReady(function() {
 
                         for (var j = 0, id, value; j < columnIds.length; j++) {
                             id = columnIds[j] + rowIds[i];
-                            value = xResponse.idValueMap[id];
+                            value = idValueMap[id];
                             rowValues.push(value);
 
                             obj[failSafeColumnIds[j]] = value ? parseFloat(value) : '0.0';
