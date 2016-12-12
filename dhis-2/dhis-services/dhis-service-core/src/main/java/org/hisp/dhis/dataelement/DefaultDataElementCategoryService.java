@@ -808,10 +808,11 @@ public class DefaultDataElementCategoryService
             DataElement dataElement = dataElementService.getDataElement( operand.getDataElementId() );
             DataElementCategoryOptionCombo categoryOptionCombo = getDataElementCategoryOptionCombo( operand
                 .getOptionComboId() );
-            DataElementCategoryOptionCombo attributeOptionCombo = getDataElementCategoryOptionCombo( operand
-                .getAttributeComboId() );
+//            DataElementCategoryOptionCombo attributeOptionCombo = getDataElementCategoryOptionCombo( operand
+//                .getAttributeComboId() );
 
-            operand.updateProperties( dataElement, categoryOptionCombo, attributeOptionCombo  );
+            //operand.updateProperties( dataElement, categoryOptionCombo, attributeOptionCombo  );
+            operand.updateProperties( dataElement, categoryOptionCombo, null);
         }
 
         return operands;
@@ -840,33 +841,37 @@ public class DefaultDataElementCategoryService
                     operands.add( operand );
                 }
 
-                List<DataElementCategoryOptionCombo> categoryOptionCombos =
-                    dataElement.getCategoryCombo().getSortedOptionCombos();
-                DataSet dataSet = dataElement.getDataSet();
-                DataElementCategoryCombo categoryCombo =
-                    (dataSet != null) ? dataSet.getCategoryCombo() : null;
-                List<DataElementCategoryOptionCombo> attributeOptionCombos = (categoryCombo != null) ?
-                    categoryCombo.getSortedOptionCombos() : Collections.emptyList();
+//                List<DataElementCategoryOptionCombo> categoryOptionCombos =
+//                    dataElement.getCategoryCombo().getSortedOptionCombos();
+//                DataSet dataSet = dataElement.getDataSet();
+//                DataElementCategoryCombo categoryCombo =
+//                    (dataSet != null) ? dataSet.getCategoryCombo() : null;
+//                List<DataElementCategoryOptionCombo> attributeOptionCombos = (categoryCombo != null) ?
+//                    categoryCombo.getSortedOptionCombos() : Collections.emptyList();
 
-                for ( DataElementCategoryOptionCombo categoryOptionCombo : categoryOptionCombos )
+                //for ( DataElementCategoryOptionCombo categoryOptionCombo : categoryOptionCombos )
+                for ( DataElementCategoryOptionCombo categoryOptionCombo : dataElement.getCategoryCombo().getSortedOptionCombos() )
                 {
-                    DataElementOperand operand = new DataElementOperand( dataElement, categoryOptionCombo );
-                    operand.updateProperties(dataElement, categoryOptionCombo, null);
-
-                    operands.add( operand );
+//                    DataElementOperand operand = new DataElementOperand( dataElement, categoryOptionCombo );
+//                    operand.updateProperties(dataElement, categoryOptionCombo, null);
+//
+//                    operands.add( operand );
+                	DataElementOperand operand = new DataElementOperand( dataElement, categoryOptionCombo );
+                	operand.updateProperties( dataElement, categoryOptionCombo, null );
+                	operands.add( operand );
                 }
 
-                for ( DataElementCategoryOptionCombo categoryOptionCombo : categoryOptionCombos )
-                {
-                    for ( DataElementCategoryOptionCombo attributeOptionCombo : attributeOptionCombos )
-                    {
-                        DataElementOperand operand =
-                            new DataElementOperand(dataElement, categoryOptionCombo, attributeOptionCombo);
-                        operand.updateProperties(dataElement, categoryOptionCombo, attributeOptionCombo);
-
-                        operands.add(operand);
-                    }
-                }
+//                for ( DataElementCategoryOptionCombo categoryOptionCombo : categoryOptionCombos )
+//                {
+//                    for ( DataElementCategoryOptionCombo attributeOptionCombo : attributeOptionCombos )
+//                    {
+//                        DataElementOperand operand =
+//                            new DataElementOperand(dataElement, categoryOptionCombo, attributeOptionCombo);
+//                        operand.updateProperties(dataElement, categoryOptionCombo, attributeOptionCombo);
+//
+//                        operands.add(operand);
+//                    }
+//                }
             }
         }
 
